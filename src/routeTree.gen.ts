@@ -10,33 +10,153 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
+import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
+import { Route as ApiUsersIncentivesRouteImport } from './routes/api/users.incentives'
+import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
+import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
+import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
+import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTransactionsRoute = ApiTransactionsRouteImport.update({
+  id: '/api/transactions',
+  path: '/api/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProposalsRoute = ApiProposalsRouteImport.update({
+  id: '/api/proposals',
+  path: '/api/proposals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersSyncRoute = ApiUsersSyncRouteImport.update({
+  id: '/api/users/sync',
+  path: '/api/users/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersIncentivesRoute = ApiUsersIncentivesRouteImport.update({
+  id: '/api/users/incentives',
+  path: '/api/users/incentives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersClaimRoute = ApiUsersClaimRouteImport.update({
+  id: '/api/users/claim',
+  path: '/api/users/claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersBindWalletRoute = ApiUsersBindWalletRouteImport.update({
+  id: '/api/users/bind-wallet',
+  path: '/api/users/bind-wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
+  id: '/api/incentives/global',
+  path: '/api/incentives/global',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
+  id: '/$id/vote',
+  path: '/$id/vote',
+  getParentRoute: () => ApiProposalsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/proposals': typeof ApiProposalsRouteWithChildren
+  '/api/transactions': typeof ApiTransactionsRoute
+  '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
+  '/api/users/claim': typeof ApiUsersClaimRoute
+  '/api/users/incentives': typeof ApiUsersIncentivesRoute
+  '/api/users/sync': typeof ApiUsersSyncRoute
+  '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/proposals': typeof ApiProposalsRouteWithChildren
+  '/api/transactions': typeof ApiTransactionsRoute
+  '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
+  '/api/users/claim': typeof ApiUsersClaimRoute
+  '/api/users/incentives': typeof ApiUsersIncentivesRoute
+  '/api/users/sync': typeof ApiUsersSyncRoute
+  '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/proposals': typeof ApiProposalsRouteWithChildren
+  '/api/transactions': typeof ApiTransactionsRoute
+  '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
+  '/api/users/claim': typeof ApiUsersClaimRoute
+  '/api/users/incentives': typeof ApiUsersIncentivesRoute
+  '/api/users/sync': typeof ApiUsersSyncRoute
+  '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/api/health'
+    | '/api/proposals'
+    | '/api/transactions'
+    | '/api/incentives/global'
+    | '/api/users/bind-wallet'
+    | '/api/users/claim'
+    | '/api/users/incentives'
+    | '/api/users/sync'
+    | '/api/proposals/$id/vote'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/api/health'
+    | '/api/proposals'
+    | '/api/transactions'
+    | '/api/incentives/global'
+    | '/api/users/bind-wallet'
+    | '/api/users/claim'
+    | '/api/users/incentives'
+    | '/api/users/sync'
+    | '/api/proposals/$id/vote'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/health'
+    | '/api/proposals'
+    | '/api/transactions'
+    | '/api/incentives/global'
+    | '/api/users/bind-wallet'
+    | '/api/users/claim'
+    | '/api/users/incentives'
+    | '/api/users/sync'
+    | '/api/proposals/$id/vote'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiHealthRoute: typeof ApiHealthRoute
+  ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
+  ApiTransactionsRoute: typeof ApiTransactionsRoute
+  ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
+  ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
+  ApiUsersClaimRoute: typeof ApiUsersClaimRoute
+  ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
+  ApiUsersSyncRoute: typeof ApiUsersSyncRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +168,94 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/transactions': {
+      id: '/api/transactions'
+      path: '/api/transactions'
+      fullPath: '/api/transactions'
+      preLoaderRoute: typeof ApiTransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/proposals': {
+      id: '/api/proposals'
+      path: '/api/proposals'
+      fullPath: '/api/proposals'
+      preLoaderRoute: typeof ApiProposalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/sync': {
+      id: '/api/users/sync'
+      path: '/api/users/sync'
+      fullPath: '/api/users/sync'
+      preLoaderRoute: typeof ApiUsersSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/incentives': {
+      id: '/api/users/incentives'
+      path: '/api/users/incentives'
+      fullPath: '/api/users/incentives'
+      preLoaderRoute: typeof ApiUsersIncentivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/claim': {
+      id: '/api/users/claim'
+      path: '/api/users/claim'
+      fullPath: '/api/users/claim'
+      preLoaderRoute: typeof ApiUsersClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/bind-wallet': {
+      id: '/api/users/bind-wallet'
+      path: '/api/users/bind-wallet'
+      fullPath: '/api/users/bind-wallet'
+      preLoaderRoute: typeof ApiUsersBindWalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/incentives/global': {
+      id: '/api/incentives/global'
+      path: '/api/incentives/global'
+      fullPath: '/api/incentives/global'
+      preLoaderRoute: typeof ApiIncentivesGlobalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/proposals/$id/vote': {
+      id: '/api/proposals/$id/vote'
+      path: '/$id/vote'
+      fullPath: '/api/proposals/$id/vote'
+      preLoaderRoute: typeof ApiProposalsIdVoteRouteImport
+      parentRoute: typeof ApiProposalsRoute
+    }
   }
 }
 
+interface ApiProposalsRouteChildren {
+  ApiProposalsIdVoteRoute: typeof ApiProposalsIdVoteRoute
+}
+
+const ApiProposalsRouteChildren: ApiProposalsRouteChildren = {
+  ApiProposalsIdVoteRoute: ApiProposalsIdVoteRoute,
+}
+
+const ApiProposalsRouteWithChildren = ApiProposalsRoute._addFileChildren(
+  ApiProposalsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiHealthRoute: ApiHealthRoute,
+  ApiProposalsRoute: ApiProposalsRouteWithChildren,
+  ApiTransactionsRoute: ApiTransactionsRoute,
+  ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
+  ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,
+  ApiUsersClaimRoute: ApiUsersClaimRoute,
+  ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
+  ApiUsersSyncRoute: ApiUsersSyncRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

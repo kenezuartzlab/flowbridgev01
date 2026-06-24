@@ -1,120 +1,124 @@
-import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  onAuthStateChanged, 
-  User,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendEmailVerification,
-  updateProfile
-} from 'firebase/auth';
-import firebaseConfig from '../../firebase-applet-config.json';
+// Backwards-compatible auth shim that wraps Lovable Cloud (Supabase) auth so
+// the existing FlowBridge UI (which expected a Firebase-style API) keeps working.
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
+import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export interface AppUser {
+  uid: string;
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  email_verified: boolean;
+  displayName: string | null;
+  photoURL: string | null;
+  isDemo?: boolean;
+}
 
-const provider = new GoogleAuthProvider();
-
-let isSigningIn = false;
-let cachedAccessToken: string | null = null;
+function toAppUser(u: SupabaseUser): AppUser {
+  const verified = !!u.email_confirmed_at || !!(u as any).confirmed_at;
+  return {
+    uid: u.id,
+    id: u.id,
+    email: u.email ?? "",
+    emailVerified: verified,
+    email_verified: verified,
+    displayName:
+      (u.user_metadata?.full_name as string | undefined) ??
+      (u.user_metadata?.name as string | undefined) ??
+      null,
+    photoURL: (u.user_metadata?.avatar_url as string | undefined) ?? null,
+  };
+}
 
 export const initAuth = (
-  onAuthSuccess?: (user: User, token: string) => void,
-  onAuthFailure?: () => void
+  onAuthSuccess?: (user: AppUser, token: string) => void,
+  onAuthFailure?: () => void,
 ) => {
-  return onAuthStateChanged(auth, async (user: User | null) => {
-    if (user) {
-      try {
-        const token = await user.getIdToken(true);
-        cachedAccessToken = token;
-        if (onAuthSuccess) onAuthSuccess(user, token);
-      } catch (err) {
-        console.error("Error getting ID token in auth change listener:", err);
-        cachedAccessToken = null;
-        if (onAuthFailure) onAuthFailure();
-      }
+  // Fire once with current session
+  supabase.auth.getSession().then(({ data }) => {
+    const session = data.session;
+    if (session?.user) {
+      onAuthSuccess?.(toAppUser(session.user), session.access_token);
     } else {
-      cachedAccessToken = null;
-      if (onAuthFailure) onAuthFailure();
+      onAuthFailure?.();
     }
   });
-};
 
-export const googleSignIn = async (): Promise<{ user: User; accessToken: string } | null> => {
-  try {
-    isSigningIn = true;
-    const result = await signInWithPopup(auth, provider);
-    const token = await result.user.getIdToken(true);
-    cachedAccessToken = token;
-    return { user: result.user, accessToken: cachedAccessToken };
-  } catch (error: any) {
-    if (error.code !== 'auth/popup-closed-by-user') {
-      console.error('Sign in error:', error);
+  const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      onAuthSuccess?.(toAppUser(session.user), session.access_token);
+    } else {
+      onAuthFailure?.();
     }
-    throw error;
-  } finally {
-    isSigningIn = false;
-  }
+  });
+
+  return () => sub.subscription.unsubscribe();
 };
 
-export const emailSignUp = async (email: string, password: string, displayName: string): Promise<User> => {
-  try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(result.user, { displayName });
-    await sendEmailVerification(result.user);
-    const token = await result.user.getIdToken(true);
-    cachedAccessToken = token;
-    return result.user;
-  } catch (error: any) {
-    console.error('Email sign up error:', error);
-    throw error;
-  }
+export const googleSignIn = async (): Promise<{ user: AppUser; accessToken: string } | null> => {
+  const result = await lovable.auth.signInWithOAuth("google", {
+    redirect_uri: window.location.origin,
+  });
+  if (result.error) throw result.error;
+  if (result.redirected) return null; // browser will redirect
+  const { data } = await supabase.auth.getSession();
+  if (!data.session?.user) throw new Error("Sign-in did not produce a session");
+  return { user: toAppUser(data.session.user), accessToken: data.session.access_token };
 };
 
-export const emailSignIn = async (email: string, password: string): Promise<User> => {
-  try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    const token = await result.user.getIdToken(true);
-    cachedAccessToken = token;
-    return result.user;
-  } catch (error: any) {
-    console.error('Email sign in error:', error);
-    throw error;
-  }
+export const emailSignUp = async (
+  email: string,
+  password: string,
+  displayName: string,
+): Promise<AppUser> => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: displayName },
+      emailRedirectTo: `${window.location.origin}/`,
+    },
+  });
+  if (error) throw error;
+  if (!data.user) throw new Error("Sign-up failed");
+  return toAppUser(data.user);
+};
+
+export const emailSignIn = async (email: string, password: string): Promise<AppUser> => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  if (!data.user) throw new Error("Sign-in failed");
+  return toAppUser(data.user);
 };
 
 export const sendVerification = async (): Promise<void> => {
-  const user = auth.currentUser;
-  if (!user) throw new Error('No user is currently signed in.');
-  await sendEmailVerification(user);
+  const { data: sessionData } = await supabase.auth.getSession();
+  const email = sessionData.session?.user.email;
+  if (!email) throw new Error("No user is currently signed in.");
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/` },
+  });
+  if (error) throw error;
 };
 
-export const reloadUser = async (): Promise<User | null> => {
-  const user = auth.currentUser;
-  if (!user) return null;
-  await user.reload();
-  const refreshedUser = auth.currentUser;
-  if (refreshedUser) {
-    const token = await refreshedUser.getIdToken(true);
-    cachedAccessToken = token;
-  }
-  return refreshedUser;
+export const reloadUser = async (): Promise<AppUser | null> => {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
+  return toAppUser(data.user);
 };
 
 export const getAccessToken = async (): Promise<string | null> => {
-  return cachedAccessToken;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
 };
 
-export const getIdToken = async (): Promise<string | null> => {
-  const user = auth.currentUser;
-  if (!user) return null;
-  return await user.getIdToken(true);
-};
+export const getIdToken = getAccessToken;
 
 export const logout = async () => {
-  await auth.signOut();
-  cachedAccessToken = null;
+  await supabase.auth.signOut();
 };
+
+export type { Session };
