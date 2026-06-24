@@ -266,6 +266,12 @@ export default function App() {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [actionStep, setActionStep] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [walletLinkNotice, setWalletLinkNotice] = useState<
+    | { kind: "signin-needed"; emailHint: string }
+    | { kind: "mismatch"; emailHint: string }
+    | { kind: "linked" }
+    | null
+  >(null);
 
   // Premium Modal Interactivity States
   const [activeConfirmModal, setActiveConfirmModal] = useState<'CA/BOT' | 'BOT/USDT' | 'BRIDGE' | null>(null);
@@ -288,6 +294,52 @@ export default function App() {
       setCustomDestinationAddress(address);
     }
   }, [address]);
+
+  // When a wallet connects, check if it's already bound to a registered
+  // account so the user can be guided back into the linked email (instead of
+  // earning points/referrals on an unlinked session). Privacy-safe: the
+  // public endpoint returns only a masked email hint.
+  useEffect(() => {
+    let cancelled = false;
+    if (!isConnected || !address) {
+      setWalletLinkNotice(null);
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch("/api/public/wallet-lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ walletAddress: address }),
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          bound?: boolean;
+          userId?: string;
+          emailHint?: string;
+        };
+        if (cancelled) return;
+        if (!data.bound) {
+          setWalletLinkNotice(null);
+          return;
+        }
+        if (!googleUser) {
+          setWalletLinkNotice({ kind: "signin-needed", emailHint: data.emailHint ?? "" });
+        } else if (data.userId && data.userId !== googleUser.uid) {
+          setWalletLinkNotice({ kind: "mismatch", emailHint: data.emailHint ?? "" });
+        } else {
+          setWalletLinkNotice({ kind: "linked" });
+        }
+      } catch {
+        /* non-fatal */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [address, isConnected, googleUser?.uid]);
+
+
 
   // Load contract registry
   const contracts = getContracts(isMainnet);
@@ -1490,6 +1542,42 @@ export default function App() {
           </div>
           
           {/* Detailed Error Warning and Simulation Toggle Helper */}
+          {walletLinkNotice && walletLinkNotice.kind !== "linked" && (
+            <div className="p-3.5 bg-[#32FF8B]/5 border border-[#32FF8B]/25 rounded-2xl space-y-2">
+              <div className="text-[11px] text-white/90 leading-snug">
+                {walletLinkNotice.kind === "signin-needed" ? (
+                  <>
+                    This wallet is already linked to{" "}
+                    <span className="text-[#32FF8B] font-mono">{walletLinkNotice.emailHint}</span>.
+                    Sign in to that account to keep earning FlowPoints and referrals on this address.
+                  </>
+                ) : (
+                  <>
+                    Heads up — this wallet is bound to a different account{" "}
+                    <span className="text-[#F6BA00] font-mono">{walletLinkNotice.emailHint}</span>.
+                    FlowPoints will accrue to that account, not the one you're signed into.
+                  </>
+                )}
+              </div>
+              <div className="flex gap-2 justify-end font-mono">
+                {walletLinkNotice.kind === "signin-needed" && (
+                  <button
+                    onClick={() => setIsConnectGuideOpen(true)}
+                    className="px-3 py-1.5 bg-[#32FF8B] hover:bg-[#32FF8B]/90 text-[#010C1B] rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
+                  >
+                    Sign in to linked account
+                  </button>
+                )}
+                <button
+                  onClick={() => setWalletLinkNotice(null)}
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
           {errorMessage && (
             <div className="p-3.5 bg-red-950/20 border border-red-500/25 rounded-2xl space-y-2">
               <WarningPanel 
