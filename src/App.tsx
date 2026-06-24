@@ -266,6 +266,12 @@ export default function App() {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [actionStep, setActionStep] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [walletLinkNotice, setWalletLinkNotice] = useState<
+    | { kind: "signin-needed"; emailHint: string }
+    | { kind: "mismatch"; emailHint: string }
+    | { kind: "linked" }
+    | null
+  >(null);
 
   // Premium Modal Interactivity States
   const [activeConfirmModal, setActiveConfirmModal] = useState<'CA/BOT' | 'BOT/USDT' | 'BRIDGE' | null>(null);
