@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <!-- Background Gradient for BOT - beautiful emerald teal as in bot-icon.png -->
+    <linearGradient id="bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#14b8a6"/>
+      <stop offset="50%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+
+    <!-- Shading shadows for Origami folding folds -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="1" dy="1.8" stdDeviation="1.2" flood-color="#042f2e" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <!-- Circular background -->
+  <circle cx="50" cy="50" r="49.5" fill="url(#bg)" />
+
+  <!-- Origami symbol 'B' constructed of clean angled planes -->
+  <g filter="url(#shadow)">
+    <!-- Vertical stem ribbon -->
+    <path d="M 39.5 17.5 L 39.5 54 L 29.5 54 L 29.5 69 L 39.5 69 L 39.5 17.5 Z" fill="#f8fafc" />
+
+    <!-- Top fold ribbon -->
+    <path d="M 39.5 17.5 L 70.5 35.5 L 60.5 44 L 39.5 32 Z" fill="#ffffff" />
+    <path d="M 70.5 35.5 L 60.5 44 L 56 44 Q 63 40 70.5 35.5" fill="#e2e8f0" opacity="0.8" />
+
+    <!-- Middle fold ribbon -->
+    <path d="M 39.5 39.5 L 70.5 57.5 L 60.5 66 L 39.5 54 Z" fill="#ffffff" />
+    <path d="M 70.5 57.5 L 60.5 66 L 56 66 Q 63 62 70.5 57.5" fill="#cbd5e1" opacity="0.9" />
+
+    <!-- Bottom fold ribbon -->
+    <path d="M 29.5 58 L 60.5 76 L 50.5 84.5 L 29.5 72.5 Z" fill="#ffffff" />
+    <path d="M 60.5 76 L 50.5 84.5 L 46.5 84.5 Q 53.5 80.5 60.5 76" fill="#f1f5f9" opacity="0.85" />
+    
+    <!-- Fine alignment visual touch lines/creases -->
+    <line x1="39.5" y1="32" x2="39.5" y2="54" stroke="#f1f5f9" stroke-width="0.5" />
+  </g>
+</svg>

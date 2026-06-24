@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <!-- Background Gradient: Deep rich space space -->
+    <linearGradient id="bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0b0a24"/>
+      <stop offset="60%" stop-color="#08071a"/>
+      <stop offset="100%" stop-color="#140822"/>
+    </linearGradient>
+
+    <!-- Chrome/Metallic Silver Gradient for Crescent -->
+    <linearGradient id="silver" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="15%" stop-color="#f1f5f9"/>
+      <stop offset="45%" stop-color="#cbd5e1"/>
+      <stop offset="60%" stop-color="#64748b"/>
+      <stop offset="80%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+
+    <!-- Bevel light for 3D metallic volume -->
+    <linearGradient id="metalHighlight" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Nebula Purple Gradient for Diamond and Wing -->
+    <linearGradient id="purpleGlow" x1="45" y1="50" x2="100" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2d0050"/>
+      <stop offset="40%" stop-color="#580088"/>
+      <stop offset="75%" stop-color="#a01bf5"/>
+      <stop offset="100%" stop-color="#40006c"/>
+    </linearGradient>
+
+    <!-- Bright Cyan Accent Flow -->
+    <linearGradient id="cyanAccent" x1="50" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#00f3ff"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+
+    <!-- Drop Shadow on parts to bring depth -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#03000a" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- Main circle outer shape -->
+    <circle cx="50" cy="50" r="49" fill="url(#bg)" />
+
+    <!-- Cyan glow outer path arc -->
+    <path d="M 50 1.5 C 76.5 1.5, 98.5 23, 98.5 50 C 98.5 77, 76.5 98.5, 50 98.5" stroke="url(#cyanAccent)" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.9" />
+
+    <!-- Purple Wing & rotatable center diamond -->
+    <!-- Wing bar on right -->
+    <rect x="44" y="38" width="54.5" height="24" fill="url(#purpleGlow)" />
+    <!-- Borders on wing bar -->
+    <line x1="62" y1="38" x2="98" y2="38" stroke="#f472b6" stroke-width="1.2" stroke-opacity="0.5" />
+    <line x1="62" y1="62" x2="98" y2="62" stroke="#f472b6" stroke-width="1.2" stroke-opacity="0.5" />
+
+    <!-- Rotated Rounded center diamond -->
+    <g transform="translate(50, 50) rotate(45) translate(-25, -25)">
+      <rect x="0" y="0" width="50" height="50" rx="9" fill="url(#purpleGlow)" stroke="#f472b6" stroke-width="1.5" />
+    </g>
+
+    <!-- Bridge block blending bar and diamond -->
+    <rect x="44" y="39.5" width="20" height="21" fill="url(#purpleGlow)" />
+
+    <!-- White gloss line across logo -->
+    <path d="M 10 24 C 34 11, 72 27, 89 65" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.12" />
+
+    <!-- Left Metallic Crescent -->
+    <path d="M 50 1 C 22.9 1, 1 22.9, 1 50 C 1 77.1, 22.9 99, 50 99 C 31.5 99, 15.5 83, 15.5 50 C 15.5 17, 31.5 1, 50 1 Z" fill="url(#silver)" />
+
+    <!-- 3D reflective highlight streak inner metal edge -->
+    <path d="M 47.5 3 C 24 3, 3 24, 3 47.5 C 3 71, 24 92, 47.5 92" stroke="url(#metalHighlight)" stroke-width="1.2" />
+  </g>
+</svg>
