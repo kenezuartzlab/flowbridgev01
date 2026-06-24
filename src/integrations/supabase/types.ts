@@ -14,7 +14,119 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          binding_changes_count: number
+          claimed_tokens: number
+          created_at: string
+          email: string
+          flow_points: number
+          id: string
+          last_binding_change: string | null
+          referral_code: string | null
+          referred_by: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          binding_changes_count?: number
+          claimed_tokens?: number
+          created_at?: string
+          email?: string
+          flow_points?: number
+          id: string
+          last_binding_change?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          binding_changes_count?: number
+          claimed_tokens?: number
+          created_at?: string
+          email?: string
+          flow_points?: number
+          id?: string
+          last_binding_change?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      proposals: {
+        Row: {
+          author: string
+          category: string
+          created_at: string
+          id: string
+          text: string
+          votes: number
+        }
+        Insert: {
+          author?: string
+          category: string
+          created_at?: string
+          id: string
+          text: string
+          votes?: number
+        }
+        Update: {
+          author?: string
+          category?: string
+          created_at?: string
+          id?: string
+          text?: string
+          votes?: number
+        }
+        Relationships: []
+      }
+      transactions_history: {
+        Row: {
+          created_at: string
+          direction: string
+          from_amount: string
+          id: string
+          points_earned: number
+          status: string
+          to_amount: string
+          tx_hash: string | null
+          tx_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          from_amount: string
+          id?: string
+          points_earned?: number
+          status: string
+          to_amount: string
+          tx_hash?: string | null
+          tx_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          from_amount?: string
+          id?: string
+          points_earned?: number
+          status?: string
+          to_amount?: string
+          tx_hash?: string | null
+          tx_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
