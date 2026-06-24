@@ -18,6 +18,7 @@ import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
 import { Route as ApiUsersIncentivesRouteImport } from './routes/api/users.incentives'
 import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
+import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 
@@ -66,6 +67,11 @@ const ApiUsersBindWalletRoute = ApiUsersBindWalletRouteImport.update({
   path: '/api/users/bind-wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWalletLookupRoute = ApiPublicWalletLookupRouteImport.update({
+  id: '/api/public/wallet-lookup',
+  path: '/api/public/wallet-lookup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
   id: '/api/incentives/global',
   path: '/api/incentives/global',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/transactions'
     | '/api/incentives/global'
+    | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/transactions'
     | '/api/incentives/global'
+    | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/transactions'
     | '/api/incentives/global'
+    | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
   ApiTransactionsRoute: typeof ApiTransactionsRoute
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
+  ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
   ApiUsersClaimRoute: typeof ApiUsersClaimRoute
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUsersBindWalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/wallet-lookup': {
+      id: '/api/public/wallet-lookup'
+      path: '/api/public/wallet-lookup'
+      fullPath: '/api/public/wallet-lookup'
+      preLoaderRoute: typeof ApiPublicWalletLookupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/incentives/global': {
       id: '/api/incentives/global'
       path: '/api/incentives/global'
@@ -273,6 +293,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
   ApiTransactionsRoute: ApiTransactionsRoute,
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
+  ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,
   ApiUsersClaimRoute: ApiUsersClaimRoute,
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
