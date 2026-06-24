@@ -295,6 +295,52 @@ export default function App() {
     }
   }, [address]);
 
+  // When a wallet connects, check if it's already bound to a registered
+  // account so the user can be guided back into the linked email (instead of
+  // earning points/referrals on an unlinked session). Privacy-safe: the
+  // public endpoint returns only a masked email hint.
+  useEffect(() => {
+    let cancelled = false;
+    if (!isConnected || !address) {
+      setWalletLinkNotice(null);
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch("/api/public/wallet-lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ walletAddress: address }),
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          bound?: boolean;
+          userId?: string;
+          emailHint?: string;
+        };
+        if (cancelled) return;
+        if (!data.bound) {
+          setWalletLinkNotice(null);
+          return;
+        }
+        if (!googleUser) {
+          setWalletLinkNotice({ kind: "signin-needed", emailHint: data.emailHint ?? "" });
+        } else if (data.userId && data.userId !== googleUser.uid) {
+          setWalletLinkNotice({ kind: "mismatch", emailHint: data.emailHint ?? "" });
+        } else {
+          setWalletLinkNotice({ kind: "linked" });
+        }
+      } catch {
+        /* non-fatal */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [address, isConnected, googleUser?.uid]);
+
+
+
   // Load contract registry
   const contracts = getContracts(isMainnet);
 
