@@ -1542,6 +1542,42 @@ export default function App() {
           </div>
           
           {/* Detailed Error Warning and Simulation Toggle Helper */}
+          {walletLinkNotice && walletLinkNotice.kind !== "linked" && (
+            <div className="p-3.5 bg-[#32FF8B]/5 border border-[#32FF8B]/25 rounded-2xl space-y-2">
+              <div className="text-[11px] text-white/90 leading-snug">
+                {walletLinkNotice.kind === "signin-needed" ? (
+                  <>
+                    This wallet is already linked to{" "}
+                    <span className="text-[#32FF8B] font-mono">{walletLinkNotice.emailHint}</span>.
+                    Sign in to that account to keep earning FlowPoints and referrals on this address.
+                  </>
+                ) : (
+                  <>
+                    Heads up — this wallet is bound to a different account{" "}
+                    <span className="text-[#F6BA00] font-mono">{walletLinkNotice.emailHint}</span>.
+                    FlowPoints will accrue to that account, not the one you're signed into.
+                  </>
+                )}
+              </div>
+              <div className="flex gap-2 justify-end font-mono">
+                {walletLinkNotice.kind === "signin-needed" && (
+                  <button
+                    onClick={() => setIsConnectGuideOpen(true)}
+                    className="px-3 py-1.5 bg-[#32FF8B] hover:bg-[#32FF8B]/90 text-[#010C1B] rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
+                  >
+                    Sign in to linked account
+                  </button>
+                )}
+                <button
+                  onClick={() => setWalletLinkNotice(null)}
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
           {errorMessage && (
             <div className="p-3.5 bg-red-950/20 border border-red-500/25 rounded-2xl space-y-2">
               <WarningPanel 
