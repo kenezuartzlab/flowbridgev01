@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink } from 'lucide-react';
+import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound } from 'lucide-react';
+import { useAccount, useSignMessage } from 'wagmi';
+import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, requestPasswordReset } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
 
@@ -34,6 +36,30 @@ export function ConnectGuideModal({
 
   const inApp = useMemo(() => isInAppBrowser(), []);
   const inAppName = useMemo(() => inAppBrowserName(), []);
+  const { address: connectedAddress } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const [siweBusy, setSiweBusy] = useState(false);
+
+  const handleSiwe = async () => {
+    if (!connectedAddress) return;
+    setErr(null); setMsg(null); setSiweBusy(true);
+    try {
+      const result = await signInWithEthereum({
+        address: connectedAddress,
+        signMessage: (m) => signMessageAsync({ message: m }),
+      });
+      if (result.status === 'signed_in') {
+        setMsg(`Signed in as ${result.email}.`);
+      } else {
+        setMsg('Wallet verified, but no email is linked yet. Sign in once with email below to bind this wallet.');
+        setShowEmail(true);
+      }
+    } catch (e: any) {
+      setErr(e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.');
+    } finally {
+      setSiweBusy(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -198,6 +224,23 @@ export function ConnectGuideModal({
               </div>
             ) : (
               <>
+                {isWalletConnected && connectedAddress && (
+                  <button
+                    onClick={handleSiwe}
+                    disabled={siweBusy}
+                    className="w-full flex items-center justify-center gap-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[10px] uppercase transition duration-150 shadow-md active:scale-95 disabled:opacity-60 cursor-pointer"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" />
+                    {siweBusy ? 'Waiting for signature…' : 'Sign in with wallet'}
+                  </button>
+                )}
+                {isWalletConnected && (
+                  <div className="flex items-center gap-1.5 text-[9px] text-[#C5C1B9]/70 font-mono uppercase tracking-widest">
+                    <span className="h-px flex-1 bg-white/5" />
+                    <span>or</span>
+                    <span className="h-px flex-1 bg-white/5" />
+                  </div>
+                )}
                 {inApp ? (
                   <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-2.5 flex flex-col gap-2">
                     <p className="text-[10px] text-amber-200/90 leading-snug">
