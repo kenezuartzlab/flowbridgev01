@@ -282,6 +282,9 @@ export default function App() {
   const [receiptUrlPrefix, setReceiptUrlPrefix] = useState('');
   const [receiptTxType, setReceiptTxType] = useState<'swap' | 'bridge'>('swap');
   const [receiptStatus, setReceiptStatus] = useState<'success' | 'failed'>('success');
+  const [universalSwapInfo, setUniversalSwapInfo] = useState<{
+    fromAmount: string; fromSymbol: string; toAmount: string; toSymbol: string;
+  } | null>(null);
   const [activeRouteModal, setActiveRouteModal] = useState<{ from: string; to: string } | null>(null);
 
   // Premium Destination Address & Tracker Modal States
