@@ -1223,8 +1223,8 @@ export default function App() {
   let caButtonLabel = "Enter amount";
   if (!isConnected) caButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) caButtonLabel = "Switch Chain to BOT Chain";
-  else if (isActionLoading && (actionStep === 'approving_ca' || actionStep === 'swapping_ca' || actionStep === 'sending_fee')) {
-    caButtonLabel = actionStep === 'approving_ca' ? `Approving ${caPaySymbol}...` : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${caPaySymbol} to ${caRecSymbol}...`;
+  else if (isActionLoading && (actionStep === 'approving_ca' || actionStep === 'swapping_ca' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
+    caButtonLabel = actionStep === 'approving_ca' ? `Approving ${caPaySymbol}...` : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${caPaySymbol} to ${caRecSymbol}...`;
   }
   else if (session.step1.status === 'done' && !caAmount) caButtonLabel = "✅ Step 1 Complete - Next →";
   else if (caAmount && !isDemoMode && caToBotDirection === 'CA_TO_BOT' && rawCaAllowance !== undefined && BigInt(rawCaAllowance.toString()) < parseUnits(caAmount, 18)) {
@@ -1238,8 +1238,8 @@ export default function App() {
   let botButtonLabel = "Enter amount";
   if (!isConnected) botButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) botButtonLabel = "Switch Chain to BOT Chain";
-  else if (isActionLoading && (actionStep === 'swapping_bot' || actionStep === 'approving_bot' || actionStep === 'sending_fee')) {
-    botButtonLabel = actionStep === 'approving_bot' ? `Approving ${botPaySymbol}...` : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${botPaySymbol} to ${botRecSymbol}...`;
+  else if (isActionLoading && (actionStep === 'swapping_bot' || actionStep === 'approving_bot' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
+    botButtonLabel = actionStep === 'approving_bot' ? `Approving ${botPaySymbol}...` : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${botPaySymbol} to ${botRecSymbol}...`;
   }
   else if (session.step2.status === 'done' && !botAmount) botButtonLabel = "✅ Step 2 Complete - Next →";
   else if (botAmount && !isDemoMode && botToUsdtDirection === 'USDT_TO_BOT' && rawUsdtBotSwapAllowance !== undefined && BigInt(rawUsdtBotSwapAllowance.toString()) < parseUnits(botAmount, 6)) {
@@ -1265,8 +1265,8 @@ export default function App() {
 
   if (!isConnected) bridgeButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) bridgeButtonLabel = `Switch Chain to ${bridgeFromName}`;
-  else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'sending_fee')) {
-    bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
+  else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
+    bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
   }
   else if (session.step3.status === 'submitted') bridgeButtonLabel = `Bridge Submitted ↗`;
   else if (usdtAmount && !isApprovedForBridge) bridgeButtonLabel = "Approve USDT";
@@ -1291,6 +1291,19 @@ export default function App() {
     if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "0.00";
     if (type === 'USDT_BOT') return rawUsdtBotBalance ? formatBalance(rawUsdtBotBalance, 6) : "0.00";
     return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.00";
+  };
+
+  const getExactBalanceAmount = (type: 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB') => {
+    if (isDemoMode) return getBalanceDisplay(type).replace(/\s*FLOW$/, '');
+    try {
+      if (type === 'CA' && rawCaBalance) return formatUnits(BigInt(rawCaBalance.toString()), 18);
+      if (type === 'BOT' && botBalance) return formatUnits(botBalance.value, botBalance.decimals);
+      if (type === 'USDT_BOT' && rawUsdtBotBalance) return formatUnits(BigInt(rawUsdtBotBalance.toString()), 6);
+      if (type === 'USDT_BNB' && rawUsdtBnbBalance) return formatUnits(BigInt(rawUsdtBnbBalance.toString()), 18);
+    } catch {
+      return getBalanceDisplay(type);
+    }
+    return getBalanceDisplay(type);
   };
 
   const getLiveBotPrice = () => {
