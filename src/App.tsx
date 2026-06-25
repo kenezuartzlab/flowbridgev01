@@ -1932,6 +1932,7 @@ export default function App() {
           txUrlPrefix={receiptUrlPrefix}
           onDonateClick={() => setIsDonateModalOpen(true)}
           txType={receiptTxType}
+          status={receiptStatus}
         />
       )}
 
