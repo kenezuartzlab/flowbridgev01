@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowDownUp, ChevronDown, Loader2, CheckCircle2 } from "lucide-react";
-import { useAccount, useBalance, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, type Address } from "viem";
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import {
   NATIVE_TOKEN_ADDRESS,
   type Token,
 } from "@/lib/swap/tokenRegistry";
-import { getBestRoute, type QuoteResult } from "@/lib/swap/quoter";
+import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
@@ -39,8 +39,10 @@ export function UniversalSwapCard({
   txUrlPrefix,
 }: UniversalSwapCardProps) {
   const { address } = useAccount();
+  const publicClient = usePublicClient();
   const contracts = useMemo(() => getContracts(isMainnet), [isMainnet]);
-  const router = contracts.bdexRouter.toLowerCase() as Address;
+  // Router used for the token-in ERC20 allowance check (the first step's router).
+  // Recomputed after a quote arrives.
 
   const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet]);
   const [tokenIn, setTokenIn] = useState<Token>(curated[0]); // BOT
@@ -102,12 +104,17 @@ export function UniversalSwapCard({
   const inBalanceDisplay = formatUnits(inBalanceRaw, tokenIn.decimals);
   const outBalanceDisplay = formatUnits(outBalanceRaw, tokenOut.decimals);
 
+  // Router that the token-in ERC20 must approve: first step's router from the
+  // current quote, falling back to Bohr router for an initial allowance read.
+  const firstStepRouter: Address = (quote?.steps[0]?.router ??
+    (contracts.bdexRouter.toLowerCase() as Address)) as Address;
+
   // ── Allowance ─────────────────────────────────────────────────────────────
   const allowanceRead = useReadContract({
     address: tokenIn.isNative ? undefined : (tokenIn.address as Address),
     abi: ERC20_ABI,
     functionName: "allowance",
-    args: address ? [address, router] : undefined,
+    args: address ? [address, firstStepRouter] : undefined,
     query: { enabled: !!address && !tokenIn.isNative },
   });
   const allowanceRaw = (allowanceRead.data as bigint | undefined) ?? 0n;
@@ -131,7 +138,7 @@ export function UniversalSwapCard({
         if (cancelled) return;
         if (!result) {
           setQuote(null);
-          setQuoteError("No Bohr route found for this pair.");
+          setQuoteError("No on-chain route found (no Bohr or CaryPact liquidity).");
         } else {
           setQuote(result);
           setQuoteError(null);
@@ -154,57 +161,99 @@ export function UniversalSwapCard({
   // ── Writes ────────────────────────────────────────────────────────────────
   const { writeContractAsync } = useWriteContract();
 
+  const minOutFor = (expected: bigint) =>
+    (expected * BigInt(Math.floor((100 - slippage) * 1000))) / 100000n;
+
+  // Execute a single SwapStep. `amountInRaw` is the on-chain input amount
+  // (for native steps this is the native value to send).
+  const executeStep = async (
+    step: SwapStep,
+    amountInRaw: bigint,
+    deadline: bigint,
+  ): Promise<`0x${string}`> => {
+    if (!address) throw new Error("No wallet");
+    const minOut = minOutFor(step.expectedOut);
+
+    // ERC20 approval for non-native input on this specific step's router
+    if (!step.inIsNative) {
+      const tokenAddr = step.path[0];
+      const currentAllowance = (await publicClient!.readContract({
+        address: tokenAddr,
+        abi: ERC20_ABI,
+        functionName: "allowance",
+        args: [address, step.router],
+      })) as bigint;
+      if (currentAllowance < amountInRaw) {
+        setBusyMsg(`Approving ${step.symbolPath[0]}…`);
+        const approveTx = await writeContractAsync({
+          address: tokenAddr,
+          abi: ERC20_ABI,
+          functionName: "approve",
+          args: [step.router, amountInRaw],
+        });
+        await publicClient!.waitForTransactionReceipt({ hash: approveTx });
+      }
+    }
+
+    setBusyMsg(`Swapping ${step.symbolPath[0]} → ${step.symbolPath[step.symbolPath.length - 1]}…`);
+
+    if (step.inIsNative) {
+      return await writeContractAsync({
+        address: step.router,
+        abi: UNISWAP_V2_ROUTER_ABI,
+        functionName: "swapExactETHForTokens",
+        args: [minOut, step.path, address, deadline],
+        value: amountInRaw,
+      });
+    }
+    if (step.outIsNative) {
+      return await writeContractAsync({
+        address: step.router,
+        abi: UNISWAP_V2_ROUTER_ABI,
+        functionName: "swapExactTokensForETH",
+        args: [amountInRaw, minOut, step.path, address, deadline],
+      });
+    }
+    return await writeContractAsync({
+      address: step.router,
+      abi: UNISWAP_V2_ROUTER_ABI,
+      functionName: "swapExactTokensForTokens",
+      args: [amountInRaw, minOut, step.path, address, deadline],
+    });
+  };
+
   const handleSwap = async () => {
-    if (!address || !quote) return;
+    if (!address || !quote || !publicClient) return;
     setBusy(true);
     setTxError(null);
     setLastTx(null);
     try {
-      const amountInRaw = parseUnits(amountIn, tokenIn.decimals);
-      const minOut =
-        (quote.amountOut * BigInt(Math.floor((100 - slippage) * 1000))) / 100000n;
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 10);
+      const initialAmount = parseUnits(amountIn, tokenIn.decimals);
+      let lastTx: `0x${string}` | null = null;
+      let nextAmount = initialAmount;
 
-      // 1. Approve if needed (token-in only)
-      if (!tokenIn.isNative && allowanceRaw < amountInRaw) {
-        setBusyMsg(`Approving ${tokenIn.symbol}…`);
-        await writeContractAsync({
-          address: tokenIn.address as Address,
-          abi: ERC20_ABI,
-          functionName: "approve",
-          args: [router, amountInRaw],
-        });
-        await allowanceRead.refetch?.();
+      for (let i = 0; i < quote.steps.length; i++) {
+        const step = quote.steps[i];
+
+        // For step 2+ whose input is native BOT, measure native balance delta
+        // from the previous step to get the actual unwrapped amount.
+        if (i > 0 && step.inIsNative) {
+          // expectedOut from previous step minus slippage is the worst case;
+          // use it directly so we can submit immediately without polling balance.
+          nextAmount = minOutFor(quote.steps[i - 1].expectedOut);
+        }
+
+        const tx = await executeStep(step, nextAmount, deadline);
+        lastTx = tx;
+        await publicClient.waitForTransactionReceipt({ hash: tx });
       }
 
-      // 2. Swap
-      setBusyMsg("Submitting swap…");
-      let tx: `0x${string}`;
-      if (tokenIn.isNative) {
-        tx = await writeContractAsync({
-          address: router,
-          abi: UNISWAP_V2_ROUTER_ABI,
-          functionName: "swapExactETHForTokens",
-          args: [minOut, quote.path, address, deadline],
-          value: amountInRaw,
-        });
-      } else if (tokenOut.isNative) {
-        tx = await writeContractAsync({
-          address: router,
-          abi: UNISWAP_V2_ROUTER_ABI,
-          functionName: "swapExactTokensForETH",
-          args: [amountInRaw, minOut, quote.path, address, deadline],
-        });
-      } else {
-        tx = await writeContractAsync({
-          address: router,
-          abi: UNISWAP_V2_ROUTER_ABI,
-          functionName: "swapExactTokensForTokens",
-          args: [amountInRaw, minOut, quote.path, address, deadline],
-        });
+      if (lastTx) {
+        setLastTx(lastTx);
+        onSwapSuccess?.({ fromSymbol: tokenIn.symbol, toSymbol: tokenOut.symbol, txHash: lastTx });
       }
-      setLastTx(tx);
-      onSwapSuccess?.({ fromSymbol: tokenIn.symbol, toSymbol: tokenOut.symbol, txHash: tx });
+      await allowanceRead.refetch?.();
     } catch (e: any) {
       setTxError(e?.shortMessage ?? e?.message ?? "Swap failed");
     } finally {
@@ -212,6 +261,7 @@ export function UniversalSwapCard({
       setBusyMsg("");
     }
   };
+
 
   const onToggle = () => {
     setTokenIn(tokenOut);
