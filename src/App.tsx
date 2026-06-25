@@ -282,6 +282,9 @@ export default function App() {
   const [receiptUrlPrefix, setReceiptUrlPrefix] = useState('');
   const [receiptTxType, setReceiptTxType] = useState<'swap' | 'bridge'>('swap');
   const [receiptStatus, setReceiptStatus] = useState<'success' | 'failed'>('success');
+  const [universalSwapInfo, setUniversalSwapInfo] = useState<{
+    fromAmount: string; fromSymbol: string; toAmount: string; toSymbol: string;
+  } | null>(null);
   const [activeRouteModal, setActiveRouteModal] = useState<{ from: string; to: string } | null>(null);
 
   // Premium Destination Address & Tracker Modal States
@@ -1729,9 +1732,36 @@ export default function App() {
               isNetworkCorrect={isNetworkCorrect}
               onSwitchNetwork={handleSwitchNetwork}
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
+              getUsdPrice={(sym) => {
+                const s = sym.toUpperCase();
+                if (s === 'USDT') return 1;
+                if (s === 'BOT' || s === 'WBOT') return getLiveBotPrice();
+                if (s === 'CA') return getLiveCaPrice();
+                return null;
+              }}
+              onSwapPhaseChange={(e) => {
+                if (e.phase === 'approving' || e.phase === 'swapping') {
+                  if (e.fromAmount && e.toAmount) {
+                    setUniversalSwapInfo({
+                      fromAmount: e.fromAmount,
+                      fromSymbol: e.fromSymbol ?? '',
+                      toAmount: e.toAmount,
+                      toSymbol: e.toSymbol ?? '',
+                    });
+                  }
+                  setIsWaitingModalOpen(true);
+                } else if (e.phase === 'success') {
+                  setIsWaitingModalOpen(false);
+                  setReceiptTxHash(e.txHash);
+                  setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
+                  setReceiptTxType('swap');
+                  setReceiptStatus('success');
+                  setIsReceiptModalOpen(true);
+                } else if (e.phase === 'error') {
+                  setIsWaitingModalOpen(false);
+                }
+              }}
               onSwapSuccess={({ fromSymbol, toSymbol, txHash }) => {
-                // Mark route session step 2 complete on a BOT↔USDT swap so the
-                // FlowBridge journey progresses to BRIDGE as before.
                 const isBotUsdt =
                   (fromSymbol === 'BOT' && toSymbol === 'USDT') ||
                   (fromSymbol === 'USDT' && toSymbol === 'BOT');
@@ -1889,22 +1919,22 @@ export default function App() {
           onClose={() => setIsWaitingModalOpen(false)}
           fromAmount={
             activeTab === 'CA/BOT' ? caAmount :
-            activeTab === 'BOT/USDT' ? botAmount :
+            activeTab === 'BOT/USDT' ? (universalSwapInfo?.fromAmount ?? botAmount) :
             usdtAmount
           }
           fromSymbol={
             activeTab === 'CA/BOT' ? caPaySymbol :
-            activeTab === 'BOT/USDT' ? paySymbol :
+            activeTab === 'BOT/USDT' ? (universalSwapInfo?.fromSymbol ?? paySymbol) :
             "USDT"
           }
           toAmount={
             activeTab === 'CA/BOT' ? getCaToBotDisplayQuote() :
-            activeTab === 'BOT/USDT' ? getActiveSwapQuote() :
+            activeTab === 'BOT/USDT' ? (universalSwapInfo?.toAmount ?? getActiveSwapQuote()) :
             (usdtAmount ? parseFloat(calculateBridgeReceive(usdtAmount)).toFixed(6) : "0.00")
           }
           toSymbol={
             activeTab === 'CA/BOT' ? caRecSymbol :
-            activeTab === 'BOT/USDT' ? recSymbol :
+            activeTab === 'BOT/USDT' ? (universalSwapInfo?.toSymbol ?? recSymbol) :
             "USDT"
           }
           isBridge={activeTab === 'BRIDGE'}

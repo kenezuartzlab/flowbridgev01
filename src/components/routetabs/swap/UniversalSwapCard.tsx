@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, ChevronDown, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowDownUp, ChevronDown, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
-import { formatUnits, parseUnits, type Address } from "viem";
+import { encodeAbiParameters, encodePacked, formatUnits, parseUnits, type Address } from "viem";
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
-import { ERC20_ABI, UNISWAP_V2_ROUTER_ABI, getContracts } from "@/lib/contracts";
+import {
+  ERC20_ABI,
+  UNISWAP_V2_ROUTER_ABI,
+  UNIVERSAL_ROUTER_ABI,
+  getContracts,
+} from "@/lib/contracts";
 import {
   getCuratedTokens,
   NATIVE_TOKEN_ADDRESS,
@@ -14,6 +19,20 @@ import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
+
+export interface SwapSummary {
+  fromAmount: string;
+  fromSymbol: string;
+  toAmount: string;
+  toSymbol: string;
+}
+
+export type SwapPhase =
+  | ({ phase: "approving"; symbol: string } & Partial<SwapSummary>)
+  | ({ phase: "swapping"; from: string; to: string } & Partial<SwapSummary>)
+  | { phase: "success"; from: string; to: string; txHash: `0x${string}` }
+  | { phase: "error"; message: string }
+  | { phase: "idle" };
 
 interface UniversalSwapCardProps {
   isMainnet: boolean;
@@ -26,6 +45,10 @@ interface UniversalSwapCardProps {
     toSymbol: string;
     txHash: `0x${string}`;
   }) => void;
+  /** Notifies parent so it can show shared waiting/receipt modals. */
+  onSwapPhaseChange?: (e: SwapPhase) => void;
+  /** Resolve a USD price for a token symbol (BOT/WBOT/USDT/CA…). Return null/undefined if unknown. */
+  getUsdPrice?: (symbol: string) => number | null | undefined;
   txUrlPrefix: string;
 }
 
@@ -36,6 +59,8 @@ export function UniversalSwapCard({
   isNetworkCorrect,
   onSwitchNetwork,
   onSwapSuccess,
+  onSwapPhaseChange,
+  getUsdPrice,
   txUrlPrefix,
 }: UniversalSwapCardProps) {
   const { address } = useAccount();
@@ -185,6 +210,14 @@ export function UniversalSwapCard({
       })) as bigint;
       if (currentAllowance < amountInRaw) {
         setBusyMsg(`Approving ${step.symbolPath[0]}…`);
+        onSwapPhaseChange?.({
+          phase: "approving",
+          symbol: step.symbolPath[0],
+          fromAmount: amountIn,
+          fromSymbol: tokenIn.symbol,
+          toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+          toSymbol: tokenOut.symbol,
+        });
         const approveTx = await writeContractAsync({
           address: tokenAddr,
           abi: ERC20_ABI,
@@ -195,8 +228,97 @@ export function UniversalSwapCard({
       }
     }
 
-    setBusyMsg(`Swapping ${step.symbolPath[0]} → ${step.symbolPath[step.symbolPath.length - 1]}…`);
+    const inSym = step.symbolPath[0];
+    const outSym = step.symbolPath[step.symbolPath.length - 1];
+    setBusyMsg(`Swapping ${inSym} → ${outSym}…`);
+    onSwapPhaseChange?.({
+      phase: "swapping",
+      from: inSym,
+      to: outSym,
+      fromAmount: amountIn,
+      fromSymbol: tokenIn.symbol,
+      toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+      toSymbol: tokenOut.symbol,
+    });
 
+    // ── Bohr Uniswap V3 (Universal Router) branch ─────────────────────────
+    if (step.dex === "bdex-v3") {
+      const fee = step.v3Fee ?? 3000;
+      const [inAddr, outAddr] = step.path;
+      const v3Path = encodePacked(
+        ["address", "uint24", "address"],
+        [inAddr, fee, outAddr],
+      );
+      // Recipient placeholder used by Universal Router commands for "msg.sender = router".
+      const ROUTER_AS_RECIPIENT = "0x0000000000000000000000000000000000000002" as `0x${string}`;
+
+      if (step.inIsNative) {
+        // BOT → USDT: WRAP_ETH (0x0b) then V3_SWAP_EXACT_IN (0x00)
+        const wrapInput = encodeAbiParameters(
+          [{ type: "address" }, { type: "uint256" }],
+          [ROUTER_AS_RECIPIENT, amountInRaw],
+        );
+        const swapInput = encodeAbiParameters(
+          [
+            { type: "address" },
+            { type: "uint256" },
+            { type: "uint256" },
+            { type: "bytes" },
+            { type: "bool" },
+          ],
+          [address as `0x${string}`, amountInRaw, minOut, v3Path, false],
+        );
+        return await writeContractAsync({
+          address: step.router,
+          abi: UNIVERSAL_ROUTER_ABI,
+          functionName: "execute",
+          args: ["0x0b00", [wrapInput, swapInput], deadline],
+          value: amountInRaw,
+        });
+      }
+      if (step.outIsNative) {
+        // USDT → BOT: V3_SWAP_EXACT_IN (0x00) then UNWRAP_WETH (0x0c)
+        const swapInput = encodeAbiParameters(
+          [
+            { type: "address" },
+            { type: "uint256" },
+            { type: "uint256" },
+            { type: "bytes" },
+            { type: "bool" },
+          ],
+          [ROUTER_AS_RECIPIENT, amountInRaw, minOut, v3Path, true],
+        );
+        const unwrapInput = encodeAbiParameters(
+          [{ type: "address" }, { type: "uint256" }],
+          [address as `0x${string}`, 0n],
+        );
+        return await writeContractAsync({
+          address: step.router,
+          abi: UNIVERSAL_ROUTER_ABI,
+          functionName: "execute",
+          args: ["0x000c", [swapInput, unwrapInput], deadline],
+        });
+      }
+      // WBOT/USDT ERC20 ↔ ERC20 via V3 (rare; both wrapped). Recipient = user, no wrap/unwrap.
+      const swapInput = encodeAbiParameters(
+        [
+          { type: "address" },
+          { type: "uint256" },
+          { type: "uint256" },
+          { type: "bytes" },
+          { type: "bool" },
+        ],
+        [address as `0x${string}`, amountInRaw, minOut, v3Path, true],
+      );
+      return await writeContractAsync({
+        address: step.router,
+        abi: UNIVERSAL_ROUTER_ABI,
+        functionName: "execute",
+        args: ["0x00", [swapInput], deadline],
+      });
+    }
+
+    // ── V2 router branches ─────────────────────────────────────────────────
     if (step.inIsNative) {
       return await writeContractAsync({
         address: step.router,
@@ -252,10 +374,18 @@ export function UniversalSwapCard({
       if (lastTx) {
         setLastTx(lastTx);
         onSwapSuccess?.({ fromSymbol: tokenIn.symbol, toSymbol: tokenOut.symbol, txHash: lastTx });
+        onSwapPhaseChange?.({
+          phase: "success",
+          from: tokenIn.symbol,
+          to: tokenOut.symbol,
+          txHash: lastTx,
+        });
       }
       await allowanceRead.refetch?.();
     } catch (e: any) {
-      setTxError(e?.shortMessage ?? e?.message ?? "Swap failed");
+      const msg = e?.shortMessage ?? e?.message ?? "Swap failed";
+      setTxError(msg);
+      onSwapPhaseChange?.({ phase: "error", message: msg });
     } finally {
       setBusy(false);
       setBusyMsg("");
@@ -333,6 +463,17 @@ export function UniversalSwapCard({
     void handleSwap();
   };
 
+  const usdValueFor = (t: Token, amt: string): string | undefined => {
+    const n = parseFloat(amt);
+    if (!isFinite(n) || n <= 0) return undefined;
+    const px = getUsdPrice?.(t.symbol);
+    if (px == null || !isFinite(px)) return undefined;
+    const v = n * px;
+    if (v >= 1) return `$${v.toFixed(4)}`;
+    return `$${v.toFixed(6)}`;
+  };
+
+
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4 font-sans">
       {/* Header */}
@@ -358,6 +499,7 @@ export function UniversalSwapCard({
           balanceDisplay={inBalanceDisplay}
           onPickToken={() => setPickerOpen("in")}
           onMax={onMax}
+          usdValue={usdValueFor(tokenIn, amountIn)}
         />
 
         <div className="flex justify-center -my-6.5 relative z-20">
@@ -379,6 +521,7 @@ export function UniversalSwapCard({
           onPickToken={() => setPickerOpen("out")}
           readOnly
           quoting={quoting}
+          usdValue={usdValueFor(tokenOut, amountOutDisplay)}
         />
       </div>
 
@@ -413,20 +556,6 @@ export function UniversalSwapCard({
 
       {txError && <WarningPanel type="error" message={txError} />}
 
-      {lastTx && (
-        <div className="flex items-center gap-2 bg-[#32FF8B]/10 border border-[#32FF8B]/30 rounded-xl p-3 text-[11px] font-mono">
-          <CheckCircle2 className="w-4 h-4 text-[#32FF8B] shrink-0" />
-          <span className="text-white">Swap submitted.</span>
-          <a
-            href={`${txUrlPrefix}${lastTx}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-[#32FF8B] hover:underline font-black tracking-wider ml-auto"
-          >
-            View tx ↗
-          </a>
-        </div>
-      )}
 
       <TokenPickerModal
         isOpen={pickerOpen === "in"}
@@ -471,6 +600,7 @@ interface TokenSideProps {
   onMax?: () => void;
   readOnly?: boolean;
   quoting?: boolean;
+  usdValue?: string;
 }
 
 function TokenSide({
@@ -483,6 +613,7 @@ function TokenSide({
   onMax,
   readOnly,
   quoting,
+  usdValue,
 }: TokenSideProps) {
   const shortBalance = (() => {
     const n = parseFloat(balanceDisplay);
@@ -548,12 +679,13 @@ function TokenSide({
         </button>
       </div>
 
-      <div className="text-[#C5C1B9] font-medium flex items-center text-[10px] font-mono leading-none">
-        <span>
+      <div className="text-[#C5C1B9] font-medium flex items-center justify-between gap-2 text-[10px] font-mono leading-none">
+        <span className="truncate">
           {token.isNative
             ? "Native BOT"
             : `${token.address.slice(0, 6)}…${token.address.slice(-4)}`}
         </span>
+        {usdValue && <span className="text-[#C5C1B9] shrink-0">≈ {usdValue}</span>}
       </div>
     </div>
   );
