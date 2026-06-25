@@ -20,9 +20,16 @@ import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
 
+export interface SwapSummary {
+  fromAmount: string;
+  fromSymbol: string;
+  toAmount: string;
+  toSymbol: string;
+}
+
 export type SwapPhase =
-  | { phase: "approving"; symbol: string; fromAmount: string; fromSymbol: string; toAmount: string; toSymbol: string }
-  | { phase: "swapping"; from: string; to: string; fromAmount: string; fromSymbol: string; toAmount: string; toSymbol: string }
+  | ({ phase: "approving"; symbol: string } & Partial<SwapSummary>)
+  | ({ phase: "swapping"; from: string; to: string } & Partial<SwapSummary>)
   | { phase: "success"; from: string; to: string; txHash: `0x${string}` }
   | { phase: "error"; message: string }
   | { phase: "idle" };
