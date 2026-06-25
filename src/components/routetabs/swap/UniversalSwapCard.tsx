@@ -441,6 +441,17 @@ export function UniversalSwapCard({
     void handleSwap();
   };
 
+  const usdValueFor = (t: Token, amt: string): string | undefined => {
+    const n = parseFloat(amt);
+    if (!isFinite(n) || n <= 0) return undefined;
+    const px = getUsdPrice?.(t.symbol);
+    if (px == null || !isFinite(px)) return undefined;
+    const v = n * px;
+    if (v >= 1) return `$${v.toFixed(4)}`;
+    return `$${v.toFixed(6)}`;
+  };
+
+
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4 font-sans">
       {/* Header */}
