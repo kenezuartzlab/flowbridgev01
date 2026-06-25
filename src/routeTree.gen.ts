@@ -21,6 +21,8 @@ import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
+import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -84,6 +86,16 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicSiweVerifyRoute = ApiPublicSiweVerifyRouteImport.update({
+  id: '/api/public/siwe/verify',
+  path: '/api/public/siwe/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSiweNonceRoute = ApiPublicSiweNonceRouteImport.update({
+  id: '/api/public/siwe/nonce',
+  path: '/api/public/siwe/nonce',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
   id: '/$id/vote',
   path: '/$id/vote',
@@ -103,6 +115,8 @@ export interface FileRoutesByFullPath {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
+  '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -118,6 +132,8 @@ export interface FileRoutesByTo {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
+  '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -134,6 +150,8 @@ export interface FileRoutesById {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
+  '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -151,6 +169,8 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/siwe/nonce'
+    | '/api/public/siwe/verify'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -166,6 +186,8 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/siwe/nonce'
+    | '/api/public/siwe/verify'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -181,6 +203,8 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/siwe/nonce'
+    | '/api/public/siwe/verify'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -196,6 +220,8 @@ export interface RootRouteChildren {
   ApiUsersClaimRoute: typeof ApiUsersClaimRoute
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
+  ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
+  ApiPublicSiweVerifyRoute: typeof ApiPublicSiweVerifyRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -285,6 +311,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/siwe/verify': {
+      id: '/api/public/siwe/verify'
+      path: '/api/public/siwe/verify'
+      fullPath: '/api/public/siwe/verify'
+      preLoaderRoute: typeof ApiPublicSiweVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/siwe/nonce': {
+      id: '/api/public/siwe/nonce'
+      path: '/api/public/siwe/nonce'
+      fullPath: '/api/public/siwe/nonce'
+      preLoaderRoute: typeof ApiPublicSiweNonceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/proposals/$id/vote': {
       id: '/api/proposals/$id/vote'
       path: '/$id/vote'
@@ -319,6 +359,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersClaimRoute: ApiUsersClaimRoute,
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
   ApiUsersSyncRoute: ApiUsersSyncRoute,
+  ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,
+  ApiPublicSiweVerifyRoute: ApiPublicSiweVerifyRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
