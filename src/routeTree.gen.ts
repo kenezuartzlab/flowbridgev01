@@ -20,6 +20,7 @@ import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -77,6 +78,12 @@ const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
   path: '/api/incentives/global',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
   id: '/$id/vote',
   path: '/$id/vote',
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +118,7 @@ export interface FileRoutesByTo {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +134,7 @@ export interface FileRoutesById {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -169,6 +181,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,6 +196,7 @@ export interface RootRouteChildren {
   ApiUsersClaimRoute: typeof ApiUsersClaimRoute
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -264,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIncentivesGlobalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/proposals/$id/vote': {
       id: '/api/proposals/$id/vote'
       path: '/$id/vote'
@@ -298,17 +319,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersClaimRoute: ApiUsersClaimRoute,
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
   ApiUsersSyncRoute: ApiUsersSyncRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
