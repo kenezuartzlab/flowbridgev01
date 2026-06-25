@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, ChevronDown, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowDownUp, ChevronDown, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
-import { formatUnits, parseUnits, type Address } from "viem";
+import { encodeAbiParameters, encodePacked, formatUnits, parseUnits, type Address } from "viem";
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
-import { ERC20_ABI, UNISWAP_V2_ROUTER_ABI, getContracts } from "@/lib/contracts";
+import {
+  ERC20_ABI,
+  UNISWAP_V2_ROUTER_ABI,
+  UNIVERSAL_ROUTER_ABI,
+  getContracts,
+} from "@/lib/contracts";
 import {
   getCuratedTokens,
   NATIVE_TOKEN_ADDRESS,
@@ -14,6 +19,13 @@ import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
+
+export type SwapPhase =
+  | { phase: "approving"; symbol: string }
+  | { phase: "swapping"; from: string; to: string }
+  | { phase: "success"; from: string; to: string; txHash: `0x${string}` }
+  | { phase: "error"; message: string }
+  | { phase: "idle" };
 
 interface UniversalSwapCardProps {
   isMainnet: boolean;
@@ -26,6 +38,10 @@ interface UniversalSwapCardProps {
     toSymbol: string;
     txHash: `0x${string}`;
   }) => void;
+  /** Notifies parent so it can show shared waiting/receipt modals. */
+  onSwapPhaseChange?: (e: SwapPhase) => void;
+  /** Resolve a USD price for a token symbol (BOT/WBOT/USDT/CA…). Return null/undefined if unknown. */
+  getUsdPrice?: (symbol: string) => number | null | undefined;
   txUrlPrefix: string;
 }
 
