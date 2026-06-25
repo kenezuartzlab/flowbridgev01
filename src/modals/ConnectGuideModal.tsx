@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink } from 'lucide-react';
+import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound } from 'lucide-react';
+import { useAccount, useSignMessage } from 'wagmi';
+import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, requestPasswordReset } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
 
@@ -34,6 +36,30 @@ export function ConnectGuideModal({
 
   const inApp = useMemo(() => isInAppBrowser(), []);
   const inAppName = useMemo(() => inAppBrowserName(), []);
+  const { address: connectedAddress } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const [siweBusy, setSiweBusy] = useState(false);
+
+  const handleSiwe = async () => {
+    if (!connectedAddress) return;
+    setErr(null); setMsg(null); setSiweBusy(true);
+    try {
+      const result = await signInWithEthereum({
+        address: connectedAddress,
+        signMessage: (m) => signMessageAsync({ message: m }),
+      });
+      if (result.status === 'signed_in') {
+        setMsg(`Signed in as ${result.email}.`);
+      } else {
+        setMsg('Wallet verified, but no email is linked yet. Sign in once with email below to bind this wallet.');
+        setShowEmail(true);
+      }
+    } catch (e: any) {
+      setErr(e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.');
+    } finally {
+      setSiweBusy(false);
+    }
+  };
 
   if (!isOpen) return null;
 
