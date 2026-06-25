@@ -661,7 +661,6 @@ export default function App() {
   };
 
   const waitForFinalReceipt = async (txHash: `0x${string}`, chainId: number) => {
-    setActionStep('confirming_chain');
     const client = createPublicClient({
       chain: getChainForId(chainId),
       transport: http()
