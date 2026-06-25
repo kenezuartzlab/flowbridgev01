@@ -1729,9 +1729,28 @@ export default function App() {
               isNetworkCorrect={isNetworkCorrect}
               onSwitchNetwork={handleSwitchNetwork}
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
+              getUsdPrice={(sym) => {
+                const s = sym.toUpperCase();
+                if (s === 'USDT') return 1;
+                if (s === 'BOT' || s === 'WBOT') return getLiveBotPrice();
+                if (s === 'CA') return getLiveCaPrice();
+                return null;
+              }}
+              onSwapPhaseChange={(e) => {
+                if (e.phase === 'approving' || e.phase === 'swapping') {
+                  setIsWaitingModalOpen(true);
+                } else if (e.phase === 'success') {
+                  setIsWaitingModalOpen(false);
+                  setReceiptTxHash(e.txHash);
+                  setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
+                  setReceiptTxType('swap');
+                  setReceiptStatus('success');
+                  setIsReceiptModalOpen(true);
+                } else if (e.phase === 'error') {
+                  setIsWaitingModalOpen(false);
+                }
+              }}
               onSwapSuccess={({ fromSymbol, toSymbol, txHash }) => {
-                // Mark route session step 2 complete on a BOT↔USDT swap so the
-                // FlowBridge journey progresses to BRIDGE as before.
                 const isBotUsdt =
                   (fromSymbol === 'BOT' && toSymbol === 'USDT') ||
                   (fromSymbol === 'USDT' && toSymbol === 'BOT');
