@@ -39,8 +39,10 @@ export function UniversalSwapCard({
   txUrlPrefix,
 }: UniversalSwapCardProps) {
   const { address } = useAccount();
+  const publicClient = usePublicClient();
   const contracts = useMemo(() => getContracts(isMainnet), [isMainnet]);
-  const router = contracts.bdexRouter.toLowerCase() as Address;
+  // Router used for the token-in ERC20 allowance check (the first step's router).
+  // Recomputed after a quote arrives.
 
   const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet]);
   const [tokenIn, setTokenIn] = useState<Token>(curated[0]); // BOT
