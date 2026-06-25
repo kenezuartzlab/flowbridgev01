@@ -1681,7 +1681,7 @@ export default function App() {
               onReset={resetStep2}
               showAggregatorSelector={true}
               selectedPair={selectedPair}
-              onPairChange={(pair) => { setSelectedPair(pair); setIsPairReversed(false); }}
+              onPairChange={(pair) => { setSelectedPair(pair); setIsPairReversed(false); setBotToUsdtDirection('BOT_TO_USDT'); }}
               isFlowUnlocked={isFlowUnlocked}
               livePrice={getLiveBotPrice()}
             />
