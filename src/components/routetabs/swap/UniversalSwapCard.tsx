@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, ChevronDown, Loader2 } from "lucide-react";
+import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { encodeAbiParameters, encodePacked, formatUnits, parseUnits, type Address } from "viem";
+import { toast } from "sonner";
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
 import {
@@ -19,6 +20,28 @@ import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
+
+function parseTxError(e: any): string {
+  const raw =
+    e?.shortMessage ||
+    e?.details ||
+    e?.cause?.shortMessage ||
+    e?.cause?.message ||
+    e?.message ||
+    "Transaction failed";
+  const s = String(raw);
+  if (/user rejected|user denied|rejected the request/i.test(s)) return "Transaction rejected in wallet";
+  if (/insufficient funds/i.test(s)) return "Insufficient funds for gas";
+  if (/INSUFFICIENT_OUTPUT_AMOUNT/i.test(s)) return "Price moved — increase slippage and retry";
+  if (/EXPIRED/i.test(s)) return "Transaction deadline expired — retry";
+  if (/TRANSFER_FROM_FAILED|TRANSFER_FAILED/i.test(s)) return "Token transfer failed (allowance or balance)";
+  // Trim noisy viem prefixes
+  return s.replace(/^Error:\s*/, "").slice(0, 200);
+}
+
+function shortHash(h: string) {
+  return `${h.slice(0, 8)}…${h.slice(-6)}`;
+}
 
 export interface SwapSummary {
   fromAmount: string;
@@ -218,13 +241,31 @@ export function UniversalSwapCard({
           toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
           toSymbol: tokenOut.symbol,
         });
-        const approveTx = await writeContractAsync({
-          address: tokenAddr,
-          abi: ERC20_ABI,
-          functionName: "approve",
-          args: [step.router, amountInRaw],
-        });
-        await publicClient!.waitForTransactionReceipt({ hash: approveTx });
+        const toastId = toast.loading(`Approving ${step.symbolPath[0]}…`);
+        try {
+          const approveTx = await writeContractAsync({
+            address: tokenAddr,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [step.router, amountInRaw],
+          });
+          const rcpt = await publicClient!.waitForTransactionReceipt({ hash: approveTx });
+          if (rcpt.status !== "success") {
+            toast.error(`Approval reverted`, { id: toastId, description: shortHash(approveTx) });
+            throw new Error("Approval transaction reverted on-chain");
+          }
+          toast.success(`${step.symbolPath[0]} approved`, {
+            id: toastId,
+            description: shortHash(approveTx),
+            action: {
+              label: "View",
+              onClick: () => window.open(`${txUrlPrefix}${approveTx}`, "_blank"),
+            },
+          });
+        } catch (err) {
+          toast.error(parseTxError(err), { id: toastId });
+          throw err;
+        }
       }
     }
 
@@ -349,6 +390,9 @@ export function UniversalSwapCard({
     setBusy(true);
     setTxError(null);
     setLastTx(null);
+    const swapToastId = toast.loading(
+      `Swapping ${tokenIn.symbol} → ${tokenOut.symbol}…`,
+    );
     try {
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 10);
       const initialAmount = parseUnits(amountIn, tokenIn.decimals);
@@ -357,22 +401,51 @@ export function UniversalSwapCard({
 
       for (let i = 0; i < quote.steps.length; i++) {
         const step = quote.steps[i];
-
-        // For step 2+ whose input is native BOT, measure native balance delta
-        // from the previous step to get the actual unwrapped amount.
         if (i > 0 && step.inIsNative) {
-          // expectedOut from previous step minus slippage is the worst case;
-          // use it directly so we can submit immediately without polling balance.
           nextAmount = minOutFor(quote.steps[i - 1].expectedOut);
         }
+        const stepLabel = `${step.symbolPath[0]} → ${step.symbolPath[step.symbolPath.length - 1]}`;
+        toast.loading(
+          quote.steps.length > 1
+            ? `Step ${i + 1}/${quote.steps.length}: ${stepLabel}…`
+            : `Swapping ${stepLabel}…`,
+          { id: swapToastId },
+        );
 
         const tx = await executeStep(step, nextAmount, deadline);
         lastTx = tx;
-        await publicClient.waitForTransactionReceipt({ hash: tx });
+        const rcpt = await publicClient.waitForTransactionReceipt({ hash: tx });
+        if (rcpt.status !== "success") {
+          toast.error(`Swap reverted on-chain`, {
+            id: swapToastId,
+            description: shortHash(tx),
+            action: {
+              label: "View",
+              onClick: () => window.open(`${txUrlPrefix}${tx}`, "_blank"),
+            },
+          });
+          setTxError(`Transaction reverted: ${tx}`);
+          onSwapPhaseChange?.({
+            phase: "error",
+            message: `Transaction reverted on-chain (${shortHash(tx)})`,
+          });
+          return;
+        }
       }
 
       if (lastTx) {
         setLastTx(lastTx);
+        toast.success(
+          `Swapped ${tokenIn.symbol} → ${tokenOut.symbol}`,
+          {
+            id: swapToastId,
+            description: shortHash(lastTx),
+            action: {
+              label: "View",
+              onClick: () => window.open(`${txUrlPrefix}${lastTx}`, "_blank"),
+            },
+          },
+        );
         onSwapSuccess?.({ fromSymbol: tokenIn.symbol, toSymbol: tokenOut.symbol, txHash: lastTx });
         onSwapPhaseChange?.({
           phase: "success",
@@ -383,8 +456,9 @@ export function UniversalSwapCard({
       }
       await allowanceRead.refetch?.();
     } catch (e: any) {
-      const msg = e?.shortMessage ?? e?.message ?? "Swap failed";
+      const msg = parseTxError(e);
       setTxError(msg);
+      toast.error(msg, { id: swapToastId });
       onSwapPhaseChange?.({ phase: "error", message: msg });
     } finally {
       setBusy(false);
@@ -554,7 +628,33 @@ export function UniversalSwapCard({
         <WarningPanel type="warning" message={quoteError} />
       )}
 
-      {txError && <WarningPanel type="error" message={txError} />}
+      {txError && (
+        <WarningPanel
+          type="error"
+          title="Swap Failed"
+          message={txError}
+          txHash={lastTx ?? undefined}
+          txUrlPrefix={txUrlPrefix}
+        />
+      )}
+
+      {lastTx && !txError && (
+        <div className="bg-[#32FF8B]/10 border border-[#32FF8B]/25 rounded-xl p-3 flex items-center justify-between gap-2 text-[10px] font-mono">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[#32FF8B] font-black uppercase tracking-widest">Swap Confirmed</span>
+            <span className="text-[#C5C1B9]">Receipt status: success</span>
+          </div>
+          <a
+            href={`${txUrlPrefix}${lastTx}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 px-2 py-1 bg-[#32FF8B]/15 hover:bg-[#32FF8B]/25 border border-[#32FF8B]/30 text-[#32FF8B] rounded-lg font-bold"
+          >
+            {shortHash(lastTx)}
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      )}
 
 
       <TokenPickerModal
