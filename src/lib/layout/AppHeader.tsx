@@ -40,21 +40,53 @@ export function AppHeader({
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [cooldownSec, setCooldownSec] = useState(0);
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isUserLoggedIn = !!googleUser;
   const isVerified = !!(googleUser?.emailVerified || googleUser?.email_verified || googleUser?.isDemo);
   const isUnverified = isUserLoggedIn && !isVerified;
 
+  useEffect(() => {
+    const raw = typeof window !== 'undefined' ? window.localStorage.getItem(RESEND_COOLDOWN_KEY) : null;
+    const until = raw ? parseInt(raw, 10) : 0;
+    const remain = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+    if (remain > 0) setCooldownSec(remain);
+  }, []);
+
+  useEffect(() => {
+    if (cooldownSec <= 0) {
+      if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
+      return;
+    }
+    tickRef.current = setInterval(() => {
+      setCooldownSec((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => { if (tickRef.current) clearInterval(tickRef.current); };
+  }, [cooldownSec]);
+
   const handleResend = async () => {
+    if (cooldownSec > 0 || loading) return;
     setLoading(true);
     setErrorMsg(null);
     setSuccessMsg(null);
     try {
       await sendVerification();
-      setSuccessMsg("Verification sent!");
+      const until = Date.now() + RESEND_COOLDOWN_SECONDS * 1000;
+      try { window.localStorage.setItem(RESEND_COOLDOWN_KEY, String(until)); } catch {}
+      setCooldownSec(RESEND_COOLDOWN_SECONDS);
+      setSuccessMsg("Verification sent! Check inbox + spam.");
       setTimeout(() => setSuccessMsg(null), 6000);
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to resend.");
+      const msg = err?.message || "Failed to resend.";
+      // Surface Supabase rate-limit hint clearly
+      if (/rate|too many|seconds/i.test(msg)) {
+        setCooldownSec(RESEND_COOLDOWN_SECONDS);
+        try {
+          window.localStorage.setItem(RESEND_COOLDOWN_KEY, String(Date.now() + RESEND_COOLDOWN_SECONDS * 1000));
+        } catch {}
+      }
+      setErrorMsg(msg);
       setTimeout(() => setErrorMsg(null), 6000);
     } finally {
       setLoading(false);
