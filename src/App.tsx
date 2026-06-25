@@ -680,6 +680,31 @@ export default function App() {
     return receipt;
   };
 
+  const confirmAndShowReceipt = async (
+    txHash: `0x${string}`,
+    chainId: number,
+    txType: 'swap' | 'bridge'
+  ) => {
+    setReceiptTxHash(txHash);
+    setReceiptUrlPrefix(getExplorerPrefixForChain(chainId));
+    setReceiptTxType(txType);
+    try {
+      await waitForFinalReceipt(txHash, chainId);
+      setReceiptStatus('success');
+      setIsWaitingModalOpen(false);
+      setIsReceiptModalOpen(true);
+      return true;
+    } catch (err: any) {
+      if (err?.finalReceiptStatus === 'failed') {
+        setReceiptStatus('failed');
+        setIsWaitingModalOpen(false);
+        setIsReceiptModalOpen(true);
+        return false;
+      }
+      throw err;
+    }
+  };
+
   const isNetworkCorrect = !isConnected || currentChainId === targetChainIdForTab();
 
   const handleSwitchNetwork = async () => {
