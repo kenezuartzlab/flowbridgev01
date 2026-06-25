@@ -195,10 +195,11 @@ export function AppHeader({
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={handleResend}
-              disabled={loading}
-              className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 hover:text-white rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50"
+              disabled={loading || cooldownSec > 0}
+              title={cooldownSec > 0 ? `Wait ${cooldownSec}s before resending` : 'Resend verification email'}
+              className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 hover:text-white rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px]"
             >
-              Resend
+              {cooldownSec > 0 ? `${cooldownSec}s` : 'Resend'}
             </button>
             <button
               onClick={handleRefresh}
