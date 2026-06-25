@@ -684,6 +684,7 @@ export default function App() {
     chainId: number,
     txType: 'swap' | 'bridge'
   ) => {
+    setActionStep('confirming_chain');
     setReceiptTxHash(txHash);
     setReceiptUrlPrefix(getExplorerPrefixForChain(chainId));
     setReceiptTxType(txType);
@@ -776,6 +777,7 @@ export default function App() {
       setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
       setIsWaitingModalOpen(false);
       setReceiptTxType('swap');
+      setReceiptStatus('success');
       setIsReceiptModalOpen(true);
     } else {
       // Real Blockchain Mode
@@ -885,6 +887,7 @@ export default function App() {
       setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
       setIsWaitingModalOpen(false);
       setReceiptTxType('swap');
+      setReceiptStatus('success');
       setIsReceiptModalOpen(true);
       
       // Fetch fresh points instantly
@@ -1062,6 +1065,7 @@ export default function App() {
         : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/'));
       setIsWaitingModalOpen(false);
       setReceiptTxType('bridge');
+      setReceiptStatus('success');
       setIsReceiptModalOpen(true);
     } else {
       try {
@@ -1121,17 +1125,13 @@ export default function App() {
             gas: 1000000n // plenty of gas to satisfy reentrancy sentry and handler subcalls
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
-
-          // TRIGGER RECEIPT
-          setReceiptTxHash(txBridge);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('bridge');
-          setIsReceiptModalOpen(true);
         } else {
           // USDT BNB -> USDT BOT (Call deposit function on BotBridge proxy)
           const parsedAmount = parseUnits(usdtAmount, 18); // standard 18 on BSC
@@ -1186,17 +1186,13 @@ export default function App() {
             gas: 1000000n // plenty of gas to satisfy reentrancy sentry and handler subcalls
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
-
-          // TRIGGER RECEIPT
-          setReceiptTxHash(txBridge);
-          setReceiptUrlPrefix(isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('bridge');
-          setIsReceiptModalOpen(true);
         }
       } catch (err: any) {
         setErrorMessage(cleanError(err));
