@@ -1,4 +1,5 @@
-import { ArrowDownUp } from 'lucide-react';
+import { ArrowDownUp, ChevronDown, Check } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '../../lib/utils';
 import { WarningPanel } from './WarningPanel';
 import { FeePanel } from './FeePanel';
