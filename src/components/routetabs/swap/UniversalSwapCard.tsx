@@ -66,6 +66,8 @@ interface UniversalSwapCardProps {
   onSwapSuccess?: (info: {
     fromSymbol: string;
     toSymbol: string;
+    fromAmount: string;
+    toAmount: string;
     txHash: `0x${string}`;
   }) => void;
   /** Notifies parent so it can show shared waiting/receipt modals. */
