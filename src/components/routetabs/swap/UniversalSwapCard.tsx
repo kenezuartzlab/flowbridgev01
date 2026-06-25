@@ -578,6 +578,7 @@ interface TokenSideProps {
   onMax?: () => void;
   readOnly?: boolean;
   quoting?: boolean;
+  usdValue?: string;
 }
 
 function TokenSide({
@@ -590,6 +591,7 @@ function TokenSide({
   onMax,
   readOnly,
   quoting,
+  usdValue,
 }: TokenSideProps) {
   const shortBalance = (() => {
     const n = parseFloat(balanceDisplay);
