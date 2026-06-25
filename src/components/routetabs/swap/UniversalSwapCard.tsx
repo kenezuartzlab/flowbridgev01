@@ -657,12 +657,13 @@ function TokenSide({
         </button>
       </div>
 
-      <div className="text-[#C5C1B9] font-medium flex items-center text-[10px] font-mono leading-none">
-        <span>
+      <div className="text-[#C5C1B9] font-medium flex items-center justify-between gap-2 text-[10px] font-mono leading-none">
+        <span className="truncate">
           {token.isNative
             ? "Native BOT"
             : `${token.address.slice(0, 6)}…${token.address.slice(-4)}`}
         </span>
+        {usdValue && <span className="text-[#C5C1B9] shrink-0">≈ {usdValue}</span>}
       </div>
     </div>
   );
