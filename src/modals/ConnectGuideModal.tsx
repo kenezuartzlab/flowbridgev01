@@ -32,7 +32,19 @@ export function ConnectGuideModal({
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
+  const inApp = useMemo(() => isInAppBrowser(), []);
+  const inAppName = useMemo(() => inAppBrowserName(), []);
+
   if (!isOpen) return null;
+
+  const copyUrlToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setMsg('Link copied — paste it into Chrome or Safari to use Google sign-in.');
+    } catch {
+      setErr('Copy failed. Long-press the address bar to copy the URL.');
+    }
+  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
