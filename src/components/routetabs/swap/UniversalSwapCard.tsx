@@ -66,6 +66,8 @@ interface UniversalSwapCardProps {
   onSwapSuccess?: (info: {
     fromSymbol: string;
     toSymbol: string;
+    fromAmount: string;
+    toAmount: string;
     txHash: `0x${string}`;
   }) => void;
   /** Notifies parent so it can show shared waiting/receipt modals. */
@@ -446,7 +448,13 @@ export function UniversalSwapCard({
             },
           },
         );
-        onSwapSuccess?.({ fromSymbol: tokenIn.symbol, toSymbol: tokenOut.symbol, txHash: lastTx });
+        onSwapSuccess?.({
+          fromSymbol: tokenIn.symbol,
+          toSymbol: tokenOut.symbol,
+          fromAmount: amountIn,
+          toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+          txHash: lastTx,
+        });
         onSwapPhaseChange?.({
           phase: "success",
           from: tokenIn.symbol,

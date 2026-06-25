@@ -1761,7 +1761,7 @@ export default function App() {
                   setIsWaitingModalOpen(false);
                 }
               }}
-              onSwapSuccess={({ fromSymbol, toSymbol, txHash }) => {
+              onSwapSuccess={({ fromSymbol, toSymbol, fromAmount, toAmount, txHash }) => {
                 const isBotUsdt =
                   (fromSymbol === 'BOT' && toSymbol === 'USDT') ||
                   (fromSymbol === 'USDT' && toSymbol === 'BOT');
@@ -1770,6 +1770,15 @@ export default function App() {
                     step2: { ...session.step2, status: 'done', tx_hash: txHash, timestamp: Date.now() },
                   });
                 }
+                // Persist to Flow rewards ledger (eligibility checked server-side)
+                logTransactionToDb(
+                  'SWAP',
+                  `${fromSymbol}_TO_${toSymbol}`,
+                  fromAmount,
+                  toAmount,
+                  txHash,
+                  'SUCCESS',
+                );
               }}
             />
           )}
