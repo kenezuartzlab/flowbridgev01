@@ -21,8 +21,8 @@ import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
 
 export type SwapPhase =
-  | { phase: "approving"; symbol: string }
-  | { phase: "swapping"; from: string; to: string }
+  | { phase: "approving"; symbol: string; fromAmount: string; fromSymbol: string; toAmount: string; toSymbol: string }
+  | { phase: "swapping"; from: string; to: string; fromAmount: string; fromSymbol: string; toAmount: string; toSymbol: string }
   | { phase: "success"; from: string; to: string; txHash: `0x${string}` }
   | { phase: "error"; message: string }
   | { phase: "idle" };
