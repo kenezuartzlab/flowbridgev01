@@ -1479,6 +1479,13 @@ export default function App() {
     return "0.00";
   };
 
+  const getTokenMaxAmount = (symbol: string) => {
+    if (symbol === 'BOT') return getExactBalanceAmount('BOT');
+    if (symbol === 'USDT') return getExactBalanceAmount('USDT_BOT');
+    if (symbol === 'CA') return getExactBalanceAmount('CA');
+    return getTokenBalance(symbol).replace(/\s*FLOW$/, '');
+  };
+
   const payBalance = getTokenBalance(paySymbol);
   const recBalance = getTokenBalance(recSymbol);
 
@@ -1706,6 +1713,7 @@ export default function App() {
               toUsdValue={getCaToBotDisplayUsd(false)}
               fromBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('CA') : getBalanceDisplay('BOT')}
               toBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('BOT') : getBalanceDisplay('CA')}
+              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? getExactBalanceAmount('CA') : getExactBalanceAmount('BOT')}
               onFromAmountChange={setCaAmount}
               onToggleDirection={handleToggleCaBot}
               buttonLabel={caButtonLabel}
@@ -1735,6 +1743,7 @@ export default function App() {
               toUsdValue={getActiveSwapDisplayUsd(false)}
               fromBalance={payBalance}
               toBalance={recBalance}
+              fromMaxAmount={getTokenMaxAmount(paySymbol)}
               onFromAmountChange={setBotAmount}
               onToggleDirection={handleToggleDynamicSwap}
               buttonLabel={activeSwapButtonLabel}
