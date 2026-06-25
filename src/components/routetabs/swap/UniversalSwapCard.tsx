@@ -210,7 +210,14 @@ export function UniversalSwapCard({
       })) as bigint;
       if (currentAllowance < amountInRaw) {
         setBusyMsg(`Approving ${step.symbolPath[0]}…`);
-        onSwapPhaseChange?.({ phase: "approving", symbol: step.symbolPath[0] });
+        onSwapPhaseChange?.({
+          phase: "approving",
+          symbol: step.symbolPath[0],
+          fromAmount: amountIn,
+          fromSymbol: tokenIn.symbol,
+          toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+          toSymbol: tokenOut.symbol,
+        });
         const approveTx = await writeContractAsync({
           address: tokenAddr,
           abi: ERC20_ABI,
@@ -224,7 +231,15 @@ export function UniversalSwapCard({
     const inSym = step.symbolPath[0];
     const outSym = step.symbolPath[step.symbolPath.length - 1];
     setBusyMsg(`Swapping ${inSym} → ${outSym}…`);
-    onSwapPhaseChange?.({ phase: "swapping", from: inSym, to: outSym });
+    onSwapPhaseChange?.({
+      phase: "swapping",
+      from: inSym,
+      to: outSym,
+      fromAmount: amountIn,
+      fromSymbol: tokenIn.symbol,
+      toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+      toSymbol: tokenOut.symbol,
+    });
 
     // ── Bohr Uniswap V3 (Universal Router) branch ─────────────────────────
     if (step.dex === "bdex-v3") {
