@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction } from 'wagmi';
-import { formatUnits, parseUnits, encodePacked, encodeAbiParameters } from 'viem';
+import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { injected } from 'wagmi/connectors';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet } from './lib/wagmi';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
@@ -280,6 +280,7 @@ export default function App() {
   const [receiptTxHash, setReceiptTxHash] = useState('');
   const [receiptUrlPrefix, setReceiptUrlPrefix] = useState('');
   const [receiptTxType, setReceiptTxType] = useState<'swap' | 'bridge'>('swap');
+  const [receiptStatus, setReceiptStatus] = useState<'success' | 'failed'>('success');
   const [activeRouteModal, setActiveRouteModal] = useState<{ from: string; to: string } | null>(null);
 
   // Premium Destination Address & Tracker Modal States
@@ -645,6 +646,40 @@ export default function App() {
     }
   };
 
+  const getChainForId = (chainId: number) => {
+    if (chainId === 677) return botMainnet;
+    if (chainId === 968) return botTestnet;
+    if (chainId === 56) return bscMainnet;
+    return bscTestnet;
+  };
+
+  const getExplorerPrefixForChain = (chainId: number) => {
+    if (chainId === 677) return 'https://scan.botchain.ai/tx/';
+    if (chainId === 968) return 'https://scan.bohr.life/tx/';
+    if (chainId === 56) return 'https://bscscan.com/tx/';
+    return 'https://testnet.bscscan.com/tx/';
+  };
+
+  const waitForFinalReceipt = async (txHash: `0x${string}`, chainId: number) => {
+    setActionStep('confirming_chain');
+    const client = createPublicClient({
+      chain: getChainForId(chainId),
+      transport: http()
+    });
+    const receipt = await client.waitForTransactionReceipt({
+      hash: txHash,
+      confirmations: 1,
+      pollingInterval: 2_000,
+      timeout: 120_000
+    });
+    if (receipt.status !== 'success') {
+      const finalError = new Error('Final blockchain confirmation failed: the transaction was mined but reverted.');
+      (finalError as any).finalReceiptStatus = 'failed';
+      throw finalError;
+    }
+    return receipt;
+  };
+
   const isNetworkCorrect = !isConnected || currentChainId === targetChainIdForTab();
 
   const handleSwitchNetwork = async () => {
@@ -671,6 +706,10 @@ export default function App() {
     
     if (rawMsg.includes("user rejected") || rawMsg.includes("User rejected") || rawMsg.includes("User denied")) {
       return "The transaction request was rejected in your wallet.";
+    }
+
+    if (rawMsg.includes("TRANSFER_FROM_FAILED")) {
+      return "Swap failed on-chain because the router could not pull the token amount. I tightened Max to use the exact wallet balance instead of the rounded display balance; try Max again after balances refresh.";
     }
 
     // Strip any nested JSON string messages that cause messy displays
