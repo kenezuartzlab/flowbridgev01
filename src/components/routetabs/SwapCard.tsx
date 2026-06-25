@@ -162,19 +162,14 @@ export function SwapCard({
             <span className="text-[9px] text-[#32FF8B] uppercase font-black tracking-widest">Bohr DEX Aggregator (Pro)</span>
             <span className="text-[10px] text-white/50">Multi-routing non-custodial engine</span>
           </div>
-          <select
-            value={selectedPair}
-            onChange={(e) => onPairChange?.(e.target.value)}
-            className="bg-[#010C1B] border border-white/10 rounded-xl px-3 py-1.5 text-xs font-black text-white focus:outline-none cursor-pointer w-full sm:w-auto uppercase"
-          >
-            <option value="BOT/USDT">BOT / USDT (Standard)</option>
-            <option value="CA/BOT">CA / BOT</option>
-            <option value="CA/USDT">CA / USDT</option>
-            <option value="FLOW/BOT">FLOW / BOT {!isFlowUnlocked ? "🔒 Locked" : ""}</option>
-            <option value="FLOW/USDT">FLOW / USDT {!isFlowUnlocked ? "🔒 Locked" : ""}</option>
-          </select>
+          <PairDropdown
+            value={selectedPair ?? 'BOT/USDT'}
+            onChange={(v) => onPairChange?.(v)}
+            isFlowUnlocked={isFlowUnlocked}
+          />
         </div>
       )}
+
 
       {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}
       <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-4.5 relative space-y-2.5">
