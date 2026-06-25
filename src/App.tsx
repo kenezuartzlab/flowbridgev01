@@ -574,6 +574,8 @@ export default function App() {
 
   const handleToggleDynamicSwap = () => {
     setIsPairReversed(prev => !prev);
+    // Keep contract-side direction in sync with UI for the BOT/USDT pair
+    setBotToUsdtDirection(prev => prev === 'BOT_TO_USDT' ? 'USDT_TO_BOT' : 'BOT_TO_USDT');
     setBotAmount('');
     setErrorMessage(null);
   };
