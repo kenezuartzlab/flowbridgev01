@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowDownUp, ChevronDown, Loader2, CheckCircle2 } from "lucide-react";
-import { useAccount, useBalance, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, type Address } from "viem";
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import {
   NATIVE_TOKEN_ADDRESS,
   type Token,
 } from "@/lib/swap/tokenRegistry";
-import { getBestRoute, type QuoteResult } from "@/lib/swap/quoter";
+import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
