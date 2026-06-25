@@ -129,7 +129,7 @@ export function ReceiptModal({
           </div>
           
           {/* Success Check badge */}
-          <div className="absolute -bottom-1 left-7 bg-[#32FF8B] text-[#010C1B] p-1 rounded-full border-2 border-[#0D1C2A] shadow-md animate-bounce">
+          <div className={`absolute -bottom-1 left-7 text-[#010C1B] p-1 rounded-full border-2 border-[#0D1C2A] shadow-md animate-bounce ${status === 'success' ? 'bg-[#32FF8B]' : 'bg-red-400'}`}>
             {status === 'success' ? <CheckCircle className="w-5 h-5 fill-none" /> : <XCircle className="w-5 h-5 fill-none" />}
           </div>
         </div>
