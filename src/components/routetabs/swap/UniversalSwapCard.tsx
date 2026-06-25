@@ -241,13 +241,31 @@ export function UniversalSwapCard({
           toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
           toSymbol: tokenOut.symbol,
         });
-        const approveTx = await writeContractAsync({
-          address: tokenAddr,
-          abi: ERC20_ABI,
-          functionName: "approve",
-          args: [step.router, amountInRaw],
-        });
-        await publicClient!.waitForTransactionReceipt({ hash: approveTx });
+        const toastId = toast.loading(`Approving ${step.symbolPath[0]}…`);
+        try {
+          const approveTx = await writeContractAsync({
+            address: tokenAddr,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [step.router, amountInRaw],
+          });
+          const rcpt = await publicClient!.waitForTransactionReceipt({ hash: approveTx });
+          if (rcpt.status !== "success") {
+            toast.error(`Approval reverted`, { id: toastId, description: shortHash(approveTx) });
+            throw new Error("Approval transaction reverted on-chain");
+          }
+          toast.success(`${step.symbolPath[0]} approved`, {
+            id: toastId,
+            description: shortHash(approveTx),
+            action: {
+              label: "View",
+              onClick: () => window.open(`${txUrlPrefix}${approveTx}`, "_blank"),
+            },
+          });
+        } catch (err) {
+          toast.error(parseTxError(err), { id: toastId });
+          throw err;
+        }
       }
     }
 
