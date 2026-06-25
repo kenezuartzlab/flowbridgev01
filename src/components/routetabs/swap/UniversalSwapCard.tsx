@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, ChevronDown, Loader2 } from "lucide-react";
+import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { encodeAbiParameters, encodePacked, formatUnits, parseUnits, type Address } from "viem";
+import { toast } from "sonner";
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
 import {
@@ -19,6 +20,28 @@ import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
+
+function parseTxError(e: any): string {
+  const raw =
+    e?.shortMessage ||
+    e?.details ||
+    e?.cause?.shortMessage ||
+    e?.cause?.message ||
+    e?.message ||
+    "Transaction failed";
+  const s = String(raw);
+  if (/user rejected|user denied|rejected the request/i.test(s)) return "Transaction rejected in wallet";
+  if (/insufficient funds/i.test(s)) return "Insufficient funds for gas";
+  if (/INSUFFICIENT_OUTPUT_AMOUNT/i.test(s)) return "Price moved — increase slippage and retry";
+  if (/EXPIRED/i.test(s)) return "Transaction deadline expired — retry";
+  if (/TRANSFER_FROM_FAILED|TRANSFER_FAILED/i.test(s)) return "Token transfer failed (allowance or balance)";
+  // Trim noisy viem prefixes
+  return s.replace(/^Error:\s*/, "").slice(0, 200);
+}
+
+function shortHash(h: string) {
+  return `${h.slice(0, 8)}…${h.slice(-6)}`;
+}
 
 export interface SwapSummary {
   fromAmount: string;
