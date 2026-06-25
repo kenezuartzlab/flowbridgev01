@@ -1738,6 +1738,14 @@ export default function App() {
               }}
               onSwapPhaseChange={(e) => {
                 if (e.phase === 'approving' || e.phase === 'swapping') {
+                  if (e.fromAmount && e.toAmount) {
+                    setUniversalSwapInfo({
+                      fromAmount: e.fromAmount,
+                      fromSymbol: e.fromSymbol ?? '',
+                      toAmount: e.toAmount,
+                      toSymbol: e.toSymbol ?? '',
+                    });
+                  }
                   setIsWaitingModalOpen(true);
                 } else if (e.phase === 'success') {
                   setIsWaitingModalOpen(false);
