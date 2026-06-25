@@ -352,10 +352,18 @@ export function UniversalSwapCard({
       if (lastTx) {
         setLastTx(lastTx);
         onSwapSuccess?.({ fromSymbol: tokenIn.symbol, toSymbol: tokenOut.symbol, txHash: lastTx });
+        onSwapPhaseChange?.({
+          phase: "success",
+          from: tokenIn.symbol,
+          to: tokenOut.symbol,
+          txHash: lastTx,
+        });
       }
       await allowanceRead.refetch?.();
     } catch (e: any) {
-      setTxError(e?.shortMessage ?? e?.message ?? "Swap failed");
+      const msg = e?.shortMessage ?? e?.message ?? "Swap failed";
+      setTxError(msg);
+      onSwapPhaseChange?.({ phase: "error", message: msg });
     } finally {
       setBusy(false);
       setBusyMsg("");
