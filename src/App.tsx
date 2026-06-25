@@ -1504,8 +1504,8 @@ export default function App() {
   let activeSwapButtonLabel = "Enter amount";
   if (!isConnected) activeSwapButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) activeSwapButtonLabel = "Switch Chain to BOT Chain";
-  else if (isActionLoading && (actionStep === 'swapping_bot' || actionStep === 'approving_bot' || actionStep === 'sending_fee')) {
-    activeSwapButtonLabel = actionStep === 'approving_bot' ? `Approving ${paySymbol}...` : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${paySymbol} to ${recSymbol}...`;
+  else if (isActionLoading && (actionStep === 'swapping_bot' || actionStep === 'approving_bot' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
+    activeSwapButtonLabel = actionStep === 'approving_bot' ? `Approving ${paySymbol}...` : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${paySymbol} to ${recSymbol}...`;
   }
   else if (session.step2.status === 'done' && !botAmount) activeSwapButtonLabel = "✅ Step 2 Complete - Next →";
   else if (isTradeLocked) activeSwapButtonLabel = "🔒 FLOW Trading Locked";
