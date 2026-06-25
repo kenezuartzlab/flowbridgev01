@@ -283,3 +283,87 @@ export function SwapCard({
     </div>
   );
 }
+
+interface PairDropdownProps {
+  value: string;
+  onChange: (value: string) => void;
+  isFlowUnlocked?: boolean;
+}
+
+function PairDropdown({ value, onChange, isFlowUnlocked }: PairDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const options: { value: string; label: string; locked?: boolean }[] = [
+    { value: 'BOT/USDT', label: 'BOT / USDT (Standard)' },
+    { value: 'CA/BOT', label: 'CA / BOT' },
+    { value: 'CA/USDT', label: 'CA / USDT' },
+    { value: 'FLOW/BOT', label: 'FLOW / BOT', locked: !isFlowUnlocked },
+    { value: 'FLOW/USDT', label: 'FLOW / USDT', locked: !isFlowUnlocked },
+  ];
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocPointer = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('pointerdown', onDocPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDocPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const current = options.find(o => o.value === value);
+
+  return (
+    <div ref={ref} className="relative w-full sm:w-auto">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="bg-[#010C1B] border border-white/10 rounded-xl px-3 py-1.5 text-xs font-black text-white focus:outline-none cursor-pointer w-full sm:w-auto uppercase flex items-center justify-between gap-2 min-w-[180px] hover:border-white/25 transition-colors"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className="truncate">{current?.label ?? value}</span>
+        <ChevronDown className={cn('w-3.5 h-3.5 text-white/60 transition-transform shrink-0', open && 'rotate-180')} />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-50 mt-1.5 right-0 left-0 sm:left-auto sm:min-w-[220px] bg-[#010C1B] border border-white/15 rounded-xl shadow-2xl overflow-hidden py-1"
+        >
+          {options.map(opt => {
+            const selected = opt.value === value;
+            return (
+              <li key={opt.value}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (opt.locked) return;
+                    onChange(opt.value);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'w-full text-left px-3 py-2 text-[11px] font-black uppercase tracking-wider flex items-center justify-between gap-2 transition-colors',
+                    opt.locked
+                      ? 'text-white/30 cursor-not-allowed'
+                      : 'text-white hover:bg-[#32FF8B]/10 hover:text-[#32FF8B] cursor-pointer'
+                  )}
+                  disabled={opt.locked}
+                >
+                  <span className="truncate">
+                    {opt.label} {opt.locked && <span className="text-[9px] ml-1">🔒</span>}
+                  </span>
+                  {selected && <Check className="w-3.5 h-3.5 text-[#32FF8B] shrink-0" />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
