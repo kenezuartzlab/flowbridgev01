@@ -203,6 +203,7 @@ export function UniversalSwapCard({
       })) as bigint;
       if (currentAllowance < amountInRaw) {
         setBusyMsg(`Approving ${step.symbolPath[0]}…`);
+        onSwapPhaseChange?.({ phase: "approving", symbol: step.symbolPath[0] });
         const approveTx = await writeContractAsync({
           address: tokenAddr,
           abi: ERC20_ABI,
@@ -213,8 +214,89 @@ export function UniversalSwapCard({
       }
     }
 
-    setBusyMsg(`Swapping ${step.symbolPath[0]} → ${step.symbolPath[step.symbolPath.length - 1]}…`);
+    const inSym = step.symbolPath[0];
+    const outSym = step.symbolPath[step.symbolPath.length - 1];
+    setBusyMsg(`Swapping ${inSym} → ${outSym}…`);
+    onSwapPhaseChange?.({ phase: "swapping", from: inSym, to: outSym });
 
+    // ── Bohr Uniswap V3 (Universal Router) branch ─────────────────────────
+    if (step.dex === "bdex-v3") {
+      const fee = step.v3Fee ?? 3000;
+      const [inAddr, outAddr] = step.path;
+      const v3Path = encodePacked(
+        ["address", "uint24", "address"],
+        [inAddr, fee, outAddr],
+      );
+      // Recipient placeholder used by Universal Router commands for "msg.sender = router".
+      const ROUTER_AS_RECIPIENT = "0x0000000000000000000000000000000000000002" as `0x${string}`;
+
+      if (step.inIsNative) {
+        // BOT → USDT: WRAP_ETH (0x0b) then V3_SWAP_EXACT_IN (0x00)
+        const wrapInput = encodeAbiParameters(
+          [{ type: "address" }, { type: "uint256" }],
+          [ROUTER_AS_RECIPIENT, amountInRaw],
+        );
+        const swapInput = encodeAbiParameters(
+          [
+            { type: "address" },
+            { type: "uint256" },
+            { type: "uint256" },
+            { type: "bytes" },
+            { type: "bool" },
+          ],
+          [address as `0x${string}`, amountInRaw, minOut, v3Path, false],
+        );
+        return await writeContractAsync({
+          address: step.router,
+          abi: UNIVERSAL_ROUTER_ABI,
+          functionName: "execute",
+          args: ["0x0b00", [wrapInput, swapInput], deadline],
+          value: amountInRaw,
+        });
+      }
+      if (step.outIsNative) {
+        // USDT → BOT: V3_SWAP_EXACT_IN (0x00) then UNWRAP_WETH (0x0c)
+        const swapInput = encodeAbiParameters(
+          [
+            { type: "address" },
+            { type: "uint256" },
+            { type: "uint256" },
+            { type: "bytes" },
+            { type: "bool" },
+          ],
+          [ROUTER_AS_RECIPIENT, amountInRaw, minOut, v3Path, true],
+        );
+        const unwrapInput = encodeAbiParameters(
+          [{ type: "address" }, { type: "uint256" }],
+          [address as `0x${string}`, 0n],
+        );
+        return await writeContractAsync({
+          address: step.router,
+          abi: UNIVERSAL_ROUTER_ABI,
+          functionName: "execute",
+          args: ["0x000c", [swapInput, unwrapInput], deadline],
+        });
+      }
+      // WBOT/USDT ERC20 ↔ ERC20 via V3 (rare; both wrapped). Recipient = user, no wrap/unwrap.
+      const swapInput = encodeAbiParameters(
+        [
+          { type: "address" },
+          { type: "uint256" },
+          { type: "uint256" },
+          { type: "bytes" },
+          { type: "bool" },
+        ],
+        [address as `0x${string}`, amountInRaw, minOut, v3Path, true],
+      );
+      return await writeContractAsync({
+        address: step.router,
+        abi: UNIVERSAL_ROUTER_ABI,
+        functionName: "execute",
+        args: ["0x00", [swapInput], deadline],
+      });
+    }
+
+    // ── V2 router branches ─────────────────────────────────────────────────
     if (step.inIsNative) {
       return await writeContractAsync({
         address: step.router,
