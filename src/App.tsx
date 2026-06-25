@@ -819,17 +819,13 @@ export default function App() {
             gas: 350000n // Ensure higher gas limit for swaps
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step1: { ...session.step1, status: 'done', tx_hash: txSwap, timestamp: Date.now() }
           });
           logTransactionToDb('SWAP', caToBotDirection, caAmount, botAmount || '0', txSwap, 'SUCCESS');
-          
-          // Open Success Notification Modal
-          setReceiptTxHash(txSwap);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('swap');
-          setIsReceiptModalOpen(true);
         } else {
           // Swap BOT -> CA: Native BOT is sent (requires no approvals)
           setActionStep('swapping_ca');
@@ -849,17 +845,13 @@ export default function App() {
             gas: 350000n
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step1: { ...session.step1, status: 'done', tx_hash: txSwap, timestamp: Date.now() }
           });
           logTransactionToDb('SWAP', caToBotDirection, caAmount, botAmount || '0', txSwap, 'SUCCESS');
-          
-          // Open Success Notification Modal
-          setReceiptTxHash(txSwap);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('swap');
-          setIsReceiptModalOpen(true);
         }
       } catch (err: any) {
         setErrorMessage(cleanError(err));
