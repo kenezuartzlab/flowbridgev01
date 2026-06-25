@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { X, ExternalLink, Sparkles, CheckCircle, Heart } from 'lucide-react';
+import { X, ExternalLink, Sparkles, CheckCircle, Heart, XCircle } from 'lucide-react';
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface ReceiptModalProps {
   txUrlPrefix: string;
   onDonateClick?: () => void;
   txType?: 'swap' | 'bridge';
+  status?: 'success' | 'failed';
 }
 
 export function ReceiptModal({
@@ -17,10 +18,11 @@ export function ReceiptModal({
   txHash,
   txUrlPrefix,
   onDonateClick,
-  txType = 'swap'
+  txType = 'swap',
+  status = 'success'
 }: ReceiptModalProps) {
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && status === 'success') {
       // Primary celebratory burst of confetti in center
       confetti({
         particleCount: 120,
@@ -56,7 +58,7 @@ export function ReceiptModal({
         clearTimeout(delayRight);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, status]);
 
   if (!isOpen) return null;
 
@@ -70,7 +72,7 @@ export function ReceiptModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="receipt_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[360px] p-7 shadow-2xl relative flex flex-col items-center space-y-6 animate-scale-up border-b-[5px] border-b-[#32FF8B]"
+        className={`bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[360px] p-7 shadow-2xl relative flex flex-col items-center space-y-6 animate-scale-up border-b-[5px] ${status === 'success' ? 'border-b-[#32FF8B]' : 'border-b-red-400'}`}
       >
         {/* Close Button */}
         <button 
@@ -127,28 +129,32 @@ export function ReceiptModal({
           </div>
           
           {/* Success Check badge */}
-          <div className="absolute -bottom-1 left-7 bg-[#32FF8B] text-[#010C1B] p-1 rounded-full border-2 border-[#0D1C2A] shadow-md animate-bounce">
-            <CheckCircle className="w-5 h-5 fill-none" />
+          <div className={`absolute -bottom-1 left-7 text-[#010C1B] p-1 rounded-full border-2 border-[#0D1C2A] shadow-md animate-bounce ${status === 'success' ? 'bg-[#32FF8B]' : 'bg-red-400'}`}>
+            {status === 'success' ? <CheckCircle className="w-5 h-5 fill-none" /> : <XCircle className="w-5 h-5 fill-none" />}
           </div>
         </div>
 
         {/* Dynamic content descriptors */}
         <div className="space-y-1.5 text-center font-sans">
           <span className="text-[10px] font-black uppercase text-[#C5C1B9] tracking-widest leading-none font-mono">
-            Transaction receipt
+            Final blockchain receipt
           </span>
           <h3 className="text-base font-black text-white uppercase tracking-wider font-mono">
-            {txType === 'bridge' ? 'Bridge Broadcast Complete' : 'Swap Broadcast Complete'}
+            {status === 'success'
+              ? (txType === 'bridge' ? 'Bridge Confirmed On-Chain' : 'Swap Confirmed On-Chain')
+              : (txType === 'bridge' ? 'Bridge Failed On-Chain' : 'Swap Failed On-Chain')}
           </h3>
           <p className="text-xs text-[#C5C1B9] px-4 max-w-[280px] mx-auto leading-relaxed">
-            {txType === 'bridge' 
-              ? 'Your bridge transaction was successfully initiated on-chain and securely logged.'
-              : 'Your swap/trade transaction was successfully completed on-chain and securely logged.'}
+            {status === 'success'
+              ? (txType === 'bridge'
+                  ? 'The bridge transaction was mined successfully and verified from the final chain receipt.'
+                  : 'The swap transaction was mined successfully and verified from the final chain receipt.')
+              : 'The transaction was mined but reverted on-chain. It was not saved as a successful transaction.'}
           </p>
         </div>
 
         {/* Support CTA box */}
-        {onDonateClick && (
+        {onDonateClick && status === 'success' && (
           <div className="bg-[#122A26] border border-[#32FF8B]/15 rounded-xl p-3 text-left w-full relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-[#32FF8B]/10 to-transparent blur-md pointer-events-none" />
             <p className="text-[10px] leading-relaxed font-semibold text-[#32FF8B] mb-2 flex items-center gap-1">

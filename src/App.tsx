@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction } from 'wagmi';
-import { formatUnits, parseUnits, encodePacked, encodeAbiParameters } from 'viem';
+import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { injected } from 'wagmi/connectors';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet } from './lib/wagmi';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
@@ -280,6 +280,7 @@ export default function App() {
   const [receiptTxHash, setReceiptTxHash] = useState('');
   const [receiptUrlPrefix, setReceiptUrlPrefix] = useState('');
   const [receiptTxType, setReceiptTxType] = useState<'swap' | 'bridge'>('swap');
+  const [receiptStatus, setReceiptStatus] = useState<'success' | 'failed'>('success');
   const [activeRouteModal, setActiveRouteModal] = useState<{ from: string; to: string } | null>(null);
 
   // Premium Destination Address & Tracker Modal States
@@ -645,6 +646,65 @@ export default function App() {
     }
   };
 
+  const getChainForId = (chainId: number) => {
+    if (chainId === 677) return botMainnet;
+    if (chainId === 968) return botTestnet;
+    if (chainId === 56) return bscMainnet;
+    return bscTestnet;
+  };
+
+  const getExplorerPrefixForChain = (chainId: number) => {
+    if (chainId === 677) return 'https://scan.botchain.ai/tx/';
+    if (chainId === 968) return 'https://scan.bohr.life/tx/';
+    if (chainId === 56) return 'https://bscscan.com/tx/';
+    return 'https://testnet.bscscan.com/tx/';
+  };
+
+  const waitForFinalReceipt = async (txHash: `0x${string}`, chainId: number) => {
+    const client = createPublicClient({
+      chain: getChainForId(chainId),
+      transport: http()
+    });
+    const receipt = await client.waitForTransactionReceipt({
+      hash: txHash,
+      confirmations: 1,
+      pollingInterval: 2_000,
+      timeout: 120_000
+    });
+    if (receipt.status !== 'success') {
+      const finalError = new Error('Final blockchain confirmation failed: the transaction was mined but reverted.');
+      (finalError as any).finalReceiptStatus = 'failed';
+      throw finalError;
+    }
+    return receipt;
+  };
+
+  const confirmAndShowReceipt = async (
+    txHash: `0x${string}`,
+    chainId: number,
+    txType: 'swap' | 'bridge'
+  ) => {
+    setActionStep('confirming_chain');
+    setReceiptTxHash(txHash);
+    setReceiptUrlPrefix(getExplorerPrefixForChain(chainId));
+    setReceiptTxType(txType);
+    try {
+      await waitForFinalReceipt(txHash, chainId);
+      setReceiptStatus('success');
+      setIsWaitingModalOpen(false);
+      setIsReceiptModalOpen(true);
+      return true;
+    } catch (err: any) {
+      if (err?.finalReceiptStatus === 'failed') {
+        setReceiptStatus('failed');
+        setIsWaitingModalOpen(false);
+        setIsReceiptModalOpen(true);
+        return false;
+      }
+      throw err;
+    }
+  };
+
   const isNetworkCorrect = !isConnected || currentChainId === targetChainIdForTab();
 
   const handleSwitchNetwork = async () => {
@@ -671,6 +731,10 @@ export default function App() {
     
     if (rawMsg.includes("user rejected") || rawMsg.includes("User rejected") || rawMsg.includes("User denied")) {
       return "The transaction request was rejected in your wallet.";
+    }
+
+    if (rawMsg.includes("TRANSFER_FROM_FAILED")) {
+      return "Swap failed on-chain because the router could not pull the token amount. I tightened Max to use the exact wallet balance instead of the rounded display balance; try Max again after balances refresh.";
     }
 
     // Strip any nested JSON string messages that cause messy displays
@@ -713,6 +777,7 @@ export default function App() {
       setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
       setIsWaitingModalOpen(false);
       setReceiptTxType('swap');
+      setReceiptStatus('success');
       setIsReceiptModalOpen(true);
     } else {
       // Real Blockchain Mode
@@ -755,17 +820,13 @@ export default function App() {
             gas: 350000n // Ensure higher gas limit for swaps
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step1: { ...session.step1, status: 'done', tx_hash: txSwap, timestamp: Date.now() }
           });
           logTransactionToDb('SWAP', caToBotDirection, caAmount, botAmount || '0', txSwap, 'SUCCESS');
-          
-          // Open Success Notification Modal
-          setReceiptTxHash(txSwap);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('swap');
-          setIsReceiptModalOpen(true);
         } else {
           // Swap BOT -> CA: Native BOT is sent (requires no approvals)
           setActionStep('swapping_ca');
@@ -785,17 +846,13 @@ export default function App() {
             gas: 350000n
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step1: { ...session.step1, status: 'done', tx_hash: txSwap, timestamp: Date.now() }
           });
           logTransactionToDb('SWAP', caToBotDirection, caAmount, botAmount || '0', txSwap, 'SUCCESS');
-          
-          // Open Success Notification Modal
-          setReceiptTxHash(txSwap);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('swap');
-          setIsReceiptModalOpen(true);
         }
       } catch (err: any) {
         setErrorMessage(cleanError(err));
@@ -830,6 +887,7 @@ export default function App() {
       setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
       setIsWaitingModalOpen(false);
       setReceiptTxType('swap');
+      setReceiptStatus('success');
       setIsReceiptModalOpen(true);
       
       // Fetch fresh points instantly
@@ -888,16 +946,13 @@ export default function App() {
             gas: 350000n
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step2: { ...session.step2, status: 'done', tx_hash: txSwap, timestamp: Date.now() }
           });
           logTransactionToDb('SWAP', botToUsdtDirection, botAmount, usdtAmount || '0', txSwap, 'SUCCESS');
-          
-          setReceiptTxHash(txSwap);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('swap');
-          setIsReceiptModalOpen(true);
         } else {
           // USDT -> BOT Swapping (Uniswap V3 swap via bdexRouter Universal Router execute)
           const parsedAmount = parseUnits(botAmount, 6); // USDT on BOT chain is 6 decimals
@@ -906,7 +961,7 @@ export default function App() {
           const allowance = rawUsdtBotSwapAllowance ? BigInt(rawUsdtBotSwapAllowance.toString()) : 0n;
           if (allowance < parsedAmount) {
             setActionStep('approving_bot');
-            await writeContractAsync({
+            const txApprove = await writeContractAsync({
               address: contracts.usdtBot as `0x${string}`,
               abi: ERC20_ABI,
               functionName: 'approve',
@@ -914,7 +969,7 @@ export default function App() {
               chainId: targetChainIdForTab(),
               gas: 150000n
             } as any);
-            await new Promise(r => setTimeout(r, 3000));
+            await waitForFinalReceipt(txApprove, targetChainIdForTab());
             refetchUsdtBotSwapAllowance();
           }
 
@@ -965,16 +1020,13 @@ export default function App() {
             gas: 350000n
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step2: { ...session.step2, status: 'done', tx_hash: txSwap, timestamp: Date.now() }
           });
           logTransactionToDb('SWAP', botToUsdtDirection, botAmount, usdtAmount || '0', txSwap, 'SUCCESS');
-          
-          setReceiptTxHash(txSwap);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('swap');
-          setIsReceiptModalOpen(true);
         }
       } catch (err: any) {
         setErrorMessage(cleanError(err));
@@ -1013,6 +1065,7 @@ export default function App() {
         : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/'));
       setIsWaitingModalOpen(false);
       setReceiptTxType('bridge');
+      setReceiptStatus('success');
       setIsReceiptModalOpen(true);
     } else {
       try {
@@ -1072,17 +1125,13 @@ export default function App() {
             gas: 1000000n // plenty of gas to satisfy reentrancy sentry and handler subcalls
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
-
-          // TRIGGER RECEIPT
-          setReceiptTxHash(txBridge);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('bridge');
-          setIsReceiptModalOpen(true);
         } else {
           // USDT BNB -> USDT BOT (Call deposit function on BotBridge proxy)
           const parsedAmount = parseUnits(usdtAmount, 18); // standard 18 on BSC
@@ -1137,17 +1186,13 @@ export default function App() {
             gas: 1000000n // plenty of gas to satisfy reentrancy sentry and handler subcalls
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
-
-          // TRIGGER RECEIPT
-          setReceiptTxHash(txBridge);
-          setReceiptUrlPrefix(isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('bridge');
-          setIsReceiptModalOpen(true);
         }
       } catch (err: any) {
         setErrorMessage(cleanError(err));
@@ -1165,8 +1210,8 @@ export default function App() {
   let caButtonLabel = "Enter amount";
   if (!isConnected) caButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) caButtonLabel = "Switch Chain to BOT Chain";
-  else if (isActionLoading && (actionStep === 'approving_ca' || actionStep === 'swapping_ca' || actionStep === 'sending_fee')) {
-    caButtonLabel = actionStep === 'approving_ca' ? `Approving ${caPaySymbol}...` : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${caPaySymbol} to ${caRecSymbol}...`;
+  else if (isActionLoading && (actionStep === 'approving_ca' || actionStep === 'swapping_ca' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
+    caButtonLabel = actionStep === 'approving_ca' ? `Approving ${caPaySymbol}...` : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${caPaySymbol} to ${caRecSymbol}...`;
   }
   else if (session.step1.status === 'done' && !caAmount) caButtonLabel = "✅ Step 1 Complete - Next →";
   else if (caAmount && !isDemoMode && caToBotDirection === 'CA_TO_BOT' && rawCaAllowance !== undefined && BigInt(rawCaAllowance.toString()) < parseUnits(caAmount, 18)) {
@@ -1180,8 +1225,8 @@ export default function App() {
   let botButtonLabel = "Enter amount";
   if (!isConnected) botButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) botButtonLabel = "Switch Chain to BOT Chain";
-  else if (isActionLoading && (actionStep === 'swapping_bot' || actionStep === 'approving_bot' || actionStep === 'sending_fee')) {
-    botButtonLabel = actionStep === 'approving_bot' ? `Approving ${botPaySymbol}...` : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${botPaySymbol} to ${botRecSymbol}...`;
+  else if (isActionLoading && (actionStep === 'swapping_bot' || actionStep === 'approving_bot' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
+    botButtonLabel = actionStep === 'approving_bot' ? `Approving ${botPaySymbol}...` : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${botPaySymbol} to ${botRecSymbol}...`;
   }
   else if (session.step2.status === 'done' && !botAmount) botButtonLabel = "✅ Step 2 Complete - Next →";
   else if (botAmount && !isDemoMode && botToUsdtDirection === 'USDT_TO_BOT' && rawUsdtBotSwapAllowance !== undefined && BigInt(rawUsdtBotSwapAllowance.toString()) < parseUnits(botAmount, 6)) {
@@ -1207,8 +1252,8 @@ export default function App() {
 
   if (!isConnected) bridgeButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) bridgeButtonLabel = `Switch Chain to ${bridgeFromName}`;
-  else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'sending_fee')) {
-    bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
+  else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
+    bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
   }
   else if (session.step3.status === 'submitted') bridgeButtonLabel = `Bridge Submitted ↗`;
   else if (usdtAmount && !isApprovedForBridge) bridgeButtonLabel = "Approve USDT";
@@ -1233,6 +1278,19 @@ export default function App() {
     if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "0.00";
     if (type === 'USDT_BOT') return rawUsdtBotBalance ? formatBalance(rawUsdtBotBalance, 6) : "0.00";
     return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.00";
+  };
+
+  const getExactBalanceAmount = (type: 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB') => {
+    if (isDemoMode) return getBalanceDisplay(type).replace(/\s*FLOW$/, '');
+    try {
+      if (type === 'CA' && rawCaBalance) return formatUnits(BigInt(rawCaBalance.toString()), 18);
+      if (type === 'BOT' && botBalance) return formatUnits(botBalance.value, botBalance.decimals);
+      if (type === 'USDT_BOT' && rawUsdtBotBalance) return formatUnits(BigInt(rawUsdtBotBalance.toString()), 6);
+      if (type === 'USDT_BNB' && rawUsdtBnbBalance) return formatUnits(BigInt(rawUsdtBnbBalance.toString()), 18);
+    } catch {
+      return getBalanceDisplay(type);
+    }
+    return getBalanceDisplay(type);
   };
 
   const getLiveBotPrice = () => {
@@ -1408,6 +1466,13 @@ export default function App() {
     return "0.00";
   };
 
+  const getTokenMaxAmount = (symbol: string) => {
+    if (symbol === 'BOT') return getExactBalanceAmount('BOT');
+    if (symbol === 'USDT') return getExactBalanceAmount('USDT_BOT');
+    if (symbol === 'CA') return getExactBalanceAmount('CA');
+    return getTokenBalance(symbol).replace(/\s*FLOW$/, '');
+  };
+
   const payBalance = getTokenBalance(paySymbol);
   const recBalance = getTokenBalance(recSymbol);
 
@@ -1439,8 +1504,8 @@ export default function App() {
   let activeSwapButtonLabel = "Enter amount";
   if (!isConnected) activeSwapButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) activeSwapButtonLabel = "Switch Chain to BOT Chain";
-  else if (isActionLoading && (actionStep === 'swapping_bot' || actionStep === 'approving_bot' || actionStep === 'sending_fee')) {
-    activeSwapButtonLabel = actionStep === 'approving_bot' ? `Approving ${paySymbol}...` : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${paySymbol} to ${recSymbol}...`;
+  else if (isActionLoading && (actionStep === 'swapping_bot' || actionStep === 'approving_bot' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
+    activeSwapButtonLabel = actionStep === 'approving_bot' ? `Approving ${paySymbol}...` : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${paySymbol} to ${recSymbol}...`;
   }
   else if (session.step2.status === 'done' && !botAmount) activeSwapButtonLabel = "✅ Step 2 Complete - Next →";
   else if (isTradeLocked) activeSwapButtonLabel = "🔒 FLOW Trading Locked";
@@ -1635,6 +1700,7 @@ export default function App() {
               toUsdValue={getCaToBotDisplayUsd(false)}
               fromBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('CA') : getBalanceDisplay('BOT')}
               toBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('BOT') : getBalanceDisplay('CA')}
+              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? getExactBalanceAmount('CA') : getExactBalanceAmount('BOT')}
               onFromAmountChange={setCaAmount}
               onToggleDirection={handleToggleCaBot}
               buttonLabel={caButtonLabel}
@@ -1664,6 +1730,7 @@ export default function App() {
               toUsdValue={getActiveSwapDisplayUsd(false)}
               fromBalance={payBalance}
               toBalance={recBalance}
+              fromMaxAmount={getTokenMaxAmount(paySymbol)}
               onFromAmountChange={setBotAmount}
               onToggleDirection={handleToggleDynamicSwap}
               buttonLabel={activeSwapButtonLabel}
@@ -1831,26 +1898,26 @@ export default function App() {
           isOpen={isWaitingModalOpen}
           onClose={() => setIsWaitingModalOpen(false)}
           fromAmount={
-            actionStep === 'approving_ca' || actionStep === 'swapping_ca' ? caAmount :
-            actionStep === 'swapping_bot' || actionStep === 'approving_bot' ? botAmount :
+            activeTab === 'CA/BOT' ? caAmount :
+            activeTab === 'BOT/USDT' ? botAmount :
             usdtAmount
           }
           fromSymbol={
-            actionStep === 'approving_ca' || actionStep === 'swapping_ca' ? caPaySymbol :
-            actionStep === 'swapping_bot' || actionStep === 'approving_bot' ? botPaySymbol :
+            activeTab === 'CA/BOT' ? caPaySymbol :
+            activeTab === 'BOT/USDT' ? paySymbol :
             "USDT"
           }
           toAmount={
-            actionStep === 'approving_ca' || actionStep === 'swapping_ca' ? getCaToBotDisplayQuote() :
-            actionStep === 'swapping_bot' || actionStep === 'approving_bot' ? getBotToUsdtDisplayQuote() :
+            activeTab === 'CA/BOT' ? getCaToBotDisplayQuote() :
+            activeTab === 'BOT/USDT' ? getActiveSwapQuote() :
             (usdtAmount ? parseFloat(calculateBridgeReceive(usdtAmount)).toFixed(6) : "0.00")
           }
           toSymbol={
-            actionStep === 'approving_ca' || actionStep === 'swapping_ca' ? caRecSymbol :
-            actionStep === 'swapping_bot' || actionStep === 'approving_bot' ? botRecSymbol :
+            activeTab === 'CA/BOT' ? caRecSymbol :
+            activeTab === 'BOT/USDT' ? recSymbol :
             "USDT"
           }
-          isBridge={actionStep === 'approving_usdt' || actionStep === 'bridging_usdt'}
+          isBridge={activeTab === 'BRIDGE'}
           fromChain={bridgeFromName}
           toChain={bridgeToName}
         />
@@ -1865,6 +1932,7 @@ export default function App() {
           txUrlPrefix={receiptUrlPrefix}
           onDonateClick={() => setIsDonateModalOpen(true)}
           txType={receiptTxType}
+          status={receiptStatus}
         />
       )}
 

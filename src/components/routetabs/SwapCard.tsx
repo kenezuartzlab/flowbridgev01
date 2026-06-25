@@ -12,17 +12,19 @@ interface TokenInputProps {
   symbol: string;
   usdValue: string;
   balance: string;
+  maxAmount?: string;
   onChange?: (val: string) => void;
   readOnly?: boolean;
 }
 
-function TokenInput({ label, amount, symbol, usdValue, balance, onChange, readOnly }: TokenInputProps) {
+function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onChange, readOnly }: TokenInputProps) {
   const handleMaxClick = () => {
     if (!readOnly && onChange) {
-      // Ensure we extract a clean numeric value from the balance.
-      const parsed = parseFloat(balance);
+      // Use the exact spendable amount when supplied; display balances can be rounded/truncated.
+      const nextValue = maxAmount || balance;
+      const parsed = parseFloat(nextValue);
       if (!isNaN(parsed)) {
-        onChange(parsed.toString());
+        onChange(nextValue);
       } else {
         onChange(balance);
       }
@@ -97,6 +99,7 @@ interface SwapCardProps {
   toUsdValue: string;
   fromBalance: string;
   toBalance: string;
+  fromMaxAmount?: string;
   onFromAmountChange: (val: string) => void;
   onSubmit: () => void;
   onToggleDirection?: () => void;
@@ -127,6 +130,7 @@ export function SwapCard({
   toUsdValue,
   fromBalance,
   toBalance,
+  fromMaxAmount,
   onFromAmountChange,
   onSubmit,
   onToggleDirection,
@@ -179,6 +183,7 @@ export function SwapCard({
           symbol={fromSymbol}
           usdValue={fromUsdValue}
           balance={fromBalance}
+          maxAmount={fromMaxAmount}
           onChange={onFromAmountChange}
         />
         

@@ -135,7 +135,7 @@ export function WaitingModal({
 
           {/* VM Execution Validation Milestone */}
           <div className="flex items-center justify-between">
-            <span className="text-[#C5C1B9]">3. Confirming swap settlement</span>
+            <span className="text-[#C5C1B9]">3. Final blockchain receipt</span>
             <div className="shrink-0 ml-2">
               {subStage3 === 'loading' && <Loader2 className="w-3 h-3 text-teal-400 animate-spin" />}
               {subStage3 === 'done' && <Check className="w-3.5 h-3.5 text-[#32FF8B] bg-[#32FF8B]/10 rounded border border-[#32FF8B]/20 p-0.5" />}
@@ -145,7 +145,7 @@ export function WaitingModal({
         </div>
 
         <p className="text-[9px] text-[#C5C1B9] leading-relaxed uppercase tracking-wide font-mono">
-          Please do not close this window while VM validates.
+          Please do not close this window while the chain confirms final success or fail status.
         </p>
       </div>
     </div>
