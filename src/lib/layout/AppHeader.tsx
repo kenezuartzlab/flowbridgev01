@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
+
+const RESEND_COOLDOWN_SECONDS = 60;
+const RESEND_COOLDOWN_KEY = 'fb_resend_verify_until';
 
 interface AppHeaderProps {
   walletAddress?: string | null;
@@ -37,21 +40,53 @@ export function AppHeader({
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [cooldownSec, setCooldownSec] = useState(0);
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isUserLoggedIn = !!googleUser;
   const isVerified = !!(googleUser?.emailVerified || googleUser?.email_verified || googleUser?.isDemo);
   const isUnverified = isUserLoggedIn && !isVerified;
 
+  useEffect(() => {
+    const raw = typeof window !== 'undefined' ? window.localStorage.getItem(RESEND_COOLDOWN_KEY) : null;
+    const until = raw ? parseInt(raw, 10) : 0;
+    const remain = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+    if (remain > 0) setCooldownSec(remain);
+  }, []);
+
+  useEffect(() => {
+    if (cooldownSec <= 0) {
+      if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
+      return;
+    }
+    tickRef.current = setInterval(() => {
+      setCooldownSec((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => { if (tickRef.current) clearInterval(tickRef.current); };
+  }, [cooldownSec]);
+
   const handleResend = async () => {
+    if (cooldownSec > 0 || loading) return;
     setLoading(true);
     setErrorMsg(null);
     setSuccessMsg(null);
     try {
       await sendVerification();
-      setSuccessMsg("Verification sent!");
+      const until = Date.now() + RESEND_COOLDOWN_SECONDS * 1000;
+      try { window.localStorage.setItem(RESEND_COOLDOWN_KEY, String(until)); } catch {}
+      setCooldownSec(RESEND_COOLDOWN_SECONDS);
+      setSuccessMsg("Verification sent! Check inbox + spam.");
       setTimeout(() => setSuccessMsg(null), 6000);
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to resend.");
+      const msg = err?.message || "Failed to resend.";
+      // Surface Supabase rate-limit hint clearly
+      if (/rate|too many|seconds/i.test(msg)) {
+        setCooldownSec(RESEND_COOLDOWN_SECONDS);
+        try {
+          window.localStorage.setItem(RESEND_COOLDOWN_KEY, String(Date.now() + RESEND_COOLDOWN_SECONDS * 1000));
+        } catch {}
+      }
+      setErrorMsg(msg);
       setTimeout(() => setErrorMsg(null), 6000);
     } finally {
       setLoading(false);
@@ -160,10 +195,11 @@ export function AppHeader({
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={handleResend}
-              disabled={loading}
-              className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 hover:text-white rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50"
+              disabled={loading || cooldownSec > 0}
+              title={cooldownSec > 0 ? `Wait ${cooldownSec}s before resending` : 'Resend verification email'}
+              className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 hover:text-white rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px]"
             >
-              Resend
+              {cooldownSec > 0 ? `${cooldownSec}s` : 'Resend'}
             </button>
             <button
               onClick={handleRefresh}
