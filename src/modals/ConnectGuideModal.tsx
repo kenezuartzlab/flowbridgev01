@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink } from 'lucide-react';
 import { emailSignIn, emailSignUp, requestPasswordReset } from '@/lib/auth';
+import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
 
 interface ConnectGuideModalProps {
   isOpen: boolean;
