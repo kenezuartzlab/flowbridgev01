@@ -52,6 +52,8 @@ export function UniversalSwapCard({
   isNetworkCorrect,
   onSwitchNetwork,
   onSwapSuccess,
+  onSwapPhaseChange,
+  getUsdPrice,
   txUrlPrefix,
 }: UniversalSwapCardProps) {
   const { address } = useAccount();
