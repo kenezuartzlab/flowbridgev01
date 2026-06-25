@@ -628,7 +628,33 @@ export function UniversalSwapCard({
         <WarningPanel type="warning" message={quoteError} />
       )}
 
-      {txError && <WarningPanel type="error" message={txError} />}
+      {txError && (
+        <WarningPanel
+          type="error"
+          title="Swap Failed"
+          message={txError}
+          txHash={lastTx ?? undefined}
+          txUrlPrefix={txUrlPrefix}
+        />
+      )}
+
+      {lastTx && !txError && (
+        <div className="bg-[#32FF8B]/10 border border-[#32FF8B]/25 rounded-xl p-3 flex items-center justify-between gap-2 text-[10px] font-mono">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[#32FF8B] font-black uppercase tracking-widest">Swap Confirmed</span>
+            <span className="text-[#C5C1B9]">Receipt status: success</span>
+          </div>
+          <a
+            href={`${txUrlPrefix}${lastTx}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 px-2 py-1 bg-[#32FF8B]/15 hover:bg-[#32FF8B]/25 border border-[#32FF8B]/30 text-[#32FF8B] rounded-lg font-bold"
+          >
+            {shortHash(lastTx)}
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      )}
 
 
       <TokenPickerModal
