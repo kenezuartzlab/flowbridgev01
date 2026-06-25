@@ -1898,26 +1898,26 @@ export default function App() {
           isOpen={isWaitingModalOpen}
           onClose={() => setIsWaitingModalOpen(false)}
           fromAmount={
-            actionStep === 'approving_ca' || actionStep === 'swapping_ca' ? caAmount :
-            actionStep === 'swapping_bot' || actionStep === 'approving_bot' ? botAmount :
+            activeTab === 'CA/BOT' ? caAmount :
+            activeTab === 'BOT/USDT' ? botAmount :
             usdtAmount
           }
           fromSymbol={
-            actionStep === 'approving_ca' || actionStep === 'swapping_ca' ? caPaySymbol :
-            actionStep === 'swapping_bot' || actionStep === 'approving_bot' ? botPaySymbol :
+            activeTab === 'CA/BOT' ? caPaySymbol :
+            activeTab === 'BOT/USDT' ? paySymbol :
             "USDT"
           }
           toAmount={
-            actionStep === 'approving_ca' || actionStep === 'swapping_ca' ? getCaToBotDisplayQuote() :
-            actionStep === 'swapping_bot' || actionStep === 'approving_bot' ? getBotToUsdtDisplayQuote() :
+            activeTab === 'CA/BOT' ? getCaToBotDisplayQuote() :
+            activeTab === 'BOT/USDT' ? getActiveSwapQuote() :
             (usdtAmount ? parseFloat(calculateBridgeReceive(usdtAmount)).toFixed(6) : "0.00")
           }
           toSymbol={
-            actionStep === 'approving_ca' || actionStep === 'swapping_ca' ? caRecSymbol :
-            actionStep === 'swapping_bot' || actionStep === 'approving_bot' ? botRecSymbol :
+            activeTab === 'CA/BOT' ? caRecSymbol :
+            activeTab === 'BOT/USDT' ? recSymbol :
             "USDT"
           }
-          isBridge={actionStep === 'approving_usdt' || actionStep === 'bridging_usdt'}
+          isBridge={activeTab === 'BRIDGE'}
           fromChain={bridgeFromName}
           toChain={bridgeToName}
         />
