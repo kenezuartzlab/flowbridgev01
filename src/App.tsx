@@ -8,6 +8,7 @@ import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
 import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
+import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
@@ -1721,36 +1722,25 @@ export default function App() {
           )}
 
           {activeTab === 'BOT/USDT' && (
-            <SwapCard
-              fromSymbol={paySymbol}
-              toSymbol={recSymbol}
-              fromAmount={botAmount}
-              toAmount={getActiveSwapQuote()}
-              fromUsdValue={getActiveSwapDisplayUsd(true)}
-              toUsdValue={getActiveSwapDisplayUsd(false)}
-              fromBalance={payBalance}
-              toBalance={recBalance}
-              fromMaxAmount={getTokenMaxAmount(paySymbol)}
-              onFromAmountChange={setBotAmount}
-              onToggleDirection={handleToggleDynamicSwap}
-              buttonLabel={activeSwapButtonLabel}
-              buttonDisabled={activeSwapButtonDisabled}
-              onShowRoute={() => setActiveRouteModal({ from: paySymbol, to: recSymbol })}
-              onSubmit={() => {
-                if (!isConnected) return handleConnect();
-                if (!isNetworkCorrect) return handleSwitchNetwork();
-                if (botAmount) setActiveConfirmModal('BOT/USDT');
-              }}
-              infoMessage={session.step1.status === 'done' && session.step2.status !== 'done' && selectedPair === 'BOT/USDT' ? "Step 1 complete. Convert your BOT to USDT to prepare for bridging." : undefined}
-              successMessage={session.step2.status === 'done' ? 'Output swap transaction was successfully executed in the Bohr VM.' : undefined}
-              txHash={session.step2.status === 'done' ? session.step2.tx_hash : undefined}
+            <UniversalSwapCard
+              isMainnet={isMainnet}
+              isConnected={isConnected}
+              onConnect={handleConnect}
+              isNetworkCorrect={isNetworkCorrect}
+              onSwitchNetwork={handleSwitchNetwork}
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
-              onReset={resetStep2}
-              showAggregatorSelector={true}
-              selectedPair={selectedPair}
-              onPairChange={(pair) => { setSelectedPair(pair); setIsPairReversed(false); setBotToUsdtDirection('BOT_TO_USDT'); }}
-              isFlowUnlocked={isFlowUnlocked}
-              livePrice={getLiveBotPrice()}
+              onSwapSuccess={({ fromSymbol, toSymbol, txHash }) => {
+                // Mark route session step 2 complete on a BOT↔USDT swap so the
+                // FlowBridge journey progresses to BRIDGE as before.
+                const isBotUsdt =
+                  (fromSymbol === 'BOT' && toSymbol === 'USDT') ||
+                  (fromSymbol === 'USDT' && toSymbol === 'BOT');
+                if (isBotUsdt) {
+                  updateSession({
+                    step2: { ...session.step2, status: 'done', tx_hash: txHash, timestamp: Date.now() },
+                  });
+                }
+              }}
             />
           )}
 

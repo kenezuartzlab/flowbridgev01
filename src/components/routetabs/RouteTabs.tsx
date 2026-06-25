@@ -9,7 +9,7 @@ interface RouteTabsProps {
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'CA/BOT', label: 'CA / BOT' },
-  { id: 'BOT/USDT', label: 'BOT / USDT' },
+  { id: 'BOT/USDT', label: 'SWAP' },
   { id: 'BRIDGE', label: 'BRIDGE' },
 ];
 
