@@ -523,20 +523,6 @@ export function UniversalSwapCard({
 
       {txError && <WarningPanel type="error" message={txError} />}
 
-      {lastTx && (
-        <div className="flex items-center gap-2 bg-[#32FF8B]/10 border border-[#32FF8B]/30 rounded-xl p-3 text-[11px] font-mono">
-          <CheckCircle2 className="w-4 h-4 text-[#32FF8B] shrink-0" />
-          <span className="text-white">Swap submitted.</span>
-          <a
-            href={`${txUrlPrefix}${lastTx}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-[#32FF8B] hover:underline font-black tracking-wider ml-auto"
-          >
-            View tx ↗
-          </a>
-        </div>
-      )}
 
       <TokenPickerModal
         isOpen={pickerOpen === "in"}
