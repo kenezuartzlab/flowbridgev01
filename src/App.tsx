@@ -952,16 +952,13 @@ export default function App() {
             gas: 350000n
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step2: { ...session.step2, status: 'done', tx_hash: txSwap, timestamp: Date.now() }
           });
           logTransactionToDb('SWAP', botToUsdtDirection, botAmount, usdtAmount || '0', txSwap, 'SUCCESS');
-          
-          setReceiptTxHash(txSwap);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('swap');
-          setIsReceiptModalOpen(true);
         } else {
           // USDT -> BOT Swapping (Uniswap V3 swap via bdexRouter Universal Router execute)
           const parsedAmount = parseUnits(botAmount, 6); // USDT on BOT chain is 6 decimals
@@ -970,7 +967,7 @@ export default function App() {
           const allowance = rawUsdtBotSwapAllowance ? BigInt(rawUsdtBotSwapAllowance.toString()) : 0n;
           if (allowance < parsedAmount) {
             setActionStep('approving_bot');
-            await writeContractAsync({
+            const txApprove = await writeContractAsync({
               address: contracts.usdtBot as `0x${string}`,
               abi: ERC20_ABI,
               functionName: 'approve',
@@ -978,7 +975,7 @@ export default function App() {
               chainId: targetChainIdForTab(),
               gas: 150000n
             } as any);
-            await new Promise(r => setTimeout(r, 3000));
+            await waitForFinalReceipt(txApprove, targetChainIdForTab());
             refetchUsdtBotSwapAllowance();
           }
 
@@ -1029,16 +1026,13 @@ export default function App() {
             gas: 350000n
           } as any);
 
+          const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
+          if (!finalConfirmed) return;
+
           await updateSession({
             step2: { ...session.step2, status: 'done', tx_hash: txSwap, timestamp: Date.now() }
           });
           logTransactionToDb('SWAP', botToUsdtDirection, botAmount, usdtAmount || '0', txSwap, 'SUCCESS');
-          
-          setReceiptTxHash(txSwap);
-          setReceiptUrlPrefix(isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/');
-          setIsWaitingModalOpen(false);
-          setReceiptTxType('swap');
-          setIsReceiptModalOpen(true);
         }
       } catch (err: any) {
         setErrorMessage(cleanError(err));
