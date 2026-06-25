@@ -390,6 +390,9 @@ export function UniversalSwapCard({
     setBusy(true);
     setTxError(null);
     setLastTx(null);
+    const swapToastId = toast.loading(
+      `Swapping ${tokenIn.symbol} → ${tokenOut.symbol}…`,
+    );
     try {
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 10);
       const initialAmount = parseUnits(amountIn, tokenIn.decimals);
@@ -398,22 +401,51 @@ export function UniversalSwapCard({
 
       for (let i = 0; i < quote.steps.length; i++) {
         const step = quote.steps[i];
-
-        // For step 2+ whose input is native BOT, measure native balance delta
-        // from the previous step to get the actual unwrapped amount.
         if (i > 0 && step.inIsNative) {
-          // expectedOut from previous step minus slippage is the worst case;
-          // use it directly so we can submit immediately without polling balance.
           nextAmount = minOutFor(quote.steps[i - 1].expectedOut);
         }
+        const stepLabel = `${step.symbolPath[0]} → ${step.symbolPath[step.symbolPath.length - 1]}`;
+        toast.loading(
+          quote.steps.length > 1
+            ? `Step ${i + 1}/${quote.steps.length}: ${stepLabel}…`
+            : `Swapping ${stepLabel}…`,
+          { id: swapToastId },
+        );
 
         const tx = await executeStep(step, nextAmount, deadline);
         lastTx = tx;
-        await publicClient.waitForTransactionReceipt({ hash: tx });
+        const rcpt = await publicClient.waitForTransactionReceipt({ hash: tx });
+        if (rcpt.status !== "success") {
+          toast.error(`Swap reverted on-chain`, {
+            id: swapToastId,
+            description: shortHash(tx),
+            action: {
+              label: "View",
+              onClick: () => window.open(`${txUrlPrefix}${tx}`, "_blank"),
+            },
+          });
+          setTxError(`Transaction reverted: ${tx}`);
+          onSwapPhaseChange?.({
+            phase: "error",
+            message: `Transaction reverted on-chain (${shortHash(tx)})`,
+          });
+          return;
+        }
       }
 
       if (lastTx) {
         setLastTx(lastTx);
+        toast.success(
+          `Swapped ${tokenIn.symbol} → ${tokenOut.symbol}`,
+          {
+            id: swapToastId,
+            description: shortHash(lastTx),
+            action: {
+              label: "View",
+              onClick: () => window.open(`${txUrlPrefix}${lastTx}`, "_blank"),
+            },
+          },
+        );
         onSwapSuccess?.({ fromSymbol: tokenIn.symbol, toSymbol: tokenOut.symbol, txHash: lastTx });
         onSwapPhaseChange?.({
           phase: "success",
@@ -424,8 +456,9 @@ export function UniversalSwapCard({
       }
       await allowanceRead.refetch?.();
     } catch (e: any) {
-      const msg = e?.shortMessage ?? e?.message ?? "Swap failed";
+      const msg = parseTxError(e);
       setTxError(msg);
+      toast.error(msg, { id: swapToastId });
       onSwapPhaseChange?.({ phase: "error", message: msg });
     } finally {
       setBusy(false);
