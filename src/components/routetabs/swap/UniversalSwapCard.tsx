@@ -466,6 +466,7 @@ export function UniversalSwapCard({
           balanceDisplay={inBalanceDisplay}
           onPickToken={() => setPickerOpen("in")}
           onMax={onMax}
+          usdValue={usdValueFor(tokenIn, amountIn)}
         />
 
         <div className="flex justify-center -my-6.5 relative z-20">
@@ -487,6 +488,7 @@ export function UniversalSwapCard({
           onPickToken={() => setPickerOpen("out")}
           readOnly
           quoting={quoting}
+          usdValue={usdValueFor(tokenOut, amountOutDisplay)}
         />
       </div>
 
