@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
+
+const RESEND_COOLDOWN_SECONDS = 60;
+const RESEND_COOLDOWN_KEY = 'fb_resend_verify_until';
 
 interface AppHeaderProps {
   walletAddress?: string | null;
