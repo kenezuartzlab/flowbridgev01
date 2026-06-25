@@ -448,7 +448,13 @@ export function UniversalSwapCard({
             },
           },
         );
-        onSwapSuccess?.({ fromSymbol: tokenIn.symbol, toSymbol: tokenOut.symbol, txHash: lastTx });
+        onSwapSuccess?.({
+          fromSymbol: tokenIn.symbol,
+          toSymbol: tokenOut.symbol,
+          fromAmount: amountIn,
+          toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+          txHash: lastTx,
+        });
         onSwapPhaseChange?.({
           phase: "success",
           from: tokenIn.symbol,
