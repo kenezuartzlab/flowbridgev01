@@ -83,14 +83,14 @@ export function ConfirmDestinationModal({
 
         {/* Warning Banner block - Matching page 4 exactly */}
         <div className="bg-[#122A26] border border-[#32FF8B]/15 rounded-xl p-3 text-left">
-          <p className="text-[11px] leading-relaxed font-semibold text-[#32FF8B]">
+          <p className="text-[13px] leading-relaxed font-semibold text-[#32FF8B]">
             Please ensure the destination address below is correct before proceeding
           </p>
         </div>
 
         {/* Address Input Section */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-[#C5C1B9] uppercase tracking-wider font-mono block text-left">
+          <label className="text-[12px] font-bold text-[#C5C1B9] uppercase tracking-wider font-mono block text-left">
             Destination address
           </label>
           <div className="relative flex items-center bg-[#010C1B] rounded-xl border border-white/10 p-1 group focus-within:border-[#32FF8B]/50 transition-colors">
@@ -102,7 +102,7 @@ export function ConfirmDestinationModal({
                 if (addressError) setAddressError(null);
               }}
               placeholder="0x..."
-              className="bg-transparent text-[11px] font-mono font-bold text-white w-full py-2.5 px-3 focus:outline-none placeholder:text-white/25 overflow-x-auto"
+              className="bg-transparent text-[13px] font-mono font-bold text-white w-full py-2.5 px-3 focus:outline-none placeholder:text-white/25 overflow-x-auto"
             />
             
             {/* Action buttons inside input box */}
@@ -131,7 +131,7 @@ export function ConfirmDestinationModal({
             </div>
           </div>
           {addressError && (
-            <p className="text-[10px] text-red-400 font-medium text-left pt-0.5">
+            <p className="text-[12px] text-red-400 font-medium text-left pt-0.5">
               {addressError}
             </p>
           )}
@@ -140,7 +140,7 @@ export function ConfirmDestinationModal({
         {/* Actions - Confirm Button */}
         <button
           onClick={handleValidateAndConfirm}
-          className="w-full py-4 rounded-2xl bg-white hover:bg-white/95 text-[#010C1B] font-black text-xs uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md hover:shadow-white/10 cursor-pointer"
+          className="w-full py-4 rounded-2xl bg-white hover:bg-white/95 text-[#010C1B] font-black text-sm uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md hover:shadow-white/10 cursor-pointer"
         >
           Confirm
         </button>

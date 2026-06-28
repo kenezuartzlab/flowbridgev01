@@ -21,7 +21,7 @@ export function RouteTabs({ activeTab, onTabChange }: RouteTabsProps) {
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            "flex-1 py-3.5 text-[10px] font-black tracking-widest transition-all border-b-2 uppercase cursor-pointer",
+            "flex-1 py-3.5 text-[12px] font-black tracking-widest transition-all border-b-2 uppercase cursor-pointer",
             activeTab === tab.id
               ? "text-[#32FF8B] border-[#32FF8B] bg-[#32FF8B]/5"
               : "text-[#C5C1B9] border-transparent hover:text-[#32FF8B] hover:bg-white/5"

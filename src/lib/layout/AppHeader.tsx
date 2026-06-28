@@ -142,7 +142,7 @@ export function AppHeader({
             <button
               onClick={onRewardsClick}
               title="Claim off-chain FLOW rewards & Referral points"
-              className="p-1.5 sm:p-2 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/30 hover:border-[#32FF8B]/50 active:scale-95 text-[#32FF8B] hover:text-[#1FFF7D] transition-all rounded-xl cursor-pointer shadow-sm flex items-center gap-1.5 px-2 sm:px-3 text-[9px] font-black tracking-widest uppercase"
+              className="p-1.5 sm:p-2 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/30 hover:border-[#32FF8B]/50 active:scale-95 text-[#32FF8B] hover:text-[#1FFF7D] transition-all rounded-xl cursor-pointer shadow-sm flex items-center gap-1.5 px-2 sm:px-3 text-[11px] font-black tracking-widest uppercase"
             >
               <Gift className="w-3.5 h-3.5" />
               <span className="hidden xs:inline text-[#32FF8B]">REWARDS</span>
@@ -152,7 +152,7 @@ export function AppHeader({
             <button
               onClick={onDonateClick}
               title="Donate to support FlowBridge volunteer builders"
-              className="p-1.5 sm:p-2 bg-[#0D1C2A] border border-white/10 hover:border-[#32FF8B]/30 hover:bg-white/5 active:scale-95 text-[#C5C1B9] hover:text-[#32FF8B] transition-all rounded-xl cursor-pointer shadow-sm flex items-center gap-1 px-2.5 sm:px-3 text-[10px] font-bold"
+              className="p-1.5 sm:p-2 bg-[#0D1C2A] border border-white/10 hover:border-[#32FF8B]/30 hover:bg-white/5 active:scale-95 text-[#C5C1B9] hover:text-[#32FF8B] transition-all rounded-xl cursor-pointer shadow-sm flex items-center gap-1 px-2.5 sm:px-3 text-[12px] font-bold"
             >
               <Heart className="w-3.5 h-3.5 fill-[#32FF8B]/20 text-[#32FF8B]/80" />
               <span className="hidden xs:inline text-rose-100 tracking-wider">Support</span>
@@ -176,7 +176,7 @@ export function AppHeader({
       </div>
 
       {isUnverified && (
-        <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-amber-950/20 border-t border-amber-500/10 text-amber-200 text-[10px] font-mono select-none">
+        <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-amber-950/20 border-t border-amber-500/10 text-amber-200 text-[12px] font-mono select-none">
           <div className="flex items-center gap-2 text-left min-w-0">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
             <span className="leading-tight truncate pr-1">
@@ -197,7 +197,7 @@ export function AppHeader({
               onClick={handleResend}
               disabled={loading || cooldownSec > 0}
               title={cooldownSec > 0 ? `Wait ${cooldownSec}s before resending` : 'Resend verification email'}
-              className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 hover:text-white rounded text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px]"
+              className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 hover:text-white rounded text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px]"
             >
               {cooldownSec > 0 ? `${cooldownSec}s` : 'Resend'}
             </button>

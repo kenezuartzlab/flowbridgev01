@@ -152,13 +152,13 @@ export function RealtimeBridgeTrackerModal({
               <div className="relative p-1 bg-[#010C1B] rounded-2xl border border-white/5 shadow-lg group">
                 <TokenIcon symbol={symbol} size={48} className="translate-y-0.5" />
                 <span className="absolute -bottom-1 -right-1 bg-yellow-500/20 border border-yellow-500/40 rounded-full p-0.5">
-                  <div className="w-4 h-4 rounded-full bg-yellow-500 flex items-center justify-center text-[8px] font-black text-[#010C1B]">B</div>
+                  <div className="w-4 h-4 rounded-full bg-yellow-500 flex items-center justify-center text-[10px] font-black text-[#010C1B]">B</div>
                 </span>
               </div>
               <div className="text-center">
-                <span className="text-[12px] font-bold block">{symbol}</span>
-                <span className="text-[10px] font-black text-white/50 block tracking-wider font-mono">{parseFloat(amount || '0').toFixed(0)}</span>
-                <span className="text-[10px] font-bold text-amber-500 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
+                <span className="text-[14px] font-bold block">{symbol}</span>
+                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{parseFloat(amount || '0').toFixed(0)}</span>
+                <span className="text-[12px] font-bold text-amber-500 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
               </div>
             </div>
 
@@ -179,13 +179,13 @@ export function RealtimeBridgeTrackerModal({
               <div className="relative p-1 bg-[#010C1B] rounded-2xl border border-white/5 shadow-lg">
                 <TokenIcon symbol={symbol} size={48} />
                 <span className="absolute -bottom-1 -right-1 bg-teal-500/20 border border-teal-500/40 rounded-full p-0.5">
-                  <div className="w-4 h-4 rounded-full bg-teal-500 flex items-center justify-center text-[8px] font-black text-[#010C1B]">₮</div>
+                  <div className="w-4 h-4 rounded-full bg-teal-500 flex items-center justify-center text-[10px] font-black text-[#010C1B]">₮</div>
                 </span>
               </div>
               <div className="text-center">
-                <span className="text-[12px] font-bold block">{symbol}</span>
-                <span className="text-[10px] font-black text-white/50 block tracking-wider font-mono">{parseFloat(amount || '0').toFixed(0)}</span>
-                <span className="text-[10px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
+                <span className="text-[14px] font-bold block">{symbol}</span>
+                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{parseFloat(amount || '0').toFixed(0)}</span>
+                <span className="text-[12px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
               </div>
             </div>
           </div>
@@ -196,7 +196,7 @@ export function RealtimeBridgeTrackerModal({
           {isCompleted ? (
             <div className="px-6 py-2.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/15 border border-[#32FF8B]/35 rounded-full flex items-center gap-2 shadow-[0_0_12px_rgba(50,255,139,0.15)] animate-bounce-slow">
               <span className="w-2 h-2 rounded-full bg-[#32FF8B] animate-ping" />
-              <span className="text-xs font-black uppercase text-[#32FF8B] tracking-widest font-mono">Completed</span>
+              <span className="text-sm font-black uppercase text-[#32FF8B] tracking-widest font-mono">Completed</span>
             </div>
           ) : (
             <div className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-full text-center">
@@ -211,7 +211,7 @@ export function RealtimeBridgeTrackerModal({
         <div className="bg-[#010C1B]/80 border border-white/10 rounded-[20px] p-5 space-y-4">
           {/* Milestone 1 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[11px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
+            <span className="text-[13px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
               Sent transaction from <strong className="text-amber-300 font-bold">{normChain(fromChain)}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -223,7 +223,7 @@ export function RealtimeBridgeTrackerModal({
 
           {/* Milestone 2 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[11px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
+            <span className="text-[13px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
               Sent transaction to <strong className="text-teal-400 font-bold">{normChain(toChain)}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -235,7 +235,7 @@ export function RealtimeBridgeTrackerModal({
 
           {/* Milestone 3 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[11px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
+            <span className="text-[13px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
               Received {symbol} on <strong className="text-teal-400 font-mono font-black">{truncatedAddress}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -250,11 +250,11 @@ export function RealtimeBridgeTrackerModal({
         {onDonateClick && (
           <div className="bg-[#122A26] border border-[#32FF8B]/15 rounded-xl p-3 text-left w-full relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-[#32FF8B]/10 to-transparent blur-md pointer-events-none" />
-            <p className="text-[10px] leading-relaxed font-semibold text-[#32FF8B] mb-1 flex items-center gap-1">
+            <p className="text-[12px] leading-relaxed font-semibold text-[#32FF8B] mb-1 flex items-center gap-1">
               <Heart className="w-3 h-3 fill-[#32FF8B]" />
               <span>FlowBridge is free and charges 0% fees!</span>
             </p>
-            <p className="text-[10px] text-[#C5C1B9] leading-tight mb-2.5">
+            <p className="text-[12px] text-[#C5C1B9] leading-tight mb-2.5">
               Support original open-source builders to bring you new cross-chain analytics & earnings trackers.
             </p>
             <button
@@ -262,7 +262,7 @@ export function RealtimeBridgeTrackerModal({
                 onClose();
                 onDonateClick();
               }}
-              className="w-full py-1.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/35 text-[#32FF8B] font-mono font-black text-[9px] uppercase tracking-widest rounded-lg transition-all duration-150 cursor-pointer text-center"
+              className="w-full py-1.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/35 text-[#32FF8B] font-mono font-black text-[11px] uppercase tracking-widest rounded-lg transition-all duration-150 cursor-pointer text-center"
             >
               💖 Donate / Support
             </button>
@@ -277,7 +277,7 @@ export function RealtimeBridgeTrackerModal({
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "w-full py-3.5 rounded-xl border font-mono text-xs tracking-widest font-bold uppercase transition-all duration-150 flex items-center justify-center gap-2",
+              "w-full py-3.5 rounded-xl border font-mono text-sm tracking-widest font-bold uppercase transition-all duration-150 flex items-center justify-center gap-2",
               isCompleted 
                 ? "bg-[#32FF8B] border-[#32FF8B] text-[#010C1B] hover:bg-[#1FFF7D] cursor-pointer shadow-[0_0_12px_rgba(50,255,139,0.25)]" 
                 : "bg-white/5 border-white/5 text-[#C5C1B9]/60 hover:text-white cursor-pointer"

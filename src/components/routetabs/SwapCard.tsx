@@ -34,7 +34,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
   return (
     <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
       {/* Top Row: Label and Balance */}
-      <div className="flex justify-between items-center text-[10px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
+      <div className="flex justify-between items-center text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
           <span 
@@ -50,7 +50,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
             <button
               type="button"
               onClick={handleMaxClick}
-              className="bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 active:scale-95 text-[#32FF8B] border border-[#32FF8B]/25 px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest uppercase transition-all duration-150 cursor-pointer shadow-none"
+              className="bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 active:scale-95 text-[#32FF8B] border border-[#32FF8B]/25 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase transition-all duration-150 cursor-pointer shadow-none"
             >
               Max
             </button>
@@ -62,7 +62,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
       <div className="flex justify-between items-center gap-3">
         <div className="flex-1 min-w-0">
           {readOnly ? (
-            <div className="text-2xl font-black text-white leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
+            <div className="text-3xl font-black text-white leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
                {amount ? parseFloat(amount).toFixed(8) : '0.00000000'}
             </div>
           ) : (
@@ -71,19 +71,19 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               placeholder="0.00"
               value={amount}
               onChange={(e) => onChange?.(e.target.value)}
-              className="bg-transparent text-white text-2xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
+              className="bg-transparent text-white text-3xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
             />
           )}
         </div>
 
         <div className="bg-[#0D1C2A]/90 px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 shadow-sm font-mono">
           <TokenIcon symbol={symbol} size={22} />
-          <span className="font-black text-xs text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
+          <span className="font-black text-sm text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
         </div>
       </div>
 
       {/* Bottom Row: Estimated USD value */}
-      <div className="text-[#C5C1B9] font-medium flex items-center text-[10px] font-mono leading-none">
+      <div className="text-[#C5C1B9] font-medium flex items-center text-[12px] font-mono leading-none">
         <span>≈ {usdValue}</span>
       </div>
     </div>
@@ -163,8 +163,8 @@ export function SwapCard({
       {showAggregatorSelector && (
         <div className="bg-[#0D1C2A]/60 border border-white/15 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono">
           <div className="flex flex-col text-left w-full sm:w-auto">
-            <span className="text-[9px] text-[#32FF8B] uppercase font-black tracking-widest">Bohr DEX Aggregator (Pro)</span>
-            <span className="text-[10px] text-white/50">Multi-routing non-custodial engine</span>
+            <span className="text-[11px] text-[#32FF8B] uppercase font-black tracking-widest">Bohr DEX Aggregator (Pro)</span>
+            <span className="text-[12px] text-white/50">Multi-routing non-custodial engine</span>
           </div>
           <PairDropdown
             value={selectedPair ?? 'BOT/USDT'}
@@ -215,7 +215,7 @@ export function SwapCard({
           onClick={onSubmit}
           disabled={buttonDisabled}
           className={cn(
-            "w-full py-4 rounded-2xl text-xs font-black tracking-widest uppercase transition-all flex justify-center items-center gap-2 cursor-pointer",
+            "w-full py-4 rounded-2xl text-sm font-black tracking-widest uppercase transition-all flex justify-center items-center gap-2 cursor-pointer",
             buttonDisabled 
               ? "bg-white/5 text-[#C5C1B9]/45 border border-white/10 cursor-not-allowed shadow-none" 
               : "bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] shadow-[0_0_16px_rgba(50,255,139,0.25)] hover:shadow-[0_0_24px_rgba(50,255,139,0.45)] hover:scale-[1.01] active:scale-[0.99]"
@@ -236,7 +236,7 @@ export function SwapCard({
             ]}
           />
           {onShowRoute && (
-            <div className="flex justify-between items-center bg-[#32FF8B]/5 border border-[#32FF8B]/15 rounded-xl px-3 py-2 text-[10px] font-bold text-[#F0F7F3] shadow-sm font-mono">
+            <div className="flex justify-between items-center bg-[#32FF8B]/5 border border-[#32FF8B]/15 rounded-xl px-3 py-2 text-[12px] font-bold text-[#F0F7F3] shadow-sm font-mono">
               <span className="text-[#C5C1B9] flex items-center gap-1 uppercase tracking-wider">
                 Routing Path
               </span>
@@ -247,7 +247,7 @@ export function SwapCard({
                 id="show_route_btn"
               >
                 1 on-chain route
-                <span className="text-[9px] bg-[#32FF8B]/20 text-[#32FF8B] px-1.5 py-0.5 rounded font-black shrink-0 tracking-widest">VIEW</span>
+                <span className="text-[11px] bg-[#32FF8B]/20 text-[#32FF8B] px-1.5 py-0.5 rounded font-black shrink-0 tracking-widest">VIEW</span>
               </button>
             </div>
           )}
@@ -273,7 +273,7 @@ export function SwapCard({
             <button
               type="button"
               onClick={onReset}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-[10px] tracking-widest uppercase font-black rounded-xl transition duration-150 active:scale-98 border border-white/10 cursor-pointer shadow-inner text-center"
+              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-[12px] tracking-widest uppercase font-black rounded-xl transition duration-150 active:scale-98 border border-white/10 cursor-pointer shadow-inner text-center"
             >
               Start New Swap
             </button>
@@ -328,7 +328,7 @@ function PairDropdown({ value, onChange, isFlowUnlocked }: PairDropdownProps) {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="bg-[#010C1B] border border-white/10 rounded-xl px-3 py-1.5 text-xs font-black text-white focus:outline-none cursor-pointer w-full sm:w-auto uppercase flex items-center justify-between gap-2 min-w-[180px] hover:border-white/25 transition-colors"
+        className="bg-[#010C1B] border border-white/10 rounded-xl px-3 py-1.5 text-sm font-black text-white focus:outline-none cursor-pointer w-full sm:w-auto uppercase flex items-center justify-between gap-2 min-w-[180px] hover:border-white/25 transition-colors"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -352,7 +352,7 @@ function PairDropdown({ value, onChange, isFlowUnlocked }: PairDropdownProps) {
                     setOpen(false);
                   }}
                   className={cn(
-                    'w-full text-left px-3 py-2 text-[11px] font-black uppercase tracking-wider flex items-center justify-between gap-2 transition-colors',
+                    'w-full text-left px-3 py-2 text-[13px] font-black uppercase tracking-wider flex items-center justify-between gap-2 transition-colors',
                     opt.locked
                       ? 'text-white/30 cursor-not-allowed'
                       : 'text-white hover:bg-[#32FF8B]/10 hover:text-[#32FF8B] cursor-pointer'
@@ -360,7 +360,7 @@ function PairDropdown({ value, onChange, isFlowUnlocked }: PairDropdownProps) {
                   disabled={opt.locked}
                 >
                   <span className="truncate">
-                    {opt.label} {opt.locked && <span className="text-[9px] ml-1">🔒</span>}
+                    {opt.label} {opt.locked && <span className="text-[11px] ml-1">🔒</span>}
                   </span>
                   {selected && <Check className="w-3.5 h-3.5 text-[#32FF8B] shrink-0" />}
                 </button>
