@@ -111,12 +111,12 @@ export function TokenPickerModal({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name or paste 0x address…"
-            className="bg-transparent text-white text-xs flex-1 focus:outline-none placeholder:text-[#C5C1B9]/60 font-mono"
+            className="bg-transparent text-white text-sm flex-1 focus:outline-none placeholder:text-[#C5C1B9]/60 font-mono"
           />
         </div>
 
         {importError && (
-          <div className="flex items-center gap-2 text-[10px] text-amber-400 font-mono bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2 text-[12px] text-amber-400 font-mono bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
             <span>{importError}</span>
           </div>
@@ -127,7 +127,7 @@ export function TokenPickerModal({
             type="button"
             disabled={importing}
             onClick={handleImport}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#32FF8B]/10 border border-[#32FF8B]/30 text-[#32FF8B] text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#32FF8B]/20 transition-colors font-mono disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#32FF8B]/10 border border-[#32FF8B]/30 text-[#32FF8B] text-[13px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#32FF8B]/20 transition-colors font-mono disabled:opacity-50"
           >
             <Plus className="w-3.5 h-3.5" />
             {importing ? "Verifying liquidity…" : "Import token"}
@@ -136,7 +136,7 @@ export function TokenPickerModal({
 
         <div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-1.5">
           {list.length === 0 && !isUnknownAddress && (
-            <div className="text-center text-[11px] text-[#C5C1B9] py-8 font-mono">
+            <div className="text-center text-[13px] text-[#C5C1B9] py-8 font-mono">
               No tokens match.
             </div>
           )}
@@ -149,15 +149,15 @@ export function TokenPickerModal({
             >
               <TokenIcon symbol={t.symbol} size={32} />
               <div className="flex-1 min-w-0">
-                <div className="text-white text-xs font-black tracking-wider font-mono">
+                <div className="text-white text-sm font-black tracking-wider font-mono">
                   {t.symbol}
                   {t.imported && (
-                    <span className="ml-2 text-[8px] text-[#32FF8B] font-bold uppercase tracking-widest">
+                    <span className="ml-2 text-[10px] text-[#32FF8B] font-bold uppercase tracking-widest">
                       imported
                     </span>
                   )}
                 </div>
-                <div className="text-[10px] text-[#C5C1B9] truncate font-mono">
+                <div className="text-[12px] text-[#C5C1B9] truncate font-mono">
                   {t.name}
                 </div>
               </div>

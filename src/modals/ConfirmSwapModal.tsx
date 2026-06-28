@@ -49,7 +49,7 @@ export function ConfirmSwapModal({
       >
         {/* Header decoration */}
         <div className="flex justify-between items-center font-mono">
-          <h3 className="text-xs font-black text-white uppercase tracking-wider">
+          <h3 className="text-sm font-black text-white uppercase tracking-wider">
             {isBridge ? "Confirm Bridge Tx" : "Confirm swap Tx"}
           </h3>
           <button 
@@ -64,11 +64,11 @@ export function ConfirmSwapModal({
         <div className="space-y-4">
           {/* Pay Amount Box */}
           <div className="flex justify-between items-center py-1 border-b border-white/5 pb-2">
-            <span className="text-2xl font-black text-white tracking-tight shrink-0 truncate max-w-[180px] font-mono">
+            <span className="text-3xl font-black text-white tracking-tight shrink-0 truncate max-w-[180px] font-mono">
               {parseFloat(fromAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-white tracking-widest uppercase font-mono">{fromSymbol}</span>
+              <span className="text-sm font-black text-white tracking-widest uppercase font-mono">{fromSymbol}</span>
               <TokenIcon symbol={fromSymbol} size={24} />
             </div>
           </div>
@@ -82,11 +82,11 @@ export function ConfirmSwapModal({
 
           {/* Receive Amount Box */}
           <div className="flex justify-between items-center py-1 pt-2">
-            <span className="text-2xl font-black text-[#32FF8B] tracking-tight shrink-0 truncate max-w-[180px] font-mono">
+            <span className="text-3xl font-black text-[#32FF8B] tracking-tight shrink-0 truncate max-w-[180px] font-mono">
               {parseFloat(toAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-white tracking-widest uppercase font-mono">{toSymbol}</span>
+              <span className="text-sm font-black text-white tracking-widest uppercase font-mono">{toSymbol}</span>
               <TokenIcon symbol={toSymbol} size={24} />
             </div>
           </div>
@@ -94,20 +94,20 @@ export function ConfirmSwapModal({
 
         {/* Bridge specific chain information card */}
         {isBridge && (
-          <div className="bg-[#010C1B]/60 border border-white/5 rounded-xl p-3.5 space-y-1.5 text-xs font-sans">
+          <div className="bg-[#010C1B]/60 border border-white/5 rounded-xl p-3.5 space-y-1.5 text-sm font-sans">
             <div className="flex justify-between text-[#C5C1B9]">
-              <span className="text-[10px] uppercase font-bold tracking-wider font-mono">Source network</span>
-              <span className="font-bold text-white uppercase font-mono text-[10px]">{fromChain}</span>
+              <span className="text-[12px] uppercase font-bold tracking-wider font-mono">Source network</span>
+              <span className="font-bold text-white uppercase font-mono text-[12px]">{fromChain}</span>
             </div>
             <div className="flex justify-between text-[#C5C1B9]">
-              <span className="text-[10px] uppercase font-bold tracking-wider font-mono">Destination network</span>
-              <span className="font-bold text-[#32FF8B] uppercase font-mono text-[10px]">{toChain}</span>
+              <span className="text-[12px] uppercase font-bold tracking-wider font-mono">Destination network</span>
+              <span className="font-bold text-[#32FF8B] uppercase font-mono text-[12px]">{toChain}</span>
             </div>
           </div>
         )}
 
         {/* Transaction Summary Card */}
-        <div className="bg-[#010C1B]/80 border border-white/10 rounded-xl p-4.5 space-y-3 text-[11px] font-mono">
+        <div className="bg-[#010C1B]/80 border border-white/10 rounded-xl p-4.5 space-y-3 text-[13px] font-mono">
           <div className="flex justify-between items-center text-[#C5C1B9]">
             <span className="uppercase tracking-wider">Price Rate</span>
             <div className="flex items-center gap-1.5 font-bold text-white">
@@ -128,7 +128,7 @@ export function ConfirmSwapModal({
 
           <div className="flex justify-between items-center text-[#C5C1B9]">
             <span className="uppercase tracking-wider">Slippage</span>
-            <span className="px-1.5 py-0.5 bg-[#32FF8B]/10 border border-[#32FF8B]/25 rounded text-[10px] font-black text-[#32FF8B]">
+            <span className="px-1.5 py-0.5 bg-[#32FF8B]/10 border border-[#32FF8B]/25 rounded text-[12px] font-black text-[#32FF8B]">
               {slippageTolerance}
             </span>
           </div>
@@ -147,14 +147,14 @@ export function ConfirmSwapModal({
         </div>
 
         {/* Footnote disclaimer */}
-        <p className="text-[10px] text-[#C5C1B9] text-center leading-relaxed px-2">
+        <p className="text-[12px] text-[#C5C1B9] text-center leading-relaxed px-2">
           Output is estimated. You will receive at least <strong className="text-white font-mono">{minRec} {toSymbol}</strong> or the transaction will revert.
         </p>
 
         {/* Submit Button */}
         <button
           onClick={onConfirm}
-          className="w-full py-3.5 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-xs uppercase transition-all duration-200 active:scale-[0.98] shadow-md hover:shadow-[0_0_20px_rgba(50,255,139,0.3)] cursor-pointer"
+          className="w-full py-3.5 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-sm uppercase transition-all duration-200 active:scale-[0.98] shadow-md hover:shadow-[0_0_20px_rgba(50,255,139,0.3)] cursor-pointer"
         >
           {isBridge ? "Confirm Bridge" : "Confirm swap"}
         </button>

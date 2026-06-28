@@ -52,8 +52,8 @@ export function BridgeCard({
         {/* FROM BLOCK */}
         <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
           <div className="flex justify-between items-center border-b border-white/5 pb-2">
-            <span className="text-[10px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono">
-              From <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[9px] uppercase tracking-widest">{fromChain}</span>
+            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono">
+              From <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest">{fromChain}</span>
             </span>
             <div className="flex gap-1.5">
               {['25%', '50%', '75%', '100%'].map((pct) => (
@@ -65,7 +65,7 @@ export function BridgeCard({
                     const balVal = parseFloat(balance) || 0;
                     onAmountChange((balVal * pctVal).toFixed(8));
                   }}
-                  className="px-2 py-0.5 bg-[#0D1C2A] border border-white/20 rounded-lg text-[9px] text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/20 font-black tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-sm"
+                  className="px-2 py-0.5 bg-[#0D1C2A] border border-white/20 rounded-lg text-[11px] text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/20 font-black tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-sm"
                 >
                   {pct}
                 </button>
@@ -80,7 +80,7 @@ export function BridgeCard({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => onAmountChange(e.target.value)}
-                className="bg-transparent text-white text-2xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
+                className="bg-transparent text-white text-3xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
               />
               <div 
                 onClick={() => {
@@ -91,15 +91,15 @@ export function BridgeCard({
                     onAmountChange(balance);
                   }
                 }}
-                className="text-[10px] text-[#C5C1B9] font-mono mt-1.5 select-none cursor-pointer hover:text-[#32FF8B] transition-colors inline-block"
+                className="text-[12px] text-[#C5C1B9] font-mono mt-1.5 select-none cursor-pointer hover:text-[#32FF8B] transition-colors inline-block"
                 title="Use maximum balance"
               >
-                Balance: {balance} {symbol} <span className="text-[9px] text-[#32FF8B] font-black ml-1 uppercase hover:underline">(Max)</span>
+                Balance: {balance} {symbol} <span className="text-[11px] text-[#32FF8B] font-black ml-1 uppercase hover:underline">(Max)</span>
               </div>
             </div>
             <div className="bg-[#0D1C2A]/90 px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 shadow-sm font-mono">
               <TokenIcon symbol={symbol} size={22} />
-              <span className="font-black text-xs text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
+              <span className="font-black text-sm text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
             </div>
           </div>
         </div>
@@ -119,20 +119,20 @@ export function BridgeCard({
         {/* TO BLOCK */}
         <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
           <div className="flex justify-between items-center border-b border-white/5 pb-2">
-            <span className="text-[10px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono">
-              To <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[9px] uppercase tracking-widest">{toChain}</span>
+            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono">
+              To <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest">{toChain}</span>
             </span>
           </div>
           
           <div className="flex justify-between items-center gap-3">
             <div className="flex-1 min-w-0">
-              <div className="text-2xl font-black text-white/50 leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
+              <div className="text-3xl font-black text-white/50 leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
                 {estimatedReceive ? parseFloat(estimatedReceive).toFixed(8) : '0.00000000'}
               </div>
             </div>
             <div className="bg-[#0D1C2A]/90 px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 shadow-sm font-mono opacity-90">
                <TokenIcon symbol={symbol} size={22} />
-               <span className="font-black text-xs text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
+               <span className="font-black text-sm text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
             </div>
           </div>
         </div>
@@ -144,7 +144,7 @@ export function BridgeCard({
           onClick={onSubmit}
           disabled={buttonDisabled}
           className={cn(
-            "w-full py-4 rounded-2xl text-xs font-black tracking-widest uppercase transition-all flex justify-center items-center gap-2 cursor-pointer",
+            "w-full py-4 rounded-2xl text-sm font-black tracking-widest uppercase transition-all flex justify-center items-center gap-2 cursor-pointer",
             buttonDisabled 
               ? "bg-white/5 text-[#C5C1B9]/45 border border-white/10 cursor-not-allowed shadow-none" 
               : "bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] shadow-[0_0_16px_rgba(50,255,139,0.25)] hover:shadow-[0_0_24px_rgba(50,255,139,0.45)] hover:scale-[1.01] active:scale-[0.99]"
@@ -177,7 +177,7 @@ export function BridgeCard({
             <button
               type="button"
               onClick={onReset}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-[10px] tracking-widest uppercase font-black rounded-xl transition duration-150 active:scale-98 border border-white/10 cursor-pointer shadow-inner text-center"
+              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-[12px] tracking-widest uppercase font-black rounded-xl transition duration-150 active:scale-98 border border-white/10 cursor-pointer shadow-inner text-center"
             >
               Start New Bridge
             </button>

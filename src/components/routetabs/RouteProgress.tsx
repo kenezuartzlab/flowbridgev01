@@ -29,7 +29,7 @@ export function RouteProgress({ session, onStepClick }: RouteProgressProps) {
           
           let circleClasses = "bg-slate-200 text-slate-500 shadow-inner";
           let textClasses = "text-slate-400";
-          let icon = <span className="text-[10px] font-bold">{idx + 1}</span>;
+          let icon = <span className="text-[12px] font-bold">{idx + 1}</span>;
 
           if (status === 'done') {
             circleClasses = "bg-emerald-500 text-white shadow-sm shadow-emerald-500/20";

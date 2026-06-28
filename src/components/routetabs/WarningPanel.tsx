@@ -31,11 +31,11 @@ export function WarningPanel({ type = 'warning', title, message, txHash, txUrlPr
         )}
       </div>
       <div className="flex-1 min-w-0">
-        {title && <span className="font-bold font-mono tracking-tight text-[#FFFFFF] block mb-1 text-xs uppercase">{title}</span>}
-        <span className="text-[11px] font-medium leading-normal block break-words">{message}</span>
+        {title && <span className="font-bold font-mono tracking-tight text-[#FFFFFF] block mb-1 text-sm uppercase">{title}</span>}
+        <span className="text-[13px] font-medium leading-normal block break-words">{message}</span>
         
         {txHash && (
-          <div className="mt-2.5 flex flex-wrap items-center gap-1.5 font-mono text-[10px]">
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5 font-mono text-[12px]">
             <span className="text-[#C5C1B9]/50 uppercase tracking-wider font-semibold">Tx Hash:</span>
             <a
               href={txUrlPrefix ? `${txUrlPrefix}${txHash}` : "#"}

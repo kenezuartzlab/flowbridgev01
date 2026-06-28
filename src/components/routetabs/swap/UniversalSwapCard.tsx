@@ -561,10 +561,10 @@ export function UniversalSwapCard({
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
-          <span className="text-xs font-black text-white uppercase tracking-widest font-mono">
+          <span className="text-sm font-black text-white uppercase tracking-widest font-mono">
             Swap
           </span>
-          <span className="text-[10px] text-[#C5C1B9] font-mono">
+          <span className="text-[12px] text-[#C5C1B9] font-mono">
             Bohr on-chain router · multi-hop
           </span>
         </div>
@@ -612,7 +612,7 @@ export function UniversalSwapCard({
         onClick={handleSubmit}
         disabled={buttonDisabled}
         className={cn(
-          "w-full py-4 rounded-2xl text-xs font-black tracking-widest uppercase transition-all flex justify-center items-center gap-2 cursor-pointer font-sans",
+          "w-full py-4 rounded-2xl text-sm font-black tracking-widest uppercase transition-all flex justify-center items-center gap-2 cursor-pointer font-sans",
           buttonDisabled
             ? "bg-white/5 text-[#C5C1B9]/45 border border-white/10 cursor-not-allowed shadow-none"
             : "bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] shadow-[0_0_16px_rgba(50,255,139,0.25)] hover:shadow-[0_0_24px_rgba(50,255,139,0.45)] hover:scale-[1.01] active:scale-[0.99]",
@@ -624,7 +624,7 @@ export function UniversalSwapCard({
 
       {/* Details */}
       {quote && !quoteError && (
-        <div className="bg-[#010C1B]/60 border border-white/10 rounded-xl p-3 space-y-1.5 text-[10px] font-mono text-[#C5C1B9]">
+        <div className="bg-[#010C1B]/60 border border-white/10 rounded-xl p-3 space-y-1.5 text-[12px] font-mono text-[#C5C1B9]">
           <Row label="Rate" value={`1 ${tokenIn.symbol} ≈ ${rate.toFixed(6)} ${tokenOut.symbol}`} />
           <Row label="Min received" value={`${minReceived.toFixed(6)} ${tokenOut.symbol}`} />
           <Row label="Slippage" value={`${slippage}%`} />
@@ -647,7 +647,7 @@ export function UniversalSwapCard({
       )}
 
       {lastTx && !txError && (
-        <div className="bg-[#32FF8B]/10 border border-[#32FF8B]/25 rounded-xl p-3 flex items-center justify-between gap-2 text-[10px] font-mono">
+        <div className="bg-[#32FF8B]/10 border border-[#32FF8B]/25 rounded-xl p-3 flex items-center justify-between gap-2 text-[12px] font-mono">
           <div className="flex flex-col gap-0.5">
             <span className="text-[#32FF8B] font-black uppercase tracking-widest">Swap Confirmed</span>
             <span className="text-[#C5C1B9]">Receipt status: success</span>
@@ -733,7 +733,7 @@ function TokenSide({
 
   return (
     <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
-      <div className="flex justify-between items-center text-[10px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
+      <div className="flex justify-between items-center text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-[#C5C1B9] normal-case font-mono font-bold">
@@ -743,7 +743,7 @@ function TokenSide({
             <button
               type="button"
               onClick={onMax}
-              className="bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 active:scale-95 text-[#32FF8B] border border-[#32FF8B]/25 px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest uppercase cursor-pointer"
+              className="bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 active:scale-95 text-[#32FF8B] border border-[#32FF8B]/25 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase cursor-pointer"
             >
               Max
             </button>
@@ -754,7 +754,7 @@ function TokenSide({
       <div className="flex justify-between items-center gap-3">
         <div className="flex-1 min-w-0">
           {readOnly ? (
-            <div className="text-2xl font-black text-white leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
+            <div className="text-3xl font-black text-white leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
               {quoting ? (
                 <Loader2 className="w-5 h-5 animate-spin text-[#C5C1B9]" />
               ) : amount ? (
@@ -769,7 +769,7 @@ function TokenSide({
               placeholder="0.00"
               value={amount}
               onChange={(e) => onAmountChange?.(e.target.value)}
-              className="bg-transparent text-white text-2xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
+              className="bg-transparent text-white text-3xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
             />
           )}
         </div>
@@ -780,14 +780,14 @@ function TokenSide({
           className="bg-[#0D1C2A]/90 hover:bg-[#0D1C2A] px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 hover:border-[#32FF8B]/40 shadow-sm font-mono cursor-pointer transition-colors"
         >
           <TokenIcon symbol={token.symbol} size={22} />
-          <span className="font-black text-xs text-white tracking-widest uppercase">
+          <span className="font-black text-sm text-white tracking-widest uppercase">
             {token.symbol}
           </span>
           <ChevronDown className="w-3.5 h-3.5 text-white/60" />
         </button>
       </div>
 
-      <div className="text-[#C5C1B9] font-medium flex items-center justify-between gap-2 text-[10px] font-mono leading-none">
+      <div className="text-[#C5C1B9] font-medium flex items-center justify-between gap-2 text-[12px] font-mono leading-none">
         <span className="truncate">
           {token.isNative
             ? "Native BOT"

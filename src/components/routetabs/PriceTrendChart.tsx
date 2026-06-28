@@ -81,10 +81,10 @@ export function PriceTrendChart({ currentLivePrice = 9.7482 }: PriceTrendChartPr
     if (active && payload && payload.length) {
       return (
         <div className="bg-[#010C1B] border border-white/10 rounded-xl p-2.5 shadow-2xl font-mono text-left">
-          <p className="text-[9px] text-white/50 uppercase tracking-wider font-bold">
+          <p className="text-[11px] text-white/50 uppercase tracking-wider font-bold">
             {payload[0].payload.time}
           </p>
-          <p className="text-xs text-[#32FF8B] font-black">
+          <p className="text-sm text-[#32FF8B] font-black">
             ${payload[0].value.toFixed(4)}
           </p>
         </div>
@@ -102,16 +102,16 @@ export function PriceTrendChart({ currentLivePrice = 9.7482 }: PriceTrendChartPr
       <div className="flex justify-between items-start gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px] text-[#32FF8B] uppercase font-black tracking-widest bg-[#32FF8B]/10 px-2 py-0.5 rounded border border-[#32FF8B]/20">
+            <span className="text-[11px] text-[#32FF8B] uppercase font-black tracking-widest bg-[#32FF8B]/10 px-2 py-0.5 rounded border border-[#32FF8B]/20">
               BOT / USDT
             </span>
-            <span className="text-[10px] text-[#C5C1B9]/60 font-medium">Bohr DEX Oracle</span>
+            <span className="text-[12px] text-[#C5C1B9]/60 font-medium">Bohr DEX Oracle</span>
           </div>
           <div className="flex items-baseline gap-2">
             <h3 className="text-lg font-black text-white tracking-tight font-sans">
               ${basePrice.toFixed(4)}
             </h3>
-            <span className={`inline-flex items-center text-[10px] font-black ${stats.isUp ? 'text-[#32FF8B]' : 'text-rose-400'}`}>
+            <span className={`inline-flex items-center text-[12px] font-black ${stats.isUp ? 'text-[#32FF8B]' : 'text-rose-400'}`}>
               {stats.isUp ? <ArrowUpRight className="w-3.5 h-3.5 shrink-0" /> : <ArrowDownRight className="w-3.5 h-3.5 shrink-0" />}
               {stats.isUp ? '+' : ''}{stats.percentChange}%
             </span>
@@ -125,7 +125,7 @@ export function PriceTrendChart({ currentLivePrice = 9.7482 }: PriceTrendChartPr
               key={tf}
               type="button"
               onClick={() => setTimeframe(tf)}
-              className={`px-2 py-1 rounded text-[8px] font-black uppercase tracking-wider transition-all duration-150 cursor-pointer ${
+              className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider transition-all duration-150 cursor-pointer ${
                 timeframe === tf
                   ? 'bg-[#32FF8B] text-[#010C1B] shadow-inner'
                   : 'text-[#C5C1B9]/60 hover:text-white hover:bg-white/5'
@@ -170,7 +170,7 @@ export function PriceTrendChart({ currentLivePrice = 9.7482 }: PriceTrendChartPr
       </div>
 
       {/* Mini Stats Grid */}
-      <div className="grid grid-cols-3 gap-2 bg-[#010C1B]/50 border border-white/5 rounded-xl p-2 text-[9px] text-center font-bold">
+      <div className="grid grid-cols-3 gap-2 bg-[#010C1B]/50 border border-white/5 rounded-xl p-2 text-[11px] text-center font-bold">
         <div className="space-y-0.5 border-r border-white/5">
           <span className="text-white/30 uppercase block text-[7px] font-black">Min Price</span>
           <span className="text-[#C5C1B9] block">${stats.min.toFixed(3)}</span>

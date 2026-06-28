@@ -123,7 +123,7 @@ export function ReceiptModal({
 
           {/* Golden gesture hand sign */}
           <div className="absolute -right-1 bottom-4 w-12 h-12 flex items-center justify-center">
-            <div className="bg-[#0D1C2A] text-xs p-1.5 rounded-xl border border-white/10 shadow-lg transform rotate-12 flex items-center justify-center font-bold">
+            <div className="bg-[#0D1C2A] text-sm p-1.5 rounded-xl border border-white/10 shadow-lg transform rotate-12 flex items-center justify-center font-bold">
               🤙
             </div>
           </div>
@@ -136,7 +136,7 @@ export function ReceiptModal({
 
         {/* Dynamic content descriptors */}
         <div className="space-y-1.5 text-center font-sans">
-          <span className="text-[10px] font-black uppercase text-[#C5C1B9] tracking-widest leading-none font-mono">
+          <span className="text-[12px] font-black uppercase text-[#C5C1B9] tracking-widest leading-none font-mono">
             Final blockchain receipt
           </span>
           <h3 className="text-base font-black text-white uppercase tracking-wider font-mono">
@@ -144,7 +144,7 @@ export function ReceiptModal({
               ? (txType === 'bridge' ? 'Bridge Confirmed On-Chain' : 'Swap Confirmed On-Chain')
               : (txType === 'bridge' ? 'Bridge Failed On-Chain' : 'Swap Failed On-Chain')}
           </h3>
-          <p className="text-xs text-[#C5C1B9] px-4 max-w-[280px] mx-auto leading-relaxed">
+          <p className="text-sm text-[#C5C1B9] px-4 max-w-[280px] mx-auto leading-relaxed">
             {status === 'success'
               ? (txType === 'bridge'
                   ? 'The bridge transaction was mined successfully and verified from the final chain receipt.'
@@ -157,11 +157,11 @@ export function ReceiptModal({
         {onDonateClick && status === 'success' && (
           <div className="bg-[#122A26] border border-[#32FF8B]/15 rounded-xl p-3 text-left w-full relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-[#32FF8B]/10 to-transparent blur-md pointer-events-none" />
-            <p className="text-[10px] leading-relaxed font-semibold text-[#32FF8B] mb-2 flex items-center gap-1">
+            <p className="text-[12px] leading-relaxed font-semibold text-[#32FF8B] mb-2 flex items-center gap-1">
               <Heart className="w-3 h-3 fill-[#32FF8B]" />
               <span>We charge 0% protocol fees!</span>
             </p>
-            <p className="text-[10px] text-[#C5C1B9] leading-tight mb-2.5">
+            <p className="text-[12px] text-[#C5C1B9] leading-tight mb-2.5">
               Support volunteer builders to keep these learning and public utility tools running fast & free.
             </p>
             <button
@@ -169,7 +169,7 @@ export function ReceiptModal({
                 onClose();
                 onDonateClick();
               }}
-              className="w-full py-1.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/35 text-[#32FF8B] font-mono font-black text-[9px] uppercase tracking-widest rounded-lg transition-all duration-150 cursor-pointer text-center"
+              className="w-full py-1.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/35 text-[#32FF8B] font-mono font-black text-[11px] uppercase tracking-widest rounded-lg transition-all duration-150 cursor-pointer text-center"
             >
               💖 Donate / Request Tools
             </button>
@@ -181,9 +181,9 @@ export function ReceiptModal({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full py-3.5 px-4 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] rounded-xl font-mono text-[10px] tracking-widest uppercase font-black transition-all text-center duration-150 flex flex-col items-center justify-center gap-1 cursor-pointer shadow-[0_0_12px_rgba(50,255,139,0.2)]"
+          className="w-full py-3.5 px-4 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] rounded-xl font-mono text-[12px] tracking-widest uppercase font-black transition-all text-center duration-150 flex flex-col items-center justify-center gap-1 cursor-pointer shadow-[0_0_12px_rgba(50,255,139,0.2)]"
         >
-          <span className="opacity-85 text-[8px] font-bold">Block Explorer hash URL</span>
+          <span className="opacity-85 text-[10px] font-bold">Block Explorer hash URL</span>
           <div className="flex items-center gap-1 text-[#010C1B]">
             {displayHash}
             <ExternalLink className="w-3.5 h-3.5 text-[#010C1B]" />
@@ -193,7 +193,7 @@ export function ReceiptModal({
         {/* Secondary close button */}
         <button
           onClick={onClose}
-          className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-[#C5C1B9] hover:text-white font-mono uppercase tracking-wider font-black text-[10px] transition-all border border-white/10 cursor-pointer"
+          className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-[#C5C1B9] hover:text-white font-mono uppercase tracking-wider font-black text-[12px] transition-all border border-white/10 cursor-pointer"
         >
           Close receipt
         </button>

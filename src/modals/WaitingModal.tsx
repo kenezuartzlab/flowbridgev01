@@ -103,17 +103,17 @@ export function WaitingModal({
 
         {/* Title descriptions */}
         <div className="space-y-1 font-sans w-full">
-          <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
+          <h4 className="text-sm font-black text-white uppercase tracking-wider font-mono">
             Transaction Processing
           </h4>
           
-          <p className="text-[11px] font-semibold text-white/90 px-2 leading-tight">
+          <p className="text-[13px] font-semibold text-white/90 px-2 leading-tight">
             Swapping <strong className="text-[#32FF8B] font-mono">{parseFloat(fromAmount || "0").toFixed(4)} {fromSymbol}</strong> for <strong className="text-[#32FF8B] font-mono">{parseFloat(toAmount || "0").toFixed(4)} {toSymbol}</strong>
           </p>
         </div>
 
         {/* Live Swap Milestones Indicator Panel */}
-        <div className="w-full bg-[#010C1B]/80 border border-white/5 rounded-xl p-3.5 space-y-2.5 text-left font-mono text-[10px]">
+        <div className="w-full bg-[#010C1B]/80 border border-white/5 rounded-xl p-3.5 space-y-2.5 text-left font-mono text-[12px]">
           {/* Sign Transaction Milestone */}
           <div className="flex items-center justify-between">
             <span className="text-[#C5C1B9]">1. Wallet Signature approved</span>
@@ -144,7 +144,7 @@ export function WaitingModal({
           </div>
         </div>
 
-        <p className="text-[9px] text-[#C5C1B9] leading-relaxed uppercase tracking-wide font-mono">
+        <p className="text-[11px] text-[#C5C1B9] leading-relaxed uppercase tracking-wide font-mono">
           Please do not close this window while the chain confirms final success or fail status.
         </p>
       </div>
