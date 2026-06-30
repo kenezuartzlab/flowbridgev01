@@ -76,3 +76,19 @@
 .presentation-mode .border-white\/15 { border-color: rgba(255,255,255,0.35) !important; }
 .presentation-mode .border-white\/20 { border-color: rgba(255,255,255,0.45) !important; }
 
+/* Opt-out: header keeps compact sizing in Demo Mode to prevent
+   button/label overlap on narrow viewports. */
+.presentation-mode .presentation-exempt,
+.presentation-mode .presentation-exempt * {
+  font-size: revert !important;
+  line-height: revert !important;
+}
+.presentation-mode .presentation-exempt .text-\[9px\]  { font-size: 9px !important; }
+.presentation-mode .presentation-exempt .text-\[10px\] { font-size: 10px !important; }
+.presentation-mode .presentation-exempt .text-\[11px\] { font-size: 11px !important; }
+.presentation-mode .presentation-exempt .text-\[12px\] { font-size: 12px !important; }
+.presentation-mode .presentation-exempt .text-\[13px\] { font-size: 13px !important; }
+.presentation-mode .presentation-exempt .text-xs { font-size: 12px !important; }
+.presentation-mode .presentation-exempt .text-sm { font-size: 14px !important; }
+.presentation-mode .presentation-exempt .text-base { font-size: 16px !important; }
+
