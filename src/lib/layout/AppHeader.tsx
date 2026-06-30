@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
-import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
+import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 
