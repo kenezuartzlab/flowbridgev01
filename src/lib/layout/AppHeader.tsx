@@ -124,10 +124,10 @@ export function AppHeader({
   };
 
   return (
-    <header className="flex flex-col border-b border-white/10 bg-[#010C1B] relative z-10 w-full font-mono">
-      <div className="flex items-center justify-between p-4">
-        <div className="flex flex-col">
-          <h1 className="text-sm font-black tracking-widest text-white uppercase leading-none">
+    <header className="presentation-exempt flex flex-col border-b border-white/10 bg-[#010C1B] relative z-10 w-full font-mono">
+      <div className="flex items-center justify-between gap-2 p-3 sm:p-4 min-w-0">
+        <div className="flex flex-col min-w-0 shrink">
+          <h1 className="text-sm font-black tracking-widest text-white uppercase leading-none truncate">
             FlowBridge<span className="text-[#32FF8B]">.</span>
           </h1>
           <div className="flex items-center gap-1.5 mt-2">
