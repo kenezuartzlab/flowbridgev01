@@ -1583,7 +1583,7 @@ export default function App() {
                     ? "Verify email in REWARDS to earn FLOW rewards."
                     : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
                       ? "Points paused. Verify email to activate."
-                      : "Swaps earn off-chain FLOW points automatically!"
+                      : "Swaps earn off-chain FLOW points."
                   }
                 </div>
               </div>
