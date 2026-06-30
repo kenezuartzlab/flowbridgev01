@@ -16,6 +16,8 @@ interface AppHeaderProps {
   onToggleMainnet: () => void;
   isDemoMode: boolean;
   onToggleDemoMode: () => void;
+  isPresentationMode?: boolean;
+  onTogglePresentationMode?: () => void;
   onShowHistory?: () => void;
   onDonateClick?: () => void;
   onRewardsClick?: () => void;
