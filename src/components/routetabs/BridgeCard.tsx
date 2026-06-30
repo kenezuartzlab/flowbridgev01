@@ -51,11 +51,12 @@ export function BridgeCard({
       <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-4.5 space-y-3 relative">
         {/* FROM BLOCK */}
         <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
-          <div className="flex justify-between items-center border-b border-white/5 pb-2">
-            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono">
-              From <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest">{fromChain}</span>
+          <div className="flex flex-col gap-2 border-b border-white/5 pb-2 min-w-0">
+            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
+              <span className="shrink-0">From</span>
+              <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{fromChain}</span>
             </span>
-            <div className="flex gap-1.5">
+            <div className="grid grid-cols-4 gap-1.5 w-full min-w-0">
               {['25%', '50%', '75%', '100%'].map((pct) => (
                 <button 
                   key={pct} 
@@ -65,7 +66,7 @@ export function BridgeCard({
                     const balVal = parseFloat(balance) || 0;
                     onAmountChange((balVal * pctVal).toFixed(8));
                   }}
-                  className="px-2 py-0.5 bg-[#0D1C2A] border border-white/20 rounded-lg text-[11px] text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/20 font-black tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-sm"
+                  className="px-1 py-1 bg-[#0D1C2A] border border-white/20 rounded-lg text-[11px] text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/20 font-black tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-sm text-center min-w-0"
                 >
                   {pct}
                 </button>
@@ -118,9 +119,10 @@ export function BridgeCard({
 
         {/* TO BLOCK */}
         <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
-          <div className="flex justify-between items-center border-b border-white/5 pb-2">
-            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono">
-              To <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest">{toChain}</span>
+          <div className="flex flex-col gap-2 border-b border-white/5 pb-2 min-w-0">
+            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
+              <span className="shrink-0">To</span>
+              <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{toChain}</span>
             </span>
           </div>
           
