@@ -119,9 +119,10 @@ export function BridgeCard({
 
         {/* TO BLOCK */}
         <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
-          <div className="flex justify-between items-center border-b border-white/5 pb-2">
-            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono">
-              To <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest">{toChain}</span>
+          <div className="flex flex-col gap-2 border-b border-white/5 pb-2 min-w-0">
+            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
+              <span className="shrink-0">To</span>
+              <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{toChain}</span>
             </span>
           </div>
           
