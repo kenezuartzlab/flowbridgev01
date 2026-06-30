@@ -33,6 +33,8 @@ export function AppHeader({
   onToggleMainnet,
   isDemoMode,
   onToggleDemoMode,
+  isPresentationMode,
+  onTogglePresentationMode,
   onShowHistory,
   onDonateClick,
   onRewardsClick,
