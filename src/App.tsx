@@ -239,6 +239,17 @@ export default function App() {
   // Environment and Mode states
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    try { return window.localStorage.getItem('fb_presentation_mode') === '1'; } catch { return false; }
+  });
+  const handleTogglePresentationMode = () => {
+    setIsPresentationMode((prev) => {
+      const next = !prev;
+      try { window.localStorage.setItem('fb_presentation_mode', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  };
 
   const [session, setSession] = useState<RouteSession>(getLocalSession());
   const [activeTab, setActiveTab] = useState<TabId>(() => {
