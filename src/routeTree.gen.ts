@@ -21,6 +21,8 @@ import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
@@ -86,6 +88,16 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSiweVerifyRoute = ApiPublicSiweVerifyRouteImport.update({
   id: '/api/public/siwe/verify',
   path: '/api/public/siwe/verify',
@@ -117,6 +129,8 @@ export interface FileRoutesByFullPath {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -134,6 +148,8 @@ export interface FileRoutesByTo {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -152,6 +168,8 @@ export interface FileRoutesById {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -171,6 +189,8 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -188,6 +208,8 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -205,6 +227,8 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -222,6 +246,8 @@ export interface RootRouteChildren {
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
   ApiPublicSiweVerifyRoute: typeof ApiPublicSiweVerifyRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -311,6 +337,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/siwe/verify': {
       id: '/api/public/siwe/verify'
       path: '/api/public/siwe/verify'
@@ -361,6 +401,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersSyncRoute: ApiUsersSyncRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,
   ApiPublicSiweVerifyRoute: ApiPublicSiweVerifyRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
