@@ -1533,7 +1533,7 @@ export default function App() {
     : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/');
 
   return (
-    <div className="min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-center font-sans overflow-y-auto relative py-6 sm:py-8 gap-4">
+    <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-center font-sans overflow-y-auto relative py-6 sm:py-8 gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
       
       {/* Background grid + ambient glow of Ecosurge specification */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none animate-pulse-slow" />
@@ -1550,6 +1550,8 @@ export default function App() {
           onToggleMainnet={handleToggleMainnet}
           isDemoMode={isDemoMode}
           onToggleDemoMode={handleToggleDemoMode}
+          isPresentationMode={isPresentationMode}
+          onTogglePresentationMode={handleTogglePresentationMode}
           onShowHistory={() => setIsHistoryModalOpen(true)}
           onDonateClick={() => {
             setDonateModalInitialTab('donate');
