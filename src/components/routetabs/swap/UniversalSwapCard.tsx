@@ -561,11 +561,8 @@ export function UniversalSwapCard({
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
-          <span className="text-sm font-black text-white uppercase tracking-widest font-mono">
+          <span className="text-lg font-black text-white uppercase tracking-widest font-mono">
             Swap
-          </span>
-          <span className="text-[12px] text-[#C5C1B9] font-mono">
-            Bohr on-chain router · multi-hop
           </span>
         </div>
         <SlippagePopover value={slippage} onChange={setSlippage} />
