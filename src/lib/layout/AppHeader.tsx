@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
-import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
+import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 
@@ -16,6 +16,8 @@ interface AppHeaderProps {
   onToggleMainnet: () => void;
   isDemoMode: boolean;
   onToggleDemoMode: () => void;
+  isPresentationMode?: boolean;
+  onTogglePresentationMode?: () => void;
   onShowHistory?: () => void;
   onDonateClick?: () => void;
   onRewardsClick?: () => void;
@@ -31,6 +33,8 @@ export function AppHeader({
   onToggleMainnet,
   isDemoMode,
   onToggleDemoMode,
+  isPresentationMode,
+  onTogglePresentationMode,
   onShowHistory,
   onDonateClick,
   onRewardsClick,
@@ -138,6 +142,20 @@ export function AppHeader({
         </div>
         
         <div className="flex items-center gap-1.5">
+          {onTogglePresentationMode && (
+            <button
+              onClick={onTogglePresentationMode}
+              title={isPresentationMode ? 'Disable Demo Mode (extra-large fonts & high contrast)' : 'Enable Demo Mode (extra-large fonts & high contrast for video recording)'}
+              className={cn(
+                "p-2 border active:scale-95 transition-all rounded-xl cursor-pointer shadow-sm",
+                isPresentationMode
+                  ? "bg-[#32FF8B]/15 border-[#32FF8B]/50 text-[#32FF8B] hover:bg-[#32FF8B]/25"
+                  : "bg-[#0D1C2A] border-white/10 text-[#C5C1B9] hover:text-[#32FF8B] hover:bg-white/5"
+              )}
+            >
+              <Video className="w-3.5 h-3.5" />
+            </button>
+          )}
           {onRewardsClick && (
             <button
               onClick={onRewardsClick}
