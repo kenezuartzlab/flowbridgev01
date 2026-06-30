@@ -35,3 +35,44 @@
   border-color: #32FF8B;
   box-shadow: 0 0 0 3px rgba(50, 255, 139, 0.1);
 }
+
+/* ============================================================
+   DEMO / PRESENTATION MODE — extra-large fonts + high contrast
+   Toggled via the Video icon in AppHeader; ideal for screen
+   recordings, demo videos, and grant-application walkthroughs.
+   ============================================================ */
+.presentation-mode .text-\[9px\]  { font-size: 13px !important; line-height: 1.4 !important; }
+.presentation-mode .text-\[10px\] { font-size: 14px !important; line-height: 1.4 !important; }
+.presentation-mode .text-\[11px\] { font-size: 15px !important; line-height: 1.45 !important; }
+.presentation-mode .text-\[12px\] { font-size: 16px !important; line-height: 1.5 !important; }
+.presentation-mode .text-\[13px\] { font-size: 17px !important; line-height: 1.5 !important; }
+.presentation-mode .text-\[14px\] { font-size: 18px !important; line-height: 1.55 !important; }
+.presentation-mode .text-xs   { font-size: 16px !important; line-height: 1.5 !important; }
+.presentation-mode .text-sm   { font-size: 18px !important; line-height: 1.55 !important; }
+.presentation-mode .text-base { font-size: 20px !important; line-height: 1.6 !important; }
+.presentation-mode .text-lg   { font-size: 22px !important; line-height: 1.6 !important; }
+.presentation-mode .text-xl   { font-size: 26px !important; line-height: 1.5 !important; }
+.presentation-mode .text-2xl  { font-size: 30px !important; line-height: 1.4 !important; }
+.presentation-mode .text-3xl  { font-size: 36px !important; line-height: 1.3 !important; }
+.presentation-mode .text-4xl  { font-size: 44px !important; line-height: 1.2 !important; }
+
+/* High-contrast: push muted/translucent text toward solid white */
+.presentation-mode .text-\[\#C5C1B9\],
+.presentation-mode .text-\[\#C5C1B9\]\/80,
+.presentation-mode .text-\[\#C5C1B9\]\/70,
+.presentation-mode .text-\[\#C5C1B9\]\/60 { color: #F0F7F3 !important; }
+.presentation-mode .text-white\/40,
+.presentation-mode .text-white\/50,
+.presentation-mode .text-white\/60,
+.presentation-mode .text-white\/70,
+.presentation-mode .text-white\/80 { color: #FFFFFF !important; }
+.presentation-mode .opacity-50 { opacity: 0.85 !important; }
+.presentation-mode .opacity-60 { opacity: 0.9 !important; }
+.presentation-mode .opacity-70 { opacity: 0.95 !important; }
+
+/* Stronger borders for camera capture */
+.presentation-mode .border-white\/5  { border-color: rgba(255,255,255,0.18) !important; }
+.presentation-mode .border-white\/10 { border-color: rgba(255,255,255,0.28) !important; }
+.presentation-mode .border-white\/15 { border-color: rgba(255,255,255,0.35) !important; }
+.presentation-mode .border-white\/20 { border-color: rgba(255,255,255,0.45) !important; }
+
