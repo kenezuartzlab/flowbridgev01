@@ -80,7 +80,7 @@ export function BridgeCard({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => onAmountChange(e.target.value)}
-                className="bg-transparent text-white text-3xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
+                className="bg-transparent text-white text-4xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono"
               />
               <div 
                 onClick={() => {
@@ -126,7 +126,7 @@ export function BridgeCard({
           
           <div className="flex justify-between items-center gap-3">
             <div className="flex-1 min-w-0">
-              <div className="text-3xl font-black text-white/50 leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
+              <div className="text-4xl font-black text-white/50 leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
                 {estimatedReceive ? parseFloat(estimatedReceive).toFixed(8) : '0.00000000'}
               </div>
             </div>

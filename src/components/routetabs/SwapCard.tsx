@@ -62,7 +62,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
       <div className="flex justify-between items-center gap-3">
         <div className="flex-1 min-w-0">
           {readOnly ? (
-            <div className="text-3xl font-black text-white leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
+            <div className="text-4xl font-black text-white leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
                {amount ? parseFloat(amount).toFixed(8) : '0.00000000'}
             </div>
           ) : (
@@ -71,7 +71,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               placeholder="0.00"
               value={amount}
               onChange={(e) => onChange?.(e.target.value)}
-              className="bg-transparent text-white text-3xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
+              className="bg-transparent text-white text-4xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono"
             />
           )}
         </div>

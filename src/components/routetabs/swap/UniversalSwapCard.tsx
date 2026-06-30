@@ -561,11 +561,8 @@ export function UniversalSwapCard({
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
-          <span className="text-sm font-black text-white uppercase tracking-widest font-mono">
+          <span className="text-lg font-black text-white uppercase tracking-widest font-mono">
             Swap
-          </span>
-          <span className="text-[12px] text-[#C5C1B9] font-mono">
-            Bohr on-chain router · multi-hop
           </span>
         </div>
         <SlippagePopover value={slippage} onChange={setSlippage} />
@@ -754,7 +751,7 @@ function TokenSide({
       <div className="flex justify-between items-center gap-3">
         <div className="flex-1 min-w-0">
           {readOnly ? (
-            <div className="text-3xl font-black text-white leading-none h-[36px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
+            <div className="text-4xl font-black text-white leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
               {quoting ? (
                 <Loader2 className="w-5 h-5 animate-spin text-[#C5C1B9]" />
               ) : amount ? (
@@ -769,7 +766,7 @@ function TokenSide({
               placeholder="0.00"
               value={amount}
               onChange={(e) => onAmountChange?.(e.target.value)}
-              className="bg-transparent text-white text-3xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[36px] font-mono"
+              className="bg-transparent text-white text-4xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono"
             />
           )}
         </div>
