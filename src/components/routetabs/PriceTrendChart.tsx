@@ -107,19 +107,19 @@ export function PriceTrendChart({
       <div className="absolute top-0 right-0 w-32 h-32 bg-[#32FF8B]/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header Info */}
-      <div className="flex justify-between items-start gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-[#32FF8B] uppercase font-black tracking-widest bg-[#32FF8B]/10 px-2 py-0.5 rounded border border-[#32FF8B]/20">
-              BOT / USDT
+      <div className="flex justify-between items-start gap-2">
+        <div className="space-y-1 min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[10px] text-[#32FF8B] uppercase font-black tracking-widest bg-[#32FF8B]/10 px-2 py-0.5 rounded border border-[#32FF8B]/20 whitespace-nowrap">
+              {pairLabel}
             </span>
-            <span className="text-[12px] text-[#C5C1B9]/60 font-medium">Bohr DEX Oracle</span>
+            <span className="text-[10px] text-[#C5C1B9]/60 font-medium truncate">{sourceLabel}</span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <h3 className="text-lg font-black text-white tracking-tight font-sans">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <h3 className="text-base sm:text-lg font-black text-white tracking-tight font-sans">
               ${basePrice.toFixed(4)}
             </h3>
-            <span className={`inline-flex items-center text-[12px] font-black ${stats.isUp ? 'text-[#32FF8B]' : 'text-rose-400'}`}>
+            <span className={`inline-flex items-center text-[11px] font-black ${stats.isUp ? 'text-[#32FF8B]' : 'text-rose-400'}`}>
               {stats.isUp ? <ArrowUpRight className="w-3.5 h-3.5 shrink-0" /> : <ArrowDownRight className="w-3.5 h-3.5 shrink-0" />}
               {stats.isUp ? '+' : ''}{stats.percentChange}%
             </span>
@@ -133,7 +133,7 @@ export function PriceTrendChart({
               key={tf}
               type="button"
               onClick={() => setTimeframe(tf)}
-              className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider transition-all duration-150 cursor-pointer ${
+              className={`px-1.5 sm:px-2 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all duration-150 cursor-pointer ${
                 timeframe === tf
                   ? 'bg-[#32FF8B] text-[#010C1B] shadow-inner'
                   : 'text-[#C5C1B9]/60 hover:text-white hover:bg-white/5'
@@ -144,6 +144,7 @@ export function PriceTrendChart({
           ))}
         </div>
       </div>
+
 
       {/* Mini Recharts Area Chart */}
       <div className="h-28 w-full -mx-2.5">
