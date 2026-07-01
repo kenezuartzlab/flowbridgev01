@@ -211,6 +211,7 @@ async function botUsdtStep(
 
   return {
     dex: "bdex-v3",
+    routerId: ROUTER_ID["bdex-v3"],
     router: bdexRouter,
     path: [inAddr, outAddr],
     symbolPath: [
@@ -222,6 +223,7 @@ async function botUsdtStep(
     expectedOut: q.amountOut,
     v3Fee: q.fee,
   };
+
 }
 
 // Best single-DEX V2 quote (direct, hop-via-wnative, hop-via-usdt).
