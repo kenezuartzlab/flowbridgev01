@@ -375,8 +375,8 @@ export function LimitOrderCard({
               Limit price
             </span>
             <span className="text-[10px] text-[#C5C1B9]">
-              {spotPrice
-                ? `Spot: 1 ${tokenIn.symbol} ≈ ${(parseFloat(spotPrice) / (parseFloat(amountIn) || 1)).toFixed(6)} ${tokenOut.symbol}`
+              {spotPrice && amountIn && parseFloat(amountIn) > 0
+                ? `Spot: 1 ${tokenIn.symbol} ≈ ${(parseFloat(spotPrice) / parseFloat(amountIn)).toFixed(6)} ${tokenOut.symbol}`
                 : "—"}
             </span>
           </div>
@@ -407,6 +407,24 @@ export function LimitOrderCard({
             </button>
           )}
         </div>
+
+        {/* Order preview */}
+        {route && amountIn && parseFloat(amountIn) > 0 && (
+          <OrderPreviewPanel
+            tokenIn={tokenIn}
+            tokenOut={tokenOut}
+            amountIn={amountIn}
+            spotOut={spotPrice}
+            limitOut={
+              minAmountOutRaw > 0n
+                ? formatUnits(minAmountOutRaw, tokenOut.decimals)
+                : null
+            }
+            routeLabel={route.humanLabel}
+            getUsdPrice={getUsdPrice}
+          />
+        )}
+
 
         {/* Expiry */}
         <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2">
