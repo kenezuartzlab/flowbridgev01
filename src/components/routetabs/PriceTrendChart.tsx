@@ -102,7 +102,7 @@ export function PriceTrendChart({
   };
 
   return (
-    <div className="bg-[#0D1C2A]/40 border border-white/15 rounded-2xl p-4.5 space-y-4 font-mono text-left relative overflow-hidden shadow-2xl">
+    <div className="bg-[#0D1C2A]/40 border border-white/15 rounded-2xl p-3 sm:p-4 space-y-3 font-mono text-left relative overflow-hidden shadow-2xl">
       {/* Background soft pulse effect */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-[#32FF8B]/5 rounded-full blur-3xl pointer-events-none" />
 
