@@ -154,10 +154,10 @@ export function UniversalSwapCard({
   const inBalanceDisplay = formatUnits(inBalanceRaw, tokenIn.decimals);
   const outBalanceDisplay = formatUnits(outBalanceRaw, tokenOut.decimals);
 
-  // Router that the token-in ERC20 must approve: first step's router from the
-  // current quote, falling back to Bohr router for an initial allowance read.
-  const firstStepRouter: Address = (quote?.steps[0]?.router ??
-    (contracts.bdexRouter.toLowerCase() as Address)) as Address;
+  // All swaps route through FlowBridgeRouter v3, so ERC20 approvals target it.
+  const flowRouter: Address = contracts.flowBridgeRouterV3.toLowerCase() as Address;
+  const firstStepRouter: Address = flowRouter;
+
 
   // ── Allowance ─────────────────────────────────────────────────────────────
   const allowanceRead = useReadContract({
