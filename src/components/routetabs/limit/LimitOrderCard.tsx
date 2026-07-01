@@ -762,3 +762,226 @@ function PairPriceChart({
     </div>
   );
 }
+
+/**
+ * User-friendly limit price editor.
+ * Users set a target USD price for the "base" (non-stable) asset — e.g. "sell BOT @ $12"
+ * or "buy BOT @ $8". Under the hood we still store the rate as tokenOut per 1 tokenIn.
+ * Advanced mode lets power users type the raw pair rate.
+ */
+function LimitPriceEditor({
+  tokenIn,
+  tokenOut,
+  amountIn,
+  spotOut,
+  limitPrice,
+  onLimitPriceChange,
+  getUsdPrice,
+}: {
+  tokenIn: Token;
+  tokenOut: Token;
+  amountIn: string;
+  spotOut: string | null;
+  limitPrice: string;
+  onLimitPriceChange: (v: string) => void;
+  getUsdPrice?: (symbol: string) => number | null | undefined;
+}) {
+  const STABLES = new Set(["USDT", "USDC", "DAI", "USD"]);
+  const inPx = getUsdPrice?.(tokenIn.symbol) ?? null;
+  const outPx = getUsdPrice?.(tokenOut.symbol) ?? null;
+
+  // Pick the "base" asset: prefer non-stable side, default to tokenIn.
+  const baseIsIn = !STABLES.has(tokenIn.symbol) || STABLES.has(tokenOut.symbol);
+  const baseToken = baseIsIn ? tokenIn : tokenOut;
+  const quoteToken = baseIsIn ? tokenOut : tokenIn;
+  const basePx = baseIsIn ? inPx : outPx;
+  const quotePx = baseIsIn ? outPx : inPx;
+
+  const isSell = baseIsIn; // paying base for quote = "sell base"
+  const actionWord = isSell ? "Sell" : "Buy";
+
+  // Spot rate = tokenOut per 1 tokenIn.
+  const parsedAmt = parseFloat(amountIn) || 0;
+  const spotRate =
+    spotOut && parsedAmt > 0 ? parseFloat(spotOut) / parsedAmt : null;
+
+  // Convert between (rate = tokenOut per tokenIn) and (targetUsd = USD price of base).
+  const rateToTargetUsd = (rate: number): number | null => {
+    if (!isFinite(rate) || rate <= 0) return null;
+    if (baseIsIn) {
+      // rate = quote per base ⇒ baseUsd = rate * quoteUsd
+      if (quotePx == null) return null;
+      return rate * quotePx;
+    } else {
+      // rate = base per quote ⇒ baseUsd = quoteUsd / rate
+      if (quotePx == null) return null;
+      return quotePx / rate;
+    }
+  };
+  const targetUsdToRate = (usd: number): number | null => {
+    if (!isFinite(usd) || usd <= 0 || quotePx == null) return null;
+    return baseIsIn ? usd / quotePx : quotePx / usd;
+  };
+
+  const [mode, setMode] = useState<"usd" | "rate">("usd");
+  const [usdInput, setUsdInput] = useState("");
+
+  const canUseUsd = quotePx != null;
+
+  // Keep USD input in sync when the rate changes externally (flip, presets, spot).
+  useEffect(() => {
+    if (mode !== "usd") return;
+    const n = parseFloat(limitPrice);
+    if (!isFinite(n) || n <= 0) {
+      setUsdInput("");
+      return;
+    }
+    const usd = rateToTargetUsd(n);
+    if (usd == null) return;
+    setUsdInput(usd.toFixed(usd < 1 ? 6 : usd < 100 ? 4 : 2));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [limitPrice, baseIsIn, quotePx]);
+
+  const handleUsdChange = (raw: string) => {
+    const clean = raw.replace(/[^0-9.]/g, "");
+    setUsdInput(clean);
+    const n = parseFloat(clean);
+    const rate = isFinite(n) ? targetUsdToRate(n) : null;
+    if (rate != null) {
+      onLimitPriceChange(rate.toFixed(Math.min(tokenOut.decimals, 10)));
+    } else if (clean === "") {
+      onLimitPriceChange("");
+    }
+  };
+
+  const applyPresetPct = (pct: number) => {
+    if (spotRate == null) return;
+    // For a SELL, positive pct = higher target price = better for user (rate ↑).
+    // For a BUY, positive pct = higher target price = worse (they want lower). We invert.
+    const bias = isSell ? 1 + pct / 100 : 1 - pct / 100;
+    const newRate = spotRate * bias;
+    onLimitPriceChange(newRate.toFixed(Math.min(tokenOut.decimals, 10)));
+  };
+
+  const spotUsd = spotRate != null ? rateToTargetUsd(spotRate) : basePx;
+
+  return (
+    <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">
+          {actionWord} {baseToken.symbol} @ target price
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setMode("usd")}
+            disabled={!canUseUsd}
+            className={cn(
+              "px-2 py-0.5 rounded-md text-[9px] uppercase tracking-widest font-black transition-colors",
+              mode === "usd"
+                ? "bg-[#32FF8B]/15 text-[#32FF8B] border border-[#32FF8B]/40"
+                : "bg-white/5 text-[#C5C1B9] border border-white/10 hover:border-white/25 cursor-pointer",
+              !canUseUsd && "opacity-40 cursor-not-allowed",
+            )}
+          >
+            USD
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("rate")}
+            className={cn(
+              "px-2 py-0.5 rounded-md text-[9px] uppercase tracking-widest font-black transition-colors cursor-pointer",
+              mode === "rate"
+                ? "bg-[#32FF8B]/15 text-[#32FF8B] border border-[#32FF8B]/40"
+                : "bg-white/5 text-[#C5C1B9] border border-white/10 hover:border-white/25",
+            )}
+          >
+            Rate
+          </button>
+        </div>
+      </div>
+
+      {mode === "usd" && canUseUsd ? (
+        <>
+          <div className="flex items-center gap-2">
+            <span className="text-white/60 text-lg font-black">$</span>
+            <input
+              value={usdInput}
+              onChange={(e) => handleUsdChange(e.target.value)}
+              placeholder="0.00"
+              inputMode="decimal"
+              className="flex-1 bg-transparent text-white text-lg font-black focus:outline-none min-w-0"
+            />
+            <span className="text-[11px] text-[#C5C1B9] whitespace-nowrap">
+              per {baseToken.symbol}
+            </span>
+          </div>
+          <p className="text-[9px] text-[#C5C1B9] leading-snug">
+            {isSell
+              ? `Order fills when 1 ${baseToken.symbol} trades at or above your price.`
+              : `Order fills when 1 ${baseToken.symbol} trades at or below your price.`}
+          </p>
+        </>
+      ) : (
+        <div className="flex items-center gap-2">
+          <input
+            value={limitPrice}
+            onChange={(e) =>
+              onLimitPriceChange(e.target.value.replace(/[^0-9.]/g, ""))
+            }
+            placeholder="0.0"
+            inputMode="decimal"
+            className="flex-1 bg-transparent text-white text-lg font-black focus:outline-none min-w-0"
+          />
+          <span className="text-[11px] text-[#C5C1B9] whitespace-nowrap">
+            {tokenOut.symbol} / {tokenIn.symbol}
+          </span>
+        </div>
+      )}
+
+      {/* Quick presets */}
+      {spotRate != null && (
+        <div className="flex gap-1 flex-wrap">
+          {[-10, -5, 0, 5, 10].map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => applyPresetPct(p)}
+              className={cn(
+                "px-2 py-0.5 rounded-md text-[9px] uppercase tracking-widest font-black cursor-pointer transition-colors",
+                p === 0
+                  ? "bg-white/10 text-white border border-white/20 hover:border-white/40"
+                  : (isSell ? p > 0 : p < 0)
+                  ? "bg-[#32FF8B]/5 text-[#32FF8B] border border-[#32FF8B]/25 hover:border-[#32FF8B]/50"
+                  : "bg-amber-500/5 text-amber-300 border border-amber-500/25 hover:border-amber-500/50",
+              )}
+            >
+              {p === 0 ? "Spot" : `${p > 0 ? "+" : ""}${p}%`}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Spot reference + preview of what user gets */}
+      <div className="flex items-center justify-between text-[10px] text-[#C5C1B9] pt-1 border-t border-white/5">
+        <span>
+          Spot: {spotUsd != null ? fmtUsd(spotUsd) : "—"}
+          {spotRate != null && (
+            <span className="text-white/40 ml-1">
+              ({spotRate.toFixed(6)} {tokenOut.symbol}/{tokenIn.symbol})
+            </span>
+          )}
+        </span>
+        {parsedAmt > 0 && parseFloat(limitPrice) > 0 && (
+          <span className="text-white font-black">
+            → {(parsedAmt * parseFloat(limitPrice)).toLocaleString(undefined, {
+              maximumFractionDigits: 6,
+            })}{" "}
+            {tokenOut.symbol}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
