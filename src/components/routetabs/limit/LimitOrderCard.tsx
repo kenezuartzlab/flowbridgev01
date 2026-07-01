@@ -870,11 +870,11 @@ function LimitPriceEditor({
 
   return (
     <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9] min-w-0 truncate">
           {actionWord} {baseToken.symbol} @ target price
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             onClick={() => setMode("usd")}
@@ -903,6 +903,7 @@ function LimitPriceEditor({
           </button>
         </div>
       </div>
+
 
       {mode === "usd" && canUseUsd ? (
         <>
