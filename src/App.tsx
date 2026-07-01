@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient } from 'wagmi';
+
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { injected } from 'wagmi/connectors';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet } from './lib/wagmi';
-import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
+import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
 import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
 import { RouteProgress } from './components/routetabs/RouteProgress';
@@ -367,6 +368,7 @@ export default function App() {
   // On-Chain Reads (Cached balances)
   const currentBotChainId = isMainnet ? 677 : 968;
   const currentBscChainId = isMainnet ? 56 : 97;
+  const botPublicClient = usePublicClient({ chainId: currentBotChainId });
 
   // 1. Native BOT balance
   const { data: botBalance, refetch: refetchBotBalance } = useBalance({
@@ -434,6 +436,15 @@ export default function App() {
     abi: ERC20_ABI,
     functionName: 'allowance',
     args: address ? [address as `0x${string}`, contracts.botBridgeProxy as `0x${string}`] : undefined,
+    chainId: currentBotChainId,
+    query: { enabled: !!address && !isDemoMode }
+  });
+
+  const { data: rawUsdtBotFlowRouterAllowance, refetch: refetchUsdtBotFlowRouterAllowance } = useReadContract({
+    address: contracts.usdtBot as `0x${string}`,
+    abi: ERC20_ABI,
+    functionName: 'allowance',
+    args: address ? [address as `0x${string}`, contracts.flowBridgeRouterV3 as `0x${string}`] : undefined,
     chainId: currentBotChainId,
     query: { enabled: !!address && !isDemoMode }
   });
@@ -1087,66 +1098,119 @@ export default function App() {
         setIsActionLoading(true);
         
         if (bridgeDirection === 'BOT_TO_BNB') {
-          // USDT BOT -> USDT BNB (Call deposit function on BotBridge proxy)
+          // USDT BOT -> USDT BNB
           const parsedAmount = parseUnits(usdtAmount, 6);
 
-          // Check allowance of usdtBot for botBridgeProxy
-          const allowance = rawUsdtBotBridgeAllowance ? BigInt(rawUsdtBotBridgeAllowance.toString()) : 0n;
-          if (allowance < parsedAmount) {
-            setActionStep('approving_usdt');
-            await writeContractAsync({
-              address: contracts.usdtBot as `0x${string}`,
-              abi: ERC20_ABI,
-              functionName: 'approve',
-              args: [contracts.botBridgeProxy as `0x${string}`, parsedAmount],
+          // Route via FlowBridgeRouter v3 when the recipient equals the connected wallet
+          // (v3 bridgeWithFee uses msg.sender as destination recipient — no custom-recipient arg).
+          const canUseV3Router = !!address && !!botPublicClient &&
+            recipientAddr.toLowerCase() === address.toLowerCase();
+
+          if (canUseV3Router) {
+            // Fetch the exact protocol fee for bridgeId 0 (USDT bridge)
+            let bridgeFee = 0n;
+            try {
+              const feeRes = await botPublicClient!.readContract({
+                address: contracts.flowBridgeRouterV3 as `0x${string}`,
+                abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+                functionName: 'computeBridgeFee',
+                args: [0n, parsedAmount, address as `0x${string}`]
+              }) as readonly [bigint, bigint];
+              bridgeFee = feeRes[0];
+            } catch (e) {
+              console.warn('computeBridgeFee failed, defaulting to 0', e);
+            }
+            const totalApprove = parsedAmount + bridgeFee;
+
+            // Approve USDT to FlowBridgeRouter v3
+            const allowance = rawUsdtBotFlowRouterAllowance ? BigInt(rawUsdtBotFlowRouterAllowance.toString()) : 0n;
+            if (allowance < totalApprove) {
+              setActionStep('approving_usdt');
+              await writeContractAsync({
+                address: contracts.usdtBot as `0x${string}`,
+                abi: ERC20_ABI,
+                functionName: 'approve',
+                args: [contracts.flowBridgeRouterV3 as `0x${string}`, totalApprove],
+                chainId: targetChainIdForTab(),
+                gas: 150000n
+              } as any);
+              await new Promise(r => setTimeout(r, 3000));
+              refetchUsdtBotFlowRouterAllowance();
+            }
+
+            setActionStep('bridging_usdt');
+            const txBridge = await writeContractAsync({
+              address: contracts.flowBridgeRouterV3 as `0x${string}`,
+              abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+              functionName: 'bridgeWithFee',
+              args: [0n, contracts.usdtBot as `0x${string}`, parsedAmount],
               chainId: targetChainIdForTab(),
-              gas: 150000n
+              gas: 1200000n
             } as any);
-            await new Promise(r => setTimeout(r, 3000));
-            refetchUsdtBotBridgeAllowance();
+
+            const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
+            if (!finalConfirmed) return;
+
+            await updateSession({
+              step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
+            });
+            logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
+          } else {
+            // Fallback: legacy direct deposit on BotBridge proxy (supports custom recipient)
+            const allowance = rawUsdtBotBridgeAllowance ? BigInt(rawUsdtBotBridgeAllowance.toString()) : 0n;
+            if (allowance < parsedAmount) {
+              setActionStep('approving_usdt');
+              await writeContractAsync({
+                address: contracts.usdtBot as `0x${string}`,
+                abi: ERC20_ABI,
+                functionName: 'approve',
+                args: [contracts.botBridgeProxy as `0x${string}`, parsedAmount],
+                chainId: targetChainIdForTab(),
+                gas: 150000n
+              } as any);
+              await new Promise(r => setTimeout(r, 3000));
+              refetchUsdtBotBridgeAllowance();
+            }
+
+            setActionStep('bridging_usdt');
+            const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
+            const destChainIdForBridge = isMainnet ? 56n : 97n;
+
+            const txBridge = await writeContractAsync({
+              address: contracts.botBridgeProxy as `0x${string}`,
+              abi: [
+                {
+                  inputs: [
+                    { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+                    { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+                    { internalType: "address", name: "recipient", type: "address" },
+                    { internalType: "uint256", name: "amount", type: "uint256" }
+                  ],
+                  name: "deposit",
+                  outputs: [],
+                  stateMutability: "payable",
+                  type: "function"
+                }
+              ],
+              functionName: 'deposit',
+              args: [
+                destChainIdForBridge,
+                resourceId as `0x${string}`,
+                recipientAddr as `0x${string}`,
+                parsedAmount
+              ],
+              chainId: targetChainIdForTab(),
+              gas: 1000000n
+            } as any);
+
+            const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
+            if (!finalConfirmed) return;
+
+            await updateSession({
+              step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
+            });
+            logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
           }
-
-          setActionStep('bridging_usdt');
-          
-          // In standard ChainBridge architectures for Bohr, custom registered tokens have a 32-byte resource ID.
-          // The main stablecoin USDT maps to resource ID '0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d'
-          const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
-          const destChainIdForBridge = isMainnet ? 56n : 97n; // target BNB Chain ID is 56 (mainnet) or 97 (testnet)
-
-          const txBridge = await writeContractAsync({
-            address: contracts.botBridgeProxy as `0x${string}`,
-            abi: [
-              {
-                inputs: [
-                  { internalType: "uint256", name: "destinationChainId", type: "uint256" },
-                  { internalType: "bytes32", name: "resourceId", type: "bytes32" },
-                  { internalType: "address", name: "recipient", type: "address" },
-                  { internalType: "uint256", name: "amount", type: "uint256" }
-                ],
-                name: "deposit",
-                outputs: [],
-                stateMutability: "payable",
-                type: "function"
-              }
-            ],
-            functionName: 'deposit',
-            args: [
-              destChainIdForBridge,
-              resourceId as `0x${string}`,
-              recipientAddr as `0x${string}`,
-              parsedAmount
-            ],
-            chainId: targetChainIdForTab(),
-            gas: 1000000n // plenty of gas to satisfy reentrancy sentry and handler subcalls
-          } as any);
-
-          const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
-          if (!finalConfirmed) return;
-
-          await updateSession({
-            step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
-          });
-          logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
         } else {
           // USDT BNB -> USDT BOT (Call deposit function on BotBridge proxy)
           const parsedAmount = parseUnits(usdtAmount, 18); // standard 18 on BSC
