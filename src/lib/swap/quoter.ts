@@ -418,6 +418,7 @@ export async function getBestRoute(
         steps: [
           {
             dex: dexA.id,
+            routerId: ROUTER_ID[dexA.id],
             router: dexA.router,
             path: leg1.path,
             symbolPath: leg1.symbolPath,
@@ -425,6 +426,7 @@ export async function getBestRoute(
             outIsNative: true,
             expectedOut: leg1.amountOut,
           },
+
           leg2,
         ],
       });
