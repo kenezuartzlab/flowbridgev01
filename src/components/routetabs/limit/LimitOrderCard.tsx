@@ -737,31 +737,34 @@ function PairPriceChart({
   amountIn: string;
   getUsdPrice?: (symbol: string) => number | null | undefined;
 }) {
-  // Prefer live pair rate (tokenOut per 1 tokenIn) in USD terms of tokenIn.
+  const STABLES = new Set(["USDT", "USDC", "DAI", "USD"]);
   const outPx = getUsdPrice?.(tokenOut.symbol) ?? null;
   const inPx = getUsdPrice?.(tokenIn.symbol) ?? null;
-  let livePrice: number | null = null;
+
+  // Chart the non-stable "base" side in USD terms.
+  const baseIsIn = !STABLES.has(tokenIn.symbol) || STABLES.has(tokenOut.symbol);
+  const baseSym = baseIsIn ? tokenIn.symbol : tokenOut.symbol;
+  const quoteSym = baseIsIn ? tokenOut.symbol : tokenIn.symbol;
+
+  let livePrice: number | null = baseIsIn ? inPx : outPx;
   const parsedIn = parseFloat(amountIn);
-  if (spotOut && parsedIn > 0 && outPx != null) {
-    livePrice = (parseFloat(spotOut) / parsedIn) * outPx;
-  } else if (inPx != null) {
-    livePrice = inPx;
+  if (spotOut && parsedIn > 0) {
+    const rate = parseFloat(spotOut) / parsedIn; // out per in
+    if (baseIsIn && outPx != null) livePrice = rate * outPx;
+    else if (!baseIsIn && inPx != null) livePrice = inPx / rate;
   }
   if (livePrice == null || !isFinite(livePrice) || livePrice <= 0) return null;
+
   return (
-    <div className="bg-[#0D1C2A] border border-white/10 rounded-[24px] p-4 font-mono">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">
-          {tokenIn.symbol} / {tokenOut.symbol} · price trend
-        </span>
-        <span className="text-[10px] text-[#32FF8B] font-black">
-          {fmtUsd(livePrice)}
-        </span>
-      </div>
-      <PriceTrendChart currentLivePrice={livePrice} />
-    </div>
+    <PriceTrendChart
+      currentLivePrice={livePrice}
+      pairLabel={`${baseSym} / ${quoteSym}`}
+      sourceLabel="Live pair rate"
+      volumeLabel={null}
+    />
   );
 }
+
 
 /**
  * User-friendly limit price editor.
@@ -867,11 +870,11 @@ function LimitPriceEditor({
 
   return (
     <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9] min-w-0 truncate">
           {actionWord} {baseToken.symbol} @ target price
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             onClick={() => setMode("usd")}
@@ -900,6 +903,7 @@ function LimitPriceEditor({
           </button>
         </div>
       </div>
+
 
       {mode === "usd" && canUseUsd ? (
         <>
