@@ -22,6 +22,7 @@ import { resolveLimitRoute, isCrossRouterPair } from "@/lib/limitOrders/routing"
 import { runPreflight, type PreflightResult } from "@/lib/limitOrders/preflight";
 import { decodePlacedOrderId, executorAddress } from "@/lib/limitOrders/executor";
 import { ActiveOrdersList } from "./ActiveOrdersList";
+import { PriceTrendChart } from "@/components/routetabs/PriceTrendChart";
 
 interface LimitOrderCardProps {
   isMainnet: boolean;
@@ -30,6 +31,17 @@ interface LimitOrderCardProps {
   isNetworkCorrect: boolean;
   onSwitchNetwork: () => void;
   txUrlPrefix: string;
+  /** Resolve a USD price for a token symbol. */
+  getUsdPrice?: (symbol: string) => number | null | undefined;
+}
+
+function fmtUsd(v: number | null | undefined): string {
+  if (v == null || !isFinite(v)) return "—";
+  if (v === 0) return "$0.00";
+  if (v < 0.01) return `$${v.toFixed(6)}`;
+  if (v < 1) return `$${v.toFixed(4)}`;
+  if (v < 1000) return `$${v.toFixed(2)}`;
+  return `$${v.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 }
 
 const EXPIRY_PRESETS: { label: string; seconds: number }[] = [
