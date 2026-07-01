@@ -368,45 +368,17 @@ export function LimitOrderCard({
           editable={false}
         />
 
-        {/* Limit price + spot */}
-        <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">
-              Limit price
-            </span>
-            <span className="text-[10px] text-[#C5C1B9]">
-              {spotPrice && amountIn && parseFloat(amountIn) > 0
-                ? `Spot: 1 ${tokenIn.symbol} ≈ ${(parseFloat(spotPrice) / parseFloat(amountIn)).toFixed(6)} ${tokenOut.symbol}`
-                : "—"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              value={limitPrice}
-              onChange={(e) => setLimitPrice(e.target.value.replace(/[^0-9.]/g, ""))}
-              placeholder="0.0"
-              className="flex-1 bg-transparent text-white text-lg font-black focus:outline-none"
-            />
-            <span className="text-[11px] text-[#C5C1B9]">
-              {tokenOut.symbol} per 1 {tokenIn.symbol}
-            </span>
-          </div>
-          {spotPrice && amountIn && parseFloat(amountIn) > 0 && (
-            <button
-              type="button"
-              onClick={() =>
-                setLimitPrice(
-                  (parseFloat(spotPrice) / parseFloat(amountIn)).toFixed(
-                    Math.min(tokenOut.decimals, 8),
-                  ),
-                )
-              }
-              className="text-[9px] text-[#32FF8B] uppercase tracking-widest font-bold cursor-pointer hover:underline"
-            >
-              Use spot
-            </button>
-          )}
-        </div>
+        {/* Limit price editor (USD-friendly with quick presets) */}
+        <LimitPriceEditor
+          tokenIn={tokenIn}
+          tokenOut={tokenOut}
+          amountIn={amountIn}
+          spotOut={spotPrice}
+          limitPrice={limitPrice}
+          onLimitPriceChange={setLimitPrice}
+          getUsdPrice={getUsdPrice}
+        />
+
 
         {/* Order preview */}
         {route && amountIn && parseFloat(amountIn) > 0 && (
