@@ -1860,6 +1860,17 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'LIMIT' && (
+            <LimitOrderCard
+              isMainnet={isMainnet}
+              isConnected={isConnected}
+              onConnect={handleConnect}
+              isNetworkCorrect={isNetworkCorrect}
+              onSwitchNetwork={handleSwitchNetwork}
+              txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
+            />
+          )}
+
           {activeTab === 'BRIDGE' && (
             <BridgeCard
               amount={usdtAmount}
