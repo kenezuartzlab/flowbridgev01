@@ -584,28 +584,29 @@ function TokenAmountRow({
   return (
     <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2">
       <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">{label}</span>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 w-full">
         <input
           value={amount}
           onChange={(e) => editable && onAmountChange(e.target.value.replace(/[^0-9.]/g, ""))}
           placeholder="0.0"
           readOnly={!editable}
           className={cn(
-            "flex-1 bg-transparent text-white text-xl font-black focus:outline-none",
+            "flex-1 min-w-0 bg-transparent text-white text-xl font-black focus:outline-none",
             !editable && "opacity-70",
           )}
         />
         <button
           type="button"
           onClick={onPickToken}
-          className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-2.5 py-1.5 cursor-pointer"
+          className="shrink-0 flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-2 py-1.5 cursor-pointer"
         >
-          <TokenIcon symbol={token.symbol} size={20} />
-          <span className="text-white text-[12px] font-black tracking-wider">{token.symbol}</span>
+          <TokenIcon symbol={token.symbol} size={18} />
+          <span className="text-white text-[11px] font-black tracking-wider">{token.symbol}</span>
           <ChevronDown className="w-3 h-3 text-[#C5C1B9]" />
         </button>
       </div>
     </div>
+
   );
 }
 
