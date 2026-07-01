@@ -134,29 +134,9 @@ export async function createTransactionHistory(
     .single();
   if (error) throw error;
 
-  if (pointsToEarn > 0) {
-    await supabaseAdmin
-      .from("profiles")
-      .update({ flow_points: (user.flow_points ?? 0) + pointsToEarn })
-      .eq("id", userId);
+  // No client-driven point awards; verified on-chain flows should update
+  // profiles.flow_points server-side after verification.
 
-    if (user.referred_by) {
-      const { data: referrer } = await supabaseAdmin
-        .from("profiles")
-        .select("id, flow_points")
-        .eq("referral_code", user.referred_by)
-        .maybeSingle();
-      if (referrer) {
-        const bonus = Math.floor(pointsToEarn * 0.2);
-        if (bonus > 0) {
-          await supabaseAdmin
-            .from("profiles")
-            .update({ flow_points: (referrer.flow_points ?? 0) + bonus })
-            .eq("id", referrer.id);
-        }
-      }
-    }
-  }
   return tx;
 }
 
