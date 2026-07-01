@@ -662,7 +662,7 @@ export default function App() {
 
   // Determine needed chain based on active screen and directions
   const targetChainIdForTab = (): number => {
-    if (activeTab === 'CA/BOT' || activeTab === 'BOT/USDT') {
+    if (activeTab === 'CA/BOT' || activeTab === 'BOT/USDT' || activeTab === 'LIMIT') {
       return isMainnet ? 677 : 968; // BOT Chain
     } else {
       // BRIDGE tab

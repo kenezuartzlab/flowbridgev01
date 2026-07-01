@@ -1,6 +1,6 @@
 import { cn } from '../../lib/utils';
 
-export type TabId = 'CA/BOT' | 'BOT/USDT' | 'BRIDGE';
+export type TabId = 'CA/BOT' | 'BOT/USDT' | 'LIMIT' | 'BRIDGE';
 
 interface RouteTabsProps {
   activeTab: TabId;
@@ -10,6 +10,7 @@ interface RouteTabsProps {
 const TABS: { id: TabId; label: string }[] = [
   { id: 'CA/BOT', label: 'CA / BOT' },
   { id: 'BOT/USDT', label: 'SWAP' },
+  { id: 'LIMIT', label: 'LIMIT' },
   { id: 'BRIDGE', label: 'BRIDGE' },
 ];
 

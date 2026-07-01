@@ -1,73 +1,95 @@
 
 ## Scope
 
-Phase 1 (this change): route every swap in `UniversalSwapCard` through the new **FlowBridgeRouter v3** using the on-chain registry (routerIds 0/1/2). No UI changes. No bridge-flow changes. No limit-order work yet.
+Integrate `FlowLimitOrderExecutor` v3 at `0x7FE51363C6694ACddf3EBBF64B2d4A7Ef970ecB4` (BOT mainnet) for three pair sets: **CA↔BOT** (routerId 0, CaSwap V2), **BOT↔USDT** (routerId 2, BDex V3, feePool 3000), **CA↔USDT** (single-hop not possible on-chain — see below). No bridge-flow changes; existing swap path is untouched.
 
-Phase 2 (next turn, after user confirms Phase 1 works): route the BOT→BNB bridge leg through `FlowBridgeRouter.bridgeWithFee` (requires confirming USDT is in bridgeId 0's `supportedTokens`).
+## Key contract facts (from on-chain ABI + source)
 
-Phase 3 (after that): integrate `FlowLimitOrderExecutor` for limit orders.
+- `placeOrder(tokenIn, tokenOut, amountIn, minAmountOut, expiry, routerId, feePoolV3, recipient) payable → orderId`
+  - `msg.value` = **keeper bounty** (native BOT). Not a protocol fee. Recommend a sensible default (e.g. 0.001 BOT) with UI override.
+  - Protocol placement fee = `placementFeeBps` of `amountIn` in `tokenIn` (currently `0`).
+  - `tokenIn` is transferred via `safeTransferFrom` → **native BOT is not accepted as `tokenIn`**. Users placing a `BOT → X` order must wrap to WBOT first (standard `wbot`, since V3 uses `wbot`; CaSwap V2 uses `caWbot` — see routing table below).
+  - `recipient = address(0)` defaults to `msg.sender`.
+- `executeOrder(orderId, v2Path)` — V2 fills; `executeOrderMultiHop(orderId, routerIds[], paths[][], minAmountsPerHop[])` — cross-router fills. Keepers execute; we do not.
+- Events: `OrderPlaced`, `OrderFilled`, `OrderCancelled` — all indexed by `orderId`.
+- Views: `getOrder(id)`, `getActiveUserOrders(user)`, `getOpenOrdersPaginated(user, offset, limit)`, `openOrderCount(user)`, `maxOrdersPerUser`, `computePlacementFee(user, amountIn)`, `paused()`.
 
-## FlowBridgeRouter addresses & registry
+## Routing table (per pair)
 
-- Mainnet: `0x986962de6F00D0eC571b1a34Fa70AEeB445b5445`
-- Testnet: `0x6a8C4ce7544A75fEc6E577b990e44fe621D8a5ac`
-- Registered routers (both nets — same IDs):
-  - `0` = CaSwap V2
-  - `1` = BDex V2
-  - `2` = BDex V3 (`0x07032d47A1b9f8460cBeE9dC17c1d3E438693929`)
+| Pair | Direction | routerId | feePoolV3 | tokenIn / tokenOut on-chain |
+|---|---|---|---|---|
+| BOT ↔ USDT | BOT→USDT | 2 | 3000 | WBOT (`wbot`) → USDT |
+|  | USDT→BOT | 2 | 3000 | USDT → WBOT (`wbot`) |
+| CA ↔ BOT | CA→BOT | 0 | 0 | CA → caWBOT |
+|  | BOT→CA | 0 | 0 | caWBOT → CA |
+| CA ↔ USDT | — | n/a | — | Requires V2+V3 multi-hop — **not placeable as a single limit order** in v3 executor (routerId is scalar). Excluded from placement; user is shown "route unsupported for limit orders — use instant swap". |
 
-## Behavior changes
+Rationale: `placeOrder` stores a single `routerId`. `executeOrderMultiHop` allows multi-router fill, but placement itself still binds one `routerId`; the multi-hop path is intended for same-router chained pools, not CA→BOT(V2)→USDT(V3). Keeping CA↔USDT out of Phase 3 avoids an unfillable order. We can add it in a later phase once we design a two-order primitive or upstream contract change.
 
-Today `UniversalSwapCard.executeStep` calls each underlying DEX router directly (CaSwap V2, or the BDex Universal Router for the V3 BOT↔USDT pool). After this change, **every step** goes through FlowBridgeRouter v3:
+## New UI
 
-- ERC20-in step → ERC20 `approve` goes to FlowBridgeRouter (amount = `swapAmount + fee`), then one of:
-  - `swapV2(routerId, swapAmount, minOut, path, to, deadline)`
-  - `swapV3Single(routerId=2, tokenIn, tokenOut, feePool, swapAmount, minOut, to, deadline)`
-  - `swapTokenToNative(routerId, tokenIn, feePool, swapAmount, minOut, path, to, deadline)`
-- Native-in step → `swapNativeToToken(routerId, tokenOut, feePool, minOut, path, to, deadline)` with `value = swapAmount + fee` (contract splits fee off msg.value).
+Add a fourth tab `LIMIT` in `RouteTabs.tsx` with a new `LimitOrderCard.tsx` under `src/components/routetabs/limit/`.
 
-Two-tx cross-DEX routes (e.g. CA→USDT split as CA→BOT on CaSwap V2 + BOT→USDT on BDex V3) stay two sequential txs — FlowBridgeRouter's `swapMultiHop` is V2-only, so we can't collapse a V2+V3 chain atomically. Each leg is still individually routed through FlowBridgeRouter.
+```text
+┌────────────────────────────────────────┐
+│  You pay      [BOT ▼]     [1.0]        │
+│  You receive  [USDT ▼]    [ ~ 0.098 ]  │
+│  Limit price  [1 BOT = 0.10 USDT]      │
+│  Expires in   [24h ▼]  Custom recipient│
+│  Keeper tip   [0.001 BOT] (advanced)   │
+│                                        │
+│  Live quote: 0.096 USDT (spot)         │
+│  Placement fee: 0 %  (on-chain)        │
+│  ──────────────────────────────────    │
+│  [Approve WBOT] → [Place Limit Order]  │
+└────────────────────────────────────────┘
 
-Fees: before submitting, call `computeRouterFee(routerId, swapAmount, user)` to get the exact fee and either (a) approve `swapAmount + fee` for ERC20 in, or (b) send `msg.value = swapAmount + fee` for native in. Current `globalFeeBps` on mainnet is `0` per docs, so `fee` will typically be `0`, but the wiring supports non-zero.
+Below: Active Orders list — id, pair, amount, limit, status, expiry, cancel.
+```
 
-Quoter stays as-is (quotes come from the underlying pools/routers — routing through FlowBridgeRouter doesn't change the price for the current 0% fee).
+Pre-flight validations (all on-chain; block submit if any fails):
+1. `paused() == false`
+2. Pair maps to a known routerId in the table above; otherwise disabled.
+3. `openOrderCount(user) < maxOrdersPerUser`.
+4. `tokenIn.balanceOf(user) >= amountIn`.
+5. `tokenIn.allowance(user, executor) >= amountIn` (else show Approve step; approve exact `amountIn`).
+6. For BOT-in orders: native BOT balance ≥ `amountIn + keeperBounty + gas headroom` for the wrap step, and WBOT balance/allowance check after wrap.
+7. `expiry == 0 || expiry > now + 60s`.
+8. `minAmountOut > 0`; warn if `minAmountOut` deviates from live spot by > slippage bound (default 5%).
+9. `computePlacementFee(user, amountIn)` — display exact deduction; adjust displayed escrow.
 
-## Files & concrete edits
+## Event-driven state (fulfillment tracking)
 
-- `src/lib/contracts.ts`
-  - Add `flowBridgeRouterV3` addresses on `MAINNET_CONTRACTS` / `TESTNET_CONTRACTS`.
-  - Add `FLOW_BRIDGE_ROUTER_V3_ABI` for: `swapV2`, `swapV3Single`, `swapNativeToToken`, `swapTokenToNative`, `swapMultiHop`, `computeRouterFee`, `getFeeConfig`, `bridgeWithFee`, `computeBridgeFee` (bridgeWithFee wired but unused until Phase 2).
+- On `placeOrder` tx confirmation, decode `OrderPlaced` from the receipt to capture the definitive `orderId`; only then move UI state from `submitting` → `open`.
+- Subscribe with `publicClient.watchContractEvent` filtered by `creator = user` for `OrderPlaced` / `OrderCancelled`, and by `orderId` for `OrderFilled` on active orders. Reconcile any missed events on mount via `getActiveUserOrders(user)` + `getOrder(id)`.
+- UI status transitions only on confirmed events:
+  - `submitting` (tx sent) → `open` (OrderPlaced) → `filled` (OrderFilled) or `cancelled` (OrderCancelled) or `expired` (derived from `expiry < now` + `status == OPEN`).
+- Persist a lightweight `{orderId → localMeta}` map in localStorage keyed by chain+user (for pair symbols, submitted keeper tip, ui timestamps). Ground truth is always the contract.
 
-- `src/lib/swap/quoter.ts`
-  - Add `routerId: number` on `SwapStep` (0/1/2). `bestOnV2Dex` returns dex tag → map to routerId; `botUsdtStep` sets routerId `2`.
-  - Keep quoting logic identical (still reads the underlying pools/routers directly). Only annotate the chosen routerId.
+## Files & edits
 
-- `src/components/routetabs/swap/UniversalSwapCard.tsx`
-  - Replace `firstStepRouter` with FlowBridgeRouter v3 address (allowance display + approvals all target FlowBridgeRouter).
-  - Rewrite `executeStep` to:
-    1. Read `computeRouterFee(routerId, amountInRaw, address)` from FlowBridgeRouter.
-    2. For ERC20 in: approve `amountInRaw + fee` to FlowBridgeRouter (if allowance < that). For native in: send `value = amountInRaw + fee`.
-    3. Dispatch based on `(dex, inIsNative, outIsNative)`:
-       - `bdex-v3` + native-in → `swapNativeToToken(2, tokenOut, v3Fee, minOut, [], to, deadline)`.
-       - `bdex-v3` + native-out → `swapTokenToNative(2, tokenIn, v3Fee, swapAmount, minOut, [], to, deadline)`.
-       - `bdex-v3` + ERC20↔ERC20 → `swapV3Single(2, in, out, v3Fee, swapAmount, minOut, to, deadline)`.
-       - V2 (bohr=routerId 1, caswap=routerId 0) + native-in → `swapNativeToToken(routerId, tokenOut, 0, minOut, path, to, deadline)`.
-       - V2 + native-out → `swapTokenToNative(routerId, tokenIn, 0, swapAmount, minOut, path, to, deadline)`.
-       - V2 + ERC20↔ERC20 → `swapV2(routerId, swapAmount, minOut, path, to, deadline)`.
-    4. Keep the same modal/toast/receipt callbacks (`onSwapPhaseChange`, `onSwapSuccess`).
+- `src/lib/contracts.ts` — add `flowLimitOrderExecutor` address (mainnet only for now; testnet address left blank + a runtime guard) and `FLOW_LIMIT_ORDER_EXECUTOR_ABI` (placeOrder / cancelOrder / getOrder / getActiveUserOrders / openOrderCount / maxOrdersPerUser / computePlacementFee / paused, plus events OrderPlaced/OrderFilled/OrderCancelled).
+- `src/lib/limitOrders/routing.ts` (new) — pure mapping `(tokenIn, tokenOut) → { routerId, feePoolV3, onchainTokenIn, onchainTokenOut, needsWrapBOT }`. Single source of truth for the routing table above.
+- `src/lib/limitOrders/executor.ts` (new) — thin wagmi/viem helpers: `placeLimitOrder`, `cancelLimitOrder`, `fetchActiveOrders`, `watchUserOrderEvents`, `decodePlacedOrderId`.
+- `src/lib/limitOrders/preflight.ts` (new) — the validation checklist above; returns a discriminated result the UI renders.
+- `src/components/routetabs/limit/LimitOrderCard.tsx` (new) — the form + validation UI. Reuses existing `TokenPickerModal`, `SlippagePopover`.
+- `src/components/routetabs/limit/ActiveOrdersList.tsx` (new) — list + cancel + event subscription.
+- `src/components/routetabs/RouteTabs.tsx` — add `'LIMIT'` tab id.
+- `src/App.tsx` — wire the new tab to render `LimitOrderCard` and `ActiveOrdersList`; add a WBOT wrap/unwrap helper for BOT-in / BOT-out orders (uses standard `wbot`; for CA↔BOT the executor holds `CA` on CA→BOT orders and `caWBOT` will be unwrapped by the router at fill time to native BOT — verify with dry `eth_call`).
 
-- `src/App.tsx`
-  - No functional change to the bridge flow this phase. Only unused-import cleanup if any becomes dead (`UNIVERSAL_ROUTER_ABI`, `UNISWAP_V3_ROUTER_ABI` in App.tsx may stay; the legacy BOT/USDT `SwapCard` code still uses them).
+## Verification before ship
 
-## Verification (before handing back)
+1. `tsgo` clean.
+2. `eth_call` dry-run: `paused()`, `placementFeeBps()`, `maxOrdersPerUser()`, `openOrderCount(0xDEAD)` — sanity on ABI + address.
+3. `eth_call` dry-run `placeOrder` for USDT→BOT with a funded impersonated address (via state override) to confirm the call succeeds and to sanity-check that BOT-out orders leave WBOT unwrapping to the keeper filler path.
+4. Live: place a small USDT→BOT order at a limit close to spot, watch keeper fill, confirm `OrderFilled` event arrives and UI flips to `filled`.
 
-1. Typecheck must pass (`tsgo`).
-2. Sanity read against BOT mainnet via a short node script: assert `computeRouterFee(2, 1e18, 0x0)` returns `(0, 0)` (global fee is 0) and `getFeeConfig()` returns treasury `0xFA3D…7e47`. Confirms our ABI + address are correct.
-3. Ask the user to sanity-check one small BOT→USDT swap on mainnet preview; watch for `Router not found`/`Router inactive`/`Not a V3 router` reverts — those are the ABI/routerId mismatch signals.
+## Explicit non-goals this phase
 
-## Out of scope (do NOT touch this phase)
+- CA↔USDT limit orders (unfillable as single order; needs product decision).
+- Running our own keeper — external keepers fill; we only place / cancel / display.
+- Editing bridge, swap, or fee flows.
 
-- BridgeCard / bridge txs.
-- Limit-order executor.
-- Curated token list, UI copy, modals.
-- `src/App.tsx` legacy BOT/USDT `SwapCard` (keeping it on the old Universal Router path is fine — user's card in scope is `UniversalSwapCard`).
+## One question before I build
+
+CA↔USDT limit orders can't be a single on-chain order in v3 — the executor stores one `routerId`, and no keeper will fill a V2→V3 chain. I plan to **disable** CA↔USDT in the limit UI with a helpful message and keep CA↔BOT / BOT↔USDT / USDT↔BOT / BOT↔CA / USDT↔CA-via-instant-swap fallback. Confirm this is acceptable, or reply "simulate CA↔USDT as two chained orders" and I'll add a client-side two-order primitive (place USDT→BOT, then auto-place BOT→CA after the first fills — brittle but doable).
