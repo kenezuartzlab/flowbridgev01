@@ -121,7 +121,9 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   botBridgeProxy: "0xef8dc669eca13e612b67ff09478352e85bd6cc53", // fallbacks since actual is verify
   bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
   flowBridgeRouter: "0x72c7d69f44cf0ce056b1c39032c41ee97e09bc8e",
+  flowBridgeRouterV3: "0x6a8C4ce7544A75fEc6E577b990e44fe621D8a5ac",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
+
 };
 
 export const getContracts = (isMainnet: boolean): ChainContracts => {
