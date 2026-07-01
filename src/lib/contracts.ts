@@ -100,7 +100,9 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   botBridgeProxy: "0xef8dc669eca13e612b67ff09478352e85bd6cc53",
   bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
   flowBridgeRouter: "0x19784e19546307af427902a75771434df831d882",
+  flowBridgeRouterV3: "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
+
 };
 
 export const TESTNET_CONTRACTS: ChainContracts = {
