@@ -46,6 +46,23 @@ export const UNIVERSAL_ROUTER_ABI = parseAbi([
   'function execute(bytes commands, bytes[] inputs) external payable'
 ]);
 
+// FlowBridgeRouter v3 — registry-router + configurable fee dispatcher on BOT Chain.
+// Registered router IDs (mainnet & testnet): 0 = CaSwap V2, 1 = BDex V2, 2 = BDex V3.
+export const FLOW_BRIDGE_ROUTER_V3_ABI = parseAbi([
+  // Fee views
+  'function computeRouterFee(uint256 routerId, uint256 swapAmount, address user) view returns (uint256 fee, uint256 effectiveBps)',
+  'function computeBridgeFee(uint256 bridgeId, uint256 bridgeAmount, address user) view returns (uint256 fee, uint256 effectiveBps)',
+  'function getFeeConfig() view returns (uint256 globalFeeBps, uint256 maxFeeBps, address feeTreasury)',
+  // Swap entry points
+  'function swapV2(uint256 routerId, uint256 swapAmount, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256[] amounts)',
+  'function swapV3Single(uint256 routerId, address tokenIn, address tokenOut, uint24 feePool, uint256 swapAmount, uint256 amountOutMinimum, address to, uint256 deadline) returns (uint256 amountOut)',
+  'function swapNativeToToken(uint256 routerId, address tokenOut, uint24 feePool, uint256 amountOutMin, address[] path, address to, uint256 deadline) payable returns (uint256 amountOut)',
+  'function swapTokenToNative(uint256 routerId, address tokenIn, uint24 feePool, uint256 swapAmount, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256 amountOut)',
+  // Bridge (used in Phase 2)
+  'function bridgeWithFee(uint256 bridgeId, address token, uint256 bridgeAmount) returns (bool)'
+]);
+
+
 export interface ChainContracts {
   caToken: string;
   caStake: string;
@@ -62,7 +79,9 @@ export interface ChainContracts {
   botBridgeProxy: string;
   bnbBridgeProxy: string;
   flowBridgeRouter: string;
+  flowBridgeRouterV3: string;
   usdtBotPoolV3: string;
+
 }
 
 export const MAINNET_CONTRACTS: ChainContracts = {
@@ -81,7 +100,9 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   botBridgeProxy: "0xef8dc669eca13e612b67ff09478352e85bd6cc53",
   bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
   flowBridgeRouter: "0x19784e19546307af427902a75771434df831d882",
+  flowBridgeRouterV3: "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
+
 };
 
 export const TESTNET_CONTRACTS: ChainContracts = {
@@ -100,7 +121,9 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   botBridgeProxy: "0xef8dc669eca13e612b67ff09478352e85bd6cc53", // fallbacks since actual is verify
   bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
   flowBridgeRouter: "0x72c7d69f44cf0ce056b1c39032c41ee97e09bc8e",
+  flowBridgeRouterV3: "0x6a8C4ce7544A75fEc6E577b990e44fe621D8a5ac",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
+
 };
 
 export const getContracts = (isMainnet: boolean): ChainContracts => {

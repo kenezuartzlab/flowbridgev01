@@ -26,9 +26,18 @@ const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
 export type DexId = "bohr" | "caswap" | "bdex-v3";
 
+// FlowBridgeRouter v3 registry IDs (identical on mainnet + testnet):
+//   0 = CaSwap V2, 1 = BDex V2, 2 = BDex V3.
+export const ROUTER_ID: Record<DexId, number> = {
+  caswap: 0,
+  bohr: 1,
+  "bdex-v3": 2,
+};
+
 export interface SwapStep {
   dex: DexId;
-  router: Address;
+  routerId: number;           // FlowBridgeRouter v3 registry ID
+  router: Address;            // underlying DEX router (kept for backwards-compat / display)
   path: Address[];            // ERC20 path passed to the router (V2) or [tokenIn,tokenOut] (V3)
   symbolPath: string[];       // for display
   inIsNative: boolean;
@@ -37,6 +46,7 @@ export interface SwapStep {
   // V3-only:
   v3Fee?: number;             // Uniswap V3 pool fee (e.g. 3000 = 0.3%)
 }
+
 
 export interface QuoteResult {
   amountOut: bigint;          // final out (after last step)
@@ -201,6 +211,7 @@ async function botUsdtStep(
 
   return {
     dex: "bdex-v3",
+    routerId: ROUTER_ID["bdex-v3"],
     router: bdexRouter,
     path: [inAddr, outAddr],
     symbolPath: [
@@ -212,6 +223,7 @@ async function botUsdtStep(
     expectedOut: q.amountOut,
     v3Fee: q.fee,
   };
+
 }
 
 // Best single-DEX V2 quote (direct, hop-via-wnative, hop-via-usdt).
@@ -328,6 +340,7 @@ export async function getBestRoute(
         steps: [
           {
             dex: dex.id,
+            routerId: ROUTER_ID[dex.id],
             router: dex.router,
             path: r.path,
             symbolPath: r.symbolPath,
@@ -335,6 +348,7 @@ export async function getBestRoute(
             outIsNative: !!tokenOut.isNative,
             expectedOut: r.amountOut,
           },
+
         ],
       });
     }
@@ -356,6 +370,7 @@ export async function getBestRoute(
           steps: [
             {
               dex: dexA.id,
+              routerId: ROUTER_ID[dexA.id],
               router: dexA.router,
               path: leg1.path,
               symbolPath: leg1.symbolPath,
@@ -365,6 +380,7 @@ export async function getBestRoute(
             },
             {
               dex: dexB.id,
+              routerId: ROUTER_ID[dexB.id],
               router: dexB.router,
               path: leg2.path,
               symbolPath: leg2.symbolPath,
@@ -372,6 +388,7 @@ export async function getBestRoute(
               outIsNative: !!tokenOut.isNative,
               expectedOut: leg2.amountOut,
             },
+
           ],
         });
       }
@@ -401,6 +418,7 @@ export async function getBestRoute(
         steps: [
           {
             dex: dexA.id,
+            routerId: ROUTER_ID[dexA.id],
             router: dexA.router,
             path: leg1.path,
             symbolPath: leg1.symbolPath,
@@ -408,6 +426,7 @@ export async function getBestRoute(
             outIsNative: true,
             expectedOut: leg1.amountOut,
           },
+
           leg2,
         ],
       });
@@ -429,6 +448,7 @@ export async function getBestRoute(
             leg1,
             {
               dex: dexB.id,
+              routerId: ROUTER_ID[dexB.id],
               router: dexB.router,
               path: leg2.path,
               symbolPath: leg2.symbolPath,
@@ -436,6 +456,7 @@ export async function getBestRoute(
               outIsNative: !!tokenOut.isNative,
               expectedOut: leg2.amountOut,
             },
+
           ],
         });
       }
