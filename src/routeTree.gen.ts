@@ -25,6 +25,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
+import { Route as ApiPublicHooksKeeperTickRouteImport } from './routes/api/public/hooks/keeper-tick'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -108,6 +109,12 @@ const ApiPublicSiweNonceRoute = ApiPublicSiweNonceRouteImport.update({
   path: '/api/public/siwe/nonce',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksKeeperTickRoute =
+  ApiPublicHooksKeeperTickRouteImport.update({
+    id: '/api/public/hooks/keeper-tick',
+    path: '/api/public/hooks/keeper-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
   id: '/$id/vote',
   path: '/$id/vote',
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/hooks/keeper-tick': typeof ApiPublicHooksKeeperTickRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -146,6 +154,7 @@ export interface FileRoutesByTo {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/hooks/keeper-tick': typeof ApiPublicHooksKeeperTickRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -166,6 +175,7 @@ export interface FileRoutesById {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/hooks/keeper-tick': typeof ApiPublicHooksKeeperTickRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/hooks/keeper-tick'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/hooks/keeper-tick'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -225,6 +237,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/hooks/keeper-tick'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -244,6 +257,7 @@ export interface RootRouteChildren {
   ApiUsersClaimRoute: typeof ApiUsersClaimRoute
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
+  ApiPublicHooksKeeperTickRoute: typeof ApiPublicHooksKeeperTickRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
   ApiPublicSiweVerifyRoute: typeof ApiPublicSiweVerifyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -365,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSiweNonceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/keeper-tick': {
+      id: '/api/public/hooks/keeper-tick'
+      path: '/api/public/hooks/keeper-tick'
+      fullPath: '/api/public/hooks/keeper-tick'
+      preLoaderRoute: typeof ApiPublicHooksKeeperTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/proposals/$id/vote': {
       id: '/api/proposals/$id/vote'
       path: '/$id/vote'
@@ -399,6 +420,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersClaimRoute: ApiUsersClaimRoute,
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
   ApiUsersSyncRoute: ApiUsersSyncRoute,
+  ApiPublicHooksKeeperTickRoute: ApiPublicHooksKeeperTickRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,
   ApiPublicSiweVerifyRoute: ApiPublicSiweVerifyRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
@@ -408,13 +430,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
