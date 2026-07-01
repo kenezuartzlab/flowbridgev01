@@ -630,6 +630,10 @@ function TokenAmountRow({
   onAmountChange,
   onPickToken,
   editable,
+  balanceLabel,
+  balanceUsd,
+  onMax,
+  balanceLoading,
 }: {
   label: string;
   token: Token;
@@ -637,10 +641,42 @@ function TokenAmountRow({
   onAmountChange: (v: string) => void;
   onPickToken: () => void;
   editable: boolean;
+  balanceLabel?: string | null;
+  balanceUsd?: number | null;
+  onMax?: () => void;
+  balanceLoading?: boolean;
 }) {
   return (
     <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2">
-      <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">{label}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">{label}</span>
+        {(balanceLabel != null || balanceLoading) && (
+          <div className="flex items-center gap-1.5 text-[10px] text-[#C5C1B9]">
+            <Wallet className="w-3 h-3" />
+            {balanceLoading && balanceLabel == null ? (
+              <span className="opacity-60">…</span>
+            ) : (
+              <>
+                <span className="font-mono">
+                  {balanceLabel} {token.symbol}
+                </span>
+                {balanceUsd != null && (
+                  <span className="text-white/40">({fmtUsd(balanceUsd)})</span>
+                )}
+                {onMax && editable && (
+                  <button
+                    type="button"
+                    onClick={onMax}
+                    className="ml-0.5 px-1.5 py-0.5 rounded-md bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/30 text-[9px] font-black uppercase tracking-widest hover:bg-[#32FF8B]/20 cursor-pointer"
+                  >
+                    Max
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
       <div className="flex items-center gap-2 w-full">
         <input
           value={amount}
@@ -663,9 +699,9 @@ function TokenAmountRow({
         </button>
       </div>
     </div>
-
   );
 }
+
 
 function ActionButton({
   children,
