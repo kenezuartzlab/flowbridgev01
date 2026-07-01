@@ -91,6 +91,45 @@ export function LimitOrderCard({
     setTokenOut(curated[2]);
   }, [curated]);
 
+  // ── Wallet balance for the input token (native or ERC20) ──────────────
+  const nativeBalance = useBalance({
+    address,
+    query: { enabled: !!address && tokenIn.isNative, refetchInterval: 15_000 },
+  });
+  const erc20Balance = useReadContract({
+    address: tokenIn.isNative ? undefined : (tokenIn.address as Address),
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address && !tokenIn.isNative && !!tokenIn.address,
+      refetchInterval: 15_000,
+    },
+  });
+  const balanceRaw: bigint | null = tokenIn.isNative
+    ? (nativeBalance.data?.value ?? null)
+    : ((erc20Balance.data as bigint | undefined) ?? null);
+  const balanceFmt =
+    balanceRaw != null ? formatUnits(balanceRaw, tokenIn.decimals) : null;
+  const balanceNum = balanceFmt != null ? Number(balanceFmt) : null;
+  const balanceUsd =
+    balanceNum != null && getUsdPrice
+      ? (getUsdPrice(tokenIn.symbol) ?? null)
+      : null;
+
+  const handleMax = () => {
+    if (balanceRaw == null) return;
+    // For native BOT, leave a small buffer for the keeper tip + gas.
+    if (tokenIn.isNative) {
+      const buffer = parseUnits("0.005", 18); // ~gas + tip headroom
+      const usable = balanceRaw > buffer ? balanceRaw - buffer : 0n;
+      setAmountIn(formatUnits(usable, tokenIn.decimals));
+    } else {
+      setAmountIn(formatUnits(balanceRaw, tokenIn.decimals));
+    }
+  };
+
+
   const route = useMemo(
     () => resolveLimitRoute(tokenIn, tokenOut, isMainnet),
     [tokenIn, tokenOut, isMainnet],
