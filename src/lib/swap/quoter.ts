@@ -26,9 +26,18 @@ const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
 export type DexId = "bohr" | "caswap" | "bdex-v3";
 
+// FlowBridgeRouter v3 registry IDs (identical on mainnet + testnet):
+//   0 = CaSwap V2, 1 = BDex V2, 2 = BDex V3.
+export const ROUTER_ID: Record<DexId, number> = {
+  caswap: 0,
+  bohr: 1,
+  "bdex-v3": 2,
+};
+
 export interface SwapStep {
   dex: DexId;
-  router: Address;
+  routerId: number;           // FlowBridgeRouter v3 registry ID
+  router: Address;            // underlying DEX router (kept for backwards-compat / display)
   path: Address[];            // ERC20 path passed to the router (V2) or [tokenIn,tokenOut] (V3)
   symbolPath: string[];       // for display
   inIsNative: boolean;
@@ -37,6 +46,7 @@ export interface SwapStep {
   // V3-only:
   v3Fee?: number;             // Uniswap V3 pool fee (e.g. 3000 = 0.3%)
 }
+
 
 export interface QuoteResult {
   amountOut: bigint;          // final out (after last step)
