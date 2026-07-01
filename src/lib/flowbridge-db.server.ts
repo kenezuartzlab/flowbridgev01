@@ -263,9 +263,10 @@ export async function bindUserWallet(userId: string, walletAddress: string) {
     .neq("id", userId)
     .maybeSingle();
   if (dup) {
-    throw new Error(
-      `This wallet address is already bound to another registered email (${dup.email}).`,
+    console.warn(
+      `[bindUserWallet] wallet ${normalized} already bound to another account (user ${dup.id})`,
     );
+    throw new Error("This wallet address is already registered to another account.");
   }
 
   const now = new Date();
