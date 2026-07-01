@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, ChevronDown, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { useAccount, usePublicClient, useWriteContract } from "wagmi";
+import { ArrowDownUp, ChevronDown, Loader2, AlertTriangle, CheckCircle2, Wallet } from "lucide-react";
+import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, type Address } from "viem";
 import { toast } from "sonner";
+
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
 import {
@@ -89,6 +90,45 @@ export function LimitOrderCard({
     setTokenIn(curated[0]);
     setTokenOut(curated[2]);
   }, [curated]);
+
+  // ── Wallet balance for the input token (native or ERC20) ──────────────
+  const nativeBalance = useBalance({
+    address,
+    query: { enabled: !!address && tokenIn.isNative, refetchInterval: 15_000 },
+  });
+  const erc20Balance = useReadContract({
+    address: tokenIn.isNative ? undefined : (tokenIn.address as Address),
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address && !tokenIn.isNative && !!tokenIn.address,
+      refetchInterval: 15_000,
+    },
+  });
+  const balanceRaw: bigint | null = tokenIn.isNative
+    ? (nativeBalance.data?.value ?? null)
+    : ((erc20Balance.data as bigint | undefined) ?? null);
+  const balanceFmt =
+    balanceRaw != null ? formatUnits(balanceRaw, tokenIn.decimals) : null;
+  const balanceNum = balanceFmt != null ? Number(balanceFmt) : null;
+  const balanceUsd =
+    balanceNum != null && getUsdPrice
+      ? (getUsdPrice(tokenIn.symbol) ?? null)
+      : null;
+
+  const handleMax = () => {
+    if (balanceRaw == null) return;
+    // For native BOT, leave a small buffer for the keeper tip + gas.
+    if (tokenIn.isNative) {
+      const buffer = parseUnits("0.005", 18); // ~gas + tip headroom
+      const usable = balanceRaw > buffer ? balanceRaw - buffer : 0n;
+      setAmountIn(formatUnits(usable, tokenIn.decimals));
+    } else {
+      setAmountIn(formatUnits(balanceRaw, tokenIn.decimals));
+    }
+  };
+
 
   const route = useMemo(
     () => resolveLimitRoute(tokenIn, tokenOut, isMainnet),
@@ -341,7 +381,24 @@ export function LimitOrderCard({
           onAmountChange={setAmountIn}
           onPickToken={() => setPickerOpen("in")}
           editable
+          balanceLabel={
+            balanceNum != null
+              ? balanceNum.toLocaleString(undefined, {
+                  maximumFractionDigits: balanceNum < 1 ? 6 : 4,
+                })
+              : null
+          }
+          balanceUsd={
+            balanceNum != null && balanceUsd != null ? balanceNum * balanceUsd : null
+          }
+          onMax={balanceRaw != null && balanceRaw > 0n ? handleMax : undefined}
+          balanceLoading={
+            tokenIn.isNative
+              ? nativeBalance.isLoading
+              : erc20Balance.isLoading
+          }
         />
+
 
         <div className="flex justify-center">
           <button
@@ -573,6 +630,10 @@ function TokenAmountRow({
   onAmountChange,
   onPickToken,
   editable,
+  balanceLabel,
+  balanceUsd,
+  onMax,
+  balanceLoading,
 }: {
   label: string;
   token: Token;
@@ -580,10 +641,42 @@ function TokenAmountRow({
   onAmountChange: (v: string) => void;
   onPickToken: () => void;
   editable: boolean;
+  balanceLabel?: string | null;
+  balanceUsd?: number | null;
+  onMax?: () => void;
+  balanceLoading?: boolean;
 }) {
   return (
     <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2">
-      <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">{label}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">{label}</span>
+        {(balanceLabel != null || balanceLoading) && (
+          <div className="flex items-center gap-1.5 text-[10px] text-[#C5C1B9]">
+            <Wallet className="w-3 h-3" />
+            {balanceLoading && balanceLabel == null ? (
+              <span className="opacity-60">…</span>
+            ) : (
+              <>
+                <span className="font-mono">
+                  {balanceLabel} {token.symbol}
+                </span>
+                {balanceUsd != null && (
+                  <span className="text-white/40">({fmtUsd(balanceUsd)})</span>
+                )}
+                {onMax && editable && (
+                  <button
+                    type="button"
+                    onClick={onMax}
+                    className="ml-0.5 px-1.5 py-0.5 rounded-md bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/30 text-[9px] font-black uppercase tracking-widest hover:bg-[#32FF8B]/20 cursor-pointer"
+                  >
+                    Max
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
       <div className="flex items-center gap-2 w-full">
         <input
           value={amount}
@@ -606,9 +699,9 @@ function TokenAmountRow({
         </button>
       </div>
     </div>
-
   );
 }
+
 
 function ActionButton({
   children,
