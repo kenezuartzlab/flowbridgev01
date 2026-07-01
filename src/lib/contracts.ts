@@ -79,7 +79,9 @@ export interface ChainContracts {
   botBridgeProxy: string;
   bnbBridgeProxy: string;
   flowBridgeRouter: string;
+  flowBridgeRouterV3: string;
   usdtBotPoolV3: string;
+
 }
 
 export const MAINNET_CONTRACTS: ChainContracts = {
