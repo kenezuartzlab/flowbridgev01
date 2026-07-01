@@ -61,6 +61,7 @@ export function LimitOrderCard({
   isNetworkCorrect,
   onSwitchNetwork,
   txUrlPrefix,
+  getUsdPrice,
 }: LimitOrderCardProps) {
   const { address } = useAccount();
   const publicClient = usePublicClient();
