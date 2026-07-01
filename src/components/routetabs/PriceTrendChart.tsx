@@ -179,20 +179,23 @@ export function PriceTrendChart({
       </div>
 
       {/* Mini Stats Grid */}
-      <div className="grid grid-cols-3 gap-2 bg-[#010C1B]/50 border border-white/5 rounded-xl p-2 text-[11px] text-center font-bold">
-        <div className="space-y-0.5 border-r border-white/5">
+      <div className={`grid ${volumeLabel ? 'grid-cols-3' : 'grid-cols-2'} gap-2 bg-[#010C1B]/50 border border-white/5 rounded-xl p-2 text-[11px] text-center font-bold`}>
+        <div className="space-y-0.5 border-r border-white/5 min-w-0">
           <span className="text-white/30 uppercase block text-[7px] font-black">Min Price</span>
-          <span className="text-[#C5C1B9] block">${stats.min.toFixed(3)}</span>
+          <span className="text-[#C5C1B9] block truncate">${stats.min.toFixed(stats.min < 1 ? 5 : 3)}</span>
         </div>
-        <div className="space-y-0.5 border-r border-white/5">
+        <div className={`space-y-0.5 min-w-0 ${volumeLabel ? 'border-r border-white/5' : ''}`}>
           <span className="text-white/30 uppercase block text-[7px] font-black">Max Price</span>
-          <span className="text-[#C5C1B9] block">${stats.max.toFixed(3)}</span>
+          <span className="text-[#C5C1B9] block truncate">${stats.max.toFixed(stats.max < 1 ? 5 : 3)}</span>
         </div>
-        <div className="space-y-0.5">
-          <span className="text-white/30 uppercase block text-[7px] font-black">24H Volume</span>
-          <span className="text-[#32FF8B] block">1.45M BOT</span>
-        </div>
+        {volumeLabel && (
+          <div className="space-y-0.5 min-w-0">
+            <span className="text-white/30 uppercase block text-[7px] font-black">24H Volume</span>
+            <span className="text-[#32FF8B] block truncate">{volumeLabel}</span>
+          </div>
+        )}
       </div>
+
     </div>
   );
 }
