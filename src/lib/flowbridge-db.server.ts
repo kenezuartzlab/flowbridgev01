@@ -111,36 +111,12 @@ export async function createTransactionHistory(
     .maybeSingle();
   if (!user) throw new Error("Profile not found");
 
-  const amount = parseFloat(payload.fromAmount) || 0;
-  const { direction, status } = payload;
-  let usdValue = 0;
-  if (direction.includes("BOT_TO_USDT") || direction.includes("BOT_TO_CA") || direction.includes("BOT_TO_BNB")) {
-    usdValue = amount * 10;
-  } else if (direction.includes("USDT_TO_BOT") || direction.includes("BNB_TO_BOT") || direction.includes("USDT_BOT") || direction.includes("USDT_BNB")) {
-    usdValue = amount * 1;
-  } else if (direction.includes("CA_TO_BOT")) {
-    usdValue = amount * 31.24;
-  } else {
-    usdValue = amount;
-  }
+  // SECURITY: Do not award points from client-supplied transaction data.
+  // Points must only be awarded by server-side on-chain verification (e.g., a
+  // trusted webhook or RPC-verified txHash). Recording the transaction row is
+  // still allowed for user history, but points_earned is always 0 here.
+  const pointsToEarn = 0;
 
-  let pointsToEarn = 0;
-  const isWalletBound = !!user.wallet_address;
-  if (status === "SUCCESS" && usdValue >= 5.0 && isEmailVerified && isWalletBound) {
-    let calc = Math.floor(usdValue);
-    if (calc > 1500) calc = 1500;
-    pointsToEarn = calc;
-
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { data: recent } = await supabaseAdmin
-      .from("transactions_history")
-      .select("points_earned")
-      .eq("user_id", userId)
-      .gte("created_at", oneDayAgo);
-    const sum = (recent ?? []).reduce((s, t) => s + (t.points_earned ?? 0), 0);
-    if (sum >= 5000) pointsToEarn = 0;
-    else if (sum + pointsToEarn > 5000) pointsToEarn = 5000 - sum;
-  }
 
   const { data: tx, error } = await supabaseAdmin
     .from("transactions_history")
@@ -158,29 +134,9 @@ export async function createTransactionHistory(
     .single();
   if (error) throw error;
 
-  if (pointsToEarn > 0) {
-    await supabaseAdmin
-      .from("profiles")
-      .update({ flow_points: (user.flow_points ?? 0) + pointsToEarn })
-      .eq("id", userId);
+  // No client-driven point awards; verified on-chain flows should update
+  // profiles.flow_points server-side after verification.
 
-    if (user.referred_by) {
-      const { data: referrer } = await supabaseAdmin
-        .from("profiles")
-        .select("id, flow_points")
-        .eq("referral_code", user.referred_by)
-        .maybeSingle();
-      if (referrer) {
-        const bonus = Math.floor(pointsToEarn * 0.2);
-        if (bonus > 0) {
-          await supabaseAdmin
-            .from("profiles")
-            .update({ flow_points: (referrer.flow_points ?? 0) + bonus })
-            .eq("id", referrer.id);
-        }
-      }
-    }
-  }
   return tx;
 }
 
@@ -263,9 +219,10 @@ export async function bindUserWallet(userId: string, walletAddress: string) {
     .neq("id", userId)
     .maybeSingle();
   if (dup) {
-    throw new Error(
-      `This wallet address is already bound to another registered email (${dup.email}).`,
+    console.warn(
+      `[bindUserWallet] wallet ${normalized} already bound to another account (user ${dup.id})`,
     );
+    throw new Error("This wallet address is already registered to another account.");
   }
 
   const now = new Date();
