@@ -550,11 +550,21 @@ export function LimitOrderCard({
         )}
       </div>
 
+      {/* Price trend for the selected pair */}
+      <PairPriceChart
+        tokenIn={tokenIn}
+        tokenOut={tokenOut}
+        spotOut={spotPrice}
+        amountIn={amountIn}
+        getUsdPrice={getUsdPrice}
+      />
+
       <ActiveOrdersList
         isMainnet={isMainnet}
         txUrlPrefix={txUrlPrefix}
         refreshTick={refreshTick}
       />
+
 
       <TokenPickerModal
         isOpen={pickerOpen !== null}
