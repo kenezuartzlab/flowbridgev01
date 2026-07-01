@@ -111,36 +111,12 @@ export async function createTransactionHistory(
     .maybeSingle();
   if (!user) throw new Error("Profile not found");
 
-  const amount = parseFloat(payload.fromAmount) || 0;
-  const { direction, status } = payload;
-  let usdValue = 0;
-  if (direction.includes("BOT_TO_USDT") || direction.includes("BOT_TO_CA") || direction.includes("BOT_TO_BNB")) {
-    usdValue = amount * 10;
-  } else if (direction.includes("USDT_TO_BOT") || direction.includes("BNB_TO_BOT") || direction.includes("USDT_BOT") || direction.includes("USDT_BNB")) {
-    usdValue = amount * 1;
-  } else if (direction.includes("CA_TO_BOT")) {
-    usdValue = amount * 31.24;
-  } else {
-    usdValue = amount;
-  }
+  // SECURITY: Do not award points from client-supplied transaction data.
+  // Points must only be awarded by server-side on-chain verification (e.g., a
+  // trusted webhook or RPC-verified txHash). Recording the transaction row is
+  // still allowed for user history, but points_earned is always 0 here.
+  const pointsToEarn = 0;
 
-  let pointsToEarn = 0;
-  const isWalletBound = !!user.wallet_address;
-  if (status === "SUCCESS" && usdValue >= 5.0 && isEmailVerified && isWalletBound) {
-    let calc = Math.floor(usdValue);
-    if (calc > 1500) calc = 1500;
-    pointsToEarn = calc;
-
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { data: recent } = await supabaseAdmin
-      .from("transactions_history")
-      .select("points_earned")
-      .eq("user_id", userId)
-      .gte("created_at", oneDayAgo);
-    const sum = (recent ?? []).reduce((s, t) => s + (t.points_earned ?? 0), 0);
-    if (sum >= 5000) pointsToEarn = 0;
-    else if (sum + pointsToEarn > 5000) pointsToEarn = 5000 - sum;
-  }
 
   const { data: tx, error } = await supabaseAdmin
     .from("transactions_history")
