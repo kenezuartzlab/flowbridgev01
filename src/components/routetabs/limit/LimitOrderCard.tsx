@@ -662,3 +662,131 @@ function ActionButton({
     </button>
   );
 }
+
+function OrderPreviewPanel({
+  tokenIn,
+  tokenOut,
+  amountIn,
+  spotOut,
+  limitOut,
+  routeLabel,
+  getUsdPrice,
+}: {
+  tokenIn: Token;
+  tokenOut: Token;
+  amountIn: string;
+  spotOut: string | null;
+  limitOut: string | null;
+  routeLabel: string;
+  getUsdPrice?: (symbol: string) => number | null | undefined;
+}) {
+  const inPx = getUsdPrice?.(tokenIn.symbol) ?? null;
+  const outPx = getUsdPrice?.(tokenOut.symbol) ?? null;
+  const inAmt = parseFloat(amountIn) || 0;
+  const spotAmt = spotOut ? parseFloat(spotOut) : null;
+  const limitAmt = limitOut ? parseFloat(limitOut) : null;
+
+  const payUsd = inPx != null ? inAmt * inPx : null;
+  const spotUsd = outPx != null && spotAmt != null ? spotAmt * outPx : null;
+  const limitUsd = outPx != null && limitAmt != null ? limitAmt * outPx : null;
+
+  const deltaBps =
+    spotAmt != null && limitAmt != null && spotAmt > 0
+      ? ((limitAmt - spotAmt) / spotAmt) * 100
+      : null;
+
+  return (
+    <div className="bg-[#010C1B] border border-white/10 rounded-2xl p-3 space-y-2 text-[11px] font-mono">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">
+          Order preview
+        </span>
+        <span className="text-[9px] text-[#32FF8B] uppercase tracking-widest font-bold">
+          {routeLabel}
+        </span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="text-[#C5C1B9]">You pay</span>
+        <span className="text-white font-black">
+          {inAmt.toLocaleString(undefined, { maximumFractionDigits: 6 })} {tokenIn.symbol}
+          <span className="text-[#C5C1B9] font-mono ml-1.5">({fmtUsd(payUsd)})</span>
+        </span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="text-[#C5C1B9]">Expected @ market</span>
+        <span className="text-white font-black">
+          {spotAmt != null
+            ? `${spotAmt.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenOut.symbol}`
+            : "—"}
+          <span className="text-[#C5C1B9] font-mono ml-1.5">({fmtUsd(spotUsd)})</span>
+        </span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="text-[#C5C1B9]">Min @ limit</span>
+        <span className="text-[#32FF8B] font-black">
+          {limitAmt != null
+            ? `${limitAmt.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenOut.symbol}`
+            : "—"}
+          <span className="text-[#C5C1B9] font-mono ml-1.5">({fmtUsd(limitUsd)})</span>
+        </span>
+      </div>
+
+      {deltaBps != null && (
+        <div className="flex justify-between pt-1 border-t border-white/5">
+          <span className="text-[#C5C1B9]">Δ vs spot</span>
+          <span
+            className={cn(
+              "font-black",
+              deltaBps >= 0 ? "text-[#32FF8B]" : "text-amber-300",
+            )}
+          >
+            {deltaBps >= 0 ? "+" : ""}
+            {deltaBps.toFixed(2)}%
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PairPriceChart({
+  tokenIn,
+  tokenOut,
+  spotOut,
+  amountIn,
+  getUsdPrice,
+}: {
+  tokenIn: Token;
+  tokenOut: Token;
+  spotOut: string | null;
+  amountIn: string;
+  getUsdPrice?: (symbol: string) => number | null | undefined;
+}) {
+  // Prefer live pair rate (tokenOut per 1 tokenIn) in USD terms of tokenIn.
+  const outPx = getUsdPrice?.(tokenOut.symbol) ?? null;
+  const inPx = getUsdPrice?.(tokenIn.symbol) ?? null;
+  let livePrice: number | null = null;
+  const parsedIn = parseFloat(amountIn);
+  if (spotOut && parsedIn > 0 && outPx != null) {
+    livePrice = (parseFloat(spotOut) / parsedIn) * outPx;
+  } else if (inPx != null) {
+    livePrice = inPx;
+  }
+  if (livePrice == null || !isFinite(livePrice) || livePrice <= 0) return null;
+  return (
+    <div className="bg-[#0D1C2A] border border-white/10 rounded-[24px] p-4 font-mono">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">
+          {tokenIn.symbol} / {tokenOut.symbol} · price trend
+        </span>
+        <span className="text-[10px] text-[#32FF8B] font-black">
+          {fmtUsd(livePrice)}
+        </span>
+      </div>
+      <PriceTrendChart currentLivePrice={livePrice} />
+    </div>
+  );
+}
