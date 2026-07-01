@@ -46,6 +46,23 @@ export const UNIVERSAL_ROUTER_ABI = parseAbi([
   'function execute(bytes commands, bytes[] inputs) external payable'
 ]);
 
+// FlowBridgeRouter v3 — registry-router + configurable fee dispatcher on BOT Chain.
+// Registered router IDs (mainnet & testnet): 0 = CaSwap V2, 1 = BDex V2, 2 = BDex V3.
+export const FLOW_BRIDGE_ROUTER_V3_ABI = parseAbi([
+  // Fee views
+  'function computeRouterFee(uint256 routerId, uint256 swapAmount, address user) view returns (uint256 fee, uint256 effectiveBps)',
+  'function computeBridgeFee(uint256 bridgeId, uint256 bridgeAmount, address user) view returns (uint256 fee, uint256 effectiveBps)',
+  'function getFeeConfig() view returns (uint256 globalFeeBps, uint256 maxFeeBps, address feeTreasury)',
+  // Swap entry points
+  'function swapV2(uint256 routerId, uint256 swapAmount, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256[] amounts)',
+  'function swapV3Single(uint256 routerId, address tokenIn, address tokenOut, uint24 feePool, uint256 swapAmount, uint256 amountOutMinimum, address to, uint256 deadline) returns (uint256 amountOut)',
+  'function swapNativeToToken(uint256 routerId, address tokenOut, uint24 feePool, uint256 amountOutMin, address[] path, address to, uint256 deadline) payable returns (uint256 amountOut)',
+  'function swapTokenToNative(uint256 routerId, address tokenIn, uint24 feePool, uint256 swapAmount, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256 amountOut)',
+  // Bridge (used in Phase 2)
+  'function bridgeWithFee(uint256 bridgeId, address token, uint256 bridgeAmount) returns (bool)'
+]);
+
+
 export interface ChainContracts {
   caToken: string;
   caStake: string;
