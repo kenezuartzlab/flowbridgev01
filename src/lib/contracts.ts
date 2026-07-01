@@ -84,6 +84,8 @@ export const FLOW_LIMIT_ORDER_EXECUTOR_ABI = parseAbi([
   'function getOrderRouterName(uint256 orderId) view returns (string)',
   'function placeOrder(address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 expiry, uint256 routerId, uint24 feePoolV3, address recipient) payable returns (uint256 orderId)',
   'function cancelOrder(uint256 orderId)',
+  'function executeOrder(uint256 orderId, address[] v2Path)',
+  'function executeOrderMultiHop(uint256 orderId, uint256[] routerIds, address[][] paths, uint256[] minAmountsPerHop)',
   'event OrderPlaced(uint256 indexed orderId, address indexed creator, address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 executionFee, uint256 expiry, uint256 routerId, address recipient, uint256 placementFee)',
   'event OrderFilled(uint256 indexed orderId, address indexed executor, uint256 amountOut, uint256 routerId)',
   'event OrderCancelled(uint256 indexed orderId, address indexed creator, address tokenIn, uint256 amountIn, uint256 executionFee)',
