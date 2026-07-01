@@ -1869,6 +1869,13 @@ export default function App() {
               isNetworkCorrect={isNetworkCorrect}
               onSwitchNetwork={handleSwitchNetwork}
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
+              getUsdPrice={(sym) => {
+                const s = sym.toUpperCase();
+                if (s === 'USDT') return 1;
+                if (s === 'BOT' || s === 'WBOT' || s === 'CAWBOT') return getLiveBotPrice();
+                if (s === 'CA') return getLiveCaPrice();
+                return null;
+              }}
             />
           )}
 
