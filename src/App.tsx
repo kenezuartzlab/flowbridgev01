@@ -10,6 +10,7 @@ import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
 import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
+import { LimitOrderCard } from './components/routetabs/limit/LimitOrderCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
@@ -662,7 +663,7 @@ export default function App() {
 
   // Determine needed chain based on active screen and directions
   const targetChainIdForTab = (): number => {
-    if (activeTab === 'CA/BOT' || activeTab === 'BOT/USDT') {
+    if (activeTab === 'CA/BOT' || activeTab === 'BOT/USDT' || activeTab === 'LIMIT') {
       return isMainnet ? 677 : 968; // BOT Chain
     } else {
       // BRIDGE tab
@@ -1857,6 +1858,17 @@ export default function App() {
                   'SUCCESS',
                 );
               }}
+            />
+          )}
+
+          {activeTab === 'LIMIT' && (
+            <LimitOrderCard
+              isMainnet={isMainnet}
+              isConnected={isConnected}
+              onConnect={handleConnect}
+              isNetworkCorrect={isNetworkCorrect}
+              onSwitchNetwork={handleSwitchNetwork}
+              txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
             />
           )}
 
