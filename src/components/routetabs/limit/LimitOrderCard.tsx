@@ -381,7 +381,24 @@ export function LimitOrderCard({
           onAmountChange={setAmountIn}
           onPickToken={() => setPickerOpen("in")}
           editable
+          balanceLabel={
+            balanceNum != null
+              ? balanceNum.toLocaleString(undefined, {
+                  maximumFractionDigits: balanceNum < 1 ? 6 : 4,
+                })
+              : null
+          }
+          balanceUsd={
+            balanceNum != null && balanceUsd != null ? balanceNum * balanceUsd : null
+          }
+          onMax={balanceRaw != null && balanceRaw > 0n ? handleMax : undefined}
+          balanceLoading={
+            tokenIn.isNative
+              ? nativeBalance.isLoading
+              : erc20Balance.isLoading
+          }
         />
+
 
         <div className="flex justify-center">
           <button
