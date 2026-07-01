@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
-import { TrendingUp, TrendingDown, Clock, Activity, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 interface PriceTrendChartProps {
   currentLivePrice?: number;
+  pairLabel?: string;
+  sourceLabel?: string;
+  volumeLabel?: string | null;
 }
 
-export function PriceTrendChart({ currentLivePrice = 9.7482 }: PriceTrendChartProps) {
+export function PriceTrendChart({
+  currentLivePrice = 9.7482,
+  pairLabel = 'BOT / USDT',
+  sourceLabel = 'Bohr DEX Oracle',
+  volumeLabel = '1.45M BOT',
+}: PriceTrendChartProps) {
   const [timeframe, setTimeframe] = useState<'24H' | '7D' | '1M'>('24H');
 
   // Ground price trend dynamically using the live price
