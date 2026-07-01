@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, ChevronDown, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { useAccount, usePublicClient, useWriteContract } from "wagmi";
+import { ArrowDownUp, ChevronDown, Loader2, AlertTriangle, CheckCircle2, Wallet } from "lucide-react";
+import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, type Address } from "viem";
 import { toast } from "sonner";
+
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
 import {
