@@ -147,7 +147,7 @@ export function PriceTrendChart({
 
 
       {/* Mini Recharts Area Chart */}
-      <div className="h-28 w-full -mx-2.5">
+      <div className="h-28 w-full -mx-1 sm:-mx-2">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={activeData} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
             <defs>
