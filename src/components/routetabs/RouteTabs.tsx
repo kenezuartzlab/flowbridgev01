@@ -5,16 +5,19 @@ export type TabId = 'CA/BOT' | 'BOT/USDT' | 'LIMIT' | 'BRIDGE';
 interface RouteTabsProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
+  showLimitTab?: boolean;
 }
 
-const TABS: { id: TabId; label: string }[] = [
+const ALL_TABS: { id: TabId; label: string }[] = [
   { id: 'CA/BOT', label: 'CA / BOT' },
   { id: 'BOT/USDT', label: 'SWAP' },
   { id: 'LIMIT', label: 'LIMIT' },
   { id: 'BRIDGE', label: 'BRIDGE' },
 ];
 
-export function RouteTabs({ activeTab, onTabChange }: RouteTabsProps) {
+export function RouteTabs({ activeTab, onTabChange, showLimitTab = false }: RouteTabsProps) {
+  const TABS = ALL_TABS.filter((t) => t.id !== 'LIMIT' || showLimitTab);
+
   return (
     <nav className="flex bg-[#010C1B] border-b border-white/10 relative z-10 w-full mb-0 font-mono">
       {TABS.map((tab) => (

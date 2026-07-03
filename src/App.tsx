@@ -260,6 +260,12 @@ export default function App() {
     return 'BRIDGE';
   });
 
+  // Admin-only gate for the LIMIT tab (still experimental, kept private)
+  const isLimitAdmin = googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com';
+  useEffect(() => {
+    if (activeTab === 'LIMIT' && !isLimitAdmin) setActiveTab('BOT/USDT');
+  }, [activeTab, isLimitAdmin]);
+
   // Form states
   const [caAmount, setCaAmount] = useState('');
   const [botAmount, setBotAmount] = useState('');
@@ -1630,7 +1636,11 @@ export default function App() {
           setGoogleUser={setGoogleUser}
         />
         
-        <RouteTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <RouteTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          showLimitTab={googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com'}
+        />
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col p-5 space-y-4 font-sans">
           
@@ -1861,7 +1871,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'LIMIT' && (
+          {activeTab === 'LIMIT' && isLimitAdmin && (
             <LimitOrderCard
               isMainnet={isMainnet}
               isConnected={isConnected}
