@@ -1871,7 +1871,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'LIMIT' && (
+          {activeTab === 'LIMIT' && isLimitAdmin && (
             <LimitOrderCard
               isMainnet={isMainnet}
               isConnected={isConnected}
