@@ -260,6 +260,12 @@ export default function App() {
     return 'BRIDGE';
   });
 
+  // Admin-only gate for the LIMIT tab (still experimental, kept private)
+  const isLimitAdmin = googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com';
+  useEffect(() => {
+    if (activeTab === 'LIMIT' && !isLimitAdmin) setActiveTab('BOT/USDT');
+  }, [activeTab, isLimitAdmin]);
+
   // Form states
   const [caAmount, setCaAmount] = useState('');
   const [botAmount, setBotAmount] = useState('');
