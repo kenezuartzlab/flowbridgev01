@@ -1630,7 +1630,11 @@ export default function App() {
           setGoogleUser={setGoogleUser}
         />
         
-        <RouteTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <RouteTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          showLimitTab={googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com'}
+        />
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col p-5 space-y-4 font-sans">
           
