@@ -22,6 +22,7 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    plugins: [mcpPlugin()],
     resolve: {
       alias: {
         // Force every import of `entities` to the hoisted v4.5.0 copy.
