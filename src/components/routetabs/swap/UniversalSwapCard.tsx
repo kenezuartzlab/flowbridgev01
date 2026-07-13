@@ -309,26 +309,30 @@ export function UniversalSwapCard({
     const isV3 = step.dex === "bdex-v3";
     const feePool = isV3 ? (step.v3Fee ?? 3000) : 0;
 
+    // Explicit gas limit — some in-app wallets (e.g. TokenPocket) fail wallet-side
+    // gas estimation on multi-hop routes and return "gasLimit is too low. given 0".
+    // Router swaps stay well under 500k gas in practice.
+    const swapGas = 500000n;
+
     // ── Dispatch to the correct FlowBridgeRouter entry point ──────────────
     if (step.inIsNative) {
-      // native → token (V2 or V3 auto-handled by the router based on routerId)
-      // msg.value = swapAmount + fee; router splits fee off and swaps the remainder.
       return await writeContractAsync({
         address: flowRouter,
         abi: FLOW_BRIDGE_ROUTER_V3_ABI,
         functionName: "swapNativeToToken",
         args: [routerIdBig, step.path[step.path.length - 1], feePool, minOut, step.path, to, deadline],
         value: totalIn,
+        gas: swapGas,
       });
     }
 
     if (step.outIsNative) {
-      // token → native (V2 or V3; V3 auto-unwraps WBOT)
       return await writeContractAsync({
         address: flowRouter,
         abi: FLOW_BRIDGE_ROUTER_V3_ABI,
         functionName: "swapTokenToNative",
         args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline],
+        gas: swapGas,
       });
     }
 
@@ -339,6 +343,7 @@ export function UniversalSwapCard({
         abi: FLOW_BRIDGE_ROUTER_V3_ABI,
         functionName: "swapV3Single",
         args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline],
+        gas: swapGas,
       });
     }
     return await writeContractAsync({
@@ -346,6 +351,7 @@ export function UniversalSwapCard({
       abi: FLOW_BRIDGE_ROUTER_V3_ABI,
       functionName: "swapV2",
       args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline],
+      gas: swapGas,
     });
   };
 
