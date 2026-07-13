@@ -271,6 +271,7 @@ export function UniversalSwapCard({
             abi: ERC20_ABI,
             functionName: "approve",
             args: [flowRouter, totalIn],
+            gas: 80000n,
           });
           const rcpt = await publicClient!.waitForTransactionReceipt({ hash: approveTx });
           if (rcpt.status !== "success") {
