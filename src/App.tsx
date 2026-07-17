@@ -241,6 +241,42 @@ export default function App() {
   // Environment and Mode states
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+
+  // Live market prices in USD from BDEX public price API (mainnet only).
+  // Keyed by lowercase token address. Falls back to on-chain math when absent.
+  const [marketPrices, setMarketPrices] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!isMainnet || isDemoMode) return;
+    const c = getContracts(true);
+    const tokens = [
+      c.wbot.toLowerCase(),
+      c.caToken.toLowerCase(),
+      c.usdtBot.toLowerCase(),
+    ];
+    let cancelled = false;
+    const fetchPrices = async () => {
+      try {
+        const results = await Promise.all(
+          tokens.map(async (t) => {
+            try {
+              const r = await fetch(`https://dex-wallet.botchain.ai/api/v1/price?token=${t}&pool_type=all`);
+              const j = await r.json();
+              const p = parseFloat(j?.data?.price ?? '');
+              return [t, isFinite(p) ? p : NaN] as const;
+            } catch { return [t, NaN] as const; }
+          })
+        );
+        if (cancelled) return;
+        const next: Record<string, number> = {};
+        for (const [t, p] of results) if (isFinite(p) && p > 0) next[t] = p;
+        setMarketPrices(next);
+      } catch (e) { /* ignore */ }
+    };
+    fetchPrices();
+    const id = setInterval(fetchPrices, 30000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isMainnet, isDemoMode]);
+
   const [isPresentationMode, setIsPresentationMode] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     try { return window.localStorage.getItem('fb_presentation_mode') === '1'; } catch { return false; }
@@ -1331,6 +1367,9 @@ export default function App() {
 
   const getLiveBotPrice = () => {
     if (isDemoMode) return 9.7482;
+    // Prefer authoritative BDEX price API when available (mainnet).
+    const apiPrice = marketPrices[contracts.wbot.toLowerCase()];
+    if (apiPrice && isFinite(apiPrice) && apiPrice > 0) return apiPrice;
     if (rawV3PoolSlot0) {
       try {
         let sqrtPriceX96: bigint | undefined;
@@ -1346,13 +1385,6 @@ export default function App() {
         }
         
         if (sqrtPriceX96 && sqrtPriceX96 > 0n) {
-          // USDT BOT is 6 decimals, WBOT is 18 decimals.
-          // Since token0 is USDT (smaller address 0xaba...) and token1 is WBOT (starts with 0xd54...),
-          // sqrtPriceX96 = sqrt(token1 / token0) * 2^96 = sqrt(WBOT / USDT) * 2^96.
-          // Therefore, BOT_Price (USDT per BOT) = token0 / token1 = 2^192 / sqrtPriceX96^2.
-          // To scale the raw amounts into human amounts:
-          // human_price = raw_price * 10^(18 - 6) = raw_price * 10^12.
-          // We also use an extra 10^6 factor for floating point precision before bigint-to-number division.
           const numerator = (1n << 192n) * 1000000000000n * 1000000n;
           const denominator = sqrtPriceX96 * sqrtPriceX96;
           if (denominator > 0n) {
@@ -1364,7 +1396,7 @@ export default function App() {
         console.error("V3 price calculation error:", err);
       }
     }
-    return 9.7482; // Baseline fallback matching CaryPact exchange rate
+    return 9.7482;
   };
 
   const getLiveCaPrice = () => {
@@ -1372,14 +1404,17 @@ export default function App() {
     if (isDemoMode) {
       return 3.12405 * botPrice;
     }
+    // Prefer authoritative BDEX price API (routes CA→BOT→USDT internally).
+    const apiPrice = marketPrices[contracts.caToken.toLowerCase()];
+    if (apiPrice && isFinite(apiPrice) && apiPrice > 0) return apiPrice;
     if (rawLiveCaToBotQuote && Array.isArray(rawLiveCaToBotQuote) && rawLiveCaToBotQuote.length >= 2) {
       const outVal = BigInt(rawLiveCaToBotQuote[rawLiveCaToBotQuote.length - 1].toString());
-      const caToBotRate = parseFloat(formatUnits(outVal, 18)); // CA/BOT swap is 18 decimals
+      const caToBotRate = parseFloat(formatUnits(outVal, 18));
       return caToBotRate * botPrice;
     }
-    // Fallback based on baseline exchange rate of 3.12405 BOT per CA times actual active BOT price
     return 3.12405 * botPrice;
   };
+
 
   const getCaToBotDisplayQuote = () => {
     if (!caAmount || isNaN(parseFloat(caAmount)) || parseFloat(caAmount) <= 0) return "";
