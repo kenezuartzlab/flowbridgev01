@@ -1516,7 +1516,7 @@ export default function App() {
 
   const getTokenUsdPrice = (symbol: string) => {
     if (symbol === 'BOT') return getLiveBotPrice();
-    if (symbol === 'USDT') return 1.0;
+    if (symbol === 'USDT') return getUsdtLivePrice();
     if (symbol === 'CA') return getLiveCaPrice();
     if (symbol === 'FLOW') return 1.0;
     return 0;
@@ -1552,16 +1552,13 @@ export default function App() {
   };
 
   const getActiveSwapDisplayUsd = (isFromField: boolean) => {
-    if (!botAmount || isNaN(parseFloat(botAmount)) || parseFloat(botAmount) <= 0) return "$0.00000";
+    if (!botAmount || isNaN(parseFloat(botAmount)) || parseFloat(botAmount) <= 0) return formatUsd(0);
     const payPrice = getTokenUsdPrice(paySymbol);
     const recPrice = getTokenUsdPrice(recSymbol);
-    if (isFromField) {
-      return `$${(parseFloat(botAmount) * payPrice).toFixed(5)}`;
-    } else {
-      const quote = getActiveSwapQuote();
-      if (!quote) return "$0.00000";
-      return `$${(parseFloat(quote) * recPrice).toFixed(5)}`;
-    }
+    if (isFromField) return formatUsd(parseFloat(botAmount) * payPrice);
+    const quote = getActiveSwapQuote();
+    if (!quote) return formatUsd(0);
+    return formatUsd(parseFloat(quote) * recPrice);
   };
 
   const isFlowUnlocked = globalTotalClaimed >= 1000000;
