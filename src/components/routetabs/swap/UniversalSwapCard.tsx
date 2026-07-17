@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, type Address } from "viem";
@@ -521,9 +522,7 @@ export function UniversalSwapCard({
     if (!isFinite(n) || n <= 0) return undefined;
     const px = getUsdPrice?.(t.symbol);
     if (px == null || !isFinite(px)) return undefined;
-    const v = n * px;
-    if (v >= 1) return `$${v.toFixed(4)}`;
-    return `$${v.toFixed(6)}`;
+    return formatUsd(n * px);
   };
 
 

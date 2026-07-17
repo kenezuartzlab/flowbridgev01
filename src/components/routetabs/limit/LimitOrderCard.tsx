@@ -36,14 +36,7 @@ interface LimitOrderCardProps {
   getUsdPrice?: (symbol: string) => number | null | undefined;
 }
 
-function fmtUsd(v: number | null | undefined): string {
-  if (v == null || !isFinite(v)) return "—";
-  if (v === 0) return "$0.00";
-  if (v < 0.01) return `$${v.toFixed(6)}`;
-  if (v < 1) return `$${v.toFixed(4)}`;
-  if (v < 1000) return `$${v.toFixed(2)}`;
-  return `$${v.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-}
+import { formatUsd as fmtUsd } from "../../../lib/format";
 
 const EXPIRY_PRESETS: { label: string; seconds: number }[] = [
   { label: "1 h", seconds: 3600 },
