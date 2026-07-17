@@ -521,9 +521,7 @@ export function UniversalSwapCard({
     if (!isFinite(n) || n <= 0) return undefined;
     const px = getUsdPrice?.(t.symbol);
     if (px == null || !isFinite(px)) return undefined;
-    const v = n * px;
-    if (v >= 1) return `$${v.toFixed(4)}`;
-    return `$${v.toFixed(6)}`;
+    return formatUsd(n * px);
   };
 
 
