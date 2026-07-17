@@ -26,6 +26,7 @@ import { LedgerHistoryModal } from './modals/LedgerHistoryModal';
 import { ConnectGuideModal } from './modals/ConnectGuideModal';
 import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
+import { formatUsd } from './lib/format';
 
 export default function App() {
   const { address, isConnected } = useAccount();
