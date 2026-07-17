@@ -241,6 +241,42 @@ export default function App() {
   // Environment and Mode states
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+
+  // Live market prices in USD from BDEX public price API (mainnet only).
+  // Keyed by lowercase token address. Falls back to on-chain math when absent.
+  const [marketPrices, setMarketPrices] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!isMainnet || isDemoMode) return;
+    const c = getContracts(true);
+    const tokens = [
+      c.wbot.toLowerCase(),
+      c.caToken.toLowerCase(),
+      c.usdtBot.toLowerCase(),
+    ];
+    let cancelled = false;
+    const fetchPrices = async () => {
+      try {
+        const results = await Promise.all(
+          tokens.map(async (t) => {
+            try {
+              const r = await fetch(`https://dex-wallet.botchain.ai/api/v1/price?token=${t}&pool_type=all`);
+              const j = await r.json();
+              const p = parseFloat(j?.data?.price ?? '');
+              return [t, isFinite(p) ? p : NaN] as const;
+            } catch { return [t, NaN] as const; }
+          })
+        );
+        if (cancelled) return;
+        const next: Record<string, number> = {};
+        for (const [t, p] of results) if (isFinite(p) && p > 0) next[t] = p;
+        setMarketPrices(next);
+      } catch (e) { /* ignore */ }
+    };
+    fetchPrices();
+    const id = setInterval(fetchPrices, 30000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isMainnet, isDemoMode]);
+
   const [isPresentationMode, setIsPresentationMode] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     try { return window.localStorage.getItem('fb_presentation_mode') === '1'; } catch { return false; }
