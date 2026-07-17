@@ -1467,51 +1467,45 @@ export default function App() {
     }
   };
 
+  const getUsdtLivePrice = () => {
+    const apiPrice = marketPrices[contracts.usdtBot.toLowerCase()];
+    if (apiPrice && isFinite(apiPrice) && apiPrice > 0) return apiPrice;
+    return 1.0;
+  };
+
   const getCaToBotDisplayUsd = (isFromField: boolean) => {
-    if (!caAmount || isNaN(parseFloat(caAmount)) || parseFloat(caAmount) <= 0) return "$0.00000";
+    if (!caAmount || isNaN(parseFloat(caAmount)) || parseFloat(caAmount) <= 0) return formatUsd(0);
     const caPrice = getLiveCaPrice();
     const botPrice = getLiveBotPrice();
-    
+
     if (caToBotDirection === 'CA_TO_BOT') {
-      if (isFromField) {
-        return `$${(parseFloat(caAmount) * caPrice).toFixed(5)}`;
-      } else {
-        const received = getCaToBotDisplayQuote();
-        if (!received) return "$0.00000";
-        return `$${(parseFloat(received) * botPrice).toFixed(5)}`;
-      }
+      if (isFromField) return formatUsd(parseFloat(caAmount) * caPrice);
+      const received = getCaToBotDisplayQuote();
+      if (!received) return formatUsd(0);
+      return formatUsd(parseFloat(received) * botPrice);
     } else {
-      if (isFromField) {
-        return `$${(parseFloat(caAmount) * botPrice).toFixed(5)}`;
-      } else {
-        const received = getCaToBotDisplayQuote();
-        if (!received) return "$0.00000";
-        return `$${(parseFloat(received) * caPrice).toFixed(5)}`;
-      }
+      if (isFromField) return formatUsd(parseFloat(caAmount) * botPrice);
+      const received = getCaToBotDisplayQuote();
+      if (!received) return formatUsd(0);
+      return formatUsd(parseFloat(received) * caPrice);
     }
   };
 
   const getBotToUsdtDisplayUsd = (isFromField: boolean) => {
-    if (!botAmount || isNaN(parseFloat(botAmount)) || parseFloat(botAmount) <= 0) return "$0.00000";
+    if (!botAmount || isNaN(parseFloat(botAmount)) || parseFloat(botAmount) <= 0) return formatUsd(0);
     const botPrice = getLiveBotPrice();
-    const usdtPrice = 1.00;
-    
+    const usdtPrice = getUsdtLivePrice();
+
     if (botToUsdtDirection === 'BOT_TO_USDT') {
-      if (isFromField) {
-        return `$${(parseFloat(botAmount) * botPrice).toFixed(5)}`;
-      } else {
-        const received = getBotToUsdtDisplayQuote();
-        if (!received) return "$0.00000";
-        return `$${(parseFloat(received) * usdtPrice).toFixed(5)}`;
-      }
+      if (isFromField) return formatUsd(parseFloat(botAmount) * botPrice);
+      const received = getBotToUsdtDisplayQuote();
+      if (!received) return formatUsd(0);
+      return formatUsd(parseFloat(received) * usdtPrice);
     } else {
-      if (isFromField) {
-        return `$${(parseFloat(botAmount) * usdtPrice).toFixed(5)}`;
-      } else {
-        const received = getBotToUsdtDisplayQuote();
-        if (!received) return "$0.00000";
-        return `$${(parseFloat(received) * botPrice).toFixed(5)}`;
-      }
+      if (isFromField) return formatUsd(parseFloat(botAmount) * usdtPrice);
+      const received = getBotToUsdtDisplayQuote();
+      if (!received) return formatUsd(0);
+      return formatUsd(parseFloat(received) * botPrice);
     }
   };
 
