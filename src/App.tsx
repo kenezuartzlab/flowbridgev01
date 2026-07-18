@@ -313,6 +313,7 @@ export default function App() {
   const [caToBotDirection, setCaToBotDirection] = useState<'CA_TO_BOT' | 'BOT_TO_CA'>('CA_TO_BOT');
   const [botToUsdtDirection, setBotToUsdtDirection] = useState<'BOT_TO_USDT' | 'USDT_TO_BOT'>('BOT_TO_USDT');
   const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT'>('BOT_TO_BNB');
+  const [receiveBotGas, setReceiveBotGas] = useState<boolean>(false);
 
   // Bohr DEX Aggregator Pro states
   const [selectedPair, setSelectedPair] = useState<string>('BOT/USDT');
