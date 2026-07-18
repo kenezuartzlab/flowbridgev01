@@ -1638,6 +1638,8 @@ export default function App() {
           onToggleDemoMode={handleToggleDemoMode}
           isPresentationMode={isPresentationMode}
           onTogglePresentationMode={handleTogglePresentationMode}
+          theme={theme}
+          onToggleTheme={handleToggleTheme}
           onShowHistory={() => setIsHistoryModalOpen(true)}
           onDonateClick={() => {
             setDonateModalInitialTab('donate');
