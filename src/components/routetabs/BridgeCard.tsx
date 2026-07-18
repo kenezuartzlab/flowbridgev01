@@ -11,6 +11,8 @@ interface BridgeCardProps {
   toChain: string;
   symbol: string;
   balance: string;
+  /** Full-precision balance string (unrounded) used for MAX & percentage clicks. Falls back to `balance` when omitted. */
+  exactBalance?: string;
   estimatedReceive: string;
   receiveAddress: string;
   onSubmit: () => void;
@@ -35,6 +37,7 @@ export function BridgeCard({
   toChain,
   symbol,
   balance,
+  exactBalance,
   estimatedReceive,
   receiveAddress,
   onSubmit,
@@ -51,6 +54,49 @@ export function BridgeCard({
   onReceiveBotGasChange,
   showReceiveBotGasOption = false
 }: BridgeCardProps) {
+  // Full-precision source for MAX / percentage math. Never round the wallet
+  // balance — the bridge accepts arbitrary uint256, so passing the exact
+  // wallet amount avoids "insufficient balance" reverts and dust left behind.
+  const rawBalance = (exactBalance ?? balance ?? '').trim();
+  const rawBalanceNum = parseFloat(rawBalance);
+  const hasRawBalance = isFinite(rawBalanceNum) && rawBalanceNum > 0;
+
+  // Trim a decimal string to at most `maxDp` decimals WITHOUT rounding, so
+  // 12.345678901234567 → 12.345678 (maxDp=6) — never exceeds wallet balance.
+  const truncateDecimals = (s: string, maxDp: number) => {
+    if (!s.includes('.')) return s;
+    const [int, dec] = s.split('.');
+    return dec.length > maxDp ? `${int}.${dec.slice(0, maxDp)}` : s;
+  };
+  const applyPercent = (pct: number) => {
+    if (!hasRawBalance) return onAmountChange('0');
+    if (pct >= 1) {
+      // MAX: use the exact wallet balance verbatim.
+      onAmountChange(rawBalance);
+      return;
+    }
+    // Fractional percentage: compute in JS, then truncate (not round) to a
+    // safe precision so we never exceed the wallet balance.
+    const dp = Math.min(18, (rawBalance.split('.')[1]?.length ?? 6));
+    const val = rawBalanceNum * pct;
+    onAmountChange(truncateDecimals(val.toFixed(dp), dp));
+  };
+
+  // Auto-shrink the big input font as the value grows so long decimals stay
+  // visible without clipping — mimics wallet/Uniswap-style adaptive typography.
+  const amtLen = (amount ?? '').length;
+  const amountFontClass =
+    amtLen > 18 ? 'text-lg' :
+    amtLen > 14 ? 'text-xl' :
+    amtLen > 11 ? 'text-2xl' :
+    amtLen > 8  ? 'text-3xl' : 'text-4xl';
+  const estimatedStr = estimatedReceive ? parseFloat(estimatedReceive).toFixed(8) : '0.00000000';
+  const estLen = estimatedStr.length;
+  const estimatedFontClass =
+    estLen > 18 ? 'text-lg' :
+    estLen > 14 ? 'text-xl' :
+    estLen > 11 ? 'text-2xl' :
+    estLen > 8  ? 'text-3xl' : 'text-4xl';
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4">
       {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}
@@ -67,11 +113,7 @@ export function BridgeCard({
                 <button 
                   key={pct} 
                   type="button"
-                  onClick={() => {
-                    const pctVal = parseFloat(pct) / 100;
-                    const balVal = parseFloat(balance) || 0;
-                    onAmountChange((balVal * pctVal).toFixed(8));
-                  }}
+                  onClick={() => applyPercent(parseFloat(pct) / 100)}
                   className="px-1 py-1 bg-[#0D1C2A] border border-white/20 rounded-lg text-[11px] text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/20 font-black tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-sm text-center min-w-0"
                 >
                   {pct}
@@ -83,23 +125,25 @@ export function BridgeCard({
           <div className="flex justify-between items-center gap-3">
             <div className="flex-1 min-w-0">
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                spellCheck={false}
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => onAmountChange(e.target.value)}
-                className="bg-transparent text-white text-4xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono"
+                onChange={(e) => {
+                  // Accept only digits + a single dot; strip anything else so
+                  // long-decimal paste from wallet balances stays clean.
+                  const cleaned = e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1');
+                  onAmountChange(cleaned);
+                }}
+                title={amount}
+                className={`bg-transparent text-white ${amountFontClass} font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono overflow-x-auto whitespace-nowrap scrollbar-none transition-[font-size] duration-150`}
               />
               <div 
-                onClick={() => {
-                  const parsed = parseFloat(balance);
-                  if (!isNaN(parsed)) {
-                    onAmountChange(parsed.toString());
-                  } else {
-                    onAmountChange(balance);
-                  }
-                }}
-                className="text-[12px] text-[#C5C1B9] font-mono mt-1.5 select-none cursor-pointer hover:text-[#32FF8B] transition-colors inline-block"
-                title="Use maximum balance"
+                onClick={() => applyPercent(1)}
+                className="text-[12px] text-[#C5C1B9] font-mono mt-1.5 select-none cursor-pointer hover:text-[#32FF8B] transition-colors inline-block max-w-full truncate"
+                title={`Use full balance: ${rawBalance} ${symbol}`}
               >
                 Balance: {balance} {symbol} <span className="text-[11px] text-[#32FF8B] font-black ml-1 uppercase hover:underline">(Max)</span>
               </div>
@@ -134,8 +178,8 @@ export function BridgeCard({
           
           <div className="flex justify-between items-center gap-3">
             <div className="flex-1 min-w-0">
-              <div className="text-4xl font-black text-white/50 leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
-                {estimatedReceive ? parseFloat(estimatedReceive).toFixed(8) : '0.00000000'}
+              <div title={estimatedStr} className={`${estimatedFontClass} font-black text-white/50 leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono transition-[font-size] duration-150`}>
+                {estimatedStr}
               </div>
             </div>
             <div className="bg-[#0D1C2A]/90 px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 shadow-sm font-mono opacity-90">

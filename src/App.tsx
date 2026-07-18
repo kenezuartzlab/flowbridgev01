@@ -292,6 +292,23 @@ export default function App() {
     });
   };
 
+  // Theme toggle (dark ↔ light). Applies a `light` class on <html> that
+  // styles.css maps to inverted surface / text tokens.
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const saved = window.localStorage.getItem('fb_theme');
+      if (saved === 'light' || saved === 'dark') setTheme(saved);
+    } catch {}
+  }, []);
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.classList.toggle('light', theme === 'light');
+    try { window.localStorage.setItem('fb_theme', theme); } catch {}
+  }, [theme]);
+  const handleToggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+
   const [session, setSession] = useState<RouteSession>(getLocalSession());
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     if (session.step1.status !== 'done') return 'CA/BOT';
@@ -1621,6 +1638,8 @@ export default function App() {
           onToggleDemoMode={handleToggleDemoMode}
           isPresentationMode={isPresentationMode}
           onTogglePresentationMode={handleTogglePresentationMode}
+          theme={theme}
+          onToggleTheme={handleToggleTheme}
           onShowHistory={() => setIsHistoryModalOpen(true)}
           onDonateClick={() => {
             setDonateModalInitialTab('donate');
@@ -1895,6 +1914,7 @@ export default function App() {
               toChain={bridgeToName}
               symbol="USDT"
               balance={bridgeDirection === 'BOT_TO_BNB' ? getBalanceDisplay('USDT_BOT') : getBalanceDisplay('USDT_BNB')}
+              exactBalance={bridgeDirection === 'BOT_TO_BNB' ? getExactBalanceAmount('USDT_BOT') : getExactBalanceAmount('USDT_BNB')}
               estimatedReceive={calculateBridgeReceive(usdtAmount)}
               receiveAddress={customDestinationAddress || address || "Connect wallet to see address..."}
               onToggleDirection={handleToggleBridge}

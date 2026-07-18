@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
-import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video } from 'lucide-react';
+import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 
@@ -18,6 +18,8 @@ interface AppHeaderProps {
   onToggleDemoMode: () => void;
   isPresentationMode?: boolean;
   onTogglePresentationMode?: () => void;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
   onShowHistory?: () => void;
   onDonateClick?: () => void;
   onRewardsClick?: () => void;
@@ -35,6 +37,8 @@ export function AppHeader({
   onToggleDemoMode,
   isPresentationMode,
   onTogglePresentationMode,
+  theme = 'dark',
+  onToggleTheme,
   onShowHistory,
   onDonateClick,
   onRewardsClick,
@@ -142,6 +146,18 @@ export function AppHeader({
         </div>
         
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap justify-end">
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              aria-label="Toggle color theme"
+              className="p-2 bg-[#0D1C2A] border border-white/10 hover:border-[#32FF8B]/30 hover:bg-white/5 active:scale-95 text-[#C5C1B9] hover:text-[#32FF8B] transition-all rounded-xl cursor-pointer shadow-sm"
+            >
+              {theme === 'light'
+                ? <Moon className="w-3.5 h-3.5" />
+                : <Sun className="w-3.5 h-3.5" />}
+            </button>
+          )}
           {onTogglePresentationMode && (
             <button
               onClick={onTogglePresentationMode}
