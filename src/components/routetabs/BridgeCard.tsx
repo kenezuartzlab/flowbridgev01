@@ -37,6 +37,7 @@ export function BridgeCard({
   toChain,
   symbol,
   balance,
+  exactBalance,
   estimatedReceive,
   receiveAddress,
   onSubmit,
@@ -53,6 +54,49 @@ export function BridgeCard({
   onReceiveBotGasChange,
   showReceiveBotGasOption = false
 }: BridgeCardProps) {
+  // Full-precision source for MAX / percentage math. Never round the wallet
+  // balance — the bridge accepts arbitrary uint256, so passing the exact
+  // wallet amount avoids "insufficient balance" reverts and dust left behind.
+  const rawBalance = (exactBalance ?? balance ?? '').trim();
+  const rawBalanceNum = parseFloat(rawBalance);
+  const hasRawBalance = isFinite(rawBalanceNum) && rawBalanceNum > 0;
+
+  // Trim a decimal string to at most `maxDp` decimals WITHOUT rounding, so
+  // 12.345678901234567 → 12.345678 (maxDp=6) — never exceeds wallet balance.
+  const truncateDecimals = (s: string, maxDp: number) => {
+    if (!s.includes('.')) return s;
+    const [int, dec] = s.split('.');
+    return dec.length > maxDp ? `${int}.${dec.slice(0, maxDp)}` : s;
+  };
+  const applyPercent = (pct: number) => {
+    if (!hasRawBalance) return onAmountChange('0');
+    if (pct >= 1) {
+      // MAX: use the exact wallet balance verbatim.
+      onAmountChange(rawBalance);
+      return;
+    }
+    // Fractional percentage: compute in JS, then truncate (not round) to a
+    // safe precision so we never exceed the wallet balance.
+    const dp = Math.min(18, (rawBalance.split('.')[1]?.length ?? 6));
+    const val = rawBalanceNum * pct;
+    onAmountChange(truncateDecimals(val.toFixed(dp), dp));
+  };
+
+  // Auto-shrink the big input font as the value grows so long decimals stay
+  // visible without clipping — mimics wallet/Uniswap-style adaptive typography.
+  const amtLen = (amount ?? '').length;
+  const amountFontClass =
+    amtLen > 18 ? 'text-lg' :
+    amtLen > 14 ? 'text-xl' :
+    amtLen > 11 ? 'text-2xl' :
+    amtLen > 8  ? 'text-3xl' : 'text-4xl';
+  const estimatedStr = estimatedReceive ? parseFloat(estimatedReceive).toFixed(8) : '0.00000000';
+  const estLen = estimatedStr.length;
+  const estimatedFontClass =
+    estLen > 18 ? 'text-lg' :
+    estLen > 14 ? 'text-xl' :
+    estLen > 11 ? 'text-2xl' :
+    estLen > 8  ? 'text-3xl' : 'text-4xl';
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4">
       {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}
