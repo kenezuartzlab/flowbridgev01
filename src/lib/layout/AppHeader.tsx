@@ -37,6 +37,8 @@ export function AppHeader({
   onToggleDemoMode,
   isPresentationMode,
   onTogglePresentationMode,
+  theme = 'dark',
+  onToggleTheme,
   onShowHistory,
   onDonateClick,
   onRewardsClick,
