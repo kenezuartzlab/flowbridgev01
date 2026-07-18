@@ -23,6 +23,9 @@ interface BridgeCardProps {
   onReset?: () => void;
   txHash?: string;
   txUrlPrefix?: string;
+  receiveBotGas?: boolean;
+  onReceiveBotGasChange?: (checked: boolean) => void;
+  showReceiveBotGasOption?: boolean;
 }
 
 export function BridgeCard({
@@ -43,7 +46,10 @@ export function BridgeCard({
   bridgeDirection = 'BOT_TO_BNB',
   onReset,
   txHash,
-  txUrlPrefix
+  txUrlPrefix,
+  receiveBotGas = false,
+  onReceiveBotGasChange,
+  showReceiveBotGasOption = false
 }: BridgeCardProps) {
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4">
@@ -166,6 +172,25 @@ export function BridgeCard({
           { label: 'Receive (estimated)', value: estimatedReceive ? `${parseFloat(estimatedReceive).toFixed(8)} USDT` : '0.00000000 USDT', isImportant: true }
         ]} 
       />
+
+      {showReceiveBotGasOption && (
+        <label className="bg-[#0D1C2A]/70 border border-white/15 rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-[#32FF8B]/30 transition-colors font-sans">
+          <input
+            type="checkbox"
+            checked={receiveBotGas}
+            onChange={(e) => onReceiveBotGasChange?.(e.target.checked)}
+            className="mt-0.5 w-4 h-4 accent-[#32FF8B] cursor-pointer shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="text-[13px] font-black text-white leading-snug">
+              Receive 0.1 BOT for Future Gas Fees
+            </div>
+            <div className="text-[11px] text-[#C5C1B9] mt-1 leading-relaxed">
+              This BOT will be used to pay gas fees for your other operations on the BOT chain, so you can use all features smoothly without worrying about insufficient gas. The equivalent amount will be deducted from your USDT transfer (based on the real-time BDEX exchange rate).
+            </div>
+          </div>
+        </label>
+      )}
 
       <WarningPanel 
         type="warning" 

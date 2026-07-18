@@ -313,6 +313,7 @@ export default function App() {
   const [caToBotDirection, setCaToBotDirection] = useState<'CA_TO_BOT' | 'BOT_TO_CA'>('CA_TO_BOT');
   const [botToUsdtDirection, setBotToUsdtDirection] = useState<'BOT_TO_USDT' | 'USDT_TO_BOT'>('BOT_TO_USDT');
   const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT'>('BOT_TO_BNB');
+  const [receiveBotGas, setReceiveBotGas] = useState<boolean>(false);
 
   // Bohr DEX Aggregator Pro states
   const [selectedPair, setSelectedPair] = useState<string>('BOT/USDT');
@@ -1244,6 +1245,7 @@ export default function App() {
           const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
           const destChainIdForBridge = isMainnet ? 677n : 968n;
 
+          const useBotGas = receiveBotGas;
           const txBridge = await writeContractAsync({
             address: contracts.bnbBridgeProxy as `0x${string}`,
             abi: [
@@ -1254,13 +1256,13 @@ export default function App() {
                   { internalType: "address", name: "recipient", type: "address" },
                   { internalType: "uint256", name: "amount", type: "uint256" }
                 ],
-                name: "deposit",
+                name: useBotGas ? "depositWithBotGas" : "deposit",
                 outputs: [],
                 stateMutability: "payable",
                 type: "function"
               }
             ],
-            functionName: 'deposit',
+            functionName: useBotGas ? 'depositWithBotGas' : 'deposit',
             args: [
               destChainIdForBridge,
               resourceId as `0x${string}`,
@@ -1915,6 +1917,9 @@ export default function App() {
               gasFeeLabel={bridgeDirection === 'BOT_TO_BNB' ? '≈ 0.095238 BOT' : '≈ 0.005 BNB'}
               bridgeDirection={bridgeDirection}
               onReset={resetStep3}
+              showReceiveBotGasOption={bridgeDirection === 'BNB_TO_BOT'}
+              receiveBotGas={receiveBotGas}
+              onReceiveBotGasChange={setReceiveBotGas}
             />
           )}
 
