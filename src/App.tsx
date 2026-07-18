@@ -1917,6 +1917,9 @@ export default function App() {
               gasFeeLabel={bridgeDirection === 'BOT_TO_BNB' ? '≈ 0.095238 BOT' : '≈ 0.005 BNB'}
               bridgeDirection={bridgeDirection}
               onReset={resetStep3}
+              showReceiveBotGasOption={bridgeDirection === 'BNB_TO_BOT'}
+              receiveBotGas={receiveBotGas}
+              onReceiveBotGasChange={setReceiveBotGas}
             />
           )}
 
