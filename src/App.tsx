@@ -1950,7 +1950,7 @@ export default function App() {
                   setIsConfirmDestinationOpen(true);
                 }
               }}
-              successMessage={session.step3.status === 'submitted' ? 'Your cross-chain bridge transaction was initiated successfully.' : undefined}
+              successMessage={session.step3.status === 'submitted' ? 'Source-chain transaction confirmed. USDT is being relayed to the destination chain by the bridge validators.' : undefined}
               txHash={session.step3.status === 'submitted' ? session.step3.tx_hash ?? undefined : undefined}
               txUrlPrefix={bridgeDirection === 'BOT_TO_BNB' ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/') : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')}
               gasFeeLabel={bridgeDirection === 'BOT_TO_BNB' ? '≈ 0.095238 BOT' : '≈ 0.005 BNB'}
