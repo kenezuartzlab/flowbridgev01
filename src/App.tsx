@@ -1245,6 +1245,7 @@ export default function App() {
           const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
           const destChainIdForBridge = isMainnet ? 677n : 968n;
 
+          const useBotGas = receiveBotGas;
           const txBridge = await writeContractAsync({
             address: contracts.bnbBridgeProxy as `0x${string}`,
             abi: [
@@ -1255,13 +1256,13 @@ export default function App() {
                   { internalType: "address", name: "recipient", type: "address" },
                   { internalType: "uint256", name: "amount", type: "uint256" }
                 ],
-                name: "deposit",
+                name: useBotGas ? "depositWithBotGas" : "deposit",
                 outputs: [],
                 stateMutability: "payable",
                 type: "function"
               }
             ],
-            functionName: 'deposit',
+            functionName: useBotGas ? 'depositWithBotGas' : 'deposit',
             args: [
               destChainIdForBridge,
               resourceId as `0x${string}`,
