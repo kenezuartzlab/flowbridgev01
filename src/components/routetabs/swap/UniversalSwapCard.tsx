@@ -33,7 +33,9 @@ function parseTxError(e: any): string {
   const s = String(raw);
   if (/user rejected|user denied|rejected the request/i.test(s)) return "Transaction rejected in wallet";
   if (/insufficient funds/i.test(s)) return "Insufficient funds for gas";
-  if (/INSUFFICIENT_OUTPUT_AMOUNT/i.test(s)) return "Price moved — increase slippage and retry";
+  if (/INSUFFICIENT_OUTPUT_AMOUNT|Too little received/i.test(s)) {
+    return "Price moved before confirmation — refresh the quote or increase slippage slightly and retry";
+  }
   if (/EXPIRED/i.test(s)) return "Transaction deadline expired — retry";
   if (/TRANSFER_FROM_FAILED|TRANSFER_FAILED/i.test(s)) return "Token transfer failed (allowance or balance)";
   // Trim noisy viem prefixes
@@ -224,6 +226,7 @@ export function UniversalSwapCard({
     step: SwapStep,
     amountInRaw: bigint,
     deadline: bigint,
+    finalToAmountDisplay?: string,
   ): Promise<`0x${string}`> => {
     if (!address) throw new Error("No wallet");
     const minOut = minOutFor(step.expectedOut);
@@ -262,7 +265,7 @@ export function UniversalSwapCard({
           symbol: step.symbolPath[0],
           fromAmount: amountIn,
           fromSymbol: tokenIn.symbol,
-          toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+          toAmount: finalToAmountDisplay ?? (quote ? formatUnits(quote.amountOut, tokenOut.decimals) : ""),
           toSymbol: tokenOut.symbol,
         });
         const toastId = toast.loading(`Approving ${step.symbolPath[0]}…`);
@@ -303,7 +306,7 @@ export function UniversalSwapCard({
       to: outSym,
       fromAmount: amountIn,
       fromSymbol: tokenIn.symbol,
-      toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+      toAmount: finalToAmountDisplay ?? (quote ? formatUnits(quote.amountOut, tokenOut.decimals) : ""),
       toSymbol: tokenOut.symbol,
     });
 
@@ -370,26 +373,59 @@ export function UniversalSwapCard({
     try {
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 10);
       const initialAmount = parseUnits(amountIn, tokenIn.decimals);
+      const latestQuote = await getBestRoute(tokenIn, tokenOut, initialAmount, isMainnet);
+      if (!latestQuote) throw new Error("No live route available. Refresh and try again.");
+      setQuote(latestQuote);
       let lastTx: `0x${string}` | null = null;
       let nextAmount = initialAmount;
+      let activeQuote = latestQuote;
+      let finalExpectedOut = latestQuote.amountOut;
+      let finalToAmountDisplay = formatUnits(finalExpectedOut, tokenOut.decimals);
 
-      for (let i = 0; i < quote.steps.length; i++) {
-        const step = quote.steps[i];
+      for (let i = 0; i < activeQuote.steps.length; i++) {
+        let step = activeQuote.steps[i];
         if (i > 0 && step.inIsNative) {
-          nextAmount = minOutFor(quote.steps[i - 1].expectedOut);
+          nextAmount = minOutFor(activeQuote.steps[i - 1].expectedOut);
+
+          // Multi-router routes (CA↔USDT) execute as two confirmed transactions.
+          // The second leg must be quoted against the actual amount we will send
+          // into that leg (the first leg's safe minimum), not the earlier optimistic
+          // first-leg quote. Otherwise the second transaction can revert with
+          // CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT / "Too little received".
+          const refreshed = await getBestRoute(curated[0], tokenOut, nextAmount, isMainnet);
+          const refreshedStep = refreshed?.steps[0];
+          if (!refreshed || !refreshedStep || refreshed.steps.length !== 1) {
+            throw new Error("Route changed after the first swap. Refresh and try again.");
+          }
+          step = refreshedStep;
+          activeQuote = {
+            ...activeQuote,
+            amountOut: refreshed.amountOut,
+            symbolPath: [
+              ...activeQuote.symbolPath.slice(0, Math.max(1, i)),
+              ...refreshed.symbolPath,
+            ],
+            steps: [
+              ...activeQuote.steps.slice(0, i),
+              refreshedStep,
+            ],
+          };
+          finalExpectedOut = refreshed.amountOut;
+          finalToAmountDisplay = formatUnits(finalExpectedOut, tokenOut.decimals);
         }
         const stepLabel = `${step.symbolPath[0]} → ${step.symbolPath[step.symbolPath.length - 1]}`;
         toast.loading(
-          quote.steps.length > 1
-            ? `Step ${i + 1}/${quote.steps.length}: ${stepLabel}…`
+          activeQuote.steps.length > 1
+            ? `Step ${i + 1}/${activeQuote.steps.length}: ${stepLabel}…`
             : `Swapping ${stepLabel}…`,
           { id: swapToastId },
         );
 
-        const tx = await executeStep(step, nextAmount, deadline);
+        const tx = await executeStep(step, nextAmount, deadline, finalToAmountDisplay);
         lastTx = tx;
         const rcpt = await publicClient.waitForTransactionReceipt({ hash: tx });
         if (rcpt.status !== "success") {
+          setLastTx(tx);
           toast.error(`Swap reverted on-chain`, {
             id: swapToastId,
             description: shortHash(tx),
@@ -424,7 +460,7 @@ export function UniversalSwapCard({
           fromSymbol: tokenIn.symbol,
           toSymbol: tokenOut.symbol,
           fromAmount: amountIn,
-          toAmount: quote ? formatUnits(quote.amountOut, tokenOut.decimals) : "",
+          toAmount: finalToAmountDisplay,
           txHash: lastTx,
         });
         onSwapPhaseChange?.({
