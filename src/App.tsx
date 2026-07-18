@@ -26,6 +26,7 @@ import { RouteModal } from './modals/RouteModal';
 import { LedgerHistoryModal } from './modals/LedgerHistoryModal';
 import { ConnectGuideModal } from './modals/ConnectGuideModal';
 import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
+import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
 import { formatUsd } from './lib/format';
 
@@ -314,6 +315,7 @@ export default function App() {
   const [botToUsdtDirection, setBotToUsdtDirection] = useState<'BOT_TO_USDT' | 'USDT_TO_BOT'>('BOT_TO_USDT');
   const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT'>('BOT_TO_BNB');
   const [receiveBotGas, setReceiveBotGas] = useState<boolean>(false);
+  const [isBotGasNoticeOpen, setIsBotGasNoticeOpen] = useState<boolean>(false);
 
   // Bohr DEX Aggregator Pro states
   const [selectedPair, setSelectedPair] = useState<string>('BOT/USDT');
@@ -1919,7 +1921,13 @@ export default function App() {
               onReset={resetStep3}
               showReceiveBotGasOption={bridgeDirection === 'BNB_TO_BOT'}
               receiveBotGas={receiveBotGas}
-              onReceiveBotGasChange={setReceiveBotGas}
+              onReceiveBotGasChange={(checked) => {
+                if (checked) {
+                  setIsBotGasNoticeOpen(true);
+                } else {
+                  setReceiveBotGas(false);
+                }
+              }}
             />
           )}
 
@@ -2117,6 +2125,13 @@ export default function App() {
           }}
         />
       )}
+
+      <BotGasNoticeModal
+        isOpen={isBotGasNoticeOpen}
+        onClose={() => setIsBotGasNoticeOpen(false)}
+        onConfirm={() => setReceiveBotGas(true)}
+      />
+
 
       {/* Premium Realtime Multi-Stage Transaction Tracker Modal Overlay */}
       {isRealtimeTrackerOpen && (
