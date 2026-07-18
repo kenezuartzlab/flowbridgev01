@@ -26,10 +26,10 @@ const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
 export type DexId = "bohr" | "caswap" | "bdex-v3";
 
-// FlowBridgeRouter v3 registry IDs (identical on mainnet + testnet):
-//   0 = CaSwap V2, 1 = BDex V2, 2 = BDex V3.
+// FlowBridgeRouter v3 registry IDs (mainnet):
+//   1 = BDex V2, 2 = BDex V3, 3 = CaSwap V2 (new router; old routerId 0 disabled).
 export const ROUTER_ID: Record<DexId, number> = {
-  caswap: 0,
+  caswap: 3,
   bohr: 1,
   "bdex-v3": 2,
 };

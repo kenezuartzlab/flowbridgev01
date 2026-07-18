@@ -1,7 +1,7 @@
 // Routing table for FlowLimitOrderExecutor. The executor stores ONE routerId per
 // order, so only routes that live on a single registered DEX are placeable.
 //
-//   routerId 0 = CaSwap V2   (CA ↔ BOT via caWBOT)
+//   routerId 3 = CaSwap V2   (CA ↔ BOT via caWBOT) — new router; old id 0 disabled
 //   routerId 2 = BDex V3     (BOT ↔ USDT, feePool 3000)
 //
 // CA↔USDT requires V2 + V3 which is not single-router. It is intentionally not
@@ -69,11 +69,11 @@ export function resolveLimitRoute(
     };
   }
 
-  // ── CA ↔ BOT via CaSwap V2 (routerId 0, uses caWBOT) ───────────────────
+  // ── CA ↔ BOT via CaSwap V2 (routerId 3, uses caWBOT) ───────────────────
   if ((inAddr === CA && isBotSide(outAddr)) || (isBotSide(inAddr) && outAddr === CA)) {
     const inIsCa = inAddr === CA;
     return {
-      routerId: 0,
+      routerId: 3,
       feePoolV3: 0,
       onchainTokenIn: (inIsCa ? (CA as Address) : CAWBOT) as Address,
       onchainTokenOut: (inIsCa ? CAWBOT : (CA as Address)) as Address,
