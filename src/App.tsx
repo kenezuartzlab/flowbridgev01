@@ -1895,6 +1895,7 @@ export default function App() {
               toChain={bridgeToName}
               symbol="USDT"
               balance={bridgeDirection === 'BOT_TO_BNB' ? getBalanceDisplay('USDT_BOT') : getBalanceDisplay('USDT_BNB')}
+              exactBalance={bridgeDirection === 'BOT_TO_BNB' ? getExactBalanceAmount('USDT_BOT') : getExactBalanceAmount('USDT_BNB')}
               estimatedReceive={calculateBridgeReceive(usdtAmount)}
               receiveAddress={customDestinationAddress || address || "Connect wallet to see address..."}
               onToggleDirection={handleToggleBridge}
