@@ -29,6 +29,7 @@ import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
 import { formatUsd } from './lib/format';
+import { SiteLoader } from './components/SiteLoader';
 
 export default function App() {
   const { address, isConnected } = useAccount();
