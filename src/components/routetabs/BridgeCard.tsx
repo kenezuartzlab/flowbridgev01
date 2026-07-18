@@ -178,8 +178,8 @@ export function BridgeCard({
           
           <div className="flex justify-between items-center gap-3">
             <div className="flex-1 min-w-0">
-              <div className="text-4xl font-black text-white/50 leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
-                {estimatedReceive ? parseFloat(estimatedReceive).toFixed(8) : '0.00000000'}
+              <div title={estimatedStr} className={`${estimatedFontClass} font-black text-white/50 leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono transition-[font-size] duration-150`}>
+                {estimatedStr}
               </div>
             </div>
             <div className="bg-[#0D1C2A]/90 px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 shadow-sm font-mono opacity-90">
