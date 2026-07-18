@@ -18,6 +18,8 @@ interface AppHeaderProps {
   onToggleDemoMode: () => void;
   isPresentationMode?: boolean;
   onTogglePresentationMode?: () => void;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
   onShowHistory?: () => void;
   onDonateClick?: () => void;
   onRewardsClick?: () => void;
