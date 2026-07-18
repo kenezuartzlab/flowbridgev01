@@ -1135,6 +1135,13 @@ export default function App() {
     const amountVal = parseFloat(usdtAmount);
     if (!amountVal || amountVal <= 0) return;
 
+    // Hard-enforce the $10 bridge minimum before any wallet prompt so the user
+    // never signs a tx that BotBridge will revert.
+    if (amountVal < 10) {
+      setErrorMessage(`Bridge minimum is $10. Enter at least 10 USDT to continue.`);
+      return;
+    }
+
     const recipientAddr = (recipientParam || customDestinationAddress || address || "").trim();
 
     // SAFETY: BotBridge.deposit() credits the pegged USDT on the destination chain
