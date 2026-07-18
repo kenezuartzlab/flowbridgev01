@@ -46,7 +46,10 @@ export function BridgeCard({
   bridgeDirection = 'BOT_TO_BNB',
   onReset,
   txHash,
-  txUrlPrefix
+  txUrlPrefix,
+  receiveBotGas = false,
+  onReceiveBotGasChange,
+  showReceiveBotGasOption = false
 }: BridgeCardProps) {
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4">
