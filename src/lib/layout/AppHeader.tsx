@@ -146,6 +146,18 @@ export function AppHeader({
         </div>
         
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap justify-end">
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              aria-label="Toggle color theme"
+              className="p-2 bg-[#0D1C2A] border border-white/10 hover:border-[#32FF8B]/30 hover:bg-white/5 active:scale-95 text-[#C5C1B9] hover:text-[#32FF8B] transition-all rounded-xl cursor-pointer shadow-sm"
+            >
+              {theme === 'light'
+                ? <Moon className="w-3.5 h-3.5" />
+                : <Sun className="w-3.5 h-3.5" />}
+            </button>
+          )}
           {onTogglePresentationMode && (
             <button
               onClick={onTogglePresentationMode}
