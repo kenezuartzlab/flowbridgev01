@@ -1917,8 +1917,29 @@ export default function App() {
               onReset={resetStep3}
             />
           )}
+
+          {activeTab === 'BRIDGE' && session.step3.status === 'submitted' && session.step3.tx_hash && (
+            <div className="mt-4">
+              <BridgeStatusPanel
+                txHash={session.step3.tx_hash}
+                bridgeDirection={bridgeDirection}
+                isMainnet={isMainnet}
+                sourceExplorerPrefix={
+                  bridgeDirection === 'BOT_TO_BNB'
+                    ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
+                    : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')
+                }
+                destExplorerPrefix={
+                  bridgeDirection === 'BOT_TO_BNB'
+                    ? (isMainnet ? 'https://bscscan.com/' : 'https://testnet.bscscan.com/')
+                    : (isMainnet ? 'https://scan.botchain.ai/' : 'https://scan.bohr.life/')
+                }
+              />
+            </div>
+          )}
         </main>
       </div>
+
 
       {/* Very tiny footer centered at bottom of layout */}
       <footer className="relative z-10 text-center py-5 select-none transition-opacity duration-300 flex flex-col items-center gap-2 font-mono uppercase">
