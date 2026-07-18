@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
-import { History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon } from 'lucide-react';
+import {
+  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X
+} from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
+import logoUrl from '@/assets/flowbridge-logo.png';
 
 const RESEND_COOLDOWN_SECONDS = 60;
 const RESEND_COOLDOWN_KEY = 'fb_resend_verify_until';
@@ -27,14 +30,12 @@ interface AppHeaderProps {
   setGoogleUser?: (user: any) => void;
 }
 
-export function AppHeader({ 
-  walletAddress, 
-  onConnect, 
-  onDisconnect, 
+export function AppHeader({
+  walletAddress,
+  onConnect,
+  onDisconnect,
   isMainnet,
   onToggleMainnet,
-  isDemoMode,
-  onToggleDemoMode,
   isPresentationMode,
   onTogglePresentationMode,
   theme = 'dark',
@@ -43,12 +44,14 @@ export function AppHeader({
   onDonateClick,
   onRewardsClick,
   googleUser,
-  setGoogleUser
- }: AppHeaderProps) {
+  setGoogleUser,
+}: AppHeaderProps) {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [cooldownSec, setCooldownSec] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isUserLoggedIn = !!googleUser;
@@ -73,11 +76,24 @@ export function AppHeader({
     return () => { if (tickRef.current) clearInterval(tickRef.current); };
   }, [cooldownSec]);
 
+  // Close submenu on outside click / Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
   const handleResend = async () => {
     if (cooldownSec > 0 || loading) return;
-    setLoading(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
+    setLoading(true); setErrorMsg(null); setSuccessMsg(null);
     try {
       await sendVerification();
       const until = Date.now() + RESEND_COOLDOWN_SECONDS * 1000;
@@ -87,30 +103,21 @@ export function AppHeader({
       setTimeout(() => setSuccessMsg(null), 6000);
     } catch (err: any) {
       const msg = err?.message || "Failed to resend.";
-      // Surface Supabase rate-limit hint clearly
       if (/rate|too many|seconds/i.test(msg)) {
         setCooldownSec(RESEND_COOLDOWN_SECONDS);
-        try {
-          window.localStorage.setItem(RESEND_COOLDOWN_KEY, String(Date.now() + RESEND_COOLDOWN_SECONDS * 1000));
-        } catch {}
+        try { window.localStorage.setItem(RESEND_COOLDOWN_KEY, String(Date.now() + RESEND_COOLDOWN_SECONDS * 1000)); } catch {}
       }
       setErrorMsg(msg);
       setTimeout(() => setErrorMsg(null), 6000);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleRefresh = async () => {
-    setLoading(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
+    setLoading(true); setErrorMsg(null); setSuccessMsg(null);
     try {
       const refreshedUser = await reloadUser();
       if (refreshedUser) {
-        if (setGoogleUser) {
-          setGoogleUser(refreshedUser);
-        }
+        setGoogleUser?.(refreshedUser);
         if (refreshedUser.emailVerified) {
           setSuccessMsg("Verified!");
           setTimeout(() => setSuccessMsg(null), 6000);
@@ -122,20 +129,69 @@ export function AppHeader({
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to refresh.");
       setTimeout(() => setErrorMsg(null), 6000);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
+  type MenuItem = {
+    id: string;
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+    accent?: boolean;
+    show: boolean;
+  };
+  const menuItems: MenuItem[] = [
+    {
+      id: 'rewards',
+      label: 'Rewards',
+      icon: <Gift className="w-4 h-4" />,
+      onClick: () => { onRewardsClick?.(); setMenuOpen(false); },
+      accent: true,
+      show: !!onRewardsClick,
+    },
+    {
+      id: 'donate',
+      label: 'Support',
+      icon: <Heart className="w-4 h-4 fill-[#32FF8B]/20 text-[#32FF8B]/80" />,
+      onClick: () => { onDonateClick?.(); setMenuOpen(false); },
+      show: !!onDonateClick,
+    },
+    {
+      id: 'history',
+      label: 'History',
+      icon: <History className="w-4 h-4" />,
+      onClick: () => { onShowHistory?.(); setMenuOpen(false); },
+      show: !!(walletAddress && onShowHistory),
+    },
+    {
+      id: 'theme',
+      label: theme === 'light' ? 'Dark mode' : 'Light mode',
+      icon: theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />,
+      onClick: () => { onToggleTheme?.(); setMenuOpen(false); },
+      show: !!onToggleTheme,
+    },
+    {
+      id: 'demo',
+      label: isPresentationMode ? 'Exit demo mode' : 'Demo mode',
+      icon: <Video className="w-4 h-4" />,
+      onClick: () => { onTogglePresentationMode?.(); setMenuOpen(false); },
+      show: !!onTogglePresentationMode,
+    },
+  ].filter(m => m.show);
+
   return (
-    <header className="presentation-exempt flex flex-col border-b border-white/10 bg-[#010C1B] relative z-10 w-full font-mono">
+    <header className="presentation-exempt flex flex-col border-b border-white/10 bg-[#010C1B] relative z-20 w-full font-mono">
       <div className="flex items-center justify-between gap-2 p-3 sm:p-4 min-w-0">
+        {/* Brand */}
         <div className="flex flex-col min-w-0 shrink">
-          <h1 className="text-sm font-black tracking-widest text-white uppercase leading-none truncate">
-            FlowBridge<span className="text-[#32FF8B]">.</span>
-          </h1>
+          <div className="flex items-center gap-2 min-w-0">
+            <img src={logoUrl} alt="" className="w-6 h-6 rounded-md shrink-0" draggable={false} />
+            <h1 className="text-sm font-black tracking-widest text-white uppercase leading-none truncate">
+              FlowBridge<span className="text-[#32FF8B]">.</span>
+            </h1>
+          </div>
           <div className="flex items-center gap-1.5 mt-2">
-            <button 
+            <button
               onClick={onToggleMainnet}
               title="Click to toggle Testnet / Mainnet"
               className="transition-transform hover:scale-105 active:scale-95 cursor-pointer"
@@ -144,68 +200,71 @@ export function AppHeader({
             </button>
           </div>
         </div>
-        
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap justify-end">
-          {onToggleTheme && (
+
+        {/* Actions: wallet + one menu button */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <WalletPill
+            address={walletAddress}
+            onConnect={onConnect}
+            onDisconnect={onDisconnect}
+          />
+
+          <div className="relative" ref={menuRef}>
             <button
-              onClick={onToggleTheme}
-              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-              aria-label="Toggle color theme"
-              className="p-2 bg-[#0D1C2A] border border-white/10 hover:border-[#32FF8B]/30 hover:bg-white/5 active:scale-95 text-[#C5C1B9] hover:text-[#32FF8B] transition-all rounded-xl cursor-pointer shadow-sm"
-            >
-              {theme === 'light'
-                ? <Moon className="w-3.5 h-3.5" />
-                : <Sun className="w-3.5 h-3.5" />}
-            </button>
-          )}
-          {onTogglePresentationMode && (
-            <button
-              onClick={onTogglePresentationMode}
-              title={isPresentationMode ? 'Disable Demo Mode (extra-large fonts & high contrast)' : 'Enable Demo Mode (extra-large fonts & high contrast for video recording)'}
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-label="Open menu"
+              title="Menu"
               className={cn(
-                "p-2 border active:scale-95 transition-all rounded-xl cursor-pointer shadow-sm",
-                isPresentationMode
-                  ? "bg-[#32FF8B]/15 border-[#32FF8B]/50 text-[#32FF8B] hover:bg-[#32FF8B]/25"
-                  : "bg-[#0D1C2A] border-white/10 text-[#C5C1B9] hover:text-[#32FF8B] hover:bg-white/5"
+                "p-2 border rounded-xl cursor-pointer transition-all shadow-sm active:scale-95",
+                menuOpen
+                  ? "bg-[#32FF8B]/15 border-[#32FF8B]/50 text-[#32FF8B]"
+                  : "bg-[#0D1C2A] border-white/10 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30 hover:bg-white/5"
               )}
             >
-              <Video className="w-3.5 h-3.5" />
+              {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-          )}
-          {onRewardsClick && (
-            <button
-              onClick={onRewardsClick}
-              title="Claim off-chain FLOW rewards & Referral points"
-              className="p-1.5 sm:p-2 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/30 hover:border-[#32FF8B]/50 active:scale-95 text-[#32FF8B] hover:text-[#1FFF7D] transition-all rounded-xl cursor-pointer shadow-sm flex items-center gap-1.5 px-2 sm:px-3 text-[11px] font-black tracking-widest uppercase"
-            >
-              <Gift className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline text-[#32FF8B]">REWARDS</span>
-            </button>
-          )}
-          {onDonateClick && (
-            <button
-              onClick={onDonateClick}
-              title="Donate to support FlowBridge volunteer builders"
-              className="p-1.5 sm:p-2 bg-[#0D1C2A] border border-white/10 hover:border-[#32FF8B]/30 hover:bg-white/5 active:scale-95 text-[#C5C1B9] hover:text-[#32FF8B] transition-all rounded-xl cursor-pointer shadow-sm flex items-center gap-1 px-2.5 sm:px-3 text-[12px] font-bold"
-            >
-              <Heart className="w-3.5 h-3.5 fill-[#32FF8B]/20 text-[#32FF8B]/80" />
-              <span className="hidden xs:inline text-rose-100 tracking-wider">Support</span>
-            </button>
-          )}
-          {walletAddress && onShowHistory && (
-            <button
-              onClick={onShowHistory}
-              title="View cloud transaction ledger"
-              className="p-2 bg-[#0D1C2A] border border-white/10 hover:bg-white/5 active:scale-95 text-[#C5C1B9] hover:text-[#32FF8B] transition-all rounded-xl cursor-pointer shadow-sm animate-fade-in"
-            >
-              <History className="w-3.5 h-3.5" />
-            </button>
-          )}
-          <WalletPill 
-            address={walletAddress} 
-            onConnect={onConnect} 
-            onDisconnect={onDisconnect} 
-          />
+
+            {menuOpen && (
+              <div
+                role="menu"
+                className="animate-menu-in absolute right-0 mt-2 w-56 bg-[#0D1C2A]/98 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.75)] overflow-hidden z-50"
+              >
+                <div className="px-3 py-2 border-b border-white/5">
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-[#C5C1B9]/70 font-black">
+                    Menu
+                  </p>
+                </div>
+                <ul className="py-1">
+                  {menuItems.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        role="menuitem"
+                        onClick={item.onClick}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
+                          item.accent
+                            ? "text-[#32FF8B] hover:bg-[#32FF8B]/10"
+                            : "text-[#F0F7F3] hover:bg-white/5 hover:text-[#32FF8B]"
+                        )}
+                      >
+                        <span className={cn(
+                          "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
+                          item.accent
+                            ? "bg-[#32FF8B]/10 border-[#32FF8B]/30"
+                            : "bg-white/5 border-white/10"
+                        )}>
+                          {item.icon}
+                        </span>
+                        <span className="font-semibold truncate">{item.label}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -225,7 +284,7 @@ export function AppHeader({
               )}
             </span>
           </div>
-          
+
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={handleResend}
