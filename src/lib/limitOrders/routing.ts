@@ -1,7 +1,7 @@
 // Routing table for FlowLimitOrderExecutor. The executor stores ONE routerId per
 // order, so only routes that live on a single registered DEX are placeable.
 //
-//   routerId 0 = CaSwap V2   (CA ↔ BOT via caWBOT)
+//   routerId 3 = CaSwap V2   (CA ↔ BOT via caWBOT) — new router; old id 0 disabled
 //   routerId 2 = BDex V3     (BOT ↔ USDT, feePool 3000)
 //
 // CA↔USDT requires V2 + V3 which is not single-router. It is intentionally not
