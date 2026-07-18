@@ -125,9 +125,9 @@ export interface ChainContracts {
 export const MAINNET_CONTRACTS: ChainContracts = {
   caToken: "0x546307af427902a75771434df831d88219784e19",
   caStake: "0xb24952ced79e39a947ef17a27492040bd9212a53",
-  caPool: "0x59f6fdfbce098f16072daff7284ff68a237cb8b2",
+  caPool: "0x0A0cfC8c3756D000bE19F0809A23f57522a594F6",
   caSwapFactory: "0xebb8e27312af5ef867dd481eddb74fafe75f21a2",
-  caSwapRouter: "0x5508ec3006e6d82ec3a3219f9c041ffcd5791cd3",
+  caSwapRouter: "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
   routerWhitelist: "0x90aca2aa71ddf917679f7f9d9713131815eb59d6",
   bdexFactory: "0x117115f3b72c8d1989178089a67d0c26f8ee0aa3",
   bdexRouter: "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
