@@ -23,6 +23,9 @@ interface BridgeCardProps {
   onReset?: () => void;
   txHash?: string;
   txUrlPrefix?: string;
+  receiveBotGas?: boolean;
+  onReceiveBotGasChange?: (checked: boolean) => void;
+  showReceiveBotGasOption?: boolean;
 }
 
 export function BridgeCard({
