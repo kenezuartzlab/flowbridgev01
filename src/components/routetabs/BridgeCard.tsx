@@ -113,11 +113,7 @@ export function BridgeCard({
                 <button 
                   key={pct} 
                   type="button"
-                  onClick={() => {
-                    const pctVal = parseFloat(pct) / 100;
-                    const balVal = parseFloat(balance) || 0;
-                    onAmountChange((balVal * pctVal).toFixed(8));
-                  }}
+                  onClick={() => applyPercent(parseFloat(pct) / 100)}
                   className="px-1 py-1 bg-[#0D1C2A] border border-white/20 rounded-lg text-[11px] text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/20 font-black tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-sm text-center min-w-0"
                 >
                   {pct}
@@ -129,23 +125,25 @@ export function BridgeCard({
           <div className="flex justify-between items-center gap-3">
             <div className="flex-1 min-w-0">
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                spellCheck={false}
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => onAmountChange(e.target.value)}
-                className="bg-transparent text-white text-4xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono"
+                onChange={(e) => {
+                  // Accept only digits + a single dot; strip anything else so
+                  // long-decimal paste from wallet balances stays clean.
+                  const cleaned = e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1');
+                  onAmountChange(cleaned);
+                }}
+                title={amount}
+                className={`bg-transparent text-white ${amountFontClass} font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono overflow-x-auto whitespace-nowrap scrollbar-none transition-[font-size] duration-150`}
               />
               <div 
-                onClick={() => {
-                  const parsed = parseFloat(balance);
-                  if (!isNaN(parsed)) {
-                    onAmountChange(parsed.toString());
-                  } else {
-                    onAmountChange(balance);
-                  }
-                }}
-                className="text-[12px] text-[#C5C1B9] font-mono mt-1.5 select-none cursor-pointer hover:text-[#32FF8B] transition-colors inline-block"
-                title="Use maximum balance"
+                onClick={() => applyPercent(1)}
+                className="text-[12px] text-[#C5C1B9] font-mono mt-1.5 select-none cursor-pointer hover:text-[#32FF8B] transition-colors inline-block max-w-full truncate"
+                title={`Use full balance: ${rawBalance} ${symbol}`}
               >
                 Balance: {balance} {symbol} <span className="text-[11px] text-[#32FF8B] font-black ml-1 uppercase hover:underline">(Max)</span>
               </div>
