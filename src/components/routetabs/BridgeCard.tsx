@@ -11,6 +11,8 @@ interface BridgeCardProps {
   toChain: string;
   symbol: string;
   balance: string;
+  /** Full-precision balance string (unrounded) used for MAX & percentage clicks. Falls back to `balance` when omitted. */
+  exactBalance?: string;
   estimatedReceive: string;
   receiveAddress: string;
   onSubmit: () => void;
