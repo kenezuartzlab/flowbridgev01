@@ -1135,6 +1135,13 @@ export default function App() {
     const amountVal = parseFloat(usdtAmount);
     if (!amountVal || amountVal <= 0) return;
 
+    // Hard-enforce the $10 bridge minimum before any wallet prompt so the user
+    // never signs a tx that BotBridge will revert.
+    if (amountVal < 10) {
+      setErrorMessage(`Bridge minimum is $10. Enter at least 10 USDT to continue.`);
+      return;
+    }
+
     const recipientAddr = (recipientParam || customDestinationAddress || address || "").trim();
 
     // SAFETY: BotBridge.deposit() credits the pegged USDT on the destination chain
@@ -1357,15 +1364,23 @@ export default function App() {
     }
   })();
 
+  // Bridge minimum: $10 USD. USDT ≈ $1, so require >= 10 USDT before
+  // enabling the button (matches on-chain minimum enforced by BotBridge —
+  // sending less reverts and wastes gas).
+  const BRIDGE_MIN_USDT = 10;
+  const parsedUsdtAmt = parseFloat(usdtAmount || '0');
+  const belowBridgeMin = !!usdtAmount && isFinite(parsedUsdtAmt) && parsedUsdtAmt > 0 && parsedUsdtAmt < BRIDGE_MIN_USDT;
+
   if (!isConnected) bridgeButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) bridgeButtonLabel = `Switch Chain to ${bridgeFromName}`;
   else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
     bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
   }
-  else if (session.step3.status === 'submitted') bridgeButtonLabel = `Bridge Submitted ↗`;
+  else if (session.step3.status === 'submitted') bridgeButtonLabel = `Bridge Confirmed ↗`;
+  else if (belowBridgeMin) bridgeButtonLabel = `Minimum $10 to bridge`;
   else if (usdtAmount && !isApprovedForBridge) bridgeButtonLabel = "Approve USDT";
   else if (usdtAmount) bridgeButtonLabel = `Bridge to ${bridgeToName}`;
-  let bridgeButtonDisabled = isActionLoading || (isConnected && !usdtAmount && session.step3.status !== 'submitted');
+  let bridgeButtonDisabled = isActionLoading || belowBridgeMin || (isConnected && !usdtAmount && session.step3.status !== 'submitted');
 
   // Dynamic formatting for real and mock balances
   const formatBalance = (raw: any, decimals = 18) => {
@@ -1935,7 +1950,7 @@ export default function App() {
                   setIsConfirmDestinationOpen(true);
                 }
               }}
-              successMessage={session.step3.status === 'submitted' ? 'Your cross-chain bridge transaction was initiated successfully.' : undefined}
+              successMessage={session.step3.status === 'submitted' ? 'Source-chain transaction confirmed. USDT is being relayed to the destination chain by the bridge validators.' : undefined}
               txHash={session.step3.status === 'submitted' ? session.step3.tx_hash ?? undefined : undefined}
               txUrlPrefix={bridgeDirection === 'BOT_TO_BNB' ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/') : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')}
               gasFeeLabel={bridgeDirection === 'BOT_TO_BNB' ? '≈ 0.095238 BOT' : '≈ 0.005 BNB'}
