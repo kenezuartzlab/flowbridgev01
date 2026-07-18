@@ -1405,14 +1405,19 @@ export default function App() {
     if (isDemoMode) {
       return 3.12405 * botPrice;
     }
-    // Prefer authoritative BDEX price API (routes CA→BOT→USDT internally).
-    const apiPrice = marketPrices[contracts.caToken.toLowerCase()];
-    if (apiPrice && isFinite(apiPrice) && apiPrice > 0) return apiPrice;
+    // CA↔USDT trades route through CaSwap V2 (CA/caWBOT) then BDex V3 (BOT/USDT).
+    // The user-facing CA/USD price MUST reflect that actual execution path — i.e.
+    // (CA→BOT rate on CaSwap V2) × (BOT/USD live price). Using the BDEX v3-only
+    // CA price feed here creates a phantom spread vs the price the swap actually
+    // fills at (matches what CaryPact displays).
     if (rawLiveCaToBotQuote && Array.isArray(rawLiveCaToBotQuote) && rawLiveCaToBotQuote.length >= 2) {
       const outVal = BigInt(rawLiveCaToBotQuote[rawLiveCaToBotQuote.length - 1].toString());
       const caToBotRate = parseFloat(formatUnits(outVal, 18));
-      return caToBotRate * botPrice;
+      if (isFinite(caToBotRate) && caToBotRate > 0) return caToBotRate * botPrice;
     }
+    // Fallback: BDEX price API (v3 route) if the on-chain quote is unavailable.
+    const apiPrice = marketPrices[contracts.caToken.toLowerCase()];
+    if (apiPrice && isFinite(apiPrice) && apiPrice > 0) return apiPrice;
     return 3.12405 * botPrice;
   };
 
