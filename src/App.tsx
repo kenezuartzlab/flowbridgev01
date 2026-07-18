@@ -1113,7 +1113,18 @@ export default function App() {
     const amountVal = parseFloat(usdtAmount);
     if (!amountVal || amountVal <= 0) return;
 
-    const recipientAddr = recipientParam || customDestinationAddress || address || "";
+    const recipientAddr = (recipientParam || customDestinationAddress || address || "").trim();
+
+    // SAFETY: BotBridge.deposit() credits the pegged USDT on the destination chain
+    // to the `recipient` argument. If we send address(0) or a malformed value the
+    // funds are unrecoverable. Hard-fail before signing.
+    const isValidRecipient = /^0x[a-fA-F0-9]{40}$/.test(recipientAddr)
+      && recipientAddr.toLowerCase() !== "0x0000000000000000000000000000000000000000";
+    if (!isValidRecipient) {
+      setErrorMessage("Invalid destination address. Connect a wallet or enter a valid 0x… recipient before bridging.");
+      return;
+    }
+
 
     if (isDemoMode) {
       setActionStep('approving_usdt');
