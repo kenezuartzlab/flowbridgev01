@@ -69,11 +69,11 @@ export function resolveLimitRoute(
     };
   }
 
-  // ── CA ↔ BOT via CaSwap V2 (routerId 0, uses caWBOT) ───────────────────
+  // ── CA ↔ BOT via CaSwap V2 (routerId 3, uses caWBOT) ───────────────────
   if ((inAddr === CA && isBotSide(outAddr)) || (isBotSide(inAddr) && outAddr === CA)) {
     const inIsCa = inAddr === CA;
     return {
-      routerId: 0,
+      routerId: 3,
       feePoolV3: 0,
       onchainTokenIn: (inIsCa ? (CA as Address) : CAWBOT) as Address,
       onchainTokenOut: (inIsCa ? CAWBOT : (CA as Address)) as Address,
