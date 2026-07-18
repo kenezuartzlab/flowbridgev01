@@ -12,6 +12,7 @@ import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { LimitOrderCard } from './components/routetabs/limit/LimitOrderCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
+import { BridgeStatusPanel } from './components/routetabs/BridgeStatusPanel';
 import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
 import { initAuth, googleSignIn, logout as googleLogout, getIdToken } from './lib/auth';
