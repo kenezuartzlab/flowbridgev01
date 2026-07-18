@@ -29,6 +29,7 @@ import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
 import { formatUsd } from './lib/format';
+import { SiteLoader } from './components/SiteLoader';
 
 export default function App() {
   const { address, isConnected } = useAccount();
@@ -1620,6 +1621,7 @@ export default function App() {
 
   return (
     <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-center font-sans overflow-y-auto relative py-6 sm:py-8 gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
+      <SiteLoader />
       
       {/* Background grid + ambient glow of Ecosurge specification */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none animate-pulse-slow" />
