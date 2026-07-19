@@ -2000,6 +2000,32 @@ export default function App() {
         >
           <span className="inline-block animate-pulse">💖</span> Support FlowBridge & Request Features
         </button>
+        <div className="flex items-center gap-3 mt-1">
+          <a
+            href="https://x.com/flowbridgeweb3"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="FlowBridge on X"
+            title="Follow FlowBridge on X"
+            className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+          >
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-6.98L4.66 22H1.4l8.02-9.17L1 2h7.02l4.84 6.4L18.244 2Zm-1.2 18h1.86L7.05 4H5.09l11.954 16Z" />
+            </svg>
+          </a>
+          <a
+            href="https://youtube.com/@flowbridgeweb3"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="FlowBridge on YouTube"
+            title="FlowBridge on YouTube"
+            className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
+              <path d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.55 3.5 12 3.5 12 3.5s-7.55 0-9.4.58A3 3 0 0 0 .5 6.2C0 8.06 0 12 0 12s0 3.94.5 5.8a3 3 0 0 0 2.1 2.12C4.45 20.5 12 20.5 12 20.5s7.55 0 9.4-.58a3 3 0 0 0 2.1-2.12C24 15.94 24 12 24 12s0-3.94-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" />
+            </svg>
+          </a>
+        </div>
         <span className="text-[9px] text-[#C5C1B9]/70 tracking-[0.2em] font-medium">
           ⓒ 2026 FlowBridge. Built by Kenezu
         </span>
