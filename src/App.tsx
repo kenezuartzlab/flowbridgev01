@@ -2233,6 +2233,10 @@ export default function App() {
                   setReceiveBotGas(false);
                 }
               }}
+              tronStatus={bridgePeer === 'TRX' ? tronStatus : undefined}
+              tronAddress={tronAddress ?? undefined}
+              tronConnecting={tronConnecting}
+              onConnectTron={handleConnectTron}
             />
           )}
 
