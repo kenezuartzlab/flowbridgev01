@@ -1460,7 +1460,8 @@ export default function App() {
     return parseFloat(formatUnits(BigInt(raw.toString()), decimals)).toFixed(4);
   };
 
-  const getBalanceDisplay = (type: 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB') => {
+  type BalanceType = 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB' | 'USDT_ETH' | 'USDT_TRX';
+  const getBalanceDisplay = (type: BalanceType) => {
     if (isDemoMode) {
       if (type === 'CA') return "100.0000";
       if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "50.0000";
@@ -1471,21 +1472,27 @@ export default function App() {
     if (type === 'CA') return rawCaBalance ? formatBalance(rawCaBalance, 18) : "0.00";
     if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "0.00";
     if (type === 'USDT_BOT') return rawUsdtBotBalance ? formatBalance(rawUsdtBotBalance, 6) : "0.00";
-    return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.00";
+    if (type === 'USDT_BNB') return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.00";
+    if (type === 'USDT_ETH') return rawUsdtEthBalance ? formatBalance(rawUsdtEthBalance, 6) : "0.00";
+    if (type === 'USDT_TRX') return tronUsdtBalance || "0.00";
+    return "0.00";
   };
 
-  const getExactBalanceAmount = (type: 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB') => {
+  const getExactBalanceAmount = (type: BalanceType) => {
     if (isDemoMode) return getBalanceDisplay(type).replace(/\s*FLOW$/, '');
     try {
       if (type === 'CA' && rawCaBalance) return formatUnits(BigInt(rawCaBalance.toString()), 18);
       if (type === 'BOT' && botBalance) return formatUnits(botBalance.value, botBalance.decimals);
       if (type === 'USDT_BOT' && rawUsdtBotBalance) return formatUnits(BigInt(rawUsdtBotBalance.toString()), 6);
       if (type === 'USDT_BNB' && rawUsdtBnbBalance) return formatUnits(BigInt(rawUsdtBnbBalance.toString()), 18);
+      if (type === 'USDT_ETH' && rawUsdtEthBalance) return formatUnits(BigInt(rawUsdtEthBalance.toString()), 6);
+      if (type === 'USDT_TRX') return tronUsdtBalance || '0';
     } catch {
       return getBalanceDisplay(type);
     }
     return getBalanceDisplay(type);
   };
+
 
   const getLiveBotPrice = () => {
     if (isDemoMode) return 9.7482;
