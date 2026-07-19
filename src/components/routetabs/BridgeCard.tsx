@@ -27,7 +27,9 @@ interface BridgeCardProps {
   buttonDisabled?: boolean;
   successMessage?: string;
   gasFeeLabel?: string;
-  bridgeDirection?: 'BOT_TO_BNB' | 'BNB_TO_BOT';
+  bridgeDirection?: BridgeDirection;
+  peer?: BridgePeer;
+  onPeerChange?: (peer: BridgePeer) => void;
   onReset?: () => void;
   txHash?: string;
   txUrlPrefix?: string;
