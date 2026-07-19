@@ -754,31 +754,48 @@ export default function App() {
     setErrorMessage(null);
   };
 
+  // Peer helpers for the BRIDGE tab
+  const bridgePeer: 'BNB' | 'ETH' | 'TRX' =
+    bridgeDirection.includes('ETH') ? 'ETH'
+    : bridgeDirection.includes('TRX') ? 'TRX'
+    : 'BNB';
+  const isBotSource = bridgeDirection.startsWith('BOT_TO_');
+  const peerChainId = (p: 'BNB' | 'ETH' | 'TRX'): number | null => {
+    if (p === 'BNB') return isMainnet ? 56 : 97;
+    if (p === 'ETH') return isMainnet ? 1 : 11155111;
+    return null; // TRX is non-EVM
+  };
+
   // Determine needed chain based on active screen and directions
   const targetChainIdForTab = (): number => {
     if (activeTab === 'CA/BOT' || activeTab === 'BOT/USDT' || activeTab === 'LIMIT') {
       return isMainnet ? 677 : 968; // BOT Chain
-    } else {
-      // BRIDGE tab
-      return bridgeDirection === 'BOT_TO_BNB'
-        ? (isMainnet ? 677 : 968) // BOT Chain
-        : (isMainnet ? 56 : 97);  // BNB Chain
     }
+    // BRIDGE tab
+    if (isBotSource) return isMainnet ? 677 : 968;
+    // Peer → BOT: EVM peers need chain switch; TRX has no EVM chain id, keep on BOT for network-correct check
+    const pid = peerChainId(bridgePeer);
+    return pid ?? (isMainnet ? 677 : 968);
   };
 
   const getChainForId = (chainId: number) => {
     if (chainId === 677) return botMainnet;
     if (chainId === 968) return botTestnet;
     if (chainId === 56) return bscMainnet;
-    return bscTestnet;
+    if (chainId === 97) return bscTestnet;
+    if (chainId === 1) return ethereum;
+    return sepolia;
   };
 
   const getExplorerPrefixForChain = (chainId: number) => {
     if (chainId === 677) return 'https://scan.botchain.ai/tx/';
     if (chainId === 968) return 'https://scan.bohr.life/tx/';
     if (chainId === 56) return 'https://bscscan.com/tx/';
-    return 'https://testnet.bscscan.com/tx/';
+    if (chainId === 97) return 'https://testnet.bscscan.com/tx/';
+    if (chainId === 1) return 'https://etherscan.io/tx/';
+    return 'https://sepolia.etherscan.io/tx/';
   };
+
 
   const waitForFinalReceipt = async (txHash: `0x${string}`, chainId: number) => {
     const client = createPublicClient({
