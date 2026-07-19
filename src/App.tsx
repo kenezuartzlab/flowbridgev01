@@ -340,6 +340,8 @@ export default function App() {
   const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT' | 'BOT_TO_ETH' | 'ETH_TO_BOT' | 'BOT_TO_TRX' | 'TRX_TO_BOT'>('BOT_TO_BNB');
   const [tronAddress, setTronAddress] = useState<string | null>(null);
   const [tronUsdtBalance, setTronUsdtBalance] = useState<string>('0');
+  const [tronStatus, setTronStatus] = useState<TronStatus>('unavailable');
+  const [tronConnecting, setTronConnecting] = useState(false);
   const [receiveBotGas, setReceiveBotGas] = useState<boolean>(false);
   const [isBotGasNoticeOpen, setIsBotGasNoticeOpen] = useState<boolean>(false);
 
