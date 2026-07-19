@@ -55,6 +55,8 @@ export function BridgeCard({
   successMessage,
   gasFeeLabel = "≈ 0.095238 BOT",
   bridgeDirection = 'BOT_TO_BNB',
+  peer,
+  onPeerChange,
   onReset,
   txHash,
   txUrlPrefix,
@@ -62,6 +64,10 @@ export function BridgeCard({
   onReceiveBotGasChange,
   showReceiveBotGasOption = false
 }: BridgeCardProps) {
+  const activePeer: BridgePeer = peer
+    ?? (bridgeDirection.includes('ETH') ? 'ETH'
+      : bridgeDirection.includes('TRX') ? 'TRX'
+      : 'BNB');
   // Full-precision source for MAX / percentage math. Never round the wallet
   // balance — the bridge accepts arbitrary uint256, so passing the exact
   // wallet amount avoids "insufficient balance" reverts and dust left behind.
