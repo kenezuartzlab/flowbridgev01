@@ -217,11 +217,19 @@ export function AppHeader({
 
         {/* Actions: wallet + one menu button */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <WalletPill
-            address={walletAddress}
-            onConnect={onConnect}
-            onDisconnect={onDisconnect}
-          />
+          {activeNetworkLabel === 'TRON' ? (
+            <WalletPill
+              address={tronAddress || null}
+              onConnect={onConnectTron}
+              onDisconnect={undefined}
+            />
+          ) : (
+            <WalletPill
+              address={walletAddress}
+              onConnect={onConnect}
+              onDisconnect={onDisconnect}
+            />
+          )}
 
           <div className="relative" ref={menuRef}>
             <button
