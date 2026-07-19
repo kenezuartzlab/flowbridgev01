@@ -1,48 +1,73 @@
 import { useEffect, useState } from 'react';
 import { createPublicClient, http } from 'viem';
-import { botMainnet, botTestnet, bscMainnet, bscTestnet } from '../../lib/wagmi';
+import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '../../lib/wagmi';
+import { fetchTronConfirmations } from '../../lib/tronBridge';
 import { CheckCircle2, Loader2, XCircle, ExternalLink, Clock } from 'lucide-react';
 
 type Phase = 'pending' | 'mining' | 'confirming' | 'success' | 'failed';
 
+export type BridgeDirection =
+  | 'BOT_TO_BNB' | 'BNB_TO_BOT'
+  | 'BOT_TO_ETH' | 'ETH_TO_BOT'
+  | 'BOT_TO_TRX' | 'TRX_TO_BOT';
+
 interface BridgeStatusPanelProps {
   txHash?: string;
-  bridgeDirection: 'BOT_TO_BNB' | 'BNB_TO_BOT';
+  bridgeDirection: BridgeDirection;
   isMainnet: boolean;
   sourceExplorerPrefix: string;
   destExplorerPrefix: string;
 }
 
 const REQUIRED_CONFIRMATIONS: Record<number, number> = {
-  677: 3,   // BOT mainnet
-  968: 1,   // BOT testnet
-  56: 15,   // BNB mainnet
-  97: 3,    // BNB testnet
+  677: 3,        // BOT mainnet
+  968: 1,        // BOT testnet
+  56: 15,        // BNB mainnet
+  97: 3,         // BNB testnet
+  1: 12,         // ETH mainnet
+  11155111: 3,   // Sepolia
 };
 
-const RELAY_ETA_SECONDS: Record<'BOT_TO_BNB' | 'BNB_TO_BOT', number> = {
+const RELAY_ETA_SECONDS: Record<BridgeDirection, number> = {
   BOT_TO_BNB: 7 * 60,
   BNB_TO_BOT: 5 * 60,
+  BOT_TO_ETH: 10 * 60,
+  ETH_TO_BOT: 8 * 60,
+  BOT_TO_TRX: 6 * 60,
+  TRX_TO_BOT: 5 * 60,
 };
 
 function chainFor(chainId: number) {
   if (chainId === 677) return botMainnet;
   if (chainId === 968) return botTestnet;
   if (chainId === 56) return bscMainnet;
-  return bscTestnet;
+  if (chainId === 97) return bscTestnet;
+  if (chainId === 1) return ethereum;
+  return sepolia;
 }
 
-function sourceChainId(dir: 'BOT_TO_BNB' | 'BNB_TO_BOT', isMainnet: boolean) {
-  if (dir === 'BOT_TO_BNB') return isMainnet ? 677 : 968;
-  return isMainnet ? 56 : 97;
+function sourceChainId(dir: BridgeDirection, isMainnet: boolean): number | null {
+  switch (dir) {
+    case 'BOT_TO_BNB': case 'BOT_TO_ETH': case 'BOT_TO_TRX': return isMainnet ? 677 : 968;
+    case 'BNB_TO_BOT': return isMainnet ? 56 : 97;
+    case 'ETH_TO_BOT': return isMainnet ? 1 : 11155111;
+    case 'TRX_TO_BOT': return null; // Tron: non-EVM, polled separately
+  }
 }
 
-function destChainName(dir: 'BOT_TO_BNB' | 'BNB_TO_BOT') {
-  return dir === 'BOT_TO_BNB' ? 'BNB Chain' : 'BOT Chain';
-}
+const CHAIN_NAME: Record<'BOT' | 'BNB' | 'ETH' | 'TRX', string> = {
+  BOT: 'BOT Chain', BNB: 'BNB Chain', ETH: 'Ethereum', TRX: 'Tron',
+};
 
-function sourceChainName(dir: 'BOT_TO_BNB' | 'BNB_TO_BOT') {
-  return dir === 'BOT_TO_BNB' ? 'BOT Chain' : 'BNB Chain';
+function peerFor(dir: BridgeDirection) {
+  if (dir.startsWith('BOT_TO_')) return dir.slice(7) as 'BNB' | 'ETH' | 'TRX';
+  return dir.slice(0, 3) as 'BNB' | 'ETH' | 'TRX';
+}
+function destChainName(dir: BridgeDirection) {
+  return dir.startsWith('BOT_TO_') ? CHAIN_NAME[peerFor(dir)] : CHAIN_NAME.BOT;
+}
+function sourceChainName(dir: BridgeDirection) {
+  return dir.startsWith('BOT_TO_') ? CHAIN_NAME.BOT : CHAIN_NAME[peerFor(dir)];
 }
 
 export function BridgeStatusPanel({
