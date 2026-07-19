@@ -7,7 +7,8 @@ import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } fro
 import {
   isTronLinkAvailable, requestTronLinkAccounts, isValidTronAddress,
   fetchTronUsdtBalance, fetchTronUsdtAllowance, tronApproveUsdt, tronBridgeDepositToBot,
-  TRON_EXPLORER_TX_PREFIX,
+  TRON_EXPLORER_TX_PREFIX, getTronStatus, subscribeTronLink, waitForTronWeb,
+  type TronStatus,
 } from './lib/tronBridge';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
 import { AppHeader } from './lib/layout/AppHeader';
