@@ -1215,6 +1215,14 @@ export default function App() {
       return;
     }
 
+    // BOT_TO_TRX is intentionally gated: we do not yet have a verified
+    // registered destination chain id or Tron address encoding path on the
+    // BOT-side gateway. Sending with a wrong id/encoding is unrecoverable.
+    if (bridgeDirection === 'BOT_TO_TRX') {
+      setErrorMessage('BOT → Tron bridging is coming soon (awaiting registered destination id). Use Tron → BOT for now.');
+      return;
+    }
+
     const recipientAddr = (recipientParam || customDestinationAddress || address || "").trim();
 
     // SAFETY: BotBridge.deposit() credits the pegged USDT on the destination chain
