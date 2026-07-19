@@ -4,6 +4,12 @@ import { WarningPanel } from './WarningPanel';
 import { FeePanel } from './FeePanel';
 import { TokenIcon } from '../TokenIcon';
 
+export type BridgePeer = 'BNB' | 'ETH' | 'TRX';
+export type BridgeDirection =
+  | 'BOT_TO_BNB' | 'BNB_TO_BOT'
+  | 'BOT_TO_ETH' | 'ETH_TO_BOT'
+  | 'BOT_TO_TRX' | 'TRX_TO_BOT';
+
 interface BridgeCardProps {
   amount: string;
   onAmountChange: (val: string) => void;
