@@ -1422,15 +1422,21 @@ export default function App() {
   else if (botAmount) botButtonLabel = `Swap ${botPaySymbol} to ${botRecSymbol}`;
   let botButtonDisabled = isActionLoading || (isConnected && !botAmount && session.step2.status !== 'done');
   
-  const bridgeFromName = bridgeDirection === 'BOT_TO_BNB' ? "BOT Chain" : "BNB Chain";
-  const bridgeToName = bridgeDirection === 'BOT_TO_BNB' ? "BNB Chain" : "BOT Chain";
+  const peerName = bridgePeer === 'BNB' ? 'BNB Chain' : bridgePeer === 'ETH' ? 'Ethereum' : 'Tron';
+  const bridgeFromName = isBotSource ? 'BOT Chain' : peerName;
+  const bridgeToName = isBotSource ? peerName : 'BOT Chain';
   let bridgeButtonLabel = "Enter amount";
-  const usdtDecs = bridgeDirection === 'BOT_TO_BNB' ? 6 : 18;
-  const activeBridgeAllowance = bridgeDirection === 'BOT_TO_BNB' ? rawUsdtBotBridgeAllowance : rawUsdtBnbBridgeAllowance;
-  const isApprovedForBridge = isDemoMode || !usdtAmount ? true : (() => {
+  // Source-side USDT decimals: BOT/ETH/TRX use 6dp, BSC uses 18dp
+  const sourceUsdtDecs = isBotSource ? 6 : (bridgePeer === 'BNB' ? 18 : 6);
+  const activeBridgeAllowance = isBotSource
+    ? rawUsdtBotBridgeAllowance
+    : (bridgePeer === 'BNB' ? rawUsdtBnbBridgeAllowance
+      : bridgePeer === 'ETH' ? rawUsdtEthBridgeAllowance
+      : undefined /* TRX allowance is fetched imperatively */);
+  const isApprovedForBridge = isDemoMode || !usdtAmount || bridgePeer === 'TRX' ? true : (() => {
     if (activeBridgeAllowance === undefined) return false;
     try {
-      const parsed = parseUnits(usdtAmount, usdtDecs);
+      const parsed = parseUnits(usdtAmount, sourceUsdtDecs);
       return BigInt(activeBridgeAllowance.toString()) >= parsed;
     } catch {
       return false;
