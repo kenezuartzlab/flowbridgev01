@@ -795,9 +795,10 @@ export default function App() {
       : (`${p}_TO_BOT` as any)));
     setUsdtAmount('');
     setErrorMessage(null);
-    // Try to fetch a Tron account when switching to TRX
-    if (p === 'TRX' && isTronLinkAvailable()) {
-      requestTronLinkAccounts().then(a => a && setTronAddress(a));
+    // Auto-attempt a silent TronLink connect when the user switches to TRX.
+    if (p === 'TRX') {
+      // Fire-and-forget; UI shows explicit "Connect Tron" retry if this fails.
+      handleConnectTron().catch(() => {});
     }
   };
 
