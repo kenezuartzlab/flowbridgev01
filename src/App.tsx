@@ -1590,6 +1590,9 @@ export default function App() {
   const belowBridgeMin = !!usdtAmount && isFinite(parsedUsdtAmt) && parsedUsdtAmt > 0 && parsedUsdtAmt < BRIDGE_MIN_USDT;
 
   if (!isConnected) bridgeButtonLabel = "Connect Wallet";
+  else if (bridgeDirection === 'TRX_TO_BOT' && tronStatus !== 'ready') {
+    bridgeButtonLabel = tronStatus === 'unavailable' ? 'Install TronLink' : tronConnecting ? 'Connecting TronLink…' : 'Connect TronLink';
+  }
   else if (!isNetworkCorrect) bridgeButtonLabel = `Switch Chain to ${bridgeFromName}`;
   else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
     bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
