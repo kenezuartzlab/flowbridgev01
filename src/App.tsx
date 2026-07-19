@@ -631,10 +631,13 @@ export default function App() {
     refetchCaBalance();
     refetchUsdtBotBalance();
     refetchUsdtBnbBalance();
+    refetchEthNativeBalance();
+    refetchUsdtEthBalance();
     refetchCaAllowance();
     refetchUsdtBotSwapAllowance();
     refetchUsdtBotBridgeAllowance();
     refetchUsdtBnbBridgeAllowance();
+    refetchUsdtEthBridgeAllowance();
     try {
       refetchCaToBotQuote();
       refetchV3PoolSlot0();
