@@ -114,13 +114,27 @@ export interface ChainContracts {
   caWbot: string;
   usdtBot: string;
   usdtBnb: string;
+  usdtEth: string;
   botBridgeProxy: string;
   bnbBridgeProxy: string;
+  ethBridgeProxy: string;
+  /** Tron BridgeGateway — base58 (T…), non-EVM. Signed via TronLink, not wagmi. */
+  tronBridgeProxy: string;
+  /** Tron USDT (TRC-20) — base58, non-EVM. */
+  usdtTron: string;
   flowBridgeRouter: string;
   flowBridgeRouterV3: string;
   flowLimitOrderExecutor: string;
   usdtBotPoolV3: string;
 }
+
+// Shared USDT resource ID across every BOT-Chain bridge gateway (BSC, ETH, TRX).
+// Source: docs/bridge/README.md §2.
+export const USDT_BRIDGE_RESOURCE_ID =
+  "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d" as const;
+
+/** Supported bridge peers for USDT transfers to/from BOT Chain. */
+export type BridgePeer = 'BNB' | 'ETH' | 'TRX';
 
 export const MAINNET_CONTRACTS: ChainContracts = {
   caToken: "0x546307af427902a75771434df831d88219784e19",
@@ -134,15 +148,22 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   wbot: "0xd5452816194a3784dba983426cce7c122f4abd30",
   caWbot: "0x68caea9104419203cf8b8f0b222e75709b97bfc6",
   usdtBot: "0xababc7ddc03e501d190c676bf3d92ef0e6e87a3c",
-  usdtBnb: "0x55d398326f99059ff775485246999027b3197955", // default BSC mainnet template address
+  // Native USDT on each external chain — verified against docs/bridge/README.md §2.
+  usdtBnb: "0x55d398326f99059ff775485246999027b3197955", // BEP-20 USDT (18 dp)
+  usdtEth: "0xdAC17F958D2ee523a2206206994597C13D831ec7", // ERC-20 USDT (6 dp)
+  usdtTron: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",         // TRC-20 USDT (6 dp), base58
+  // BridgeRouter on BOT Chain — single router services all outbound destinations.
   botBridgeProxy: "0xef8dc669eca13e612b67ff09478352e85bd6cc53",
+  // External-chain BridgeGateway addresses (inbound to BOT Chain).
   bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
+  ethBridgeProxy: "0x2945d3aF6f012e49f7421252b5fB57D1bb7E6Edd",
+  tronBridgeProxy: "TGhXbQpjBgC6bDp5jAexzeQPHEXXsx5f35", // base58, requires TronLink
   flowBridgeRouter: "0x19784e19546307af427902a75771434df831d882",
   flowBridgeRouterV3: "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
   flowLimitOrderExecutor: "0x7FE51363C6694ACddf3EBBF64B2d4A7Ef970ecB4",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
-
 };
+
 
 export const TESTNET_CONTRACTS: ChainContracts = {
   caToken: "0x4cf0ce056b1c39032c41ee97e09bc8e72c7d69f4", // CaryPact testnet CA address from documents
@@ -156,15 +177,19 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   wbot: "0xd5452816194a3784dba983426cce7c122f4abd30",
   caWbot: "0xf704ad4be6d75c62550571f3ead025efe7ca30d1",
   usdtBot: "0x75edc9335175fc0552d51d48439f229c10420fe3", // Tether USD on BOT testnet
-  usdtBnb: "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd",  // standard USDT on BSC testnet
-  botBridgeProxy: "0xef8dc669eca13e612b67ff09478352e85bd6cc53", // fallbacks since actual is verify
+  usdtBnb: "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd",  // USDT BSC testnet
+  usdtEth: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDT Sepolia (placeholder — verify before enabling ETH testnet bridge)
+  usdtTron: "TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs",         // USDT Shasta (TRC-20)
+  botBridgeProxy: "0x6239404Aa276ba68486E2Fa40E90CDd36ff8ec3A", // BOT testnet BridgeRouter (from docs)
   bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
+  ethBridgeProxy: "0x0000000000000000000000000000000000000000", // not published for testnet — disable ETH bridge on testnet
+  tronBridgeProxy: "",                                          // not published for testnet — disable TRX bridge on testnet
   flowBridgeRouter: "0x72c7d69f44cf0ce056b1c39032c41ee97e09bc8e",
   flowBridgeRouterV3: "0x6a8C4ce7544A75fEc6E577b990e44fe621D8a5ac",
   flowLimitOrderExecutor: "",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
-
 };
+
 
 export const getContracts = (isMainnet: boolean): ChainContracts => {
   return isMainnet ? MAINNET_CONTRACTS : TESTNET_CONTRACTS;
