@@ -3,7 +3,12 @@ import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, use
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { injected } from 'wagmi/connectors';
-import { botTestnet, bscTestnet, botMainnet, bscMainnet } from './lib/wagmi';
+import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/wagmi';
+import {
+  isTronLinkAvailable, requestTronLinkAccounts, isValidTronAddress,
+  fetchTronUsdtBalance, fetchTronUsdtAllowance, tronApproveUsdt, tronBridgeDepositToBot,
+  TRON_EXPLORER_TX_PREFIX,
+} from './lib/tronBridge';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
 import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
@@ -331,7 +336,9 @@ export default function App() {
   // Directions
   const [caToBotDirection, setCaToBotDirection] = useState<'CA_TO_BOT' | 'BOT_TO_CA'>('CA_TO_BOT');
   const [botToUsdtDirection, setBotToUsdtDirection] = useState<'BOT_TO_USDT' | 'USDT_TO_BOT'>('BOT_TO_USDT');
-  const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT'>('BOT_TO_BNB');
+  const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT' | 'BOT_TO_ETH' | 'ETH_TO_BOT' | 'BOT_TO_TRX' | 'TRX_TO_BOT'>('BOT_TO_BNB');
+  const [tronAddress, setTronAddress] = useState<string | null>(null);
+  const [tronUsdtBalance, setTronUsdtBalance] = useState<string>('0');
   const [receiveBotGas, setReceiveBotGas] = useState<boolean>(false);
   const [isBotGasNoticeOpen, setIsBotGasNoticeOpen] = useState<boolean>(false);
 
@@ -434,6 +441,7 @@ export default function App() {
   // On-Chain Reads (Cached balances)
   const currentBotChainId = isMainnet ? 677 : 968;
   const currentBscChainId = isMainnet ? 56 : 97;
+  const currentEthChainId = isMainnet ? 1 : 11155111;
   const botPublicClient = usePublicClient({ chainId: currentBotChainId });
 
   // 1. Native BOT balance
@@ -524,6 +532,32 @@ export default function App() {
     query: { enabled: !!address && !isDemoMode }
   });
 
+  // Ethereum USDT (ERC-20, 6 decimals) balance + bridge allowance
+  const { data: ethNativeBalance, refetch: refetchEthNativeBalance } = useBalance({
+    address,
+    chainId: currentEthChainId,
+    query: { enabled: !!address && !isDemoMode }
+  });
+  const { data: rawUsdtEthBalance, refetch: refetchUsdtEthBalance } = useReadContract({
+    address: contracts.usdtEth as `0x${string}` | undefined,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    chainId: currentEthChainId,
+    query: { enabled: !!address && !!contracts.usdtEth && !isDemoMode }
+  });
+  const { data: rawUsdtEthBridgeAllowance, refetch: refetchUsdtEthBridgeAllowance } = useReadContract({
+    address: contracts.usdtEth as `0x${string}` | undefined,
+    abi: ERC20_ABI,
+    functionName: 'allowance',
+    args: address && contracts.ethBridgeProxy
+      ? [address as `0x${string}`, contracts.ethBridgeProxy as `0x${string}`]
+      : undefined,
+    chainId: currentEthChainId,
+    query: { enabled: !!address && !!contracts.usdtEth && !!contracts.ethBridgeProxy && !isDemoMode }
+  });
+
+
   // Safe parsers for inputs to calculate live pool quotes
   const safeParseCaAmount = () => {
     try {
@@ -597,10 +631,13 @@ export default function App() {
     refetchCaBalance();
     refetchUsdtBotBalance();
     refetchUsdtBnbBalance();
+    refetchEthNativeBalance();
+    refetchUsdtEthBalance();
     refetchCaAllowance();
     refetchUsdtBotSwapAllowance();
     refetchUsdtBotBridgeAllowance();
     refetchUsdtBnbBridgeAllowance();
+    refetchUsdtEthBridgeAllowance();
     try {
       refetchCaToBotQuote();
       refetchV3PoolSlot0();
@@ -616,6 +653,26 @@ export default function App() {
       refreshAllBalances();
     }
   }, [address, isConnected, isMainnet]);
+
+  // TronLink: detect available account + poll USDT balance when TRX peer selected
+  useEffect(() => {
+    const isTrxPeer = bridgeDirection.includes('TRX');
+    if (!isTrxPeer) return;
+    let cancelled = false;
+    let intervalId: number | undefined;
+    const tick = async () => {
+      if (!isTronLinkAvailable()) return;
+      const addr = window.tronWeb?.defaultAddress?.base58 || tronAddress;
+      if (!addr) return;
+      if (!cancelled) setTronAddress(addr);
+      const bal = await fetchTronUsdtBalance(addr, isMainnet);
+      if (!cancelled) setTronUsdtBalance(bal);
+    };
+    tick();
+    intervalId = window.setInterval(tick, 12_000);
+    return () => { cancelled = true; if (intervalId) window.clearInterval(intervalId); };
+  }, [bridgeDirection, isMainnet, tronAddress]);
+
 
   // Save session to localStorage when it changes
   useEffect(() => {
@@ -674,10 +731,32 @@ export default function App() {
   };
 
   const handleToggleBridge = () => {
-    setBridgeDirection(prev => prev === 'BOT_TO_BNB' ? 'BNB_TO_BOT' : 'BOT_TO_BNB');
+    // Flip source ↔ destination within the currently selected peer
+    setBridgeDirection(prev => {
+      if (prev.startsWith('BOT_TO_')) {
+        const p = prev.slice(7);
+        return `${p}_TO_BOT` as typeof prev;
+      }
+      const p = prev.slice(0, 3);
+      return `BOT_TO_${p}` as typeof prev;
+    });
     setUsdtAmount('');
     setErrorMessage(null);
   };
+
+  const handleChangeBridgePeer = (p: 'BNB' | 'ETH' | 'TRX') => {
+    // Preserve current source side (BOT source stays BOT source)
+    setBridgeDirection(prev => (prev.startsWith('BOT_TO_')
+      ? (`BOT_TO_${p}` as any)
+      : (`${p}_TO_BOT` as any)));
+    setUsdtAmount('');
+    setErrorMessage(null);
+    // Try to fetch a Tron account when switching to TRX
+    if (p === 'TRX' && isTronLinkAvailable()) {
+      requestTronLinkAccounts().then(a => a && setTronAddress(a));
+    }
+  };
+
 
   const resetStep1 = () => {
     const updated = {
@@ -726,31 +805,48 @@ export default function App() {
     setErrorMessage(null);
   };
 
+  // Peer helpers for the BRIDGE tab
+  const bridgePeer: 'BNB' | 'ETH' | 'TRX' =
+    bridgeDirection.includes('ETH') ? 'ETH'
+    : bridgeDirection.includes('TRX') ? 'TRX'
+    : 'BNB';
+  const isBotSource = bridgeDirection.startsWith('BOT_TO_');
+  const peerChainId = (p: 'BNB' | 'ETH' | 'TRX'): number | null => {
+    if (p === 'BNB') return isMainnet ? 56 : 97;
+    if (p === 'ETH') return isMainnet ? 1 : 11155111;
+    return null; // TRX is non-EVM
+  };
+
   // Determine needed chain based on active screen and directions
   const targetChainIdForTab = (): number => {
     if (activeTab === 'CA/BOT' || activeTab === 'BOT/USDT' || activeTab === 'LIMIT') {
       return isMainnet ? 677 : 968; // BOT Chain
-    } else {
-      // BRIDGE tab
-      return bridgeDirection === 'BOT_TO_BNB'
-        ? (isMainnet ? 677 : 968) // BOT Chain
-        : (isMainnet ? 56 : 97);  // BNB Chain
     }
+    // BRIDGE tab
+    if (isBotSource) return isMainnet ? 677 : 968;
+    // Peer → BOT: EVM peers need chain switch; TRX has no EVM chain id, keep on BOT for network-correct check
+    const pid = peerChainId(bridgePeer);
+    return pid ?? (isMainnet ? 677 : 968);
   };
 
   const getChainForId = (chainId: number) => {
     if (chainId === 677) return botMainnet;
     if (chainId === 968) return botTestnet;
     if (chainId === 56) return bscMainnet;
-    return bscTestnet;
+    if (chainId === 97) return bscTestnet;
+    if (chainId === 1) return ethereum;
+    return sepolia;
   };
 
   const getExplorerPrefixForChain = (chainId: number) => {
     if (chainId === 677) return 'https://scan.botchain.ai/tx/';
     if (chainId === 968) return 'https://scan.bohr.life/tx/';
     if (chainId === 56) return 'https://bscscan.com/tx/';
-    return 'https://testnet.bscscan.com/tx/';
+    if (chainId === 97) return 'https://testnet.bscscan.com/tx/';
+    if (chainId === 1) return 'https://etherscan.io/tx/';
+    return 'https://sepolia.etherscan.io/tx/';
   };
+
 
   const waitForFinalReceipt = async (txHash: `0x${string}`, chainId: number) => {
     const client = createPublicClient({
@@ -1142,6 +1238,14 @@ export default function App() {
       return;
     }
 
+    // BOT_TO_TRX is intentionally gated: we do not yet have a verified
+    // registered destination chain id or Tron address encoding path on the
+    // BOT-side gateway. Sending with a wrong id/encoding is unrecoverable.
+    if (bridgeDirection === 'BOT_TO_TRX') {
+      setErrorMessage('BOT → Tron bridging is coming soon (awaiting registered destination id). Use Tron → BOT for now.');
+      return;
+    }
+
     const recipientAddr = (recipientParam || customDestinationAddress || address || "").trim();
 
     // SAFETY: BotBridge.deposit() credits the pegged USDT on the destination chain
@@ -1180,16 +1284,17 @@ export default function App() {
     } else {
       try {
         setIsActionLoading(true);
-        
-        if (bridgeDirection === 'BOT_TO_BNB') {
-          // USDT BOT -> USDT BNB
-          // SAFETY: Always route through the direct BotBridge `deposit` so we can
-          // pass an explicit `recipient` on the destination chain. FlowBridgeRouter
-          // v3 `bridgeWithFee(bridgeId, token, amount)` does NOT accept a recipient
-          // arg — BotBridge would see msg.sender = router contract and mint the
-          // pegged USDT on BSC to the router address (unrecoverable). Re-enable the
-          // v3 path only after the contract exposes a recipient parameter.
-          const parsedAmount = parseUnits(usdtAmount, 6);
+
+        // ============================================================
+        // BOT → {BNB, ETH} : source = BOT Chain, use botBridgeProxy
+        // (BOT_TO_TRX is gated above; do not send.)
+        // ============================================================
+        if (isBotSource) {
+          const parsedAmount = parseUnits(usdtAmount, 6); // BOT USDT = 6dp
+          const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
+          const destChainIdForBridge: bigint = bridgePeer === 'BNB'
+            ? (isMainnet ? 56n : 97n)
+            : /* ETH */ (isMainnet ? 1n : 11155111n);
 
           const allowance = rawUsdtBotBridgeAllowance ? BigInt(rawUsdtBotBridgeAllowance.toString()) : 0n;
           if (allowance < parsedAmount) {
@@ -1207,32 +1312,19 @@ export default function App() {
           }
 
           setActionStep('bridging_usdt');
-          const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
-          const destChainIdForBridge = isMainnet ? 56n : 97n;
-
           const txBridge = await writeContractAsync({
             address: contracts.botBridgeProxy as `0x${string}`,
-            abi: [
-              {
-                inputs: [
-                  { internalType: "uint256", name: "destinationChainId", type: "uint256" },
-                  { internalType: "bytes32", name: "resourceId", type: "bytes32" },
-                  { internalType: "address", name: "recipient", type: "address" },
-                  { internalType: "uint256", name: "amount", type: "uint256" }
-                ],
-                name: "deposit",
-                outputs: [],
-                stateMutability: "payable",
-                type: "function"
-              }
-            ],
+            abi: [{
+              inputs: [
+                { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+                { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+                { internalType: "address", name: "recipient", type: "address" },
+                { internalType: "uint256", name: "amount", type: "uint256" }
+              ],
+              name: "deposit", outputs: [], stateMutability: "payable", type: "function"
+            }],
             functionName: 'deposit',
-            args: [
-              destChainIdForBridge,
-              resourceId as `0x${string}`,
-              recipientAddr as `0x${string}`,
-              parsedAmount
-            ],
+            args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
             chainId: targetChainIdForTab(),
             gas: 1000000n
           } as any);
@@ -1245,11 +1337,9 @@ export default function App() {
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
 
-        } else {
-          // USDT BNB -> USDT BOT (Call deposit function on BotBridge proxy)
-          const parsedAmount = parseUnits(usdtAmount, 18); // standard 18 on BSC
-
-          // Check allowance of usdtBnb for bnbBridgeProxy
+        } else if (bridgePeer === 'BNB') {
+          // ================= BNB → BOT (existing path) =================
+          const parsedAmount = parseUnits(usdtAmount, 18);
           const allowance = rawUsdtBnbBridgeAllowance ? BigInt(rawUsdtBnbBridgeAllowance.toString()) : 0n;
           if (allowance < parsedAmount) {
             setActionStep('approving_usdt');
@@ -1266,38 +1356,26 @@ export default function App() {
           }
 
           setActionStep('bridging_usdt');
-          
-          // In standard ChainBridge architectures for Bohr, custom registered tokens have a 32-byte resource ID.
-          // The main stablecoin USDT maps to resource ID '0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d'
           const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
           const destChainIdForBridge = isMainnet ? 677n : 968n;
 
           const useBotGas = receiveBotGas;
           const txBridge = await writeContractAsync({
             address: contracts.bnbBridgeProxy as `0x${string}`,
-            abi: [
-              {
-                inputs: [
-                  { internalType: "uint256", name: "destinationChainId", type: "uint256" },
-                  { internalType: "bytes32", name: "resourceId", type: "bytes32" },
-                  { internalType: "address", name: "recipient", type: "address" },
-                  { internalType: "uint256", name: "amount", type: "uint256" }
-                ],
-                name: useBotGas ? "depositWithBotGas" : "deposit",
-                outputs: [],
-                stateMutability: "payable",
-                type: "function"
-              }
-            ],
+            abi: [{
+              inputs: [
+                { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+                { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+                { internalType: "address", name: "recipient", type: "address" },
+                { internalType: "uint256", name: "amount", type: "uint256" }
+              ],
+              name: useBotGas ? "depositWithBotGas" : "deposit",
+              outputs: [], stateMutability: "payable", type: "function"
+            }],
             functionName: useBotGas ? 'depositWithBotGas' : 'deposit',
-            args: [
-              destChainIdForBridge,
-              resourceId as `0x${string}`,
-              recipientAddr as `0x${string}`,
-              parsedAmount
-            ],
+            args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
             chainId: targetChainIdForTab(),
-            gas: 1000000n // plenty of gas to satisfy reentrancy sentry and handler subcalls
+            gas: 1000000n
           } as any);
 
           const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
@@ -1307,6 +1385,90 @@ export default function App() {
             step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
+
+        } else if (bridgePeer === 'ETH') {
+          // ================= ETH → BOT (new) =================
+          if (!contracts.ethBridgeProxy || contracts.ethBridgeProxy === '0x0000000000000000000000000000000000000000') {
+            throw new Error('Ethereum bridge is not configured on this network yet.');
+          }
+          const parsedAmount = parseUnits(usdtAmount, 6); // ERC-20 USDT = 6dp
+          const allowance = rawUsdtEthBridgeAllowance ? BigInt(rawUsdtEthBridgeAllowance.toString()) : 0n;
+          if (allowance < parsedAmount) {
+            setActionStep('approving_usdt');
+            await writeContractAsync({
+              address: contracts.usdtEth as `0x${string}`,
+              abi: ERC20_ABI,
+              functionName: 'approve',
+              args: [contracts.ethBridgeProxy as `0x${string}`, parsedAmount],
+              chainId: targetChainIdForTab(),
+              gas: 80000n
+            } as any);
+            await new Promise(r => setTimeout(r, 3000));
+            refetchUsdtEthBridgeAllowance();
+          }
+
+          setActionStep('bridging_usdt');
+          const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
+          const destChainIdForBridge = isMainnet ? 677n : 968n;
+          const txBridge = await writeContractAsync({
+            address: contracts.ethBridgeProxy as `0x${string}`,
+            abi: [{
+              inputs: [
+                { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+                { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+                { internalType: "address", name: "recipient", type: "address" },
+                { internalType: "uint256", name: "amount", type: "uint256" }
+              ],
+              name: "deposit", outputs: [], stateMutability: "payable", type: "function"
+            }],
+            functionName: 'deposit',
+            args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
+            chainId: targetChainIdForTab(),
+            gas: 600000n
+          } as any);
+
+          const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
+          if (!finalConfirmed) return;
+
+          await updateSession({
+            step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
+          });
+          logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
+
+        } else {
+          // ================= TRX → BOT (non-EVM, TronLink) =================
+          if (!isTronLinkAvailable()) throw new Error('TronLink not detected. Install TronLink to bridge from Tron.');
+          const tronOwner = tronAddress || await requestTronLinkAccounts();
+          if (!tronOwner) throw new Error('Unlock TronLink and select an account to continue.');
+          setTronAddress(tronOwner);
+
+          const parsedAmount = BigInt(Math.floor(parseFloat(usdtAmount) * 1_000_000)); // TRC-20 6dp
+          const currentAllowance = await fetchTronUsdtAllowance(tronOwner, contracts.tronBridgeProxy, isMainnet);
+          if (currentAllowance < parsedAmount) {
+            setActionStep('approving_usdt');
+            await tronApproveUsdt(parsedAmount, isMainnet);
+            await new Promise(r => setTimeout(r, 3000));
+          }
+
+          setActionStep('bridging_usdt');
+          const txid = await tronBridgeDepositToBot({
+            amountBase: parsedAmount,
+            recipientHexBot: recipientAddr,
+            isMainnet,
+          });
+
+          // Tron txids are 64 hex chars WITHOUT 0x. Store as-is.
+          await updateSession({
+            step3: { ...session.step3, status: 'submitted', tx_hash: txid, timestamp: Date.now() }
+          });
+          logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txid, 'SUCCESS');
+
+          setReceiptTxHash(txid);
+          setReceiptUrlPrefix(TRON_EXPLORER_TX_PREFIX);
+          setIsWaitingModalOpen(false);
+          setReceiptTxType('bridge');
+          setReceiptStatus('success');
+          setIsReceiptModalOpen(true);
         }
       } catch (err: any) {
         setErrorMessage(cleanError(err));
@@ -1314,9 +1476,14 @@ export default function App() {
       } finally {
         setIsActionLoading(false);
         refreshAllBalances();
+        // Refresh Tron balance if TronLink present
+        if (isTronLinkAvailable() && tronAddress) {
+          fetchTronUsdtBalance(tronAddress, isMainnet).then(setTronUsdtBalance).catch(() => {});
+        }
       }
     }
   };
+
 
   // Determine button displays and loading templates
   const caPaySymbol = caToBotDirection === 'CA_TO_BOT' ? 'CA' : 'BOT';
@@ -1349,15 +1516,21 @@ export default function App() {
   else if (botAmount) botButtonLabel = `Swap ${botPaySymbol} to ${botRecSymbol}`;
   let botButtonDisabled = isActionLoading || (isConnected && !botAmount && session.step2.status !== 'done');
   
-  const bridgeFromName = bridgeDirection === 'BOT_TO_BNB' ? "BOT Chain" : "BNB Chain";
-  const bridgeToName = bridgeDirection === 'BOT_TO_BNB' ? "BNB Chain" : "BOT Chain";
+  const peerName = bridgePeer === 'BNB' ? 'BNB Chain' : bridgePeer === 'ETH' ? 'Ethereum' : 'Tron';
+  const bridgeFromName = isBotSource ? 'BOT Chain' : peerName;
+  const bridgeToName = isBotSource ? peerName : 'BOT Chain';
   let bridgeButtonLabel = "Enter amount";
-  const usdtDecs = bridgeDirection === 'BOT_TO_BNB' ? 6 : 18;
-  const activeBridgeAllowance = bridgeDirection === 'BOT_TO_BNB' ? rawUsdtBotBridgeAllowance : rawUsdtBnbBridgeAllowance;
-  const isApprovedForBridge = isDemoMode || !usdtAmount ? true : (() => {
+  // Source-side USDT decimals: BOT/ETH/TRX use 6dp, BSC uses 18dp
+  const sourceUsdtDecs = isBotSource ? 6 : (bridgePeer === 'BNB' ? 18 : 6);
+  const activeBridgeAllowance = isBotSource
+    ? rawUsdtBotBridgeAllowance
+    : (bridgePeer === 'BNB' ? rawUsdtBnbBridgeAllowance
+      : bridgePeer === 'ETH' ? rawUsdtEthBridgeAllowance
+      : undefined /* TRX allowance is fetched imperatively */);
+  const isApprovedForBridge = isDemoMode || !usdtAmount || bridgePeer === 'TRX' ? true : (() => {
     if (activeBridgeAllowance === undefined) return false;
     try {
-      const parsed = parseUnits(usdtAmount, usdtDecs);
+      const parsed = parseUnits(usdtAmount, sourceUsdtDecs);
       return BigInt(activeBridgeAllowance.toString()) >= parsed;
     } catch {
       return false;
@@ -1388,7 +1561,8 @@ export default function App() {
     return parseFloat(formatUnits(BigInt(raw.toString()), decimals)).toFixed(4);
   };
 
-  const getBalanceDisplay = (type: 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB') => {
+  type BalanceType = 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB' | 'USDT_ETH' | 'USDT_TRX';
+  const getBalanceDisplay = (type: BalanceType) => {
     if (isDemoMode) {
       if (type === 'CA') return "100.0000";
       if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "50.0000";
@@ -1399,21 +1573,27 @@ export default function App() {
     if (type === 'CA') return rawCaBalance ? formatBalance(rawCaBalance, 18) : "0.00";
     if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "0.00";
     if (type === 'USDT_BOT') return rawUsdtBotBalance ? formatBalance(rawUsdtBotBalance, 6) : "0.00";
-    return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.00";
+    if (type === 'USDT_BNB') return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.00";
+    if (type === 'USDT_ETH') return rawUsdtEthBalance ? formatBalance(rawUsdtEthBalance, 6) : "0.00";
+    if (type === 'USDT_TRX') return tronUsdtBalance || "0.00";
+    return "0.00";
   };
 
-  const getExactBalanceAmount = (type: 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB') => {
+  const getExactBalanceAmount = (type: BalanceType) => {
     if (isDemoMode) return getBalanceDisplay(type).replace(/\s*FLOW$/, '');
     try {
       if (type === 'CA' && rawCaBalance) return formatUnits(BigInt(rawCaBalance.toString()), 18);
       if (type === 'BOT' && botBalance) return formatUnits(botBalance.value, botBalance.decimals);
       if (type === 'USDT_BOT' && rawUsdtBotBalance) return formatUnits(BigInt(rawUsdtBotBalance.toString()), 6);
       if (type === 'USDT_BNB' && rawUsdtBnbBalance) return formatUnits(BigInt(rawUsdtBnbBalance.toString()), 18);
+      if (type === 'USDT_ETH' && rawUsdtEthBalance) return formatUnits(BigInt(rawUsdtEthBalance.toString()), 6);
+      if (type === 'USDT_TRX') return tronUsdtBalance || '0';
     } catch {
       return getBalanceDisplay(type);
     }
     return getBalanceDisplay(type);
   };
+
 
   const getLiveBotPrice = () => {
     if (isDemoMode) return 9.7482;
@@ -1630,9 +1810,22 @@ export default function App() {
 
   const activeSwapButtonDisabled = isActionLoading || (isConnected && !botAmount && session.step2.status !== 'done') || isTradeLocked;
 
-  const activeTxPrefix = bridgeDirection === 'BOT_TO_BNB' 
-    ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
-    : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/');
+  // Explorer prefix for the *source* chain of the current bridge direction.
+  const bridgeSrcExplorerPrefix = (() => {
+    if (isBotSource) return isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/';
+    if (bridgePeer === 'BNB') return isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/';
+    if (bridgePeer === 'ETH') return isMainnet ? 'https://etherscan.io/tx/' : 'https://sepolia.etherscan.io/tx/';
+    return TRON_EXPLORER_TX_PREFIX;
+  })();
+  const bridgeDestExplorerBase = (() => {
+    if (isBotSource) {
+      if (bridgePeer === 'BNB') return isMainnet ? 'https://bscscan.com/' : 'https://testnet.bscscan.com/';
+      if (bridgePeer === 'ETH') return isMainnet ? 'https://etherscan.io/' : 'https://sepolia.etherscan.io/';
+      return 'https://tronscan.org/#/';
+    }
+    return isMainnet ? 'https://scan.botchain.ai/' : 'https://scan.bohr.life/';
+  })();
+  const activeTxPrefix = bridgeSrcExplorerPrefix;
 
   return (
     <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-center font-sans overflow-y-auto relative py-6 sm:py-8 gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
@@ -1930,21 +2123,46 @@ export default function App() {
               fromChain={bridgeFromName}
               toChain={bridgeToName}
               symbol="USDT"
-              balance={bridgeDirection === 'BOT_TO_BNB' ? getBalanceDisplay('USDT_BOT') : getBalanceDisplay('USDT_BNB')}
-              exactBalance={bridgeDirection === 'BOT_TO_BNB' ? getExactBalanceAmount('USDT_BOT') : getExactBalanceAmount('USDT_BNB')}
+              balance={
+                isBotSource
+                  ? getBalanceDisplay('USDT_BOT')
+                  : bridgePeer === 'BNB' ? getBalanceDisplay('USDT_BNB')
+                  : bridgePeer === 'ETH' ? getBalanceDisplay('USDT_ETH')
+                  : getBalanceDisplay('USDT_TRX')
+              }
+              exactBalance={
+                isBotSource
+                  ? getExactBalanceAmount('USDT_BOT')
+                  : bridgePeer === 'BNB' ? getExactBalanceAmount('USDT_BNB')
+                  : bridgePeer === 'ETH' ? getExactBalanceAmount('USDT_ETH')
+                  : getExactBalanceAmount('USDT_TRX')
+              }
               estimatedReceive={calculateBridgeReceive(usdtAmount)}
-              receiveAddress={customDestinationAddress || address || "Connect wallet to see address..."}
+              receiveAddress={
+                bridgeDirection === 'BOT_TO_TRX'
+                  ? (tronAddress || 'Connect TronLink to see address...')
+                  : (customDestinationAddress || address || 'Connect wallet to see address...')
+              }
               onToggleDirection={handleToggleBridge}
+              peer={bridgePeer}
+              onPeerChange={handleChangeBridgePeer}
               buttonLabel={bridgeButtonLabel}
               buttonDisabled={bridgeButtonDisabled}
               onSubmit={() => {
+                // TRX source uses TronLink signing — bypass EVM network check
+                if (bridgeDirection === 'TRX_TO_BOT') {
+                  if (!isTronLinkAvailable()) {
+                    setErrorMessage('TronLink not detected. Install TronLink to bridge from Tron.');
+                    return;
+                  }
+                  if (!isConnected) return handleConnect(); // still need BOT recipient
+                  if (usdtAmount) setIsConfirmDestinationOpen(true);
+                  return;
+                }
                 if (!isConnected) return handleConnect();
                 if (!isNetworkCorrect) return handleSwitchNetwork();
                 if (session.step3.status === 'submitted') {
-                  const explorePrefix = bridgeDirection === 'BOT_TO_BNB' 
-                    ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
-                    : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/');
-                  return window.open(`${explorePrefix}${session.step3.tx_hash ?? 'pending'}`, '_blank');
+                  return window.open(`${bridgeSrcExplorerPrefix}${session.step3.tx_hash ?? 'pending'}`, '_blank');
                 }
                 if (usdtAmount) {
                   setIsConfirmDestinationOpen(true);
@@ -1952,8 +2170,13 @@ export default function App() {
               }}
               successMessage={session.step3.status === 'submitted' ? 'Source-chain transaction confirmed. USDT is being relayed to the destination chain by the bridge validators.' : undefined}
               txHash={session.step3.status === 'submitted' ? session.step3.tx_hash ?? undefined : undefined}
-              txUrlPrefix={bridgeDirection === 'BOT_TO_BNB' ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/') : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')}
-              gasFeeLabel={bridgeDirection === 'BOT_TO_BNB' ? '≈ 0.095238 BOT' : '≈ 0.005 BNB'}
+              txUrlPrefix={bridgeSrcExplorerPrefix}
+              gasFeeLabel={
+                isBotSource ? '≈ 0.095238 BOT'
+                : bridgePeer === 'BNB' ? '≈ 0.005 BNB'
+                : bridgePeer === 'ETH' ? '≈ 0.003 ETH'
+                : '≈ 15 TRX'
+              }
               bridgeDirection={bridgeDirection}
               onReset={resetStep3}
               showReceiveBotGasOption={bridgeDirection === 'BNB_TO_BOT'}
@@ -1968,22 +2191,15 @@ export default function App() {
             />
           )}
 
+
           {activeTab === 'BRIDGE' && session.step3.status === 'submitted' && session.step3.tx_hash && (
             <div className="mt-4">
               <BridgeStatusPanel
                 txHash={session.step3.tx_hash}
                 bridgeDirection={bridgeDirection}
                 isMainnet={isMainnet}
-                sourceExplorerPrefix={
-                  bridgeDirection === 'BOT_TO_BNB'
-                    ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
-                    : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')
-                }
-                destExplorerPrefix={
-                  bridgeDirection === 'BOT_TO_BNB'
-                    ? (isMainnet ? 'https://bscscan.com/' : 'https://testnet.bscscan.com/')
-                    : (isMainnet ? 'https://scan.botchain.ai/' : 'https://scan.bohr.life/')
-                }
+                sourceExplorerPrefix={bridgeSrcExplorerPrefix}
+                destExplorerPrefix={bridgeDestExplorerBase}
               />
             </div>
           )}

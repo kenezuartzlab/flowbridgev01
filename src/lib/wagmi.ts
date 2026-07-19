@@ -62,8 +62,34 @@ export const bscTestnet = defineChain({
   testnet: true,
 });
 
+export const ethereum = defineChain({
+  id: 1,
+  name: 'Ethereum',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://eth.llamarpc.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'Etherscan', url: 'https://etherscan.io' },
+  },
+  testnet: false,
+});
+
+export const sepolia = defineChain({
+  id: 11155111,
+  name: 'Sepolia',
+  nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://ethereum-sepolia-rpc.publicnode.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'Etherscan', url: 'https://sepolia.etherscan.io' },
+  },
+  testnet: true,
+});
+
 export const wagmiConfig = createConfig({
-  chains: [botMainnet, bscMainnet, botTestnet, bscTestnet],
+  chains: [botMainnet, bscMainnet, botTestnet, bscTestnet, ethereum, sepolia],
   connectors: [
     injected(),
   ],
@@ -72,5 +98,8 @@ export const wagmiConfig = createConfig({
     [bscMainnet.id]: http(),
     [botTestnet.id]: http(),
     [bscTestnet.id]: http(),
+    [ethereum.id]: http(),
+    [sepolia.id]: http(),
   },
 });
+

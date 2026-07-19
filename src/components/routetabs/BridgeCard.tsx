@@ -4,6 +4,12 @@ import { WarningPanel } from './WarningPanel';
 import { FeePanel } from './FeePanel';
 import { TokenIcon } from '../TokenIcon';
 
+export type BridgePeer = 'BNB' | 'ETH' | 'TRX';
+export type BridgeDirection =
+  | 'BOT_TO_BNB' | 'BNB_TO_BOT'
+  | 'BOT_TO_ETH' | 'ETH_TO_BOT'
+  | 'BOT_TO_TRX' | 'TRX_TO_BOT';
+
 interface BridgeCardProps {
   amount: string;
   onAmountChange: (val: string) => void;
@@ -21,7 +27,9 @@ interface BridgeCardProps {
   buttonDisabled?: boolean;
   successMessage?: string;
   gasFeeLabel?: string;
-  bridgeDirection?: 'BOT_TO_BNB' | 'BNB_TO_BOT';
+  bridgeDirection?: BridgeDirection;
+  peer?: BridgePeer;
+  onPeerChange?: (peer: BridgePeer) => void;
   onReset?: () => void;
   txHash?: string;
   txUrlPrefix?: string;
@@ -47,6 +55,8 @@ export function BridgeCard({
   successMessage,
   gasFeeLabel = "≈ 0.095238 BOT",
   bridgeDirection = 'BOT_TO_BNB',
+  peer,
+  onPeerChange,
   onReset,
   txHash,
   txUrlPrefix,
@@ -54,6 +64,10 @@ export function BridgeCard({
   onReceiveBotGasChange,
   showReceiveBotGasOption = false
 }: BridgeCardProps) {
+  const activePeer: BridgePeer = peer
+    ?? (bridgeDirection.includes('ETH') ? 'ETH'
+      : bridgeDirection.includes('TRX') ? 'TRX'
+      : 'BNB');
   // Full-precision source for MAX / percentage math. Never round the wallet
   // balance — the bridge accepts arbitrary uint256, so passing the exact
   // wallet amount avoids "insufficient balance" reverts and dust left behind.
@@ -99,8 +113,32 @@ export function BridgeCard({
     estLen > 8  ? 'text-3xl' : 'text-4xl';
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4">
+      {/* PEER SELECTOR — pick the counter-chain (BNB / ETH / TRX). */}
+      {onPeerChange && (
+        <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-2xl p-2 flex items-center gap-1.5 font-mono">
+          <span className="text-[11px] font-black text-[#C5C1B9] uppercase tracking-widest px-2 shrink-0">Bridge with</span>
+          <div className="grid grid-cols-3 gap-1 flex-1">
+            {(['BNB', 'ETH', 'TRX'] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPeerChange(p)}
+                className={cn(
+                  'px-2 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all duration-150 active:scale-95 cursor-pointer border',
+                  activePeer === p
+                    ? 'bg-[#32FF8B]/15 text-[#32FF8B] border-[#32FF8B]/40 shadow-[0_0_10px_rgba(50,255,139,0.25)]'
+                    : 'bg-[#010C1B]/70 text-[#C5C1B9] border-white/10 hover:text-white hover:border-white/25'
+                )}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}
       <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-4.5 space-y-3 relative">
+
         {/* FROM BLOCK */}
         <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
           <div className="flex flex-col gap-2 border-b border-white/5 pb-2 min-w-0">

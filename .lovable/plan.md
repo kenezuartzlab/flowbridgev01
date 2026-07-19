@@ -1,95 +1,80 @@
+## Goal
+
+Extend the existing bridge from BOT↔BNB to also support **BOT↔ETH** (EVM) and **BOT↔TRX** (non-EVM via TronLink), driven by a destination dropdown inside the Bridge card. Zero regression to BOT↔BNB.
 
 ## Scope
 
-Integrate `FlowLimitOrderExecutor` v3 at `0x7FE51363C6694ACddf3EBBF64B2d4A7Ef970ecB4` (BOT mainnet) for three pair sets: **CA↔BOT** (routerId 0, CaSwap V2), **BOT↔USDT** (routerId 2, BDex V3, feePool 3000), **CA↔USDT** (single-hop not possible on-chain — see below). No bridge-flow changes; existing swap path is untouched.
+### 1. Config foundation (done)
+- Added ETH/Tron gateway + USDT addresses and a `USDT_BRIDGE_RESOURCE_ID` constant to `src/lib/contracts.ts`, sourced from `docs/bridge/README.md`.
 
-## Key contract facts (from on-chain ABI + source)
+### 2. Chain registration
+- Add `ethereum` (chainId 1, RPC `https://eth.llamarpc.com`, explorer `https://etherscan.io`) and `sepolia` (11155111) to `src/lib/wagmi.ts` with matching transports and register in `wagmiConfig.chains`.
 
-- `placeOrder(tokenIn, tokenOut, amountIn, minAmountOut, expiry, routerId, feePoolV3, recipient) payable → orderId`
-  - `msg.value` = **keeper bounty** (native BOT). Not a protocol fee. Recommend a sensible default (e.g. 0.001 BOT) with UI override.
-  - Protocol placement fee = `placementFeeBps` of `amountIn` in `tokenIn` (currently `0`).
-  - `tokenIn` is transferred via `safeTransferFrom` → **native BOT is not accepted as `tokenIn`**. Users placing a `BOT → X` order must wrap to WBOT first (standard `wbot`, since V3 uses `wbot`; CaSwap V2 uses `caWbot` — see routing table below).
-  - `recipient = address(0)` defaults to `msg.sender`.
-- `executeOrder(orderId, v2Path)` — V2 fills; `executeOrderMultiHop(orderId, routerIds[], paths[][], minAmountsPerHop[])` — cross-router fills. Keepers execute; we do not.
-- Events: `OrderPlaced`, `OrderFilled`, `OrderCancelled` — all indexed by `orderId`.
-- Views: `getOrder(id)`, `getActiveUserOrders(user)`, `getOpenOrdersPaginated(user, offset, limit)`, `openOrderCount(user)`, `maxOrdersPerUser`, `computePlacementFee(user, amountIn)`, `paused()`.
+### 3. Bridge direction model
+- Replace the two-value `bridgeDirection` union in `src/App.tsx` with:
+  ```
+  type BridgePeer = 'BNB' | 'ETH' | 'TRX';
+  type BridgeSide = 'OUT' | 'IN'; // OUT = BOT→peer, IN = peer→BOT
+  ```
+  Store `{ peer, side }` in state. Derive legacy `BOT_TO_X`/`X_TO_BOT` strings where still needed for logging/labels.
+- Chain-id lookup table keyed by `peer` + `isMainnet` (BNB → 56/97, ETH → 1/11155111, TRX → no EVM id).
+- Bridge-gateway + USDT-address + decimals lookup keyed by peer (BNB: 18, ETH: 6, TRX: 6).
 
-## Routing table (per pair)
+### 4. UI: destination dropdown in `BridgeCard`
+- Add a compact "Destination" segmented dropdown at the top of the card (`BNB · ETH · TRX`) with the token icon. Selecting a peer updates parent state via a new `onPeerChange` prop.
+- The existing swap-direction toggle stays; it flips OUT/IN for the selected peer.
+- Show a small non-blocking note for TRX: "Signed via TronLink (base58)."
+- When peer is TRX and TronLink isn't detected, the CTA becomes "Install TronLink" linking to `https://www.tronlink.org/`.
 
-| Pair | Direction | routerId | feePoolV3 | tokenIn / tokenOut on-chain |
-|---|---|---|---|---|
-| BOT ↔ USDT | BOT→USDT | 2 | 3000 | WBOT (`wbot`) → USDT |
-|  | USDT→BOT | 2 | 3000 | USDT → WBOT (`wbot`) |
-| CA ↔ BOT | CA→BOT | 0 | 0 | CA → caWBOT |
-|  | BOT→CA | 0 | 0 | caWBOT → CA |
-| CA ↔ USDT | — | n/a | — | Requires V2+V3 multi-hop — **not placeable as a single limit order** in v3 executor (routerId is scalar). Excluded from placement; user is shown "route unsupported for limit orders — use instant swap". |
+### 5. Recipient handling
+- Keep 0x…40-hex validation for BNB and ETH.
+- For TRX, validate base58 T-addresses (34 chars, starts with `T`) using a lightweight regex + `window.tronWeb.isAddress` when present.
+- Auto-populate recipient with the connected EVM address (BNB/ETH) or the TronLink address (TRX). Allow override via the existing `ConfirmDestinationModal`.
 
-Rationale: `placeOrder` stores a single `routerId`. `executeOrderMultiHop` allows multi-router fill, but placement itself still binds one `routerId`; the multi-hop path is intended for same-router chained pools, not CA→BOT(V2)→USDT(V3). Keeping CA↔USDT out of Phase 3 avoids an unfillable order. We can add it in a later phase once we design a two-order primitive or upstream contract change.
+### 6. Execution paths
+Refactor `completeStep3` into a peer-dispatched flow (keep the current BNB code exactly as-is inside the `peer === 'BNB'` branch):
 
-## New UI
+- **BOT→peer (OUT)** for BNB/ETH/TRX peers:
+  Call `botBridgeProxy.deposit(destChainId, USDT_BRIDGE_RESOURCE_ID, recipient, amount)` on BOT Chain. For TRX destination, use TRX's registered destination chain id from docs (published as decimal in the BOT registry; use `728126428` — the standard BOT Chain Bridge Tron chain id — but read it from a `TRX_DEST_CHAIN_ID` constant so we can adjust). For the ETH destination, `destChainId = isMainnet ? 1n : 11155111n`.
 
-Add a fourth tab `LIMIT` in `RouteTabs.tsx` with a new `LimitOrderCard.tsx` under `src/components/routetabs/limit/`.
+- **BNB→BOT / ETH→BOT (IN, EVM)**:
+  Approve USDT on the external gateway, then `bnbBridgeProxy.deposit(...)` / `ethBridgeProxy.deposit(...)` with `destChainId = 677n | 968n`. Reuses the existing BNB code path — ETH is the same shape.
 
-```text
-┌────────────────────────────────────────┐
-│  You pay      [BOT ▼]     [1.0]        │
-│  You receive  [USDT ▼]    [ ~ 0.098 ]  │
-│  Limit price  [1 BOT = 0.10 USDT]      │
-│  Expires in   [24h ▼]  Custom recipient│
-│  Keeper tip   [0.001 BOT] (advanced)   │
-│                                        │
-│  Live quote: 0.096 USDT (spot)         │
-│  Placement fee: 0 %  (on-chain)        │
-│  ──────────────────────────────────    │
-│  [Approve WBOT] → [Place Limit Order]  │
-└────────────────────────────────────────┘
+- **TRX→BOT (IN, non-EVM)**:
+  New helper `src/lib/tronBridge.ts`:
+  - Detect `window.tronWeb?.ready`.
+  - Build TRC-20 approve for `usdtTron` → `tronBridgeProxy`.
+  - Call `tronBridgeProxy.deposit(destChainId, resourceId, recipientHex, amount)` via `tronWeb.transactionBuilder.triggerSmartContract`, sign with `tronWeb.trx.sign`, broadcast with `tronWeb.trx.sendRawTransaction`.
+  - Return tx hash; explorer prefix `https://tronscan.org/#/transaction/`.
 
-Below: Active Orders list — id, pair, amount, limit, status, expiry, cancel.
-```
+### 7. Balances + allowances
+- Add `useReadContract` reads for USDT-ETH balance/allowance on Ethereum chain (mirrors the existing BNB reads).
+- Add a TronLink balance fetch via `tronWeb.contract().at(usdtTron).balanceOf(base58Addr).call()` on peer change / interval.
+- `BridgeCard` `balance` / `exactBalance` / `symbol` come from the peer lookup.
 
-Pre-flight validations (all on-chain; block submit if any fails):
-1. `paused() == false`
-2. Pair maps to a known routerId in the table above; otherwise disabled.
-3. `openOrderCount(user) < maxOrdersPerUser`.
-4. `tokenIn.balanceOf(user) >= amountIn`.
-5. `tokenIn.allowance(user, executor) >= amountIn` (else show Approve step; approve exact `amountIn`).
-6. For BOT-in orders: native BOT balance ≥ `amountIn + keeperBounty + gas headroom` for the wrap step, and WBOT balance/allowance check after wrap.
-7. `expiry == 0 || expiry > now + 60s`.
-8. `minAmountOut > 0`; warn if `minAmountOut` deviates from live spot by > slippage bound (default 5%).
-9. `computePlacementFee(user, amountIn)` — display exact deduction; adjust displayed escrow.
+### 8. Status panel
+- Extend `REQUIRED_CONFIRMATIONS` in `BridgeStatusPanel` with ETH mainnet (`12`) and Sepolia (`3`). Add a TRX branch that skips the EVM `getTransactionReceipt` polling and instead polls `tronWeb.trx.getTransactionInfo(hash)` for `blockNumber`; require ≥19 confirmations on Tron mainnet.
 
-## Event-driven state (fulfillment tracking)
+### 9. Safety guards (non-negotiable)
+- Reject if `peer==='ETH'` and `ethBridgeProxy === zeroAddress` (testnet stub) — button shows "ETH bridge unavailable on testnet".
+- Reject if `peer==='TRX'` and `tronBridgeProxy === ''` on testnet.
+- Reject if recipient fails the peer-specific format check.
+- Enforce `> 10 USDT` minimum for every direction.
+- Fee logic:
+  - Into BOT (peer→BOT): 0 USDT.
+  - Out of BOT (BOT→peer): `max(amount * 0.001, 1 USDT)` — display separately and included in the receive estimate.
 
-- On `placeOrder` tx confirmation, decode `OrderPlaced` from the receipt to capture the definitive `orderId`; only then move UI state from `submitting` → `open`.
-- Subscribe with `publicClient.watchContractEvent` filtered by `creator = user` for `OrderPlaced` / `OrderCancelled`, and by `orderId` for `OrderFilled` on active orders. Reconcile any missed events on mount via `getActiveUserOrders(user)` + `getOrder(id)`.
-- UI status transitions only on confirmed events:
-  - `submitting` (tx sent) → `open` (OrderPlaced) → `filled` (OrderFilled) or `cancelled` (OrderCancelled) or `expired` (derived from `expiry < now` + `status == OPEN`).
-- Persist a lightweight `{orderId → localMeta}` map in localStorage keyed by chain+user (for pair symbols, submitted keeper tip, ui timestamps). Ground truth is always the contract.
+### 10. Copy + logging
+- `logTransactionToDb('BRIDGE', <peer>_<side>, ...)` uses the derived legacy string so history stays consistent.
+- Explorer prefixes lookup by peer (`bscscan` / `etherscan` / `tronscan`).
 
-## Files & edits
+## Non-goals
+- No changes to swap, limit-order, rewards, or auth code.
+- No wagmi connector for Tron (TronLink exposes `window.tronWeb` directly — no adapter needed).
+- No new tables or migrations.
 
-- `src/lib/contracts.ts` — add `flowLimitOrderExecutor` address (mainnet only for now; testnet address left blank + a runtime guard) and `FLOW_LIMIT_ORDER_EXECUTOR_ABI` (placeOrder / cancelOrder / getOrder / getActiveUserOrders / openOrderCount / maxOrdersPerUser / computePlacementFee / paused, plus events OrderPlaced/OrderFilled/OrderCancelled).
-- `src/lib/limitOrders/routing.ts` (new) — pure mapping `(tokenIn, tokenOut) → { routerId, feePoolV3, onchainTokenIn, onchainTokenOut, needsWrapBOT }`. Single source of truth for the routing table above.
-- `src/lib/limitOrders/executor.ts` (new) — thin wagmi/viem helpers: `placeLimitOrder`, `cancelLimitOrder`, `fetchActiveOrders`, `watchUserOrderEvents`, `decodePlacedOrderId`.
-- `src/lib/limitOrders/preflight.ts` (new) — the validation checklist above; returns a discriminated result the UI renders.
-- `src/components/routetabs/limit/LimitOrderCard.tsx` (new) — the form + validation UI. Reuses existing `TokenPickerModal`, `SlippagePopover`.
-- `src/components/routetabs/limit/ActiveOrdersList.tsx` (new) — list + cancel + event subscription.
-- `src/components/routetabs/RouteTabs.tsx` — add `'LIMIT'` tab id.
-- `src/App.tsx` — wire the new tab to render `LimitOrderCard` and `ActiveOrdersList`; add a WBOT wrap/unwrap helper for BOT-in / BOT-out orders (uses standard `wbot`; for CA↔BOT the executor holds `CA` on CA→BOT orders and `caWBOT` will be unwrapped by the router at fill time to native BOT — verify with dry `eth_call`).
-
-## Verification before ship
-
-1. `tsgo` clean.
-2. `eth_call` dry-run: `paused()`, `placementFeeBps()`, `maxOrdersPerUser()`, `openOrderCount(0xDEAD)` — sanity on ABI + address.
-3. `eth_call` dry-run `placeOrder` for USDT→BOT with a funded impersonated address (via state override) to confirm the call succeeds and to sanity-check that BOT-out orders leave WBOT unwrapping to the keeper filler path.
-4. Live: place a small USDT→BOT order at a limit close to spot, watch keeper fill, confirm `OrderFilled` event arrives and UI flips to `filled`.
-
-## Explicit non-goals this phase
-
-- CA↔USDT limit orders (unfillable as single order; needs product decision).
-- Running our own keeper — external keepers fill; we only place / cancel / display.
-- Editing bridge, swap, or fee flows.
-
-## One question before I build
-
-CA↔USDT limit orders can't be a single on-chain order in v3 — the executor stores one `routerId`, and no keeper will fill a V2→V3 chain. I plan to **disable** CA↔USDT in the limit UI with a helpful message and keep CA↔BOT / BOT↔USDT / USDT↔BOT / BOT↔CA / USDT↔CA-via-instant-swap fallback. Confirm this is acceptable, or reply "simulate CA↔USDT as two chained orders" and I'll add a client-side two-order primitive (place USDT→BOT, then auto-place BOT→CA after the first fills — brittle but doable).
+## Verification
+- Build passes with strict TS.
+- Manual: switch BNB/ETH/TRX in the dropdown, verify balances render, verify the OUT/IN toggle correctly swaps source/destination labels, verify the CTA disables correctly for testnet-unavailable peers and for missing TronLink, verify recipient validation rejects mismatched formats (0x for TRX, T… for EVM).
+- eth_call simulate the ETH→BOT `deposit` before signing to catch address-mismatch reverts early.
+- Regression: BOT↔BNB path executes byte-for-byte the same calldata as today.
