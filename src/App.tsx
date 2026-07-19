@@ -659,22 +659,65 @@ export default function App() {
 
   // TronLink: detect available account + poll USDT balance when TRX peer selected
   useEffect(() => {
+  // TronLink: detect + poll status whenever TRX peer is selected. Handles
+  // late injection (extension often injects tronWeb after page load), account
+  // switches, and lock/unlock without a page reload.
+  useEffect(() => {
     const isTrxPeer = bridgeDirection.includes('TRX');
     if (!isTrxPeer) return;
     let cancelled = false;
-    let intervalId: number | undefined;
-    const tick = async () => {
-      if (!isTronLinkAvailable()) return;
-      const addr = window.tronWeb?.defaultAddress?.base58 || tronAddress;
-      if (!addr) return;
-      if (!cancelled) setTronAddress(addr);
-      const bal = await fetchTronUsdtBalance(addr, isMainnet);
-      if (!cancelled) setTronUsdtBalance(bal);
+
+    const refreshStatus = async () => {
+      const status = getTronStatus();
+      if (cancelled) return;
+      setTronStatus(status);
+      const addr = window.tronWeb?.defaultAddress?.base58 || null;
+      setTronAddress(addr);
+      if (addr) {
+        try {
+          const bal = await fetchTronUsdtBalance(addr, isMainnet);
+          if (!cancelled) setTronUsdtBalance(bal);
+        } catch { /* ignore transient */ }
+      } else {
+        setTronUsdtBalance('0');
+      }
     };
-    tick();
-    intervalId = window.setInterval(tick, 12_000);
-    return () => { cancelled = true; if (intervalId) window.clearInterval(intervalId); };
-  }, [bridgeDirection, isMainnet, tronAddress]);
+
+    // Wait for late injection then refresh.
+    waitForTronWeb(8000).then(() => { if (!cancelled) refreshStatus(); });
+    refreshStatus();
+    const intervalId = window.setInterval(refreshStatus, 8000);
+    const unsub = subscribeTronLink(refreshStatus);
+    return () => { cancelled = true; window.clearInterval(intervalId); unsub(); };
+  }, [bridgeDirection, isMainnet]);
+
+  // User-triggered TronLink connect (retry-safe). Surfaces friendly errors.
+  const handleConnectTron = async () => {
+    setErrorMessage(null);
+    setTronConnecting(true);
+    try {
+      const ok = await waitForTronWeb(2000);
+      if (!ok) {
+        setTronStatus('unavailable');
+        throw new Error('TronLink not detected. Install the TronLink browser extension, then click Retry.');
+      }
+      const addr = await requestTronLinkAccounts();
+      if (!addr) {
+        setTronStatus('locked');
+        throw new Error('Unlock TronLink and select an account, then click Retry.');
+      }
+      setTronAddress(addr);
+      setTronStatus('ready');
+      try {
+        const bal = await fetchTronUsdtBalance(addr, isMainnet);
+        setTronUsdtBalance(bal);
+      } catch { /* ignore */ }
+    } catch (e: any) {
+      setErrorMessage(e?.message || 'Failed to connect TronLink. Try again.');
+    } finally {
+      setTronConnecting(false);
+    }
+  };
 
 
   // Save session to localStorage when it changes
