@@ -707,10 +707,32 @@ export default function App() {
   };
 
   const handleToggleBridge = () => {
-    setBridgeDirection(prev => prev === 'BOT_TO_BNB' ? 'BNB_TO_BOT' : 'BOT_TO_BNB');
+    // Flip source ↔ destination within the currently selected peer
+    setBridgeDirection(prev => {
+      if (prev.startsWith('BOT_TO_')) {
+        const p = prev.slice(7);
+        return `${p}_TO_BOT` as typeof prev;
+      }
+      const p = prev.slice(0, 3);
+      return `BOT_TO_${p}` as typeof prev;
+    });
     setUsdtAmount('');
     setErrorMessage(null);
   };
+
+  const handleChangeBridgePeer = (p: 'BNB' | 'ETH' | 'TRX') => {
+    // Preserve current source side (BOT source stays BOT source)
+    setBridgeDirection(prev => (prev.startsWith('BOT_TO_')
+      ? (`BOT_TO_${p}` as any)
+      : (`${p}_TO_BOT` as any)));
+    setUsdtAmount('');
+    setErrorMessage(null);
+    // Try to fetch a Tron account when switching to TRX
+    if (p === 'TRX' && isTronLinkAvailable()) {
+      requestTronLinkAccounts().then(a => a && setTronAddress(a));
+    }
+  };
+
 
   const resetStep1 = () => {
     const updated = {
