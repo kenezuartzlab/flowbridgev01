@@ -656,7 +656,8 @@ export default function App() {
 
   // TronLink: detect available account + poll USDT balance when TRX peer selected
   useEffect(() => {
-    if (bridgePeer !== 'TRX') return;
+    const isTrxPeer = bridgeDirection.includes('TRX');
+    if (!isTrxPeer) return;
     let cancelled = false;
     let intervalId: number | undefined;
     const tick = async () => {
@@ -670,7 +671,7 @@ export default function App() {
     tick();
     intervalId = window.setInterval(tick, 12_000);
     return () => { cancelled = true; if (intervalId) window.clearInterval(intervalId); };
-  }, [bridgePeer, isMainnet, tronAddress]);
+  }, [bridgeDirection, isMainnet, tronAddress]);
 
 
   // Save session to localStorage when it changes
