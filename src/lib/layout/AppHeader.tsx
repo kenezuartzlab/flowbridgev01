@@ -28,6 +28,15 @@ interface AppHeaderProps {
   onRewardsClick?: () => void;
   googleUser?: any;
   setGoogleUser?: (user: any) => void;
+  /** Active source network label, e.g. "BOT", "BNB", "ETH", "TRON". Drives which wallet pill is primary. */
+  activeNetworkLabel?: string;
+  /** When TRON is the active source, pass the base58 address so it becomes the primary pill. */
+  tronAddress?: string | null;
+  /** Called when user clicks Connect on the Tron pill (TRON active + not connected). */
+  onConnectTron?: () => void;
+  /** Secondary/recipient chip (the counterparty address, shown below the primary pill). */
+  recipientAddress?: string | null;
+  recipientLabel?: string;
 }
 
 export function AppHeader({
@@ -45,6 +54,11 @@ export function AppHeader({
   onRewardsClick,
   googleUser,
   setGoogleUser,
+  activeNetworkLabel,
+  tronAddress,
+  onConnectTron,
+  recipientAddress,
+  recipientLabel,
 }: AppHeaderProps) {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -203,11 +217,19 @@ export function AppHeader({
 
         {/* Actions: wallet + one menu button */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <WalletPill
-            address={walletAddress}
-            onConnect={onConnect}
-            onDisconnect={onDisconnect}
-          />
+          {activeNetworkLabel === 'TRON' ? (
+            <WalletPill
+              address={tronAddress || null}
+              onConnect={onConnectTron}
+              onDisconnect={undefined}
+            />
+          ) : (
+            <WalletPill
+              address={walletAddress}
+              onConnect={onConnect}
+              onDisconnect={onDisconnect}
+            />
+          )}
 
           <div className="relative" ref={menuRef}>
             <button
@@ -267,6 +289,19 @@ export function AppHeader({
           </div>
         </div>
       </div>
+
+      {recipientAddress && (
+        <div className="flex items-center justify-end gap-2 px-3 sm:px-4 pb-2 -mt-1">
+          <div className="flex items-center gap-1.5 bg-[#0D1C2A]/60 border border-white/5 rounded-lg px-2 py-1">
+            <span className="text-[9px] tracking-[0.2em] uppercase text-[#C5C1B9]/60 font-black">
+              {recipientLabel || 'Recipient'}
+            </span>
+            <span className="text-[11px] font-mono font-bold text-[#F0F7F3]/85">
+              {`${recipientAddress.slice(0, 6)}…${recipientAddress.slice(-4)}`}
+            </span>
+          </div>
+        </div>
+      )}
 
       {isUnverified && (
         <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-amber-950/20 border-t border-amber-500/10 text-amber-200 text-[12px] font-mono select-none">

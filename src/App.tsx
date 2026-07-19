@@ -1886,30 +1886,61 @@ export default function App() {
 
       {/* Styled Phone/DApp Frame container matching Ecosurge Tech-Forward theme */}
       <div className="w-full sm:w-[410px] h-[100dvh] sm:h-[780px] bg-[#010C1B] sm:rounded-[36px] sm:border-[8px] border-[#0D1C2A] shadow-[0_0_60px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col relative z-10">
-        <AppHeader 
-          isMainnet={isMainnet}
-          walletAddress={address}
-          onConnect={handleConnect}
-          onDisconnect={handleDisconnect}
-          onToggleMainnet={handleToggleMainnet}
-          isDemoMode={isDemoMode}
-          onToggleDemoMode={handleToggleDemoMode}
-          isPresentationMode={isPresentationMode}
-          onTogglePresentationMode={handleTogglePresentationMode}
-          theme={theme}
-          onToggleTheme={handleToggleTheme}
-          onShowHistory={() => setIsHistoryModalOpen(true)}
-          onDonateClick={() => {
-            setDonateModalInitialTab('donate');
-            setIsDonateModalOpen(true);
-          }}
-          onRewardsClick={() => {
-            setDonateModalInitialTab('incentives');
-            setIsDonateModalOpen(true);
-          }}
-          googleUser={googleUser}
-          setGoogleUser={setGoogleUser}
-        />
+        {(() => {
+          const isBridgeTab = activeTab === 'BRIDGE';
+          const isTronSource = isBridgeTab && bridgeDirection === 'TRX_TO_BOT';
+          const activeNetworkLabel = !isBridgeTab
+            ? 'BOT'
+            : bridgeDirection.startsWith('BOT_TO_')
+              ? 'BOT'
+              : bridgeDirection === 'BNB_TO_BOT' ? 'BNB'
+              : bridgeDirection === 'ETH_TO_BOT' ? 'ETH'
+              : bridgeDirection === 'TRX_TO_BOT' ? 'TRON'
+              : 'BOT';
+          // Recipient chip = counterparty address (the other wallet), only when relevant.
+          let recipientAddress: string | null = null;
+          let recipientLabel: string | undefined;
+          if (isBridgeTab) {
+            if (isTronSource && address) {
+              recipientAddress = address; // BOT chain recipient
+              recipientLabel = 'To BOT';
+            } else if (bridgeDirection === 'BOT_TO_TRX' && tronAddress) {
+              recipientAddress = tronAddress;
+              recipientLabel = 'To TRON';
+            }
+          }
+          return (
+            <AppHeader
+              isMainnet={isMainnet}
+              walletAddress={address}
+              onConnect={handleConnect}
+              onDisconnect={handleDisconnect}
+              onToggleMainnet={handleToggleMainnet}
+              isDemoMode={isDemoMode}
+              onToggleDemoMode={handleToggleDemoMode}
+              isPresentationMode={isPresentationMode}
+              onTogglePresentationMode={handleTogglePresentationMode}
+              theme={theme}
+              onToggleTheme={handleToggleTheme}
+              onShowHistory={() => setIsHistoryModalOpen(true)}
+              onDonateClick={() => {
+                setDonateModalInitialTab('donate');
+                setIsDonateModalOpen(true);
+              }}
+              onRewardsClick={() => {
+                setDonateModalInitialTab('incentives');
+                setIsDonateModalOpen(true);
+              }}
+              googleUser={googleUser}
+              setGoogleUser={setGoogleUser}
+              activeNetworkLabel={activeNetworkLabel}
+              tronAddress={tronAddress}
+              onConnectTron={handleConnectTron}
+              recipientAddress={recipientAddress}
+              recipientLabel={recipientLabel}
+            />
+          );
+        })()}
         
         <RouteTabs
           activeTab={activeTab}
