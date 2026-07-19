@@ -36,6 +36,11 @@ interface BridgeCardProps {
   receiveBotGas?: boolean;
   onReceiveBotGasChange?: (checked: boolean) => void;
   showReceiveBotGasOption?: boolean;
+  /** TronLink readiness — only used when peer === 'TRX'. */
+  tronStatus?: 'unavailable' | 'locked' | 'ready';
+  tronAddress?: string;
+  tronConnecting?: boolean;
+  onConnectTron?: () => void;
 }
 
 export function BridgeCard({
