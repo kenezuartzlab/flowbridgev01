@@ -2196,8 +2196,8 @@ export default function App() {
               onSubmit={() => {
                 // TRX source uses TronLink signing — bypass EVM network check
                 if (bridgeDirection === 'TRX_TO_BOT') {
-                  if (!isTronLinkAvailable()) {
-                    setErrorMessage('TronLink not detected. Install TronLink to bridge from Tron.');
+                  if (tronStatus !== 'ready') {
+                    handleConnectTron();
                     return;
                   }
                   if (!isConnected) return handleConnect(); // still need BOT recipient
