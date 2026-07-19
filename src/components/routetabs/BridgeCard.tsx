@@ -1,4 +1,4 @@
-import { ArrowDownUp } from 'lucide-react';
+import { ArrowDownUp, Loader2, ExternalLink } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { WarningPanel } from './WarningPanel';
 import { FeePanel } from './FeePanel';
@@ -36,6 +36,11 @@ interface BridgeCardProps {
   receiveBotGas?: boolean;
   onReceiveBotGasChange?: (checked: boolean) => void;
   showReceiveBotGasOption?: boolean;
+  /** TronLink readiness — only used when peer === 'TRX'. */
+  tronStatus?: 'unavailable' | 'locked' | 'ready';
+  tronAddress?: string;
+  tronConnecting?: boolean;
+  onConnectTron?: () => void;
 }
 
 export function BridgeCard({
@@ -62,7 +67,11 @@ export function BridgeCard({
   txUrlPrefix,
   receiveBotGas = false,
   onReceiveBotGasChange,
-  showReceiveBotGasOption = false
+  showReceiveBotGasOption = false,
+  tronStatus,
+  tronAddress,
+  tronConnecting = false,
+  onConnectTron,
 }: BridgeCardProps) {
   const activePeer: BridgePeer = peer
     ?? (bridgeDirection.includes('ETH') ? 'ETH'
@@ -134,6 +143,68 @@ export function BridgeCard({
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* TRON LINK STATUS — only when the TRX peer is selected. Guides the
+          user through Install / Unlock / Connected states with a retry CTA. */}
+      {activePeer === 'TRX' && tronStatus && (
+        <div
+          className={cn(
+            'rounded-2xl border p-3.5 flex items-start gap-3 font-sans shadow-inner',
+            tronStatus === 'ready'
+              ? 'bg-[#32FF8B]/10 border-[#32FF8B]/25 text-[#32FF8B]'
+              : tronStatus === 'locked'
+                ? 'bg-[#F6BA00]/10 border-[#F6BA00]/25 text-amber-200'
+                : 'bg-[#FC4447]/10 border-[#FC4447]/25 text-red-200'
+          )}
+        >
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] uppercase tracking-widest font-black font-mono mb-1">
+              {tronStatus === 'ready' ? 'TronLink Connected' : tronStatus === 'locked' ? 'Unlock TronLink' : 'TronLink Not Detected'}
+            </div>
+            {tronStatus === 'ready' && tronAddress ? (
+              <div className="text-[12px] font-mono break-all text-white/85">
+                {tronAddress.slice(0, 10)}…{tronAddress.slice(-8)}
+              </div>
+            ) : tronStatus === 'locked' ? (
+              <div className="text-[12px] text-white/75 leading-relaxed">
+                Open the TronLink extension, unlock it, and select an account. Then click Retry.
+              </div>
+            ) : (
+              <div className="text-[12px] text-white/75 leading-relaxed">
+                Install the TronLink browser extension to sign Tron (TRC-20) transactions.
+              </div>
+            )}
+          </div>
+          {tronStatus === 'unavailable' ? (
+            <a
+              href="https://www.tronlink.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white text-[11px] font-black uppercase tracking-widest font-mono transition"
+            >
+              Install <ExternalLink className="w-3 h-3" />
+            </a>
+          ) : tronStatus === 'locked' ? (
+            <button
+              type="button"
+              onClick={onConnectTron}
+              disabled={tronConnecting}
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#F6BA00]/20 hover:bg-[#F6BA00]/30 border border-[#F6BA00]/40 text-[#F6BA00] text-[11px] font-black uppercase tracking-widest font-mono transition disabled:opacity-60"
+            >
+              {tronConnecting ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+              {tronConnecting ? 'Connecting…' : 'Retry'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onConnectTron}
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#32FF8B]/15 hover:bg-[#32FF8B]/25 border border-[#32FF8B]/40 text-[#32FF8B] text-[11px] font-black uppercase tracking-widest font-mono transition"
+            >
+              Refresh
+            </button>
+          )}
         </div>
       )}
       {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}

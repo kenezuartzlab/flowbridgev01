@@ -7,7 +7,8 @@ import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } fro
 import {
   isTronLinkAvailable, requestTronLinkAccounts, isValidTronAddress,
   fetchTronUsdtBalance, fetchTronUsdtAllowance, tronApproveUsdt, tronBridgeDepositToBot,
-  TRON_EXPLORER_TX_PREFIX,
+  TRON_EXPLORER_TX_PREFIX, getTronStatus, subscribeTronLink, waitForTronWeb,
+  type TronStatus,
 } from './lib/tronBridge';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
 import { AppHeader } from './lib/layout/AppHeader';
@@ -339,6 +340,8 @@ export default function App() {
   const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT' | 'BOT_TO_ETH' | 'ETH_TO_BOT' | 'BOT_TO_TRX' | 'TRX_TO_BOT'>('BOT_TO_BNB');
   const [tronAddress, setTronAddress] = useState<string | null>(null);
   const [tronUsdtBalance, setTronUsdtBalance] = useState<string>('0');
+  const [tronStatus, setTronStatus] = useState<TronStatus>('unavailable');
+  const [tronConnecting, setTronConnecting] = useState(false);
   const [receiveBotGas, setReceiveBotGas] = useState<boolean>(false);
   const [isBotGasNoticeOpen, setIsBotGasNoticeOpen] = useState<boolean>(false);
 
@@ -654,24 +657,65 @@ export default function App() {
     }
   }, [address, isConnected, isMainnet]);
 
-  // TronLink: detect available account + poll USDT balance when TRX peer selected
+  // TronLink: detect + poll status whenever TRX peer is selected. Handles
+  // late injection (extension often injects tronWeb after page load), account
+  // switches, and lock/unlock without a page reload.
   useEffect(() => {
     const isTrxPeer = bridgeDirection.includes('TRX');
     if (!isTrxPeer) return;
     let cancelled = false;
-    let intervalId: number | undefined;
-    const tick = async () => {
-      if (!isTronLinkAvailable()) return;
-      const addr = window.tronWeb?.defaultAddress?.base58 || tronAddress;
-      if (!addr) return;
-      if (!cancelled) setTronAddress(addr);
-      const bal = await fetchTronUsdtBalance(addr, isMainnet);
-      if (!cancelled) setTronUsdtBalance(bal);
+
+    const refreshStatus = async () => {
+      const status = getTronStatus();
+      if (cancelled) return;
+      setTronStatus(status);
+      const addr = window.tronWeb?.defaultAddress?.base58 || null;
+      setTronAddress(addr);
+      if (addr) {
+        try {
+          const bal = await fetchTronUsdtBalance(addr, isMainnet);
+          if (!cancelled) setTronUsdtBalance(bal);
+        } catch { /* ignore transient */ }
+      } else {
+        setTronUsdtBalance('0');
+      }
     };
-    tick();
-    intervalId = window.setInterval(tick, 12_000);
-    return () => { cancelled = true; if (intervalId) window.clearInterval(intervalId); };
-  }, [bridgeDirection, isMainnet, tronAddress]);
+
+    // Wait for late injection then refresh.
+    waitForTronWeb(8000).then(() => { if (!cancelled) refreshStatus(); });
+    refreshStatus();
+    const intervalId = window.setInterval(refreshStatus, 8000);
+    const unsub = subscribeTronLink(refreshStatus);
+    return () => { cancelled = true; window.clearInterval(intervalId); unsub(); };
+  }, [bridgeDirection, isMainnet]);
+
+  // User-triggered TronLink connect (retry-safe). Surfaces friendly errors.
+  const handleConnectTron = async () => {
+    setErrorMessage(null);
+    setTronConnecting(true);
+    try {
+      const ok = await waitForTronWeb(2000);
+      if (!ok) {
+        setTronStatus('unavailable');
+        throw new Error('TronLink not detected. Install the TronLink browser extension, then click Retry.');
+      }
+      const addr = await requestTronLinkAccounts();
+      if (!addr) {
+        setTronStatus('locked');
+        throw new Error('Unlock TronLink and select an account, then click Retry.');
+      }
+      setTronAddress(addr);
+      setTronStatus('ready');
+      try {
+        const bal = await fetchTronUsdtBalance(addr, isMainnet);
+        setTronUsdtBalance(bal);
+      } catch { /* ignore */ }
+    } catch (e: any) {
+      setErrorMessage(e?.message || 'Failed to connect TronLink. Try again.');
+    } finally {
+      setTronConnecting(false);
+    }
+  };
 
 
   // Save session to localStorage when it changes
@@ -751,9 +795,10 @@ export default function App() {
       : (`${p}_TO_BOT` as any)));
     setUsdtAmount('');
     setErrorMessage(null);
-    // Try to fetch a Tron account when switching to TRX
-    if (p === 'TRX' && isTronLinkAvailable()) {
-      requestTronLinkAccounts().then(a => a && setTronAddress(a));
+    // Auto-attempt a silent TronLink connect when the user switches to TRX.
+    if (p === 'TRX') {
+      // Fire-and-forget; UI shows explicit "Connect Tron" retry if this fails.
+      handleConnectTron().catch(() => {});
     }
   };
 
@@ -1545,7 +1590,10 @@ export default function App() {
   const belowBridgeMin = !!usdtAmount && isFinite(parsedUsdtAmt) && parsedUsdtAmt > 0 && parsedUsdtAmt < BRIDGE_MIN_USDT;
 
   if (!isConnected) bridgeButtonLabel = "Connect Wallet";
-  else if (!isNetworkCorrect) bridgeButtonLabel = `Switch Chain to ${bridgeFromName}`;
+  else if (bridgeDirection === 'TRX_TO_BOT' && tronStatus !== 'ready') {
+    bridgeButtonLabel = tronStatus === 'unavailable' ? 'Install TronLink' : tronConnecting ? 'Connecting TronLink…' : 'Connect TronLink';
+  }
+  else if (bridgeDirection !== 'TRX_TO_BOT' && !isNetworkCorrect) bridgeButtonLabel = `Switch Chain to ${bridgeFromName}`;
   else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
     bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
   }
@@ -2151,8 +2199,8 @@ export default function App() {
               onSubmit={() => {
                 // TRX source uses TronLink signing — bypass EVM network check
                 if (bridgeDirection === 'TRX_TO_BOT') {
-                  if (!isTronLinkAvailable()) {
-                    setErrorMessage('TronLink not detected. Install TronLink to bridge from Tron.');
+                  if (tronStatus !== 'ready') {
+                    handleConnectTron();
                     return;
                   }
                   if (!isConnected) return handleConnect(); // still need BOT recipient
@@ -2188,6 +2236,10 @@ export default function App() {
                   setReceiveBotGas(false);
                 }
               }}
+              tronStatus={bridgePeer === 'TRX' ? tronStatus : undefined}
+              tronAddress={tronAddress ?? undefined}
+              tronConnecting={tronConnecting}
+              onConnectTron={handleConnectTron}
             />
           )}
 

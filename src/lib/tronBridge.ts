@@ -22,18 +22,68 @@ declare global {
   }
 }
 
+export type TronStatus = 'unavailable' | 'locked' | 'ready';
+
+export function isTronWebInjected(): boolean {
+  return typeof window !== 'undefined' && !!window.tronWeb;
+}
+
 export function isTronLinkAvailable(): boolean {
   if (typeof window === 'undefined') return false;
   return !!(window.tronWeb && window.tronWeb.ready);
 }
 
+export function getTronStatus(): TronStatus {
+  if (!isTronWebInjected()) return 'unavailable';
+  const addr = window.tronWeb?.defaultAddress?.base58;
+  if (!window.tronWeb.ready || !addr) return 'locked';
+  return 'ready';
+}
+
+/** Poll for TronLink injection — the extension often injects tronWeb after page load. */
+export function waitForTronWeb(timeoutMs = 8000): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (isTronWebInjected()) return resolve(true);
+    const start = Date.now();
+    const id = window.setInterval(() => {
+      if (isTronWebInjected()) { window.clearInterval(id); resolve(true); }
+      else if (Date.now() - start > timeoutMs) { window.clearInterval(id); resolve(false); }
+    }, 250);
+  });
+}
+
+/** Subscribe to TronLink account/lock changes. Returns unsubscribe. */
+export function subscribeTronLink(cb: () => void): () => void {
+  if (typeof window === 'undefined') return () => {};
+  const handler = (e: MessageEvent) => {
+    const msg = (e && e.data && (e.data as any).message) || null;
+    if (!msg) return;
+    if (msg.action === 'setAccount' || msg.action === 'accountsChanged' ||
+        msg.action === 'setNode' || msg.action === 'connect' || msg.action === 'disconnect') {
+      cb();
+    }
+  };
+  window.addEventListener('message', handler);
+  return () => window.removeEventListener('message', handler);
+}
+
 export async function requestTronLinkAccounts(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
+  // Wait briefly for extension injection (installed but not yet ready).
+  if (!isTronWebInjected()) await waitForTronWeb(4000);
   try {
     if (window.tronLink?.request) {
-      await window.tronLink.request({ method: 'tron_requestAccounts' });
+      const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
+      // TronLink returns { code: 4001 } on user rejection, 4000 = already processing.
+      if (res && typeof res === 'object' && 'code' in res) {
+        if (res.code === 4001) throw new Error('TronLink connection rejected. Click Connect Tron to try again.');
+        if (res.code === 4000) throw new Error('TronLink is already processing a request. Open the extension and complete it.');
+      }
     }
-  } catch { /* user rejected */ }
+  } catch (e: any) {
+    if (e?.message?.includes('rejected') || e?.message?.includes('already processing')) throw e;
+    // Silent for other injection quirks — fall through to read defaultAddress.
+  }
   return window.tronWeb?.defaultAddress?.base58 || null;
 }
 
