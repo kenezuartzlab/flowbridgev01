@@ -435,6 +435,7 @@ export default function App() {
   // On-Chain Reads (Cached balances)
   const currentBotChainId = isMainnet ? 677 : 968;
   const currentBscChainId = isMainnet ? 56 : 97;
+  const currentEthChainId = isMainnet ? 1 : 11155111;
   const botPublicClient = usePublicClient({ chainId: currentBotChainId });
 
   // 1. Native BOT balance
