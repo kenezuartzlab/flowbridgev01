@@ -2198,16 +2198,8 @@ export default function App() {
                 txHash={session.step3.tx_hash}
                 bridgeDirection={bridgeDirection}
                 isMainnet={isMainnet}
-                sourceExplorerPrefix={
-                  bridgeDirection === 'BOT_TO_BNB'
-                    ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
-                    : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')
-                }
-                destExplorerPrefix={
-                  bridgeDirection === 'BOT_TO_BNB'
-                    ? (isMainnet ? 'https://bscscan.com/' : 'https://testnet.bscscan.com/')
-                    : (isMainnet ? 'https://scan.botchain.ai/' : 'https://scan.bohr.life/')
-                }
+                sourceExplorerPrefix={bridgeSrcExplorerPrefix}
+                destExplorerPrefix={bridgeDestExplorerBase}
               />
             </div>
           )}
