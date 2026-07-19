@@ -28,6 +28,15 @@ interface AppHeaderProps {
   onRewardsClick?: () => void;
   googleUser?: any;
   setGoogleUser?: (user: any) => void;
+  /** Active source network label, e.g. "BOT", "BNB", "ETH", "TRON". Drives which wallet pill is primary. */
+  activeNetworkLabel?: string;
+  /** When TRON is the active source, pass the base58 address so it becomes the primary pill. */
+  tronAddress?: string | null;
+  /** Called when user clicks Connect on the Tron pill (TRON active + not connected). */
+  onConnectTron?: () => void;
+  /** Secondary/recipient chip (the counterparty address, shown below the primary pill). */
+  recipientAddress?: string | null;
+  recipientLabel?: string;
 }
 
 export function AppHeader({
