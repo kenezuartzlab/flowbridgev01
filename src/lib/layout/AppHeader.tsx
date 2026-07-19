@@ -54,6 +54,11 @@ export function AppHeader({
   onRewardsClick,
   googleUser,
   setGoogleUser,
+  activeNetworkLabel,
+  tronAddress,
+  onConnectTron,
+  recipientAddress,
+  recipientLabel,
 }: AppHeaderProps) {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
