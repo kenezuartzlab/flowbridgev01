@@ -1810,9 +1810,22 @@ export default function App() {
 
   const activeSwapButtonDisabled = isActionLoading || (isConnected && !botAmount && session.step2.status !== 'done') || isTradeLocked;
 
-  const activeTxPrefix = bridgeDirection === 'BOT_TO_BNB' 
-    ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
-    : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/');
+  // Explorer prefix for the *source* chain of the current bridge direction.
+  const bridgeSrcExplorerPrefix = (() => {
+    if (isBotSource) return isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/';
+    if (bridgePeer === 'BNB') return isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/';
+    if (bridgePeer === 'ETH') return isMainnet ? 'https://etherscan.io/tx/' : 'https://sepolia.etherscan.io/tx/';
+    return TRON_EXPLORER_TX_PREFIX;
+  })();
+  const bridgeDestExplorerBase = (() => {
+    if (isBotSource) {
+      if (bridgePeer === 'BNB') return isMainnet ? 'https://bscscan.com/' : 'https://testnet.bscscan.com/';
+      if (bridgePeer === 'ETH') return isMainnet ? 'https://etherscan.io/' : 'https://sepolia.etherscan.io/';
+      return 'https://tronscan.org/#/';
+    }
+    return isMainnet ? 'https://scan.botchain.ai/' : 'https://scan.bohr.life/';
+  })();
+  const activeTxPrefix = bridgeSrcExplorerPrefix;
 
   return (
     <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-center font-sans overflow-y-auto relative py-6 sm:py-8 gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
