@@ -526,6 +526,32 @@ export default function App() {
     query: { enabled: !!address && !isDemoMode }
   });
 
+  // Ethereum USDT (ERC-20, 6 decimals) balance + bridge allowance
+  const { data: ethNativeBalance, refetch: refetchEthNativeBalance } = useBalance({
+    address,
+    chainId: currentEthChainId,
+    query: { enabled: !!address && !isDemoMode }
+  });
+  const { data: rawUsdtEthBalance, refetch: refetchUsdtEthBalance } = useReadContract({
+    address: contracts.usdtEth as `0x${string}` | undefined,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    chainId: currentEthChainId,
+    query: { enabled: !!address && !!contracts.usdtEth && !isDemoMode }
+  });
+  const { data: rawUsdtEthBridgeAllowance, refetch: refetchUsdtEthBridgeAllowance } = useReadContract({
+    address: contracts.usdtEth as `0x${string}` | undefined,
+    abi: ERC20_ABI,
+    functionName: 'allowance',
+    args: address && contracts.ethBridgeProxy
+      ? [address as `0x${string}`, contracts.ethBridgeProxy as `0x${string}`]
+      : undefined,
+    chainId: currentEthChainId,
+    query: { enabled: !!address && !!contracts.usdtEth && !!contracts.ethBridgeProxy && !isDemoMode }
+  });
+
+
   // Safe parsers for inputs to calculate live pool quotes
   const safeParseCaAmount = () => {
     try {
