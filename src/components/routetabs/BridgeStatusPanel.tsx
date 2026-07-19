@@ -83,7 +83,8 @@ export function BridgeStatusPanel({
   const [relayCountdown, setRelayCountdown] = useState<number>(0);
 
   const srcChainId = sourceChainId(bridgeDirection, isMainnet);
-  const required = REQUIRED_CONFIRMATIONS[srcChainId] ?? 1;
+  const isTron = srcChainId === null;
+  const required = srcChainId != null ? (REQUIRED_CONFIRMATIONS[srcChainId] ?? 1) : 1;
 
   useEffect(() => {
     if (!txHash) return;
@@ -92,7 +93,31 @@ export function BridgeStatusPanel({
     setConfirmations(0);
     setErrorMsg(null);
 
-    const client = createPublicClient({ chain: chainFor(srcChainId), transport: http() });
+    // Tron: poll TronGrid via injected tronWeb (see tronBridge.ts). Non-EVM path.
+    if (isTron) {
+      const pollTron = async () => {
+        try {
+          const info = await fetchTronConfirmations(txHash);
+          if (cancelled) return;
+          if (info.confirmed) {
+            setPhase('success');
+            setConfirmations(1);
+            setRelayCountdown(RELAY_ETA_SECONDS[bridgeDirection]);
+          } else {
+            setPhase('mining');
+          }
+        } catch (e: any) {
+          if (cancelled) return;
+          setPhase('failed');
+          setErrorMsg(e?.message || 'Failed to fetch Tron status.');
+        }
+      };
+      pollTron();
+      const id = setInterval(pollTron, 4000);
+      return () => { cancelled = true; clearInterval(id); };
+    }
+
+    const client = createPublicClient({ chain: chainFor(srcChainId!), transport: http() });
 
     const poll = async () => {
       try {
@@ -126,7 +151,8 @@ export function BridgeStatusPanel({
     poll();
     const id = setInterval(poll, 4000);
     return () => { cancelled = true; clearInterval(id); };
-  }, [txHash, srcChainId, required, bridgeDirection]);
+  }, [txHash, srcChainId, isTron, required, bridgeDirection]);
+
 
   useEffect(() => {
     if (phase !== 'success' || relayCountdown <= 0) return;
