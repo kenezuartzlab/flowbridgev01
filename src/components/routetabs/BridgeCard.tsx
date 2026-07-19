@@ -67,7 +67,11 @@ export function BridgeCard({
   txUrlPrefix,
   receiveBotGas = false,
   onReceiveBotGasChange,
-  showReceiveBotGasOption = false
+  showReceiveBotGasOption = false,
+  tronStatus,
+  tronAddress,
+  tronConnecting = false,
+  onConnectTron,
 }: BridgeCardProps) {
   const activePeer: BridgePeer = peer
     ?? (bridgeDirection.includes('ETH') ? 'ETH'
