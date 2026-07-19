@@ -2123,21 +2123,46 @@ export default function App() {
               fromChain={bridgeFromName}
               toChain={bridgeToName}
               symbol="USDT"
-              balance={bridgeDirection === 'BOT_TO_BNB' ? getBalanceDisplay('USDT_BOT') : getBalanceDisplay('USDT_BNB')}
-              exactBalance={bridgeDirection === 'BOT_TO_BNB' ? getExactBalanceAmount('USDT_BOT') : getExactBalanceAmount('USDT_BNB')}
+              balance={
+                isBotSource
+                  ? getBalanceDisplay('USDT_BOT')
+                  : bridgePeer === 'BNB' ? getBalanceDisplay('USDT_BNB')
+                  : bridgePeer === 'ETH' ? getBalanceDisplay('USDT_ETH')
+                  : getBalanceDisplay('USDT_TRX')
+              }
+              exactBalance={
+                isBotSource
+                  ? getExactBalanceAmount('USDT_BOT')
+                  : bridgePeer === 'BNB' ? getExactBalanceAmount('USDT_BNB')
+                  : bridgePeer === 'ETH' ? getExactBalanceAmount('USDT_ETH')
+                  : getExactBalanceAmount('USDT_TRX')
+              }
               estimatedReceive={calculateBridgeReceive(usdtAmount)}
-              receiveAddress={customDestinationAddress || address || "Connect wallet to see address..."}
+              receiveAddress={
+                bridgeDirection === 'BOT_TO_TRX'
+                  ? (tronAddress || 'Connect TronLink to see address...')
+                  : (customDestinationAddress || address || 'Connect wallet to see address...')
+              }
               onToggleDirection={handleToggleBridge}
+              peer={bridgePeer}
+              onPeerChange={handleChangeBridgePeer}
               buttonLabel={bridgeButtonLabel}
               buttonDisabled={bridgeButtonDisabled}
               onSubmit={() => {
+                // TRX source uses TronLink signing — bypass EVM network check
+                if (bridgeDirection === 'TRX_TO_BOT') {
+                  if (!isTronLinkAvailable()) {
+                    setErrorMessage('TronLink not detected. Install TronLink to bridge from Tron.');
+                    return;
+                  }
+                  if (!isConnected) return handleConnect(); // still need BOT recipient
+                  if (usdtAmount) setIsConfirmDestinationOpen(true);
+                  return;
+                }
                 if (!isConnected) return handleConnect();
                 if (!isNetworkCorrect) return handleSwitchNetwork();
                 if (session.step3.status === 'submitted') {
-                  const explorePrefix = bridgeDirection === 'BOT_TO_BNB' 
-                    ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
-                    : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/');
-                  return window.open(`${explorePrefix}${session.step3.tx_hash ?? 'pending'}`, '_blank');
+                  return window.open(`${bridgeSrcExplorerPrefix}${session.step3.tx_hash ?? 'pending'}`, '_blank');
                 }
                 if (usdtAmount) {
                   setIsConfirmDestinationOpen(true);
@@ -2145,8 +2170,13 @@ export default function App() {
               }}
               successMessage={session.step3.status === 'submitted' ? 'Source-chain transaction confirmed. USDT is being relayed to the destination chain by the bridge validators.' : undefined}
               txHash={session.step3.status === 'submitted' ? session.step3.tx_hash ?? undefined : undefined}
-              txUrlPrefix={bridgeDirection === 'BOT_TO_BNB' ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/') : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')}
-              gasFeeLabel={bridgeDirection === 'BOT_TO_BNB' ? '≈ 0.095238 BOT' : '≈ 0.005 BNB'}
+              txUrlPrefix={bridgeSrcExplorerPrefix}
+              gasFeeLabel={
+                isBotSource ? '≈ 0.095238 BOT'
+                : bridgePeer === 'BNB' ? '≈ 0.005 BNB'
+                : bridgePeer === 'ETH' ? '≈ 0.003 ETH'
+                : '≈ 15 TRX'
+              }
               bridgeDirection={bridgeDirection}
               onReset={resetStep3}
               showReceiveBotGasOption={bridgeDirection === 'BNB_TO_BOT'}
@@ -2160,6 +2190,7 @@ export default function App() {
               }}
             />
           )}
+
 
           {activeTab === 'BRIDGE' && session.step3.status === 'submitted' && session.step3.tx_hash && (
             <div className="mt-4">
