@@ -654,6 +654,25 @@ export default function App() {
     }
   }, [address, isConnected, isMainnet]);
 
+  // TronLink: detect available account + poll USDT balance when TRX peer selected
+  useEffect(() => {
+    if (bridgePeer !== 'TRX') return;
+    let cancelled = false;
+    let intervalId: number | undefined;
+    const tick = async () => {
+      if (!isTronLinkAvailable()) return;
+      const addr = window.tronWeb?.defaultAddress?.base58 || tronAddress;
+      if (!addr) return;
+      if (!cancelled) setTronAddress(addr);
+      const bal = await fetchTronUsdtBalance(addr, isMainnet);
+      if (!cancelled) setTronUsdtBalance(bal);
+    };
+    tick();
+    intervalId = window.setInterval(tick, 12_000);
+    return () => { cancelled = true; if (intervalId) window.clearInterval(intervalId); };
+  }, [bridgePeer, isMainnet, tronAddress]);
+
+
   // Save session to localStorage when it changes
   useEffect(() => {
     saveLocalSession(session);
