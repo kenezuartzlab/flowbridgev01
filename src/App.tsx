@@ -657,8 +657,6 @@ export default function App() {
     }
   }, [address, isConnected, isMainnet]);
 
-  // TronLink: detect available account + poll USDT balance when TRX peer selected
-  useEffect(() => {
   // TronLink: detect + poll status whenever TRX peer is selected. Handles
   // late injection (extension often injects tronWeb after page load), account
   // switches, and lock/unlock without a page reload.
