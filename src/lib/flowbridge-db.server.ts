@@ -81,7 +81,7 @@ export async function linkReferralIfMissing(userId: string, referredByCode?: str
 
   const { data: ref } = await supabaseAdmin
     .from("profiles")
-    .select("id, flow_points")
+    .select("id, flow_points, points_referral_signup")
     .eq("referral_code", referredByCode)
     .maybeSingle();
   if (!ref) return;
@@ -92,9 +92,13 @@ export async function linkReferralIfMissing(userId: string, referredByCode?: str
     .eq("id", userId);
   await supabaseAdmin
     .from("profiles")
-    .update({ flow_points: (ref.flow_points ?? 0) + 50 })
+    .update({
+      flow_points: (ref.flow_points ?? 0) + 50,
+      points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
+    })
     .eq("id", ref.id);
 }
+
 
 export async function createTransactionHistory(
   userId: string,
