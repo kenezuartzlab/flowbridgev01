@@ -189,13 +189,12 @@ export async function getSocialFollows(userId: string) {
 }
 
 export async function confirmSocialFollow(userId: string, channel: SocialChannel) {
-  const col =
-    channel === "youtube"
-      ? "youtube_confirmed_at"
-      : channel === "x"
-        ? "x_confirmed_at"
-        : "telegram_confirmed_at";
   const now = new Date().toISOString();
+  const patch: Record<string, string> = { updated_at: now };
+  if (channel === "youtube") patch.youtube_confirmed_at = now;
+  else if (channel === "x") patch.x_confirmed_at = now;
+  else patch.telegram_confirmed_at = now;
+
   const { data: existing } = await supabaseAdmin
     .from("social_follows")
     .select("user_id")
@@ -204,15 +203,16 @@ export async function confirmSocialFollow(userId: string, channel: SocialChannel
   if (existing) {
     await supabaseAdmin
       .from("social_follows")
-      .update({ [col]: now, updated_at: now })
+      .update(patch as any)
       .eq("user_id", userId);
   } else {
     await supabaseAdmin
       .from("social_follows")
-      .insert({ user_id: userId, [col]: now, updated_at: now });
+      .insert({ user_id: userId, ...patch } as any);
   }
   return getSocialFollows(userId);
 }
+
 
 function computeClaimable(u: {
   points_self?: number | null;
