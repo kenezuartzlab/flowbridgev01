@@ -215,7 +215,17 @@ export function DonateModal({
     globalTotalEarned: number;
     globalTotalClaimed: number;
     milestoneReached: boolean;
+    pointsSelf?: number;
+    pointsReferralActivity?: number;
+    pointsReferralSignup?: number;
+    signupUnlocked?: number;
+    signupLocked?: number;
+    totalSwapVolumeUsd?: number;
+    nextUnlockUsd?: number;
+    claimableTotal?: number;
+    socials?: { youtube: boolean; x: boolean; telegram: boolean };
   } | null>(null);
+
   const [isIncentivesLoading, setIsIncentivesLoading] = useState(false);
   const [incentivesError, setIncentivesError] = useState<string | null>(null);
   const [claimStatus, setClaimStatus] = useState<{ success?: boolean; error?: string; loading?: boolean }>({});
