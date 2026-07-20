@@ -351,23 +351,52 @@ export async function bindUserWallet(userId: string, walletAddress: string) {
   return updated;
 }
 
-export async function claimFlowPoints(userId: string) {
+export async function claimFlowPoints(userId: string, emailVerified: boolean) {
   const { data: user } = await supabaseAdmin
     .from("profiles")
     .select("*")
     .eq("id", userId)
     .maybeSingle();
   if (!user) throw new Error("Profile not found");
-  if ((user.flow_points ?? 0) < 1000) {
-    throw new Error("Insufficient FLOW points. A minimum of 1,000 points is required to claim.");
+
+  if (!emailVerified) throw new Error("Please verify your email before claiming FLOW.");
+  if (!user.wallet_address) throw new Error("Bind your Web3 wallet before claiming FLOW.");
+
+  const socials = await getSocialFollows(userId);
+  if (!socials.youtube || !socials.x || !socials.telegram) {
+    throw new Error(
+      "Follow all three community channels (YouTube, X, Telegram) before claiming FLOW.",
+    );
   }
-  const claimable = user.flow_points ?? 0;
+
+  const b = computeClaimable(user as any);
+  if (b.claimable < 1000) {
+    if (b.signupLocked > 0) {
+      throw new Error(
+        `Insufficient claimable FLOW. Referral-signup points unlock at $100 in swaps per 1,000. Trade $${b.nextUnlockUsd} more to unlock the next 1,000.`,
+      );
+    }
+    throw new Error("Insufficient FLOW points. A minimum of 1,000 claimable points is required.");
+  }
+
+  const newSelf = 0;
+  const newActivity = 0;
+  const newSignup = b.signupLocked; // keep locked signup points until user swaps more
+  const newFlow = newSelf + newActivity + newSignup;
+
   await supabaseAdmin
     .from("profiles")
-    .update({ flow_points: 0, claimed_tokens: (user.claimed_tokens ?? 0) + claimable })
+    .update({
+      points_self: newSelf,
+      points_referral_activity: newActivity,
+      points_referral_signup: newSignup,
+      flow_points: newFlow,
+      claimed_tokens: (user.claimed_tokens ?? 0) + b.claimable,
+    })
     .eq("id", userId);
   return getUserPointsAndReferrals(userId);
 }
+
 
 const DEFAULT_PROPOSALS = [
   {
