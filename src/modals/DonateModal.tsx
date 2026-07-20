@@ -1743,36 +1743,53 @@ export function DonateModal({
                   </div>
 
                   {/* Claim Button action panel */}
-                  <div className="bg-[#0D1C2A]/30 border border-white/5 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1 text-center sm:text-left">
-                      <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5 justify-center sm:justify-start">
-                        Claim FLOW Tokens
-                      </h4>
-                      <p className="text-[12px] text-[#C5C1B9] leading-relaxed max-w-md text-left font-mono">
-                        Accumulate at least 1,000 points to claim. Claiming transfers your off-chain points to on-chain FLOW tokens.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      disabled={!incentives || incentives.flowPoints < 1000 || claimStatus.loading}
-                      onClick={handleClaimPoints}
-                      className={cn(
-                        "w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-wider font-mono cursor-pointer transition-all duration-150 active:scale-95 text-center shrink-0 min-w-[160px]",
-                        incentives && incentives.flowPoints >= 1000 && !claimStatus.loading
-                          ? "bg-[#32FF8B] text-black shadow-lg shadow-[#32FF8B]/15 hover:bg-[#1FFF7D]"
-                          : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
-                      )}
-                    >
-                      {claimStatus.loading ? (
-                        <span className="flex items-center justify-center gap-1.5">
-                          <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
-                          Processing...
-                        </span>
-                      ) : (
-                        `Claim FLOW`
-                      )}
-                    </button>
-                  </div>
+                  {(() => {
+                    const claimable = incentives?.claimableTotal ?? incentives?.flowPoints ?? 0;
+                    const socialsOk = !!(incentives?.socials?.youtube && incentives?.socials?.x && incentives?.socials?.telegram);
+                    const walletOk = !!incentives?.walletAddress;
+                    const canClaim = !!incentives && claimable >= 1000 && socialsOk && walletOk && !claimStatus.loading;
+                    const gateReason = !walletOk
+                      ? "Bind your Web3 wallet above to enable claiming."
+                      : !socialsOk
+                        ? "Follow all three community channels to enable claiming."
+                        : claimable < 1000
+                          ? "Accumulate at least 1,000 claimable points to claim."
+                          : null;
+                    return (
+                      <div className="bg-[#0D1C2A]/30 border border-white/5 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="space-y-1 text-center sm:text-left">
+                          <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5 justify-center sm:justify-start">
+                            Claim FLOW Tokens
+                          </h4>
+                          <p className="text-[12px] text-[#C5C1B9] leading-relaxed max-w-md text-left font-mono">
+                            Claimable now: <strong className="text-[#32FF8B]">{claimable.toLocaleString()}</strong> FLOW.
+                            {gateReason && <span className="block text-amber-300/85 mt-1">{gateReason}</span>}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={!canClaim}
+                          onClick={handleClaimPoints}
+                          className={cn(
+                            "w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-wider font-mono cursor-pointer transition-all duration-150 active:scale-95 text-center shrink-0 min-w-[160px]",
+                            canClaim
+                              ? "bg-[#32FF8B] text-black shadow-lg shadow-[#32FF8B]/15 hover:bg-[#1FFF7D]"
+                              : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
+                          )}
+                        >
+                          {claimStatus.loading ? (
+                            <span className="flex items-center justify-center gap-1.5">
+                              <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                              Processing...
+                            </span>
+                          ) : (
+                            `Claim FLOW`
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })()}
+
 
                   {claimStatus.error && (
                     <div className="p-3 bg-red-950/20 border border-red-500/20 rounded-xl text-red-400 text-[12px] font-mono uppercase text-center font-mono">
