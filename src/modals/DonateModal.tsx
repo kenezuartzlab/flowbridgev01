@@ -281,6 +281,36 @@ export function DonateModal({
     }
   };
 
+  const SOCIAL_LINKS = {
+    youtube: 'https://youtube.com/@flowbridgeweb3',
+    x: 'https://x.com/flowbridgeweb3',
+    telegram: 'https://t.me/flowbridgeweb3',
+  } as const;
+  type SocialCh = keyof typeof SOCIAL_LINKS;
+  const [socialBusy, setSocialBusy] = useState<SocialCh | null>(null);
+  const handleFollowSocial = async (channel: SocialCh) => {
+    if (!googleUser || !getEffectiveIdToken) return;
+    // Open the community page first so the user actually follows.
+    try { window.open(SOCIAL_LINKS[channel], '_blank', 'noopener,noreferrer'); } catch {}
+    setSocialBusy(channel);
+    try {
+      const token = await getEffectiveIdToken();
+      if (!token) return;
+      const res = await fetch('/api/users/socials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ channel }),
+      });
+      const data = await res.json();
+      if (data.success) await fetchIncentives();
+    } catch (e) {
+      console.error('follow error', e);
+    } finally {
+      setSocialBusy(null);
+    }
+  };
+
+
   const [bindStatus, setBindStatus] = useState<{ success?: boolean; error?: string; loading?: boolean }>({});
   const [manualWalletInput, setManualWalletInput] = useState("");
   const [showManualInput, setShowManualInput] = useState(false);
