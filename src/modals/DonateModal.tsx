@@ -215,7 +215,17 @@ export function DonateModal({
     globalTotalEarned: number;
     globalTotalClaimed: number;
     milestoneReached: boolean;
+    pointsSelf?: number;
+    pointsReferralActivity?: number;
+    pointsReferralSignup?: number;
+    signupUnlocked?: number;
+    signupLocked?: number;
+    totalSwapVolumeUsd?: number;
+    nextUnlockUsd?: number;
+    claimableTotal?: number;
+    socials?: { youtube: boolean; x: boolean; telegram: boolean };
   } | null>(null);
+
   const [isIncentivesLoading, setIsIncentivesLoading] = useState(false);
   const [incentivesError, setIncentivesError] = useState<string | null>(null);
   const [claimStatus, setClaimStatus] = useState<{ success?: boolean; error?: string; loading?: boolean }>({});
@@ -270,6 +280,36 @@ export function DonateModal({
       setClaimStatus({ error: e.message || "Network failure during claim." });
     }
   };
+
+  const SOCIAL_LINKS = {
+    youtube: 'https://youtube.com/@flowbridgeweb3',
+    x: 'https://x.com/flowbridgeweb3',
+    telegram: 'https://t.me/flowbridgeweb3',
+  } as const;
+  type SocialCh = keyof typeof SOCIAL_LINKS;
+  const [socialBusy, setSocialBusy] = useState<SocialCh | null>(null);
+  const handleFollowSocial = async (channel: SocialCh) => {
+    if (!googleUser || !getEffectiveIdToken) return;
+    // Open the community page first so the user actually follows.
+    try { window.open(SOCIAL_LINKS[channel], '_blank', 'noopener,noreferrer'); } catch {}
+    setSocialBusy(channel);
+    try {
+      const token = await getEffectiveIdToken();
+      if (!token) return;
+      const res = await fetch('/api/users/socials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ channel }),
+      });
+      const data = await res.json();
+      if (data.success) await fetchIncentives();
+    } catch (e) {
+      console.error('follow error', e);
+    } finally {
+      setSocialBusy(null);
+    }
+  };
+
 
   const [bindStatus, setBindStatus] = useState<{ success?: boolean; error?: string; loading?: boolean }>({});
   const [manualWalletInput, setManualWalletInput] = useState("");
@@ -1473,6 +1513,84 @@ export function DonateModal({
                     </div>
                   </div>
 
+                  {/* Points Breakdown by Source */}
+                  <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-5 space-y-3 text-left font-mono">
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-[#32FF8B]" /> Points Breakdown
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="p-3 bg-[#010C1B] border border-white/5 rounded-xl">
+                        <div className="text-[10px] uppercase tracking-wider text-white/50">Own Swaps / Bridges</div>
+                        <div className="text-xl font-black text-[#32FF8B] mt-1">
+                          {(incentives?.pointsSelf ?? 0).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="p-3 bg-[#010C1B] border border-white/5 rounded-xl">
+                        <div className="text-[10px] uppercase tracking-wider text-white/50">Referral Activity</div>
+                        <div className="text-xl font-black text-blue-300 mt-1">
+                          {(incentives?.pointsReferralActivity ?? 0).toLocaleString()}
+                        </div>
+                        <div className="text-[9.5px] text-white/40 mt-0.5">recurring from referred users</div>
+                      </div>
+                      <div className="p-3 bg-[#010C1B] border border-white/5 rounded-xl">
+                        <div className="text-[10px] uppercase tracking-wider text-white/50">Referral Sign-ups</div>
+                        <div className="text-xl font-black text-amber-300 mt-1">
+                          {(incentives?.pointsReferralSignup ?? 0).toLocaleString()}
+                        </div>
+                        {(incentives?.signupLocked ?? 0) > 0 ? (
+                          <div className="text-[9.5px] text-amber-300/80 mt-0.5">
+                            {incentives?.signupUnlocked ?? 0} unlocked • {incentives?.signupLocked ?? 0} locked
+                          </div>
+                        ) : (
+                          <div className="text-[9.5px] text-white/40 mt-0.5">all unlocked</div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="p-3 bg-amber-950/10 border border-amber-500/15 rounded-xl text-[11px] text-amber-200/85 leading-relaxed">
+                      Referral sign-up bonuses unlock at a rate of <strong className="text-white">1,000 FLOW per $100</strong> of your own verified swap/bridge volume.
+                      <div className="mt-1 text-[10.5px] text-amber-200/70">
+                        Your swap volume: <strong className="text-white">${(incentives?.totalSwapVolumeUsd ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong>
+                        {(incentives?.signupLocked ?? 0) > 0 && (
+                          <> • Trade <strong className="text-white">${incentives?.nextUnlockUsd ?? 0}</strong> more to unlock the next 1,000.</>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Social Follow Gate */}
+                  <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-5 space-y-3 text-left font-mono">
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <Heart className="w-4 h-4 text-[#32FF8B]" /> Community Follow Required
+                    </h4>
+                    <p className="text-[11px] text-[#C5C1B9] leading-relaxed">
+                      Follow all three official channels to unlock the Claim button. Click each to open — we'll mark it done automatically.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {(['youtube','x','telegram'] as const).map((ch) => {
+                        const done = !!incentives?.socials?.[ch];
+                        const label = ch === 'youtube' ? 'YouTube' : ch === 'x' ? 'X / Twitter' : 'Telegram';
+                        return (
+                          <button
+                            key={ch}
+                            type="button"
+                            disabled={socialBusy === ch}
+                            onClick={() => handleFollowSocial(ch)}
+                            className={cn(
+                              "flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-[12px] font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer",
+                              done
+                                ? "bg-[#32FF8B]/10 border-[#32FF8B]/40 text-[#32FF8B]"
+                                : "bg-white/5 border-white/10 text-white hover:border-[#32FF8B]/30"
+                            )}
+                          >
+                            <span>{label}</span>
+                            {done ? <Check className="w-4 h-4" /> : <span className="text-[10px] opacity-70">Follow →</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+
                   {/* Cryptographic Wallet Binding Panel */}
                   <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-5 space-y-4">
                     <div className="flex items-start justify-between gap-3 text-left">
@@ -1625,36 +1743,53 @@ export function DonateModal({
                   </div>
 
                   {/* Claim Button action panel */}
-                  <div className="bg-[#0D1C2A]/30 border border-white/5 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1 text-center sm:text-left">
-                      <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5 justify-center sm:justify-start">
-                        Claim FLOW Tokens
-                      </h4>
-                      <p className="text-[12px] text-[#C5C1B9] leading-relaxed max-w-md text-left font-mono">
-                        Accumulate at least 1,000 points to claim. Claiming transfers your off-chain points to on-chain FLOW tokens.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      disabled={!incentives || incentives.flowPoints < 1000 || claimStatus.loading}
-                      onClick={handleClaimPoints}
-                      className={cn(
-                        "w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-wider font-mono cursor-pointer transition-all duration-150 active:scale-95 text-center shrink-0 min-w-[160px]",
-                        incentives && incentives.flowPoints >= 1000 && !claimStatus.loading
-                          ? "bg-[#32FF8B] text-black shadow-lg shadow-[#32FF8B]/15 hover:bg-[#1FFF7D]"
-                          : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
-                      )}
-                    >
-                      {claimStatus.loading ? (
-                        <span className="flex items-center justify-center gap-1.5">
-                          <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
-                          Processing...
-                        </span>
-                      ) : (
-                        `Claim FLOW`
-                      )}
-                    </button>
-                  </div>
+                  {(() => {
+                    const claimable = incentives?.claimableTotal ?? incentives?.flowPoints ?? 0;
+                    const socialsOk = !!(incentives?.socials?.youtube && incentives?.socials?.x && incentives?.socials?.telegram);
+                    const walletOk = !!incentives?.walletAddress;
+                    const canClaim = !!incentives && claimable >= 1000 && socialsOk && walletOk && !claimStatus.loading;
+                    const gateReason = !walletOk
+                      ? "Bind your Web3 wallet above to enable claiming."
+                      : !socialsOk
+                        ? "Follow all three community channels to enable claiming."
+                        : claimable < 1000
+                          ? "Accumulate at least 1,000 claimable points to claim."
+                          : null;
+                    return (
+                      <div className="bg-[#0D1C2A]/30 border border-white/5 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="space-y-1 text-center sm:text-left">
+                          <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5 justify-center sm:justify-start">
+                            Claim FLOW Tokens
+                          </h4>
+                          <p className="text-[12px] text-[#C5C1B9] leading-relaxed max-w-md text-left font-mono">
+                            Claimable now: <strong className="text-[#32FF8B]">{claimable.toLocaleString()}</strong> FLOW.
+                            {gateReason && <span className="block text-amber-300/85 mt-1">{gateReason}</span>}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={!canClaim}
+                          onClick={handleClaimPoints}
+                          className={cn(
+                            "w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-wider font-mono cursor-pointer transition-all duration-150 active:scale-95 text-center shrink-0 min-w-[160px]",
+                            canClaim
+                              ? "bg-[#32FF8B] text-black shadow-lg shadow-[#32FF8B]/15 hover:bg-[#1FFF7D]"
+                              : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
+                          )}
+                        >
+                          {claimStatus.loading ? (
+                            <span className="flex items-center justify-center gap-1.5">
+                              <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                              Processing...
+                            </span>
+                          ) : (
+                            `Claim FLOW`
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })()}
+
 
                   {claimStatus.error && (
                     <div className="p-3 bg-red-950/20 border border-red-500/20 rounded-xl text-red-400 text-[12px] font-mono uppercase text-center font-mono">

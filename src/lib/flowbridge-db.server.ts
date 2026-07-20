@@ -38,7 +38,7 @@ export async function ensureProfile(userId: string, email: string, referredByCod
   if (referredByCode) {
     const { data: ref } = await supabaseAdmin
       .from("profiles")
-      .select("id, flow_points, referral_code")
+      .select("id, flow_points, points_referral_signup, referral_code")
       .eq("referral_code", referredByCode)
       .maybeSingle();
     if (ref) finalReferredBy = referredByCode;
@@ -52,18 +52,22 @@ export async function ensureProfile(userId: string, email: string, referredByCod
   if (finalReferredBy) {
     const { data: ref } = await supabaseAdmin
       .from("profiles")
-      .select("id, flow_points")
+      .select("id, flow_points, points_referral_signup")
       .eq("referral_code", finalReferredBy)
       .maybeSingle();
     if (ref) {
       await supabaseAdmin
         .from("profiles")
-        .update({ flow_points: (ref.flow_points ?? 0) + 50 })
+        .update({
+          flow_points: (ref.flow_points ?? 0) + 50,
+          points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
+        })
         .eq("id", ref.id);
     }
   }
   return created;
 }
+
 
 export async function linkReferralIfMissing(userId: string, referredByCode?: string) {
   if (!referredByCode) return;
@@ -77,7 +81,7 @@ export async function linkReferralIfMissing(userId: string, referredByCode?: str
 
   const { data: ref } = await supabaseAdmin
     .from("profiles")
-    .select("id, flow_points")
+    .select("id, flow_points, points_referral_signup")
     .eq("referral_code", referredByCode)
     .maybeSingle();
   if (!ref) return;
@@ -88,9 +92,13 @@ export async function linkReferralIfMissing(userId: string, referredByCode?: str
     .eq("id", userId);
   await supabaseAdmin
     .from("profiles")
-    .update({ flow_points: (ref.flow_points ?? 0) + 50 })
+    .update({
+      flow_points: (ref.flow_points ?? 0) + 50,
+      points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
+    })
     .eq("id", ref.id);
 }
+
 
 export async function createTransactionHistory(
   userId: string,
@@ -159,6 +167,74 @@ async function globalTotals() {
   return { globalTotalEarned, globalTotalClaimed, totalUsers: all.length };
 }
 
+export const SOCIAL_LINKS = {
+  youtube: "https://youtube.com/@flowbridgeweb3",
+  x: "https://x.com/flowbridgeweb3",
+  telegram: "https://t.me/flowbridgeweb3",
+} as const;
+
+export type SocialChannel = keyof typeof SOCIAL_LINKS;
+
+export async function getSocialFollows(userId: string) {
+  const { data } = await supabaseAdmin
+    .from("social_follows")
+    .select("youtube_confirmed_at, x_confirmed_at, telegram_confirmed_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return {
+    youtube: !!data?.youtube_confirmed_at,
+    x: !!data?.x_confirmed_at,
+    telegram: !!data?.telegram_confirmed_at,
+  };
+}
+
+export async function confirmSocialFollow(userId: string, channel: SocialChannel) {
+  const now = new Date().toISOString();
+  const patch: Record<string, string> = { updated_at: now };
+  if (channel === "youtube") patch.youtube_confirmed_at = now;
+  else if (channel === "x") patch.x_confirmed_at = now;
+  else patch.telegram_confirmed_at = now;
+
+  const { data: existing } = await supabaseAdmin
+    .from("social_follows")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (existing) {
+    await supabaseAdmin
+      .from("social_follows")
+      .update(patch as any)
+      .eq("user_id", userId);
+  } else {
+    await supabaseAdmin
+      .from("social_follows")
+      .insert({ user_id: userId, ...patch } as any);
+  }
+  return getSocialFollows(userId);
+}
+
+
+function computeClaimable(u: {
+  points_self?: number | null;
+  points_referral_activity?: number | null;
+  points_referral_signup?: number | null;
+  total_swap_volume_usd?: number | string | null;
+}) {
+  const self = u.points_self ?? 0;
+  const activity = u.points_referral_activity ?? 0;
+  const signup = u.points_referral_signup ?? 0;
+  const volume = Number(u.total_swap_volume_usd ?? 0);
+  // $100 total swaps unlocks 1000 signup-referral points
+  const maxSignupClaimable = Math.floor(volume / 100) * 1000;
+  const signupUnlocked = Math.min(signup, maxSignupClaimable);
+  const signupLocked = Math.max(0, signup - signupUnlocked);
+  const nextUnlockUsd = signupLocked > 0
+    ? Math.max(0, Math.ceil(((Math.floor(volume / 100) + 1) * 100) - volume))
+    : 0;
+  const claimable = self + activity + signupUnlocked;
+  return { self, activity, signup, signupUnlocked, signupLocked, volume, nextUnlockUsd, claimable };
+}
+
 export async function getUserPointsAndReferrals(userId: string) {
   const { data: user } = await supabaseAdmin
     .from("profiles")
@@ -177,6 +253,8 @@ export async function getUserPointsAndReferrals(userId: string) {
   }
 
   const totals = await globalTotals();
+  const socials = await getSocialFollows(userId);
+  const breakdown = computeClaimable(user as any);
   return {
     flowPoints: user.flow_points,
     claimedTokens: user.claimed_tokens,
@@ -186,6 +264,15 @@ export async function getUserPointsAndReferrals(userId: string) {
     lastBindingChange: user.last_binding_change,
     bindingChangesCount: user.binding_changes_count,
     inviteCount,
+    pointsSelf: breakdown.self,
+    pointsReferralActivity: breakdown.activity,
+    pointsReferralSignup: breakdown.signup,
+    signupUnlocked: breakdown.signupUnlocked,
+    signupLocked: breakdown.signupLocked,
+    totalSwapVolumeUsd: breakdown.volume,
+    nextUnlockUsd: breakdown.nextUnlockUsd,
+    claimableTotal: breakdown.claimable,
+    socials,
     ...totals,
     milestoneReached: totals.globalTotalClaimed >= 1_000_000,
   };
@@ -202,6 +289,7 @@ export async function getGlobalIncentiveStats() {
     milestoneReached: totals.globalTotalClaimed >= 1_000_000,
   };
 }
+
 
 export async function bindUserWallet(userId: string, walletAddress: string) {
   const normalized = walletAddress.trim().toLowerCase();
@@ -263,23 +351,52 @@ export async function bindUserWallet(userId: string, walletAddress: string) {
   return updated;
 }
 
-export async function claimFlowPoints(userId: string) {
+export async function claimFlowPoints(userId: string, emailVerified: boolean) {
   const { data: user } = await supabaseAdmin
     .from("profiles")
     .select("*")
     .eq("id", userId)
     .maybeSingle();
   if (!user) throw new Error("Profile not found");
-  if ((user.flow_points ?? 0) < 1000) {
-    throw new Error("Insufficient FLOW points. A minimum of 1,000 points is required to claim.");
+
+  if (!emailVerified) throw new Error("Please verify your email before claiming FLOW.");
+  if (!user.wallet_address) throw new Error("Bind your Web3 wallet before claiming FLOW.");
+
+  const socials = await getSocialFollows(userId);
+  if (!socials.youtube || !socials.x || !socials.telegram) {
+    throw new Error(
+      "Follow all three community channels (YouTube, X, Telegram) before claiming FLOW.",
+    );
   }
-  const claimable = user.flow_points ?? 0;
+
+  const b = computeClaimable(user as any);
+  if (b.claimable < 1000) {
+    if (b.signupLocked > 0) {
+      throw new Error(
+        `Insufficient claimable FLOW. Referral-signup points unlock at $100 in swaps per 1,000. Trade $${b.nextUnlockUsd} more to unlock the next 1,000.`,
+      );
+    }
+    throw new Error("Insufficient FLOW points. A minimum of 1,000 claimable points is required.");
+  }
+
+  const newSelf = 0;
+  const newActivity = 0;
+  const newSignup = b.signupLocked; // keep locked signup points until user swaps more
+  const newFlow = newSelf + newActivity + newSignup;
+
   await supabaseAdmin
     .from("profiles")
-    .update({ flow_points: 0, claimed_tokens: (user.claimed_tokens ?? 0) + claimable })
+    .update({
+      points_self: newSelf,
+      points_referral_activity: newActivity,
+      points_referral_signup: newSignup,
+      flow_points: newFlow,
+      claimed_tokens: (user.claimed_tokens ?? 0) + b.claimable,
+    })
     .eq("id", userId);
   return getUserPointsAndReferrals(userId);
 }
+
 
 const DEFAULT_PROPOSALS = [
   {

@@ -91,15 +91,37 @@ export default function App() {
 
     const unsubscribe = initAuth(
       (user) => {
-        setGoogleUser(user);
+        setGoogleUser((prev: any) => {
+          const wasUnverified = prev && !(prev.emailVerified || prev.email_verified);
+          const nowVerified = user && (user.emailVerified || user.email_verified);
+          if (wasUnverified && nowVerified) {
+            try {
+              // Simple toast; App already uses lightweight notifications elsewhere.
+              alert("Email verified! You can now earn and claim FLOW rewards.");
+            } catch {}
+          }
+          return user;
+        });
       },
       () => {
         setGoogleUser(null);
       }
     );
+    // Detect Supabase email confirmation redirect (hash contains type=signup&access_token=...)
+    try {
+      const hash = window.location.hash || "";
+      if (hash.includes("type=signup") || hash.includes("type=magiclink")) {
+        setTimeout(() => {
+          try { alert("Email verified! You can now earn and claim FLOW rewards."); } catch {}
+          // Clean the hash so we don't re-notify on reload
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        }, 400);
+      }
+    } catch {}
     fetchGlobalStats();
     return () => unsubscribe();
   }, []);
+
 
   // Cloud SQL Persistence States
   const [dbTransactions, setDbTransactions] = useState<any[]>([]);

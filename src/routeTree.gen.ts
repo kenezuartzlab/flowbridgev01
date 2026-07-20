@@ -18,6 +18,7 @@ import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
+import { Route as ApiUsersSocialsRouteImport } from './routes/api/users.socials'
 import { Route as ApiUsersIncentivesRouteImport } from './routes/api/users.incentives'
 import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
@@ -77,6 +78,11 @@ const Char91DotmcpChar93ListToolsRoute =
 const ApiUsersSyncRoute = ApiUsersSyncRouteImport.update({
   id: '/api/users/sync',
   path: '/api/users/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersSocialsRoute = ApiUsersSocialsRouteImport.update({
+  id: '/api/users/socials',
+  path: '/api/users/socials',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUsersIncentivesRoute = ApiUsersIncentivesRouteImport.update({
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
+  '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/hooks/keeper-tick': typeof ApiPublicHooksKeeperTickRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
+  '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/hooks/keeper-tick': typeof ApiPublicHooksKeeperTickRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
+  '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/hooks/keeper-tick': typeof ApiPublicHooksKeeperTickRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
+    | '/api/users/socials'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
     | '/api/public/hooks/keeper-tick'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
+    | '/api/users/socials'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
     | '/api/public/hooks/keeper-tick'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
+    | '/api/users/socials'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
     | '/api/public/hooks/keeper-tick'
@@ -311,6 +323,7 @@ export interface RootRouteChildren {
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
   ApiUsersClaimRoute: typeof ApiUsersClaimRoute
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
+  ApiUsersSocialsRoute: typeof ApiUsersSocialsRoute
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
   ApiPublicHooksKeeperTickRoute: typeof ApiPublicHooksKeeperTickRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/api/users/sync'
       fullPath: '/api/users/sync'
       preLoaderRoute: typeof ApiUsersSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/socials': {
+      id: '/api/users/socials'
+      path: '/api/users/socials'
+      fullPath: '/api/users/socials'
+      preLoaderRoute: typeof ApiUsersSocialsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/users/incentives': {
@@ -507,6 +527,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,
   ApiUsersClaimRoute: ApiUsersClaimRoute,
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
+  ApiUsersSocialsRoute: ApiUsersSocialsRoute,
   ApiUsersSyncRoute: ApiUsersSyncRoute,
   ApiPublicHooksKeeperTickRoute: ApiPublicHooksKeeperTickRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,

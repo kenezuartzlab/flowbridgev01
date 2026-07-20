@@ -1,80 +1,64 @@
-## Goal
+## 1. Fix "Bind Manual Address" error
 
-Extend the existing bridge from BOT↔BNB to also support **BOT↔ETH** (EVM) and **BOT↔TRX** (non-EVM via TronLink), driven by a destination dropdown inside the Bridge card. Zero regression to BOT↔BNB.
+Root cause: `prevent_protected_profile_updates` trigger checks `current_setting('request.jwt.claim.role', true) = 'service_role'`. With new `sb_secret_*` API keys (non-JWT), that claim is empty, so the server-side admin update to `binding_changes_count` / `last_binding_change` is rejected.
 
-## Scope
+Fix: migration to update the trigger to also allow bypass when `current_user = 'service_role'` (or `session_user`), which is how Supabase routes admin key traffic regardless of key format.
 
-### 1. Config foundation (done)
-- Added ETH/Tron gateway + USDT addresses and a `USDT_BRIDGE_RESOURCE_ID` constant to `src/lib/contracts.ts`, sourced from `docs/bridge/README.md`.
+## 2. Email verification UX
 
-### 2. Chain registration
-- Add `ethereum` (chainId 1, RPC `https://eth.llamarpc.com`, explorer `https://etherscan.io`) and `sepolia` (11155111) to `src/lib/wagmi.ts` with matching transports and register in `wagmiConfig.chains`.
+- Verification email: check `check_email_domain_status`; if templates/rate limit is the issue, call `scaffold_auth_email_templates` and/or raise `rate_limit_email_sent`. Guide user if custom domain isn't verified yet.
+- After clicking verification link, user lands back on `/` with `?type=signup` in hash. Add a small effect in `src/App.tsx` (or root) that detects a fresh confirmed session (transitioned from unverified → verified via `onAuthStateChange` USER_UPDATED, or hash contains `type=signup`) and shows a toast: "Email verified! You can now earn FLOW points."
 
-### 3. Bridge direction model
-- Replace the two-value `bridgeDirection` union in `src/App.tsx` with:
-  ```
-  type BridgePeer = 'BNB' | 'ETH' | 'TRX';
-  type BridgeSide = 'OUT' | 'IN'; // OUT = BOT→peer, IN = peer→BOT
-  ```
-  Store `{ peer, side }` in state. Derive legacy `BOT_TO_X`/`X_TO_BOT` strings where still needed for logging/labels.
-- Chain-id lookup table keyed by `peer` + `isMainnet` (BNB → 56/97, ETH → 1/11155111, TRX → no EVM id).
-- Bridge-gateway + USDT-address + decimals lookup keyed by peer (BNB: 18, ETH: 6, TRX: 6).
+## 3. Social-follow gate before FLOW claim
 
-### 4. UI: destination dropdown in `BridgeCard`
-- Add a compact "Destination" segmented dropdown at the top of the card (`BNB · ETH · TRX`) with the token icon. Selecting a peer updates parent state via a new `onPeerChange` prop.
-- The existing swap-direction toggle stays; it flips OUT/IN for the selected peer.
-- Show a small non-blocking note for TRX: "Signed via TronLink (base58)."
-- When peer is TRX and TronLink isn't detected, the CTA becomes "Install TronLink" linking to `https://www.tronlink.org/`.
+Add a `social_follows` table:
+```
+user_id uuid PK -> auth.users
+youtube_confirmed_at timestamptz
+x_confirmed_at timestamptz
+telegram_confirmed_at timestamptz
+```
+Grants + RLS: user can select/update own row.
 
-### 5. Recipient handling
-- Keep 0x…40-hex validation for BNB and ETH.
-- For TRX, validate base58 T-addresses (34 chars, starts with `T`) using a lightweight regex + `window.tronWeb.isAddress` when present.
-- Auto-populate recipient with the connected EVM address (BNB/ETH) or the TronLink address (TRX). Allow override via the existing `ConfirmDestinationModal`.
+UI: in the Rewards → Claim panel, add three link-out buttons (YouTube, X, Telegram). Each opens the link in a new tab and marks that channel confirmed on click (self-attested; standard pattern for these gates). Claim button is disabled until all three are confirmed AND the other constraints below are satisfied. Server `claimFlowPoints` verifies all three flags before allowing claim.
 
-### 6. Execution paths
-Refactor `completeStep3` into a peer-dispatched flow (keep the current BNB code exactly as-is inside the `peer === 'BNB'` branch):
+## 4. Split FLOW points into 3 buckets + $100/1000 referral cap
 
-- **BOT→peer (OUT)** for BNB/ETH/TRX peers:
-  Call `botBridgeProxy.deposit(destChainId, USDT_BRIDGE_RESOURCE_ID, recipient, amount)` on BOT Chain. For TRX destination, use TRX's registered destination chain id from docs (published as decimal in the BOT registry; use `728126428` — the standard BOT Chain Bridge Tron chain id — but read it from a `TRX_DEST_CHAIN_ID` constant so we can adjust). For the ETH destination, `destChainId = isMainnet ? 1n : 11155111n`.
+Schema change (migration):
+Add columns to `profiles`:
+- `points_self` int default 0 — own swap/bridge points
+- `points_referral_activity` int default 0 — recurring points from referred users' swaps/bridges
+- `points_referral_signup` int default 0 — one-time signup bonuses (currently the +50 on link)
+- `total_swap_volume_usd` numeric default 0 — cumulative $ volume of caller's verified swaps/bridges
 
-- **BNB→BOT / ETH→BOT (IN, EVM)**:
-  Approve USDT on the external gateway, then `bnbBridgeProxy.deposit(...)` / `ethBridgeProxy.deposit(...)` with `destChainId = 677n | 968n`. Reuses the existing BNB code path — ETH is the same shape.
+Keep `flow_points` as the sum (mirror) for backwards compatibility, updated by the same server writes.
 
-- **TRX→BOT (IN, non-EVM)**:
-  New helper `src/lib/tronBridge.ts`:
-  - Detect `window.tronWeb?.ready`.
-  - Build TRC-20 approve for `usdtTron` → `tronBridgeProxy`.
-  - Call `tronBridgeProxy.deposit(destChainId, resourceId, recipientHex, amount)` via `tronWeb.transactionBuilder.triggerSmartContract`, sign with `tronWeb.trx.sign`, broadcast with `tronWeb.trx.sendRawTransaction`.
-  - Return tx hash; explorer prefix `https://tronscan.org/#/transaction/`.
+Server rules:
+- Signup bonus (+50 today) → `points_referral_signup` on referrer.
+- Server-verified swap/bridge points → `points_self` on caller, and a recurring cut → `points_referral_activity` on referrer.
+- `createTransactionHistory` (or the on-chain verification path) also increments `total_swap_volume_usd` for the caller.
 
-### 7. Balances + allowances
-- Add `useReadContract` reads for USDT-ETH balance/allowance on Ethereum chain (mirrors the existing BNB reads).
-- Add a TronLink balance fetch via `tronWeb.contract().at(usdtTron).balanceOf(base58Addr).call()` on peer change / interval.
-- `BridgeCard` `balance` / `exactBalance` / `symbol` come from the peer lookup.
+Claim rule in `claimFlowPoints`:
+- Require ≥ 1000 total, social gates all true, wallet bound, email verified.
+- Compute `maxSignupClaimable = floor(total_swap_volume_usd / 100) * 1000` for the caller.
+- Effective referral-signup claimable = `min(points_referral_signup, maxSignupClaimable)`.
+- Claimable total = `points_self + points_referral_activity + effectiveSignupClaimable`.
+- Deduct exactly those amounts from their respective columns; any locked signup points remain until the user swaps more.
 
-### 8. Status panel
-- Extend `REQUIRED_CONFIRMATIONS` in `BridgeStatusPanel` with ETH mainnet (`12`) and Sepolia (`3`). Add a TRX branch that skips the EVM `getTransactionReceipt` polling and instead polls `tronWeb.trx.getTransactionInfo(hash)` for `blockNumber`; require ≥19 confirmations on Tron mainnet.
+UI Rewards panel: show three separate totals + a "Locked (needs $X more in swaps)" hint for referral-signup points; the Claim button reflects effective claimable.
 
-### 9. Safety guards (non-negotiable)
-- Reject if `peer==='ETH'` and `ethBridgeProxy === zeroAddress` (testnet stub) — button shows "ETH bridge unavailable on testnet".
-- Reject if `peer==='TRX'` and `tronBridgeProxy === ''` on testnet.
-- Reject if recipient fails the peer-specific format check.
-- Enforce `> 10 USDT` minimum for every direction.
-- Fee logic:
-  - Into BOT (peer→BOT): 0 USDT.
-  - Out of BOT (BOT→peer): `max(amount * 0.001, 1 USDT)` — display separately and included in the receive estimate.
+## Technical Details
 
-### 10. Copy + logging
-- `logTransactionToDb('BRIDGE', <peer>_<side>, ...)` uses the derived legacy string so history stays consistent.
-- Explorer prefixes lookup by peer (`bscscan` / `etherscan` / `tronscan`).
+Files:
+- `supabase/migrations/*` — trigger fix, new columns, `social_follows` table + RLS/grants.
+- `src/lib/flowbridge-db.server.ts` — split accounting, updated `claimFlowPoints`, `ensureProfile`, `linkReferralIfMissing`, `getUserPointsAndReferrals` (returns 3 buckets + volume + locked amount + social flags).
+- `src/routes/api/social-follows.ts` (GET + POST channel confirm).
+- `src/routes/api/users.claim.ts` — unchanged signature, new checks live in helper.
+- Rewards UI component (find current file — likely `src/components/incentives/*` or in `App.tsx`) — add social buttons, split breakdown, locked hint.
+- Root/App — post-verification toast.
+- Email: run `email_domain--check_email_domain_status`, act on result.
 
-## Non-goals
-- No changes to swap, limit-order, rewards, or auth code.
-- No wagmi connector for Tron (TronLink exposes `window.tronWeb` directly — no adapter needed).
-- No new tables or migrations.
+## Out of scope
 
-## Verification
-- Build passes with strict TS.
-- Manual: switch BNB/ETH/TRX in the dropdown, verify balances render, verify the OUT/IN toggle correctly swaps source/destination labels, verify the CTA disables correctly for testnet-unavailable peers and for missing TronLink, verify recipient validation rejects mismatched formats (0x for TRX, T… for EVM).
-- eth_call simulate the ETH→BOT `deposit` before signing to catch address-mismatch reverts early.
-- Regression: BOT↔BNB path executes byte-for-byte the same calldata as today.
+- Real OAuth verification of social follows (self-attest is standard for this kind of gate).
+- Historical backfill: on migration, seed `points_self = flow_points`, others = 0 so existing users aren't penalized.

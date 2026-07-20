@@ -110,8 +110,12 @@ export type Database = {
           flow_points: number
           id: string
           last_binding_change: string | null
+          points_referral_activity: number
+          points_referral_signup: number
+          points_self: number
           referral_code: string | null
           referred_by: string | null
+          total_swap_volume_usd: number
           wallet_address: string | null
         }
         Insert: {
@@ -122,8 +126,12 @@ export type Database = {
           flow_points?: number
           id: string
           last_binding_change?: string | null
+          points_referral_activity?: number
+          points_referral_signup?: number
+          points_self?: number
           referral_code?: string | null
           referred_by?: string | null
+          total_swap_volume_usd?: number
           wallet_address?: string | null
         }
         Update: {
@@ -134,8 +142,12 @@ export type Database = {
           flow_points?: number
           id?: string
           last_binding_change?: string | null
+          points_referral_activity?: number
+          points_referral_signup?: number
+          points_self?: number
           referral_code?: string | null
           referred_by?: string | null
+          total_swap_volume_usd?: number
           wallet_address?: string | null
         }
         Relationships: []
@@ -191,6 +203,30 @@ export type Database = {
           nonce?: string
           used_at?: string | null
           wallet_address?: string
+        }
+        Relationships: []
+      }
+      social_follows: {
+        Row: {
+          telegram_confirmed_at: string | null
+          updated_at: string
+          user_id: string
+          x_confirmed_at: string | null
+          youtube_confirmed_at: string | null
+        }
+        Insert: {
+          telegram_confirmed_at?: string | null
+          updated_at?: string
+          user_id: string
+          x_confirmed_at?: string | null
+          youtube_confirmed_at?: string | null
+        }
+        Update: {
+          telegram_confirmed_at?: string | null
+          updated_at?: string
+          user_id?: string
+          x_confirmed_at?: string | null
+          youtube_confirmed_at?: string | null
         }
         Relationships: []
       }
