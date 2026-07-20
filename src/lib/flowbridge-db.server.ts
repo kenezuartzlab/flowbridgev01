@@ -38,7 +38,7 @@ export async function ensureProfile(userId: string, email: string, referredByCod
   if (referredByCode) {
     const { data: ref } = await supabaseAdmin
       .from("profiles")
-      .select("id, flow_points, referral_code")
+      .select("id, flow_points, points_referral_signup, referral_code")
       .eq("referral_code", referredByCode)
       .maybeSingle();
     if (ref) finalReferredBy = referredByCode;
@@ -52,18 +52,22 @@ export async function ensureProfile(userId: string, email: string, referredByCod
   if (finalReferredBy) {
     const { data: ref } = await supabaseAdmin
       .from("profiles")
-      .select("id, flow_points")
+      .select("id, flow_points, points_referral_signup")
       .eq("referral_code", finalReferredBy)
       .maybeSingle();
     if (ref) {
       await supabaseAdmin
         .from("profiles")
-        .update({ flow_points: (ref.flow_points ?? 0) + 50 })
+        .update({
+          flow_points: (ref.flow_points ?? 0) + 50,
+          points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
+        })
         .eq("id", ref.id);
     }
   }
   return created;
 }
+
 
 export async function linkReferralIfMissing(userId: string, referredByCode?: string) {
   if (!referredByCode) return;
