@@ -167,6 +167,74 @@ async function globalTotals() {
   return { globalTotalEarned, globalTotalClaimed, totalUsers: all.length };
 }
 
+export const SOCIAL_LINKS = {
+  youtube: "https://youtube.com/@flowbridgeweb3",
+  x: "https://x.com/flowbridgeweb3",
+  telegram: "https://t.me/flowbridgeweb3",
+} as const;
+
+export type SocialChannel = keyof typeof SOCIAL_LINKS;
+
+export async function getSocialFollows(userId: string) {
+  const { data } = await supabaseAdmin
+    .from("social_follows")
+    .select("youtube_confirmed_at, x_confirmed_at, telegram_confirmed_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return {
+    youtube: !!data?.youtube_confirmed_at,
+    x: !!data?.x_confirmed_at,
+    telegram: !!data?.telegram_confirmed_at,
+  };
+}
+
+export async function confirmSocialFollow(userId: string, channel: SocialChannel) {
+  const col =
+    channel === "youtube"
+      ? "youtube_confirmed_at"
+      : channel === "x"
+        ? "x_confirmed_at"
+        : "telegram_confirmed_at";
+  const now = new Date().toISOString();
+  const { data: existing } = await supabaseAdmin
+    .from("social_follows")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (existing) {
+    await supabaseAdmin
+      .from("social_follows")
+      .update({ [col]: now, updated_at: now })
+      .eq("user_id", userId);
+  } else {
+    await supabaseAdmin
+      .from("social_follows")
+      .insert({ user_id: userId, [col]: now, updated_at: now });
+  }
+  return getSocialFollows(userId);
+}
+
+function computeClaimable(u: {
+  points_self?: number | null;
+  points_referral_activity?: number | null;
+  points_referral_signup?: number | null;
+  total_swap_volume_usd?: number | string | null;
+}) {
+  const self = u.points_self ?? 0;
+  const activity = u.points_referral_activity ?? 0;
+  const signup = u.points_referral_signup ?? 0;
+  const volume = Number(u.total_swap_volume_usd ?? 0);
+  // $100 total swaps unlocks 1000 signup-referral points
+  const maxSignupClaimable = Math.floor(volume / 100) * 1000;
+  const signupUnlocked = Math.min(signup, maxSignupClaimable);
+  const signupLocked = Math.max(0, signup - signupUnlocked);
+  const nextUnlockUsd = signupLocked > 0
+    ? Math.max(0, Math.ceil(((Math.floor(volume / 100) + 1) * 100) - volume))
+    : 0;
+  const claimable = self + activity + signupUnlocked;
+  return { self, activity, signup, signupUnlocked, signupLocked, volume, nextUnlockUsd, claimable };
+}
+
 export async function getUserPointsAndReferrals(userId: string) {
   const { data: user } = await supabaseAdmin
     .from("profiles")
@@ -185,6 +253,8 @@ export async function getUserPointsAndReferrals(userId: string) {
   }
 
   const totals = await globalTotals();
+  const socials = await getSocialFollows(userId);
+  const breakdown = computeClaimable(user as any);
   return {
     flowPoints: user.flow_points,
     claimedTokens: user.claimed_tokens,
@@ -194,6 +264,15 @@ export async function getUserPointsAndReferrals(userId: string) {
     lastBindingChange: user.last_binding_change,
     bindingChangesCount: user.binding_changes_count,
     inviteCount,
+    pointsSelf: breakdown.self,
+    pointsReferralActivity: breakdown.activity,
+    pointsReferralSignup: breakdown.signup,
+    signupUnlocked: breakdown.signupUnlocked,
+    signupLocked: breakdown.signupLocked,
+    totalSwapVolumeUsd: breakdown.volume,
+    nextUnlockUsd: breakdown.nextUnlockUsd,
+    claimableTotal: breakdown.claimable,
+    socials,
     ...totals,
     milestoneReached: totals.globalTotalClaimed >= 1_000_000,
   };
@@ -210,6 +289,7 @@ export async function getGlobalIncentiveStats() {
     milestoneReached: totals.globalTotalClaimed >= 1_000_000,
   };
 }
+
 
 export async function bindUserWallet(userId: string, walletAddress: string) {
   const normalized = walletAddress.trim().toLowerCase();
