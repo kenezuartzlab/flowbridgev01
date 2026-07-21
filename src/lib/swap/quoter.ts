@@ -121,6 +121,46 @@ export async function getActiveRouters(isMainnet: boolean): Promise<ActiveRouter
   return fetchActiveRouters(isMainnet);
 }
 
+const ROUTER_FACTORY_ABI = parseAbi([
+  "function factory() view returns (address)",
+  "function WETH() view returns (address)",
+]);
+
+// Cache factory + wnative per router address (keyed by chain + router).
+const ROUTER_META_CACHE = new Map<string, { factory: Address; wnative: Address }>();
+
+async function resolveRouterMeta(
+  client: ReturnType<typeof publicClient>,
+  router: Address,
+  chainKey: string,
+  fallback: { factory: Address; wnative: Address },
+): Promise<{ factory: Address; wnative: Address }> {
+  const key = `${chainKey}:${router}`;
+  const cached = ROUTER_META_CACHE.get(key);
+  if (cached) return cached;
+  let factory = fallback.factory;
+  let wnative = fallback.wnative;
+  try {
+    const f = (await client.readContract({
+      address: router,
+      abi: ROUTER_FACTORY_ABI,
+      functionName: "factory",
+    })) as Address;
+    if (f && f !== ZERO) factory = f.toLowerCase() as Address;
+  } catch { /* keep fallback */ }
+  try {
+    const w = (await client.readContract({
+      address: router,
+      abi: ROUTER_FACTORY_ABI,
+      functionName: "WETH",
+    })) as Address;
+    if (w && w !== ZERO) wnative = w.toLowerCase() as Address;
+  } catch { /* keep fallback */ }
+  const meta = { factory, wnative };
+  ROUTER_META_CACHE.set(key, meta);
+  return meta;
+}
+
 async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
   const c = getContracts(isMainnet);
   const wbot = c.wbot.toLowerCase() as Address;
@@ -128,20 +168,32 @@ async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
   const bdexFactory = c.bdexFactory.toLowerCase() as Address;
   const caSwapFactory = c.caSwapFactory.toLowerCase() as Address;
   const caSwapRouter = c.caSwapRouter.toLowerCase() as Address;
+  const chainKey = isMainnet ? "main" : "test";
+  const client = publicClient(isMainnet);
 
   const routers = await fetchActiveRouters(isMainnet);
-  return routers
-    .filter((r) => r.type === 0)
-    .map((r) => {
+  const v2 = routers.filter((r) => r.type === 0);
+
+  const cfgs = await Promise.all(
+    v2.map(async (r) => {
       const isCaSwap = r.addr === caSwapRouter;
+      // Heuristic fallback: caSwap router → caSwap factory/caWBOT; else BDex family.
+      const fallback = {
+        factory: isCaSwap ? caSwapFactory : bdexFactory,
+        wnative: isCaSwap ? caWbot : wbot,
+      };
+      // Ask the router itself which factory + wrapped-native it uses.
+      const meta = await resolveRouterMeta(client, r.addr, chainKey, fallback);
       return {
         id: isCaSwap ? "caswap" : (r.name || `router-${r.id}`).toLowerCase(),
         routerId: r.id,
-        factory: isCaSwap ? caSwapFactory : bdexFactory,
+        factory: meta.factory,
         router: r.addr,
-        wnative: isCaSwap ? caWbot : wbot,
-      };
-    });
+        wnative: meta.wnative,
+      } as DexCfg;
+    }),
+  );
+  return cfgs;
 }
 
 // Router ID for BDex V3 on-chain. Read from the active registry so it is
