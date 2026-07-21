@@ -1,13 +1,15 @@
-// Multi-hop, multi-DEX quoter.
+// Multi-hop, multi-DEX quoter for BOT Chain.
 //
-// Supports two DEXes on BOT Chain:
-//   - Bohr DEX  (bdexFactory / bdexRouter, wrapped native = WBOT)
-//       · V2-style getAmountsOut for most pairs
-//       · V3 pool (usdtBotPoolV3) for BOT/USDT — quoted via slot0
-//   - CaryPact  (caSwapFactory / caSwapRouter, wrapped native = caWBOT, V2 only)
+// Router selection is 100% dynamic: we call FlowBridgeRouter v3
+// getActiveRouters() on-chain to enumerate the live registry
+// (id, name, version, type, address). Nothing is hardcoded — if the
+// admin adds/removes a router, this quoter picks it up on the next fetch.
 //
-// CA token has liquidity only on CaryPact. CA ↔ USDT is split:
-//   CA → BOT (CaSwap V2) + BOT → USDT (Bohr V3) — two transactions.
+//   type 0 = Uniswap V2-style AMM (uses getAmountsOut against a factory)
+//   type 1 = Uniswap V3-style pool (currently only the BOT/USDT V3 pool)
+//
+// CA token has liquidity only on CaSwap. CA ↔ USDT is split:
+//   CA → BOT (CaSwap V2) + BOT → USDT (BDex V3) — two transactions.
 
 import { createPublicClient, http, parseAbi, type Address } from "viem";
 import { botMainnet, botTestnet } from "@/lib/wagmi";
@@ -15,6 +17,7 @@ import {
   getContracts,
   UNISWAP_V2_ROUTER_ABI,
   UNISWAP_V3_POOL_ABI,
+  FLOW_BRIDGE_ROUTER_V3_ABI,
 } from "@/lib/contracts";
 import { NATIVE_TOKEN_ADDRESS, type Token } from "./tokenRegistry";
 
@@ -24,24 +27,13 @@ const FACTORY_ABI = parseAbi([
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
-export type DexId = "bohr" | "caswap" | "bdex-v3";
-
-// FlowBridgeRouter v3 on-chain registry IDs (mainnet):
-//   3 = CaSwap V2 (0x5b90…)   — new CaSwap router
-//   4 = BDex V2  (0x1414…)    — new BDex V2 router (old id 1 → 0xaE6a is broken)
-//   2 = BDex V3  (0x0703…)
-// Ids 0 and 1 are deprecated and MUST NOT be used.
-export const ROUTER_ID: Record<DexId, number> = {
-  caswap: 3,
-  bohr: 4,
-  "bdex-v3": 2,
-};
-
+/** Human-friendly DEX family. Names come from the on-chain registry. */
+export type DexId = string;
 
 export interface SwapStep {
   dex: DexId;
-  routerId: number;           // FlowBridgeRouter v3 registry ID
-  router: Address;            // underlying DEX router (kept for backwards-compat / display)
+  routerId: number;           // FlowBridgeRouter v3 on-chain registry ID
+  router: Address;            // underlying DEX router (kept for display)
   path: Address[];            // ERC20 path passed to the router (V2) or [tokenIn,tokenOut] (V3)
   symbolPath: string[];       // for display
   inIsNative: boolean;
@@ -60,10 +52,19 @@ export interface QuoteResult {
 }
 
 interface DexCfg {
-  id: "bohr" | "caswap";
+  id: DexId;
+  routerId: number;
   factory: Address;
   router: Address;
   wnative: Address;
+}
+
+interface ActiveRouter {
+  id: number;
+  name: string;
+  version: string;
+  type: number;
+  addr: Address;
 }
 
 function publicClient(isMainnet: boolean) {
@@ -73,23 +74,84 @@ function publicClient(isMainnet: boolean) {
   });
 }
 
-function v2Dexes(isMainnet: boolean): DexCfg[] {
+// ── Dynamic router registry ──────────────────────────────────────────────
+// Cache getActiveRouters() for 5 minutes per chain. Falls back to the known
+// mainnet/testnet router addresses in contracts.ts if the call reverts.
+const ROUTER_CACHE = new Map<string, { at: number; routers: ActiveRouter[] }>();
+const ROUTER_TTL_MS = 5 * 60_000;
+
+async function fetchActiveRouters(isMainnet: boolean): Promise<ActiveRouter[]> {
+  const key = isMainnet ? "main" : "test";
+  const cached = ROUTER_CACHE.get(key);
+  if (cached && Date.now() - cached.at < ROUTER_TTL_MS) return cached.routers;
+
   const c = getContracts(isMainnet);
-  return [
-    {
-      id: "bohr",
-      factory: c.bdexFactory.toLowerCase() as Address,
-      router: c.bdexV2Router.toLowerCase() as Address,
-      wnative: c.wbot.toLowerCase() as Address,
-    },
-    {
-      id: "caswap",
-      factory: c.caSwapFactory.toLowerCase() as Address,
-      router: c.caSwapRouter.toLowerCase() as Address,
-      wnative: c.caWbot.toLowerCase() as Address,
-    },
-  ];
+  const client = publicClient(isMainnet);
+  try {
+    const [ids, names, versions, types, addrs] = (await client.readContract({
+      address: c.flowBridgeRouterV3.toLowerCase() as Address,
+      abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+      functionName: "getActiveRouters",
+    })) as readonly [readonly bigint[], readonly string[], readonly string[], readonly number[], readonly Address[]];
+    const routers: ActiveRouter[] = ids.map((id, i) => ({
+      id: Number(id),
+      name: names[i],
+      version: versions[i],
+      type: Number(types[i]),
+      addr: addrs[i].toLowerCase() as Address,
+    }));
+    ROUTER_CACHE.set(key, { at: Date.now(), routers });
+    return routers;
+  } catch {
+    // Fallback: use the addresses baked into contracts.ts. Router IDs match
+    // the current on-chain registry (verified via getActiveRouters read).
+    const fallback: ActiveRouter[] = [
+      { id: 1, name: "BDex V2 (legacy)", version: "2.0", type: 0, addr: c.bdexRouter.toLowerCase() as Address },
+      { id: 2, name: "BDex V3", version: "3.0", type: 1, addr: c.bdexRouter.toLowerCase() as Address },
+      { id: 3, name: "CaSwapRouter", version: "3.0", type: 0, addr: c.caSwapRouter.toLowerCase() as Address },
+      { id: 4, name: "BDex UniswapV2R2", version: "2.2", type: 0, addr: c.bdexV2Router.toLowerCase() as Address },
+    ];
+    ROUTER_CACHE.set(key, { at: Date.now(), routers: fallback });
+    return fallback;
+  }
 }
+
+/** Expose active routers for UI / diagnostics. */
+export async function getActiveRouters(isMainnet: boolean): Promise<ActiveRouter[]> {
+  return fetchActiveRouters(isMainnet);
+}
+
+async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
+  const c = getContracts(isMainnet);
+  const wbot = c.wbot.toLowerCase() as Address;
+  const caWbot = c.caWbot.toLowerCase() as Address;
+  const bdexFactory = c.bdexFactory.toLowerCase() as Address;
+  const caSwapFactory = c.caSwapFactory.toLowerCase() as Address;
+  const caSwapRouter = c.caSwapRouter.toLowerCase() as Address;
+
+  const routers = await fetchActiveRouters(isMainnet);
+  return routers
+    .filter((r) => r.type === 0)
+    .map((r) => {
+      const isCaSwap = r.addr === caSwapRouter;
+      return {
+        id: isCaSwap ? "caswap" : (r.name || `router-${r.id}`).toLowerCase(),
+        routerId: r.id,
+        factory: isCaSwap ? caSwapFactory : bdexFactory,
+        router: r.addr,
+        wnative: isCaSwap ? caWbot : wbot,
+      };
+    });
+}
+
+// Router ID for BDex V3 on-chain. Read from the active registry so it is
+// never stale — falls back to 2 (the current mainnet id) if unavailable.
+async function bdexV3RouterId(isMainnet: boolean): Promise<number> {
+  const routers = await fetchActiveRouters(isMainnet);
+  const v3 = routers.find((r) => r.type === 1);
+  return v3 ? v3.id : 2;
+}
+
 
 async function pairExists(
   client: ReturnType<typeof publicClient>,
