@@ -121,6 +121,46 @@ export async function getActiveRouters(isMainnet: boolean): Promise<ActiveRouter
   return fetchActiveRouters(isMainnet);
 }
 
+const ROUTER_FACTORY_ABI = parseAbi([
+  "function factory() view returns (address)",
+  "function WETH() view returns (address)",
+]);
+
+// Cache factory + wnative per router address (keyed by chain + router).
+const ROUTER_META_CACHE = new Map<string, { factory: Address; wnative: Address }>();
+
+async function resolveRouterMeta(
+  client: ReturnType<typeof publicClient>,
+  router: Address,
+  chainKey: string,
+  fallback: { factory: Address; wnative: Address },
+): Promise<{ factory: Address; wnative: Address }> {
+  const key = `${chainKey}:${router}`;
+  const cached = ROUTER_META_CACHE.get(key);
+  if (cached) return cached;
+  let factory = fallback.factory;
+  let wnative = fallback.wnative;
+  try {
+    const f = (await client.readContract({
+      address: router,
+      abi: ROUTER_FACTORY_ABI,
+      functionName: "factory",
+    })) as Address;
+    if (f && f !== ZERO) factory = f.toLowerCase() as Address;
+  } catch { /* keep fallback */ }
+  try {
+    const w = (await client.readContract({
+      address: router,
+      abi: ROUTER_FACTORY_ABI,
+      functionName: "WETH",
+    })) as Address;
+    if (w && w !== ZERO) wnative = w.toLowerCase() as Address;
+  } catch { /* keep fallback */ }
+  const meta = { factory, wnative };
+  ROUTER_META_CACHE.set(key, meta);
+  return meta;
+}
+
 async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
   const c = getContracts(isMainnet);
   const wbot = c.wbot.toLowerCase() as Address;
@@ -128,20 +168,32 @@ async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
   const bdexFactory = c.bdexFactory.toLowerCase() as Address;
   const caSwapFactory = c.caSwapFactory.toLowerCase() as Address;
   const caSwapRouter = c.caSwapRouter.toLowerCase() as Address;
+  const chainKey = isMainnet ? "main" : "test";
+  const client = publicClient(isMainnet);
 
   const routers = await fetchActiveRouters(isMainnet);
-  return routers
-    .filter((r) => r.type === 0)
-    .map((r) => {
+  const v2 = routers.filter((r) => r.type === 0);
+
+  const cfgs = await Promise.all(
+    v2.map(async (r) => {
       const isCaSwap = r.addr === caSwapRouter;
+      // Heuristic fallback: caSwap router → caSwap factory/caWBOT; else BDex family.
+      const fallback = {
+        factory: isCaSwap ? caSwapFactory : bdexFactory,
+        wnative: isCaSwap ? caWbot : wbot,
+      };
+      // Ask the router itself which factory + wrapped-native it uses.
+      const meta = await resolveRouterMeta(client, r.addr, chainKey, fallback);
       return {
         id: isCaSwap ? "caswap" : (r.name || `router-${r.id}`).toLowerCase(),
         routerId: r.id,
-        factory: isCaSwap ? caSwapFactory : bdexFactory,
+        factory: meta.factory,
         router: r.addr,
-        wnative: isCaSwap ? caWbot : wbot,
-      };
-    });
+        wnative: meta.wnative,
+      } as DexCfg;
+    }),
+  );
+  return cfgs;
 }
 
 // Router ID for BDex V3 on-chain. Read from the active registry so it is
@@ -292,11 +344,13 @@ async function botUsdtStep(
 
 }
 
-// Best single-DEX V2 quote (direct, hop-via-wnative, hop-via-usdt).
+// Best single-DEX V2 quote. Tries direct + hop through every base in `hops`
+// (wrapped native, USDT, CA, and any imported tokens). Only paths where both
+// pairs exist on the router's factory are quoted, so extra hops are cheap.
 async function bestOnV2Dex(
   client: ReturnType<typeof publicClient>,
   dex: DexCfg,
-  usdt: Address,
+  hops: { addr: Address; symbol: string }[],
   tokenIn: Token,
   tokenOut: Token,
   amountIn: bigint,
@@ -310,25 +364,22 @@ async function bestOnV2Dex(
   if (await pairExists(client, dex.factory, inA, outA)) {
     candidates.push({ path: [inA, outA], symbolPath: [tokenIn.symbol, tokenOut.symbol] });
   }
-  if (inA !== dex.wnative && outA !== dex.wnative) {
+
+  // De-dupe hop addresses; skip hops that equal the endpoints.
+  const seen = new Set<string>();
+  for (const hop of hops) {
+    const h = hop.addr.toLowerCase() as Address;
+    if (h === inA || h === outA || seen.has(h)) continue;
+    seen.add(h);
     if (
-      (await pairExists(client, dex.factory, inA, dex.wnative)) &&
-      (await pairExists(client, dex.factory, dex.wnative, outA))
+      (await pairExists(client, dex.factory, inA, h)) &&
+      (await pairExists(client, dex.factory, h, outA))
     ) {
+      // Display symbol: wrapped-native shows as "BOT".
+      const hopSym = h === dex.wnative ? "BOT" : hop.symbol;
       candidates.push({
-        path: [inA, dex.wnative, outA],
-        symbolPath: [tokenIn.symbol, "BOT", tokenOut.symbol],
-      });
-    }
-  }
-  if (inA !== usdt && outA !== usdt) {
-    if (
-      (await pairExists(client, dex.factory, inA, usdt)) &&
-      (await pairExists(client, dex.factory, usdt, outA))
-    ) {
-      candidates.push({
-        path: [inA, usdt, outA],
-        symbolPath: [tokenIn.symbol, "USDT", tokenOut.symbol],
+        path: [inA, h, outA],
+        symbolPath: [tokenIn.symbol, hopSym, tokenOut.symbol],
       });
     }
   }
@@ -376,9 +427,31 @@ export async function getBestRoute(
 
   const c = getContracts(isMainnet);
   const wbot = c.wbot.toLowerCase() as Address;
+  const caWbot = c.caWbot.toLowerCase() as Address;
   const usdt = c.usdtBot.toLowerCase() as Address;
+  const caToken = c.caToken.toLowerCase() as Address;
   const client = publicClient(isMainnet);
   const allV2 = await v2Dexes(isMainnet);
+
+  // Hop bases considered on every V2 route: wrapped-natives, USDT, CA, plus
+  // any user-imported tokens. `bestOnV2Dex` filters out hops that don't have
+  // a live pair on the router's factory, so extra entries are safe.
+  let importedHops: { addr: Address; symbol: string }[] = [];
+  try {
+    // Dynamic import so SSR/edge builds without localStorage don't crash.
+    const mod = await import("./tokenRegistry");
+    importedHops = mod.getImportedTokens(isMainnet).map((t) => ({
+      addr: t.address.toLowerCase() as Address,
+      symbol: t.symbol,
+    }));
+  } catch { /* no localStorage or module missing — skip */ }
+  const hopBases: { addr: Address; symbol: string }[] = [
+    { addr: wbot, symbol: "BOT" },
+    { addr: caWbot, symbol: "BOT" },
+    { addr: usdt, symbol: "USDT" },
+    { addr: caToken, symbol: "CA" },
+    ...importedHops,
+  ];
 
   const candidates: QuoteResult[] = [];
 
@@ -397,7 +470,7 @@ export async function getBestRoute(
 
   // ── 2. Single-DEX V2 routes ────────────────────────────────────────────
   for (const dex of allV2) {
-    const r = await bestOnV2Dex(client, dex, usdt, tokenIn, tokenOut, amountIn);
+    const r = await bestOnV2Dex(client, dex, hopBases, tokenIn, tokenOut, amountIn);
     if (r) {
       candidates.push({
         amountOut: r.amountOut,
@@ -425,9 +498,9 @@ export async function getBestRoute(
     for (const dexA of allV2) {
       for (const dexB of allV2) {
         if (dexA.routerId === dexB.routerId) continue;
-        const leg1 = await bestOnV2Dex(client, dexA, usdt, tokenIn, NATIVE_BOT, amountIn);
+        const leg1 = await bestOnV2Dex(client, dexA, hopBases, tokenIn, NATIVE_BOT, amountIn);
         if (!leg1) continue;
-        const leg2 = await bestOnV2Dex(client, dexB, usdt, NATIVE_BOT, tokenOut, leg1.amountOut);
+        const leg2 = await bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.amountOut);
         if (!leg2) continue;
         candidates.push({
           amountOut: leg2.amountOut,
@@ -473,7 +546,7 @@ export async function getBestRoute(
   if (tokenOutIsUsdt && !tokenIn.isNative && tokenIn.address.toLowerCase() !== usdt) {
     // tokenIn → BOT on each V2 dex, then BOT → USDT via V3
     for (const dexA of allV2) {
-      const leg1 = await bestOnV2Dex(client, dexA, usdt, tokenIn, NATIVE_BOT, amountIn);
+      const leg1 = await bestOnV2Dex(client, dexA, hopBases, tokenIn, NATIVE_BOT, amountIn);
       if (!leg1) continue;
       const leg2 = await botUsdtStep(client, isMainnet, NATIVE_BOT, usdtToken, leg1.amountOut);
       if (!leg2) continue;
@@ -504,7 +577,7 @@ export async function getBestRoute(
     const leg1 = await botUsdtStep(client, isMainnet, usdtToken, NATIVE_BOT, amountIn);
     if (leg1) {
       for (const dexB of allV2) {
-        const leg2 = await bestOnV2Dex(client, dexB, usdt, NATIVE_BOT, tokenOut, leg1.expectedOut);
+        const leg2 = await bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.expectedOut);
         if (!leg2) continue;
         candidates.push({
           amountOut: leg2.amountOut,
