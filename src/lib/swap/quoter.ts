@@ -344,11 +344,13 @@ async function botUsdtStep(
 
 }
 
-// Best single-DEX V2 quote (direct, hop-via-wnative, hop-via-usdt).
+// Best single-DEX V2 quote. Tries direct + hop through every base in `hops`
+// (wrapped native, USDT, CA, and any imported tokens). Only paths where both
+// pairs exist on the router's factory are quoted, so extra hops are cheap.
 async function bestOnV2Dex(
   client: ReturnType<typeof publicClient>,
   dex: DexCfg,
-  usdt: Address,
+  hops: { addr: Address; symbol: string }[],
   tokenIn: Token,
   tokenOut: Token,
   amountIn: bigint,
@@ -362,25 +364,22 @@ async function bestOnV2Dex(
   if (await pairExists(client, dex.factory, inA, outA)) {
     candidates.push({ path: [inA, outA], symbolPath: [tokenIn.symbol, tokenOut.symbol] });
   }
-  if (inA !== dex.wnative && outA !== dex.wnative) {
+
+  // De-dupe hop addresses; skip hops that equal the endpoints.
+  const seen = new Set<string>();
+  for (const hop of hops) {
+    const h = hop.addr.toLowerCase() as Address;
+    if (h === inA || h === outA || seen.has(h)) continue;
+    seen.add(h);
     if (
-      (await pairExists(client, dex.factory, inA, dex.wnative)) &&
-      (await pairExists(client, dex.factory, dex.wnative, outA))
+      (await pairExists(client, dex.factory, inA, h)) &&
+      (await pairExists(client, dex.factory, h, outA))
     ) {
+      // Display symbol: wrapped-native shows as "BOT".
+      const hopSym = h === dex.wnative ? "BOT" : hop.symbol;
       candidates.push({
-        path: [inA, dex.wnative, outA],
-        symbolPath: [tokenIn.symbol, "BOT", tokenOut.symbol],
-      });
-    }
-  }
-  if (inA !== usdt && outA !== usdt) {
-    if (
-      (await pairExists(client, dex.factory, inA, usdt)) &&
-      (await pairExists(client, dex.factory, usdt, outA))
-    ) {
-      candidates.push({
-        path: [inA, usdt, outA],
-        symbolPath: [tokenIn.symbol, "USDT", tokenOut.symbol],
+        path: [inA, h, outA],
+        symbolPath: [tokenIn.symbol, hopSym, tokenOut.symbol],
       });
     }
   }
