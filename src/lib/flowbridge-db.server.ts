@@ -191,27 +191,90 @@ export async function getSocialFollows(userId: string) {
   };
 }
 
-function sanitizeHandle(raw: string) {
-  const trimmed = raw.trim().replace(/^@+/, "").slice(0, 64);
-  if (!/^[A-Za-z0-9._-]{2,64}$/.test(trimmed)) {
-    throw new Error("Handle must be 2–64 characters using letters, numbers, dot, underscore or dash.");
+function sanitizeHandle(raw: string, channel: SocialChannel) {
+  let trimmed = raw.trim();
+  try {
+    if (/^https?:\/\//i.test(trimmed)) {
+      const url = new URL(trimmed);
+      const parts = url.pathname.split("/").filter(Boolean);
+      trimmed = parts[0] ?? trimmed;
+    }
+  } catch {
+    // Keep raw input and validate below.
+  }
+  trimmed = trimmed.replace(/^@+/, "").replace(/\/$/, "").slice(0, 64);
+
+  if (channel === "x") {
+    if (!/^[A-Za-z0-9_]{1,15}$/.test(trimmed)) {
+      throw new Error("X handle must be 1–15 characters using letters, numbers, or underscore.");
+    }
+    return trimmed;
+  }
+  if (channel === "telegram") {
+    if (!/^[A-Za-z0-9_]{5,32}$/.test(trimmed)) {
+      throw new Error("Telegram username must be 5–32 characters using letters, numbers, or underscore.");
+    }
+    return trimmed;
+  }
+  if (!/^[A-Za-z0-9._-]{3,64}$/.test(trimmed)) {
+    throw new Error("YouTube handle must be at least 3 characters using letters, numbers, dot, underscore or dash.");
   }
   return trimmed;
+}
+
+function fetchTimeout(ms: number) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return { signal: controller.signal, done: () => clearTimeout(timer) };
+}
+
+async function fetchText(url: string) {
+  const timeout = fetchTimeout(8_000);
+  try {
+    const res = await fetch(url, {
+      signal: timeout.signal,
+      headers: { "user-agent": "FlowBridge social verification (+https://flowbridge.space)" },
+    });
+    const text = await res.text().catch(() => "");
+    return { status: res.status, text };
+  } finally {
+    timeout.done();
+  }
+}
+
+async function verifySocialProfileExists(channel: SocialChannel, handle: string) {
+  if (channel === "youtube") {
+    const res = await fetchText(`https://www.youtube.com/@${encodeURIComponent(handle)}`);
+    if (res.status === 200 && /<title>|canonicalBaseUrl|channelId/i.test(res.text)) return;
+    throw new Error(`Could not verify YouTube handle @${handle}. Check the spelling or make sure the channel exists.`);
+  }
+
+  if (channel === "telegram") {
+    const res = await fetchText(`https://t.me/${encodeURIComponent(handle)}`);
+    if (res.status === 200 && res.text.includes("tgme_page_title") && !res.text.includes("tgme_username_link")) return;
+    throw new Error(`Could not verify Telegram username @${handle}. Check the spelling or use a public account/channel username.`);
+  }
+
+  const res = await fetchText(`https://publish.twitter.com/oembed?url=${encodeURIComponent(`https://x.com/${handle}`)}`);
+  if (res.status === 200 && res.text.includes(`/${handle}`)) return;
+  throw new Error(`Could not verify X handle @${handle}. Check the spelling or make sure the profile exists.`);
 }
 
 export async function confirmSocialFollow(userId: string, channel: SocialChannel, handle?: string) {
   const now = new Date().toISOString();
   const patch: Record<string, string | null> = { updated_at: now };
-  const cleanedHandle = handle ? sanitizeHandle(handle) : undefined;
+  const cleanedHandle = handle ? sanitizeHandle(handle, channel) : undefined;
+  if (!cleanedHandle) throw new Error("Enter the handle you used to follow this channel.");
+  await verifySocialProfileExists(channel, cleanedHandle);
   if (channel === "youtube") {
     patch.youtube_confirmed_at = now;
-    if (cleanedHandle !== undefined) patch.youtube_handle = cleanedHandle;
+    patch.youtube_handle = cleanedHandle;
   } else if (channel === "x") {
     patch.x_confirmed_at = now;
-    if (cleanedHandle !== undefined) patch.x_handle = cleanedHandle;
+    patch.x_handle = cleanedHandle;
   } else {
     patch.telegram_confirmed_at = now;
-    if (cleanedHandle !== undefined) patch.telegram_handle = cleanedHandle;
+    patch.telegram_handle = cleanedHandle;
   }
 
   const { data: existing } = await supabaseAdmin

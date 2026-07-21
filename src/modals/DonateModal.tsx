@@ -68,6 +68,18 @@ export function DonateModal({
   const { signMessageAsync } = useSignMessage();
   const { connect } = useConnect();
 
+  const signPromptWithTimeout = async (message: string) => {
+    return Promise.race([
+      signMessageAsync({ message }),
+      new Promise<string>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('No wallet signature received. Unlock your wallet, approve the signature prompt, then try again.')),
+          35_000,
+        ),
+      ),
+    ]);
+  };
+
   // Basic component state
   const [selectedCoin, setSelectedCoin] = useState(COIN_CONFIGS[0]);
   const [amountStr, setAmountStr] = useState('1.0');
@@ -418,7 +430,7 @@ export function DonateModal({
       const msg = `${detailText}. I verify my wallet ownership to prevent abuse & spamming of the feedback boards.`;
       
       if (!connectedAddress) throw new Error("Wallet not connected");
-      await signMessageAsync({ message: msg, account: connectedAddress });
+      await signPromptWithTimeout(msg);
       setHasSigned(true);
     } catch (err: any) {
       console.warn("Signature failed:", err);
@@ -596,7 +608,7 @@ export function DonateModal({
 
     try {
       const voteMessage = `I cryptographically sign to authorize casting 1 community voice vote for Proposal #${id} on FlowBridge. We verify wallet owners off-chain to avoid unlimited spam.`;
-      await signMessageAsync({ message: voteMessage, account: connectedAddress });
+      await signPromptWithTimeout(voteMessage);
 
       // Save the vote to the database via Express API
       const res = await fetch(`/api/proposals/${id}/vote`, {
@@ -1578,7 +1590,7 @@ export function DonateModal({
                       <Heart className="w-4 h-4 text-[#32FF8B]" /> Community Follow Required
                     </h4>
                     <p className="text-[11px] text-[#C5C1B9] leading-relaxed">
-                      Follow each official channel, enter the handle you followed with, then hit Verify. Handles are stored for spot-checks — fake ones may disqualify the claim.
+                      Open each official channel, follow it, then enter the profile handle you used. FlowBridge checks that the profile exists before accepting it; fake handles may disqualify the claim.
                     </p>
                     <div className="space-y-2">
                       {(['youtube','x','telegram'] as const).map((ch) => {

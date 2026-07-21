@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound } from 'lucide-react';
 import { useAccount, useSignMessage } from 'wagmi';
 import { signInWithEthereum } from '@/lib/siwe';
@@ -39,17 +39,21 @@ export function ConnectGuideModal({
   const { address: connectedAddress } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const [siweBusy, setSiweBusy] = useState(false);
+  const siweRequestId = useRef(0);
 
   // If the user switches wallets (or disconnects) mid-signature, wagmi's
   // in-flight signMessage promise can hang against the previous connector.
   // Clear busy state so the button re-enables and the user can retry.
   useEffect(() => {
+    siweRequestId.current += 1;
     setSiweBusy(false);
     setErr(null);
   }, [connectedAddress]);
 
   const handleSiwe = async () => {
     if (!connectedAddress) return;
+    const requestId = siweRequestId.current + 1;
+    siweRequestId.current = requestId;
     setErr(null); setMsg(null); setSiweBusy(true);
     try {
       const signWithTimeout = (m: string) =>
@@ -57,8 +61,8 @@ export function ConnectGuideModal({
           signMessageAsync({ message: m }),
           new Promise<string>((_, reject) =>
             setTimeout(
-              () => reject(new Error('Signature request timed out. Open your wallet and try again.')),
-              120_000,
+              () => reject(new Error('No wallet signature received. Unlock your wallet, approve the signature prompt, then try again.')),
+              35_000,
             ),
           ),
         ]);
@@ -66,6 +70,7 @@ export function ConnectGuideModal({
         address: connectedAddress,
         signMessage: signWithTimeout,
       });
+      if (siweRequestId.current !== requestId) return;
       if (result.status === 'signed_in') {
         setMsg(`Signed in as ${result.email}.`);
       } else {
@@ -73,6 +78,7 @@ export function ConnectGuideModal({
         setShowEmail(true);
       }
     } catch (e: any) {
+      if (siweRequestId.current !== requestId) return;
       const raw = e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.';
       if (/reject|denied|cancel/i.test(String(raw))) {
         setErr('Signature was rejected. Approve the request in your wallet to continue.');
@@ -80,7 +86,7 @@ export function ConnectGuideModal({
         setErr(raw);
       }
     } finally {
-      setSiweBusy(false);
+      if (siweRequestId.current === requestId) setSiweBusy(false);
     }
   };
 

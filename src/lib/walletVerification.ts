@@ -5,6 +5,7 @@
 // sessionStorage so users only sign once per browser session.
 
 const STORAGE_PREFIX = "flowbridge:wallet-verified:";
+const SIGNATURE_TIMEOUT_MS = 35_000;
 
 function storageKey(address: string) {
   return `${STORAGE_PREFIX}${address.toLowerCase()}`;
@@ -58,6 +59,27 @@ export class WalletVerificationRejectedError extends Error {
   }
 }
 
+async function assertActiveInjectedAccount(expectedAddress: string): Promise<void> {
+  if (typeof window === "undefined") return;
+  const eth = (window as any).ethereum;
+  if (!eth?.request) return;
+  try {
+    const accounts = (await eth.request({ method: "eth_accounts" })) as string[];
+    if (!Array.isArray(accounts) || accounts.length === 0) return;
+    const expected = expectedAddress.toLowerCase();
+    const active = accounts.map((a) => String(a).toLowerCase());
+    if (!active.includes(expected)) {
+      throw new WalletVerificationRejectedError(
+        "Your active wallet changed before signing. Reconnect the wallet shown in FlowBridge, then try again.",
+      );
+    }
+  } catch (err) {
+    if (err instanceof WalletVerificationRejectedError) throw err;
+    // Some in-app wallets block eth_accounts until an explicit connect. Do not
+    // fail verification just because the readiness probe is unavailable.
+  }
+}
+
 /**
  * Ensure the given wallet address has proved key control this session.
  * Skips the round-trip if already verified. Throws on rejection/failure so
@@ -97,21 +119,22 @@ export async function ensureWalletVerified(
   // connector, and add a hard timeout so the UI can never lock up.
   let signature: string;
   try {
+    await assertActiveInjectedAccount(normalized);
     const signPromise = signMessageAsync({ message });
-    const timeoutMs = 120_000;
     signature = await Promise.race([
       signPromise,
       new Promise<string>((_, reject) =>
         setTimeout(
-          () => reject(new Error("Signature request timed out. Open your wallet and try again.")),
-          timeoutMs,
+          () => reject(new Error("No wallet signature received. Unlock your wallet, approve the signature prompt, then try again.")),
+          SIGNATURE_TIMEOUT_MS,
         ),
       ),
     ]);
+    await assertActiveInjectedAccount(normalized);
   } catch (err: any) {
     const msg = String(err?.shortMessage || err?.message || "");
     if (/reject|denied|cancel/i.test(msg)) throw new WalletVerificationRejectedError();
-    if (/timed out/i.test(msg)) throw new WalletVerificationRejectedError(msg);
+    if (/timed out|no wallet signature/i.test(msg)) throw new WalletVerificationRejectedError(msg);
     throw new WalletVerificationRejectedError(
       "This wallet could not produce a signature. Watch-only wallets cannot swap or bridge — reconnect with a signing wallet.",
     );
