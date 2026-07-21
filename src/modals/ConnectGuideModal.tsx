@@ -40,13 +40,31 @@ export function ConnectGuideModal({
   const { signMessageAsync } = useSignMessage();
   const [siweBusy, setSiweBusy] = useState(false);
 
+  // If the user switches wallets (or disconnects) mid-signature, wagmi's
+  // in-flight signMessage promise can hang against the previous connector.
+  // Clear busy state so the button re-enables and the user can retry.
+  useEffect(() => {
+    setSiweBusy(false);
+    setErr(null);
+  }, [connectedAddress]);
+
   const handleSiwe = async () => {
     if (!connectedAddress) return;
     setErr(null); setMsg(null); setSiweBusy(true);
     try {
+      const signWithTimeout = (m: string) =>
+        Promise.race([
+          signMessageAsync({ message: m }),
+          new Promise<string>((_, reject) =>
+            setTimeout(
+              () => reject(new Error('Signature request timed out. Open your wallet and try again.')),
+              120_000,
+            ),
+          ),
+        ]);
       const result = await signInWithEthereum({
         address: connectedAddress,
-        signMessage: (m) => signMessageAsync({ message: m }),
+        signMessage: signWithTimeout,
       });
       if (result.status === 'signed_in') {
         setMsg(`Signed in as ${result.email}.`);
@@ -55,7 +73,12 @@ export function ConnectGuideModal({
         setShowEmail(true);
       }
     } catch (e: any) {
-      setErr(e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.');
+      const raw = e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.';
+      if (/reject|denied|cancel/i.test(String(raw))) {
+        setErr('Signature was rejected. Approve the request in your wallet to continue.');
+      } else {
+        setErr(raw);
+      }
     } finally {
       setSiweBusy(false);
     }
