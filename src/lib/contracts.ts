@@ -177,6 +177,7 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   routerWhitelist: "0x397b670a24bc11e2dc7432f921d6a22fa29fe293",
   bdexFactory: "0x65b8e98cea190d8c28b3e4716402027f634d15a3",
   bdexRouter: "0xd6425a02f0845b8d99e349c34d2e7a576e177345",
+  bdexV2Router: "0xd6425a02f0845b8d99e349c34d2e7a576e177345",
   wbot: "0xd5452816194a3784dba983426cce7c122f4abd30",
   caWbot: "0xf704ad4be6d75c62550571f3ead025efe7ca30d1",
   usdtBot: "0x75edc9335175fc0552d51d48439f229c10420fe3", // Tether USD on BOT testnet
