@@ -76,6 +76,8 @@ export function AppHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const navigate = useNavigate();
+
 
   const isUserLoggedIn = !!googleUser;
   const isVerified = !!(googleUser?.emailVerified || googleUser?.email_verified || googleUser?.isDemo);
