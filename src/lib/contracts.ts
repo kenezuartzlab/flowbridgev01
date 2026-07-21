@@ -110,6 +110,8 @@ export interface ChainContracts {
   routerWhitelist: string;
   bdexFactory: string;
   bdexRouter: string;
+  /** BDex V2 router matching bdexFactory (used for V2 getAmountsOut quotes). */
+  bdexV2Router: string;
   wbot: string;
   caWbot: string;
   usdtBot: string;
