@@ -209,24 +209,33 @@ export type Database = {
       social_follows: {
         Row: {
           telegram_confirmed_at: string | null
+          telegram_handle: string | null
           updated_at: string
           user_id: string
           x_confirmed_at: string | null
+          x_handle: string | null
           youtube_confirmed_at: string | null
+          youtube_handle: string | null
         }
         Insert: {
           telegram_confirmed_at?: string | null
+          telegram_handle?: string | null
           updated_at?: string
           user_id: string
           x_confirmed_at?: string | null
+          x_handle?: string | null
           youtube_confirmed_at?: string | null
+          youtube_handle?: string | null
         }
         Update: {
           telegram_confirmed_at?: string | null
+          telegram_handle?: string | null
           updated_at?: string
           user_id?: string
           x_confirmed_at?: string | null
+          x_handle?: string | null
           youtube_confirmed_at?: string | null
+          youtube_handle?: string | null
         }
         Relationships: []
       }
