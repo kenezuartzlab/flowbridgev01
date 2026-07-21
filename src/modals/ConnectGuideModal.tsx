@@ -106,7 +106,8 @@ export function ConnectGuideModal({
       if (e?.name === 'WalletVerificationRejectedError') {
         setErr(getWalletSignatureErrorMessage(e));
       } else {
-        setErr(e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.');
+        const { toFriendlyError } = await import('@/lib/friendlyError');
+        setErr(toFriendlyError(e, { action: 'sign-in' }));
       }
     } finally {
       if (siweRequestId.current === requestId) setSiweBusy(false);
@@ -139,7 +140,8 @@ export function ConnectGuideModal({
         setMsg('Reset link sent. Check your inbox.');
       }
     } catch (e: any) {
-      setErr(e.message ?? 'Something went wrong.');
+      const { toFriendlyError } = await import('@/lib/friendlyError');
+      setErr(toFriendlyError(e, { action: mode === 'signup' ? 'sign up' : mode === 'forgot' ? 'send reset link' : 'sign in' }));
     } finally {
       setBusy(false);
     }

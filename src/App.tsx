@@ -36,6 +36,7 @@ import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
 import { formatUsd } from './lib/format';
+import { toFriendlyError } from './lib/friendlyError';
 import { SiteLoader } from './components/SiteLoader';
 
 export default function App() {
@@ -488,7 +489,7 @@ export default function App() {
     } catch (err: any) {
       const msg = err instanceof WalletVerificationRejectedError
         ? err.message
-        : (err?.message ?? "Wallet verification failed");
+        : toFriendlyError(err, { action: 'sign-in' });
       setErrorMessage(msg);
       setIsActionLoading(false);
       setIsWaitingModalOpen(false);
@@ -766,7 +767,7 @@ export default function App() {
         setTronUsdtBalance(bal);
       } catch { /* ignore */ }
     } catch (e: any) {
-      setErrorMessage(e?.message || 'Failed to connect TronLink. Try again.');
+      setErrorMessage(toFriendlyError(e, { action: 'connect TronLink', gasSymbol: 'TRX' }));
     } finally {
       setTronConnecting(false);
     }
@@ -1000,44 +1001,18 @@ export default function App() {
       setErrorMessage(null);
       await switchChain({ chainId: targetChainIdForTab() });
     } catch (err: any) {
-      setErrorMessage(`Failed to switch network: ${err.message || err}`);
+      setErrorMessage(toFriendlyError(err, { action: 'switch network' }));
     }
   };
 
-  // Helper to safely clean up and format on-chain errors
+  // All error surfaces route through the shared friendly translator so users
+  // never see raw viem/RPC strings like "e is not an Object" or long JSON blobs.
   const cleanError = (err: any): string => {
-    if (!err) return "An unknown on-chain error occurred.";
-    if (typeof err === 'string') return err;
-    
-    // Check various common error parameters safely to prevent TypeError
-    const rawMsg = err.shortMessage || err.message || "";
-    
-    // If we have gas limit warnings or zero gas returns
-    if (rawMsg.includes("gasLimit") || rawMsg.includes("gas limit") || rawMsg.includes("given 0")) {
-      return "Transaction failed because the wallet's gas estimation failed (need at least 22952 gas). This usually means you have insufficient native BOT/BNB gas to pay for transaction fees, or the slippage limit was triggered. Try swapping a smaller/standard amount, or click 'Switch to Sandbox Simulation' to test risk-free.";
-    }
-    
-    if (rawMsg.includes("user rejected") || rawMsg.includes("User rejected") || rawMsg.includes("User denied")) {
-      return "The transaction request was rejected in your wallet.";
-    }
-
-    if (rawMsg.includes("TRANSFER_FROM_FAILED")) {
-      return "Swap failed on-chain because the router could not pull the token amount. I tightened Max to use the exact wallet balance instead of the rounded display balance; try Max again after balances refresh.";
-    }
-
-    // Strip any nested JSON string messages that cause messy displays
-    try {
-      if (rawMsg.includes('{"error":')) {
-        const matches = rawMsg.match(/{"error":\s*"(.*?)"}/);
-        if (matches && matches[1]) {
-          return `Signer Error: ${matches[1]}`;
-        }
-      }
-    } catch (e) {
-      // safe fallback
-    }
-
-    return rawMsg;
+    const sym = bridgePeer === 'BNB' && !isBotSource ? 'BNB'
+              : bridgePeer === 'ETH' && !isBotSource ? 'ETH'
+              : bridgeDirection === 'TRX_TO_BOT' ? 'TRX'
+              : 'BOT';
+    return toFriendlyError(err, { action: activeTab === 'BRIDGE' ? 'bridge' : 'swap', gasSymbol: sym });
   };
 
   // Live and simulated swap step logic
