@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
-  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X
+  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut
 } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
@@ -37,6 +37,10 @@ interface AppHeaderProps {
   /** Secondary/recipient chip (the counterparty address, shown below the primary pill). */
   recipientAddress?: string | null;
   recipientLabel?: string;
+  /** Sign out the current Google/email user. */
+  onSignOut?: () => void;
+  /** Referral code the current session was captured under, if any. */
+  referralAppliedCode?: string | null;
 }
 
 export function AppHeader({
@@ -59,6 +63,8 @@ export function AppHeader({
   onConnectTron,
   recipientAddress,
   recipientLabel,
+  onSignOut,
+  referralAppliedCode,
 }: AppHeaderProps) {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -191,6 +197,13 @@ export function AppHeader({
       onClick: () => { onTogglePresentationMode?.(); setMenuOpen(false); },
       show: !!onTogglePresentationMode,
     },
+    {
+      id: 'signout',
+      label: 'Sign out',
+      icon: <LogOut className="w-4 h-4" />,
+      onClick: () => { onSignOut?.(); setMenuOpen(false); },
+      show: !!(onSignOut && isUserLoggedIn),
+    },
   ].filter(m => m.show);
 
   return (
@@ -300,6 +313,13 @@ export function AppHeader({
               {`${recipientAddress.slice(0, 6)}…${recipientAddress.slice(-4)}`}
             </span>
           </div>
+        </div>
+      )}
+
+      {referralAppliedCode && !googleUser && (
+        <div className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 bg-[#32FF8B]/8 border-t border-[#32FF8B]/20 text-[#32FF8B] text-[11px] font-mono font-bold tracking-wider">
+          <Gift className="w-3 h-3" />
+          <span>Referral applied: <span className="text-white">{referralAppliedCode}</span> — sign in to earn +50 FLOW for you & referrer.</span>
         </div>
       )}
 

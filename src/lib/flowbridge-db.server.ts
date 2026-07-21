@@ -178,22 +178,41 @@ export type SocialChannel = keyof typeof SOCIAL_LINKS;
 export async function getSocialFollows(userId: string) {
   const { data } = await supabaseAdmin
     .from("social_follows")
-    .select("youtube_confirmed_at, x_confirmed_at, telegram_confirmed_at")
+    .select("youtube_confirmed_at, x_confirmed_at, telegram_confirmed_at, youtube_handle, x_handle, telegram_handle")
     .eq("user_id", userId)
     .maybeSingle();
   return {
     youtube: !!data?.youtube_confirmed_at,
     x: !!data?.x_confirmed_at,
     telegram: !!data?.telegram_confirmed_at,
+    youtubeHandle: (data as any)?.youtube_handle ?? null,
+    xHandle: (data as any)?.x_handle ?? null,
+    telegramHandle: (data as any)?.telegram_handle ?? null,
   };
 }
 
-export async function confirmSocialFollow(userId: string, channel: SocialChannel) {
+function sanitizeHandle(raw: string) {
+  const trimmed = raw.trim().replace(/^@+/, "").slice(0, 64);
+  if (!/^[A-Za-z0-9._-]{2,64}$/.test(trimmed)) {
+    throw new Error("Handle must be 2–64 characters using letters, numbers, dot, underscore or dash.");
+  }
+  return trimmed;
+}
+
+export async function confirmSocialFollow(userId: string, channel: SocialChannel, handle?: string) {
   const now = new Date().toISOString();
-  const patch: Record<string, string> = { updated_at: now };
-  if (channel === "youtube") patch.youtube_confirmed_at = now;
-  else if (channel === "x") patch.x_confirmed_at = now;
-  else patch.telegram_confirmed_at = now;
+  const patch: Record<string, string | null> = { updated_at: now };
+  const cleanedHandle = handle ? sanitizeHandle(handle) : undefined;
+  if (channel === "youtube") {
+    patch.youtube_confirmed_at = now;
+    if (cleanedHandle !== undefined) patch.youtube_handle = cleanedHandle;
+  } else if (channel === "x") {
+    patch.x_confirmed_at = now;
+    if (cleanedHandle !== undefined) patch.x_handle = cleanedHandle;
+  } else {
+    patch.telegram_confirmed_at = now;
+    if (cleanedHandle !== undefined) patch.telegram_handle = cleanedHandle;
+  }
 
   const { data: existing } = await supabaseAdmin
     .from("social_follows")
@@ -292,63 +311,15 @@ export async function getGlobalIncentiveStats() {
 
 
 export async function bindUserWallet(userId: string, walletAddress: string) {
-  const normalized = walletAddress.trim().toLowerCase();
-  const { data: user } = await supabaseAdmin
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-  if (!user) throw new Error("Profile not found");
-
-  const { data: dup } = await supabaseAdmin
-    .from("profiles")
-    .select("id, email")
-    .eq("wallet_address", normalized)
-    .neq("id", userId)
-    .maybeSingle();
-  if (dup) {
-    console.warn(
-      `[bindUserWallet] wallet ${normalized} already bound to another account (user ${dup.id})`,
-    );
-    throw new Error("This wallet address is already registered to another account.");
-  }
-
-  const now = new Date();
-  let currentCount = user.binding_changes_count ?? 0;
-  let lastChange: Date | null = user.last_binding_change ? new Date(user.last_binding_change) : null;
-
-  if (user.wallet_address && user.wallet_address.toLowerCase() !== normalized) {
-    if (lastChange) {
-      const diffDays = (now.getTime() - lastChange.getTime()) / 86_400_000;
-      if (diffDays >= 30) currentCount = 0;
-    }
-    if (currentCount >= 2) {
-      const daysToWait = lastChange
-        ? Math.max(0, Math.ceil(30 - (now.getTime() - lastChange.getTime()) / 86_400_000))
-        : 30;
-      throw new Error(
-        `You have already changed your wallet binding 2 times within 30 days. Please wait ${daysToWait} day(s) before changing again.`,
-      );
-    }
-    currentCount += 1;
-    lastChange = now;
-  } else if (!user.wallet_address) {
-    currentCount = 1;
-    lastChange = now;
-  }
-
-  const { data: updated, error } = await supabaseAdmin
-    .from("profiles")
-    .update({
-      wallet_address: normalized,
-      binding_changes_count: currentCount,
-      last_binding_change: lastChange ? lastChange.toISOString() : null,
-    })
-    .eq("id", userId)
-    .select()
-    .single();
-  if (error) throw error;
-  return updated;
+  // Delegates to the SECURITY DEFINER RPC that safely bypasses the
+  // profile-guard trigger via a per-transaction GUC, enforces the 2×/30d
+  // rate limit, and validates the address format.
+  const { data, error } = await supabaseAdmin.rpc("admin_bind_wallet", {
+    p_user_id: userId,
+    p_wallet: walletAddress,
+  });
+  if (error) throw new Error(error.message || "Failed to bind wallet");
+  return data;
 }
 
 export async function claimFlowPoints(userId: string, emailVerified: boolean) {

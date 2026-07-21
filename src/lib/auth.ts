@@ -35,19 +35,28 @@ export const initAuth = (
   onAuthSuccess?: (user: AppUser, token: string) => void,
   onAuthFailure?: () => void,
 ) => {
-  // Fire once with current session
-  supabase.auth.getSession().then(({ data }) => {
-    const session = data.session;
-    if (session?.user) {
-      onAuthSuccess?.(toAppUser(session.user), session.access_token);
-    } else {
-      onAuthFailure?.();
-    }
-  });
+  // Emit initial state using a *revalidated* user (getUser() re-checks with
+  // Supabase Auth, so email_confirmed_at is fresh even if the cached session
+  // predates verification). Session is still fetched for the access_token.
+  (async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData.session;
+    if (!session?.user) { onAuthFailure?.(); return; }
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user ?? session.user;
+    onAuthSuccess?.(toAppUser(user), session.access_token);
+  })().catch(() => onAuthFailure?.());
 
-  const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+  const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
     if (session?.user) {
-      onAuthSuccess?.(toAppUser(session.user), session.access_token);
+      // On USER_UPDATED / TOKEN_REFRESHED, force a fresh getUser() so a newly
+      // confirmed email flips emailVerified across the app immediately.
+      let user = session.user;
+      if (event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+        const { data } = await supabase.auth.getUser();
+        if (data.user) user = data.user;
+      }
+      onAuthSuccess?.(toAppUser(user), session.access_token);
     } else {
       onAuthFailure?.();
     }

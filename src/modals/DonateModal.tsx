@@ -223,7 +223,7 @@ export function DonateModal({
     totalSwapVolumeUsd?: number;
     nextUnlockUsd?: number;
     claimableTotal?: number;
-    socials?: { youtube: boolean; x: boolean; telegram: boolean };
+    socials?: { youtube: boolean; x: boolean; telegram: boolean; youtubeHandle?: string | null; xHandle?: string | null; telegramHandle?: string | null };
   } | null>(null);
 
   const [isIncentivesLoading, setIsIncentivesLoading] = useState(false);
@@ -288,23 +288,38 @@ export function DonateModal({
   } as const;
   type SocialCh = keyof typeof SOCIAL_LINKS;
   const [socialBusy, setSocialBusy] = useState<SocialCh | null>(null);
-  const handleFollowSocial = async (channel: SocialCh) => {
-    if (!googleUser || !getEffectiveIdToken) return;
-    // Open the community page first so the user actually follows.
+  const [socialHandles, setSocialHandles] = useState<Record<SocialCh, string>>({ youtube: '', x: '', telegram: '' });
+  const [socialError, setSocialError] = useState<string | null>(null);
+
+  const handleOpenSocial = (channel: SocialCh) => {
     try { window.open(SOCIAL_LINKS[channel], '_blank', 'noopener,noreferrer'); } catch {}
+  };
+
+  const handleConfirmSocial = async (channel: SocialCh) => {
+    if (!googleUser || !getEffectiveIdToken) return;
+    const handle = socialHandles[channel].trim();
+    if (!handle) {
+      setSocialError(`Enter your ${channel === 'x' ? 'X' : channel === 'youtube' ? 'YouTube' : 'Telegram'} handle (e.g. @yourname) so we can verify.`);
+      return;
+    }
+    setSocialError(null);
     setSocialBusy(channel);
     try {
       const token = await getEffectiveIdToken();
-      if (!token) return;
+      if (!token) { setSocialError('Missing auth token — please sign in again.'); return; }
       const res = await fetch('/api/users/socials', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ channel }),
+        body: JSON.stringify({ channel, handle }),
       });
       const data = await res.json();
-      if (data.success) await fetchIncentives();
-    } catch (e) {
-      console.error('follow error', e);
+      if (!res.ok || !data.success) {
+        setSocialError(data?.error || 'Could not save handle.');
+      } else {
+        await fetchIncentives();
+      }
+    } catch (e: any) {
+      setSocialError(e?.message || 'Network error saving handle.');
     } finally {
       setSocialBusy(null);
     }
@@ -1563,30 +1578,62 @@ export function DonateModal({
                       <Heart className="w-4 h-4 text-[#32FF8B]" /> Community Follow Required
                     </h4>
                     <p className="text-[11px] text-[#C5C1B9] leading-relaxed">
-                      Follow all three official channels to unlock the Claim button. Click each to open — we'll mark it done automatically.
+                      Follow each official channel, enter the handle you followed with, then hit Verify. Handles are stored for spot-checks — fake ones may disqualify the claim.
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div className="space-y-2">
                       {(['youtube','x','telegram'] as const).map((ch) => {
                         const done = !!incentives?.socials?.[ch];
                         const label = ch === 'youtube' ? 'YouTube' : ch === 'x' ? 'X / Twitter' : 'Telegram';
+                        const savedHandle =
+                          ch === 'youtube' ? incentives?.socials?.youtubeHandle
+                          : ch === 'x' ? incentives?.socials?.xHandle
+                          : incentives?.socials?.telegramHandle;
                         return (
-                          <button
+                          <div
                             key={ch}
-                            type="button"
-                            disabled={socialBusy === ch}
-                            onClick={() => handleFollowSocial(ch)}
                             className={cn(
-                              "flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-[12px] font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer",
+                              "flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border p-2",
                               done
-                                ? "bg-[#32FF8B]/10 border-[#32FF8B]/40 text-[#32FF8B]"
-                                : "bg-white/5 border-white/10 text-white hover:border-[#32FF8B]/30"
+                                ? "bg-[#32FF8B]/8 border-[#32FF8B]/30"
+                                : "bg-white/5 border-white/10"
                             )}
                           >
-                            <span>{label}</span>
-                            {done ? <Check className="w-4 h-4" /> : <span className="text-[10px] opacity-70">Follow →</span>}
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenSocial(ch)}
+                              className={cn(
+                                "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[12px] font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer sm:w-40 shrink-0",
+                                done
+                                  ? "bg-[#32FF8B]/15 text-[#32FF8B]"
+                                  : "bg-black/30 text-white hover:bg-[#32FF8B]/10 hover:text-[#32FF8B]"
+                              )}
+                            >
+                              <span>{label}</span>
+                              {done ? <Check className="w-4 h-4" /> : <span className="text-[10px] opacity-70">Follow ↗</span>}
+                            </button>
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <input
+                                type="text"
+                                placeholder={savedHandle ? `@${savedHandle}` : `@your${ch === 'x' ? 'x' : ch}handle`}
+                                value={socialHandles[ch]}
+                                onChange={(e) => setSocialHandles((h) => ({ ...h, [ch]: e.target.value }))}
+                                className="flex-1 min-w-0 bg-black/40 border border-white/10 focus:border-[#32FF8B]/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[12px] font-mono text-white placeholder:text-white/30"
+                              />
+                              <button
+                                type="button"
+                                disabled={socialBusy === ch}
+                                onClick={() => handleConfirmSocial(ch)}
+                                className="px-3 py-1.5 bg-[#32FF8B]/15 hover:bg-[#32FF8B]/25 border border-[#32FF8B]/40 text-[#32FF8B] rounded-lg text-[11px] font-black uppercase tracking-wider disabled:opacity-50 cursor-pointer shrink-0"
+                              >
+                                {socialBusy === ch ? '…' : done ? 'Update' : 'Verify'}
+                              </button>
+                            </div>
+                          </div>
                         );
                       })}
+                      {socialError && (
+                        <p className="text-[11px] text-red-400 font-mono">{socialError}</p>
+                      )}
                     </div>
                   </div>
 
