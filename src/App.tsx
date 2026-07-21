@@ -1069,9 +1069,11 @@ export default function App() {
       setIsReceiptModalOpen(true);
     } else {
       // Real Blockchain Mode
+      if (!(await verifyWalletOrFail())) return;
       try {
         setIsActionLoading(true);
         const parsedAmount = parseUnits(caAmount, 18);
+
 
         if (caToBotDirection === 'CA_TO_BOT') {
           // 1. Check Allowance
