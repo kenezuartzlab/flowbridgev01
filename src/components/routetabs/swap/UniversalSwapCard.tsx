@@ -314,50 +314,70 @@ export function UniversalSwapCard({
     const isV3 = step.dex === "bdex-v3";
     const feePool = isV3 ? (step.v3Fee ?? 3000) : 0;
 
-    // Explicit gas limit — some in-app wallets (e.g. TokenPocket) fail wallet-side
-    // gas estimation on multi-hop routes and return "gasLimit is too low. given 0".
-    // Router swaps stay well under 500k gas in practice.
-    const swapGas = 500000n;
+    // Estimate gas per-call and add a 25% safety buffer, so the wallet reserves
+    // only what the swap actually consumes (≈180–220k) instead of the old flat
+    // 500k cap. Falls back to 500k only when estimation fails (some in-app
+    // wallets like TokenPocket report "gasLimit is too low. given 0" on
+    // multi-hop routes and need an explicit cap).
+    const FALLBACK_GAS = 500000n;
+    const withBuffer = (g: bigint) => (g * 125n) / 100n;
+    const estimateOr = async (params: Record<string, unknown>) => {
+      try {
+        const est = await publicClient!.estimateContractGas(params as Parameters<NonNullable<typeof publicClient>["estimateContractGas"]>[0]);
+        return withBuffer(est);
+      } catch {
+        return FALLBACK_GAS;
+      }
+    };
 
     // ── Dispatch to the correct FlowBridgeRouter entry point ──────────────
     if (step.inIsNative) {
-      return await writeContractAsync({
+      const base = {
         address: flowRouter,
         abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-        functionName: "swapNativeToToken",
-        args: [routerIdBig, step.path[step.path.length - 1], feePool, minOut, step.path, to, deadline],
+        functionName: "swapNativeToToken" as const,
+        args: [routerIdBig, step.path[step.path.length - 1], feePool, minOut, step.path, to, deadline] as const,
         value: totalIn,
-        gas: swapGas,
-      });
+        account: address,
+      };
+      const gas = await estimateOr(base);
+      return await writeContractAsync({ ...base, gas });
     }
 
     if (step.outIsNative) {
-      return await writeContractAsync({
+      const base = {
         address: flowRouter,
         abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-        functionName: "swapTokenToNative",
-        args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline],
-        gas: swapGas,
-      });
+        functionName: "swapTokenToNative" as const,
+        args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline] as const,
+        account: address,
+      };
+      const gas = await estimateOr(base);
+      return await writeContractAsync({ ...base, gas });
     }
 
     // ERC20 → ERC20
     if (isV3) {
-      return await writeContractAsync({
+      const base = {
         address: flowRouter,
         abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-        functionName: "swapV3Single",
-        args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline],
-        gas: swapGas,
-      });
+        functionName: "swapV3Single" as const,
+        args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline] as const,
+        account: address,
+      };
+      const gas = await estimateOr(base);
+      return await writeContractAsync({ ...base, gas });
     }
-    return await writeContractAsync({
+    const base = {
       address: flowRouter,
       abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-      functionName: "swapV2",
-      args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline],
-      gas: swapGas,
-    });
+      functionName: "swapV2" as const,
+      args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline] as const,
+      account: address,
+    };
+    const gas = await estimateOr(base);
+    return await writeContractAsync({ ...base, gas });
+
   };
 
 
