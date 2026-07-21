@@ -21,48 +21,9 @@ import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
+import { toFriendlyError, isNativeGasLow, lowGasMessage } from "@/lib/friendlyError";
 
-
-function parseTxError(e: any): string {
-  // Defensive: viem's internal `err.walk((err) => 'data' in err)` throws
-  // "e is not an Object" in Safari when the underlying error isn't an object.
-  // Guard every access so we always return a friendly string.
-  let raw: string = "Transaction failed";
-  try {
-    if (e && typeof e === "object") {
-      raw =
-        e.shortMessage ||
-        e.details ||
-        (e.cause && typeof e.cause === "object" && (e.cause.shortMessage || e.cause.message)) ||
-        e.message ||
-        raw;
-    } else if (typeof e === "string") {
-      raw = e;
-    }
-  } catch {
-    /* fall through with default */
-  }
-  const s = String(raw);
-  if (/user rejected|user denied|rejected the request|request rejected/i.test(s)) {
-    return "Transaction rejected in wallet.";
-  }
-  if (/insufficient funds|gas required exceeds|exceeds the balance|intrinsic gas/i.test(s)) {
-    return "Not enough BOT to cover network gas fees. Add a little BOT to your wallet and try again.";
-  }
-  if (/INSUFFICIENT_OUTPUT_AMOUNT|Too little received|slippage/i.test(s)) {
-    return "Price moved before confirmation. Refresh the quote or increase slippage slightly, then retry.";
-  }
-  if (/EXPIRED/i.test(s)) return "Transaction deadline expired. Please try again.";
-  if (/TRANSFER_FROM_FAILED|TRANSFER_FAILED/i.test(s)) {
-    return "Token transfer failed. Please check your balance or re-approve the token and try again.";
-  }
-  // Safari/viem quirk: raw "e is not an Object. (evaluating '`data` in e')".
-  if (/is not an Object|['"`]data['"`]\s*in\s*e|Cannot use 'in' operator/i.test(s)) {
-    return "Your wallet couldn't complete the transaction. Refresh the quote and try again — if it keeps failing, make sure you have a little BOT for gas.";
-  }
-  // Trim noisy viem prefixes
-  return s.replace(/^Error:\s*/, "").slice(0, 200) || "Transaction failed. Please try again.";
-}
+const parseTxError = (e: unknown) => toFriendlyError(e, { action: "swap", gasSymbol: "BOT" });
 
 function shortHash(h: string) {
   return `${h.slice(0, 8)}…${h.slice(-6)}`;
