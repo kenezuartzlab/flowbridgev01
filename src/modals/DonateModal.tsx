@@ -301,14 +301,20 @@ export function DonateModal({
   type SocialCh = keyof typeof SOCIAL_LINKS;
   const [socialBusy, setSocialBusy] = useState<SocialCh | null>(null);
   const [socialHandles, setSocialHandles] = useState<Record<SocialCh, string>>({ youtube: '', x: '', telegram: '' });
+  const [openedSocials, setOpenedSocials] = useState<Record<SocialCh, boolean>>({ youtube: false, x: false, telegram: false });
   const [socialError, setSocialError] = useState<string | null>(null);
 
   const handleOpenSocial = (channel: SocialCh) => {
+    setOpenedSocials((v) => ({ ...v, [channel]: true }));
     try { window.open(SOCIAL_LINKS[channel], '_blank', 'noopener,noreferrer'); } catch {}
   };
 
   const handleConfirmSocial = async (channel: SocialCh) => {
     if (!googleUser || !getEffectiveIdToken) return;
+    if (!openedSocials[channel] && !incentives?.socials?.[channel]) {
+      setSocialError(`Open and follow the official ${channel === 'x' ? 'X' : channel === 'youtube' ? 'YouTube' : 'Telegram'} channel first, then verify your handle.`);
+      return;
+    }
     const handle = socialHandles[channel].trim();
     if (!handle) {
       setSocialError(`Enter your ${channel === 'x' ? 'X' : channel === 'youtube' ? 'YouTube' : 'Telegram'} handle (e.g. @yourname) so we can verify.`);
