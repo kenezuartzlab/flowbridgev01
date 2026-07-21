@@ -141,7 +141,7 @@ export function ConnectGuideModal({
       }
     } catch (e: any) {
       const { toFriendlyError } = await import('@/lib/friendlyError');
-      setErr(toFriendlyError(e, { action: mode === 'signup' ? 'sign up' : mode === 'reset' ? 'send reset link' : 'sign in' }));
+      setErr(toFriendlyError(e, { action: mode === 'signup' ? 'sign up' : mode === 'forgot' ? 'send reset link' : 'sign in' }));
     } finally {
       setBusy(false);
     }
