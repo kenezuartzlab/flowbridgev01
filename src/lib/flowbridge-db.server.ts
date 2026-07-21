@@ -178,22 +178,41 @@ export type SocialChannel = keyof typeof SOCIAL_LINKS;
 export async function getSocialFollows(userId: string) {
   const { data } = await supabaseAdmin
     .from("social_follows")
-    .select("youtube_confirmed_at, x_confirmed_at, telegram_confirmed_at")
+    .select("youtube_confirmed_at, x_confirmed_at, telegram_confirmed_at, youtube_handle, x_handle, telegram_handle")
     .eq("user_id", userId)
     .maybeSingle();
   return {
     youtube: !!data?.youtube_confirmed_at,
     x: !!data?.x_confirmed_at,
     telegram: !!data?.telegram_confirmed_at,
+    youtubeHandle: (data as any)?.youtube_handle ?? null,
+    xHandle: (data as any)?.x_handle ?? null,
+    telegramHandle: (data as any)?.telegram_handle ?? null,
   };
 }
 
-export async function confirmSocialFollow(userId: string, channel: SocialChannel) {
+function sanitizeHandle(raw: string) {
+  const trimmed = raw.trim().replace(/^@+/, "").slice(0, 64);
+  if (!/^[A-Za-z0-9._-]{2,64}$/.test(trimmed)) {
+    throw new Error("Handle must be 2–64 characters using letters, numbers, dot, underscore or dash.");
+  }
+  return trimmed;
+}
+
+export async function confirmSocialFollow(userId: string, channel: SocialChannel, handle?: string) {
   const now = new Date().toISOString();
-  const patch: Record<string, string> = { updated_at: now };
-  if (channel === "youtube") patch.youtube_confirmed_at = now;
-  else if (channel === "x") patch.x_confirmed_at = now;
-  else patch.telegram_confirmed_at = now;
+  const patch: Record<string, string | null> = { updated_at: now };
+  const cleanedHandle = handle ? sanitizeHandle(handle) : undefined;
+  if (channel === "youtube") {
+    patch.youtube_confirmed_at = now;
+    if (cleanedHandle !== undefined) patch.youtube_handle = cleanedHandle;
+  } else if (channel === "x") {
+    patch.x_confirmed_at = now;
+    if (cleanedHandle !== undefined) patch.x_handle = cleanedHandle;
+  } else {
+    patch.telegram_confirmed_at = now;
+    if (cleanedHandle !== undefined) patch.telegram_handle = cleanedHandle;
+  }
 
   const { data: existing } = await supabaseAdmin
     .from("social_follows")
