@@ -378,7 +378,7 @@ export async function getBestRoute(
   const wbot = c.wbot.toLowerCase() as Address;
   const usdt = c.usdtBot.toLowerCase() as Address;
   const client = publicClient(isMainnet);
-  const allV2 = v2Dexes(isMainnet);
+  const allV2 = await v2Dexes(isMainnet);
 
   const candidates: QuoteResult[] = [];
 
