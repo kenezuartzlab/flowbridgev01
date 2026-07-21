@@ -389,6 +389,19 @@ export function UniversalSwapCard({
     setBusy(true);
     setTxError(null);
     setLastTx(null);
+    // Prove wallet control before any state-changing call. Blocks watch-only
+    // wallets and surfaces a clear message if the user rejects the signature.
+    try {
+      await ensureWalletVerified(address, signMessageAsync as any);
+    } catch (err: any) {
+      const msg = err instanceof WalletVerificationRejectedError
+        ? err.message
+        : (err?.message ?? "Wallet verification failed");
+      setTxError(msg);
+      toast.error(msg);
+      setBusy(false);
+      return;
+    }
     const swapToastId = toast.loading(
       `Swapping ${tokenIn.symbol} → ${tokenOut.symbol}…`,
     );
