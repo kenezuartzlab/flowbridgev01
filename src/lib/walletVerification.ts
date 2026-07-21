@@ -59,6 +59,21 @@ export class WalletVerificationRejectedError extends Error {
   }
 }
 
+export function getWalletSignatureErrorMessage(err: any) {
+  const msg = String(err?.shortMessage || err?.details || err?.message || err || "");
+  if (/request.*pending|already.*pending|already processing|resource unavailable|request already/i.test(msg)) {
+    return "A wallet signature request is already open. Close the old wallet prompt, reopen/unlock your wallet, then tap retry.";
+  }
+  if (/reject|denied|cancel|user rejected/i.test(msg)) {
+    return "Wallet signature was rejected. Approve the signature request to continue.";
+  }
+  if (/timed out|timeout|no wallet signature/i.test(msg)) {
+    return "No wallet signature received. Reopen/unlock your wallet, approve the signature prompt, then try again.";
+  }
+  if (/active wallet changed/i.test(msg)) return msg;
+  return "This wallet could not produce a signature. Watch-only wallets cannot swap or bridge — reconnect with a signing wallet.";
+}
+
 async function assertActiveInjectedAccount(expectedAddress: string): Promise<void> {
   if (typeof window === "undefined") return;
   const eth = (window as any).ethereum;
@@ -78,6 +93,55 @@ async function assertActiveInjectedAccount(expectedAddress: string): Promise<voi
     // Some in-app wallets block eth_accounts until an explicit connect. Do not
     // fail verification just because the readiness probe is unavailable.
   }
+}
+
+function withTimeout<T>(promise: Promise<T>, ms = SIGNATURE_TIMEOUT_MS): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<T>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error("No wallet signature received. Unlock your wallet, approve the signature prompt, then try again.")),
+      ms,
+    );
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
+export async function signMessageWithActiveWallet(
+  address: string,
+  message: string,
+  wagmiSignMessageAsync?: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
+): Promise<string> {
+  const normalized = address.toLowerCase();
+  await assertActiveInjectedAccount(normalized);
+
+  const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
+  if (eth?.request) {
+    try {
+      const signature = await withTimeout(
+        eth.request({ method: "personal_sign", params: [message, normalized] }) as Promise<string>,
+      );
+      await assertActiveInjectedAccount(normalized);
+      if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
+      return signature;
+    } catch (err: any) {
+      throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
+    }
+  }
+
+  if (wagmiSignMessageAsync) {
+    try {
+      const signature = await withTimeout(wagmiSignMessageAsync({ message }));
+      await assertActiveInjectedAccount(normalized);
+      if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
+      return signature;
+    } catch (err: any) {
+      throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
+    }
+  }
+
+  throw new WalletVerificationRejectedError("No signing wallet provider was found. Open FlowBridge in your wallet browser or reconnect a signing wallet.");
 }
 
 /**
@@ -119,25 +183,10 @@ export async function ensureWalletVerified(
   // connector, and add a hard timeout so the UI can never lock up.
   let signature: string;
   try {
-    await assertActiveInjectedAccount(normalized);
-    const signPromise = signMessageAsync({ message });
-    signature = await Promise.race([
-      signPromise,
-      new Promise<string>((_, reject) =>
-        setTimeout(
-          () => reject(new Error("No wallet signature received. Unlock your wallet, approve the signature prompt, then try again.")),
-          SIGNATURE_TIMEOUT_MS,
-        ),
-      ),
-    ]);
-    await assertActiveInjectedAccount(normalized);
+    signature = await signMessageWithActiveWallet(normalized, message, signMessageAsync);
   } catch (err: any) {
-    const msg = String(err?.shortMessage || err?.message || "");
-    if (/reject|denied|cancel/i.test(msg)) throw new WalletVerificationRejectedError();
-    if (/timed out|no wallet signature/i.test(msg)) throw new WalletVerificationRejectedError(msg);
-    throw new WalletVerificationRejectedError(
-      "This wallet could not produce a signature. Watch-only wallets cannot swap or bridge — reconnect with a signing wallet.",
-    );
+    if (err instanceof WalletVerificationRejectedError) throw err;
+    throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
   }
 
   // 3) Server-verify

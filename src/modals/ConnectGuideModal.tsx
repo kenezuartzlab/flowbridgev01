@@ -4,6 +4,7 @@ import { useAccount, useSignMessage } from 'wagmi';
 import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, requestPasswordReset } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
+import { getWalletSignatureErrorMessage, signMessageWithActiveWallet } from '@/lib/walletVerification';
 
 interface ConnectGuideModalProps {
   isOpen: boolean;
@@ -75,15 +76,7 @@ export function ConnectGuideModal({
     setErr(null); setMsg(null); setSiweBusy(true);
     try {
       const signWithTimeout = (m: string) =>
-        Promise.race([
-          signMessageAsync({ message: m }),
-          new Promise<string>((_, reject) =>
-            setTimeout(
-              () => reject(new Error('No wallet signature received. Unlock your wallet, approve the signature prompt, then try again.')),
-              35_000,
-            ),
-          ),
-        ]);
+        signMessageWithActiveWallet(connectedAddress, m, signMessageAsync as any);
       const result = await signInWithEthereum({
         address: connectedAddress,
         signMessage: signWithTimeout,
@@ -97,11 +90,10 @@ export function ConnectGuideModal({
       }
     } catch (e: any) {
       if (siweRequestId.current !== requestId) return;
-      const raw = e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.';
-      if (/reject|denied|cancel/i.test(String(raw))) {
-        setErr('Signature was rejected. Approve the request in your wallet to continue.');
+      if (e?.name === 'WalletVerificationRejectedError') {
+        setErr(getWalletSignatureErrorMessage(e));
       } else {
-        setErr(raw);
+        setErr(e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.');
       }
     } finally {
       if (siweRequestId.current === requestId) setSiweBusy(false);
