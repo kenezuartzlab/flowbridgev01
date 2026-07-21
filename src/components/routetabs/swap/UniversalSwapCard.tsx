@@ -267,7 +267,9 @@ export function UniversalSwapCard({
             address: tokenAddr,
             abi: ERC20_ABI,
             functionName: "approve",
-            args: [flowRouter, totalIn],
+            // Unlimited approval so users don't pay approval gas on every swap.
+            // FlowBridgeRouter v3 is the trusted spender for all swaps here.
+            args: [flowRouter, maxUint256],
             gas: 80000n,
           });
           const rcpt = await publicClient!.waitForTransactionReceipt({ hash: approveTx });
