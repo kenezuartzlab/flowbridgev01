@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
-  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut
+  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut,
+  BarChart3, Sparkles, Rocket, Gamepad2,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 import logoUrl from '@/assets/flowbridge-logo.png';
+
 
 const RESEND_COOLDOWN_SECONDS = 60;
 const RESEND_COOLDOWN_KEY = 'fb_resend_verify_until';
