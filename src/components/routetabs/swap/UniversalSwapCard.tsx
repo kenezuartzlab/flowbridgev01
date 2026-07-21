@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
-import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useBalance, usePublicClient, useReadContract, useSignMessage, useWriteContract } from "wagmi";
+import { ensureWalletVerified, WalletVerificationRejectedError } from "@/lib/walletVerification";
 import { formatUnits, parseUnits, type Address } from "viem";
 import { toast } from "sonner";
 import { TokenIcon } from "@/components/TokenIcon";
