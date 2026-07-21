@@ -97,6 +97,7 @@ export function UniversalSwapCard({
   const [busyMsg, setBusyMsg] = useState("");
   const [txError, setTxError] = useState<string | null>(null);
   const [lastTx, setLastTx] = useState<`0x${string}` | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Reset curated tokens if mainnet toggles
   useEffect(() => {
