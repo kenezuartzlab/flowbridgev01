@@ -182,7 +182,7 @@ export function UniversalSwapCard({
         if (cancelled) return;
         if (!result) {
           setQuote(null);
-          setQuoteError("No on-chain route found (no Bohr or CaryPact liquidity).");
+          setQuoteError("No on-chain route found on any active BOT Chain DEX.");
         } else {
           setQuote(result);
           setQuoteError(null);
