@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage } from 'wagmi';
+import { ensureWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { injected } from 'wagmi/connectors';
@@ -471,6 +472,29 @@ export default function App() {
   // Standard Wagmi Write Hooks
   const { writeContractAsync } = useWriteContract();
   const { sendTransactionAsync } = useSendTransaction();
+  const { signMessageAsync } = useSignMessage();
+
+  // Gate the first swap/bridge of the session behind a wallet signature so
+  // watch-only wallets cannot trigger any state-changing tx. Returns true if
+  // the caller may proceed. Sets errorMessage + resets loading state on fail.
+  const verifyWalletOrFail = async (): Promise<boolean> => {
+    if (!address) {
+      setErrorMessage("Connect a wallet before continuing.");
+      return false;
+    }
+    try {
+      await ensureWalletVerified(address, signMessageAsync as any);
+      return true;
+    } catch (err: any) {
+      const msg = err instanceof WalletVerificationRejectedError
+        ? err.message
+        : (err?.message ?? "Wallet verification failed");
+      setErrorMessage(msg);
+      setIsActionLoading(false);
+      setIsWaitingModalOpen(false);
+      return false;
+    }
+  };
 
   // On-Chain Reads (Cached balances)
   const currentBotChainId = isMainnet ? 677 : 968;
@@ -1045,9 +1069,11 @@ export default function App() {
       setIsReceiptModalOpen(true);
     } else {
       // Real Blockchain Mode
+      if (!(await verifyWalletOrFail())) return;
       try {
         setIsActionLoading(true);
         const parsedAmount = parseUnits(caAmount, 18);
+
 
         if (caToBotDirection === 'CA_TO_BOT') {
           // 1. Check Allowance
@@ -1159,6 +1185,7 @@ export default function App() {
         fetchUserIncentivesInApp();
       }, 1000);
     } else {
+      if (!(await verifyWalletOrFail())) return;
       try {
         setIsActionLoading(true);
         setActionStep('swapping_bot');
@@ -1358,6 +1385,10 @@ export default function App() {
       setReceiptStatus('success');
       setIsReceiptModalOpen(true);
     } else {
+      // Skip EVM ownership check for Tron-sourced bridges (uses TronLink signing).
+      if (bridgeDirection !== 'TRX_TO_BOT') {
+        if (!(await verifyWalletOrFail())) return;
+      }
       try {
         setIsActionLoading(true);
 

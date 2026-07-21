@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
-import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useBalance, usePublicClient, useReadContract, useSignMessage, useWriteContract } from "wagmi";
+import { ensureWalletVerified, WalletVerificationRejectedError } from "@/lib/walletVerification";
 import { formatUnits, parseUnits, type Address } from "viem";
 import { toast } from "sonner";
 import { TokenIcon } from "@/components/TokenIcon";
@@ -213,6 +214,7 @@ export function UniversalSwapCard({
 
   // ── Writes ────────────────────────────────────────────────────────────────
   const { writeContractAsync } = useWriteContract();
+  const { signMessageAsync } = useSignMessage();
 
   const minOutFor = (expected: bigint) =>
     (expected * BigInt(Math.floor((100 - slippage) * 1000))) / 100000n;
@@ -387,6 +389,19 @@ export function UniversalSwapCard({
     setBusy(true);
     setTxError(null);
     setLastTx(null);
+    // Prove wallet control before any state-changing call. Blocks watch-only
+    // wallets and surfaces a clear message if the user rejects the signature.
+    try {
+      await ensureWalletVerified(address, signMessageAsync as any);
+    } catch (err: any) {
+      const msg = err instanceof WalletVerificationRejectedError
+        ? err.message
+        : (err?.message ?? "Wallet verification failed");
+      setTxError(msg);
+      toast.error(msg);
+      setBusy(false);
+      return;
+    }
     const swapToastId = toast.loading(
       `Swapping ${tokenIn.symbol} → ${tokenOut.symbol}…`,
     );
