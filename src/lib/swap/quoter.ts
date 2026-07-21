@@ -427,9 +427,31 @@ export async function getBestRoute(
 
   const c = getContracts(isMainnet);
   const wbot = c.wbot.toLowerCase() as Address;
+  const caWbot = c.caWbot.toLowerCase() as Address;
   const usdt = c.usdtBot.toLowerCase() as Address;
+  const caToken = c.caToken.toLowerCase() as Address;
   const client = publicClient(isMainnet);
   const allV2 = await v2Dexes(isMainnet);
+
+  // Hop bases considered on every V2 route: wrapped-natives, USDT, CA, plus
+  // any user-imported tokens. `bestOnV2Dex` filters out hops that don't have
+  // a live pair on the router's factory, so extra entries are safe.
+  let importedHops: { addr: Address; symbol: string }[] = [];
+  try {
+    // Dynamic import so SSR/edge builds without localStorage don't crash.
+    const mod = await import("./tokenRegistry");
+    importedHops = mod.getImportedTokens(isMainnet).map((t) => ({
+      addr: t.address.toLowerCase() as Address,
+      symbol: t.symbol,
+    }));
+  } catch { /* no localStorage or module missing — skip */ }
+  const hopBases: { addr: Address; symbol: string }[] = [
+    { addr: wbot, symbol: "BOT" },
+    { addr: caWbot, symbol: "BOT" },
+    { addr: usdt, symbol: "USDT" },
+    { addr: caToken, symbol: "CA" },
+    ...importedHops,
+  ];
 
   const candidates: QuoteResult[] = [];
 
