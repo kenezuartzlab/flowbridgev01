@@ -1045,46 +1045,65 @@ export default function App() {
       setReceiptStatus('success');
       setIsReceiptModalOpen(true);
     } else {
-      // Real Blockchain Mode
+      // Real Blockchain Mode — routes CA↔BOT through FlowBridgeRouter v3
+      // (routerId 3 = CaSwap V2, wrapped native = caWBOT). Same pattern as
+      // the universal SWAP card so behaviour/fees are consistent.
       if (!(await verifyWalletOrFail())) return;
       try {
         setIsActionLoading(true);
         const parsedAmount = parseUnits(caAmount, 18);
+        const flowRouter = contracts.flowBridgeRouterV3 as `0x${string}`;
+        const caWbot = contracts.caWbot as `0x${string}`;
+        const caToken = contracts.caToken as `0x${string}`;
+        const routerId = 3n; // CaSwap V2 registry ID
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
+        const to = address as `0x${string}`;
 
+        // Read on-chain protocol fee so we approve / send the exact totalIn.
+        let fee = 0n;
+        try {
+          if (botPublicClient) {
+            const res = (await botPublicClient.readContract({
+              address: flowRouter,
+              abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+              functionName: 'computeRouterFee',
+              args: [routerId, parsedAmount, to],
+            })) as readonly [bigint, bigint];
+            fee = res[0] ?? 0n;
+          }
+        } catch { fee = 0n; }
+        const totalIn = parsedAmount + fee;
 
         if (caToBotDirection === 'CA_TO_BOT') {
-          // 1. Check Allowance
+          // 1. Approve FlowBridgeRouter v3 for CA if allowance too low.
           const allowance = rawCaAllowance ? BigInt(rawCaAllowance.toString()) : 0n;
-          if (allowance < parsedAmount) {
+          if (allowance < totalIn) {
             setActionStep('approving_ca');
-            await writeContractAsync({
-              address: contracts.caToken as `0x${string}`,
+            const approveTx = await writeContractAsync({
+              address: caToken,
               abi: ERC20_ABI,
               functionName: 'approve',
-              args: [contracts.caSwapRouter as `0x${string}`, parsedAmount],
+              args: [flowRouter, totalIn],
               chainId: targetChainIdForTab(),
-              gas: 150000n // Bypass zero gas limit estimation errors
+              gas: 80000n,
             } as any);
-            await new Promise(r => setTimeout(r, 3000)); // wait for propagation
+            if (botPublicClient) {
+              await botPublicClient.waitForTransactionReceipt({ hash: approveTx });
+            } else {
+              await new Promise(r => setTimeout(r, 3000));
+            }
             refetchCaAllowance();
           }
 
-          // 2. Execute Swap CA -> BOT (Direct CaryPact swap)
+          // 2. Swap CA → native BOT via FlowBridgeRouter v3.
           setActionStep('swapping_ca');
-          const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
           const txSwap = await writeContractAsync({
-            address: contracts.caSwapRouter as `0x${string}`,
-            abi: CASWAP_ROUTER_ABI,
-            functionName: 'swapExactTokensForETH',
-            args: [
-              parsedAmount, 
-              0n, // amountOutMin
-              [contracts.caToken as `0x${string}`, contracts.caWbot as `0x${string}`], 
-              address as `0x${string}`, 
-              deadline
-            ],
+            address: flowRouter,
+            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+            functionName: 'swapTokenToNative',
+            args: [routerId, caToken, 0, parsedAmount, 0n, [caToken, caWbot], to, deadline],
             chainId: targetChainIdForTab(),
-            gas: 350000n // Ensure higher gas limit for swaps
+            gas: 350000n,
           } as any);
 
           const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
@@ -1095,22 +1114,16 @@ export default function App() {
           });
           logTransactionToDb('SWAP', caToBotDirection, caAmount, botAmount || '0', txSwap, 'SUCCESS');
         } else {
-          // Swap BOT -> CA: Native BOT is sent (requires no approvals)
+          // Swap native BOT → CA via FlowBridgeRouter v3. value = amountIn + fee.
           setActionStep('swapping_ca');
-          const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
           const txSwap = await writeContractAsync({
-            address: contracts.caSwapRouter as `0x${string}`,
-            abi: CASWAP_ROUTER_ABI,
-            functionName: 'swapExactETHForTokens',
-            args: [
-              0n, // amountOutMin
-              [contracts.caWbot as `0x${string}`, contracts.caToken as `0x${string}`], 
-              address as `0x${string}`, 
-              deadline
-            ],
-            value: parsedAmount,
+            address: flowRouter,
+            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+            functionName: 'swapNativeToToken',
+            args: [routerId, caToken, 0, 0n, [caWbot, caToken], to, deadline],
+            value: totalIn,
             chainId: targetChainIdForTab(),
-            gas: 350000n
+            gas: 350000n,
           } as any);
 
           const finalConfirmed = await confirmAndShowReceipt(txSwap, targetChainIdForTab(), 'swap');
