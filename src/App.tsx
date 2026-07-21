@@ -1477,6 +1477,7 @@ export default function App() {
           setActionStep('bridging_usdt');
           const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
           const destChainIdForBridge = isMainnet ? 677n : 968n;
+          const useBotGasEth = receiveBotGas;
           const txBridge = await writeContractAsync({
             address: contracts.ethBridgeProxy as `0x${string}`,
             abi: [{
@@ -1486,13 +1487,15 @@ export default function App() {
                 { internalType: "address", name: "recipient", type: "address" },
                 { internalType: "uint256", name: "amount", type: "uint256" }
               ],
-              name: "deposit", outputs: [], stateMutability: "payable", type: "function"
+              name: useBotGasEth ? "depositWithBotGas" : "deposit",
+              outputs: [], stateMutability: "payable", type: "function"
             }],
-            functionName: 'deposit',
+            functionName: useBotGasEth ? 'depositWithBotGas' : 'deposit',
             args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
             chainId: targetChainIdForTab(),
             gas: 600000n
           } as any);
+
 
           const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
           if (!finalConfirmed) return;
