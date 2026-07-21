@@ -1972,6 +1972,8 @@ export default function App() {
               onConnectTron={handleConnectTron}
               recipientAddress={recipientAddress}
               recipientLabel={recipientLabel}
+              onSignOut={googleUser ? handleGoogleLogout : undefined}
+              referralAppliedCode={referralAppliedCode}
             />
           );
         })()}
