@@ -11,6 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as MarketsRouteImport } from './routes/markets'
+import { Route as FortuneRouteImport } from './routes/fortune'
+import { Route as EcosurgeRouteImport } from './routes/ecosurge'
+import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
@@ -41,6 +45,26 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsRoute = MarketsRouteImport.update({
+  id: '/markets',
+  path: '/markets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FortuneRoute = FortuneRouteImport.update({
+  id: '/fortune',
+  path: '/fortune',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EcosurgeRoute = EcosurgeRouteImport.update({
+  id: '/ecosurge',
+  path: '/ecosurge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArcadeflixRoute = ArcadeflixRouteImport.update({
+  id: '/arcadeflix',
+  path: '/arcadeflix',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -156,6 +180,10 @@ const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/arcadeflix': typeof ArcadeflixRoute
+  '/ecosurge': typeof EcosurgeRoute
+  '/fortune': typeof FortuneRoute
+  '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -181,6 +209,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/arcadeflix': typeof ArcadeflixRoute
+  '/ecosurge': typeof EcosurgeRoute
+  '/fortune': typeof FortuneRoute
+  '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -207,6 +239,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/arcadeflix': typeof ArcadeflixRoute
+  '/ecosurge': typeof EcosurgeRoute
+  '/fortune': typeof FortuneRoute
+  '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -234,6 +270,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/arcadeflix'
+    | '/ecosurge'
+    | '/fortune'
+    | '/markets'
     | '/mcp'
     | '/reset-password'
     | '/.mcp/list-tools'
@@ -259,6 +299,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/arcadeflix'
+    | '/ecosurge'
+    | '/fortune'
+    | '/markets'
     | '/mcp'
     | '/reset-password'
     | '/.mcp/list-tools'
@@ -284,6 +328,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/arcadeflix'
+    | '/ecosurge'
+    | '/fortune'
+    | '/markets'
     | '/mcp'
     | '/reset-password'
     | '/.mcp/list-tools'
@@ -310,6 +358,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArcadeflixRoute: typeof ArcadeflixRoute
+  EcosurgeRoute: typeof EcosurgeRoute
+  FortuneRoute: typeof FortuneRoute
+  MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -347,6 +399,34 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets': {
+      id: '/markets'
+      path: '/markets'
+      fullPath: '/markets'
+      preLoaderRoute: typeof MarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fortune': {
+      id: '/fortune'
+      path: '/fortune'
+      fullPath: '/fortune'
+      preLoaderRoute: typeof FortuneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ecosurge': {
+      id: '/ecosurge'
+      path: '/ecosurge'
+      fullPath: '/ecosurge'
+      preLoaderRoute: typeof EcosurgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arcadeflix': {
+      id: '/arcadeflix'
+      path: '/arcadeflix'
+      fullPath: '/arcadeflix'
+      preLoaderRoute: typeof ArcadeflixRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -513,6 +593,10 @@ const ApiProposalsRouteWithChildren = ApiProposalsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArcadeflixRoute: ArcadeflixRoute,
+  EcosurgeRoute: EcosurgeRoute,
+  FortuneRoute: FortuneRoute,
+  MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,

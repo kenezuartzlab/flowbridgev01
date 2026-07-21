@@ -468,21 +468,67 @@ export async function getBestRoute(
   return candidates[0];
 }
 
+/**
+ * Deep liquidity probe for custom-imported tokens.
+ * Uses the full router (getBestRoute) with a small probe amount, testing the
+ * token against every base (BOT native, USDT, CA). If any router/DEX in the
+ * registry yields a positive quote, the token is tradable — no manual pair
+ * address needed.
+ */
 export async function hasAnyLiquidity(
   tokenAddress: string,
   isMainnet: boolean,
 ): Promise<boolean> {
   const c = getContracts(isMainnet);
-  const client = publicClient(isMainnet);
-  const candidate = tokenAddress.toLowerCase() as Address;
-  const usdt = c.usdtBot.toLowerCase() as Address;
-  for (const dex of v2Dexes(isMainnet)) {
-    if (candidate === dex.wnative || candidate === usdt) return true;
-    const [a, b] = await Promise.all([
-      pairExists(client, dex.factory, candidate, dex.wnative),
-      pairExists(client, dex.factory, candidate, usdt),
-    ]);
-    if (a || b) return true;
+  const candidateAddr = tokenAddress.toLowerCase();
+
+  const bases = [
+    c.wbot.toLowerCase(),
+    c.caWbot.toLowerCase(),
+    c.usdtBot.toLowerCase(),
+    c.caToken.toLowerCase(),
+  ];
+  if (bases.includes(candidateAddr)) return true;
+
+  let decimals = 18;
+  try {
+    const client = publicClient(isMainnet);
+    const ERC20_DEC = parseAbi(["function decimals() view returns (uint8)"]);
+    decimals = Number(
+      await client.readContract({
+        address: candidateAddr as Address,
+        abi: ERC20_DEC,
+        functionName: "decimals",
+      }),
+    );
+  } catch {
+    /* keep 18 */
+  }
+  const probeAmount = 10n ** BigInt(decimals);
+
+  const candidateIn: Token = {
+    address: candidateAddr,
+    symbol: "T",
+    name: "T",
+    decimals,
+  };
+
+  const targets: Token[] = [
+    NATIVE_BOT,
+    USDT_TOKEN(isMainnet),
+    { address: c.caToken.toLowerCase(), symbol: "CA", name: "CaryPact", decimals: 18 },
+  ];
+
+  for (const out of targets) {
+    if (out.address.toLowerCase() === candidateAddr) continue;
+    try {
+      const r = await getBestRoute(candidateIn, out, probeAmount, isMainnet);
+      if (r && r.amountOut > 0n) return true;
+    } catch { /* try next */ }
+    try {
+      const r = await getBestRoute(out, candidateIn, probeAmount, isMainnet);
+      if (r && r.amountOut > 0n) return true;
+    } catch { /* try next */ }
   }
   return false;
 }

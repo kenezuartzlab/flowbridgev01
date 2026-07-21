@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
-  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut
+  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut,
+  BarChart3, Sparkles, Rocket, Gamepad2,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 import logoUrl from '@/assets/flowbridge-logo.png';
+
 
 const RESEND_COOLDOWN_SECONDS = 60;
 const RESEND_COOLDOWN_KEY = 'fb_resend_verify_until';
@@ -73,6 +76,8 @@ export function AppHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const navigate = useNavigate();
+
 
   const isUserLoggedIn = !!googleUser;
   const isVerified = !!(googleUser?.emailVerified || googleUser?.email_verified || googleUser?.isDemo);
@@ -162,6 +167,35 @@ export function AppHeader({
   };
   const menuItems: MenuItem[] = [
     {
+      id: 'markets',
+      label: 'Markets',
+      icon: <BarChart3 className="w-4 h-4" />,
+      onClick: () => { navigate({ to: '/markets' }); setMenuOpen(false); },
+      show: true,
+    },
+    {
+      id: 'fortune',
+      label: 'Flow Fortune Wheel',
+      icon: <Sparkles className="w-4 h-4" />,
+      onClick: () => { navigate({ to: '/fortune' }); setMenuOpen(false); },
+      accent: true,
+      show: true,
+    },
+    {
+      id: 'ecosurge',
+      label: 'Ecosurge Growth Hub',
+      icon: <Rocket className="w-4 h-4" />,
+      onClick: () => { navigate({ to: '/ecosurge' }); setMenuOpen(false); },
+      show: true,
+    },
+    {
+      id: 'arcadeflix',
+      label: 'ArcadeFlix P2E',
+      icon: <Gamepad2 className="w-4 h-4" />,
+      onClick: () => { navigate({ to: '/arcadeflix' }); setMenuOpen(false); },
+      show: true,
+    },
+    {
       id: 'rewards',
       label: 'Rewards',
       icon: <Gift className="w-4 h-4" />,
@@ -169,6 +203,7 @@ export function AppHeader({
       accent: true,
       show: !!onRewardsClick,
     },
+
     {
       id: 'donate',
       label: 'Support',
