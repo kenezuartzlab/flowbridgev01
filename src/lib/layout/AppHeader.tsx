@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
-  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X
+  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut
 } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
