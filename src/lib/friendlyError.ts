@@ -105,7 +105,7 @@ export function toFriendlyError(e: unknown, ctx: FriendlyErrorContext = {}): str
 
 /** Minimum native gas (in ether units) we want a user to hold before signing. */
 export const LOW_GAS_MIN_ETHER: Record<string, number> = {
-  BOT: 0.0015,
+  BOT: 0.05,
   BNB: 0.0008,
   ETH: 0.0008,
   TRX: 15,
