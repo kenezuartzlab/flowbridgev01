@@ -2114,7 +2114,7 @@ export default function App() {
             <div className="p-3.5 bg-red-950/20 border border-red-500/25 rounded-2xl space-y-2">
               <WarningPanel 
                 type="error" 
-                title="On-Chain Revert" 
+                title="Transaction Didn't Go Through" 
                 message={errorMessage} 
               />
               <div className="flex gap-2 justify-end font-mono">
