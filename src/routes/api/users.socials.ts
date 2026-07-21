@@ -21,12 +21,13 @@ export const Route = createFileRoute("/api/users/socials")({
         const user = await getAuthUser(request);
         if (!user) return unauthorized();
         try {
-          const body = (await request.json()) as { channel?: string };
+          const body = (await request.json()) as { channel?: string; handle?: string };
           const channel = body.channel;
           if (channel !== "youtube" && channel !== "x" && channel !== "telegram") {
             return jsonResponse({ error: "Invalid channel" }, 400);
           }
-          const socials = await confirmSocialFollow(user.id, channel);
+          const handle = typeof body.handle === "string" && body.handle.trim() ? body.handle : undefined;
+          const socials = await confirmSocialFollow(user.id, channel, handle);
           return jsonResponse({ success: true, socials });
         } catch (e: any) {
           return jsonResponse({ error: e.message ?? "Failed to record follow" }, 400);
