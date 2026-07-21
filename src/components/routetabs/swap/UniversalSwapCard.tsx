@@ -590,7 +590,8 @@ export function UniversalSwapCard({
   const handleSubmit = () => {
     if (!isConnected) return onConnect();
     if (!isNetworkCorrect) return onSwitchNetwork();
-    void handleSwap();
+    if (!quote || !amountIn || parsedAmount === 0n) return;
+    setConfirmOpen(true);
   };
 
   const usdValueFor = (t: Token, amt: string): string | undefined => {
