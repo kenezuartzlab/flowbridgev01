@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage } from 'wagmi';
+import { ensureWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { injected } from 'wagmi/connectors';
