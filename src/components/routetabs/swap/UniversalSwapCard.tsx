@@ -144,6 +144,12 @@ export function UniversalSwapCard({
   const flowRouter: Address = contracts.flowBridgeRouterV3.toLowerCase() as Address;
   const firstStepRouter: Address = flowRouter;
 
+  // Always-on native BOT balance for the low-gas warning banner (independent
+  // of whichever token the user is spending).
+  const nativeGasBalance = useBalance({ address, query: { enabled: !!address } });
+  const nativeGasLow = !!address && isNativeGasLow(nativeGasBalance.data?.value, 18, "BOT");
+
+
 
   // ── Allowance ─────────────────────────────────────────────────────────────
   const allowanceRead = useReadContract({
@@ -661,6 +667,10 @@ export function UniversalSwapCard({
           <Row label="Slippage" value={`${slippage}%`} />
           <Row label="Route" value={quote.symbolPath.join(" → ")} />
         </div>
+      )}
+
+      {nativeGasLow && !txError && (
+        <WarningPanel type="warning" message={lowGasMessage("BOT")} />
       )}
 
       {quoteError && amountIn && parseFloat(amountIn) > 0 && !quoting && (
