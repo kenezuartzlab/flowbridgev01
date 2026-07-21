@@ -75,7 +75,7 @@ export function TokenPickerModal({
       }
       const liquid = await hasAnyLiquidity(meta.address, isMainnet);
       if (!liquid) {
-        setImportError("No tradable liquidity found on any BOT Chain DEX (Bohr V2/V3 or CaryPact) against BOT, USDT or CA.");
+        setImportError("No tradable liquidity found on any active BOT Chain router against BOT, USDT or CA.");
         return;
       }
       addImportedToken(isMainnet, meta);
