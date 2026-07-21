@@ -65,7 +65,7 @@ export class WalletVerificationRejectedError extends Error {
  */
 export async function ensureWalletVerified(
   address: string,
-  signMessageAsync: (args: { account: `0x${string}`; message: string }) => Promise<string>,
+  signMessageAsync: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
 ): Promise<void> {
   if (!address) throw new Error("Wallet address required for verification");
   const normalized = address.toLowerCase();
