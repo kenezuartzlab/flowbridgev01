@@ -91,15 +91,27 @@ export async function ensureWalletVerified(
   });
 
   // 2) Sign — this is where watch-only wallets fail out.
+  // Do NOT pin `account` on the signMessage call: after switching wallets the
+  // active connector may not hold the previous address, and wagmi will hang
+  // forever waiting for a signer that isn't there. Let wagmi use the active
+  // connector, and add a hard timeout so the UI can never lock up.
   let signature: string;
   try {
-    signature = await signMessageAsync({
-      account: normalized as `0x${string}`,
-      message,
-    });
+    const signPromise = signMessageAsync({ message });
+    const timeoutMs = 120_000;
+    signature = await Promise.race([
+      signPromise,
+      new Promise<string>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Signature request timed out. Open your wallet and try again.")),
+          timeoutMs,
+        ),
+      ),
+    ]);
   } catch (err: any) {
     const msg = String(err?.shortMessage || err?.message || "");
     if (/reject|denied|cancel/i.test(msg)) throw new WalletVerificationRejectedError();
+    if (/timed out/i.test(msg)) throw new WalletVerificationRejectedError(msg);
     throw new WalletVerificationRejectedError(
       "This wallet could not produce a signature. Watch-only wallets cannot swap or bridge — reconnect with a signing wallet.",
     );
