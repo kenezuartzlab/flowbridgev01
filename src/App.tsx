@@ -2283,7 +2283,7 @@ export default function App() {
               }
               bridgeDirection={bridgeDirection}
               onReset={resetStep3}
-              showReceiveBotGasOption={bridgeDirection === 'BNB_TO_BOT'}
+              showReceiveBotGasOption={bridgeDirection === 'BNB_TO_BOT' || bridgeDirection === 'ETH_TO_BOT'}
               receiveBotGas={receiveBotGas}
               onReceiveBotGasChange={(checked) => {
                 if (checked) {
