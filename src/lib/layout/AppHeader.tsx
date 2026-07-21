@@ -37,6 +37,10 @@ interface AppHeaderProps {
   /** Secondary/recipient chip (the counterparty address, shown below the primary pill). */
   recipientAddress?: string | null;
   recipientLabel?: string;
+  /** Sign out the current Google/email user. */
+  onSignOut?: () => void;
+  /** Referral code the current session was captured under, if any. */
+  referralAppliedCode?: string | null;
 }
 
 export function AppHeader({
