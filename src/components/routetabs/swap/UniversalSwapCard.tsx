@@ -21,7 +21,8 @@ import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
-import { toFriendlyError, isNativeGasLow, lowGasMessage } from "@/lib/friendlyError";
+import { toFriendlyError, isNativeGasLow, lowGasMessage, lowGasSteps } from "@/lib/friendlyError";
+import { LowGasSettingsModal } from "@/modals/LowGasSettingsModal";
 
 const parseTxError = (e: unknown) => toFriendlyError(e, { action: "swap", gasSymbol: "BOT" });
 
@@ -148,6 +149,7 @@ export function UniversalSwapCard({
   // of whichever token the user is spending).
   const nativeGasBalance = useBalance({ address, query: { enabled: !!address } });
   const nativeGasLow = !!address && isNativeGasLow(nativeGasBalance.data?.value, 18, "BOT");
+  const [gasSettingsOpen, setGasSettingsOpen] = useState(false);
 
 
 
@@ -670,8 +672,16 @@ export function UniversalSwapCard({
       )}
 
       {nativeGasLow && !txError && (
-        <WarningPanel type="warning" message={lowGasMessage("BOT")} />
+        <WarningPanel
+          type="warning"
+          title="Low BOT for Gas"
+          message={lowGasMessage("BOT")}
+          steps={lowGasSteps("BOT")}
+          actionLabel="Adjust threshold"
+          onAction={() => setGasSettingsOpen(true)}
+        />
       )}
+      <LowGasSettingsModal isOpen={gasSettingsOpen} onClose={() => setGasSettingsOpen(false)} />
 
       {quoteError && amountIn && parseFloat(amountIn) > 0 && !quoting && (
         <WarningPanel type="warning" message={quoteError} />
