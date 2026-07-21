@@ -90,7 +90,11 @@ export function ConnectGuideModal({
       }
     } catch (e: any) {
       if (siweRequestId.current !== requestId) return;
-      setErr(getWalletSignatureErrorMessage(e));
+      if (e?.name === 'WalletVerificationRejectedError') {
+        setErr(getWalletSignatureErrorMessage(e));
+      } else {
+        setErr(e?.shortMessage ?? e?.message ?? 'Sign-in with wallet failed.');
+      }
     } finally {
       if (siweRequestId.current === requestId) setSiweBusy(false);
     }
