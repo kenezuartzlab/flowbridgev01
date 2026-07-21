@@ -306,6 +306,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_bind_wallet: {
+        Args: { p_user_id: string; p_wallet: string }
+        Returns: {
+          binding_changes_count: number
+          claimed_tokens: number
+          created_at: string
+          email: string
+          flow_points: number
+          id: string
+          last_binding_change: string | null
+          points_referral_activity: number
+          points_referral_signup: number
+          points_self: number
+          referral_code: string | null
+          referred_by: string | null
+          total_swap_volume_usd: number
+          wallet_address: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
