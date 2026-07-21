@@ -51,6 +51,19 @@ export function ConnectGuideModal({
     setErr(null);
   }, [connectedAddress]);
 
+  // Full SIWE state reset every time the modal opens. Prevents "stuck" busy
+  // state from a previous session/attempt from carrying over — the button
+  // must always start fresh and clickable when the user reopens the modal.
+  useEffect(() => {
+    if (!isOpen) return;
+    siweRequestId.current += 1;
+    setSiweBusy(false);
+    setErr(null);
+    setMsg(null);
+    setBusy(false);
+  }, [isOpen]);
+
+
   useEffect(() => {
     if (!siweBusy) return;
     const requestId = siweRequestId.current;
