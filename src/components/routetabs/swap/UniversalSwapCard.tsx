@@ -323,7 +323,7 @@ export function UniversalSwapCard({
     const withBuffer = (g: bigint) => (g * 125n) / 100n;
     const estimateOr = async (params: Record<string, unknown>) => {
       try {
-        const est = await publicClient!.estimateContractGas(params as Parameters<typeof publicClient.estimateContractGas>[0]);
+        const est = await publicClient!.estimateContractGas(params as Parameters<NonNullable<typeof publicClient>["estimateContractGas"]>[0]);
         return withBuffer(est);
       } catch {
         return FALLBACK_GAS;
