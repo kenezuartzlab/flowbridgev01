@@ -109,7 +109,7 @@ export function BridgeStatusPanel({
         } catch (e: any) {
           if (cancelled) return;
           setPhase('failed');
-          setErrorMsg(e?.message || 'Failed to fetch Tron status.');
+          setErrorMsg(toFriendlyError(e, { action: 'check Tron status', gasSymbol: 'TRX' }));
         }
       };
       pollTron();
@@ -144,7 +144,7 @@ export function BridgeStatusPanel({
       } catch (e: any) {
         if (cancelled) return;
         setPhase('failed');
-        setErrorMsg(e?.shortMessage || e?.message || 'Failed to fetch on-chain status.');
+        setErrorMsg(toFriendlyError(e, { action: 'check bridge status' }));
       }
     };
 

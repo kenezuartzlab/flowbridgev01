@@ -489,7 +489,7 @@ export default function App() {
     } catch (err: any) {
       const msg = err instanceof WalletVerificationRejectedError
         ? err.message
-        : (err?.message ?? "Wallet verification failed");
+        : toFriendlyError(err, { action: 'sign-in' });
       setErrorMessage(msg);
       setIsActionLoading(false);
       setIsWaitingModalOpen(false);
@@ -767,7 +767,7 @@ export default function App() {
         setTronUsdtBalance(bal);
       } catch { /* ignore */ }
     } catch (e: any) {
-      setErrorMessage(e?.message || 'Failed to connect TronLink. Try again.');
+      setErrorMessage(toFriendlyError(e, { action: 'connect TronLink', gasSymbol: 'TRX' }));
     } finally {
       setTronConnecting(false);
     }
@@ -1001,7 +1001,7 @@ export default function App() {
       setErrorMessage(null);
       await switchChain({ chainId: targetChainIdForTab() });
     } catch (err: any) {
-      setErrorMessage(`Failed to switch network: ${err.message || err}`);
+      setErrorMessage(toFriendlyError(err, { action: 'switch network' }));
     }
   };
 
