@@ -223,7 +223,7 @@ export function DonateModal({
     totalSwapVolumeUsd?: number;
     nextUnlockUsd?: number;
     claimableTotal?: number;
-    socials?: { youtube: boolean; x: boolean; telegram: boolean };
+    socials?: { youtube: boolean; x: boolean; telegram: boolean; youtubeHandle?: string | null; xHandle?: string | null; telegramHandle?: string | null };
   } | null>(null);
 
   const [isIncentivesLoading, setIsIncentivesLoading] = useState(false);
