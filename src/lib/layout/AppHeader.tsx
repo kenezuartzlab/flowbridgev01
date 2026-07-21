@@ -316,6 +316,13 @@ export function AppHeader({
         </div>
       )}
 
+      {referralAppliedCode && !googleUser && (
+        <div className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 bg-[#32FF8B]/8 border-t border-[#32FF8B]/20 text-[#32FF8B] text-[11px] font-mono font-bold tracking-wider">
+          <Gift className="w-3 h-3" />
+          <span>Referral applied: <span className="text-white">{referralAppliedCode}</span> — sign in to earn +50 FLOW for you & referrer.</span>
+        </div>
+      )}
+
       {isUnverified && (
         <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-amber-950/20 border-t border-amber-500/10 text-amber-200 text-[12px] font-mono select-none">
           <div className="flex items-center gap-2 text-left min-w-0">
