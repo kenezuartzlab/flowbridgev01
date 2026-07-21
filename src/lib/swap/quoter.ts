@@ -277,7 +277,7 @@ async function botUsdtStep(
 
   return {
     dex: "bdex-v3",
-    routerId: ROUTER_ID["bdex-v3"],
+    routerId: await bdexV3RouterId(isMainnet),
     router: bdexRouter,
     path: [inAddr, outAddr],
     symbolPath: [
