@@ -26,13 +26,17 @@ const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
 export type DexId = "bohr" | "caswap" | "bdex-v3";
 
-// FlowBridgeRouter v3 registry IDs (mainnet):
-//   1 = BDex V2, 2 = BDex V3, 3 = CaSwap V2 (new router; old routerId 0 disabled).
+// FlowBridgeRouter v3 on-chain registry IDs (mainnet):
+//   3 = CaSwap V2 (0x5b90…)   — new CaSwap router
+//   4 = BDex V2  (0x1414…)    — new BDex V2 router (old id 1 → 0xaE6a is broken)
+//   2 = BDex V3  (0x0703…)
+// Ids 0 and 1 are deprecated and MUST NOT be used.
 export const ROUTER_ID: Record<DexId, number> = {
   caswap: 3,
-  bohr: 1,
+  bohr: 4,
   "bdex-v3": 2,
 };
+
 
 export interface SwapStep {
   dex: DexId;
