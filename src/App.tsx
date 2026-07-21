@@ -546,11 +546,13 @@ export default function App() {
   });
 
   // Allowance Reads
+  // CA allowance target is FlowBridgeRouter v3 (not the underlying CaSwap router),
+  // matching the pattern used by UniversalSwapCard for all swaps.
   const { data: rawCaAllowance, refetch: refetchCaAllowance } = useReadContract({
     address: contracts.caToken as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'allowance',
-    args: address ? [address as `0x${string}`, contracts.caSwapRouter as `0x${string}`] : undefined,
+    args: address ? [address as `0x${string}`, contracts.flowBridgeRouterV3 as `0x${string}`] : undefined,
     chainId: currentBotChainId,
     query: { enabled: !!address && !isDemoMode }
   });
