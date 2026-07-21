@@ -472,6 +472,29 @@ export default function App() {
   // Standard Wagmi Write Hooks
   const { writeContractAsync } = useWriteContract();
   const { sendTransactionAsync } = useSendTransaction();
+  const { signMessageAsync } = useSignMessage();
+
+  // Gate the first swap/bridge of the session behind a wallet signature so
+  // watch-only wallets cannot trigger any state-changing tx. Returns true if
+  // the caller may proceed. Sets errorMessage + resets loading state on fail.
+  const verifyWalletOrFail = async (): Promise<boolean> => {
+    if (!address) {
+      setErrorMessage("Connect a wallet before continuing.");
+      return false;
+    }
+    try {
+      await ensureWalletVerified(address, signMessageAsync as any);
+      return true;
+    } catch (err: any) {
+      const msg = err instanceof WalletVerificationRejectedError
+        ? err.message
+        : (err?.message ?? "Wallet verification failed");
+      setErrorMessage(msg);
+      setIsActionLoading(false);
+      setIsWaitingModalOpen(false);
+      return false;
+    }
+  };
 
   // On-Chain Reads (Cached balances)
   const currentBotChainId = isMainnet ? 677 : 968;
