@@ -288,23 +288,38 @@ export function DonateModal({
   } as const;
   type SocialCh = keyof typeof SOCIAL_LINKS;
   const [socialBusy, setSocialBusy] = useState<SocialCh | null>(null);
-  const handleFollowSocial = async (channel: SocialCh) => {
-    if (!googleUser || !getEffectiveIdToken) return;
-    // Open the community page first so the user actually follows.
+  const [socialHandles, setSocialHandles] = useState<Record<SocialCh, string>>({ youtube: '', x: '', telegram: '' });
+  const [socialError, setSocialError] = useState<string | null>(null);
+
+  const handleOpenSocial = (channel: SocialCh) => {
     try { window.open(SOCIAL_LINKS[channel], '_blank', 'noopener,noreferrer'); } catch {}
+  };
+
+  const handleConfirmSocial = async (channel: SocialCh) => {
+    if (!googleUser || !getEffectiveIdToken) return;
+    const handle = socialHandles[channel].trim();
+    if (!handle) {
+      setSocialError(`Enter your ${channel === 'x' ? 'X' : channel === 'youtube' ? 'YouTube' : 'Telegram'} handle (e.g. @yourname) so we can verify.`);
+      return;
+    }
+    setSocialError(null);
     setSocialBusy(channel);
     try {
       const token = await getEffectiveIdToken();
-      if (!token) return;
+      if (!token) { setSocialError('Missing auth token — please sign in again.'); return; }
       const res = await fetch('/api/users/socials', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ channel }),
+        body: JSON.stringify({ channel, handle }),
       });
       const data = await res.json();
-      if (data.success) await fetchIncentives();
-    } catch (e) {
-      console.error('follow error', e);
+      if (!res.ok || !data.success) {
+        setSocialError(data?.error || 'Could not save handle.');
+      } else {
+        await fetchIncentives();
+      }
+    } catch (e: any) {
+      setSocialError(e?.message || 'Network error saving handle.');
     } finally {
       setSocialBusy(null);
     }
