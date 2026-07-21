@@ -406,7 +406,7 @@ export async function getBestRoute(
         steps: [
           {
             dex: dex.id,
-            routerId: ROUTER_ID[dex.id],
+            routerId: dex.routerId,
             router: dex.router,
             path: r.path,
             symbolPath: r.symbolPath,
@@ -436,7 +436,7 @@ export async function getBestRoute(
           steps: [
             {
               dex: dexA.id,
-              routerId: ROUTER_ID[dexA.id],
+              routerId: dexA.routerId,
               router: dexA.router,
               path: leg1.path,
               symbolPath: leg1.symbolPath,
@@ -446,7 +446,7 @@ export async function getBestRoute(
             },
             {
               dex: dexB.id,
-              routerId: ROUTER_ID[dexB.id],
+              routerId: dexB.routerId,
               router: dexB.router,
               path: leg2.path,
               symbolPath: leg2.symbolPath,
@@ -484,7 +484,7 @@ export async function getBestRoute(
         steps: [
           {
             dex: dexA.id,
-            routerId: ROUTER_ID[dexA.id],
+            routerId: dexA.routerId,
             router: dexA.router,
             path: leg1.path,
             symbolPath: leg1.symbolPath,
@@ -514,7 +514,7 @@ export async function getBestRoute(
             leg1,
             {
               dex: dexB.id,
-              routerId: ROUTER_ID[dexB.id],
+              routerId: dexB.routerId,
               router: dexB.router,
               path: leg2.path,
               symbolPath: leg2.symbolPath,
