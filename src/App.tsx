@@ -36,6 +36,7 @@ import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
 import { formatUsd } from './lib/format';
+import { toFriendlyError } from './lib/friendlyError';
 import { SiteLoader } from './components/SiteLoader';
 
 export default function App() {
@@ -1011,7 +1012,7 @@ export default function App() {
               : bridgePeer === 'ETH' && !isBotSource ? 'ETH'
               : bridgeDirection === 'TRX_TO_BOT' ? 'TRX'
               : 'BOT';
-    return toFriendlyError(err, { action: activeTab === 'bridge' ? 'bridge' : 'swap', gasSymbol: sym });
+    return toFriendlyError(err, { action: activeTab === 'BRIDGE' ? 'bridge' : 'swap', gasSymbol: sym });
   };
 
   // Live and simulated swap step logic
