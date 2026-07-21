@@ -50,8 +50,26 @@ export function ConnectGuideModal({
     setErr(null);
   }, [connectedAddress]);
 
+  useEffect(() => {
+    if (!siweBusy) return;
+    const requestId = siweRequestId.current;
+    const timer = window.setTimeout(() => {
+      if (siweRequestId.current !== requestId) return;
+      siweRequestId.current += 1;
+      setSiweBusy(false);
+      setErr('No wallet signature received. Reopen/unlock your wallet, approve the signature prompt, then try again.');
+    }, 38_000);
+    return () => window.clearTimeout(timer);
+  }, [siweBusy]);
+
   const handleSiwe = async () => {
     if (!connectedAddress) return;
+    if (siweBusy) {
+      siweRequestId.current += 1;
+      setSiweBusy(false);
+      setErr('Signature request cancelled. Tap “Sign in with wallet” to request a fresh signature.');
+      return;
+    }
     const requestId = siweRequestId.current + 1;
     siweRequestId.current = requestId;
     setErr(null); setMsg(null); setSiweBusy(true);
@@ -256,11 +274,10 @@ export function ConnectGuideModal({
                 {isWalletConnected && connectedAddress && (
                   <button
                     onClick={handleSiwe}
-                    disabled={siweBusy}
-                    className="w-full flex items-center justify-center gap-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 disabled:opacity-60 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
                   >
                     <KeyRound className="w-3.5 h-3.5" />
-                    {siweBusy ? 'Waiting for signature…' : 'Sign in with wallet'}
+                    {siweBusy ? 'Cancel / retry signing' : 'Sign in with wallet'}
                   </button>
                 )}
                 {isWalletConnected && (
