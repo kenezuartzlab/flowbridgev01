@@ -214,6 +214,7 @@ export function UniversalSwapCard({
 
   // ── Writes ────────────────────────────────────────────────────────────────
   const { writeContractAsync } = useWriteContract();
+  const { signMessageAsync } = useSignMessage();
 
   const minOutFor = (expected: bigint) =>
     (expected * BigInt(Math.floor((100 - slippage) * 1000))) / 100000n;
