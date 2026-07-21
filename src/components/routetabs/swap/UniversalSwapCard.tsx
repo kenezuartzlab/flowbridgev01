@@ -3,7 +3,8 @@ import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useSignMessage, useWriteContract } from "wagmi";
 import { ensureWalletVerified, WalletVerificationRejectedError } from "@/lib/walletVerification";
-import { formatUnits, parseUnits, type Address } from "viem";
+import { formatUnits, maxUint256, parseUnits, type Address } from "viem";
+import { ConfirmSwapModal } from "@/modals/ConfirmSwapModal";
 import { toast } from "sonner";
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
@@ -96,6 +97,7 @@ export function UniversalSwapCard({
   const [busyMsg, setBusyMsg] = useState("");
   const [txError, setTxError] = useState<string | null>(null);
   const [lastTx, setLastTx] = useState<`0x${string}` | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Reset curated tokens if mainnet toggles
   useEffect(() => {
@@ -266,7 +268,9 @@ export function UniversalSwapCard({
             address: tokenAddr,
             abi: ERC20_ABI,
             functionName: "approve",
-            args: [flowRouter, totalIn],
+            // Unlimited approval so users don't pay approval gas on every swap.
+            // FlowBridgeRouter v3 is the trusted spender for all swaps here.
+            args: [flowRouter, maxUint256],
             gas: 80000n,
           });
           const rcpt = await publicClient!.waitForTransactionReceipt({ hash: approveTx });
@@ -586,7 +590,8 @@ export function UniversalSwapCard({
   const handleSubmit = () => {
     if (!isConnected) return onConnect();
     if (!isNetworkCorrect) return onSwitchNetwork();
-    void handleSwap();
+    if (!quote || !amountIn || parsedAmount === 0n) return;
+    setConfirmOpen(true);
   };
 
   const usdValueFor = (t: Token, amt: string): string | undefined => {
@@ -744,6 +749,22 @@ export function UniversalSwapCard({
         isMainnet={isMainnet}
         excludeAddress={tokenIn.address}
         title="Select a token to buy"
+      />
+      <ConfirmSwapModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          void handleSwap();
+        }}
+        fromAmount={amountIn || "0"}
+        fromSymbol={tokenIn.symbol}
+        toAmount={amountOutDisplay || "0"}
+        toSymbol={tokenOut.symbol}
+        priceRate={`1 ${tokenIn.symbol} ≈ ${rate ? rate.toFixed(6) : "0"} ${tokenOut.symbol}`}
+        slippageTolerance={`${slippage}%`}
+        minimumReceived={minReceived ? minReceived.toFixed(6) : undefined}
+        tradingFee="0.30%"
       />
     </div>
   );
