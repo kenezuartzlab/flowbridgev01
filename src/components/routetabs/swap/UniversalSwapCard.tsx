@@ -321,9 +321,9 @@ export function UniversalSwapCard({
     // multi-hop routes and need an explicit cap).
     const FALLBACK_GAS = 500000n;
     const withBuffer = (g: bigint) => (g * 125n) / 100n;
-    const estimateOr = async (params: Parameters<NonNullable<typeof publicClient>["estimateContractGas"]>[0]) => {
+    const estimateOr = async (params: Record<string, unknown>) => {
       try {
-        const est = await publicClient!.estimateContractGas(params);
+        const est = await publicClient!.estimateContractGas(params as Parameters<typeof publicClient.estimateContractGas>[0]);
         return withBuffer(est);
       } catch {
         return FALLBACK_GAS;
