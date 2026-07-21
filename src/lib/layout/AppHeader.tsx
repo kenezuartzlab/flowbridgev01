@@ -167,6 +167,35 @@ export function AppHeader({
   };
   const menuItems: MenuItem[] = [
     {
+      id: 'markets',
+      label: 'Markets',
+      icon: <BarChart3 className="w-4 h-4" />,
+      onClick: () => { navigate({ to: '/markets' }); setMenuOpen(false); },
+      show: true,
+    },
+    {
+      id: 'fortune',
+      label: 'Flow Fortune Wheel',
+      icon: <Sparkles className="w-4 h-4" />,
+      onClick: () => { navigate({ to: '/fortune' }); setMenuOpen(false); },
+      accent: true,
+      show: true,
+    },
+    {
+      id: 'ecosurge',
+      label: 'Ecosurge Growth Hub',
+      icon: <Rocket className="w-4 h-4" />,
+      onClick: () => { navigate({ to: '/ecosurge' }); setMenuOpen(false); },
+      show: true,
+    },
+    {
+      id: 'arcadeflix',
+      label: 'ArcadeFlix P2E',
+      icon: <Gamepad2 className="w-4 h-4" />,
+      onClick: () => { navigate({ to: '/arcadeflix' }); setMenuOpen(false); },
+      show: true,
+    },
+    {
       id: 'rewards',
       label: 'Rewards',
       icon: <Gift className="w-4 h-4" />,
@@ -174,6 +203,7 @@ export function AppHeader({
       accent: true,
       show: !!onRewardsClick,
     },
+
     {
       id: 'donate',
       label: 'Support',
