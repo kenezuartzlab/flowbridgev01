@@ -63,6 +63,8 @@ export function AppHeader({
   onConnectTron,
   recipientAddress,
   recipientLabel,
+  onSignOut,
+  referralAppliedCode,
 }: AppHeaderProps) {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
