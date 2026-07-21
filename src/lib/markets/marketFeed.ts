@@ -21,15 +21,23 @@ export interface MarketRow {
 // ── BOT Chain ─────────────────────────────────────────────────────────────
 export async function fetchBotChainMarkets(isMainnet: boolean): Promise<MarketRow[]> {
   const rows: MarketRow[] = [];
+  const c = getContracts(isMainnet);
 
-  let botPrice = 0;
-  let caPrice = 0;
-  try {
-    botPrice = (await safeCall(() => getLiveBotPrice(isMainnet))) ?? 0;
-  } catch { /* ignore */ }
-  try {
-    caPrice = (await safeCall(() => getLiveCaPrice(isMainnet))) ?? 0;
-  } catch { /* ignore */ }
+  const usdt: Token = { address: c.usdtBot.toLowerCase(), symbol: "USDT", name: "Tether USD", decimals: 6 };
+  const bot: Token = { address: NATIVE_TOKEN_ADDRESS, symbol: "BOT", name: "BOT", decimals: 18, isNative: true };
+  const ca: Token = { address: c.caToken.toLowerCase(), symbol: "CA", name: "CaryPact", decimals: 18 };
+
+  const priceOf = async (tok: Token): Promise<number> => {
+    try {
+      const r = await getBestRoute(tok, usdt, 10n ** BigInt(tok.decimals), isMainnet);
+      if (!r || r.amountOut <= 0n) return 0;
+      return Number(r.amountOut) / 1e6;
+    } catch {
+      return 0;
+    }
+  };
+  const [botPrice, caPrice] = await Promise.all([priceOf(bot), priceOf(ca)]);
+
 
   rows.push({
     id: "bot",
