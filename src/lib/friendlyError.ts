@@ -103,22 +103,89 @@ export function toFriendlyError(e: unknown, ctx: FriendlyErrorContext = {}): str
 
 // ── Low-gas detection ────────────────────────────────────────────────────────
 
-/** Minimum native gas (in ether units) we want a user to hold before signing. */
-export const LOW_GAS_MIN_ETHER: Record<string, number> = {
+/** Built-in defaults per network — used when the user hasn't customized them. */
+export const LOW_GAS_MIN_ETHER_DEFAULTS: Record<string, number> = {
   BOT: 0.05,
   BNB: 0.0008,
   ETH: 0.0008,
   TRX: 15,
 };
 
+/** Legacy export kept for compatibility — mirrors the defaults. */
+export const LOW_GAS_MIN_ETHER: Record<string, number> = { ...LOW_GAS_MIN_ETHER_DEFAULTS };
+
+const LS_KEY = "flowbridge.lowGasThresholds.v1";
+
+function readOverrides(): Record<string, number> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(LS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeOverrides(next: Record<string, number>) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LS_KEY, JSON.stringify(next));
+    window.dispatchEvent(new CustomEvent("lowGasThresholdsChanged"));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Effective threshold: user override → default → 0.001. */
+export function getLowGasThreshold(symbol: string): number {
+  const key = symbol.toUpperCase();
+  const overrides = readOverrides();
+  if (typeof overrides[key] === "number" && isFinite(overrides[key]) && overrides[key] > 0) {
+    return overrides[key];
+  }
+  return LOW_GAS_MIN_ETHER_DEFAULTS[key] ?? 0.001;
+}
+
+export function setLowGasThreshold(symbol: string, value: number) {
+  const key = symbol.toUpperCase();
+  const overrides = readOverrides();
+  if (!isFinite(value) || value <= 0) {
+    delete overrides[key];
+  } else {
+    overrides[key] = value;
+  }
+  writeOverrides(overrides);
+}
+
+export function resetLowGasThreshold(symbol: string) {
+  const overrides = readOverrides();
+  delete overrides[symbol.toUpperCase()];
+  writeOverrides(overrides);
+}
+
 export function isNativeGasLow(balanceRaw: bigint | undefined, decimals: number, symbol: string): boolean {
   if (balanceRaw == null) return false;
-  const min = LOW_GAS_MIN_ETHER[symbol.toUpperCase()] ?? 0.001;
+  const min = getLowGasThreshold(symbol);
   const asNum = Number(balanceRaw) / Math.pow(10, decimals);
   return asNum < min;
 }
 
 export function lowGasMessage(symbol: string): string {
-  const min = LOW_GAS_MIN_ETHER[symbol.toUpperCase()] ?? 0.001;
-  return `Low ${symbol.toUpperCase()} for gas — you have less than ${min} ${symbol.toUpperCase()}. Add a small amount to cover network fees before your next transaction.`;
+  const sym = symbol.toUpperCase();
+  const min = getLowGasThreshold(sym);
+  return `Your ${sym} balance is below ${min} ${sym} — that may not be enough to cover network fees for your next transaction.`;
 }
+
+/** Short, plain-English checklist shown alongside the low-gas banner. */
+export function lowGasSteps(symbol: string): string[] {
+  const sym = symbol.toUpperCase();
+  return [
+    `Open your wallet and check your ${sym} balance.`,
+    `Add a small amount of ${sym} to cover network fees.`,
+    "Refresh the quote once your balance updates.",
+    "Try the action again.",
+  ];
+}
+
