@@ -371,6 +371,17 @@ export function UniversalSwapCard({
     setBusy(true);
     setTxError(null);
     setLastTx(null);
+    // Pre-flight: block if the wallet clearly can't afford network gas.
+    try {
+      const nativeRaw = (await publicClient.getBalance({ address })) ?? 0n;
+      if (isNativeGasLow(nativeRaw, 18, "BOT")) {
+        const msg = lowGasMessage("BOT");
+        setTxError(msg);
+        toast.error(msg);
+        setBusy(false);
+        return;
+      }
+    } catch { /* non-fatal; wallet will surface gas errors below */ }
     // Prove wallet control before any state-changing call. Blocks watch-only
     // wallets and surfaces a clear message if the user rejects the signature.
     try {
@@ -378,7 +389,7 @@ export function UniversalSwapCard({
     } catch (err: any) {
       const msg = err instanceof WalletVerificationRejectedError
         ? err.message
-        : (err?.message ?? "Wallet verification failed");
+        : toFriendlyError(err, { action: "sign-in" });
       setTxError(msg);
       toast.error(msg);
       setBusy(false);
