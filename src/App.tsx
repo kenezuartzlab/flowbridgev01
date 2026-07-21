@@ -80,14 +80,23 @@ export default function App() {
     }
   };
 
+  // Referral code captured for this session (from ?ref= URL param). Surfaced
+  // in the header so signup visitors get visible assurance the code applied.
+  const [referralAppliedCode, setReferralAppliedCode] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try { return sessionStorage.getItem('flowbridge_referred_by'); } catch { return null; }
+  });
+
   // Initialize Auth listener on start and capture referral parameter
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const refCode = params.get('ref');
     if (refCode) {
       sessionStorage.setItem('flowbridge_referred_by', refCode);
+      setReferralAppliedCode(refCode);
       console.log("Captured referral code from invitation URL:", refCode);
     }
+
 
     const unsubscribe = initAuth(
       (user) => {
