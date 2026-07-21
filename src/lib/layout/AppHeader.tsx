@@ -191,11 +191,11 @@ export function AppHeader({
       show: !!onToggleTheme,
     },
     {
-      id: 'demo',
-      label: isPresentationMode ? 'Exit demo mode' : 'Demo mode',
-      icon: <Video className="w-4 h-4" />,
-      onClick: () => { onTogglePresentationMode?.(); setMenuOpen(false); },
-      show: !!onTogglePresentationMode,
+      id: 'signout',
+      label: 'Sign out',
+      icon: <LogOut className="w-4 h-4" />,
+      onClick: () => { onSignOut?.(); setMenuOpen(false); },
+      show: !!(onSignOut && isUserLoggedIn),
     },
   ].filter(m => m.show);
 
