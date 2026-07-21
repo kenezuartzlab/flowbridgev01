@@ -424,7 +424,7 @@ export async function getBestRoute(
   if (!(tokenIn.isNative || tokenOut.isNative)) {
     for (const dexA of allV2) {
       for (const dexB of allV2) {
-        if (dexA.id === dexB.id) continue;
+        if (dexA.routerId === dexB.routerId) continue;
         const leg1 = await bestOnV2Dex(client, dexA, usdt, tokenIn, NATIVE_BOT, amountIn);
         if (!leg1) continue;
         const leg2 = await bestOnV2Dex(client, dexB, usdt, NATIVE_BOT, tokenOut, leg1.amountOut);
