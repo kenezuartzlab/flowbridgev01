@@ -75,7 +75,7 @@ function v2Dexes(isMainnet: boolean): DexCfg[] {
     {
       id: "bohr",
       factory: c.bdexFactory.toLowerCase() as Address,
-      router: c.bdexRouter.toLowerCase() as Address,
+      router: c.bdexV2Router.toLowerCase() as Address,
       wnative: c.wbot.toLowerCase() as Address,
     },
     {

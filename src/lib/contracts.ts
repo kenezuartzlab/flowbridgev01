@@ -110,6 +110,8 @@ export interface ChainContracts {
   routerWhitelist: string;
   bdexFactory: string;
   bdexRouter: string;
+  /** BDex V2 router matching bdexFactory (used for V2 getAmountsOut quotes). */
+  bdexV2Router: string;
   wbot: string;
   caWbot: string;
   usdtBot: string;
@@ -145,6 +147,7 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   routerWhitelist: "0x90aca2aa71ddf917679f7f9d9713131815eb59d6",
   bdexFactory: "0x117115f3b72c8d1989178089a67d0c26f8ee0aa3",
   bdexRouter: "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+  bdexV2Router: "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
   wbot: "0xd5452816194a3784dba983426cce7c122f4abd30",
   caWbot: "0x68caea9104419203cf8b8f0b222e75709b97bfc6",
   usdtBot: "0xababc7ddc03e501d190c676bf3d92ef0e6e87a3c",
@@ -174,6 +177,7 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   routerWhitelist: "0x397b670a24bc11e2dc7432f921d6a22fa29fe293",
   bdexFactory: "0x65b8e98cea190d8c28b3e4716402027f634d15a3",
   bdexRouter: "0xd6425a02f0845b8d99e349c34d2e7a576e177345",
+  bdexV2Router: "0xd6425a02f0845b8d99e349c34d2e7a576e177345",
   wbot: "0xd5452816194a3784dba983426cce7c122f4abd30",
   caWbot: "0xf704ad4be6d75c62550571f3ead025efe7ca30d1",
   usdtBot: "0x75edc9335175fc0552d51d48439f229c10420fe3", // Tether USD on BOT testnet
