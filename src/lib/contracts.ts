@@ -47,8 +47,11 @@ export const UNIVERSAL_ROUTER_ABI = parseAbi([
 ]);
 
 // FlowBridgeRouter v3 — registry-router + configurable fee dispatcher on BOT Chain.
-// Registered router IDs (mainnet & testnet): 0 = CaSwap V2, 1 = BDex V2, 2 = BDex V3.
+// Active router IDs are read on-chain via getActiveRouters(); never hardcoded.
+// `types`: 0 = Uniswap-V2-style, 1 = Uniswap-V3-style.
 export const FLOW_BRIDGE_ROUTER_V3_ABI = parseAbi([
+  // Registry discovery
+  'function getActiveRouters() view returns (uint256[] ids, string[] names, string[] versions, uint8[] types, address[] addrs)',
   // Fee views
   'function computeRouterFee(uint256 routerId, uint256 swapAmount, address user) view returns (uint256 fee, uint256 effectiveBps)',
   'function computeBridgeFee(uint256 bridgeId, uint256 bridgeAmount, address user) view returns (uint256 fee, uint256 effectiveBps)',
