@@ -1,8 +1,10 @@
 // Aggregates live market data for the /markets page.
-// BOT chain tokens: derived from on-chain quoter helpers.
+// BOT chain tokens: derived from on-chain quoter (getBestRoute → USDT).
 // Cross-chain (ETH/BSC/TRON): CoinGecko free public API with in-memory cache.
 
-import { getLiveBotPrice, getLiveCaPrice } from "@/lib/swap/quoter";
+import { getBestRoute } from "@/lib/swap/quoter";
+import { getContracts } from "@/lib/contracts";
+import { NATIVE_TOKEN_ADDRESS, type Token } from "@/lib/swap/tokenRegistry";
 
 export type Chain = "BOT" | "ETH" | "BSC" | "TRON";
 
