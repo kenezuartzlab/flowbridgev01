@@ -1185,6 +1185,7 @@ export default function App() {
         fetchUserIncentivesInApp();
       }, 1000);
     } else {
+      if (!(await verifyWalletOrFail())) return;
       try {
         setIsActionLoading(true);
         setActionStep('swapping_bot');
