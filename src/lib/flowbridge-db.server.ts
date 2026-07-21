@@ -311,63 +311,15 @@ export async function getGlobalIncentiveStats() {
 
 
 export async function bindUserWallet(userId: string, walletAddress: string) {
-  const normalized = walletAddress.trim().toLowerCase();
-  const { data: user } = await supabaseAdmin
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-  if (!user) throw new Error("Profile not found");
-
-  const { data: dup } = await supabaseAdmin
-    .from("profiles")
-    .select("id, email")
-    .eq("wallet_address", normalized)
-    .neq("id", userId)
-    .maybeSingle();
-  if (dup) {
-    console.warn(
-      `[bindUserWallet] wallet ${normalized} already bound to another account (user ${dup.id})`,
-    );
-    throw new Error("This wallet address is already registered to another account.");
-  }
-
-  const now = new Date();
-  let currentCount = user.binding_changes_count ?? 0;
-  let lastChange: Date | null = user.last_binding_change ? new Date(user.last_binding_change) : null;
-
-  if (user.wallet_address && user.wallet_address.toLowerCase() !== normalized) {
-    if (lastChange) {
-      const diffDays = (now.getTime() - lastChange.getTime()) / 86_400_000;
-      if (diffDays >= 30) currentCount = 0;
-    }
-    if (currentCount >= 2) {
-      const daysToWait = lastChange
-        ? Math.max(0, Math.ceil(30 - (now.getTime() - lastChange.getTime()) / 86_400_000))
-        : 30;
-      throw new Error(
-        `You have already changed your wallet binding 2 times within 30 days. Please wait ${daysToWait} day(s) before changing again.`,
-      );
-    }
-    currentCount += 1;
-    lastChange = now;
-  } else if (!user.wallet_address) {
-    currentCount = 1;
-    lastChange = now;
-  }
-
-  const { data: updated, error } = await supabaseAdmin
-    .from("profiles")
-    .update({
-      wallet_address: normalized,
-      binding_changes_count: currentCount,
-      last_binding_change: lastChange ? lastChange.toISOString() : null,
-    })
-    .eq("id", userId)
-    .select()
-    .single();
-  if (error) throw error;
-  return updated;
+  // Delegates to the SECURITY DEFINER RPC that safely bypasses the
+  // profile-guard trigger via a per-transaction GUC, enforces the 2×/30d
+  // rate limit, and validates the address format.
+  const { data, error } = await supabaseAdmin.rpc("admin_bind_wallet", {
+    p_user_id: userId,
+    p_wallet: walletAddress,
+  });
+  if (error) throw new Error(error.message || "Failed to bind wallet");
+  return data;
 }
 
 export async function claimFlowPoints(userId: string, emailVerified: boolean) {
