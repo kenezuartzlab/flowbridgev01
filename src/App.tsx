@@ -1385,6 +1385,10 @@ export default function App() {
       setReceiptStatus('success');
       setIsReceiptModalOpen(true);
     } else {
+      // Skip EVM ownership check for Tron-sourced bridges (uses TronLink signing).
+      if (bridgeDirection !== 'TRX_TO_BOT') {
+        if (!(await verifyWalletOrFail())) return;
+      }
       try {
         setIsActionLoading(true);
 
