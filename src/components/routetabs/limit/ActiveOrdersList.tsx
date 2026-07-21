@@ -3,6 +3,7 @@ import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { formatUnits, type Address } from "viem";
 import { toast } from "sonner";
 import { Loader2, XCircle, CheckCircle2, Clock } from "lucide-react";
+import { toFriendlyError } from "@/lib/friendlyError";
 import { FLOW_LIMIT_ORDER_EXECUTOR_ABI, getContracts } from "@/lib/contracts";
 import {
   executorAddress,
@@ -138,7 +139,7 @@ export function ActiveOrdersList({ isMainnet, txUrlPrefix, refreshTick }: Props)
         });
       }
     } catch (e: any) {
-      toast.error(e?.shortMessage ?? e?.message ?? "Cancel failed", { id: toastId });
+      toast.error(toFriendlyError(e, { action: "cancel order" }), { id: toastId });
     } finally {
       setCancelling(null);
     }

@@ -3,6 +3,7 @@ import { ArrowDownUp, ChevronDown, Loader2, AlertTriangle, CheckCircle2, Wallet 
 import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, type Address } from "viem";
 import { toast } from "sonner";
+import { toFriendlyError } from "@/lib/friendlyError";
 
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
@@ -263,7 +264,7 @@ export function LimitOrderCard({
         setRefreshTick((n) => n + 1);
       }
     } catch (e: any) {
-      toast.error(e?.shortMessage ?? e?.message ?? "Wrap failed", { id: toastId });
+      toast.error(toFriendlyError(e, { action: "wrap" }), { id: toastId });
     } finally {
       setBusy(false);
       setBusyMsg("");
@@ -291,7 +292,7 @@ export function LimitOrderCard({
         setRefreshTick((n) => n + 1);
       }
     } catch (e: any) {
-      toast.error(e?.shortMessage ?? e?.message ?? "Approval failed", { id: toastId });
+      toast.error(toFriendlyError(e, { action: "approve" }), { id: toastId });
     } finally {
       setBusy(false);
       setBusyMsg("");
@@ -338,7 +339,7 @@ export function LimitOrderCard({
       setPreflight(null);
       setRefreshTick((n) => n + 1);
     } catch (e: any) {
-      toast.error(e?.shortMessage ?? e?.message ?? "Placement failed", { id: toastId });
+      toast.error(toFriendlyError(e, { action: "place order" }), { id: toastId });
     } finally {
       setBusy(false);
       setBusyMsg("");
