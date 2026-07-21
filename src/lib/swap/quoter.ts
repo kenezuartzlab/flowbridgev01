@@ -470,7 +470,7 @@ export async function getBestRoute(
 
   // ── 2. Single-DEX V2 routes ────────────────────────────────────────────
   for (const dex of allV2) {
-    const r = await bestOnV2Dex(client, dex, usdt, tokenIn, tokenOut, amountIn);
+    const r = await bestOnV2Dex(client, dex, hopBases, tokenIn, tokenOut, amountIn);
     if (r) {
       candidates.push({
         amountOut: r.amountOut,
@@ -498,9 +498,9 @@ export async function getBestRoute(
     for (const dexA of allV2) {
       for (const dexB of allV2) {
         if (dexA.routerId === dexB.routerId) continue;
-        const leg1 = await bestOnV2Dex(client, dexA, usdt, tokenIn, NATIVE_BOT, amountIn);
+        const leg1 = await bestOnV2Dex(client, dexA, hopBases, tokenIn, NATIVE_BOT, amountIn);
         if (!leg1) continue;
-        const leg2 = await bestOnV2Dex(client, dexB, usdt, NATIVE_BOT, tokenOut, leg1.amountOut);
+        const leg2 = await bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.amountOut);
         if (!leg2) continue;
         candidates.push({
           amountOut: leg2.amountOut,
@@ -546,7 +546,7 @@ export async function getBestRoute(
   if (tokenOutIsUsdt && !tokenIn.isNative && tokenIn.address.toLowerCase() !== usdt) {
     // tokenIn → BOT on each V2 dex, then BOT → USDT via V3
     for (const dexA of allV2) {
-      const leg1 = await bestOnV2Dex(client, dexA, usdt, tokenIn, NATIVE_BOT, amountIn);
+      const leg1 = await bestOnV2Dex(client, dexA, hopBases, tokenIn, NATIVE_BOT, amountIn);
       if (!leg1) continue;
       const leg2 = await botUsdtStep(client, isMainnet, NATIVE_BOT, usdtToken, leg1.amountOut);
       if (!leg2) continue;
@@ -577,7 +577,7 @@ export async function getBestRoute(
     const leg1 = await botUsdtStep(client, isMainnet, usdtToken, NATIVE_BOT, amountIn);
     if (leg1) {
       for (const dexB of allV2) {
-        const leg2 = await bestOnV2Dex(client, dexB, usdt, NATIVE_BOT, tokenOut, leg1.expectedOut);
+        const leg2 = await bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.expectedOut);
         if (!leg2) continue;
         candidates.push({
           amountOut: leg2.amountOut,
