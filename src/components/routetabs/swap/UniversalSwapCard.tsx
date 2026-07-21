@@ -750,6 +750,22 @@ export function UniversalSwapCard({
         excludeAddress={tokenIn.address}
         title="Select a token to buy"
       />
+      <ConfirmSwapModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          void handleSwap();
+        }}
+        fromAmount={amountIn || "0"}
+        fromSymbol={tokenIn.symbol}
+        toAmount={amountOutDisplay || "0"}
+        toSymbol={tokenOut.symbol}
+        priceRate={`1 ${tokenIn.symbol} ≈ ${rate ? rate.toFixed(6) : "0"} ${tokenOut.symbol}`}
+        slippageTolerance={`${slippage}%`}
+        minimumReceived={minReceived ? minReceived.toFixed(6) : undefined}
+        tradingFee="0.30%"
+      />
     </div>
   );
 }
