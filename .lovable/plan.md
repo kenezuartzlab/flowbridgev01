@@ -1,64 +1,66 @@
-## 1. Fix "Bind Manual Address" error
+# FlowBridge Add-Ons Plan
 
-Root cause: `prevent_protected_profile_updates` trigger checks `current_setting('request.jwt.claim.role', true) = 'service_role'`. With new `sb_secret_*` API keys (non-JWT), that claim is empty, so the server-side admin update to `binding_changes_count` / `last_binding_change` is rejected.
+Honest review first, then scoped implementation.
 
-Fix: migration to update the trigger to also allow bypass when `current_user = 'service_role'` (or `session_user`), which is how Supabase routes admin key traffic regardless of key format.
+## Expert Review
 
-## 2. Email verification UX
+**1. Markets page — YES, high value.** Keeps users on-app instead of jumping to Dexscreener/Gecko. Great SEO surface (new indexable route with per-token pages later). Low risk.
 
-- Verification email: check `check_email_domain_status`; if templates/rate limit is the issue, call `scaffold_auth_email_templates` and/or raise `rate_limit_email_sent`. Guide user if custom domain isn't verified yet.
-- After clicking verification link, user lands back on `/` with `?type=signup` in hash. Add a small effect in `src/App.tsx` (or root) that detects a fresh confirmed session (transitioned from unverified → verified via `onAuthStateChange` USER_UPDATED, or hash contains `type=signup`) and shows a toast: "Email verified! You can now earn FLOW points."
+**2. Fortune Wheel — YES, but with guardrails.** Great retention hook. Must be:
+- Server-authoritative (spin result decided on server, never client) or users will exploit it.
+- Rate-limited per verified account (not per wallet — sybil).
+- Points sink accounted for in FLOW economics (jackpot 50 × N users/day is real emission).
 
-## 3. Social-follow gate before FLOW claim
+**3 & 4. Ecosurge / ArcadeFlix "Soon" tiles — YES, cheap.** Just menu entries + teaser routes. Good for signaling roadmap.
 
-Add a `social_follows` table:
-```
-user_id uuid PK -> auth.users
-youtube_confirmed_at timestamptz
-x_confirmed_at timestamptz
-telegram_confirmed_at timestamptz
-```
-Grants + RLS: user can select/update own row.
+**Custom token "no liquidity" issue — real bug, must fix.** Current `hasAnyLiquidity` in `src/lib/swap/quoter.ts` only checks hardcoded WBOT/USDT pairs on known routers. Any token whose LP lives on a router we don't scan (or paired with something other than WBOT/USDT) fails. Fix = auto-discovery across every registered router's factory using `getPair` / `getPool`, across a small base-token set (WBOT, USDT, CA), and cache the discovered path so the swap uses the correct routerId automatically.
 
-UI: in the Rewards → Claim panel, add three link-out buttons (YouTube, X, Telegram). Each opens the link in a new tab and marks that channel confirmed on click (self-attested; standard pattern for these gates). Claim button is disabled until all three are confirmed AND the other constraints below are satisfied. Server `claimFlowPoints` verifies all three flags before allowing claim.
+## Scope for this build
 
-## 4. Split FLOW points into 3 buckets + $100/1000 referral cap
+Do **1 + 4 (menu tiles) + LP auto-detection** now. Wheel (#2) I'll plan but ship in a follow-up because the server/economy piece deserves its own review turn — flagging so we don't half-ship a points exploit.
 
-Schema change (migration):
-Add columns to `profiles`:
-- `points_self` int default 0 — own swap/bridge points
-- `points_referral_activity` int default 0 — recurring points from referred users' swaps/bridges
-- `points_referral_signup` int default 0 — one-time signup bonuses (currently the +50 on link)
-- `total_swap_volume_usd` numeric default 0 — cumulative $ volume of caller's verified swaps/bridges
+### A. Dynamic LP discovery for imported tokens
+File: `src/lib/swap/quoter.ts`, `src/lib/swap/tokenRegistry.ts`
+- Add `discoverBestPath(tokenAddr, isMainnet)`:
+  - For each router in a `ROUTERS` registry (CaSwap v3, BDex V2, BDex V3, FlowBridgeRouter), call the factory/quoter to see if a pair/pool exists vs {WBOT, USDT, CA}.
+  - Return `{ routerId, path, baseToken }` for the deepest pool (compare reserves / `quoteExactInputSingle`).
+  - Cache to `localStorage` keyed by `${chain}:${token}`.
+- Replace `hasAnyLiquidity` check in `TokenPickerModal` import flow with `discoverBestPath` — accept the token if any path is found; store the discovered route on the Token record.
+- `UniversalSwapCard` reads the stored route for imported tokens instead of guessing.
 
-Keep `flow_points` as the sum (mirror) for backwards compatibility, updated by the same server writes.
+### B. Markets page `/markets`
+Files: `src/routes/markets.tsx` (new), `src/lib/markets/*` (new), menu entry in `AppHeader.tsx`.
+- Sections:
+  1. **BOT Chain tokens** (top): BOT, WBOT, USDT, CA + any imported tokens with discovered LPs. Price from on-chain quoter (already have `getLiveBotPrice`, `getLiveCaPrice`). 24h change from a lightweight time-series stored in Supabase (`token_price_snapshots` table, populated by existing keeper tick every 5 min).
+  2. **Other chains** (below): ETH, BNB, TRX + top 10 tokens each from CoinGecko free API (`/coins/markets?vs_currency=usd&category=…`), 60s client cache. No API key needed.
+- Filters: chain chip row (All / BOT / ETH / BSC / TRON), search box, sort by price/24h%/mcap.
+- Rows: icon, symbol, name, price ($ via existing `formatUsd`), 24h %, mini sparkline (SVG, no lib), "Trade" button (BOT tokens link to swap tab prefilled).
+- SEO: proper `head()` with title/description/og. Table is semantic `<table>` for crawlability.
 
-Server rules:
-- Signup bonus (+50 today) → `points_referral_signup` on referrer.
-- Server-verified swap/bridge points → `points_self` on caller, and a recurring cut → `points_referral_activity` on referrer.
-- `createTransactionHistory` (or the on-chain verification path) also increments `total_swap_volume_usd` for the caller.
+### C. Menu additions in `src/lib/layout/AppHeader.tsx`
+- **Markets** → `/markets`
+- **Fortune Wheel** → `/fortune` (renders "Coming this week" teaser for now; wired in next turn with server RNG)
+- **Ecosurge Growth Hub** → `/ecosurge` (soon teaser)
+- **ArcadeFlix P2E** → `/arcadeflix` (soon teaser)
+- Each teaser route is a small file with hero + email-capture (reuses existing Supabase `waitlist` pattern if present, else just a "Notify me" storing to a new `product_waitlist` table).
 
-Claim rule in `claimFlowPoints`:
-- Require ≥ 1000 total, social gates all true, wallet bound, email verified.
-- Compute `maxSignupClaimable = floor(total_swap_volume_usd / 100) * 1000` for the caller.
-- Effective referral-signup claimable = `min(points_referral_signup, maxSignupClaimable)`.
-- Claimable total = `points_self + points_referral_activity + effectiveSignupClaimable`.
-- Deduct exactly those amounts from their respective columns; any locked signup points remain until the user swaps more.
+### D. Fortune Wheel (planned, not built this turn)
+Sketch so we agree before I build:
+- Table `wheel_spins(user_id, day, spin_no, prize, tx_id)` unique on `(user_id, day, spin_no)`.
+- Server fn `spinWheel()` under `requireSupabaseAuth`: enforces ≤2 spins/day, RNG server-side with weighted table you approve, awards to `flow_points_self` bucket. Client only animates the pre-decided prize.
+- Anti-abuse: requires verified email AND bound wallet (reuse existing gates).
 
-UI Rewards panel: show three separate totals + a "Locked (needs $X more in swaps)" hint for referral-signup points; the Claim button reflects effective claimable.
+## Technical notes (skim)
 
-## Technical Details
+- Reuse existing pricing utils; don't add a new price lib.
+- CoinGecko free tier = 10-30 req/min; cache aggressively, batch by `ids=`.
+- Sparklines: 24 points, inline SVG polyline, no chart lib.
+- No changes to bridge/swap logic beyond the LP discovery hook.
 
-Files:
-- `supabase/migrations/*` — trigger fix, new columns, `social_follows` table + RLS/grants.
-- `src/lib/flowbridge-db.server.ts` — split accounting, updated `claimFlowPoints`, `ensureProfile`, `linkReferralIfMissing`, `getUserPointsAndReferrals` (returns 3 buckets + volume + locked amount + social flags).
-- `src/routes/api/social-follows.ts` (GET + POST channel confirm).
-- `src/routes/api/users.claim.ts` — unchanged signature, new checks live in helper.
-- Rewards UI component (find current file — likely `src/components/incentives/*` or in `App.tsx`) — add social buttons, split breakdown, locked hint.
-- Root/App — post-verification toast.
-- Email: run `email_domain--check_email_domain_status`, act on result.
+## Deliverables this turn
 
-## Out of scope
+1. LP auto-discovery in quoter + token import flow.
+2. `/markets` page with BOT-chain (on-chain) + other-chains (CoinGecko) sections, filters, search, sort.
+3. Menu entries for Markets, Fortune Wheel (soon), Ecosurge (soon), ArcadeFlix (soon) with placeholder routes.
 
-- Real OAuth verification of social follows (self-attest is standard for this kind of gate).
-- Historical backfill: on migration, seed `points_self = flow_points`, others = 0 so existing users aren't penalized.
+Confirm and I'll build. If you want Fortune Wheel fully live in the same turn, say so and I'll include the server RNG + table.
