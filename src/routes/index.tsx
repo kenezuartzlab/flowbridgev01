@@ -1,9 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { WagmiProvider } from "wagmi";
-import { wagmiConfig } from "@/lib/wagmi";
-import App from "@/App";
+import { lazy, Suspense } from "react";
+
+const ClientApp = lazy(async () => {
+  const [{ WagmiProvider }, { wagmiConfig }, { default: App }] = await Promise.all([
+    import("wagmi"),
+    import("@/lib/wagmi"),
+    import("@/App"),
+  ]);
+  return {
+    default: () => (
+      <WagmiProvider config={wagmiConfig}>
+        <App />
+      </WagmiProvider>
+    ),
+  };
+});
 
 export const Route = createFileRoute("/")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "FlowBridge" },
@@ -15,8 +29,8 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <App />
-    </WagmiProvider>
+    <Suspense fallback={null}>
+      <ClientApp />
+    </Suspense>
   );
 }

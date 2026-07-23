@@ -1,7 +1,6 @@
 import { http, createConfig, createStorage } from 'wagmi';
 import { defineChain } from 'viem';
-import { injected } from 'wagmi/connectors';
-import { flowWalletConnect } from './walletConnectConnector';
+import { injected, walletConnect } from 'wagmi/connectors';
 
 // WalletConnect / Reown project ID. Publishable identifier — safe in client
 // bundles. Override via VITE_WC_PROJECT_ID if you rotate the project.
@@ -119,7 +118,16 @@ export const wagmiConfig = createConfig({
     injected({ unstable_shimAsyncInject: 2_000 }),
     ...(isWalletConnectAvailable
       ? [
-          flowWalletConnect(),
+          walletConnect({
+            projectId: WC_PROJECT_ID,
+            showQrModal: true,
+            metadata: {
+              name: 'FlowBridge',
+              description: 'FlowBridge — BOT Chain swap & bridge gateway',
+              url: typeof window !== 'undefined' ? window.location.origin : 'https://flowbridge.space',
+              icons: ['https://flowbridge.space/favicon.ico'],
+            },
+          }),
         ]
       : []),
   ],
