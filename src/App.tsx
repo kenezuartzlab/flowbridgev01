@@ -562,6 +562,13 @@ export default function App() {
     };
   }, [address, isConnected, googleUser?.uid]);
 
+  const signedInEmailVerified = !!googleUser && !!(googleUser.emailVerified || googleUser.email_verified);
+  const rewardsActive =
+    signedInEmailVerified &&
+    !!address &&
+    walletLinkNotice?.kind === 'linked' &&
+    walletLinkNotice.address === address.toLowerCase();
+
 
 
   // Load contract registry
@@ -2117,9 +2124,11 @@ export default function App() {
                 "p-1.5 rounded-lg border shrink-0",
                 !googleUser 
                   ? "bg-blue-500/5 border-blue-500/10 text-blue-400"
-                  : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                  : !signedInEmailVerified
                     ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
-                    : "bg-[#32FF8B]/5 border-[#32FF8B]/10 text-[#32FF8B]"
+                    : rewardsActive
+                      ? "bg-[#32FF8B]/5 border-[#32FF8B]/10 text-[#32FF8B]"
+                      : "bg-amber-500/5 border-amber-500/10 text-amber-400"
               )}>
                 <Gift className="w-3.5 h-3.5" />
               </div>
@@ -2127,17 +2136,21 @@ export default function App() {
                 <div className="text-[10px] font-bold text-white uppercase tracking-wider">
                   {!googleUser 
                     ? "Guest Mode Active"
-                    : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                    : !signedInEmailVerified
                       ? "Verification Pending"
-                      : "Earnings Activated"
+                      : rewardsActive
+                        ? "Earnings Activated"
+                        : "Wallet Link Needed"
                   }
                 </div>
                 <div className="text-[9px] text-[#C5C1B9] leading-tight">
                   {!googleUser 
                     ? "Verify email in REWARDS to earn FLOW rewards."
-                    : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                    : !signedInEmailVerified
                       ? "Points paused. Verify email to activate."
-                      : "Swaps earn off-chain FLOW points."
+                      : rewardsActive
+                        ? "Swaps earn off-chain FLOW points."
+                        : "Sign this wallet to link it before earning."
                   }
                 </div>
               </div>
@@ -2152,16 +2165,18 @@ export default function App() {
                 "px-2.5 py-1 rounded-lg text-[9px] font-bold font-mono uppercase tracking-wider shrink-0 transition-all active:scale-95 cursor-pointer",
                 !googleUser 
                   ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/15 border border-blue-500/10"
-                  : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                  : !signedInEmailVerified || !rewardsActive
                     ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 border border-amber-500/10"
                     : "bg-[#32FF8B]/10 text-[#32FF8B] hover:bg-[#32FF8B]/15 border border-[#32FF8B]/10"
               )}
             >
               {!googleUser 
                 ? "Sign In"
-                : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                : !signedInEmailVerified
                   ? "Verify"
-                  : "View Perks"
+                  : rewardsActive
+                    ? "View Perks"
+                    : "Link"
               }
             </button>
           </div>
