@@ -149,7 +149,8 @@ export function flowWalletConnect() {
       // explicitly restored.
     },
 
-    async connect({ chainId, withCapabilities } = {}) {
+    async connect(parameters: any = {}) {
+      const { chainId, withCapabilities } = parameters;
       try {
         const provider = await getProviderInternal();
         if (!provider) throw new ProviderNotFoundError();
@@ -246,7 +247,8 @@ export function flowWalletConnect() {
       return getChainIdInternal();
     },
 
-    async getProvider({ chainId } = {}) {
+    async getProvider(parameters: any = {}) {
+      const { chainId } = parameters;
       const provider = await getProviderInternal();
       if (chainId) await switchChainInternal({ chainId });
       return provider;
@@ -265,7 +267,7 @@ export function flowWalletConnect() {
       }
     },
 
-    async switchChain({ addEthereumChainParameter, chainId }) {
+    async switchChain({ addEthereumChainParameter, chainId }: any) {
       return switchChainInternal({ addEthereumChainParameter, chainId });
     },
 
