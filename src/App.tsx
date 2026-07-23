@@ -901,9 +901,26 @@ export default function App() {
     const targetId = preferred ?? 'injected';
     const connector =
       connectors.find((item) => item.id === targetId) ??
+      (targetId === 'walletConnect'
+        ? connectors.find((item) => item.type === 'walletConnect')
+        : undefined) ??
       connectors.find((item) => item.id === 'injected') ??
       connectors[0];
-    if (connector) connect({ connector });
+    if (!connector) {
+      console.error('[wallet] no connector available', { targetId, connectors: connectors.map(c => ({ id: c.id, type: c.type })) });
+      setErrorMessage('No wallet connector available. Please install a wallet or try WalletConnect.');
+      return;
+    }
+    console.info('[wallet] connecting via', connector.id, connector.type);
+    connect(
+      { connector },
+      {
+        onError: (err: any) => {
+          console.error('[wallet] connect error', err);
+          setErrorMessage(err?.message || 'Failed to open wallet connector.');
+        },
+      },
+    );
   };
 
   const handleDisconnect = async () => {
