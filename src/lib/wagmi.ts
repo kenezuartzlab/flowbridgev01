@@ -116,7 +116,22 @@ export const wagmiConfig = createConfig({
   }),
   connectors: [
     injected({ unstable_shimAsyncInject: 2_000 }),
+    ...(isWalletConnectAvailable
+      ? [
+          walletConnect({
+            projectId: WC_PROJECT_ID,
+            showQrModal: true,
+            metadata: {
+              name: 'FlowBridge',
+              description: 'FlowBridge — BOT Chain swap & bridge gateway',
+              url: typeof window !== 'undefined' ? window.location.origin : 'https://flowbridge.space',
+              icons: ['https://flowbridge.space/favicon.ico'],
+            },
+          }),
+        ]
+      : []),
   ],
+
   transports: {
     [botMainnet.id]: http(),
     [bscMainnet.id]: http(),
