@@ -5,7 +5,7 @@ import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, getIdToken, reloadUser, requestPasswordReset, type AppUser } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
 import { getWalletSignatureErrorMessage, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
-import { botMainnet } from '@/lib/wagmi';
+import { botMainnet } from '@/lib/chains';
 
 interface ConnectGuideModalProps {
   isOpen: boolean;

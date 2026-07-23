@@ -12,7 +12,7 @@
 //   CA → BOT (CaSwap V2) + BOT → USDT (BDex V3) — two transactions.
 
 import { createPublicClient, http, parseAbi, type Address } from "viem";
-import { botMainnet, botTestnet } from "@/lib/wagmi";
+import { botMainnet, botTestnet } from "@/lib/chains";
 import {
   getContracts,
   UNISWAP_V2_ROUTER_ABI,
