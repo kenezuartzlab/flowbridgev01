@@ -42,12 +42,12 @@ export function flowWalletConnect() {
   let provider_: WalletConnectProvider | undefined;
   let providerPromise: Promise<WalletConnectProvider | undefined> | undefined;
   let accountsChanged: ((accounts: string[]) => void) | undefined;
-  let chainChanged: ((chainId: string | number) => void) | undefined;
+  let chainChanged: ((chainId: any) => void) | undefined;
   let disconnect: ((error?: Error) => void) | undefined;
   let displayUri: ((uri: string) => void) | undefined;
   let sessionDelete: (() => void) | undefined;
 
-  return createConnector((config) => ({
+  return createConnector<WalletConnectProvider>((config) => ({
     id: 'walletConnect',
     name: 'WalletConnect',
     type: 'walletConnect',
@@ -168,8 +168,8 @@ export function flowWalletConnect() {
           projectId: WC_PROJECT_ID,
           metadata,
           disableProviderPing: true,
-          optionalChains,
-          rpcMap: rpcMapForChains(config.chains),
+          optionalChains: optionalChains as [number, ...number[]],
+          rpcMap: rpcMapForChains(config.chains) as any,
           showQrModal: true,
         })) as WalletConnectProvider;
         provider.events?.setMaxListeners?.(Number.POSITIVE_INFINITY);
@@ -208,8 +208,9 @@ export function flowWalletConnect() {
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: numberToHex(chainId) }],
         });
+        const previousChains = ((await config.storage?.getItem(requestedChainsStorageKey)) ?? []) as number[];
         await config.storage?.setItem(requestedChainsStorageKey, [
-          ...new Set([...(await config.storage?.getItem(requestedChainsStorageKey) ?? []), chainId]),
+          ...new Set([...previousChains, chainId]),
         ]);
         return chain;
       } catch (switchError: any) {
@@ -232,12 +233,12 @@ export function flowWalletConnect() {
       }
     },
 
-    onAccountsChanged(accounts) {
+    onAccountsChanged(accounts: string[]) {
       if (!accounts.length) this.onDisconnect();
       else config.emitter.emit('change', { accounts: accounts.map((account) => getAddress(account)) });
     },
 
-    onChainChanged(chainId) {
+    onChainChanged(chainId: string | number) {
       config.emitter.emit('change', { chainId: Number(chainId) });
     },
 
@@ -247,7 +248,7 @@ export function flowWalletConnect() {
       config.emitter.emit('disconnect');
     },
 
-    onDisplayUri(uri) {
+    onDisplayUri(uri: string) {
       config.emitter.emit('message', { type: 'display_uri', data: uri });
     },
 
