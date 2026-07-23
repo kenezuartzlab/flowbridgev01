@@ -22,6 +22,10 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "FlowBridge" },
       { name: "description", content: "FlowBridge — guided swap & cross-chain bridge for BOT and BNB chains." },
+      { property: "og:title", content: "FlowBridge" },
+      { property: "og:description", content: "Guided swap and cross-chain bridge for BOT and BNB chains." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Index,
