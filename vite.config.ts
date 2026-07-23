@@ -56,6 +56,54 @@ export default defineConfig({
           process.cwd(),
           "node_modules/eventemitter3/dist/eventemitter3.esm.js",
         ),
+        "@walletconnect/ethereum-provider": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/ethereum-provider/dist/index.js",
+        ),
+        "@walletconnect/universal-provider": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/universal-provider/dist/index.js",
+        ),
+        "@walletconnect/sign-client": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/sign-client/dist/index.js",
+        ),
+        "@walletconnect/core": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/core/dist/index.js",
+        ),
+        "@walletconnect/jsonrpc-provider": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/jsonrpc-provider/dist/index.es.js",
+        ),
+        "@walletconnect/jsonrpc-http-connection": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/jsonrpc-http-connection/dist/index.es.js",
+        ),
+        "@walletconnect/jsonrpc-ws-connection": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/jsonrpc-ws-connection/dist/index.es.js",
+        ),
+        "@walletconnect/heartbeat": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/heartbeat/dist/index.es.js",
+        ),
+        "@walletconnect/keyvaluestorage": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/keyvaluestorage/dist/index.es.js",
+        ),
+        "@walletconnect/relay-auth": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/relay-auth/dist/index.es.js",
+        ),
+        "@walletconnect/logger": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/logger/dist/index.es.js",
+        ),
+        "@walletconnect/utils": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/utils/dist/index.js",
+        ),
         "@walletconnect/environment": path.resolve(
           process.cwd(),
           "node_modules/@walletconnect/environment/dist/esm/index.js",
@@ -84,12 +132,11 @@ export default defineConfig({
           process.cwd(),
           "node_modules/@walletconnect/window-metadata/dist/esm/index.js",
         ),
-        // WalletConnect uses both ESM imports and CommonJS `require("events")`.
-        // The npm polyfill is CommonJS-compatible (`module.exports` is the
-        // constructor and `.EventEmitter` also points to it), which is the shape
-        // WalletConnect's production bundle expects.
-        events: path.resolve(process.cwd(), "node_modules/events/events.js"),
-        "node:events": path.resolve(process.cwd(), "node_modules/events/events.js"),
+        // WalletConnect imports both default and named EventEmitter exports.
+        // Keep this on a browser-safe ESM shim so production minification does
+        // not mix CJS namespace interop with `new EventEmitter()` calls.
+        events: path.resolve(process.cwd(), "src/lib/polyfills/events.ts"),
+        "node:events": path.resolve(process.cwd(), "src/lib/polyfills/events.ts"),
       },
     },
   },
