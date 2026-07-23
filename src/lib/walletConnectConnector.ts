@@ -69,6 +69,9 @@ export function flowWalletConnect() {
     };
 
     const handleDisplayUri = (uri: string) => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('flowbridge:walletconnect-uri', { detail: { uri } }));
+      }
       config.emitter.emit('message', { type: 'display_uri', data: uri });
     };
 
@@ -81,7 +84,10 @@ export function flowWalletConnect() {
         disableProviderPing: true,
         optionalChains: optionalChains as [number, ...number[]],
         rpcMap: rpcMapForChains(config.chains) as any,
-        showQrModal: true,
+        // We render our own QR modal from the provider's `display_uri` event.
+        // This avoids Reown/AppKit modal bundle issues in the current Vite
+        // stack while keeping the WalletConnect protocol provider intact.
+        showQrModal: false,
       })) as WalletConnectProvider;
       provider.events?.setMaxListeners?.(Number.POSITIVE_INFINITY);
       return provider;
