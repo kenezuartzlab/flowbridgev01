@@ -27,10 +27,7 @@ export default defineConfig({
       global: "globalThis",
     },
     optimizeDeps: {
-      // WalletConnect is loaded lazily by our connector. Do not force a Vite
-      // prebundle here; stale prebundles were keeping the broken EventEmitter
-      // interop path alive in preview browsers.
-      exclude: ["@walletconnect/ethereum-provider"],
+      include: ["@walletconnect/ethereum-provider"],
       esbuildOptions: {
         define: { global: "globalThis" },
       },
