@@ -27,9 +27,8 @@ const DEFAULT_SESSION: RouteSession = {
 };
 
 export function getLocalSession(): RouteSession {
-  if (typeof window === 'undefined') return DEFAULT_SESSION;
   try {
-    const saved = window.localStorage.getItem('flowbridge_session');
+    const saved = localStorage.getItem('flowbridge_session');
     if (saved) return JSON.parse(saved);
   } catch (e) {
     console.error("Failed to read session", e);
@@ -38,9 +37,8 @@ export function getLocalSession(): RouteSession {
 }
 
 export function saveLocalSession(session: RouteSession) {
-  if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem('flowbridge_session', JSON.stringify(session));
+    localStorage.setItem('flowbridge_session', JSON.stringify(session));
   } catch (e) {
     console.error("Failed to save session", e);
   }

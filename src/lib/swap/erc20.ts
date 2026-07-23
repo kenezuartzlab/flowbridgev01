@@ -1,6 +1,6 @@
 // ERC-20 metadata fetcher for custom token imports.
 import { createPublicClient, http, isAddress, getAddress } from "viem";
-import { botMainnet, botTestnet } from "@/lib/chains";
+import { botMainnet, botTestnet } from "@/lib/wagmi";
 import { ERC20_ABI } from "@/lib/contracts";
 import type { Token } from "./tokenRegistry";
 

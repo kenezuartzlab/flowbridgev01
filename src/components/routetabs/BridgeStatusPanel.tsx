@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPublicClient, http } from 'viem';
-import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '../../lib/chains';
+import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '../../lib/wagmi';
 import { fetchTronConfirmations } from '../../lib/tronBridge';
 import { CheckCircle2, Loader2, XCircle, ExternalLink, Clock } from 'lucide-react';
 import { toFriendlyError } from '../../lib/friendlyError';

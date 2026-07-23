@@ -3,7 +3,7 @@ import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, use
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
-import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/chains';
+import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/wagmi';
 import {
   isTronLinkAvailable, requestTronLinkAccounts, isValidTronAddress,
   fetchTronUsdtBalance, fetchTronUsdtAllowance, tronApproveUsdt, tronBridgeDepositToBot,
