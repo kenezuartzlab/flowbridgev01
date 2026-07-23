@@ -62,11 +62,11 @@ export async function signInWithEthereum(args: {
 
   if (verifyJson.needs_binding) return { status: "needs_binding" };
 
-  const { error } = await supabase.auth.verifyOtp({
+  const { data, error } = await supabase.auth.verifyOtp({
     token_hash: verifyJson.token_hash,
-    type: "magiclink",
+    type: "email",
   });
   if (error) throw error;
 
-  return { status: "signed_in", email: verifyJson.email };
+  return { status: "signed_in", email: data.user?.email ?? verifyJson.email };
 }

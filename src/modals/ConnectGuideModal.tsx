@@ -149,7 +149,7 @@ export function ConnectGuideModal({
       if (siweRequestId.current !== requestId) return;
       if (result.status === 'signed_in') {
         const user = await reloadUser();
-        setMsg(`Signed in as ${result.email}.`);
+        setMsg(`Signed in and linked as ${result.email}.`);
         onLinked?.(user);
       } else {
         const linkedNow = await bindVerifiedWalletToSignedInUser();
@@ -321,7 +321,7 @@ export function ConnectGuideModal({
               </div>
               {googleUser && (
                 <span className="text-[10px] font-black tracking-widest text-[#32FF8B] bg-[#32FF8B]/10 px-2 py-0.5 rounded uppercase font-mono border border-[#32FF8B]/25">
-                  Linked
+                  Email active
                 </span>
               )}
             </div>
