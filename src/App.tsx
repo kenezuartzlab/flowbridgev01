@@ -34,7 +34,6 @@ import { ConnectGuideModal } from './modals/ConnectGuideModal';
 import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
-import { WalletConnectQrModal } from './modals/WalletConnectQrModal';
 import { formatUsd } from './lib/format';
 import { toFriendlyError } from './lib/friendlyError';
 import { SiteLoader } from './components/SiteLoader';
@@ -154,7 +153,6 @@ export default function App() {
   const [isDonateModalOpen, setIsDonateModalOpen] = useState<boolean>(false);
   const [donateModalInitialTab, setDonateModalInitialTab] = useState<'donate' | 'feedback' | 'incentives'>('donate');
   const [isConnectGuideOpen, setIsConnectGuideOpen] = useState<boolean>(false);
-  const [walletConnectUri, setWalletConnectUri] = useState<string | null>(null);
 
   // Helper to obtain token (gets mock token if demo bypass is active)
   const getEffectiveIdToken = async (): Promise<string | null> => {
@@ -901,57 +899,12 @@ export default function App() {
 
   const handleConnectWallet = (preferred?: 'injected' | 'walletConnect') => {
     const targetId = preferred ?? 'injected';
-    const connectorList = connectors.map(c => ({ id: c.id, name: c.name, type: c.type, ready: (c as any).ready }));
-    console.info('[wallet:debug] connect requested', {
-      preferred: targetId,
-      connectors: connectorList,
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
-    });
     const connector =
       connectors.find((item) => item.id === targetId) ??
-      (targetId === 'walletConnect'
-        ? connectors.find((item) => item.type === 'walletConnect')
-        : undefined) ??
       connectors.find((item) => item.id === 'injected') ??
       connectors[0];
-    if (!connector) {
-      console.error('[wallet] no connector available', { targetId, connectors: connectorList });
-      setErrorMessage('No wallet connector available. Please install a wallet or try WalletConnect.');
-      return;
-    }
-    console.info('[wallet:debug] connecting via', { id: connector.id, name: connector.name, type: connector.type });
-    connect(
-      { connector },
-      {
-        onError: (err: any) => {
-          console.error('[wallet] connect error', {
-            name: err?.name,
-            message: err?.message,
-            stack: err?.stack,
-            connector: { id: connector.id, name: connector.name, type: connector.type },
-          });
-          setErrorMessage(
-            targetId === 'walletConnect'
-              ? `WalletConnect could not open. Diagnostic logs were captured: ${err?.message || 'unknown connector error'}`
-              : err?.message || 'Failed to open wallet connector.',
-          );
-        },
-      },
-    );
+    if (connector) connect({ connector });
   };
-
-  useEffect(() => {
-    const handleWalletConnectUri = (event: Event) => {
-      const uri = (event as CustomEvent<{ uri?: string }>).detail?.uri;
-      if (uri) setWalletConnectUri(uri);
-    };
-    window.addEventListener('flowbridge:walletconnect-uri', handleWalletConnectUri);
-    return () => window.removeEventListener('flowbridge:walletconnect-uri', handleWalletConnectUri);
-  }, []);
-
-  useEffect(() => {
-    if (isConnected) setWalletConnectUri(null);
-  }, [isConnected]);
 
   const handleDisconnect = async () => {
     if (address) clearWalletVerified(address);
@@ -2598,12 +2551,6 @@ export default function App() {
           }}
         />
       )}
-
-      <WalletConnectQrModal
-        isOpen={Boolean(walletConnectUri)}
-        uri={walletConnectUri}
-        onClose={() => setWalletConnectUri(null)}
-      />
 
       {/* Premium Confirm Modal Overlay */}
       {activeConfirmModal && (
