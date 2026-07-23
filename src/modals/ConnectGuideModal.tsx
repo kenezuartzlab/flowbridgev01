@@ -15,7 +15,7 @@ interface ConnectGuideModalProps {
   onGoogleSignIn: () => Promise<void>;
   onSandboxSignIn?: () => void; // kept for compat, no longer rendered
   isWalletConnected: boolean;
-  onConnectWallet: () => void;
+  onConnectWallet: (preferred?: 'injected' | 'walletConnect') => void;
   onLinked?: (user: AppUser | null) => void;
 }
 
