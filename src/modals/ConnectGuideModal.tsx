@@ -341,7 +341,7 @@ export function ConnectGuideModal({
                     {googleUser.email}
                   </span>
                 </div>
-                {isWalletConnected && connectedAddress && !isWalletVerified(connectedAddress) && (
+                {isWalletConnected && connectedAddress && (
                   <button
                     onClick={handleSiwe}
                     className="w-full flex items-center justify-center gap-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
