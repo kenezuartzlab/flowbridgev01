@@ -8,7 +8,7 @@ export type SiweResult =
   | { status: "signed_in"; email: string }
   | { status: "needs_binding" };
 
-function buildMessage(opts: { address: string; nonce: string; domain: string; uri: string }) {
+function buildMessage(opts: { address: string; nonce: string; domain: string; uri: string; chainId: number }) {
   const issuedAt = new Date().toISOString();
   return [
     `${opts.domain} wants you to sign in with your Ethereum account:`,
@@ -18,6 +18,7 @@ function buildMessage(opts: { address: string; nonce: string; domain: string; ur
     "",
     `URI: ${opts.uri}`,
     `Version: 1`,
+    `Chain ID: ${opts.chainId}`,
     `Nonce: ${opts.nonce}`,
     `Issued At: ${issuedAt}`,
   ].join("\n");
@@ -25,6 +26,7 @@ function buildMessage(opts: { address: string; nonce: string; domain: string; ur
 
 export async function signInWithEthereum(args: {
   address: string;
+  chainId: number;
   signMessage: (msg: string) => Promise<string>;
 }): Promise<SiweResult> {
   const address = args.address.toLowerCase();
@@ -41,6 +43,7 @@ export async function signInWithEthereum(args: {
   const message = buildMessage({
     address,
     nonce,
+    chainId: args.chainId,
     domain: window.location.host,
     uri: window.location.origin,
   });
