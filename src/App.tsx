@@ -2158,6 +2158,10 @@ export default function App() {
             
             <button
               onClick={() => {
+                if (googleUser && signedInEmailVerified && !rewardsActive) {
+                  setIsConnectGuideOpen(true);
+                  return;
+                }
                 setDonateModalInitialTab('incentives');
                 setIsDonateModalOpen(true);
               }}
