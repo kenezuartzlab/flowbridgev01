@@ -216,15 +216,11 @@ export default function App() {
     if (!googleUser) return;
     const normalizedWallet = address?.toLowerCase();
     const emailVerified = !!(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo);
-    const walletLinkedToSession =
-      !!normalizedWallet &&
-      walletLinkNotice?.kind === 'linked' &&
-      walletLinkNotice.address === normalizedWallet;
 
     // Rewards/history rows are only recorded for a verified email + the exact
     // wallet bound to that email. Guest, unverified, or mismatched sessions can
-    // still swap, but they do not earn FlowPoints.
-    if (!emailVerified || !walletLinkedToSession) return;
+    // still swap, but the server rejects reward logging for them.
+    if (!emailVerified || !normalizedWallet) return;
 
     try {
       const token = await getEffectiveIdToken();
