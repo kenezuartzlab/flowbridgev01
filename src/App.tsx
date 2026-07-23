@@ -52,6 +52,13 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const previousWalletAddressRef = useRef<string | null>(null);
   const autoBindAttemptRef = useRef<string | null>(null);
+  const [walletLinkNotice, setWalletLinkNotice] = useState<
+    | { kind: "signin-needed"; emailHint: string; address: string }
+    | { kind: "mismatch"; emailHint: string; address: string }
+    | { kind: "linked"; address: string }
+    | { kind: "unbound"; address: string }
+    | null
+  >(null);
 
   useEffect(() => {
     void reconnect();
@@ -483,14 +490,6 @@ export default function App() {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [actionStep, setActionStep] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [walletLinkNotice, setWalletLinkNotice] = useState<
-    | { kind: "signin-needed"; emailHint: string; address: string }
-    | { kind: "mismatch"; emailHint: string; address: string }
-    | { kind: "linked"; address: string }
-    | { kind: "unbound"; address: string }
-    | null
-  >(null);
-
   // Premium Modal Interactivity States
   const [activeConfirmModal, setActiveConfirmModal] = useState<'CA/BOT' | 'BOT/USDT' | 'BRIDGE' | null>(null);
   const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
@@ -2176,11 +2175,15 @@ export default function App() {
                     <span className="text-[#32FF8B] font-mono">{walletLinkNotice.emailHint}</span>.
                     Sign in to that account to keep earning FlowPoints and referrals on this address.
                   </>
-                ) : (
+                ) : walletLinkNotice.kind === "mismatch" ? (
                   <>
                     Heads up — this wallet is bound to a different account{" "}
                     <span className="text-[#F6BA00] font-mono">{walletLinkNotice.emailHint}</span>.
                     FlowPoints will accrue to that account, not the one you're signed into.
+                  </>
+                ) : (
+                  <>
+                    This wallet is not linked to your signed-in email yet. Sign once with the wallet to activate FlowPoints for this address.
                   </>
                 )}
               </div>
