@@ -27,7 +27,11 @@ export default defineConfig({
       global: "globalThis",
     },
     optimizeDeps: {
-      include: ["@walletconnect/ethereum-provider"],
+      // Keep WalletConnect out of Vite's eager prebundle. It is loaded lazily
+      // by src/lib/walletConnectConnector.ts only after the user explicitly
+      // chooses WalletConnect; prebundling can preserve a broken CJS/ESM
+      // EventEmitter interop path in mobile production browsers.
+      exclude: ["@walletconnect/ethereum-provider"],
       esbuildOptions: {
         define: { global: "globalThis" },
       },
@@ -45,6 +49,41 @@ export default defineConfig({
           "node_modules/entities/lib/encode.js",
         ),
         entities: path.resolve(process.cwd(), "node_modules/entities"),
+        blakejs: path.resolve(process.cwd(), "src/lib/polyfills/blakejs.ts"),
+        "cross-fetch": path.resolve(process.cwd(), "src/lib/polyfills/cross-fetch.ts"),
+        "cross-fetch/dist/browser-ponyfill.js": path.resolve(process.cwd(), "src/lib/polyfills/cross-fetch.ts"),
+        eventemitter3: path.resolve(
+          process.cwd(),
+          "node_modules/eventemitter3/dist/eventemitter3.esm.js",
+        ),
+        "@walletconnect/environment": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/environment/dist/esm/index.js",
+        ),
+        "@walletconnect/events": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/events/dist/esm/index.js",
+        ),
+        "@walletconnect/jsonrpc-utils": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/jsonrpc-utils/dist/esm/index.js",
+        ),
+        "@walletconnect/safe-json": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/safe-json/dist/esm/index.js",
+        ),
+        "@walletconnect/time": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/time/dist/esm/index.js",
+        ),
+        "@walletconnect/window-getters": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/window-getters/dist/esm/index.js",
+        ),
+        "@walletconnect/window-metadata": path.resolve(
+          process.cwd(),
+          "node_modules/@walletconnect/window-metadata/dist/esm/index.js",
+        ),
         // WalletConnect uses both ESM imports and CommonJS `require("events")`.
         // The npm polyfill is CommonJS-compatible (`module.exports` is the
         // constructor and `.EventEmitter` also points to it), which is the shape

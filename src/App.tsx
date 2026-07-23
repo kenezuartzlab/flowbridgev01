@@ -34,6 +34,7 @@ import { ConnectGuideModal } from './modals/ConnectGuideModal';
 import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
+import { WalletConnectQrModal } from './modals/WalletConnectQrModal';
 import { formatUsd } from './lib/format';
 import { toFriendlyError } from './lib/friendlyError';
 import { SiteLoader } from './components/SiteLoader';
@@ -153,6 +154,7 @@ export default function App() {
   const [isDonateModalOpen, setIsDonateModalOpen] = useState<boolean>(false);
   const [donateModalInitialTab, setDonateModalInitialTab] = useState<'donate' | 'feedback' | 'incentives'>('donate');
   const [isConnectGuideOpen, setIsConnectGuideOpen] = useState<boolean>(false);
+  const [walletConnectUri, setWalletConnectUri] = useState<string | null>(null);
 
   // Helper to obtain token (gets mock token if demo bypass is active)
   const getEffectiveIdToken = async (): Promise<string | null> => {
@@ -922,6 +924,19 @@ export default function App() {
       },
     );
   };
+
+  useEffect(() => {
+    const handleWalletConnectUri = (event: Event) => {
+      const uri = (event as CustomEvent<{ uri?: string }>).detail?.uri;
+      if (uri) setWalletConnectUri(uri);
+    };
+    window.addEventListener('flowbridge:walletconnect-uri', handleWalletConnectUri);
+    return () => window.removeEventListener('flowbridge:walletconnect-uri', handleWalletConnectUri);
+  }, []);
+
+  useEffect(() => {
+    if (isConnected) setWalletConnectUri(null);
+  }, [isConnected]);
 
   const handleDisconnect = async () => {
     if (address) clearWalletVerified(address);
@@ -2568,6 +2583,12 @@ export default function App() {
           }}
         />
       )}
+
+      <WalletConnectQrModal
+        isOpen={Boolean(walletConnectUri)}
+        uri={walletConnectUri}
+        onClose={() => setWalletConnectUri(null)}
+      />
 
       {/* Premium Confirm Modal Overlay */}
       {activeConfirmModal && (
