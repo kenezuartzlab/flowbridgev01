@@ -1,8 +1,8 @@
-const fetchPonyfill: typeof fetch = (...args) => fetch(...args);
+const browserFetch = globalThis.fetch.bind(globalThis) as typeof globalThis.fetch;
 
-export const fetch = fetchPonyfill;
+export { browserFetch as fetch };
 export const Headers = globalThis.Headers;
 export const Request = globalThis.Request;
 export const Response = globalThis.Response;
 
-export default fetchPonyfill;
+export default browserFetch;
