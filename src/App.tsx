@@ -897,8 +897,12 @@ export default function App() {
     setIsConnectGuideOpen(true);
   };
 
-  const handleConnectWallet = () => {
-    const connector = connectors.find((item) => item.id === 'injected') ?? connectors[0];
+  const handleConnectWallet = (preferred?: 'injected' | 'walletConnect') => {
+    const targetId = preferred ?? 'injected';
+    const connector =
+      connectors.find((item) => item.id === targetId) ??
+      connectors.find((item) => item.id === 'injected') ??
+      connectors[0];
     if (connector) connect({ connector });
   };
 
