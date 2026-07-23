@@ -93,6 +93,7 @@ export const Route = createFileRoute("/api/public/siwe/verify")({
             verified: true,
             email: profile.email,
             token_hash: linkData.properties.hashed_token,
+            verify_type: linkData.properties.verification_type ?? "magiclink",
           });
         } catch (e: any) {
           return Response.json({ error: e?.message ?? "Verify failed" }, { status: 500 });

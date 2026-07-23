@@ -47,16 +47,23 @@ export const initAuth = (
     onAuthSuccess?.(toAppUser(user), session.access_token);
   })().catch(() => onAuthFailure?.());
 
-  const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+  const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
     if (session?.user) {
-      // On USER_UPDATED / TOKEN_REFRESHED, force a fresh getUser() so a newly
-      // confirmed email flips emailVerified across the app immediately.
-      let user = session.user;
+      onAuthSuccess?.(toAppUser(session.user), session.access_token);
+
+      // Do not await another auth call inside onAuthStateChange. Some mobile
+      // wallet browsers can stall the SIGNED_IN event if this callback performs
+      // nested Supabase auth requests synchronously. Revalidate on the next tick
+      // instead so email verification still refreshes without blocking login.
       if (event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
-        const { data } = await supabase.auth.getUser();
-        if (data.user) user = data.user;
+        setTimeout(() => {
+          supabase.auth.getUser()
+            .then(({ data }) => {
+              if (data.user) onAuthSuccess?.(toAppUser(data.user), session.access_token);
+            })
+            .catch(() => undefined);
+        }, 0);
       }
-      onAuthSuccess?.(toAppUser(user), session.access_token);
     } else {
       onAuthFailure?.();
     }

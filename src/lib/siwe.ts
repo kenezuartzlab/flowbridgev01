@@ -8,6 +8,8 @@ export type SiweResult =
   | { status: "signed_in"; email: string }
   | { status: "needs_binding" };
 
+type VerifyOtpType = "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email";
+
 function buildMessage(opts: { address: string; nonce: string; domain: string; uri: string; chainId: number }) {
   const issuedAt = new Date().toISOString();
   return [
@@ -64,8 +66,8 @@ export async function signInWithEthereum(args: {
 
   const { data, error } = await supabase.auth.verifyOtp({
     token_hash: verifyJson.token_hash,
-    type: "email",
-  });
+    type: (verifyJson.verify_type || "magiclink") as VerifyOtpType,
+  } as any);
   if (error) throw error;
   if (!data.session?.access_token || !data.session.refresh_token || !data.user) {
     throw new Error("Wallet signature was accepted, but the sign-in session was not created. Please try again.");
