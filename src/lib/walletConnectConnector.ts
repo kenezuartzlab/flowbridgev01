@@ -30,6 +30,37 @@ const metadata = {
 const connectedStorageKey = 'flowbridge.walletConnect.connected';
 const requestedChainsStorageKey = 'flowbridge.walletConnect.requestedChains';
 
+function sanitizeWalletConnectError(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      firstStackLine: error.stack?.split('\n').slice(0, 3).join(' | '),
+    };
+  }
+  return { message: String(error ?? 'Unknown error') };
+}
+
+function wcDebug(stage: string, details: Record<string, unknown> = {}) {
+  const payload = {
+    stage,
+    at: new Date().toISOString(),
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
+    ...details,
+  };
+  console.info('[walletconnect:debug]', payload);
+}
+
+function wcError(stage: string, error: unknown, details: Record<string, unknown> = {}) {
+  console.error('[walletconnect:error]', {
+    stage,
+    at: new Date().toISOString(),
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
+    ...details,
+    error: sanitizeWalletConnectError(error),
+  });
+}
+
 function rpcMapForChains(chains: readonly Chain[]) {
   return Object.fromEntries(
     chains
@@ -69,6 +100,10 @@ export function flowWalletConnect() {
     };
 
     const handleDisplayUri = (uri: string) => {
+      wcDebug('display_uri_received', {
+        uriLength: uri.length,
+        startsWithWalletConnect: uri.startsWith('wc:'),
+      });
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('flowbridge:walletconnect-uri', { detail: { uri } }));
       }
@@ -76,27 +111,65 @@ export function flowWalletConnect() {
     };
 
     const initProvider = async (): Promise<WalletConnectProvider> => {
-      const { EthereumProvider } = await import('@walletconnect/ethereum-provider');
       const optionalChains = config.chains.map((chain) => chain.id);
-      const provider = (await EthereumProvider.init({
-        projectId: WC_PROJECT_ID,
-        metadata,
-        disableProviderPing: true,
-        optionalChains: optionalChains as [number, ...number[]],
-        rpcMap: rpcMapForChains(config.chains) as any,
-        // We render our own QR modal from the provider's `display_uri` event.
-        // This avoids Reown/AppKit modal bundle issues in the current Vite
-        // stack while keeping the WalletConnect protocol provider intact.
-        showQrModal: false,
-      })) as WalletConnectProvider;
-      provider.events?.setMaxListeners?.(Number.POSITIVE_INFINITY);
-      return provider;
+      const rpcMap = rpcMapForChains(config.chains);
+      wcDebug('provider_import_start', {
+        chains: optionalChains,
+        rpcChainIds: Object.keys(rpcMap),
+        projectIdSuffix: WC_PROJECT_ID.slice(-6),
+      });
+      try {
+        const providerModule = await import('@walletconnect/ethereum-provider');
+        const { EthereumProvider } = providerModule;
+        wcDebug('provider_import_success', {
+          exportKeys: Object.keys(providerModule).slice(0, 20),
+          ethereumProviderType: typeof EthereumProvider,
+          initType: typeof EthereumProvider?.init,
+        });
+        wcDebug('provider_init_start');
+        const provider = (await EthereumProvider.init({
+          projectId: WC_PROJECT_ID,
+          metadata,
+          disableProviderPing: true,
+          optionalChains: optionalChains as [number, ...number[]],
+          rpcMap: rpcMap as any,
+          // We render our own QR modal from the provider's `display_uri` event.
+          // This avoids Reown/AppKit modal bundle issues in the current Vite
+          // stack while keeping the WalletConnect protocol provider intact.
+          showQrModal: false,
+        })) as WalletConnectProvider;
+        provider.events?.setMaxListeners?.(Number.POSITIVE_INFINITY);
+        wcDebug('provider_init_success', {
+          hasConnect: typeof provider.connect === 'function',
+          hasEnable: typeof provider.enable === 'function',
+          hasRequest: typeof provider.request === 'function',
+          hasEvents: Boolean(provider.events),
+          chainId: provider.chainId,
+          accountCount: provider.accounts?.length ?? 0,
+          hasSession: Boolean(provider.session),
+        });
+        return provider;
+      } catch (error) {
+        wcError('provider_import_or_init_failed', error, {
+          chains: optionalChains,
+          rpcChainIds: Object.keys(rpcMap),
+        });
+        throw error;
+      }
     };
 
     const getProviderInternal = async (): Promise<WalletConnectProvider> => {
       if (!provider_) {
+        wcDebug('provider_get_start', { hasExistingPromise: Boolean(providerPromise) });
         providerPromise ??= initProvider();
-        provider_ = await providerPromise;
+        try {
+          provider_ = await providerPromise;
+        } catch (error) {
+          providerPromise = undefined;
+          wcError('provider_get_failed', error);
+          throw error;
+        }
+        wcDebug('provider_get_success');
       }
       return provider_;
     };
@@ -157,6 +230,7 @@ export function flowWalletConnect() {
 
     async connect(parameters: any = {}) {
       const { chainId, withCapabilities } = parameters;
+      wcDebug('connect_start', { requestedChainId: chainId, withCapabilities: Boolean(withCapabilities) });
       try {
         const provider = await getProviderInternal();
         if (!provider) throw new ProviderNotFoundError();
@@ -164,6 +238,7 @@ export function flowWalletConnect() {
         if (!displayUri) {
           displayUri = handleDisplayUri;
           provider.on('display_uri', displayUri);
+          wcDebug('display_uri_listener_registered');
         }
 
         const targetChainId = chainId ?? config.chains[0]?.id;
@@ -173,18 +248,26 @@ export function flowWalletConnect() {
           const optionalChains = config.chains
             .filter((chain) => chain.id !== targetChainId)
             .map((chain) => chain.id);
+          wcDebug('provider_connect_call_start', { targetChainId, optionalChains });
           await provider.connect({ optionalChains: [targetChainId, ...optionalChains] });
+          wcDebug('provider_connect_call_success', { hasSession: Boolean(provider.session) });
           await config.storage?.setItem(requestedChainsStorageKey, config.chains.map((chain) => chain.id));
         }
 
+        wcDebug('provider_enable_start');
         const accounts = (await provider.enable()).map((account) => getAddress(account));
+        wcDebug('provider_enable_success', { accountCount: accounts.length });
         let currentChainId = await getChainIdInternal();
+        wcDebug('provider_chain_resolved', { currentChainId });
         if (chainId && currentChainId !== chainId) {
           try {
+            wcDebug('switch_chain_start', { from: currentChainId, to: chainId });
             const chain = await switchChainInternal({ chainId });
             currentChainId = chain?.id ?? currentChainId;
+            wcDebug('switch_chain_success', { currentChainId });
           } catch (error) {
             if (isRejected(error)) throw new UserRejectedRequestError(error as Error);
+            wcError('switch_chain_failed_non_blocking', error, { requestedChainId: chainId, currentChainId });
           }
         }
 
@@ -206,6 +289,7 @@ export function flowWalletConnect() {
         }
 
         await config.storage?.setItem(connectedStorageKey, true);
+        wcDebug('connect_success', { chainId: currentChainId, accountCount: accounts.length });
 
         return {
           accounts: withCapabilities
@@ -214,6 +298,7 @@ export function flowWalletConnect() {
           chainId: currentChainId,
         } as any;
       } catch (error) {
+        wcError('connect_failed', error, { requestedChainId: chainId });
         if (isRejected(error)) throw new UserRejectedRequestError(error as Error);
         throw error;
       }
