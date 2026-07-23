@@ -23,6 +23,18 @@ export default defineConfig({
   },
   vite: {
     plugins: [mcpPlugin()],
+    define: {
+      global: "globalThis",
+    },
+    optimizeDeps: {
+      include: [
+        "events",
+        "@walletconnect/ethereum-provider",
+      ],
+      esbuildOptions: {
+        define: { global: "globalThis" },
+      },
+    },
     resolve: {
       alias: {
         // Force every import of `entities` to the hoisted v4.5.0 copy.
@@ -36,6 +48,10 @@ export default defineConfig({
           "node_modules/entities/lib/encode.js",
         ),
         entities: path.resolve(process.cwd(), "node_modules/entities"),
+        // Force `events` to the hoisted browser-compatible copy so
+        // WalletConnect's `new events.EventEmitter()` resolves correctly
+        // in the client bundle (fixes "EventEmitter is not a constructor").
+        events: path.resolve(process.cwd(), "node_modules/events/events.js"),
       },
     },
   },
