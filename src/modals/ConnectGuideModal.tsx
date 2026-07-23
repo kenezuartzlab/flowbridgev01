@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound } from 'lucide-react';
-import { useAccount, useSignMessage } from 'wagmi';
+import { useAccount, useSignMessage, useChainId, useSwitchChain } from 'wagmi';
 import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, getIdToken, requestPasswordReset } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
 import { getWalletSignatureErrorMessage, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
+import { botMainnet } from '@/lib/wagmi';
 
 interface ConnectGuideModalProps {
   isOpen: boolean;
@@ -38,6 +39,8 @@ export function ConnectGuideModal({
   const inApp = useMemo(() => isInAppBrowser(), []);
   const inAppName = useMemo(() => inAppBrowserName(), []);
   const { address: connectedAddress } = useAccount();
+  const activeChainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const { signMessageAsync } = useSignMessage();
   const [siweBusy, setSiweBusy] = useState(false);
   const siweRequestId = useRef(0);
@@ -105,10 +108,40 @@ export function ConnectGuideModal({
     siweRequestId.current = requestId;
     setErr(null); setMsg(null); setSiweBusy(true);
     try {
+      // Pre-flight: confirm the injected wallet still exposes the connected
+      // address. Watch-only or switched wallets fail here with a clear message.
+      if (typeof window !== 'undefined') {
+        const eth = (window as any).ethereum;
+        if (eth?.request) {
+          try {
+            const accounts = (await eth.request({ method: 'eth_accounts' })) as string[];
+            const active = (accounts?.[0] || '').toLowerCase();
+            if (active && active !== connectedAddress.toLowerCase()) {
+              throw new Error(`Your wallet is now on ${active.slice(0,6)}…${active.slice(-4)} but FlowBridge is connected to ${connectedAddress.slice(0,6)}…${connectedAddress.slice(-4)}. Reconnect the matching wallet, then retry.`);
+            }
+          } catch (probeErr: any) {
+            if (probeErr?.message?.includes('FlowBridge is connected')) throw probeErr;
+            // ignore other probe failures; some in-app wallets block eth_accounts
+          }
+        }
+      }
+
+      // Auto-recover chain: SIWE binds the signature to BOT Chain (677).
+      // If the wallet is on the wrong network, try switching first.
+      let expectedChainId = botMainnet.id;
+      if (activeChainId !== expectedChainId) {
+        try {
+          await switchChainAsync({ chainId: expectedChainId });
+        } catch {
+          throw new Error(`Switch your wallet to BOT Chain (id ${expectedChainId}) and try signing again.`);
+        }
+      }
+
       const signWithTimeout = (m: string) =>
         signMessageWithActiveWallet(connectedAddress, m, signMessageAsync as any);
       const result = await signInWithEthereum({
         address: connectedAddress,
+        chainId: expectedChainId,
         signMessage: signWithTimeout,
       });
       if (siweRequestId.current !== requestId) return;
