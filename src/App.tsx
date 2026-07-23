@@ -53,7 +53,7 @@ export default function App() {
   const previousWalletAddressRef = useRef<string | null>(null);
 
   useEffect(() => {
-    reconnect();
+    void reconnect();
   }, [reconnect]);
 
   const fetchUserIncentivesInApp = async () => {
