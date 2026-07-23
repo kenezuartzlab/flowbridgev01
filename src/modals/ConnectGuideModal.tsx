@@ -15,7 +15,7 @@ interface ConnectGuideModalProps {
   onGoogleSignIn: () => Promise<void>;
   onSandboxSignIn?: () => void; // kept for compat, no longer rendered
   isWalletConnected: boolean;
-  onConnectWallet: () => void;
+  onConnectWallet: (preferred?: 'injected' | 'walletConnect') => void;
   onLinked?: (user: AppUser | null) => void;
 }
 
@@ -279,16 +279,35 @@ export function ConnectGuideModal({
                 <span className="text-[#C5C1B9] text-[12px]">Wallet address is your unique identity here.</span>
               </div>
             ) : (
-              <button
-                onClick={() => {
-                  onConnectWallet();
-                  onClose();
-                }}
-                className="w-full flex items-center justify-center gap-1.5 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
-              >
-                <Wallet className="w-3.5 h-3.5" />
-                Connect Web3 Wallet
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    onConnectWallet('injected');
+                    onClose();
+                  }}
+                  className="w-full flex items-center justify-center gap-1.5 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
+                >
+                  <Wallet className="w-3.5 h-3.5" />
+                  {inApp ? `Connect ${inAppName ?? 'Wallet'}` : 'Connect Browser Wallet'}
+                </button>
+                {!inApp && (
+                  <button
+                    onClick={() => {
+                      onConnectWallet('walletConnect');
+                      onClose();
+                    }}
+                    className="w-full flex items-center justify-center gap-1.5 bg-[#010C1B] hover:bg-[#0B1A2E] text-white border border-[#3B99FC]/40 font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
+                  >
+                    <span className="text-[#3B99FC]">◉</span>
+                    WalletConnect (QR / Mobile)
+                  </button>
+                )}
+                {!inApp && (
+                  <p className="text-[10px] text-[#7A8394] font-mono px-1 leading-relaxed">
+                    No extension? Use WalletConnect to scan a QR from your mobile wallet (Trust, MetaMask, TokenPocket, Rainbow…).
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
