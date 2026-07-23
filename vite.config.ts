@@ -48,11 +48,13 @@ export default defineConfig({
           "node_modules/entities/lib/encode.js",
         ),
         entities: path.resolve(process.cwd(), "node_modules/entities"),
-        // WalletConnect imports both named and default `events` exports in the
-        // browser. Use a tiny ESM shim with both shapes so EventEmitter is
-        // always constructable after Vite/Rolldown bundles it.
-        events: path.resolve(process.cwd(), "src/lib/polyfills/events.ts"),
-        "node:events": path.resolve(process.cwd(), "src/lib/polyfills/events.ts"),
+        // WalletConnect expects Node's CommonJS `events` package shape:
+        // default constructor + `.EventEmitter` constructor. Point directly at
+        // the battle-tested browser polyfill package instead of an ESM shim so
+        // Vite/Rolldown cannot rewrite the default export into a namespace
+        // object that later fails as `EventEmitter is not a constructor`.
+        events: path.resolve(process.cwd(), "node_modules/events/events.js"),
+        "node:events": path.resolve(process.cwd(), "node_modules/events/events.js"),
       },
     },
   },
