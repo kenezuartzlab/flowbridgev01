@@ -73,7 +73,7 @@ EventEmitter.prototype.prependOnceListener = function prependOnceListener(eventN
 EventEmitter.prototype.removeListener = function removeListener(eventName: EventName, listener: Listener) {
   const listeners = this.listenersByEvent.get(eventName);
   if (!listeners) return this;
-  const next = listeners.filter((item) => item !== listener);
+  const next = listeners.filter((item: Listener) => item !== listener);
   if (next.length) this.listenersByEvent.set(eventName, next);
   else this.listenersByEvent.delete(eventName);
   return this;
