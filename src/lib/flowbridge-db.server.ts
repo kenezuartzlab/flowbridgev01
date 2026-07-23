@@ -129,6 +129,13 @@ export async function createTransactionHistory(
     throw new Error("Rewards require the connected wallet to be linked to this signed-in email.");
   }
 
+  // Bridge transactions are excluded from earnings — only FlowBridgeRouter
+  // swap activity is eligible for rewards / swap-volume accrual.
+  if (String(payload.txType).toUpperCase() === "BRIDGE") {
+    throw new Error("Bridge transactions do not accrue rewards.");
+  }
+
+
   // SECURITY: Do not award points from client-supplied transaction data.
   // Points must only be awarded by server-side on-chain verification (e.g., a
   // trusted webhook or RPC-verified txHash). Recording the transaction row is
