@@ -110,6 +110,7 @@ export async function createTransactionHistory(
     toAmount: string;
     txHash: string | null;
     status: string;
+    walletAddress?: string | null;
   },
 ) {
   const { data: user } = await supabaseAdmin
@@ -118,6 +119,15 @@ export async function createTransactionHistory(
     .eq("id", userId)
     .maybeSingle();
   if (!user) throw new Error("Profile not found");
+
+  const submittedWallet = payload.walletAddress?.trim().toLowerCase() ?? null;
+  const boundWallet = typeof user.wallet_address === "string" ? user.wallet_address.toLowerCase() : null;
+  if (!isEmailVerified) {
+    throw new Error("Rewards require a verified email address.");
+  }
+  if (!submittedWallet || !boundWallet || submittedWallet !== boundWallet) {
+    throw new Error("Rewards require the connected wallet to be linked to this signed-in email.");
+  }
 
   // SECURITY: Do not award points from client-supplied transaction data.
   // Points must only be awarded by server-side on-chain verification (e.g., a

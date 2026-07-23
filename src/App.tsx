@@ -207,6 +207,18 @@ export default function App() {
   // Log a new transaction to Cloud SQL DB
   const logTransactionToDb = async (txType: string, direction: string, fromAmount: string, toAmount: string, txHash: string, status: string) => {
     if (!googleUser) return;
+    const normalizedWallet = address?.toLowerCase();
+    const emailVerified = !!(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo);
+    const walletLinkedToSession =
+      !!normalizedWallet &&
+      walletLinkNotice?.kind === 'linked' &&
+      walletLinkNotice.address === normalizedWallet;
+
+    // Rewards/history rows are only recorded for a verified email + the exact
+    // wallet bound to that email. Guest, unverified, or mismatched sessions can
+    // still swap, but they do not earn FlowPoints.
+    if (!emailVerified || !walletLinkedToSession) return;
+
     try {
       const token = await getEffectiveIdToken();
       if (!token) return;
@@ -223,7 +235,8 @@ export default function App() {
           fromAmount,
           toAmount,
           txHash,
-          status
+          status,
+          walletAddress: normalizedWallet,
         })
       });
       
@@ -247,7 +260,15 @@ export default function App() {
   // the already-verified wallet automatically after the auth session hydrates.
   useEffect(() => {
     const normalized = address?.toLowerCase();
-    if (!googleUser || googleUser.isDemo || !isConnected || !normalized || !isWalletVerified(normalized)) return;
+    if (
+      !googleUser ||
+      googleUser.isDemo ||
+      !isConnected ||
+      !normalized ||
+      !isWalletVerified(normalized) ||
+      walletLinkNotice?.kind !== 'unbound' ||
+      walletLinkNotice.address !== normalized
+    ) return;
 
     const key = `${googleUser.email || googleUser.uid || 'user'}:${normalized}`;
     if (autoBindAttemptRef.current === key) return;
@@ -297,7 +318,7 @@ export default function App() {
     })();
 
     return () => { cancelled = true; };
-  }, [googleUser, address, isConnected]);
+  }, [googleUser, address, isConnected, walletLinkNotice]);
 
   const handleGoogleSignIn = async () => {
     setIsAuthLoading(true);
@@ -349,14 +370,11 @@ export default function App() {
 
     if (previous && (!current || previous !== current)) {
       clearWalletVerified(previous);
-    }
-
-    if (previous && current && previous !== current && googleUser) {
-      handleGoogleLogout();
+      autoBindAttemptRef.current = null;
     }
 
     previousWalletAddressRef.current = current;
-  }, [address, googleUser]);
+  }, [address]);
 
   // Environment and Mode states
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
@@ -466,9 +484,10 @@ export default function App() {
   const [actionStep, setActionStep] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [walletLinkNotice, setWalletLinkNotice] = useState<
-    | { kind: "signin-needed"; emailHint: string }
-    | { kind: "mismatch"; emailHint: string }
-    | { kind: "linked" }
+    | { kind: "signin-needed"; emailHint: string; address: string }
+    | { kind: "mismatch"; emailHint: string; address: string }
+    | { kind: "linked"; address: string }
+    | { kind: "unbound"; address: string }
     | null
   >(null);
 
@@ -522,16 +541,17 @@ export default function App() {
           emailHint?: string;
         };
         if (cancelled) return;
+        const normalized = address.toLowerCase();
         if (!data.bound) {
-          setWalletLinkNotice(null);
+          setWalletLinkNotice({ kind: "unbound", address: normalized });
           return;
         }
         if (!googleUser) {
-          setWalletLinkNotice({ kind: "signin-needed", emailHint: data.emailHint ?? "" });
+          setWalletLinkNotice({ kind: "signin-needed", emailHint: data.emailHint ?? "", address: normalized });
         } else if (data.userId && data.userId !== googleUser.uid) {
-          setWalletLinkNotice({ kind: "mismatch", emailHint: data.emailHint ?? "" });
+          setWalletLinkNotice({ kind: "mismatch", emailHint: data.emailHint ?? "", address: normalized });
         } else {
-          setWalletLinkNotice({ kind: "linked" });
+          setWalletLinkNotice({ kind: "linked", address: normalized });
         }
       } catch {
         /* non-fatal */
