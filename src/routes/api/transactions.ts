@@ -28,6 +28,7 @@ export const Route = createFileRoute("/api/transactions")({
             toAmount?: string;
             txHash?: string;
             status?: string;
+            walletAddress?: string;
           };
           if (!body.txType || !body.direction || !body.fromAmount || !body.toAmount || !body.status) {
             return jsonResponse({ error: "Missing required fields in request body" }, 400);
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/api/transactions")({
             toAmount: body.toAmount,
             txHash: body.txHash ?? null,
             status: body.status,
+            walletAddress: body.walletAddress ?? null,
           });
           return jsonResponse({ success: true, transaction: tx }, 201);
         } catch (e: any) {

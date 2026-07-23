@@ -52,6 +52,13 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const previousWalletAddressRef = useRef<string | null>(null);
   const autoBindAttemptRef = useRef<string | null>(null);
+  const [walletLinkNotice, setWalletLinkNotice] = useState<
+    | { kind: "signin-needed"; emailHint: string; address: string }
+    | { kind: "mismatch"; emailHint: string; address: string }
+    | { kind: "linked"; address: string }
+    | { kind: "unbound"; address: string }
+    | null
+  >(null);
 
   useEffect(() => {
     void reconnect();
@@ -207,6 +214,14 @@ export default function App() {
   // Log a new transaction to Cloud SQL DB
   const logTransactionToDb = async (txType: string, direction: string, fromAmount: string, toAmount: string, txHash: string, status: string) => {
     if (!googleUser) return;
+    const normalizedWallet = address?.toLowerCase();
+    const emailVerified = !!(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo);
+
+    // Rewards/history rows are only recorded for a verified email + the exact
+    // wallet bound to that email. Guest, unverified, or mismatched sessions can
+    // still swap, but the server rejects reward logging for them.
+    if (!emailVerified || !normalizedWallet) return;
+
     try {
       const token = await getEffectiveIdToken();
       if (!token) return;
@@ -223,7 +238,8 @@ export default function App() {
           fromAmount,
           toAmount,
           txHash,
-          status
+          status,
+          walletAddress: normalizedWallet,
         })
       });
       
@@ -247,7 +263,15 @@ export default function App() {
   // the already-verified wallet automatically after the auth session hydrates.
   useEffect(() => {
     const normalized = address?.toLowerCase();
-    if (!googleUser || googleUser.isDemo || !isConnected || !normalized || !isWalletVerified(normalized)) return;
+    if (
+      !googleUser ||
+      googleUser.isDemo ||
+      !isConnected ||
+      !normalized ||
+      !isWalletVerified(normalized) ||
+      walletLinkNotice?.kind !== 'unbound' ||
+      walletLinkNotice.address !== normalized
+    ) return;
 
     const key = `${googleUser.email || googleUser.uid || 'user'}:${normalized}`;
     if (autoBindAttemptRef.current === key) return;
@@ -285,6 +309,7 @@ export default function App() {
 
         if (!cancelled) {
           setAuthError(null);
+          setWalletLinkNotice({ kind: 'linked', address: normalized });
           fetchUserIncentivesInApp();
           setIsConnectGuideOpen(false);
         }
@@ -297,7 +322,7 @@ export default function App() {
     })();
 
     return () => { cancelled = true; };
-  }, [googleUser, address, isConnected]);
+  }, [googleUser, address, isConnected, walletLinkNotice]);
 
   const handleGoogleSignIn = async () => {
     setIsAuthLoading(true);
@@ -349,14 +374,11 @@ export default function App() {
 
     if (previous && (!current || previous !== current)) {
       clearWalletVerified(previous);
-    }
-
-    if (previous && current && previous !== current && googleUser) {
-      handleGoogleLogout();
+      autoBindAttemptRef.current = null;
     }
 
     previousWalletAddressRef.current = current;
-  }, [address, googleUser]);
+  }, [address]);
 
   // Environment and Mode states
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
@@ -465,13 +487,6 @@ export default function App() {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [actionStep, setActionStep] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [walletLinkNotice, setWalletLinkNotice] = useState<
-    | { kind: "signin-needed"; emailHint: string }
-    | { kind: "mismatch"; emailHint: string }
-    | { kind: "linked" }
-    | null
-  >(null);
-
   // Premium Modal Interactivity States
   const [activeConfirmModal, setActiveConfirmModal] = useState<'CA/BOT' | 'BOT/USDT' | 'BRIDGE' | null>(null);
   const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
@@ -522,16 +537,17 @@ export default function App() {
           emailHint?: string;
         };
         if (cancelled) return;
+        const normalized = address.toLowerCase();
         if (!data.bound) {
-          setWalletLinkNotice(null);
+          setWalletLinkNotice({ kind: "unbound", address: normalized });
           return;
         }
         if (!googleUser) {
-          setWalletLinkNotice({ kind: "signin-needed", emailHint: data.emailHint ?? "" });
+          setWalletLinkNotice({ kind: "signin-needed", emailHint: data.emailHint ?? "", address: normalized });
         } else if (data.userId && data.userId !== googleUser.uid) {
-          setWalletLinkNotice({ kind: "mismatch", emailHint: data.emailHint ?? "" });
+          setWalletLinkNotice({ kind: "mismatch", emailHint: data.emailHint ?? "", address: normalized });
         } else {
-          setWalletLinkNotice({ kind: "linked" });
+          setWalletLinkNotice({ kind: "linked", address: normalized });
         }
       } catch {
         /* non-fatal */
@@ -541,6 +557,13 @@ export default function App() {
       cancelled = true;
     };
   }, [address, isConnected, googleUser?.uid]);
+
+  const signedInEmailVerified = !!googleUser && !!(googleUser.emailVerified || googleUser.email_verified);
+  const rewardsActive =
+    signedInEmailVerified &&
+    !!address &&
+    walletLinkNotice?.kind === 'linked' &&
+    walletLinkNotice.address === address.toLowerCase();
 
 
 
@@ -2097,9 +2120,11 @@ export default function App() {
                 "p-1.5 rounded-lg border shrink-0",
                 !googleUser 
                   ? "bg-blue-500/5 border-blue-500/10 text-blue-400"
-                  : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                  : !signedInEmailVerified
                     ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
-                    : "bg-[#32FF8B]/5 border-[#32FF8B]/10 text-[#32FF8B]"
+                    : rewardsActive
+                      ? "bg-[#32FF8B]/5 border-[#32FF8B]/10 text-[#32FF8B]"
+                      : "bg-amber-500/5 border-amber-500/10 text-amber-400"
               )}>
                 <Gift className="w-3.5 h-3.5" />
               </div>
@@ -2107,17 +2132,21 @@ export default function App() {
                 <div className="text-[10px] font-bold text-white uppercase tracking-wider">
                   {!googleUser 
                     ? "Guest Mode Active"
-                    : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                    : !signedInEmailVerified
                       ? "Verification Pending"
-                      : "Earnings Activated"
+                      : rewardsActive
+                        ? "Earnings Activated"
+                        : "Wallet Link Needed"
                   }
                 </div>
                 <div className="text-[9px] text-[#C5C1B9] leading-tight">
                   {!googleUser 
                     ? "Verify email in REWARDS to earn FLOW rewards."
-                    : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                    : !signedInEmailVerified
                       ? "Points paused. Verify email to activate."
-                      : "Swaps earn off-chain FLOW points."
+                      : rewardsActive
+                        ? "Swaps earn off-chain FLOW points."
+                        : "Sign this wallet to link it before earning."
                   }
                 </div>
               </div>
@@ -2125,6 +2154,10 @@ export default function App() {
             
             <button
               onClick={() => {
+                if (googleUser && signedInEmailVerified && !rewardsActive) {
+                  setIsConnectGuideOpen(true);
+                  return;
+                }
                 setDonateModalInitialTab('incentives');
                 setIsDonateModalOpen(true);
               }}
@@ -2132,16 +2165,18 @@ export default function App() {
                 "px-2.5 py-1 rounded-lg text-[9px] font-bold font-mono uppercase tracking-wider shrink-0 transition-all active:scale-95 cursor-pointer",
                 !googleUser 
                   ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/15 border border-blue-500/10"
-                  : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                  : !signedInEmailVerified || !rewardsActive
                     ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 border border-amber-500/10"
                     : "bg-[#32FF8B]/10 text-[#32FF8B] hover:bg-[#32FF8B]/15 border border-[#32FF8B]/10"
               )}
             >
               {!googleUser 
                 ? "Sign In"
-                : !(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo)
+                : !signedInEmailVerified
                   ? "Verify"
-                  : "View Perks"
+                  : rewardsActive
+                    ? "View Perks"
+                    : "Link"
               }
             </button>
           </div>
@@ -2156,11 +2191,15 @@ export default function App() {
                     <span className="text-[#32FF8B] font-mono">{walletLinkNotice.emailHint}</span>.
                     Sign in to that account to keep earning FlowPoints and referrals on this address.
                   </>
-                ) : (
+                ) : walletLinkNotice.kind === "mismatch" ? (
                   <>
                     Heads up — this wallet is bound to a different account{" "}
                     <span className="text-[#F6BA00] font-mono">{walletLinkNotice.emailHint}</span>.
                     FlowPoints will accrue to that account, not the one you're signed into.
+                  </>
+                ) : (
+                  <>
+                    This wallet is not linked to your signed-in email yet. Sign once with the wallet to activate FlowPoints for this address.
                   </>
                 )}
               </div>
@@ -2494,6 +2533,8 @@ export default function App() {
           onConnectWallet={handleConnectWallet}
           onLinked={(user) => {
             if (user) setGoogleUser(user);
+            const normalized = address?.toLowerCase();
+            if (normalized) setWalletLinkNotice({ kind: 'linked', address: normalized });
             setIsConnectGuideOpen(false);
             void syncUserWithDb();
             void fetchUserIncentivesInApp();
