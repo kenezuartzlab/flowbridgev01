@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound } from 'lucide-react';
 import { useAccount, useSignMessage, useChainId, useSwitchChain } from 'wagmi';
 import { signInWithEthereum } from '@/lib/siwe';
-import { emailSignIn, emailSignUp, getIdToken, requestPasswordReset } from '@/lib/auth';
+import { emailSignIn, emailSignUp, getIdToken, reloadUser, requestPasswordReset, type AppUser } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
 import { getWalletSignatureErrorMessage, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
 import { botMainnet } from '@/lib/wagmi';
@@ -16,6 +16,7 @@ interface ConnectGuideModalProps {
   onSandboxSignIn?: () => void; // kept for compat, no longer rendered
   isWalletConnected: boolean;
   onConnectWallet: () => void;
+  onLinked?: (user: AppUser | null) => void;
 }
 
 export function ConnectGuideModal({
@@ -26,6 +27,7 @@ export function ConnectGuideModal({
   onGoogleSignIn,
   isWalletConnected,
   onConnectWallet,
+  onLinked,
 }: ConnectGuideModalProps) {
   const [showEmail, setShowEmail] = useState(false);
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
@@ -146,11 +148,14 @@ export function ConnectGuideModal({
       });
       if (siweRequestId.current !== requestId) return;
       if (result.status === 'signed_in') {
+        const user = await reloadUser();
         setMsg(`Signed in as ${result.email}.`);
+        onLinked?.(user);
       } else {
         const linkedNow = await bindVerifiedWalletToSignedInUser();
         if (linkedNow) {
           setMsg('Wallet verified and linked to your signed-in email.');
+          onLinked?.(await reloadUser());
         } else {
           setMsg('Wallet verified, but no email is linked yet. Sign in once with email below to bind this wallet.');
           setShowEmail(true);
@@ -185,13 +190,15 @@ export function ConnectGuideModal({
     setErr(null); setMsg(null); setBusy(true);
     try {
       if (mode === 'signin') {
-        await emailSignIn(email.trim(), password);
+        const user = await emailSignIn(email.trim(), password);
         const linkedNow = await bindVerifiedWalletToSignedInUser();
         setMsg(linkedNow ? 'Signed in and wallet linked.' : 'Signed in. Tap “Sign in with wallet” once to prove and link this wallet.');
+        if (linkedNow) onLinked?.(user);
       } else if (mode === 'signup') {
-        await emailSignUp(email.trim(), password, name.trim() || email.split('@')[0]);
+        const user = await emailSignUp(email.trim(), password, name.trim() || email.split('@')[0]);
         const linkedNow = await bindVerifiedWalletToSignedInUser();
         setMsg(linkedNow ? 'Account created and wallet linked. Check your inbox to verify your email.' : 'Check your inbox to verify your email. Then sign in to link this wallet.');
+        if (linkedNow) onLinked?.(user);
       } else {
         await requestPasswordReset(email.trim());
         setMsg('Reset link sent. Check your inbox.');
