@@ -64,18 +64,6 @@ export function ConnectGuideModal({
   }, [isOpen]);
 
 
-  useEffect(() => {
-    if (!siweBusy) return;
-    const requestId = siweRequestId.current;
-    const timer = window.setTimeout(() => {
-      if (siweRequestId.current !== requestId) return;
-      siweRequestId.current += 1;
-      setSiweBusy(false);
-      setErr('No wallet signature received. Reopen/unlock your wallet, approve the signature prompt, then try again.');
-    }, 38_000);
-    return () => window.clearTimeout(timer);
-  }, [siweBusy]);
-
   const handleSiwe = async () => {
     if (!connectedAddress) return;
     if (siweBusy) {
