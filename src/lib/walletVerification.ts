@@ -2,36 +2,35 @@
 // bridge in a session, it must produce a signature over a fresh server-issued
 // nonce. Watch-only wallets cannot sign, so they are stopped before signing
 // any state-changing transaction. Verification is cached per-address in
-// sessionStorage so users only sign once per browser session.
+// localStorage so a refresh does not force another signature. The cache is
+// explicitly cleared when the user disconnects or switches wallets.
 
 const STORAGE_PREFIX = "flowbridge:wallet-verified:";
-const SIGNATURE_TIMEOUT_MS = 35_000;
+const SIGNATURE_TIMEOUT_MS = 45_000;
 
 function storageKey(address: string) {
   return `${STORAGE_PREFIX}${address.toLowerCase()}`;
 }
 
 export function isWalletVerified(address: string): boolean {
-  if (typeof sessionStorage === "undefined") return false;
   try {
-    return sessionStorage.getItem(storageKey(address)) === "1";
+    return window.localStorage.getItem(storageKey(address)) === "1";
   } catch {
     return false;
   }
 }
 
 export function clearWalletVerified(address: string): void {
-  if (typeof sessionStorage === "undefined") return;
   try {
-    sessionStorage.removeItem(storageKey(address));
+    window.localStorage.removeItem(storageKey(address));
   } catch {
     /* ignore */
   }
 }
 
-function markVerified(address: string): void {
+export function markWalletVerified(address: string): void {
   try {
-    sessionStorage.setItem(storageKey(address), "1");
+    window.localStorage.setItem(storageKey(address), "1");
   } catch {
     /* ignore */
   }
@@ -72,6 +71,16 @@ export function getWalletSignatureErrorMessage(err: any) {
   }
   if (/active wallet changed/i.test(msg)) return msg;
   return "This wallet could not produce a signature. Watch-only wallets cannot swap or bridge — reconnect with a signing wallet.";
+}
+
+function shouldFallbackToInjected(err: any) {
+  const msg = String(err?.shortMessage || err?.details || err?.message || err || "");
+  const code = Number(err?.code ?? err?.cause?.code);
+  return (
+    code === -32601 ||
+    code === -32004 ||
+    /connector.*not.*connected|provider.*not.*found|method.*not.*found|method.*not.*supported|unsupported/i.test(msg)
+  );
 }
 
 async function assertActiveInjectedAccount(expectedAddress: string): Promise<void> {
@@ -116,23 +125,29 @@ export async function signMessageWithActiveWallet(
   const normalized = address.toLowerCase();
   await assertActiveInjectedAccount(normalized);
 
+  // Prefer wagmi's active connector. It tracks the selected wallet better on
+  // mobile wallet browsers than a raw window.ethereum request.
+  if (wagmiSignMessageAsync) {
+    try {
+      const signature = await withTimeout(
+        wagmiSignMessageAsync({ message, account: normalized as `0x${string}` }),
+      );
+      await assertActiveInjectedAccount(normalized);
+      if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
+      return signature;
+    } catch (err: any) {
+      if (!shouldFallbackToInjected(err)) {
+        throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
+      }
+    }
+  }
+
   const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
   if (eth?.request) {
     try {
       const signature = await withTimeout(
         eth.request({ method: "personal_sign", params: [message, normalized] }) as Promise<string>,
       );
-      await assertActiveInjectedAccount(normalized);
-      if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
-      return signature;
-    } catch (err: any) {
-      throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
-    }
-  }
-
-  if (wagmiSignMessageAsync) {
-    try {
-      const signature = await withTimeout(wagmiSignMessageAsync({ message }));
       await assertActiveInjectedAccount(normalized);
       if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
       return signature;
@@ -200,5 +215,5 @@ export async function ensureWalletVerified(
     throw new Error(verifyJson?.error ?? "Wallet verification failed");
   }
 
-  markVerified(normalized);
+  markWalletVerified(normalized);
 }

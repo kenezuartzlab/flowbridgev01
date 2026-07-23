@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage } from 'wagmi';
-import { ensureWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
+import { useState, useEffect, useRef } from 'react';
+import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
+import { clearWalletVerified, ensureWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
-import { injected } from 'wagmi/connectors';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/wagmi';
 import {
   isTronLinkAvailable, requestTronLinkAccounts, isValidTronAddress,
@@ -41,7 +40,8 @@ import { SiteLoader } from './components/SiteLoader';
 
 export default function App() {
   const { address, isConnected } = useAccount();
-  const { connect } = useConnect();
+  const { connect, connectors } = useConnect();
+  const { reconnect } = useReconnect();
   const { disconnect } = useDisconnect();
   const currentChainId = useChainId();
   const { switchChain } = useSwitchChain();
@@ -50,6 +50,11 @@ export default function App() {
   const [googleUser, setGoogleUser] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const previousWalletAddressRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    void reconnect();
+  }, [reconnect]);
 
   const fetchUserIncentivesInApp = async () => {
     try {
@@ -280,6 +285,21 @@ export default function App() {
       setIsAuthLoading(false);
     }
   };
+
+  useEffect(() => {
+    const previous = previousWalletAddressRef.current;
+    const current = address?.toLowerCase() ?? null;
+
+    if (previous && (!current || previous !== current)) {
+      clearWalletVerified(previous);
+    }
+
+    if (previous && current && previous !== current && googleUser) {
+      handleGoogleLogout();
+    }
+
+    previousWalletAddressRef.current = current;
+  }, [address, googleUser]);
 
   // Environment and Mode states
   const [isMainnet, setIsMainnet] = useState<boolean>(true);
@@ -791,7 +811,13 @@ export default function App() {
     setIsConnectGuideOpen(true);
   };
 
+  const handleConnectWallet = () => {
+    const connector = connectors.find((item) => item.id === 'injected') ?? connectors[0];
+    if (connector) connect({ connector });
+  };
+
   const handleDisconnect = async () => {
+    if (address) clearWalletVerified(address);
     disconnect();
     try {
       if (googleUser) {
@@ -2408,7 +2434,7 @@ export default function App() {
           onGoogleSignIn={handleGoogleSignIn}
           onSandboxSignIn={handleSandboxSignIn}
           isWalletConnected={isConnected}
-          onConnectWallet={() => connect({ connector: injected() })}
+          onConnectWallet={handleConnectWallet}
         />
       )}
 

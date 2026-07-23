@@ -1,4 +1,4 @@
-import { http, createConfig } from 'wagmi';
+import { http, createConfig, createStorage } from 'wagmi';
 import { defineChain } from 'viem';
 import { injected } from 'wagmi/connectors';
 
@@ -90,8 +90,12 @@ export const sepolia = defineChain({
 
 export const wagmiConfig = createConfig({
   chains: [botMainnet, bscMainnet, botTestnet, bscTestnet, ethereum, sepolia],
+  storage: createStorage({
+    key: 'flowbridge.wallet',
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  }),
   connectors: [
-    injected(),
+    injected({ unstable_shimAsyncInject: 2_000 }),
   ],
   transports: {
     [botMainnet.id]: http(),

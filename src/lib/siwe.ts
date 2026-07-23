@@ -2,6 +2,7 @@
 // message and exchanges the signature for a Supabase session when the wallet
 // is already linked to a registered email.
 import { supabase } from "@/integrations/supabase/client";
+import { markWalletVerified } from "@/lib/walletVerification";
 
 export type SiweResult =
   | { status: "signed_in"; email: string }
@@ -53,6 +54,8 @@ export async function signInWithEthereum(args: {
   });
   const verifyJson = await verifyRes.json();
   if (!verifyRes.ok) throw new Error(verifyJson?.error ?? "Signature verification failed");
+
+  markWalletVerified(address);
 
   if (verifyJson.needs_binding) return { status: "needs_binding" };
 
