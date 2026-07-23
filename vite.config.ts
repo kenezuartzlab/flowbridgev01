@@ -50,6 +50,8 @@ export default defineConfig({
         ),
         entities: path.resolve(process.cwd(), "node_modules/entities"),
         blakejs: path.resolve(process.cwd(), "src/lib/polyfills/blakejs.ts"),
+        "cross-fetch": path.resolve(process.cwd(), "src/lib/polyfills/cross-fetch.ts"),
+        "cross-fetch/dist/browser-ponyfill.js": path.resolve(process.cwd(), "src/lib/polyfills/cross-fetch.ts"),
         eventemitter3: path.resolve(
           process.cwd(),
           "node_modules/eventemitter3/dist/eventemitter3.esm.js",
