@@ -222,6 +222,12 @@ export default function App() {
     // still swap, but the server rejects reward logging for them.
     if (!emailVerified || !normalizedWallet) return;
 
+    // Bridge transactions do NOT count toward earnings. Only swaps that route
+    // through FlowBridgeRouter accrue rewards / swap volume. Skip logging any
+    // BRIDGE-type activity so it never appears in the earnings ledger.
+    if (String(txType).toUpperCase() === 'BRIDGE') return;
+
+
     try {
       const token = await getEffectiveIdToken();
       if (!token) return;
