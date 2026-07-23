@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
-import { clearWalletVerified, ensureWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
+import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/wagmi';
@@ -51,6 +51,7 @@ export default function App() {
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const previousWalletAddressRef = useRef<string | null>(null);
+  const autoBindAttemptRef = useRef<string | null>(null);
 
   useEffect(() => {
     void reconnect();
@@ -241,6 +242,62 @@ export default function App() {
       setDbTransactions([]);
     }
   }, [googleUser]);
+
+  // If a user verifies their wallet first, then signs in with email/Google, bind
+  // the already-verified wallet automatically after the auth session hydrates.
+  useEffect(() => {
+    const normalized = address?.toLowerCase();
+    if (!googleUser || googleUser.isDemo || !isConnected || !normalized || !isWalletVerified(normalized)) return;
+
+    const key = `${googleUser.email || googleUser.uid || 'user'}:${normalized}`;
+    if (autoBindAttemptRef.current === key) return;
+
+    let cancelled = false;
+    autoBindAttemptRef.current = key;
+
+    (async () => {
+      try {
+        const token = await getEffectiveIdToken();
+        if (!token) {
+          if (!cancelled) autoBindAttemptRef.current = null;
+          return;
+        }
+
+        await fetch('/api/users/sync', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ referredByCode: sessionStorage.getItem('flowbridge_referred_by') || undefined }),
+        }).catch(() => null);
+
+        const res = await fetch('/api/users/bind-wallet', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ walletAddress: normalized }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Wallet link could not be saved.');
+
+        if (!cancelled) {
+          setAuthError(null);
+          fetchUserIncentivesInApp();
+          setIsConnectGuideOpen(false);
+        }
+      } catch (err: any) {
+        if (!cancelled) {
+          autoBindAttemptRef.current = null;
+          setAuthError(err?.message || 'Wallet link could not be saved.');
+        }
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [googleUser, address, isConnected]);
 
   const handleGoogleSignIn = async () => {
     setIsAuthLoading(true);
@@ -2435,6 +2492,12 @@ export default function App() {
           onSandboxSignIn={handleSandboxSignIn}
           isWalletConnected={isConnected}
           onConnectWallet={handleConnectWallet}
+          onLinked={(user) => {
+            if (user) setGoogleUser(user);
+            setIsConnectGuideOpen(false);
+            void syncUserWithDb();
+            void fetchUserIncentivesInApp();
+          }}
         />
       )}
 
