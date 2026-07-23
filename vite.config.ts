@@ -28,7 +28,6 @@ export default defineConfig({
     },
     optimizeDeps: {
       include: [
-        "events",
         "@walletconnect/ethereum-provider",
       ],
       esbuildOptions: {
@@ -48,13 +47,14 @@ export default defineConfig({
           "node_modules/entities/lib/encode.js",
         ),
         entities: path.resolve(process.cwd(), "node_modules/entities"),
-        // WalletConnect expects Node's CommonJS `events` package shape:
-        // default constructor + `.EventEmitter` constructor. Point directly at
-        // the battle-tested browser polyfill package instead of an ESM shim so
-        // Vite/Rolldown cannot rewrite the default export into a namespace
-        // object that later fails as `EventEmitter is not a constructor`.
-        events: path.resolve(process.cwd(), "node_modules/events/events.js"),
-        "node:events": path.resolve(process.cwd(), "node_modules/events/events.js"),
+        // WalletConnect imports `events` both ways: `import EventEmitter from
+        // "events"` and `import { EventEmitter } from "events"`. Rolldown can
+        // expose the CJS package as `{ default: EventEmitter }` in production,
+        // which makes WalletConnect crash on mobile as
+        // `EventEmitter is not a constructor`. Use our tiny ESM-compatible
+        // browser shim with BOTH default and named constructor exports.
+        events: path.resolve(process.cwd(), "src/lib/polyfills/events.ts"),
+        "node:events": path.resolve(process.cwd(), "src/lib/polyfills/events.ts"),
       },
     },
   },
