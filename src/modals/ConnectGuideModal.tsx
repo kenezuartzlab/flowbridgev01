@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound } from 'lucide-react';
 import { useAccount, useSignMessage } from 'wagmi';
 import { signInWithEthereum } from '@/lib/siwe';
-import { emailSignIn, emailSignUp, requestPasswordReset } from '@/lib/auth';
+import { emailSignIn, emailSignUp, getIdToken, requestPasswordReset } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
-import { getWalletSignatureErrorMessage, signMessageWithActiveWallet } from '@/lib/walletVerification';
+import { getWalletSignatureErrorMessage, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
 
 interface ConnectGuideModalProps {
   isOpen: boolean;
@@ -63,6 +63,35 @@ export function ConnectGuideModal({
     setBusy(false);
   }, [isOpen]);
 
+  const bindVerifiedWalletToSignedInUser = async () => {
+    if (!connectedAddress || !isWalletVerified(connectedAddress)) return false;
+
+    const token = await getIdToken();
+    if (!token) return false;
+
+    await fetch('/api/users/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({}),
+    }).catch(() => null);
+
+    const res = await fetch('/api/users/bind-wallet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ walletAddress: connectedAddress }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data?.success) {
+      throw new Error(data?.error || 'Signed in, but the wallet link was not saved. Open Rewards, then bind wallet.');
+    }
+    return true;
+  };
 
   const handleSiwe = async () => {
     if (!connectedAddress) return;
@@ -86,8 +115,13 @@ export function ConnectGuideModal({
       if (result.status === 'signed_in') {
         setMsg(`Signed in as ${result.email}.`);
       } else {
-        setMsg('Wallet verified, but no email is linked yet. Sign in once with email below to bind this wallet.');
-        setShowEmail(true);
+        const linkedNow = await bindVerifiedWalletToSignedInUser();
+        if (linkedNow) {
+          setMsg('Wallet verified and linked to your signed-in email.');
+        } else {
+          setMsg('Wallet verified, but no email is linked yet. Sign in once with email below to bind this wallet.');
+          setShowEmail(true);
+        }
       }
     } catch (e: any) {
       if (siweRequestId.current !== requestId) return;
@@ -119,10 +153,12 @@ export function ConnectGuideModal({
     try {
       if (mode === 'signin') {
         await emailSignIn(email.trim(), password);
-        setMsg('Signed in.');
+        const linkedNow = await bindVerifiedWalletToSignedInUser();
+        setMsg(linkedNow ? 'Signed in and wallet linked.' : 'Signed in. Tap “Sign in with wallet” once to prove and link this wallet.');
       } else if (mode === 'signup') {
         await emailSignUp(email.trim(), password, name.trim() || email.split('@')[0]);
-        setMsg('Check your inbox to verify your email.');
+        const linkedNow = await bindVerifiedWalletToSignedInUser();
+        setMsg(linkedNow ? 'Account created and wallet linked. Check your inbox to verify your email.' : 'Check your inbox to verify your email. Then sign in to link this wallet.');
       } else {
         await requestPasswordReset(email.trim());
         setMsg('Reset link sent. Check your inbox.');

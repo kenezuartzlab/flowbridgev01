@@ -130,7 +130,7 @@ export async function signMessageWithActiveWallet(
   if (wagmiSignMessageAsync) {
     try {
       const signature = await withTimeout(
-        wagmiSignMessageAsync({ message, account: normalized as `0x${string}` }),
+        wagmiSignMessageAsync({ message }),
       );
       await assertActiveInjectedAccount(normalized);
       if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
