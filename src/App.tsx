@@ -313,6 +313,7 @@ export default function App() {
 
         if (!cancelled) {
           setAuthError(null);
+          setWalletLinkNotice({ kind: 'linked', address: normalized });
           fetchUserIncentivesInApp();
           setIsConnectGuideOpen(false);
         }
@@ -2517,6 +2518,8 @@ export default function App() {
           onConnectWallet={handleConnectWallet}
           onLinked={(user) => {
             if (user) setGoogleUser(user);
+            const normalized = address?.toLowerCase();
+            if (normalized) setWalletLinkNotice({ kind: 'linked', address: normalized });
             setIsConnectGuideOpen(false);
             void syncUserWithDb();
             void fetchUserIncentivesInApp();
