@@ -901,6 +901,12 @@ export default function App() {
 
   const handleConnectWallet = (preferred?: 'injected' | 'walletConnect') => {
     const targetId = preferred ?? 'injected';
+    const connectorList = connectors.map(c => ({ id: c.id, name: c.name, type: c.type, ready: (c as any).ready }));
+    console.info('[wallet:debug] connect requested', {
+      preferred: targetId,
+      connectors: connectorList,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
+    });
     const connector =
       connectors.find((item) => item.id === targetId) ??
       (targetId === 'walletConnect'
@@ -909,17 +915,26 @@ export default function App() {
       connectors.find((item) => item.id === 'injected') ??
       connectors[0];
     if (!connector) {
-      console.error('[wallet] no connector available', { targetId, connectors: connectors.map(c => ({ id: c.id, type: c.type })) });
+      console.error('[wallet] no connector available', { targetId, connectors: connectorList });
       setErrorMessage('No wallet connector available. Please install a wallet or try WalletConnect.');
       return;
     }
-    console.info('[wallet] connecting via', connector.id, connector.type);
+    console.info('[wallet:debug] connecting via', { id: connector.id, name: connector.name, type: connector.type });
     connect(
       { connector },
       {
         onError: (err: any) => {
-          console.error('[wallet] connect error', err);
-          setErrorMessage(err?.message || 'Failed to open wallet connector.');
+          console.error('[wallet] connect error', {
+            name: err?.name,
+            message: err?.message,
+            stack: err?.stack,
+            connector: { id: connector.id, name: connector.name, type: connector.type },
+          });
+          setErrorMessage(
+            targetId === 'walletConnect'
+              ? `WalletConnect could not open. Diagnostic logs were captured: ${err?.message || 'unknown connector error'}`
+              : err?.message || 'Failed to open wallet connector.',
+          );
         },
       },
     );
