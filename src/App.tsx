@@ -2706,6 +2706,8 @@ export default function App() {
           txUrlPrefix={bridgeDirection === 'BOT_TO_BNB' 
             ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
             : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')}
+          bridgeDirection={bridgeDirection}
+          isMainnet={isMainnet}
           onReset={() => {
             resetStep3();
             setIsRealtimeTrackerOpen(false);
