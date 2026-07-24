@@ -5,9 +5,35 @@ import {
   RefreshCw, AlertTriangle, CheckCircle 
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { useAccount, useSendTransaction, useBalance, useSignMessage, useConnect } from 'wagmi';
+import { useAccount, useSendTransaction, useBalance, useSignMessage, useConnect, useSwitchChain, useWriteContract, useChainId } from 'wagmi';
 import { injected } from 'wagmi/connectors';
-import { parseEther } from 'viem';
+import { parseEther, parseUnits, encodeFunctionData } from 'viem';
+
+// Per-coin chain routing metadata for direct EVM donations.
+// Chain IDs and USDT contracts are pinned so the "Send direct" button
+// can never broadcast the wrong asset (e.g. native ETH when USDT was picked).
+const EVM_COIN_ROUTES: Record<string, {
+  chainId: number;
+  kind: 'native' | 'erc20';
+  token?: `0x${string}`;
+  decimals?: number;
+  chainLabel: string;
+}> = {
+  BOT: { chainId: 677, kind: 'native', chainLabel: 'BOT Chain' },
+  BNB: { chainId: 56, kind: 'native', chainLabel: 'BNB Smart Chain' },
+  POLYGON: { chainId: 137, kind: 'native', chainLabel: 'Polygon' },
+  ETH: { chainId: 1, kind: 'native', chainLabel: 'Ethereum' },
+  USDT_BOT: { chainId: 677, kind: 'erc20', token: '0xababc7ddc03e501d190c676bf3d92ef0e6e87a3c', decimals: 18, chainLabel: 'BOT Chain' },
+  USDT_BNB: { chainId: 56, kind: 'erc20', token: '0x55d398326f99059fF775485246999027B3197955', decimals: 18, chainLabel: 'BNB Smart Chain' },
+  USDT_POLYGON: { chainId: 137, kind: 'erc20', token: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', decimals: 6, chainLabel: 'Polygon' },
+  USDT_ETH: { chainId: 1, kind: 'erc20', token: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6, chainLabel: 'Ethereum' },
+};
+
+const ERC20_TRANSFER_ABI = [{
+  type: 'function', name: 'transfer', stateMutability: 'nonpayable',
+  inputs: [{ name: 'to', type: 'address' }, { name: 'amount', type: 'uint256' }],
+  outputs: [{ name: '', type: 'bool' }],
+}] as const;
 import { emailSignUp, emailSignIn, sendVerification, reloadUser, googleSignIn } from '../lib/auth';
 
 interface Suggestion {
@@ -64,9 +90,12 @@ export function DonateModal({
   setGoogleUser
 }: DonateModalProps) {
   const { address: connectedAddress, isConnected } = useAccount();
-  const { sendTransaction, data: txData, isPending: isTxPending, isSuccess: isTxSuccess } = useSendTransaction();
+  const currentChainId = useChainId();
+  const { sendTransactionAsync, data: txData, isPending: isTxPending, isSuccess: isTxSuccess } = useSendTransaction();
+  const { switchChainAsync } = useSwitchChain();
   const { signMessageAsync } = useSignMessage();
   const { connect } = useConnect();
+  const [directSendError, setDirectSendError] = useState<string | null>(null);
 
   const signPromptWithTimeout = async (message: string) => {
     return Promise.race([
@@ -499,19 +528,54 @@ export function DonateModal({
     }
   };
 
-  // EVM On-Chain direct transaction sender
+  // EVM On-Chain direct transaction sender.
+  // Guarantees the wallet is on the correct network for the selected coin,
+  // and that USDT selections broadcast an ERC-20 transfer (not a native send).
   const handleOnChainDonate = async () => {
+    setDirectSendError(null);
     if (!isConnected) return;
-    try {
-      const amtEther = parseFloat(amountStr);
-      if (isNaN(amtEther) || amtEther <= 0) return;
+    const route = EVM_COIN_ROUTES[selectedCoin.id];
+    if (!route) {
+      setDirectSendError(`Direct send is not supported for ${selectedCoin.symbol}. Use the QR / address above.`);
+      return;
+    }
+    const amt = parseFloat(amountStr);
+    if (isNaN(amt) || amt <= 0) return;
 
-      sendTransaction({
-        to: selectedCoin.address as `0x${string}`,
-        value: parseEther(amountStr),
-      });
-    } catch (err) {
-      console.warn("Direct EVM sending failed", err);
+    try {
+      if (currentChainId !== route.chainId) {
+        try {
+          await switchChainAsync({ chainId: route.chainId });
+        } catch (e: any) {
+          setDirectSendError(
+            `Please switch your wallet to ${route.chainLabel} (chain ${route.chainId}) before sending ${selectedCoin.symbol}.`,
+          );
+          return;
+        }
+      }
+
+      if (route.kind === 'native') {
+        await sendTransactionAsync({
+          chainId: route.chainId,
+          to: selectedCoin.address as `0x${string}`,
+          value: parseEther(amountStr),
+        });
+      } else {
+        // ERC-20 transfer(to, amount) with the token's real decimals.
+        const data = encodeFunctionData({
+          abi: ERC20_TRANSFER_ABI,
+          functionName: 'transfer',
+          args: [selectedCoin.address as `0x${string}`, parseUnits(amountStr, route.decimals!)],
+        });
+        await sendTransactionAsync({
+          chainId: route.chainId,
+          to: route.token!,
+          data,
+        });
+      }
+    } catch (err: any) {
+      console.warn('Direct EVM sending failed', err);
+      setDirectSendError(err?.shortMessage || err?.message || 'Direct send failed. Please try again.');
     }
   };
 
@@ -909,14 +973,26 @@ export function DonateModal({
                   {selectedCoin.type === 'evm' ? (
                     <div className="space-y-2">
                       {isConnected ? (
-                        <button
-                          onClick={handleOnChainDonate}
-                          disabled={isTxPending}
-                          className="w-full py-3 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-[10.5px] uppercase transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98"
-                        >
-                          <Send className="w-3.5 h-3.5" />
-                          <span>{isTxPending ? 'Approving modal transaction...' : `Send direct ${amountStr} ${selectedCoin.symbol}`}</span>
-                        </button>
+                        <>
+                          <button
+                            onClick={handleOnChainDonate}
+                            disabled={isTxPending}
+                            className="w-full py-3 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-[10.5px] uppercase transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>{isTxPending ? 'Approving modal transaction...' : `Send direct ${amountStr} ${selectedCoin.symbol}`}</span>
+                          </button>
+                          {directSendError && (
+                            <div className="p-2 rounded-lg bg-red-500/10 border border-red-400/30 text-[10px] font-mono text-red-300 leading-snug">
+                              {directSendError}
+                            </div>
+                          )}
+                          {EVM_COIN_ROUTES[selectedCoin.id] && currentChainId !== EVM_COIN_ROUTES[selectedCoin.id].chainId && (
+                            <p className="text-[9px] font-mono text-amber-300/80 leading-snug">
+                              Your wallet will be asked to switch to {EVM_COIN_ROUTES[selectedCoin.id].chainLabel} before sending {selectedCoin.symbol}.
+                            </p>
+                          )}
+                        </>
                       ) : (
                         <div className="text-center p-2.5 bg-[#0D1C2A]/40 border border-[#32FF8B]/10 rounded-xl">
                           <p className="text-[8.5px] leading-relaxed text-[#C5C1B9]/90 font-mono tracking-normal uppercase">
