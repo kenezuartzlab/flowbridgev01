@@ -528,19 +528,54 @@ export function DonateModal({
     }
   };
 
-  // EVM On-Chain direct transaction sender
+  // EVM On-Chain direct transaction sender.
+  // Guarantees the wallet is on the correct network for the selected coin,
+  // and that USDT selections broadcast an ERC-20 transfer (not a native send).
   const handleOnChainDonate = async () => {
+    setDirectSendError(null);
     if (!isConnected) return;
-    try {
-      const amtEther = parseFloat(amountStr);
-      if (isNaN(amtEther) || amtEther <= 0) return;
+    const route = EVM_COIN_ROUTES[selectedCoin.id];
+    if (!route) {
+      setDirectSendError(`Direct send is not supported for ${selectedCoin.symbol}. Use the QR / address above.`);
+      return;
+    }
+    const amt = parseFloat(amountStr);
+    if (isNaN(amt) || amt <= 0) return;
 
-      sendTransaction({
-        to: selectedCoin.address as `0x${string}`,
-        value: parseEther(amountStr),
-      });
-    } catch (err) {
-      console.warn("Direct EVM sending failed", err);
+    try {
+      if (currentChainId !== route.chainId) {
+        try {
+          await switchChainAsync({ chainId: route.chainId });
+        } catch (e: any) {
+          setDirectSendError(
+            `Please switch your wallet to ${route.chainLabel} (chain ${route.chainId}) before sending ${selectedCoin.symbol}.`,
+          );
+          return;
+        }
+      }
+
+      if (route.kind === 'native') {
+        await sendTransactionAsync({
+          chainId: route.chainId,
+          to: selectedCoin.address as `0x${string}`,
+          value: parseEther(amountStr),
+        });
+      } else {
+        // ERC-20 transfer(to, amount) with the token's real decimals.
+        const data = encodeFunctionData({
+          abi: ERC20_TRANSFER_ABI,
+          functionName: 'transfer',
+          args: [selectedCoin.address as `0x${string}`, parseUnits(amountStr, route.decimals!)],
+        });
+        await sendTransactionAsync({
+          chainId: route.chainId,
+          to: route.token!,
+          data,
+        });
+      }
+    } catch (err: any) {
+      console.warn('Direct EVM sending failed', err);
+      setDirectSendError(err?.shortMessage || err?.message || 'Direct send failed. Please try again.');
     }
   };
 
