@@ -973,26 +973,26 @@ export function DonateModal({
                   {selectedCoin.type === 'evm' ? (
                     <div className="space-y-2">
                       {isConnected ? (
-                        <button
-                          onClick={handleOnChainDonate}
-                          disabled={isTxPending}
-                          className="w-full py-3 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-[10.5px] uppercase transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98"
-                        >
-                          <Send className="w-3.5 h-3.5" />
-                          <span>{isTxPending ? 'Approving modal transaction...' : `Send direct ${amountStr} ${selectedCoin.symbol}`}</span>
-                        </button>
-                      )}
-                      {directSendError && (
-                        <div className="p-2 rounded-lg bg-red-500/10 border border-red-400/30 text-[10px] font-mono text-red-300 leading-snug">
-                          {directSendError}
-                        </div>
-                      )}
-                      {isConnected && EVM_COIN_ROUTES[selectedCoin.id] && currentChainId !== EVM_COIN_ROUTES[selectedCoin.id].chainId && (
-                        <p className="text-[9px] font-mono text-amber-300/80 leading-snug">
-                          Your wallet will be asked to switch to {EVM_COIN_ROUTES[selectedCoin.id].chainLabel} before sending {selectedCoin.symbol}.
-                        </p>
-                      )}
-                      {/* placeholder to satisfy JSX indentation of removed closing tag below */}
+                        <>
+                          <button
+                            onClick={handleOnChainDonate}
+                            disabled={isTxPending}
+                            className="w-full py-3 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-[10.5px] uppercase transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>{isTxPending ? 'Approving modal transaction...' : `Send direct ${amountStr} ${selectedCoin.symbol}`}</span>
+                          </button>
+                          {directSendError && (
+                            <div className="p-2 rounded-lg bg-red-500/10 border border-red-400/30 text-[10px] font-mono text-red-300 leading-snug">
+                              {directSendError}
+                            </div>
+                          )}
+                          {EVM_COIN_ROUTES[selectedCoin.id] && currentChainId !== EVM_COIN_ROUTES[selectedCoin.id].chainId && (
+                            <p className="text-[9px] font-mono text-amber-300/80 leading-snug">
+                              Your wallet will be asked to switch to {EVM_COIN_ROUTES[selectedCoin.id].chainLabel} before sending {selectedCoin.symbol}.
+                            </p>
+                          )}
+                        </>
                       ) : (
                         <div className="text-center p-2.5 bg-[#0D1C2A]/40 border border-[#32FF8B]/10 rounded-xl">
                           <p className="text-[8.5px] leading-relaxed text-[#C5C1B9]/90 font-mono tracking-normal uppercase">
