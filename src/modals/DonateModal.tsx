@@ -90,9 +90,12 @@ export function DonateModal({
   setGoogleUser
 }: DonateModalProps) {
   const { address: connectedAddress, isConnected } = useAccount();
-  const { sendTransaction, data: txData, isPending: isTxPending, isSuccess: isTxSuccess } = useSendTransaction();
+  const currentChainId = useChainId();
+  const { sendTransactionAsync, data: txData, isPending: isTxPending, isSuccess: isTxSuccess } = useSendTransaction();
+  const { switchChainAsync } = useSwitchChain();
   const { signMessageAsync } = useSignMessage();
   const { connect } = useConnect();
+  const [directSendError, setDirectSendError] = useState<string | null>(null);
 
   const signPromptWithTimeout = async (message: string) => {
     return Promise.race([
