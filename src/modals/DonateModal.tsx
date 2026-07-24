@@ -5,9 +5,35 @@ import {
   RefreshCw, AlertTriangle, CheckCircle 
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { useAccount, useSendTransaction, useBalance, useSignMessage, useConnect } from 'wagmi';
+import { useAccount, useSendTransaction, useBalance, useSignMessage, useConnect, useSwitchChain, useWriteContract, useChainId } from 'wagmi';
 import { injected } from 'wagmi/connectors';
-import { parseEther } from 'viem';
+import { parseEther, parseUnits, encodeFunctionData } from 'viem';
+
+// Per-coin chain routing metadata for direct EVM donations.
+// Chain IDs and USDT contracts are pinned so the "Send direct" button
+// can never broadcast the wrong asset (e.g. native ETH when USDT was picked).
+const EVM_COIN_ROUTES: Record<string, {
+  chainId: number;
+  kind: 'native' | 'erc20';
+  token?: `0x${string}`;
+  decimals?: number;
+  chainLabel: string;
+}> = {
+  BOT: { chainId: 677, kind: 'native', chainLabel: 'BOT Chain' },
+  BNB: { chainId: 56, kind: 'native', chainLabel: 'BNB Smart Chain' },
+  POLYGON: { chainId: 137, kind: 'native', chainLabel: 'Polygon' },
+  ETH: { chainId: 1, kind: 'native', chainLabel: 'Ethereum' },
+  USDT_BOT: { chainId: 677, kind: 'erc20', token: '0xababc7ddc03e501d190c676bf3d92ef0e6e87a3c', decimals: 18, chainLabel: 'BOT Chain' },
+  USDT_BNB: { chainId: 56, kind: 'erc20', token: '0x55d398326f99059fF775485246999027B3197955', decimals: 18, chainLabel: 'BNB Smart Chain' },
+  USDT_POLYGON: { chainId: 137, kind: 'erc20', token: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', decimals: 6, chainLabel: 'Polygon' },
+  USDT_ETH: { chainId: 1, kind: 'erc20', token: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6, chainLabel: 'Ethereum' },
+};
+
+const ERC20_TRANSFER_ABI = [{
+  type: 'function', name: 'transfer', stateMutability: 'nonpayable',
+  inputs: [{ name: 'to', type: 'address' }, { name: 'amount', type: 'uint256' }],
+  outputs: [{ name: '', type: 'bool' }],
+}] as const;
 import { emailSignUp, emailSignIn, sendVerification, reloadUser, googleSignIn } from '../lib/auth';
 
 interface Suggestion {
