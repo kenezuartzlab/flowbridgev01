@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X, ExternalLink, Loader2, Check, Heart } from 'lucide-react';
+import { createPublicClient, http } from 'viem';
 import { cn } from '../lib/utils';
 import { TokenIcon } from '../components/TokenIcon';
+import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '../lib/wagmi';
+import { fetchTronConfirmations } from '../lib/tronBridge';
+
+type BridgeDirection =
+  | 'BOT_TO_BNB' | 'BNB_TO_BOT'
+  | 'BOT_TO_ETH' | 'ETH_TO_BOT'
+  | 'BOT_TO_TRX' | 'TRX_TO_BOT';
 
 interface RealtimeBridgeTrackerModalProps {
   isOpen: boolean;
@@ -15,6 +23,39 @@ interface RealtimeBridgeTrackerModalProps {
   txUrlPrefix?: string;
   onReset: () => void;
   onDonateClick?: () => void;
+  bridgeDirection?: BridgeDirection;
+  isMainnet?: boolean;
+}
+
+// Required source-chain confirmations before the relayer picks up the transfer.
+const REQUIRED_CONFIRMATIONS: Record<number, number> = {
+  677: 3, 968: 1, 56: 15, 97: 3, 1: 12, 11155111: 3,
+};
+
+// Realistic relayer ETAs (seconds) — used only to time-gate the final "arrived"
+// state, never to fake source-chain progress.
+const RELAY_ETA_SECONDS: Record<BridgeDirection, number> = {
+  BOT_TO_BNB: 7 * 60, BNB_TO_BOT: 5 * 60,
+  BOT_TO_ETH: 10 * 60, ETH_TO_BOT: 8 * 60,
+  BOT_TO_TRX: 6 * 60, TRX_TO_BOT: 5 * 60,
+};
+
+function chainFor(chainId: number) {
+  if (chainId === 677) return botMainnet;
+  if (chainId === 968) return botTestnet;
+  if (chainId === 56) return bscMainnet;
+  if (chainId === 97) return bscTestnet;
+  if (chainId === 1) return ethereum;
+  return sepolia;
+}
+
+function sourceChainId(dir: BridgeDirection, isMainnet: boolean): number | null {
+  switch (dir) {
+    case 'BOT_TO_BNB': case 'BOT_TO_ETH': case 'BOT_TO_TRX': return isMainnet ? 677 : 968;
+    case 'BNB_TO_BOT': return isMainnet ? 56 : 97;
+    case 'ETH_TO_BOT': return isMainnet ? 1 : 11155111;
+    case 'TRX_TO_BOT': return null; // Tron polled separately
+  }
 }
 
 export function RealtimeBridgeTrackerModal({
@@ -28,19 +69,22 @@ export function RealtimeBridgeTrackerModal({
   txHash,
   txUrlPrefix = 'https://scan.bohr.life/tx/',
   onReset,
-  onDonateClick
+  onDonateClick,
+  bridgeDirection,
+  isMainnet = true,
 }: RealtimeBridgeTrackerModalProps) {
-  // Realtime count-up Stopwatch state
+  // Elapsed stopwatch (informational only).
   const [seconds, setSeconds] = useState(0);
   const [minutes, setMinutes] = useState(0);
-  
-  // Realtime 3-stage visual steps simulation
+
+  // Stage state is derived from real chain data, not fixed timers.
   const [stage1, setStage1] = useState<'pending' | 'loading' | 'done'>('loading');
   const [stage2, setStage2] = useState<'pending' | 'loading' | 'done'>('pending');
   const [stage3, setStage3] = useState<'pending' | 'loading' | 'done'>('pending');
   const [isCompleted, setIsCompleted] = useState(false);
+  const [relaySecondsLeft, setRelaySecondsLeft] = useState<number>(0);
 
-  // Restart clocks
+  // Reset when reopened.
   useEffect(() => {
     if (isOpen) {
       setSeconds(0);
@@ -49,13 +93,13 @@ export function RealtimeBridgeTrackerModal({
       setStage2('pending');
       setStage3('pending');
       setIsCompleted(false);
+      setRelaySecondsLeft(0);
     }
-  }, [isOpen]);
+  }, [isOpen, txHash]);
 
-  // Stopwatch ticking
+  // Stopwatch ticking while the transfer is in-flight.
   useEffect(() => {
     if (!isOpen || isCompleted) return;
-
     const interval = setInterval(() => {
       setSeconds((prevSec) => {
         if (prevSec === 59) {
@@ -65,38 +109,81 @@ export function RealtimeBridgeTrackerModal({
         return prevSec + 1;
       });
     }, 1000);
-
     return () => clearInterval(interval);
   }, [isOpen, isCompleted]);
 
-  // Stage transition sequencer mimicking blockchain block validations
+  // Real source-chain tracker: poll for receipt + confirmations, then start
+  // the relay ETA countdown. Never mark "Completed" from a fixed timer.
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !txHash || !bridgeDirection) return;
+    let cancelled = false;
+    const srcId = sourceChainId(bridgeDirection, isMainnet);
+    const isTron = srcId === null;
+    const required = srcId != null ? (REQUIRED_CONFIRMATIONS[srcId] ?? 1) : 1;
+    const relayEta = RELAY_ETA_SECONDS[bridgeDirection] ?? 5 * 60;
 
-    // Transition 1 -> 2 (Sent transaction from Source Chain)
-    const t1 = setTimeout(() => {
-      setStage1('done');
-      setStage2('loading');
-    }, 3200);
-
-    // Transition 2 -> 3 (Sent transaction to Target Chain)
-    const t2 = setTimeout(() => {
-      setStage2('done');
-      setStage3('loading');
-    }, 6400);
-
-    // Transition 3 -> Completed (Received USDT on BSC/Bohr Address)
-    const t3 = setTimeout(() => {
-      setStage3('done');
-      setIsCompleted(true);
-    }, 9600);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
+    const pollEvm = async () => {
+      try {
+        const client = createPublicClient({ chain: chainFor(srcId!), transport: http() });
+        const receipt = await client.getTransactionReceipt({ hash: txHash as `0x${string}` }).catch(() => null);
+        if (cancelled) return;
+        if (!receipt) return; // still waiting for inclusion
+        if (receipt.status !== 'success') {
+          setStage1('pending');
+          return;
+        }
+        setStage1('done');
+        const latest = await client.getBlockNumber();
+        const conf = Number(latest - receipt.blockNumber) + 1;
+        if (conf >= required) {
+          setStage2((s) => (s === 'done' ? s : 'done'));
+          setStage3((s) => (s === 'pending' ? 'loading' : s));
+          setRelaySecondsLeft((cur) => (cur > 0 ? cur : relayEta));
+        } else {
+          setStage2('loading');
+        }
+      } catch {
+        // transient RPC failures — keep polling.
+      }
     };
-  }, [isOpen]);
+
+    const pollTron = async () => {
+      try {
+        const info = await fetchTronConfirmations(txHash);
+        if (cancelled) return;
+        if (info.confirmed) {
+          setStage1('done');
+          setStage2('done');
+          setStage3((s) => (s === 'pending' ? 'loading' : s));
+          setRelaySecondsLeft((cur) => (cur > 0 ? cur : relayEta));
+        }
+      } catch {
+        // ignore transient errors
+      }
+    };
+
+    const tick = isTron ? pollTron : pollEvm;
+    tick();
+    const id = setInterval(tick, 4000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isOpen, txHash, bridgeDirection, isMainnet]);
+
+  // Relay countdown — only after source confirms — finally flips "Completed".
+  useEffect(() => {
+    if (!isOpen || relaySecondsLeft <= 0) return;
+    const id = setInterval(() => {
+      setRelaySecondsLeft((s) => {
+        if (s <= 1) {
+          setStage3('done');
+          setIsCompleted(true);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isOpen, relaySecondsLeft]);
+
 
   if (!isOpen) return null;
 
