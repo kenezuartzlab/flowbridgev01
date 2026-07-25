@@ -2,7 +2,7 @@ import swapHero from "@/assets/swap-hero.png";
 
 const bridgeHero = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
 
-type Variant = "swap" | "bridge";
+type Variant = "swap" | "bridge" | "rewards" | "activity";
 
 const COPY: Record<Variant, { eyebrow: string; title: string; body: string; art: string }> = {
   swap: {
@@ -17,7 +17,20 @@ const COPY: Record<Variant, { eyebrow: string; title: string; body: string; art:
     body: "BOT ↔ BNB, ETH and TRON with live confirmation tracking. Recorded in your activity.",
     art: bridgeHero,
   },
+  rewards: {
+    eyebrow: "FLOW Rewards",
+    title: "Track every FLOW point",
+    body: "Rewards overview, tasks and claim progress for your verified email + bound wallet.",
+    art: swapHero,
+  },
+  activity: {
+    eyebrow: "Your history",
+    title: "Swaps & bridges, recorded",
+    body: "Every transaction is attributed to your account with status, amounts and FLOW earned.",
+    art: bridgeHero,
+  },
 };
+
 
 /**
  * Presentational hero banner shown above the swap / bridge cards.
