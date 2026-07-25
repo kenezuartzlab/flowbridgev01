@@ -74,15 +74,10 @@ export default function App() {
     try {
       const token = await getEffectiveIdToken();
       if (!token) return;
-      const res = await fetch('/api/users/incentives', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      if (data.success && data.incentives) {
-        setIncentives(data.incentives);
-        setGlobalTotalClaimed(data.incentives.globalTotalClaimed || 0);
+      const incentives = await fetchUserIncentives(token);
+      if (incentives) {
+        setIncentives(incentives);
+        setGlobalTotalClaimed(incentives.globalTotalClaimed || 0);
       }
     } catch (e) {
       console.error("Failed to load user incentives:", e);
@@ -91,15 +86,13 @@ export default function App() {
 
   const fetchGlobalStats = async () => {
     try {
-      const res = await fetch('/api/incentives/global');
-      const data = await res.json();
-      if (data.success && data.stats) {
-        setGlobalTotalClaimed(data.stats.globalTotalClaimed || 0);
-      }
+      const stats = await fetchGlobalIncentiveStats();
+      if (stats) setGlobalTotalClaimed(stats.globalTotalClaimed || 0);
     } catch (e) {
       console.error("Failed to load global stats:", e);
     }
   };
+
 
   // Referral code captured for this session (from ?ref= URL param). Surfaced
   // in the header so signup visitors get visible assurance the code applied.
