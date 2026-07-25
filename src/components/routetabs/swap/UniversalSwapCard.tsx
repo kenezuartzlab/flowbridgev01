@@ -707,6 +707,7 @@ export function UniversalSwapCard({
                 <Row label="Slippage" value={`${slippage}%`} />
                 <Row label="Route" value={quote.symbolPath.join(" → ")} />
                 <Row label="Trading fee" value="0.30%" />
+                <Row label="Platform fee" value={PLATFORM_FEE_LABEL} />
                 
                 <Row
                   label="FLOW volume credit"
