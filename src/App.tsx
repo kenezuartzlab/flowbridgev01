@@ -2878,7 +2878,6 @@ export default function App() {
           onClose={() => setIsReceiptModalOpen(false)}
           txHash={receiptTxHash}
           txUrlPrefix={receiptUrlPrefix}
-          onDonateClick={() => setIsDonateModalOpen(true)}
           txType={receiptTxType}
           status={receiptStatus}
         />
@@ -2938,7 +2937,6 @@ export default function App() {
             resetStep3();
             setIsRealtimeTrackerOpen(false);
           }}
-          onDonateClick={() => setIsDonateModalOpen(true)}
         />
       )}
 

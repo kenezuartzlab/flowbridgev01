@@ -22,7 +22,6 @@ interface RealtimeBridgeTrackerModalProps {
   txHash?: string;
   txUrlPrefix?: string;
   onReset: () => void;
-  onDonateClick?: () => void;
   bridgeDirection?: BridgeDirection;
   isMainnet?: boolean;
 }
