@@ -743,7 +743,7 @@ export function DonateModal({
                   Fuel FlowBridge
                 </h2>
                 <p className="text-[13px] text-[#C5C1B9] max-w-[340px] leading-relaxed hidden sm:block">
-                  We charge **0% protocol fees**! Support our decentralized team in building advanced cross-chain indices, learning tools, & earnings scanners.
+                  Support our decentralized team in building advanced cross-chain indices, learning tools, & earnings scanners.
                 </p>
               </>
             )}
@@ -1276,7 +1276,7 @@ export function DonateModal({
                         </button>
                       </div>
                       <p>
-                        Scan the "Donate Direct" QR code or use any wallet app to send the registration security fee. Your fee directly supports our zero-fee project. Thank you!
+                        Scan the "Donate Direct" QR code or use any wallet app to send the registration security fee. Thank you!
                       </p>
                     </div>
                   )}
