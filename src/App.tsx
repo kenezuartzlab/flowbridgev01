@@ -1611,35 +1611,43 @@ export default function App() {
             ? (isMainnet ? 56n : 97n)
             : /* ETH */ (isMainnet ? 1n : 11155111n);
 
-          const allowance = rawUsdtBotBridgeAllowance ? BigInt(rawUsdtBotBridgeAllowance.toString()) : 0n;
-          if (allowance < parsedAmount) {
-            setActionStep('approving_usdt');
-            await writeContractAsync({
-              address: contracts.usdtBot as `0x${string}`,
-              abi: ERC20_ABI,
-              functionName: 'approve',
-              args: [contracts.botBridgeProxy as `0x${string}`, parsedAmount],
-              chainId: targetChainIdForTab(),
-              gas: 150000n
-            } as any);
-            await new Promise(r => setTimeout(r, 3000));
-            refetchUsdtBotBridgeAllowance();
-          }
+          const depositAbi = [{
+            inputs: [
+              { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+              { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+              { internalType: "address", name: "recipient", type: "address" },
+              { internalType: "uint256", name: "amount", type: "uint256" }
+            ],
+            name: "deposit", outputs: [], stateMutability: "payable", type: "function"
+          }] as const;
+          const depositArgs = [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount];
+
+          await ensureBridgeAllowance({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtBot as `0x${string}`,
+            owner: address as `0x${string}`,
+            spender: contracts.botBridgeProxy as `0x${string}`,
+            needed: parsedAmount,
+          });
+          refetchUsdtBotBridgeAllowance();
 
           setActionStep('bridging_usdt');
+          await preflightBridgeDeposit({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtBot as `0x${string}`,
+            owner: address as `0x${string}`,
+            amount: parsedAmount,
+            bridge: contracts.botBridgeProxy as `0x${string}`,
+            abi: depositAbi,
+            functionName: 'deposit',
+            args: depositArgs,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.botBridgeProxy as `0x${string}`,
-            abi: [{
-              inputs: [
-                { internalType: "uint256", name: "destinationChainId", type: "uint256" },
-                { internalType: "bytes32", name: "resourceId", type: "bytes32" },
-                { internalType: "address", name: "recipient", type: "address" },
-                { internalType: "uint256", name: "amount", type: "uint256" }
-              ],
-              name: "deposit", outputs: [], stateMutability: "payable", type: "function"
-            }],
+            abi: depositAbi,
             functionName: 'deposit',
-            args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
+            args: depositArgs,
             chainId: targetChainIdForTab(),
             gas: 1000000n
           } as any);
