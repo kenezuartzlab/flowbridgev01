@@ -11,6 +11,7 @@ import {
   type TronStatus,
 } from './lib/tronBridge';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
+import { maxSwappableDisplay } from './lib/swap/platformFee';
 import type { BridgeDeps } from './lib/bridge/evmBridge';
 import {
   ensureBridgeAllowance as ensureBridgeAllowanceCore,
