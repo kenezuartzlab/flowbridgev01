@@ -79,9 +79,14 @@ function shouldFallbackToInjected(err: any) {
   return (
     code === -32601 ||
     code === -32004 ||
+    // Some in-app wallets (TokenPocket) accept the wagmi request but never
+    // resolve it. Treat a silent timeout as "try the injected provider next"
+    // instead of reporting a rejection the user never made.
+    /timed out|timeout|no wallet signature/i.test(msg) ||
     /connector.*not.*connected|provider.*not.*found|method.*not.*found|method.*not.*supported|unsupported/i.test(msg)
   );
 }
+
 
 async function assertActiveInjectedAccount(expectedAddress: string): Promise<void> {
   if (typeof window === "undefined") return;
