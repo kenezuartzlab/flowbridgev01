@@ -78,15 +78,9 @@ html.light {
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, menu, Monaco, Consolas, monospace;
 }
 
-/* Accessibility floor: every tappable control keeps a 44px target. */
-@layer base {
-  button, a[role="button"], [role="tab"] {
-    min-height: 2.75rem;
-  }
-  button.fb-target-sm, a.fb-target-sm, [role="tab"].fb-target-sm {
-    min-height: 0;
-  }
-}
+/* Opt-in accessibility helper: 44px minimum tap target. */
+.fb-tap-target { min-height: 2.75rem; min-width: 2.75rem; }
+
 
 
 /* ---------- SiteLoader + Header submenu animations ---------- */
