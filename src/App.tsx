@@ -20,6 +20,8 @@ import {
 import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
 import { TabBanner } from './components/banners/TabBanner';
+import { BannerRotator } from './components/banners/BannerRotator';
+
 import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
