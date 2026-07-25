@@ -43,6 +43,8 @@ import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal'
 import { formatUsd } from './lib/format';
 import { toFriendlyError } from './lib/friendlyError';
 import { SiteLoader } from './components/SiteLoader';
+import { fetchActivityHistory, fetchGlobalIncentiveStats, fetchUserIncentives, logActivity } from './lib/app/activityApi';
+
 
 export default function App() {
   const { address, isConnected } = useAccount();
@@ -74,15 +76,10 @@ export default function App() {
     try {
       const token = await getEffectiveIdToken();
       if (!token) return;
-      const res = await fetch('/api/users/incentives', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      if (data.success && data.incentives) {
-        setIncentives(data.incentives);
-        setGlobalTotalClaimed(data.incentives.globalTotalClaimed || 0);
+      const incentives = await fetchUserIncentives(token);
+      if (incentives) {
+        setIncentives(incentives);
+        setGlobalTotalClaimed(incentives.globalTotalClaimed || 0);
       }
     } catch (e) {
       console.error("Failed to load user incentives:", e);
@@ -91,15 +88,13 @@ export default function App() {
 
   const fetchGlobalStats = async () => {
     try {
-      const res = await fetch('/api/incentives/global');
-      const data = await res.json();
-      if (data.success && data.stats) {
-        setGlobalTotalClaimed(data.stats.globalTotalClaimed || 0);
-      }
+      const stats = await fetchGlobalIncentiveStats();
+      if (stats) setGlobalTotalClaimed(stats.globalTotalClaimed || 0);
     } catch (e) {
       console.error("Failed to load global stats:", e);
     }
   };
+
 
   // Referral code captured for this session (from ?ref= URL param). Surfaced
   // in the header so signup visitors get visible assurance the code applied.
@@ -200,60 +195,43 @@ export default function App() {
     }
   };
 
-  // Retrieve transaction history logs from Cloud SQL DB
+  // Retrieve activity history for the signed-in account
   const fetchDbTransactions = async (token: string) => {
     try {
-      const response = await fetch('/api/transactions', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setDbTransactions(data.transactions || []);
-      }
+      setDbTransactions(await fetchActivityHistory(token));
     } catch (err) {
       console.error("Error fetching transactions:", err);
     }
   };
 
-  // Log a new transaction to Cloud SQL DB
+  // Record an activity row against the signed-in email + bound wallet
   const logTransactionToDb = async (txType: string, direction: string, fromAmount: string, toAmount: string, txHash: string, status: string) => {
     if (!googleUser) return;
     const normalizedWallet = address?.toLowerCase();
     const emailVerified = !!(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo);
 
-    // Rewards/history rows are only recorded for a verified email + the exact
-    // wallet bound to that email. Guest, unverified, or mismatched sessions can
-    // still swap, but the server rejects reward logging for them.
+    // Activity rows are only recorded for a verified email + the exact wallet
+    // bound to that email, so every activity is attributable to one account.
+    // Guest, unverified, or mismatched sessions can still swap/bridge, but the
+    // server rejects activity logging for them.
     if (!emailVerified || !normalizedWallet) return;
 
-    // Bridge transactions do NOT count toward earnings. Only swaps that route
-    // through FlowBridgeRouter accrue rewards / swap volume. Skip logging any
-    // BRIDGE-type activity so it never appears in the earnings ledger.
-    if (String(txType).toUpperCase() === 'BRIDGE') return;
-
-
+    // NOTE: bridges are recorded for history/attribution only — the server
+    // always stores 0 points for them. Rewards remain swap-only.
     try {
       const token = await getEffectiveIdToken();
       if (!token) return;
-      
-      await fetch('/api/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          txType,
-          direction,
-          fromAmount,
-          toAmount,
-          txHash,
-          status,
-          walletAddress: normalizedWallet,
-        })
+
+      await logActivity(token, {
+        txType,
+        direction,
+        fromAmount,
+        toAmount,
+        txHash,
+        status,
+        walletAddress: normalizedWallet,
       });
+
       
       fetchDbTransactions(token);
       fetchUserIncentivesInApp();

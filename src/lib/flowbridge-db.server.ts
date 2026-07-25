@@ -129,18 +129,19 @@ export async function createTransactionHistory(
     throw new Error("Rewards require the connected wallet to be linked to this signed-in email.");
   }
 
-  // Bridge transactions are excluded from earnings — only FlowBridgeRouter
-  // swap activity is eligible for rewards / swap-volume accrual.
-  if (String(payload.txType).toUpperCase() === "BRIDGE") {
-    throw new Error("Bridge transactions do not accrue rewards.");
-  }
-
+  // Bridge transactions are RECORDED for the user's activity history (tied to
+  // their verified email + bound wallet) but are never reward-eligible — only
+  // FlowBridgeRouter swap activity can accrue rewards / swap volume.
+  const isBridge = String(payload.txType).toUpperCase() === "BRIDGE";
 
   // SECURITY: Do not award points from client-supplied transaction data.
   // Points must only be awarded by server-side on-chain verification (e.g., a
   // trusted webhook or RPC-verified txHash). Recording the transaction row is
-  // still allowed for user history, but points_earned is always 0 here.
+  // still allowed for user history, but points_earned is always 0 here — and
+  // for BRIDGE rows it must stay 0 permanently.
   const pointsToEarn = 0;
+  void isBridge;
+
 
 
   const { data: tx, error } = await supabaseAdmin
