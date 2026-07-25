@@ -37,8 +37,19 @@
   --fb-banner-bridge-to: #00D7B2;
   --fb-banner-bridge-foreground: #FFFFFF;
   --fb-banner-bridge-accent: #7DD3FC;
+  /* Status card emphasis (dark) */
+  --fb-status-info-from: #0B2A56;
+  --fb-status-info-to: #05121F;
+  --fb-status-info-accent: #60A5FA;
+  --fb-status-warn-from: #3A2A05;
+  --fb-status-warn-to: #0B0F1A;
+  --fb-status-warn-accent: #FBBF24;
+  --fb-status-ok-from: #06331F;
+  --fb-status-ok-to: #04121A;
+  --fb-status-ok-accent: #32FF8B;
 
 }
+
 
 
 html.light {
