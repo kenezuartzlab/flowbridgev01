@@ -5,6 +5,8 @@
 // localStorage so a refresh does not force another signature. The cache is
 // explicitly cleared when the user disconnects or switches wallets.
 
+import { isInAppBrowser } from "@/lib/in-app-browser";
+
 const STORAGE_PREFIX = "flowbridge:wallet-verified:";
 const SIGNATURE_TIMEOUT_MS = 45_000;
 
