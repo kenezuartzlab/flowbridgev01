@@ -52,13 +52,17 @@ function RewardsPage() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-5">
+      <main className="mx-auto max-w-lg px-4 py-4 sm:py-5">
         {!user ? (
-          <EmptyState
-            title="Sign in to see your FLOW"
-            body="FLOW points are tied to a verified email plus the wallet bound to it. Sign in on the swap screen to start tracking rewards."
-          />
+          <div className="space-y-4">
+            <TabBanner variant="rewards" />
+            <EmptyState
+              title="Sign in to see your FLOW"
+              body="FLOW points are tied to a verified email plus the wallet bound to it. Sign in on the swap screen to start tracking rewards."
+            />
+          </div>
         ) : (
+
           <div className="space-y-4">
             {/* Balance hero */}
             <section className="relative overflow-hidden rounded-2xl border border-primary/25 bg-primary/5 p-5 text-center">
