@@ -1712,13 +1712,23 @@ export default function App() {
             args: depositArgs,
           });
 
+          const botDepositGas = await estimateDepositGas({
+            chainId: targetChainIdForTab(),
+            account: address as `0x${string}`,
+            bridge: contracts.botBridgeProxy as `0x${string}`,
+            abi: depositAbi,
+            functionName: 'deposit',
+            args: depositArgs,
+            fallback: 1000000n,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.botBridgeProxy as `0x${string}`,
             abi: depositAbi,
             functionName: 'deposit',
             args: depositArgs,
             chainId: targetChainIdForTab(),
-            gas: 1000000n
+            gas: botDepositGas
           } as any);
 
           const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
