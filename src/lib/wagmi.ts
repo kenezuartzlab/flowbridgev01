@@ -108,8 +108,21 @@ export const sepolia = defineChain({
   testnet: true,
 });
 
+export const polygon = defineChain({
+  id: 137,
+  name: 'Polygon',
+  nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://polygon-rpc.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'PolygonScan', url: 'https://polygonscan.com' },
+  },
+  testnet: false,
+});
+
 export const wagmiConfig = createConfig({
-  chains: [botMainnet, bscMainnet, botTestnet, bscTestnet, ethereum, sepolia],
+  chains: [botMainnet, bscMainnet, botTestnet, bscTestnet, ethereum, sepolia, polygon],
   storage: createStorage({
     key: 'flowbridge.wallet',
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
@@ -139,6 +152,7 @@ export const wagmiConfig = createConfig({
     [bscTestnet.id]: http(),
     [ethereum.id]: http(),
     [sepolia.id]: http(),
+    [polygon.id]: http(),
   },
 });
 
