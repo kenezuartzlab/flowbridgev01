@@ -19,6 +19,7 @@ import {
 } from './lib/bridge/evmBridge';
 import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
+import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
@@ -2721,6 +2722,9 @@ export default function App() {
           ⓒ 2026 FlowBridge. Built by Kenezu
         </span>
       </footer>
+
+      {/* P1 persistent navigation to Markets / Rewards / Activity */}
+      <BottomNav />
 
       {/* Cloud SQL Ledger History Modal Overlay */}
       {isHistoryModalOpen && (

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Search, TrendingUp, TrendingDown } from "lucide-react";
 import { TokenIcon } from "@/components/TokenIcon";
+import { BottomNav } from "@/components/nav/BottomNav";
 import { formatUsd } from "@/lib/format";
 import { fetchBotChainMarkets, fetchExternalMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 
@@ -192,8 +193,10 @@ function MarketsPage() {
           Auto-refreshes every 60s.
         </p>
       </div>
+      <BottomNav />
     </div>
   );
+
 }
 
 function sortRow(a: MarketRow, b: MarketRow, key: SortKey): number {

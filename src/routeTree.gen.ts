@@ -9,12 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
+import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
@@ -37,6 +39,11 @@ import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe
 import { Route as ApiPublicHooksKeeperTickRouteImport } from './routes/api/public/hooks/keeper-tick'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -65,6 +72,11 @@ const EcosurgeRoute = EcosurgeRouteImport.update({
 const ArcadeflixRoute = ArcadeflixRouteImport.update({
   id: '/arcadeflix',
   path: '/arcadeflix',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActivityRoute = ActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -180,12 +192,14 @@ const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activity': typeof ActivityRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rewards': typeof RewardsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/health': typeof ApiHealthRoute
@@ -209,12 +223,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activity': typeof ActivityRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rewards': typeof RewardsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/health': typeof ApiHealthRoute
@@ -239,12 +255,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/activity': typeof ActivityRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rewards': typeof RewardsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/health': typeof ApiHealthRoute
@@ -270,12 +288,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/activity'
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
     | '/markets'
     | '/mcp'
     | '/reset-password'
+    | '/rewards'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/health'
@@ -299,12 +319,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/activity'
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
     | '/markets'
     | '/mcp'
     | '/reset-password'
+    | '/rewards'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/health'
@@ -328,12 +350,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/activity'
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
     | '/markets'
     | '/mcp'
     | '/reset-password'
+    | '/rewards'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/health'
@@ -358,12 +382,14 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActivityRoute: typeof ActivityRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
   EcosurgeRoute: typeof EcosurgeRoute
   FortuneRoute: typeof FortuneRoute
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RewardsRoute: typeof RewardsRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiHealthRoute: typeof ApiHealthRoute
@@ -387,6 +413,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -427,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/arcadeflix'
       fullPath: '/arcadeflix'
       preLoaderRoute: typeof ArcadeflixRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activity': {
+      id: '/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof ActivityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -593,12 +633,14 @@ const ApiProposalsRouteWithChildren = ApiProposalsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActivityRoute: ActivityRoute,
   ArcadeflixRoute: ArcadeflixRoute,
   EcosurgeRoute: EcosurgeRoute,
   FortuneRoute: FortuneRoute,
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RewardsRoute: RewardsRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
