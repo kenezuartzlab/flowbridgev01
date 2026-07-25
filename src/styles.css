@@ -48,6 +48,10 @@ html.light {
   --fb-danger: #B91C1C;
   --fb-warning: #92400E;
   --fb-success: #15803D;
+  --fb-banner-from: #DCEBFF;
+  --fb-banner-to: #CFE6FF;
+  --fb-banner-foreground: #0B2C63;
+
 
 }
 
