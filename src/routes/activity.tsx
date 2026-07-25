@@ -115,6 +115,50 @@ function ActivityPage() {
   );
 }
 
+function EarningsSummary({ transactions }: { transactions: any[] }) {
+  const totals = transactions.reduce(
+    (acc, t: any) => {
+      const type = String(t.tx_type ?? t.txType ?? "").toUpperCase();
+      const points = Number(t.points_earned ?? t.pointsEarned ?? 0) || 0;
+      if (type.includes("BRIDGE")) acc.bridges += 1;
+      else acc.swaps += 1;
+      acc.points += points;
+      return acc;
+    },
+    { swaps: 0, bridges: 0, points: 0 },
+  );
+
+  return (
+    <section className="mb-4 rounded-2xl border border-primary/25 bg-primary/5 p-4">
+      <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em] text-muted">
+        Earnings Activity
+      </h2>
+      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+        <div>
+          <p className="text-xl font-black tabular-nums text-primary">
+            {totals.points.toLocaleString()}
+          </p>
+          <p className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted-soft">
+            FLOW earned
+          </p>
+        </div>
+        <div>
+          <p className="text-xl font-black tabular-nums text-foreground">{totals.swaps}</p>
+          <p className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted-soft">
+            Swaps
+          </p>
+        </div>
+        <div>
+          <p className="text-xl font-black tabular-nums text-foreground">{totals.bridges}</p>
+          <p className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted-soft">
+            Bridges
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ActivityRow({ tx }: { tx: any }) {
   const type = String(tx.tx_type ?? tx.txType ?? "TX").toUpperCase();
   const isBridge = type.includes("BRIDGE");
