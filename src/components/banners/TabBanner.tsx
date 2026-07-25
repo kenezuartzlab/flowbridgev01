@@ -70,7 +70,7 @@ export function TabBanner({ variant, className = "" }: { variant: Variant; class
 
   return (
     <section
-      className={`relative overflow-hidden rounded-2xl px-4 py-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.6)] ${className}`}
+      className={`relative flex min-h-[92px] items-center overflow-hidden rounded-2xl px-3.5 py-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.6)] sm:px-4 ${className}`}
       style={{
         background: `linear-gradient(110deg, ${t.from}, ${t.to})`,
         color: t.fg,
@@ -82,7 +82,7 @@ export function TabBanner({ variant, className = "" }: { variant: Variant; class
         className="pointer-events-none absolute -right-6 -top-10 h-28 w-28 rounded-full blur-2xl"
         style={{ background: `${t.accent}40` }}
       />
-      <div className="relative flex items-center justify-between gap-3">
+      <div className="relative flex w-full items-center justify-between gap-2.5 sm:gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
           <img
             src={art}
@@ -90,23 +90,25 @@ export function TabBanner({ variant, className = "" }: { variant: Variant; class
             aria-hidden
             loading="lazy"
             draggable={false}
-            className="h-9 w-9 shrink-0 select-none object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+            className="h-10 w-10 shrink-0 select-none object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)] sm:h-11 sm:w-11"
           />
-          <div className="min-w-0 space-y-0.5 font-mono">
+          <div className="min-w-0 space-y-1 font-mono">
             <div
-              className="truncate text-[10px] font-bold uppercase tracking-wider"
+              className="text-[11px] font-bold uppercase leading-tight tracking-wide [overflow-wrap:anywhere]"
               style={{ color: t.fg }}
             >
               {title}
             </div>
-            <div className="truncate text-[9px] leading-tight opacity-80">{body}</div>
+            <div className="line-clamp-2 text-[10px] leading-snug opacity-85 [overflow-wrap:anywhere]">
+              {body}
+            </div>
           </div>
         </div>
 
         {cta ? (
           <Link
             to={cta.to}
-            className="shrink-0 rounded-lg px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-wider transition-all active:scale-95"
+            className="shrink-0 rounded-lg px-2.5 py-1.5 text-center font-mono text-[9px] font-bold uppercase leading-tight tracking-wider transition-all active:scale-95"
             style={{
               background: `${t.accent}26`,
               color: t.accent,
@@ -122,4 +124,5 @@ export function TabBanner({ variant, className = "" }: { variant: Variant; class
     </section>
   );
 }
+
 

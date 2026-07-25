@@ -2335,23 +2335,33 @@ export default function App() {
           <BannerRotator
             slides={[
               <TabBanner key="hero" variant={activeTab === 'BRIDGE' ? 'bridge' : 'swap'} />,
-              <div key="status" className="bg-[#030E1A]/40 border border-white/5 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 text-left">
+              (() => {
+                const tone = !googleUser ? 'info' : !signedInEmailVerified ? 'warn' : rewardsActive ? 'ok' : 'warn';
+                const accent = `var(--fb-status-${tone}-accent)`;
+                return (
+              <div
+                key="status"
+                className="relative flex min-h-[92px] items-center justify-between gap-2.5 overflow-hidden rounded-2xl px-3.5 py-3 text-left shadow-[0_8px_24px_-16px_rgba(0,0,0,0.6)] sm:gap-3 sm:px-4"
+                style={{
+                  background: `linear-gradient(110deg, var(--fb-status-${tone}-from), var(--fb-status-${tone}-to))`,
+                  borderTop: `1px solid ${accent}33`,
+                }}
+              >
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-6 -top-10 h-28 w-28 rounded-full blur-2xl"
+                  style={{ background: `${accent}30` }}
+                />
 
-            <div className="flex items-center gap-2.5">
-              <div className={cn(
-                "p-1.5 rounded-lg border shrink-0",
-                !googleUser 
-                  ? "bg-blue-500/5 border-blue-500/10 text-blue-400"
-                  : !signedInEmailVerified
-                    ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
-                    : rewardsActive
-                      ? "bg-[#32FF8B]/5 border-[#32FF8B]/10 text-[#32FF8B]"
-                      : "bg-amber-500/5 border-amber-500/10 text-amber-400"
-              )}>
-                <Gift className="w-3.5 h-3.5" />
+            <div className="relative flex min-w-0 items-center gap-2.5">
+              <div
+                className="shrink-0 rounded-lg border p-2"
+                style={{ background: `${accent}1F`, borderColor: `${accent}3D`, color: accent }}
+              >
+                <Gift className="w-4 h-4" />
               </div>
-              <div className="space-y-0.5 font-mono">
-                <div className="text-[10px] font-bold text-white uppercase tracking-wider">
+              <div className="min-w-0 space-y-1 font-mono">
+                <div className="text-[11px] font-bold uppercase leading-tight tracking-wide text-white [overflow-wrap:anywhere]">
                   {!googleUser 
                     ? "Guest Mode Active"
                     : !signedInEmailVerified
@@ -2361,7 +2371,7 @@ export default function App() {
                         : "Wallet Link Needed"
                   }
                 </div>
-                <div className="text-[9px] text-[#C5C1B9] leading-tight">
+                <div className="line-clamp-2 text-[10px] leading-snug text-[#C5C1B9] [overflow-wrap:anywhere]">
                   {!googleUser 
                     ? "Verify email in REWARDS to earn FLOW rewards."
                     : !signedInEmailVerified
@@ -2383,14 +2393,8 @@ export default function App() {
                 setDonateModalInitialTab('incentives');
                 setIsDonateModalOpen(true);
               }}
-              className={cn(
-                "px-2.5 py-1 rounded-lg text-[9px] font-bold font-mono uppercase tracking-wider shrink-0 transition-all active:scale-95 cursor-pointer",
-                !googleUser 
-                  ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/15 border border-blue-500/10"
-                  : !signedInEmailVerified || !rewardsActive
-                    ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 border border-amber-500/10"
-                    : "bg-[#32FF8B]/10 text-[#32FF8B] hover:bg-[#32FF8B]/15 border border-[#32FF8B]/10"
-              )}
+              className="relative shrink-0 cursor-pointer rounded-lg border px-2.5 py-1.5 text-center font-mono text-[9px] font-bold uppercase leading-tight tracking-wider transition-all active:scale-95"
+              style={{ background: `${accent}26`, borderColor: `${accent}40`, color: accent }}
             >
               {!googleUser 
                 ? "Sign In"
@@ -2401,7 +2405,10 @@ export default function App() {
                     : "Link"
               }
             </button>
-              </div>,
+              </div>
+                );
+              })(),
+
             ]}
           />
           

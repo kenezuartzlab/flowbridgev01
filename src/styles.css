@@ -37,8 +37,19 @@
   --fb-banner-bridge-to: #00D7B2;
   --fb-banner-bridge-foreground: #FFFFFF;
   --fb-banner-bridge-accent: #7DD3FC;
+  /* Status card emphasis (dark) */
+  --fb-status-info-from: #0B2A56;
+  --fb-status-info-to: #05121F;
+  --fb-status-info-accent: #60A5FA;
+  --fb-status-warn-from: #3A2A05;
+  --fb-status-warn-to: #0B0F1A;
+  --fb-status-warn-accent: #FBBF24;
+  --fb-status-ok-from: #06331F;
+  --fb-status-ok-to: #04121A;
+  --fb-status-ok-accent: #32FF8B;
 
 }
+
 
 
 html.light {
@@ -70,10 +81,18 @@ html.light {
   --fb-banner-bridge-to: #D3F5EE;
   --fb-banner-bridge-foreground: #0B2C63;
   --fb-banner-bridge-accent: #0B7A70;
-
-
-
+  /* Status card emphasis (light) */
+  --fb-status-info-from: #E4EEFF;
+  --fb-status-info-to: #F6FAFF;
+  --fb-status-info-accent: #1D4ED8;
+  --fb-status-warn-from: #FDF0D8;
+  --fb-status-warn-to: #FFFBF2;
+  --fb-status-warn-accent: #92400E;
+  --fb-status-ok-from: #DCF6E6;
+  --fb-status-ok-to: #F5FDF8;
+  --fb-status-ok-accent: #15803D;
 }
+
 
 @theme {
   /* Semantic (theme-aware) */
