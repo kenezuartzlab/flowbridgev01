@@ -2315,6 +2315,7 @@ export default function App() {
               recipientLabel={recipientLabel}
               onSignOut={googleUser ? handleGoogleLogout : undefined}
               referralAppliedCode={referralAppliedCode}
+              incentives={incentives}
             />
           );
         })()}
