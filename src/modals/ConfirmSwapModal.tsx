@@ -1,6 +1,7 @@
 import { X, ArrowDown, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TokenIcon } from '../components/TokenIcon';
+import { PLATFORM_FEE_LABEL } from '../lib/contracts';
 
 interface ConfirmSwapModalProps {
   isOpen: boolean;
@@ -143,6 +144,11 @@ export function ConfirmSwapModal({
           <div className="flex justify-between items-center text-[#C5C1B9]">
             <span className="uppercase tracking-wider">Trading Fee</span>
             <span className="font-bold text-[#32FF8B]">{tradingFee}</span>
+          </div>
+
+          <div className="flex justify-between items-center text-[#C5C1B9]">
+            <span className="uppercase tracking-wider">Platform Fee</span>
+            <span className="font-bold text-white">{PLATFORM_FEE_LABEL}</span>
           </div>
         </div>
 
