@@ -15,6 +15,7 @@ interface ConfirmSwapModalProps {
   slippageTolerance?: string;
   minimumReceived?: string;
   tradingFee?: string;
+  platformFee?: string;
   isBridge?: boolean;
   fromChain?: string;
   toChain?: string;
@@ -33,6 +34,7 @@ export function ConfirmSwapModal({
   slippageTolerance = "0.50%",
   minimumReceived,
   tradingFee = "0.30%",
+  platformFee = "0.1%",
   isBridge = false,
   fromChain = "BOT Chain",
   toChain = "BNB Chain"
