@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, ExternalLink, Loader2, Check, Heart } from 'lucide-react';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, fallback, erc20Abi } from 'viem';
+import { getContracts } from '../lib/contracts';
 import { cn } from '../lib/utils';
 import { TokenIcon } from '../components/TokenIcon';
 import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '../lib/wagmi';
@@ -49,6 +50,34 @@ function chainFor(chainId: number) {
   return sepolia;
 }
 
+// Redundant public RPCs. Some in-app dApp browsers (TokenPocket, Bitget…)
+// block or rate-limit a single endpoint, which used to leave the tracker
+// spinning forever. Always poll through a fallback list.
+const RPC_URLS: Record<number, string[]> = {
+  677: ['https://rpc.botchain.ai'],
+  968: ['https://rpc.bohr.life'],
+  56: [
+    'https://bsc-dataseed.binance.org',
+    'https://bsc-dataseed1.defibit.io',
+    'https://bsc-dataseed1.ninicoin.io',
+    'https://binance.llamarpc.com',
+    'https://bsc.publicnode.com',
+  ],
+  97: ['https://data-seed-prebsc-1-s1.binance.org:8545', 'https://bsc-testnet.publicnode.com'],
+  1: ['https://eth.llamarpc.com', 'https://ethereum-rpc.publicnode.com', 'https://rpc.ankr.com/eth'],
+  11155111: ['https://ethereum-sepolia-rpc.publicnode.com'],
+};
+
+function clientFor(chainId: number) {
+  const urls = RPC_URLS[chainId] ?? [];
+  return createPublicClient({
+    chain: chainFor(chainId),
+    transport: urls.length
+      ? fallback(urls.map((u) => http(u, { timeout: 12_000 })), { rank: false })
+      : http(),
+  });
+}
+
 function sourceChainId(dir: BridgeDirection, isMainnet: boolean): number | null {
   switch (dir) {
     case 'BOT_TO_BNB': case 'BOT_TO_ETH': case 'BOT_TO_TRX': return isMainnet ? 677 : 968;
@@ -57,6 +86,36 @@ function sourceChainId(dir: BridgeDirection, isMainnet: boolean): number | null 
     case 'TRX_TO_BOT': return null; // Tron polled separately
   }
 }
+
+/** Destination chain id (null = Tron, non-EVM). */
+function destChainId(dir: BridgeDirection, isMainnet: boolean): number | null {
+  switch (dir) {
+    case 'BNB_TO_BOT': case 'ETH_TO_BOT': case 'TRX_TO_BOT': return isMainnet ? 677 : 968;
+    case 'BOT_TO_BNB': return isMainnet ? 56 : 97;
+    case 'BOT_TO_ETH': return isMainnet ? 1 : 11155111;
+    case 'BOT_TO_TRX': return null;
+  }
+}
+
+/** USDT token on the destination chain (EVM only). */
+function destUsdt(dir: BridgeDirection, isMainnet: boolean): `0x${string}` | null {
+  const c = getContracts(isMainnet);
+  switch (dir) {
+    case 'BNB_TO_BOT': case 'ETH_TO_BOT': case 'TRX_TO_BOT': return c.usdtBot as `0x${string}`;
+    case 'BOT_TO_BNB': return c.usdtBnb as `0x${string}`;
+    case 'BOT_TO_ETH': return c.usdtEth as `0x${string}`;
+    case 'BOT_TO_TRX': return null;
+  }
+}
+
+/** Trim trailing zeros but never round the user's input away (10.011 stays 10.011). */
+function displayAmount(raw: string): string {
+  const n = Number(raw);
+  if (!raw || Number.isNaN(n)) return '0';
+  const s = raw.trim();
+  return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
+}
+
 
 export function RealtimeBridgeTrackerModal({
   isOpen,
@@ -112,8 +171,11 @@ export function RealtimeBridgeTrackerModal({
     return () => clearInterval(interval);
   }, [isOpen, isCompleted]);
 
-  // Real source-chain tracker: poll for receipt + confirmations, then start
-  // the relay ETA countdown. Never mark "Completed" from a fixed timer.
+  // Baseline destination balance captured before the relayer credits funds.
+  const destBaseline = useRef<bigint | null>(null);
+
+  // Real source-chain tracker: poll for receipt + confirmations. Stage 2 flips
+  // only once the source chain has the required confirmations.
   useEffect(() => {
     if (!isOpen || !txHash || !bridgeDirection) return;
     let cancelled = false;
@@ -124,7 +186,7 @@ export function RealtimeBridgeTrackerModal({
 
     const pollEvm = async () => {
       try {
-        const client = createPublicClient({ chain: chainFor(srcId!), transport: http() });
+        const client = clientFor(srcId!);
         const receipt = await client.getTransactionReceipt({ hash: txHash as `0x${string}` }).catch(() => null);
         if (cancelled) return;
         if (!receipt) return; // still waiting for inclusion
@@ -136,7 +198,7 @@ export function RealtimeBridgeTrackerModal({
         const latest = await client.getBlockNumber();
         const conf = Number(latest - receipt.blockNumber) + 1;
         if (conf >= required) {
-          setStage2((s) => (s === 'done' ? s : 'done'));
+          setStage2('done');
           setStage3((s) => (s === 'pending' ? 'loading' : s));
           setRelaySecondsLeft((cur) => (cur > 0 ? cur : relayEta));
         } else {
@@ -168,21 +230,81 @@ export function RealtimeBridgeTrackerModal({
     return () => { cancelled = true; clearInterval(id); };
   }, [isOpen, txHash, bridgeDirection, isMainnet]);
 
-  // Relay countdown — only after source confirms — finally flips "Completed".
+  // Destination tracker: poll the recipient's USDT balance on the destination
+  // chain and flip "Received / Completed" only when funds actually land.
+  useEffect(() => {
+    if (!isOpen || !bridgeDirection || !recipientAddress) return;
+    const dstId = destChainId(bridgeDirection, isMainnet);
+    const token = destUsdt(bridgeDirection, isMainnet);
+    if (dstId === null || !token || !recipientAddress.startsWith('0x')) return; // Tron dest → ETA fallback
+
+    let cancelled = false;
+    destBaseline.current = null;
+    const client = clientFor(dstId);
+    const expected = (() => {
+      const n = Number(amount);
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    })();
+
+    const read = async () => {
+      try {
+        const [raw, decimals] = await Promise.all([
+          client.readContract({
+            address: token,
+            abi: erc20Abi,
+            functionName: 'balanceOf',
+            args: [recipientAddress as `0x${string}`],
+          }) as Promise<bigint>,
+          client.readContract({ address: token, abi: erc20Abi, functionName: 'decimals' }) as Promise<number>,
+        ]);
+        if (cancelled) return;
+        if (destBaseline.current === null) {
+          destBaseline.current = raw;
+          return;
+        }
+        const delta = Number(raw - destBaseline.current) / 10 ** decimals;
+        // 2% tolerance for relayer fees / partial rounding.
+        if (delta > 0 && (expected === 0 || delta >= expected * 0.9)) {
+          setStage1('done');
+          setStage2('done');
+          setStage3('done');
+          setIsCompleted(true);
+          setRelaySecondsLeft(0);
+        }
+      } catch {
+        // transient RPC failure — keep polling.
+      }
+    };
+
+    read();
+    const id = setInterval(read, 6000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isOpen, bridgeDirection, isMainnet, recipientAddress, amount, txHash]);
+
+  // Relay ETA countdown — display only. On non-EVM destinations (Tron), where
+  // the balance cannot be polled, it is also the completion fallback.
   useEffect(() => {
     if (!isOpen || relaySecondsLeft <= 0) return;
+    const canPollDest =
+      bridgeDirection != null &&
+      destChainId(bridgeDirection, isMainnet) !== null &&
+      recipientAddress.startsWith('0x');
     const id = setInterval(() => {
       setRelaySecondsLeft((s) => {
         if (s <= 1) {
-          setStage3('done');
-          setIsCompleted(true);
+          if (!canPollDest) {
+            setStage3('done');
+            setIsCompleted(true);
+          }
           return 0;
         }
         return s - 1;
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [isOpen, relaySecondsLeft]);
+  }, [isOpen, relaySecondsLeft, bridgeDirection, isMainnet, recipientAddress]);
+
+
 
 
   if (!isOpen) return null;
@@ -244,7 +366,7 @@ export function RealtimeBridgeTrackerModal({
               </div>
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{parseFloat(amount || '0').toFixed(0)}</span>
+                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{displayAmount(amount)}</span>
                 <span className="text-[12px] font-bold text-amber-500 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
               </div>
             </div>
@@ -271,7 +393,7 @@ export function RealtimeBridgeTrackerModal({
               </div>
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{parseFloat(amount || '0').toFixed(0)}</span>
+                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{displayAmount(amount)}</span>
                 <span className="text-[12px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
               </div>
             </div>

@@ -1736,7 +1736,7 @@ export default function App() {
             functionName: bnbFn,
             args: bnbArgs,
             chainId: targetChainIdForTab(),
-            gas: 1000000n
+            gas: 350000n // BSC deposit ≈120k used; cap keeps max fee ≈0.002 BNB
           } as any);
 
           const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
@@ -2596,7 +2596,7 @@ export default function App() {
               txUrlPrefix={bridgeSrcExplorerPrefix}
               gasFeeLabel={
                 isBotSource ? '≈ 0.095238 BOT'
-                : bridgePeer === 'BNB' ? '≈ 0.005 BNB'
+                : bridgePeer === 'BNB' ? '≈ 0.002 BNB'
                 : bridgePeer === 'ETH' ? '≈ 0.003 ETH'
                 : '≈ 15 TRX'
               }
