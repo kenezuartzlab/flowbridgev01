@@ -2834,6 +2834,7 @@ export default function App() {
              activeConfirmModal === 'BOT/USDT' ? "0.30%" :
              (bridgeDirection === 'BOT_TO_BNB' ? "1 USDT" : "0 USDT")
           }
+          platformFee="0.1%"
           isBridge={activeConfirmModal === 'BRIDGE'}
           fromChain={bridgeFromName}
           toChain={bridgeToName}
