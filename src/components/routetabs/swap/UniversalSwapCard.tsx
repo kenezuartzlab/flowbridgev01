@@ -534,13 +534,14 @@ export function UniversalSwapCard({
 
   const onMax = () => {
     if (!inBalanceRaw) return;
-    // leave a tiny native gas buffer
+    // The router pulls `amount + platform fee`, so a MAX of the full balance would
+    // revert (SafeERC20: call failed). Reserve the fee (and native gas) here.
     if (tokenIn.isNative) {
       const buf = parseUnits("0.001", tokenIn.decimals);
-      const usable = inBalanceRaw > buf ? inBalanceRaw - buf : 0n;
-      setAmountIn(formatUnits(usable, tokenIn.decimals));
+      const spendable = inBalanceRaw > buf ? inBalanceRaw - buf : 0n;
+      setAmountIn(formatUnits(maxSwappableFromBalance(spendable), tokenIn.decimals));
     } else {
-      setAmountIn(inBalanceDisplay);
+      setAmountIn(formatUnits(maxSwappableFromBalance(inBalanceRaw), tokenIn.decimals));
     }
   };
 
@@ -552,8 +553,10 @@ export function UniversalSwapCard({
       return 0n;
     }
   })();
-  const needsApproval = !tokenIn.isNative && parsedAmount > 0n && allowanceRaw < parsedAmount;
-  const insufficient = parsedAmount > inBalanceRaw;
+  // Total debited by FlowBridgeRouter = swap amount + protocol fee (charged on top).
+  const totalDebit = parsedAmount + routerFeeOnTop(parsedAmount);
+  const needsApproval = !tokenIn.isNative && parsedAmount > 0n && allowanceRaw < totalDebit;
+  const insufficient = totalDebit > inBalanceRaw;
 
   let buttonLabel = "Swap";
   let buttonDisabled = false;
