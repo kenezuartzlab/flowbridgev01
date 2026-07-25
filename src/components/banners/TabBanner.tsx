@@ -33,50 +33,93 @@ const COPY: Record<
   },
 };
 
+const THEME: Record<Variant, { from: string; to: string; fg: string; accent: string }> = {
+  swap: {
+    from: "var(--fb-banner-swap-from)",
+    to: "var(--fb-banner-swap-to)",
+    fg: "var(--fb-banner-swap-foreground)",
+    accent: "var(--fb-banner-swap-accent)",
+  },
+  rewards: {
+    from: "var(--fb-banner-swap-from)",
+    to: "var(--fb-banner-swap-to)",
+    fg: "var(--fb-banner-swap-foreground)",
+    accent: "var(--fb-banner-swap-accent)",
+  },
+  bridge: {
+    from: "var(--fb-banner-bridge-from)",
+    to: "var(--fb-banner-bridge-to)",
+    fg: "var(--fb-banner-bridge-foreground)",
+    accent: "var(--fb-banner-bridge-accent)",
+  },
+  activity: {
+    from: "var(--fb-banner-bridge-from)",
+    to: "var(--fb-banner-bridge-to)",
+    fg: "var(--fb-banner-bridge-foreground)",
+    accent: "var(--fb-banner-bridge-accent)",
+  },
+};
+
 /**
- * Presentational hero banner shown above the swap / bridge cards.
- * Never reads or writes execution state.
+ * Compact presentational hero banner shown above the swap / bridge cards.
+ * Matches the wallet/status card footprint. Never reads or writes execution state.
  */
 export function TabBanner({ variant, className = "" }: { variant: Variant; className?: string }) {
   const { title, body, art, cta } = COPY[variant];
+  const t = THEME[variant];
 
   return (
     <section
-      className={`relative overflow-hidden rounded-2xl bg-[linear-gradient(110deg,var(--fb-banner-from),var(--fb-banner-to))] px-4 py-4 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.6)] sm:px-5 ${className}`}
+      className={`relative overflow-hidden rounded-2xl px-4 py-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.6)] ${className}`}
+      style={{
+        background: `linear-gradient(110deg, ${t.from}, ${t.to})`,
+        color: t.fg,
+        borderTop: `1px solid ${t.accent}33`,
+      }}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-8 -top-12 h-40 w-40 rounded-full bg-white/15 blur-3xl"
+        className="pointer-events-none absolute -right-6 -top-10 h-28 w-28 rounded-full blur-2xl"
+        style={{ background: `${t.accent}40` }}
       />
-      <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:gap-4">
-        <div className="min-w-0">
-          <h2 className="text-[15px] font-black leading-tight tracking-tight text-[var(--fb-banner-foreground)] sm:text-[18px]">
-            {title}
-          </h2>
-          <p className="mt-1.5 text-[11.5px] leading-relaxed text-[var(--fb-banner-foreground)]/80 sm:text-[12.5px]">
-            {body}
-          </p>
-          {cta ? (
-            <Link
-              to={cta.to}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[var(--fb-banner-foreground)]/12 px-3 py-1.5 text-[11px] font-bold text-[var(--fb-banner-foreground)] ring-1 ring-inset ring-[var(--fb-banner-foreground)]/30 transition-colors hover:bg-[var(--fb-banner-foreground)]/20"
+      <div className="relative flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <img
+            src={art}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            draggable={false}
+            className="h-9 w-9 shrink-0 select-none object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+          />
+          <div className="min-w-0 space-y-0.5 font-mono">
+            <div
+              className="truncate text-[10px] font-bold uppercase tracking-wider"
+              style={{ color: t.fg }}
             >
-              {cta.label}
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-          ) : null}
+              {title}
+            </div>
+            <div className="truncate text-[9px] leading-tight opacity-80">{body}</div>
+          </div>
         </div>
-        <img
-          src={art}
-          alt=""
-          aria-hidden
-          loading="lazy"
-          width={1024}
-          height={700}
-          draggable={false}
-          className="h-20 w-24 shrink-0 select-none object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)] sm:h-24 sm:w-32 animate-fade-in"
-        />
+
+        {cta ? (
+          <Link
+            to={cta.to}
+            className="shrink-0 rounded-lg px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-wider transition-all active:scale-95"
+            style={{
+              background: `${t.accent}26`,
+              color: t.accent,
+              border: `1px solid ${t.accent}40`,
+            }}
+          >
+            {cta.label}
+          </Link>
+        ) : (
+          <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-60" />
+        )}
       </div>
     </section>
   );
 }
+
