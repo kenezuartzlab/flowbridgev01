@@ -223,15 +223,16 @@ export default function App() {
     const normalizedWallet = address?.toLowerCase();
     const emailVerified = !!(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo);
 
-    // Rewards/history rows are only recorded for a verified email + the exact
-    // wallet bound to that email. Guest, unverified, or mismatched sessions can
-    // still swap, but the server rejects reward logging for them.
+    // Activity rows are only recorded for a verified email + the exact wallet
+    // bound to that email, so every activity is attributable to one account.
+    // Guest, unverified, or mismatched sessions can still swap/bridge, but the
+    // server rejects activity logging for them.
     if (!emailVerified || !normalizedWallet) return;
 
-    // Bridge transactions do NOT count toward earnings. Only swaps that route
-    // through FlowBridgeRouter accrue rewards / swap volume. Skip logging any
-    // BRIDGE-type activity so it never appears in the earnings ledger.
-    if (String(txType).toUpperCase() === 'BRIDGE') return;
+    // NOTE: bridges are recorded for history/attribution only — the server
+    // always stores 0 points for them. Rewards remain swap-only.
+
+
 
 
     try {
