@@ -108,6 +108,19 @@ export const sepolia = defineChain({
   testnet: true,
 });
 
+export const polygon = defineChain({
+  id: 137,
+  name: 'Polygon',
+  nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://polygon-rpc.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'PolygonScan', url: 'https://polygonscan.com' },
+  },
+  testnet: false,
+});
+
 export const wagmiConfig = createConfig({
   chains: [botMainnet, bscMainnet, botTestnet, bscTestnet, ethereum, sepolia],
   storage: createStorage({
