@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw, Check, Circle } from "lucide-react";
+import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw, Check, Circle, Target } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { formatUsd } from "@/lib/format";
@@ -80,6 +80,83 @@ function RewardsPage() {
                 {(incentives?.claimableTotal ?? 0).toLocaleString()}
               </p>
             </section>
+            {/* Rewards Overview */}
+            <section>
+              <h2 className="mb-2 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-muted">
+                Rewards Overview
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                <OverviewTile
+                  label="Claimable"
+                  value={(incentives?.claimableTotal ?? 0).toLocaleString()}
+                  unit="FLOW"
+                  accent
+                />
+                <OverviewTile
+                  label="Claimed"
+                  value={(incentives?.claimedTokens ?? 0).toLocaleString()}
+                  unit="FLOW"
+                />
+                <OverviewTile
+                  label="Swap Volume"
+                  value={formatUsd(incentives?.totalSwapVolumeUsd ?? 0)}
+                  unit="lifetime"
+                />
+                <OverviewTile
+                  label="Invites"
+                  value={(incentives?.inviteCount ?? 0).toLocaleString()}
+                  unit="friends"
+                />
+              </div>
+            </section>
+
+            {/* Earn / Tasks */}
+            <section className="rounded-2xl border border-hairline bg-card p-4">
+              <div className="flex items-center gap-2">
+                <Target className="h-3.5 w-3.5 text-primary" />
+                <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">
+                  Earn / Tasks
+                </h2>
+              </div>
+              <ul className="mt-3 space-y-2.5">
+                <TaskRow
+                  label="Complete a swap"
+                  hint="Swaps accrue FLOW · bridges never do"
+                  progress={Math.min(1, (incentives?.pointsSelf ?? 0) > 0 ? 1 : 0)}
+                  detail={`${(incentives?.pointsSelf ?? 0).toLocaleString()} FLOW from swaps`}
+                  cta="Swap now"
+                />
+                <TaskRow
+                  label="Reach $100 swap volume"
+                  hint="Unlocks referral signup points"
+                  progress={Math.min(1, (incentives?.totalSwapVolumeUsd ?? 0) / 100)}
+                  detail={`${formatUsd(incentives?.totalSwapVolumeUsd ?? 0)} / ${formatUsd(100)}`}
+                  cta="Swap now"
+                />
+                <TaskRow
+                  label="Invite a friend"
+                  hint="Share your referral link below"
+                  progress={Math.min(1, (incentives?.inviteCount ?? 0) / 1)}
+                  detail={`${incentives?.inviteCount ?? 0} invited`}
+                />
+                <TaskRow
+                  label="Follow all socials"
+                  hint="Required before you can claim"
+                  progress={
+                    (["youtube", "x", "telegram"] as const).filter((k) => incentives?.socials?.[k])
+                      .length / 3
+                  }
+                  detail={`${
+                    (["youtube", "x", "telegram"] as const).filter((k) => incentives?.socials?.[k])
+                      .length
+                  } / 3 followed`}
+                />
+              </ul>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
+                Bridge activity is tracked for history only — no task credit
+              </p>
+            </section>
+
 
             {/* Claim checklist — mirrors the server-side claim requirements */}
             <section className="rounded-2xl border border-hairline bg-card p-4">
@@ -202,6 +279,85 @@ function RewardsPage() {
 
       <BottomNav />
     </div>
+  );
+}
+
+function OverviewTile({
+  label,
+  value,
+  unit,
+  accent,
+}: {
+  label: string;
+  value: string;
+  unit: string;
+  accent?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-2xl border p-3.5 ${
+        accent ? "border-primary/30 bg-primary/5" : "border-hairline bg-card"
+      }`}
+    >
+      <p className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted">
+        {label}
+      </p>
+      <p
+        className={`mt-1 text-xl font-black tabular-nums ${accent ? "text-primary" : "text-foreground"}`}
+      >
+        {value}
+      </p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">{unit}</p>
+    </div>
+  );
+}
+
+function TaskRow({
+  label,
+  hint,
+  progress,
+  detail,
+  cta,
+}: {
+  label: string;
+  hint: string;
+  progress: number;
+  detail: string;
+  cta?: string;
+}) {
+  const pct = Math.round(Math.min(1, Math.max(0, progress)) * 100);
+  const done = pct >= 100;
+
+  return (
+    <li className="rounded-xl border border-hairline bg-background-elev p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className={`text-[13px] font-bold ${done ? "text-foreground" : "text-muted"}`}>
+            {label}
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">{hint}</p>
+        </div>
+        {done ? (
+          <span className="shrink-0 rounded-md bg-primary/15 px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-primary">
+            Done
+          </span>
+        ) : cta ? (
+          <Link
+            to="/"
+            className="shrink-0 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-primary"
+          >
+            {cta}
+          </Link>
+        ) : null}
+      </div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-hairline">
+        <div
+          className="h-full rounded-full bg-primary transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-1 font-mono text-[10px] tabular-nums text-muted">{detail}</p>
+    </li>
   );
 }
 

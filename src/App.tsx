@@ -19,6 +19,7 @@ import {
 } from './lib/bridge/evmBridge';
 import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
+import { TabBanner } from './components/banners/TabBanner';
 import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
@@ -2327,6 +2328,11 @@ export default function App() {
         />
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col p-5 space-y-4 font-sans">
+
+          {/* Tab hero banner (presentational) */}
+          <TabBanner variant={activeTab === 'BRIDGE' ? 'bridge' : 'swap'} />
+
+
           
           {/* Dynamic FLOW Points Incentive Status Bar */}
           <div className="bg-[#030E1A]/40 border border-white/5 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 text-left">
