@@ -190,9 +190,10 @@ function MarketsPage() {
         <p className="text-[10px] text-[#C5C1B9]/50 text-center pt-2 leading-relaxed">
           BOT Chain prices are on-chain (BDex V3 / CaSwap V2). Cross-chain prices via CoinGecko public API.
           Auto-refreshes every 60s.
-        </p>
       </div>
+      <BottomNav />
     </div>
+
   );
 }
 
