@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ExternalLink, Loader2, Check, Heart } from 'lucide-react';
+import { X, ExternalLink, Loader2, Check } from 'lucide-react';
 import { createPublicClient, http, fallback, erc20Abi } from 'viem';
 import { getContracts } from '../lib/contracts';
 import { cn } from '../lib/utils';
-import { TokenIcon } from '../components/TokenIcon';
 import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '../lib/wagmi';
 import { fetchTronConfirmations } from '../lib/tronBridge';
 
@@ -116,6 +115,49 @@ function displayAmount(raw: string): string {
   return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
 }
 
+/** Chain badge artwork (real logos where we have them). */
+function chainBadge(chain: string): { src?: string; label?: string; ring: string; bg: string } {
+  const c = chain.toLowerCase();
+  if (c.includes('bnb') || c.includes('bsc') || c.includes('binance'))
+    return { src: '/bnb-logo.png', ring: 'ring-amber-400/40', bg: 'bg-[#010C1B]' };
+  if (c.includes('bot')) return { src: '/bot-icon.svg', ring: 'ring-teal-400/40', bg: 'bg-[#010C1B]' };
+  if (c.includes('eth') || c.includes('sepolia'))
+    return { label: 'Ξ', ring: 'ring-indigo-400/40', bg: 'bg-[#454A75]' };
+  if (c.includes('tron') || c.includes('trx'))
+    return { label: 'T', ring: 'ring-red-400/40', bg: 'bg-[#E50915]' };
+  return { label: chain.slice(0, 1).toUpperCase(), ring: 'ring-white/20', bg: 'bg-white/10' };
+}
+
+/** Overlapping USDT + chain logo pair, mirroring the official BotBridge tracker. */
+function TokenChainPair({ chain, delay = 0 }: { chain: string; delay?: number }) {
+  const badge = chainBadge(chain);
+  return (
+    <div className="relative flex items-center" style={{ animationDelay: `${delay}ms` }}>
+      <img
+        src="/usdt-logo.png"
+        alt="USDT"
+        className="w-12 h-12 rounded-full ring-2 ring-[#26A17B]/40 shadow-[0_0_18px_rgba(38,161,123,0.35)] animate-scale-in"
+        loading="lazy"
+      />
+      <span
+        className={cn(
+          '-ml-4 w-12 h-12 rounded-full ring-2 flex items-center justify-center overflow-hidden shadow-lg animate-scale-in',
+          badge.ring,
+          badge.bg,
+        )}
+        style={{ animationDelay: `${delay + 120}ms` }}
+      >
+        {badge.src ? (
+          <img src={badge.src} alt={chain} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <span className="text-base font-black text-white">{badge.label}</span>
+        )}
+      </span>
+    </div>
+  );
+}
+
+
 
 export function RealtimeBridgeTrackerModal({
   isOpen,
@@ -128,7 +170,6 @@ export function RealtimeBridgeTrackerModal({
   txHash,
   txUrlPrefix = 'https://scan.bohr.life/tx/',
   onReset,
-  onDonateClick,
   bridgeDirection,
   isMainnet = true,
 }: RealtimeBridgeTrackerModalProps) {
@@ -346,59 +387,52 @@ export function RealtimeBridgeTrackerModal({
           </h2>
         </div>
 
-        {/* Central Graphic Ring Overlay - Matches Page 1 and Page 2 Diagrams */}
-        <div className="relative flex justify-center py-6 h-[180px]">
+        {/* Central Graphic — real token/chain logos with ambient motion */}
+        <div className="relative flex justify-center py-6 min-h-[190px]">
           {/* Radial Glowing Ambient Circles */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-[170px] h-[170px] bg-gradient-to-r from-teal-500/10 to-[#32FF8B]/10 rounded-full blur-2xl animate-[pulse_4s_infinite]" />
-            <div className="absolute w-[140px] h-[140px] border border-slate-700/30 rounded-full" />
-            <div className="absolute w-[100px] h-[100px] border border-dashed border-teal-500/10 rounded-full animate-spin duration-[20s]" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-[190px] h-[190px] bg-gradient-to-r from-teal-500/15 to-[#32FF8B]/10 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
+            <div className="absolute w-[150px] h-[150px] border border-slate-700/30 rounded-full" />
+            <div className="absolute w-[110px] h-[110px] border border-dashed border-teal-500/20 rounded-full animate-[spin_18s_linear_infinite]" />
           </div>
 
-          <div className="relative flex items-center justify-center gap-10">
-            {/* Left Source Token Representation */}
-            <div className="flex flex-col items-center z-10 space-y-2">
-              <div className="relative p-1 bg-[#010C1B] rounded-2xl border border-white/5 shadow-lg group">
-                <TokenIcon symbol={symbol} size={48} className="translate-y-0.5" />
-                <span className="absolute -bottom-1 -right-1 bg-yellow-500/20 border border-yellow-500/40 rounded-full p-0.5">
-                  <div className="w-4 h-4 rounded-full bg-yellow-500 flex items-center justify-center text-[10px] font-black text-[#010C1B]">B</div>
-                </span>
-              </div>
+          <div className="relative flex items-start justify-between w-full px-1">
+            {/* Source */}
+            <div className="flex flex-col items-center z-10 space-y-2 w-[36%] animate-fade-in">
+              <TokenChainPair chain={fromChain} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{displayAmount(amount)}</span>
-                <span className="text-[12px] font-bold text-amber-500 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
+                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(amount)}</span>
+                <span className="text-[11px] font-bold text-amber-400 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
               </div>
             </div>
 
-            {/* Overlapping Central Exchange Arrows - Rotating loops */}
-            <div className="absolute flex flex-col items-center justify-center gap-1">
-              <div className="flex flex-col gap-1 items-center justify-center text-[#32FF8B]">
-                <span className="font-mono text-[10.5px] font-bold text-[#32FF8B]/70 uppercase animate-pulse">
-                  Relaying
-                </span>
-                <div className="flex gap-1">
-                  <span className="text-sm font-black animate-ping text-teal-400">↔</span>
-                </div>
+            {/* Center relay indicator */}
+            <div className="z-10 flex flex-col items-center justify-center gap-1.5 pt-3 w-[28%]">
+              <div className="flex items-center gap-1">
+                <span className={cn('text-lg font-black text-teal-400', !isCompleted && 'animate-bounce')}>↓</span>
+                <span className={cn('text-lg font-black text-[#32FF8B]', !isCompleted && 'animate-bounce')} style={{ animationDelay: '250ms' }}>↑</span>
+              </div>
+              <span className="font-mono text-[9.5px] font-bold text-[#32FF8B]/70 uppercase tracking-widest animate-pulse">
+                {isCompleted ? 'Settled' : 'Relaying'}
+              </span>
+              <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-amber-400/30 via-[#32FF8B]/60 to-teal-400/30 overflow-hidden">
+                <div className="h-full w-1/3 bg-[#32FF8B] animate-[slide-in-right_1.8s_ease-in-out_infinite]" />
               </div>
             </div>
 
-            {/* Right Destination Token Representation */}
-            <div className="flex flex-col items-center z-10 space-y-2">
-              <div className="relative p-1 bg-[#010C1B] rounded-2xl border border-white/5 shadow-lg">
-                <TokenIcon symbol={symbol} size={48} />
-                <span className="absolute -bottom-1 -right-1 bg-teal-500/20 border border-teal-500/40 rounded-full p-0.5">
-                  <div className="w-4 h-4 rounded-full bg-teal-500 flex items-center justify-center text-[10px] font-black text-[#010C1B]">₮</div>
-                </span>
-              </div>
+            {/* Destination */}
+            <div className="flex flex-col items-center z-10 space-y-2 w-[36%] animate-fade-in" style={{ animationDelay: '150ms' }}>
+              <TokenChainPair chain={toChain} delay={200} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{displayAmount(amount)}</span>
-                <span className="text-[12px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
+                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(amount)}</span>
+                <span className="text-[11px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
               </div>
             </div>
           </div>
         </div>
+
 
         {/* Countdown Timer or Completed Status badge in the center */}
         <div className="flex justify-center flex-col items-center">
@@ -455,28 +489,8 @@ export function RealtimeBridgeTrackerModal({
           </div>
         </div>
 
-        {/* Support CTA box */}
-        {onDonateClick && (
-          <div className="bg-[#122A26] border border-[#32FF8B]/15 rounded-xl p-3 text-left w-full relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-[#32FF8B]/10 to-transparent blur-md pointer-events-none" />
-            <p className="text-[12px] leading-relaxed font-semibold text-[#32FF8B] mb-1 flex items-center gap-1">
-              <Heart className="w-3 h-3 fill-[#32FF8B]" />
-              <span>FlowBridge is free and charges 0% fees!</span>
-            </p>
-            <p className="text-[12px] text-[#C5C1B9] leading-tight mb-2.5">
-              Support original open-source builders to bring you new cross-chain analytics & earnings trackers.
-            </p>
-            <button
-              onClick={() => {
-                onClose();
-                onDonateClick();
-              }}
-              className="w-full py-1.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/35 text-[#32FF8B] font-mono font-black text-[11px] uppercase tracking-widest rounded-lg transition-all duration-150 cursor-pointer text-center"
-            >
-              💖 Donate / Support
-            </button>
-          </div>
-        )}
+
+
 
         {/* Detail action and close paths */}
         <div className="flex flex-col gap-2 pt-2">
