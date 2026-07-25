@@ -214,7 +214,7 @@ export function AppHeader({
     {
       id: 'donate',
       label: 'Support',
-      icon: <Heart className="w-4 h-4 fill-[#32FF8B]/20 text-[#32FF8B]/80" />,
+      icon: <Heart className="w-4 h-4 fill-primary/20 text-primary/80" />,
       onClick: () => { onDonateClick?.(); setMenuOpen(false); },
       show: !!onDonateClick,
     },
@@ -249,14 +249,14 @@ export function AppHeader({
   ].filter(m => m.show);
 
   return (
-    <header className="presentation-exempt flex flex-col border-b border-white/10 bg-[#010C1B] relative z-20 w-full font-mono">
+    <header className="presentation-exempt flex flex-col border-b border-hairline bg-background relative z-20 w-full font-mono">
       <div className="flex items-center justify-between gap-2 p-3 sm:p-4 min-w-0">
         {/* Brand */}
         <div className="flex flex-col min-w-0 shrink">
           <div className="flex items-center gap-2 min-w-0">
             <img src={logoUrl} alt="" className="w-6 h-6 rounded-md shrink-0" draggable={false} />
-            <h1 className="text-sm font-black tracking-widest text-white uppercase leading-none truncate">
-              FlowBridge<span className="text-[#32FF8B]">.</span>
+            <h1 className="text-sm font-black tracking-widest text-foreground uppercase leading-none truncate">
+              FlowBridge<span className="text-primary">.</span>
             </h1>
           </div>
           <div className="flex items-center gap-1.5 mt-2">
@@ -297,8 +297,8 @@ export function AppHeader({
               className={cn(
                 "p-2 border rounded-xl cursor-pointer transition-all shadow-sm active:scale-95",
                 menuOpen
-                  ? "bg-[#32FF8B]/15 border-[#32FF8B]/50 text-[#32FF8B]"
-                  : "bg-[#0D1C2A] border-white/10 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30 hover:bg-white/5"
+                  ? "bg-primary/15 border-primary/50 text-primary"
+                  : "bg-card border-hairline text-muted hover:text-primary hover:border-primary/30 hover:bg-white/5"
               )}
             >
               {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -307,10 +307,10 @@ export function AppHeader({
             {menuOpen && (
               <div
                 role="menu"
-                className="animate-menu-in absolute right-0 mt-2 w-56 bg-[#0D1C2A]/98 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.75)] overflow-hidden z-50"
+                className="animate-menu-in absolute right-0 mt-2 w-56 bg-card/95 backdrop-blur-xl border border-hairline rounded-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.75)] overflow-hidden z-50"
               >
-                <div className="px-3 py-2 border-b border-white/5">
-                  <p className="text-[10px] tracking-[0.25em] uppercase text-[#C5C1B9]/70 font-black">
+                <div className="px-3 py-2 border-b border-hairline">
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-muted-soft font-black">
                     Menu
                   </p>
                 </div>
@@ -323,15 +323,15 @@ export function AppHeader({
                         className={cn(
                           "w-full flex items-center gap-3 px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
                           item.accent
-                            ? "text-[#32FF8B] hover:bg-[#32FF8B]/10"
-                            : "text-[#F0F7F3] hover:bg-white/5 hover:text-[#32FF8B]"
+                            ? "text-primary hover:bg-primary/10"
+                            : "text-foreground hover:bg-white/5 hover:text-primary"
                         )}
                       >
                         <span className={cn(
                           "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
                           item.accent
-                            ? "bg-[#32FF8B]/10 border-[#32FF8B]/30"
-                            : "bg-white/5 border-white/10"
+                            ? "bg-primary/10 border-primary/30"
+                            : "bg-white/5 border-hairline"
                         )}>
                           {item.icon}
                         </span>
@@ -348,11 +348,11 @@ export function AppHeader({
 
       {recipientAddress && (
         <div className="flex items-center justify-end gap-2 px-3 sm:px-4 pb-2 -mt-1">
-          <div className="flex items-center gap-1.5 bg-[#0D1C2A]/60 border border-white/5 rounded-lg px-2 py-1">
-            <span className="text-[9px] tracking-[0.2em] uppercase text-[#C5C1B9]/60 font-black">
+          <div className="flex items-center gap-1.5 bg-card/60 border border-hairline rounded-lg px-2 py-1">
+            <span className="text-[9px] tracking-[0.2em] uppercase text-muted-soft font-black">
               {recipientLabel || 'Recipient'}
             </span>
-            <span className="text-[11px] font-mono font-bold text-[#F0F7F3]/85">
+            <span className="text-[11px] font-mono font-bold text-foreground/85">
               {`${recipientAddress.slice(0, 6)}…${recipientAddress.slice(-4)}`}
             </span>
           </div>
@@ -360,9 +360,9 @@ export function AppHeader({
       )}
 
       {referralAppliedCode && !googleUser && (
-        <div className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 bg-[#32FF8B]/8 border-t border-[#32FF8B]/20 text-[#32FF8B] text-[11px] font-mono font-bold tracking-wider">
+        <div className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 bg-primary/10 border-t border-primary/25 text-primary text-[11px] font-mono font-bold tracking-wider">
           <Gift className="w-3 h-3" />
-          <span>Referral applied: <span className="text-white">{referralAppliedCode}</span> — sign in to earn +50 FLOW for you & referrer.</span>
+          <span>Referral applied: <span className="text-foreground">{referralAppliedCode}</span> — sign in to earn +50 FLOW for you & referrer.</span>
         </div>
       )}
 
@@ -372,13 +372,13 @@ export function AppHeader({
             <AlertTriangle className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
             <span className="leading-tight truncate pr-1">
               {successMsg ? (
-                <span className="text-[#32FF8B] font-bold flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3 text-[#32FF8B]" /> {successMsg}
+                <span className="text-primary font-bold flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3 text-primary" /> {successMsg}
                 </span>
               ) : errorMsg ? (
                 <span className="text-red-400 font-bold">{errorMsg}</span>
               ) : (
-                <>Email unverified! Verify <span className="text-white font-bold">{googleUser.email}</span></>
+                <>Email unverified! Verify <span className="text-foreground font-bold">{googleUser.email}</span></>
               )}
             </span>
           </div>
@@ -388,7 +388,7 @@ export function AppHeader({
               onClick={handleResend}
               disabled={loading || cooldownSec > 0}
               title={cooldownSec > 0 ? `Wait ${cooldownSec}s before resending` : 'Resend verification email'}
-              className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 hover:text-white rounded text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px]"
+              className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 hover:text-foreground rounded text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px]"
             >
               {cooldownSec > 0 ? `${cooldownSec}s` : 'Resend'}
             </button>
@@ -396,7 +396,7 @@ export function AppHeader({
               onClick={handleRefresh}
               disabled={loading}
               title="Refresh verification status"
-              className="p-1 hover:bg-white/5 border border-white/10 hover:border-white/20 text-[#C5C1B9] hover:text-white rounded transition-all cursor-pointer disabled:opacity-50"
+              className="p-1 hover:bg-white/5 border border-hairline hover:border-white/20 text-muted hover:text-foreground rounded transition-all cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={cn("w-2.5 h-2.5", loading && "animate-spin")} />
             </button>
