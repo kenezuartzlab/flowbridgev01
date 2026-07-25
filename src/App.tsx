@@ -1190,7 +1190,18 @@ export default function App() {
           chainId: cid,
           gas,
         } as any) as Promise<`0x${string}`>,
-      getChainId: () => currentChainId,
+      // Read the live provider chain id when possible: React state can be one
+      // render behind, which would make the post-switch verification flaky.
+      getChainId: () => {
+        try {
+          const raw = (globalThis as any)?.ethereum?.chainId;
+          if (typeof raw === 'string') return parseInt(raw, 16);
+          if (typeof raw === 'number') return raw;
+        } catch {
+          /* ignore */
+        }
+        return currentChainId;
+      },
       switchChain: async (cid) => {
         await switchChain({ chainId: cid });
       },
