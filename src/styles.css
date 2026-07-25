@@ -61,6 +61,16 @@ html.light {
   --fb-banner-from: #DCEBFF;
   --fb-banner-to: #CFE6FF;
   --fb-banner-foreground: #0B2C63;
+  /* Per-variant banner emphasis (light) */
+  --fb-banner-swap-from: #EDE4FF;
+  --fb-banner-swap-to: #DDF3FF;
+  --fb-banner-swap-foreground: #3B1D8F;
+  --fb-banner-swap-accent: #15803D;
+  --fb-banner-bridge-from: #DCEBFF;
+  --fb-banner-bridge-to: #D3F5EE;
+  --fb-banner-bridge-foreground: #0B2C63;
+  --fb-banner-bridge-accent: #0B7A70;
+
 
 
 }
