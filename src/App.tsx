@@ -11,6 +11,7 @@ import {
   type TronStatus,
 } from './lib/tronBridge';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
+import { maxSwappableDisplay } from './lib/swap/platformFee';
 import type { BridgeDeps } from './lib/bridge/evmBridge';
 import {
   ensureBridgeAllowance as ensureBridgeAllowanceCore,
@@ -2192,12 +2193,15 @@ export default function App() {
     return "0.00";
   };
 
+  // FlowBridgeRouter debits `amount + platform fee`, so MAX must reserve the fee
+  // or the swap reverts on-chain with SafeERC20: call failed.
   const getTokenMaxAmount = (symbol: string) => {
-    if (symbol === 'BOT') return getExactBalanceAmount('BOT');
-    if (symbol === 'USDT') return getExactBalanceAmount('USDT_BOT');
-    if (symbol === 'CA') return getExactBalanceAmount('CA');
+    if (symbol === 'BOT') return maxSwappableDisplay(getExactBalanceAmount('BOT'), 18);
+    if (symbol === 'USDT') return maxSwappableDisplay(getExactBalanceAmount('USDT_BOT'), 6);
+    if (symbol === 'CA') return maxSwappableDisplay(getExactBalanceAmount('CA'), 18);
     return getTokenBalance(symbol).replace(/\s*FLOW$/, '');
   };
+
 
   const payBalance = getTokenBalance(paySymbol);
   const recBalance = getTokenBalance(recSymbol);
@@ -2510,7 +2514,7 @@ export default function App() {
               toUsdValue={getCaToBotDisplayUsd(false)}
               fromBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('CA') : getBalanceDisplay('BOT')}
               toBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('BOT') : getBalanceDisplay('CA')}
-              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? getExactBalanceAmount('CA') : getExactBalanceAmount('BOT')}
+              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? maxSwappableDisplay(getExactBalanceAmount('CA'), 18) : maxSwappableDisplay(getExactBalanceAmount('BOT'), 18)}
               onFromAmountChange={setCaAmount}
               onToggleDirection={handleToggleCaBot}
               buttonLabel={caButtonLabel}

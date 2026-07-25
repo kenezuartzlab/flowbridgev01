@@ -20,6 +20,7 @@ import {
   type Token,
 } from "@/lib/swap/tokenRegistry";
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
+import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
@@ -243,6 +244,30 @@ export function UniversalSwapCard({
       fee = 0n;
     }
     const totalIn = amountInRaw + fee;
+
+    // ── Balance guard: the router debits `amount + fee`, so swapping an exact
+    // full balance fails on-chain with a cryptic SafeERC20 error. Catch it here
+    // with a message the user can act on.
+    try {
+      const held = step.inIsNative
+        ? await publicClient!.getBalance({ address: address as `0x${string}` })
+        : ((await publicClient!.readContract({
+            address: step.path[0],
+            abi: ERC20_ABI,
+            functionName: "balanceOf",
+            args: [address as `0x${string}`],
+          })) as bigint);
+      if (held < totalIn) {
+        const feeDisp = formatUnits(fee, step.inIsNative ? 18 : tokenIn.decimals);
+        throw new Error(
+          `Not enough ${step.symbolPath[0]} to cover this swap plus the ${PLATFORM_FEE_LABEL} platform fee (${feeDisp} ${step.symbolPath[0]}). Tap MAX again or lower the amount slightly, then retry.`,
+        );
+      }
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith("Not enough")) throw err;
+      // Balance read failed — continue and let the wallet/router surface any issue.
+    }
+
 
     // ── ERC20 approval: allowance target is FlowBridgeRouter v3, not the DEX router ──
     if (!step.inIsNative) {
@@ -533,13 +558,14 @@ export function UniversalSwapCard({
 
   const onMax = () => {
     if (!inBalanceRaw) return;
-    // leave a tiny native gas buffer
+    // The router pulls `amount + platform fee`, so a MAX of the full balance would
+    // revert (SafeERC20: call failed). Reserve the fee (and native gas) here.
     if (tokenIn.isNative) {
       const buf = parseUnits("0.001", tokenIn.decimals);
-      const usable = inBalanceRaw > buf ? inBalanceRaw - buf : 0n;
-      setAmountIn(formatUnits(usable, tokenIn.decimals));
+      const spendable = inBalanceRaw > buf ? inBalanceRaw - buf : 0n;
+      setAmountIn(formatUnits(maxSwappableFromBalance(spendable), tokenIn.decimals));
     } else {
-      setAmountIn(inBalanceDisplay);
+      setAmountIn(formatUnits(maxSwappableFromBalance(inBalanceRaw), tokenIn.decimals));
     }
   };
 
@@ -551,8 +577,10 @@ export function UniversalSwapCard({
       return 0n;
     }
   })();
-  const needsApproval = !tokenIn.isNative && parsedAmount > 0n && allowanceRaw < parsedAmount;
-  const insufficient = parsedAmount > inBalanceRaw;
+  // Total debited by FlowBridgeRouter = swap amount + protocol fee (charged on top).
+  const totalDebit = parsedAmount + routerFeeOnTop(parsedAmount);
+  const needsApproval = !tokenIn.isNative && parsedAmount > 0n && allowanceRaw < totalDebit;
+  const insufficient = totalDebit > inBalanceRaw;
 
   let buttonLabel = "Swap";
   let buttonDisabled = false;
