@@ -366,7 +366,7 @@ export function RealtimeBridgeTrackerModal({
               </div>
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{parseFloat(amount || '0').toFixed(0)}</span>
+                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{displayAmount(amount)}</span>
                 <span className="text-[12px] font-bold text-amber-500 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
               </div>
             </div>
@@ -393,7 +393,7 @@ export function RealtimeBridgeTrackerModal({
               </div>
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{parseFloat(amount || '0').toFixed(0)}</span>
+                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{displayAmount(amount)}</span>
                 <span className="text-[12px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
               </div>
             </div>
