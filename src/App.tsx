@@ -1848,13 +1848,23 @@ export default function App() {
             args: ethArgs,
           });
 
+          const ethDepositGas = await estimateDepositGas({
+            chainId: targetChainIdForTab(),
+            account: address as `0x${string}`,
+            bridge: contracts.ethBridgeProxy as `0x${string}`,
+            abi: ethAbi,
+            functionName: ethFn,
+            args: ethArgs,
+            fallback: 1000000n,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.ethBridgeProxy as `0x${string}`,
             abi: ethAbi,
             functionName: ethFn,
             args: ethArgs,
             chainId: targetChainIdForTab(),
-            gas: 600000n
+            gas: ethDepositGas
           } as any);
 
 
