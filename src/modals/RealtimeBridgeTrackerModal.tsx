@@ -50,6 +50,34 @@ function chainFor(chainId: number) {
   return sepolia;
 }
 
+// Redundant public RPCs. Some in-app dApp browsers (TokenPocket, Bitget…)
+// block or rate-limit a single endpoint, which used to leave the tracker
+// spinning forever. Always poll through a fallback list.
+const RPC_URLS: Record<number, string[]> = {
+  677: ['https://rpc.botchain.ai'],
+  968: ['https://rpc.bohr.life'],
+  56: [
+    'https://bsc-dataseed.binance.org',
+    'https://bsc-dataseed1.defibit.io',
+    'https://bsc-dataseed1.ninicoin.io',
+    'https://binance.llamarpc.com',
+    'https://bsc.publicnode.com',
+  ],
+  97: ['https://data-seed-prebsc-1-s1.binance.org:8545', 'https://bsc-testnet.publicnode.com'],
+  1: ['https://eth.llamarpc.com', 'https://ethereum-rpc.publicnode.com', 'https://rpc.ankr.com/eth'],
+  11155111: ['https://ethereum-sepolia-rpc.publicnode.com'],
+};
+
+function clientFor(chainId: number) {
+  const urls = RPC_URLS[chainId] ?? [];
+  return createPublicClient({
+    chain: chainFor(chainId),
+    transport: urls.length
+      ? fallback(urls.map((u) => http(u, { timeout: 12_000 })), { rank: false })
+      : http(),
+  });
+}
+
 function sourceChainId(dir: BridgeDirection, isMainnet: boolean): number | null {
   switch (dir) {
     case 'BOT_TO_BNB': case 'BOT_TO_ETH': case 'BOT_TO_TRX': return isMainnet ? 677 : 968;
@@ -58,6 +86,36 @@ function sourceChainId(dir: BridgeDirection, isMainnet: boolean): number | null 
     case 'TRX_TO_BOT': return null; // Tron polled separately
   }
 }
+
+/** Destination chain id (null = Tron, non-EVM). */
+function destChainId(dir: BridgeDirection, isMainnet: boolean): number | null {
+  switch (dir) {
+    case 'BNB_TO_BOT': case 'ETH_TO_BOT': case 'TRX_TO_BOT': return isMainnet ? 677 : 968;
+    case 'BOT_TO_BNB': return isMainnet ? 56 : 97;
+    case 'BOT_TO_ETH': return isMainnet ? 1 : 11155111;
+    case 'BOT_TO_TRX': return null;
+  }
+}
+
+/** USDT token on the destination chain (EVM only). */
+function destUsdt(dir: BridgeDirection, isMainnet: boolean): `0x${string}` | null {
+  const c = getContracts(isMainnet);
+  switch (dir) {
+    case 'BNB_TO_BOT': case 'ETH_TO_BOT': case 'TRX_TO_BOT': return c.usdtBot as `0x${string}`;
+    case 'BOT_TO_BNB': return c.usdtBnb as `0x${string}`;
+    case 'BOT_TO_ETH': return c.usdtEth as `0x${string}`;
+    case 'BOT_TO_TRX': return null;
+  }
+}
+
+/** Trim trailing zeros but never round the user's input away (10.011 stays 10.011). */
+function displayAmount(raw: string): string {
+  const n = Number(raw);
+  if (!raw || Number.isNaN(n)) return '0';
+  const s = raw.trim();
+  return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
+}
+
 
 export function RealtimeBridgeTrackerModal({
   isOpen,
