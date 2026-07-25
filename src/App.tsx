@@ -2329,15 +2329,12 @@ export default function App() {
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col items-stretch px-4 py-4 sm:px-5 sm:py-5 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
 
-          {/* Tab hero banner (presentational) */}
-          <TabBanner variant={activeTab === 'BRIDGE' ? 'bridge' : 'swap'} />
+          {/* Tab hero banner + status bar, cross-fading (presentational) */}
+          <BannerRotator
+            slides={[
+              <TabBanner key="hero" variant={activeTab === 'BRIDGE' ? 'bridge' : 'swap'} />,
+              <div key="status" className="bg-[#030E1A]/40 border border-white/5 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 text-left">
 
-
-
-
-          
-          {/* Dynamic FLOW Points Incentive Status Bar */}
-          <div className="bg-[#030E1A]/40 border border-white/5 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 text-left">
             <div className="flex items-center gap-2.5">
               <div className={cn(
                 "p-1.5 rounded-lg border shrink-0",
