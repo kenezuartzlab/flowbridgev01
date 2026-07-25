@@ -116,6 +116,49 @@ function displayAmount(raw: string): string {
   return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
 }
 
+/** Chain badge artwork (real logos where we have them). */
+function chainBadge(chain: string): { src?: string; label?: string; ring: string; bg: string } {
+  const c = chain.toLowerCase();
+  if (c.includes('bnb') || c.includes('bsc') || c.includes('binance'))
+    return { src: '/bnb-logo.png', ring: 'ring-amber-400/40', bg: 'bg-[#010C1B]' };
+  if (c.includes('bot')) return { src: '/bot-icon.svg', ring: 'ring-teal-400/40', bg: 'bg-[#010C1B]' };
+  if (c.includes('eth') || c.includes('sepolia'))
+    return { label: 'Ξ', ring: 'ring-indigo-400/40', bg: 'bg-[#454A75]' };
+  if (c.includes('tron') || c.includes('trx'))
+    return { label: 'T', ring: 'ring-red-400/40', bg: 'bg-[#E50915]' };
+  return { label: chain.slice(0, 1).toUpperCase(), ring: 'ring-white/20', bg: 'bg-white/10' };
+}
+
+/** Overlapping USDT + chain logo pair, mirroring the official BotBridge tracker. */
+function TokenChainPair({ chain, delay = 0 }: { chain: string; delay?: number }) {
+  const badge = chainBadge(chain);
+  return (
+    <div className="relative flex items-center" style={{ animationDelay: `${delay}ms` }}>
+      <img
+        src="/usdt-logo.png"
+        alt="USDT"
+        className="w-12 h-12 rounded-full ring-2 ring-[#26A17B]/40 shadow-[0_0_18px_rgba(38,161,123,0.35)] animate-scale-in"
+        loading="lazy"
+      />
+      <span
+        className={cn(
+          '-ml-4 w-12 h-12 rounded-full ring-2 flex items-center justify-center overflow-hidden shadow-lg animate-scale-in',
+          badge.ring,
+          badge.bg,
+        )}
+        style={{ animationDelay: `${delay + 120}ms` }}
+      >
+        {badge.src ? (
+          <img src={badge.src} alt={chain} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <span className="text-base font-black text-white">{badge.label}</span>
+        )}
+      </span>
+    </div>
+  );
+}
+
+
 
 export function RealtimeBridgeTrackerModal({
   isOpen,
