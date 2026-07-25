@@ -122,7 +122,7 @@ export const polygon = defineChain({
 });
 
 export const wagmiConfig = createConfig({
-  chains: [botMainnet, bscMainnet, botTestnet, bscTestnet, ethereum, sepolia],
+  chains: [botMainnet, bscMainnet, botTestnet, bscTestnet, ethereum, sepolia, polygon],
   storage: createStorage({
     key: 'flowbridge.wallet',
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
@@ -152,6 +152,7 @@ export const wagmiConfig = createConfig({
     [bscTestnet.id]: http(),
     [ethereum.id]: http(),
     [sepolia.id]: http(),
+    [polygon.id]: http(),
   },
 });
 
