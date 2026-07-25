@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 
-import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
+import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http, maxUint256 } from 'viem';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/wagmi';
 import {
   isTronLinkAvailable, requestTronLinkAccounts, isValidTronAddress,
@@ -1112,6 +1112,108 @@ export default function App() {
     }
   };
 
+  // ------------------------------------------------------------------
+  // Bridge preflight helpers
+  //
+  // Root cause of "it said confirming but nothing bridged, funds still on
+  // BNB": the deposit was broadcast before the ERC-20 approval had actually
+  // been mined (we only slept 3s), so the bridge's transferFrom reverted.
+  // The USDT never left the source chain. These helpers make the approval
+  // deterministic and simulate the deposit before asking the user to sign.
+  // ------------------------------------------------------------------
+  const publicClientFor = (chainId: number) =>
+    createPublicClient({ chain: getChainForId(chainId), transport: http() });
+
+  /** Approve `spender` for `token` (unlimited) and block until the allowance is really on-chain. */
+  const ensureBridgeAllowance = async (opts: {
+    chainId: number;
+    token: `0x${string}`;
+    owner: `0x${string}`;
+    spender: `0x${string}`;
+    needed: bigint;
+  }) => {
+    const client = publicClientFor(opts.chainId);
+    const readAllowance = async () =>
+      (await client.readContract({
+        address: opts.token,
+        abi: ERC20_ABI as any,
+        functionName: 'allowance',
+        args: [opts.owner, opts.spender],
+      })) as bigint;
+
+    let allowance = await readAllowance().catch(() => 0n);
+    if (allowance >= opts.needed) return;
+
+    setActionStep('approving_usdt');
+    const approveTx = await writeContractAsync({
+      address: opts.token,
+      abi: ERC20_ABI,
+      functionName: 'approve',
+      args: [opts.spender, maxUint256],
+      chainId: opts.chainId,
+      gas: 150000n,
+    } as any);
+
+    const receipt = await client.waitForTransactionReceipt({
+      hash: approveTx as `0x${string}`,
+      confirmations: 1,
+      pollingInterval: 2_000,
+      timeout: 180_000,
+    });
+    if (receipt.status !== 'success') {
+      throw new Error('The token approval transaction failed. No funds were moved — please try the approval again.');
+    }
+
+    // Some RPC nodes lag one block behind the receipt; poll until visible.
+    for (let i = 0; i < 10; i++) {
+      allowance = await readAllowance().catch(() => 0n);
+      if (allowance >= opts.needed) return;
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    throw new Error('Approval is not visible on-chain yet. Wait a few seconds and tap bridge again — no funds were sent.');
+  };
+
+  /** Balance + simulation guard. Throws a friendly message instead of letting the user sign a doomed tx. */
+  const preflightBridgeDeposit = async (opts: {
+    chainId: number;
+    token: `0x${string}`;
+    owner: `0x${string}`;
+    amount: bigint;
+    bridge: `0x${string}`;
+    abi: any;
+    functionName: string;
+    args: any[];
+    symbol?: string;
+  }) => {
+    const client = publicClientFor(opts.chainId);
+
+    const balance = (await client
+      .readContract({ address: opts.token, abi: ERC20_ABI as any, functionName: 'balanceOf', args: [opts.owner] })
+      .catch(() => null)) as bigint | null;
+    if (balance !== null && balance < opts.amount) {
+      throw new Error(`Not enough ${opts.symbol ?? 'USDT'} in your wallet for this bridge. Lower the amount and try again.`);
+    }
+
+    try {
+      await client.simulateContract({
+        account: opts.owner,
+        address: opts.bridge,
+        abi: opts.abi,
+        functionName: opts.functionName as any,
+        args: opts.args as any,
+      });
+    } catch (err: any) {
+      const msg = String(err?.shortMessage || err?.details || err?.message || '');
+      if (/insufficient funds|gas required|exceeds balance/i.test(msg)) {
+        throw new Error('Not enough gas on the source chain to pay for this bridge transaction.');
+      }
+      throw new Error(
+        'The bridge rejected this transfer before sending, so no funds left your wallet. Check the amount (minimum $10), that the destination chain is supported, and try again in a moment.',
+      );
+    }
+  };
+
+
   const isNetworkCorrect = !isConnected || currentChainId === targetChainIdForTab();
 
   const handleSwitchNetwork = async () => {
@@ -1498,6 +1600,15 @@ export default function App() {
       try {
         setIsActionLoading(true);
 
+        // Make sure the wallet is really on the source chain before signing.
+        // Some mobile wallets silently ignore the chainId hint on writeContract.
+        if (bridgeDirection !== 'TRX_TO_BOT' && currentChainId !== targetChainIdForTab()) {
+          await switchChain({ chainId: targetChainIdForTab() });
+          await new Promise((r) => setTimeout(r, 800));
+        }
+
+
+
         // ============================================================
         // BOT → {BNB, ETH} : source = BOT Chain, use botBridgeProxy
         // (BOT_TO_TRX is gated above; do not send.)
@@ -1509,35 +1620,43 @@ export default function App() {
             ? (isMainnet ? 56n : 97n)
             : /* ETH */ (isMainnet ? 1n : 11155111n);
 
-          const allowance = rawUsdtBotBridgeAllowance ? BigInt(rawUsdtBotBridgeAllowance.toString()) : 0n;
-          if (allowance < parsedAmount) {
-            setActionStep('approving_usdt');
-            await writeContractAsync({
-              address: contracts.usdtBot as `0x${string}`,
-              abi: ERC20_ABI,
-              functionName: 'approve',
-              args: [contracts.botBridgeProxy as `0x${string}`, parsedAmount],
-              chainId: targetChainIdForTab(),
-              gas: 150000n
-            } as any);
-            await new Promise(r => setTimeout(r, 3000));
-            refetchUsdtBotBridgeAllowance();
-          }
+          const depositAbi = [{
+            inputs: [
+              { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+              { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+              { internalType: "address", name: "recipient", type: "address" },
+              { internalType: "uint256", name: "amount", type: "uint256" }
+            ],
+            name: "deposit", outputs: [], stateMutability: "payable", type: "function"
+          }] as const;
+          const depositArgs = [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount];
+
+          await ensureBridgeAllowance({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtBot as `0x${string}`,
+            owner: address as `0x${string}`,
+            spender: contracts.botBridgeProxy as `0x${string}`,
+            needed: parsedAmount,
+          });
+          refetchUsdtBotBridgeAllowance();
 
           setActionStep('bridging_usdt');
+          await preflightBridgeDeposit({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtBot as `0x${string}`,
+            owner: address as `0x${string}`,
+            amount: parsedAmount,
+            bridge: contracts.botBridgeProxy as `0x${string}`,
+            abi: depositAbi,
+            functionName: 'deposit',
+            args: depositArgs,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.botBridgeProxy as `0x${string}`,
-            abi: [{
-              inputs: [
-                { internalType: "uint256", name: "destinationChainId", type: "uint256" },
-                { internalType: "bytes32", name: "resourceId", type: "bytes32" },
-                { internalType: "address", name: "recipient", type: "address" },
-                { internalType: "uint256", name: "amount", type: "uint256" }
-              ],
-              name: "deposit", outputs: [], stateMutability: "payable", type: "function"
-            }],
+            abi: depositAbi,
             functionName: 'deposit',
-            args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
+            args: depositArgs,
             chainId: targetChainIdForTab(),
             gas: 1000000n
           } as any);
@@ -1553,40 +1672,47 @@ export default function App() {
         } else if (bridgePeer === 'BNB') {
           // ================= BNB → BOT (existing path) =================
           const parsedAmount = parseUnits(usdtAmount, 18);
-          const allowance = rawUsdtBnbBridgeAllowance ? BigInt(rawUsdtBnbBridgeAllowance.toString()) : 0n;
-          if (allowance < parsedAmount) {
-            setActionStep('approving_usdt');
-            await writeContractAsync({
-              address: contracts.usdtBnb as `0x${string}`,
-              abi: ERC20_ABI,
-              functionName: 'approve',
-              args: [contracts.bnbBridgeProxy as `0x${string}`, parsedAmount],
-              chainId: targetChainIdForTab(),
-              gas: 150000n
-            } as any);
-            await new Promise(r => setTimeout(r, 3000));
-            refetchUsdtBnbBridgeAllowance();
-          }
-
-          setActionStep('bridging_usdt');
           const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
           const destChainIdForBridge = isMainnet ? 677n : 968n;
-
           const useBotGas = receiveBotGas;
+          const bnbFn = useBotGas ? 'depositWithBotGas' : 'deposit';
+          const bnbAbi = [{
+            inputs: [
+              { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+              { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+              { internalType: "address", name: "recipient", type: "address" },
+              { internalType: "uint256", name: "amount", type: "uint256" }
+            ],
+            name: bnbFn, outputs: [], stateMutability: "payable", type: "function"
+          }] as const;
+          const bnbArgs = [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount];
+
+          await ensureBridgeAllowance({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtBnb as `0x${string}`,
+            owner: address as `0x${string}`,
+            spender: contracts.bnbBridgeProxy as `0x${string}`,
+            needed: parsedAmount,
+          });
+          refetchUsdtBnbBridgeAllowance();
+
+          setActionStep('bridging_usdt');
+          await preflightBridgeDeposit({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtBnb as `0x${string}`,
+            owner: address as `0x${string}`,
+            amount: parsedAmount,
+            bridge: contracts.bnbBridgeProxy as `0x${string}`,
+            abi: bnbAbi,
+            functionName: bnbFn,
+            args: bnbArgs,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.bnbBridgeProxy as `0x${string}`,
-            abi: [{
-              inputs: [
-                { internalType: "uint256", name: "destinationChainId", type: "uint256" },
-                { internalType: "bytes32", name: "resourceId", type: "bytes32" },
-                { internalType: "address", name: "recipient", type: "address" },
-                { internalType: "uint256", name: "amount", type: "uint256" }
-              ],
-              name: useBotGas ? "depositWithBotGas" : "deposit",
-              outputs: [], stateMutability: "payable", type: "function"
-            }],
-            functionName: useBotGas ? 'depositWithBotGas' : 'deposit',
-            args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
+            abi: bnbAbi,
+            functionName: bnbFn,
+            args: bnbArgs,
             chainId: targetChainIdForTab(),
             gas: 1000000n
           } as any);
@@ -1605,39 +1731,46 @@ export default function App() {
             throw new Error('Ethereum bridge is not configured on this network yet.');
           }
           const parsedAmount = parseUnits(usdtAmount, 6); // ERC-20 USDT = 6dp
-          const allowance = rawUsdtEthBridgeAllowance ? BigInt(rawUsdtEthBridgeAllowance.toString()) : 0n;
-          if (allowance < parsedAmount) {
-            setActionStep('approving_usdt');
-            await writeContractAsync({
-              address: contracts.usdtEth as `0x${string}`,
-              abi: ERC20_ABI,
-              functionName: 'approve',
-              args: [contracts.ethBridgeProxy as `0x${string}`, parsedAmount],
-              chainId: targetChainIdForTab(),
-              gas: 80000n
-            } as any);
-            await new Promise(r => setTimeout(r, 3000));
-            refetchUsdtEthBridgeAllowance();
-          }
-
-          setActionStep('bridging_usdt');
           const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
           const destChainIdForBridge = isMainnet ? 677n : 968n;
-          const useBotGasEth = receiveBotGas;
+          const ethFn = receiveBotGas ? 'depositWithBotGas' : 'deposit';
+          const ethAbi = [{
+            inputs: [
+              { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+              { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+              { internalType: "address", name: "recipient", type: "address" },
+              { internalType: "uint256", name: "amount", type: "uint256" }
+            ],
+            name: ethFn, outputs: [], stateMutability: "payable", type: "function"
+          }] as const;
+          const ethArgs = [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount];
+
+          await ensureBridgeAllowance({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtEth as `0x${string}`,
+            owner: address as `0x${string}`,
+            spender: contracts.ethBridgeProxy as `0x${string}`,
+            needed: parsedAmount,
+          });
+          refetchUsdtEthBridgeAllowance();
+
+          setActionStep('bridging_usdt');
+          await preflightBridgeDeposit({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtEth as `0x${string}`,
+            owner: address as `0x${string}`,
+            amount: parsedAmount,
+            bridge: contracts.ethBridgeProxy as `0x${string}`,
+            abi: ethAbi,
+            functionName: ethFn,
+            args: ethArgs,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.ethBridgeProxy as `0x${string}`,
-            abi: [{
-              inputs: [
-                { internalType: "uint256", name: "destinationChainId", type: "uint256" },
-                { internalType: "bytes32", name: "resourceId", type: "bytes32" },
-                { internalType: "address", name: "recipient", type: "address" },
-                { internalType: "uint256", name: "amount", type: "uint256" }
-              ],
-              name: useBotGasEth ? "depositWithBotGas" : "deposit",
-              outputs: [], stateMutability: "payable", type: "function"
-            }],
-            functionName: useBotGasEth ? 'depositWithBotGas' : 'deposit',
-            args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
+            abi: ethAbi,
+            functionName: ethFn,
+            args: ethArgs,
             chainId: targetChainIdForTab(),
             gas: 600000n
           } as any);
