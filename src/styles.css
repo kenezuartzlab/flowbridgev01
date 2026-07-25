@@ -28,6 +28,16 @@
   --fb-banner-from: #1D4ED8;
   --fb-banner-to: #0EA5E9;
   --fb-banner-foreground: #FFFFFF;
+  /* Per-variant banner emphasis (dark) */
+  --fb-banner-swap-from: #6D28D9;
+  --fb-banner-swap-to: #0EA5E9;
+  --fb-banner-swap-foreground: #FFFFFF;
+  --fb-banner-swap-accent: #32FF8B;
+  --fb-banner-bridge-from: #1D4ED8;
+  --fb-banner-bridge-to: #00D7B2;
+  --fb-banner-bridge-foreground: #FFFFFF;
+  --fb-banner-bridge-accent: #7DD3FC;
+
 }
 
 
