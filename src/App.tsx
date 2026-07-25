@@ -1234,6 +1234,44 @@ export default function App() {
     symbol?: string;
   }) => preflightBridgeDepositCore(makeBridgeDeps(opts.chainId), opts);
 
+  /**
+   * Bridge deposits are NOT cheap: the BotBridge handler moves USDT, mints on
+   * the destination and emits relayer events, so `deposit` really needs
+   * ~650k gas on BSC and `depositWithBotGas` ~710k. A hardcoded 350k cap made
+   * every deposit run out of gas (tx mined, status 0, USDT stayed on BNB).
+   * Always ask the node what it costs and add a 40% safety buffer, with a
+   * generous floor so a failed estimate can never under-fund the tx again.
+   */
+  const estimateDepositGas = async (opts: {
+    chainId: number;
+    account: `0x${string}`;
+    bridge: `0x${string}`;
+    abi: any;
+    functionName: string;
+    args: any[];
+    value?: bigint;
+    fallback: bigint;
+  }): Promise<bigint> => {
+    const floor = opts.fallback;
+    try {
+      const client = publicClientFor(opts.chainId);
+      const est = await client.estimateContractGas({
+        account: opts.account,
+        address: opts.bridge,
+        abi: opts.abi,
+        functionName: opts.functionName as any,
+        args: opts.args as any,
+        ...(opts.value !== undefined ? { value: opts.value } : {}),
+      } as any);
+      const buffered = (est * 140n) / 100n;
+      return buffered > floor ? buffered : floor;
+    } catch {
+      return floor;
+    }
+  };
+
+
+
 
 
   const isNetworkCorrect = !isConnected || currentChainId === targetChainIdForTab();
@@ -1674,13 +1712,23 @@ export default function App() {
             args: depositArgs,
           });
 
+          const botDepositGas = await estimateDepositGas({
+            chainId: targetChainIdForTab(),
+            account: address as `0x${string}`,
+            bridge: contracts.botBridgeProxy as `0x${string}`,
+            abi: depositAbi,
+            functionName: 'deposit',
+            args: depositArgs,
+            fallback: 1000000n,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.botBridgeProxy as `0x${string}`,
             abi: depositAbi,
             functionName: 'deposit',
             args: depositArgs,
             chainId: targetChainIdForTab(),
-            gas: 1000000n
+            gas: botDepositGas
           } as any);
 
           const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
@@ -1730,13 +1778,25 @@ export default function App() {
             args: bnbArgs,
           });
 
+          // Measured on BSC: deposit ≈651k gas, depositWithBotGas ≈707k.
+          // Never cap below that or the deposit mines as a failed tx.
+          const bnbDepositGas = await estimateDepositGas({
+            chainId: targetChainIdForTab(),
+            account: address as `0x${string}`,
+            bridge: contracts.bnbBridgeProxy as `0x${string}`,
+            abi: bnbAbi,
+            functionName: bnbFn,
+            args: bnbArgs,
+            fallback: useBotGas ? 1100000n : 1000000n,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.bnbBridgeProxy as `0x${string}`,
             abi: bnbAbi,
             functionName: bnbFn,
             args: bnbArgs,
             chainId: targetChainIdForTab(),
-            gas: 350000n // BSC deposit ≈120k used; cap keeps max fee ≈0.002 BNB
+            gas: bnbDepositGas
           } as any);
 
           const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
@@ -1788,13 +1848,23 @@ export default function App() {
             args: ethArgs,
           });
 
+          const ethDepositGas = await estimateDepositGas({
+            chainId: targetChainIdForTab(),
+            account: address as `0x${string}`,
+            bridge: contracts.ethBridgeProxy as `0x${string}`,
+            abi: ethAbi,
+            functionName: ethFn,
+            args: ethArgs,
+            fallback: 1000000n,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.ethBridgeProxy as `0x${string}`,
             abi: ethAbi,
             functionName: ethFn,
             args: ethArgs,
             chainId: targetChainIdForTab(),
-            gas: 600000n
+            gas: ethDepositGas
           } as any);
 
 
