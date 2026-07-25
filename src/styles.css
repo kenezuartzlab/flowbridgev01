@@ -1,7 +1,71 @@
 @import "tailwindcss" source(none);
 @source "../src";
 
+/* ============================================================
+   P0 — SEMANTIC DESIGN TOKENS (single source of truth)
+   Dark is the default theme; `html.light` swaps the same tokens.
+   Every new component must use the semantic utilities
+   (bg-background / bg-card / text-muted / border-hairline /
+   text-primary …) instead of hardcoded hex classes.
+   ============================================================ */
+:root {
+  --fb-background: #010C1B;
+  --fb-background-elev: #040E1A;
+  --fb-card: #0D1C2A;
+  --fb-card-alt: rgba(13, 28, 42, 0.7);
+  --fb-foreground: #FFFFFF;
+  --fb-muted: #C5C1B9;
+  --fb-muted-soft: rgba(197, 193, 185, 0.7);
+  --fb-primary: #32FF8B;
+  --fb-primary-strong: #32FF8B;
+  --fb-primary-foreground: #010C1B;
+  --fb-accent: #00D7B2;
+  --fb-hairline: rgba(255, 255, 255, 0.10);
+  --fb-hairline-strong: rgba(255, 255, 255, 0.20);
+  --fb-danger: #F87171;
+  --fb-warning: #FBBF24;
+  --fb-success: #32FF8B;
+}
+
+html.light {
+  --fb-background: #F0F7F3;
+  --fb-background-elev: #E9F1EC;
+  --fb-card: #FFFFFF;
+  --fb-card-alt: rgba(255, 255, 255, 0.9);
+  --fb-foreground: #0D1C2A;
+  --fb-muted: #4A5361;
+  --fb-muted-soft: #6B7480;
+  --fb-primary: #16A34A;
+  --fb-primary-strong: #15803D;
+  --fb-primary-foreground: #FFFFFF;
+  --fb-accent: #0F9488;
+  --fb-hairline: rgba(13, 28, 42, 0.12);
+  --fb-hairline-strong: rgba(13, 28, 42, 0.20);
+  --fb-danger: #DC2626;
+  --fb-warning: #B45309;
+  --fb-success: #16A34A;
+}
+
 @theme {
+  /* Semantic (theme-aware) */
+  --color-background: var(--fb-background);
+  --color-background-elev: var(--fb-background-elev);
+  --color-card: var(--fb-card);
+  --color-card-alt: var(--fb-card-alt);
+  --color-foreground: var(--fb-foreground);
+  --color-muted: var(--fb-muted);
+  --color-muted-soft: var(--fb-muted-soft);
+  --color-primary: var(--fb-primary);
+  --color-primary-strong: var(--fb-primary-strong);
+  --color-primary-foreground: var(--fb-primary-foreground);
+  --color-accent: var(--fb-accent);
+  --color-hairline: var(--fb-hairline);
+  --color-hairline-strong: var(--fb-hairline-strong);
+  --color-danger: var(--fb-danger);
+  --color-warning: var(--fb-warning);
+  --color-success: var(--fb-success);
+
+  /* Legacy brand aliases (kept so existing screens keep working) */
   --color-ecosurge-green: #32FF8B;
   --color-ecosurge-teal: #00D7B2;
   --color-ecosurge-navy: #010C1B;
@@ -13,6 +77,17 @@
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, menu, Monaco, Consolas, monospace;
 }
+
+/* Accessibility floor: every tappable control keeps a 44px target. */
+@layer base {
+  button, a[role="button"], [role="tab"] {
+    min-height: 2.75rem;
+  }
+  button.fb-target-sm, a.fb-target-sm, [role="tab"].fb-target-sm {
+    min-height: 0;
+  }
+}
+
 
 /* ---------- SiteLoader + Header submenu animations ---------- */
 @keyframes fb-spin-slow { to { transform: rotate(360deg); } }
