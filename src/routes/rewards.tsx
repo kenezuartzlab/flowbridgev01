@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw } from "lucide-react";
+import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw, Check, Circle } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { formatUsd } from "@/lib/format";
+import bridgeHero from "@/assets/bridge-hero.png";
+
 
 export const Route = createFileRoute("/rewards")({
   head: () => ({
