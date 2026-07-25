@@ -58,10 +58,10 @@ function resolveState({ googleUser, incentives, loading }: FlowPointsPillProps):
 }
 
 const TONES: Record<PillState["tone"], string> = {
-  muted: "border-white/10 bg-white/5 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30",
-  warn: "border-amber-500/35 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20",
-  accent: "border-[#32FF8B]/30 bg-[#32FF8B]/10 text-[#32FF8B] hover:bg-[#32FF8B]/20",
-  hot: "border-[#32FF8B]/60 bg-[#32FF8B]/20 text-[#32FF8B] shadow-[0_0_18px_-4px_rgba(50,255,139,0.6)] hover:bg-[#32FF8B]/30",
+  muted: "text-[#C5C1B9] hover:text-[#32FF8B]",
+  warn: "text-amber-300 hover:text-amber-200",
+  accent: "text-[#32FF8B] hover:opacity-80",
+  hot: "text-[#32FF8B] hover:opacity-80",
 };
 
 export function FlowPointsPill(props: FlowPointsPillProps) {
@@ -71,7 +71,7 @@ export function FlowPointsPill(props: FlowPointsPillProps) {
       to="/rewards"
       title={state.title}
       aria-label={state.title}
-      className={`flex shrink-0 items-center gap-1.5 rounded-xl border px-2 py-2 font-mono text-[10px] font-black uppercase tracking-[0.08em] transition-all active:scale-95 ${TONES[state.tone]}`}
+      className={`flex shrink-0 items-center gap-1 rounded-lg px-1 py-0.5 font-mono text-[10px] font-black uppercase leading-none tracking-[0.08em] transition-all active:scale-95 ${TONES[state.tone]}`}
     >
       {state.icon}
       <span className={`max-w-[92px] truncate ${state.compact ? "hidden sm:inline" : ""}`}>{state.label}</span>
