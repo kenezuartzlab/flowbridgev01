@@ -153,28 +153,15 @@ export function ReceiptModal({
           </p>
         </div>
 
-        {/* Support CTA box */}
-        {onDonateClick && status === 'success' && (
-          <div className="bg-[#122A26] border border-[#32FF8B]/15 rounded-xl p-3 text-left w-full relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-[#32FF8B]/10 to-transparent blur-md pointer-events-none" />
-            <p className="text-[12px] leading-relaxed font-semibold text-[#32FF8B] mb-2 flex items-center gap-1">
-              <Heart className="w-3 h-3 fill-[#32FF8B]" />
-              <span>We charge 0% protocol fees!</span>
+        {/* Minimal platform fee disclosure */}
+        {status === 'success' && (
+          <div className="w-full rounded-xl border border-white/10 bg-[#010C1B]/60 px-3 py-2 text-center">
+            <p className="text-[11px] text-[#C5C1B9] leading-snug">
+              Platform fee applied: <strong className="text-[#32FF8B] font-mono">0.1%</strong>
             </p>
-            <p className="text-[12px] text-[#C5C1B9] leading-tight mb-2.5">
-              Support volunteer builders to keep these learning and public utility tools running fast & free.
-            </p>
-            <button
-              onClick={() => {
-                onClose();
-                onDonateClick();
-              }}
-              className="w-full py-1.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/35 text-[#32FF8B] font-mono font-black text-[11px] uppercase tracking-widest rounded-lg transition-all duration-150 cursor-pointer text-center"
-            >
-              💖 Donate / Request Tools
-            </button>
           </div>
         )}
+
 
         {/* Block Explorer Link */}
         <a 
