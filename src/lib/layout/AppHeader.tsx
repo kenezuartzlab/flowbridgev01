@@ -252,27 +252,28 @@ export function AppHeader({
     <header className="presentation-exempt flex flex-col border-b border-hairline bg-background relative z-20 w-full font-mono">
       <div className="flex items-center justify-between gap-2 p-3 sm:p-4 min-w-0">
         {/* Brand */}
-        <div className="flex flex-col min-w-0 shrink">
+        <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2 min-w-0">
             <img src={logoUrl} alt="" className="w-6 h-6 rounded-md shrink-0" draggable={false} />
             <h1 className="text-sm font-black tracking-widest text-foreground uppercase leading-none truncate">
               FlowBridge<span className="text-primary">.</span>
             </h1>
           </div>
-          <div className="flex items-center gap-1.5 mt-2">
+          <div className="flex items-center gap-2 mt-2 min-w-0">
             <button
               onClick={onToggleMainnet}
               title="Click to toggle Testnet / Mainnet"
-              className="transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+              className="transition-transform hover:scale-105 active:scale-95 cursor-pointer shrink-0"
             >
               <EnvironmentBadge isMainnet={isMainnet} />
             </button>
+            <FlowPointsPill googleUser={googleUser} incentives={incentives} loading={incentivesLoading} />
           </div>
         </div>
 
         {/* Actions: wallet + one menu button */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <FlowPointsPill googleUser={googleUser} incentives={incentives} loading={incentivesLoading} />
+
           {activeNetworkLabel === 'TRON' ? (
             <WalletPill
               address={tronAddress || null}
