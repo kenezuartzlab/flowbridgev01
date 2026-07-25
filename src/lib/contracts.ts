@@ -3,6 +3,16 @@ import { parseAbi } from 'viem';
 
 export const COMMUNITY_FEE_RECIPIENT = "0x3d8a7fa490f9db09dd8006b74688213ace9c0164";
 
+/**
+ * Minimal platform fee charged by FlowBridge on swaps / bridges.
+ * 10 bps = 0.1%. The router enforces the fee on-chain (computeRouterFee /
+ * computeBridgeFee); these constants are the UI disclosure of that fee.
+ */
+export const PLATFORM_FEE_BPS = 10;
+export const PLATFORM_FEE_LABEL = "0.1%";
+/** Fee amount in token units for a given input amount (display only). */
+export const platformFeeOf = (amount: number) => (amount * PLATFORM_FEE_BPS) / 10000;
+
 export const ERC20_ABI = parseAbi([
   'function balanceOf(address owner) view returns (uint256)',
   'function allowance(address owner, address spender) view returns (uint256)',
