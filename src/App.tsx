@@ -2192,12 +2192,15 @@ export default function App() {
     return "0.00";
   };
 
+  // FlowBridgeRouter debits `amount + platform fee`, so MAX must reserve the fee
+  // or the swap reverts on-chain with SafeERC20: call failed.
   const getTokenMaxAmount = (symbol: string) => {
-    if (symbol === 'BOT') return getExactBalanceAmount('BOT');
-    if (symbol === 'USDT') return getExactBalanceAmount('USDT_BOT');
-    if (symbol === 'CA') return getExactBalanceAmount('CA');
+    if (symbol === 'BOT') return maxSwappableDisplay(getExactBalanceAmount('BOT'), 18);
+    if (symbol === 'USDT') return maxSwappableDisplay(getExactBalanceAmount('USDT_BOT'), 6);
+    if (symbol === 'CA') return maxSwappableDisplay(getExactBalanceAmount('CA'), 18);
     return getTokenBalance(symbol).replace(/\s*FLOW$/, '');
   };
+
 
   const payBalance = getTokenBalance(paySymbol);
   const recBalance = getTokenBalance(recSymbol);
