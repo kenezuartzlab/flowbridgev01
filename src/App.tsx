@@ -11,6 +11,12 @@ import {
   type TronStatus,
 } from './lib/tronBridge';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
+import type { BridgeDeps } from './lib/bridge/evmBridge';
+import {
+  ensureBridgeAllowance as ensureBridgeAllowanceCore,
+  preflightBridgeDeposit as preflightBridgeDepositCore,
+  ensureSourceChain as ensureSourceChainCore,
+} from './lib/bridge/evmBridge';
 import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
 import { RouteProgress } from './components/routetabs/RouteProgress';
