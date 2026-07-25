@@ -1,6 +1,8 @@
 import { X, ArrowDown, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TokenIcon } from '../components/TokenIcon';
+import { ModalPortal } from './ModalPortal';
+
 
 interface ConfirmSwapModalProps {
   isOpen: boolean;
