@@ -1234,6 +1234,44 @@ export default function App() {
     symbol?: string;
   }) => preflightBridgeDepositCore(makeBridgeDeps(opts.chainId), opts);
 
+  /**
+   * Bridge deposits are NOT cheap: the BotBridge handler moves USDT, mints on
+   * the destination and emits relayer events, so `deposit` really needs
+   * ~650k gas on BSC and `depositWithBotGas` ~710k. A hardcoded 350k cap made
+   * every deposit run out of gas (tx mined, status 0, USDT stayed on BNB).
+   * Always ask the node what it costs and add a 40% safety buffer, with a
+   * generous floor so a failed estimate can never under-fund the tx again.
+   */
+  const estimateDepositGas = async (opts: {
+    chainId: number;
+    account: `0x${string}`;
+    bridge: `0x${string}`;
+    abi: any;
+    functionName: string;
+    args: any[];
+    value?: bigint;
+    fallback: bigint;
+  }): Promise<bigint> => {
+    const floor = opts.fallback;
+    try {
+      const client = publicClientFor(opts.chainId);
+      const est = await client.estimateContractGas({
+        account: opts.account,
+        address: opts.bridge,
+        abi: opts.abi,
+        functionName: opts.functionName as any,
+        args: opts.args as any,
+        ...(opts.value !== undefined ? { value: opts.value } : {}),
+      } as any);
+      const buffered = (est * 140n) / 100n;
+      return buffered > floor ? buffered : floor;
+    } catch {
+      return floor;
+    }
+  };
+
+
+
 
 
   const isNetworkCorrect = !isConnected || currentChainId === targetChainIdForTab();
