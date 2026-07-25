@@ -193,24 +193,16 @@ export default function App() {
     }
   };
 
-  // Retrieve transaction history logs from Cloud SQL DB
+  // Retrieve activity history for the signed-in account
   const fetchDbTransactions = async (token: string) => {
     try {
-      const response = await fetch('/api/transactions', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setDbTransactions(data.transactions || []);
-      }
+      setDbTransactions(await fetchActivityHistory(token));
     } catch (err) {
       console.error("Error fetching transactions:", err);
     }
   };
 
-  // Log a new transaction to Cloud SQL DB
+  // Record an activity row against the signed-in email + bound wallet
   const logTransactionToDb = async (txType: string, direction: string, fromAmount: string, toAmount: string, txHash: string, status: string) => {
     if (!googleUser) return;
     const normalizedWallet = address?.toLowerCase();
@@ -224,30 +216,20 @@ export default function App() {
 
     // NOTE: bridges are recorded for history/attribution only — the server
     // always stores 0 points for them. Rewards remain swap-only.
-
-
-
-
     try {
       const token = await getEffectiveIdToken();
       if (!token) return;
-      
-      await fetch('/api/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          txType,
-          direction,
-          fromAmount,
-          toAmount,
-          txHash,
-          status,
-          walletAddress: normalizedWallet,
-        })
+
+      await logActivity(token, {
+        txType,
+        direction,
+        fromAmount,
+        toAmount,
+        txHash,
+        status,
+        walletAddress: normalizedWallet,
       });
+
       
       fetchDbTransactions(token);
       fetchUserIncentivesInApp();
