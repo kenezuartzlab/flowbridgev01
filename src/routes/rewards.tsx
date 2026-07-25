@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw, Check, Circle, Target } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
+import { TabBanner } from "@/components/banners/TabBanner";
+
 import { formatUsd } from "@/lib/format";
 const bridgeHero = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
 
