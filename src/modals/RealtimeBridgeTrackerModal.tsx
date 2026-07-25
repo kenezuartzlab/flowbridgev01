@@ -170,7 +170,6 @@ export function RealtimeBridgeTrackerModal({
   txHash,
   txUrlPrefix = 'https://scan.bohr.life/tx/',
   onReset,
-  onDonateClick,
   bridgeDirection,
   isMainnet = true,
 }: RealtimeBridgeTrackerModalProps) {
