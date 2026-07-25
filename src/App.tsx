@@ -2399,7 +2399,11 @@ export default function App() {
                     : "Link"
               }
             </button>
-          </div>
+              </div>,
+            ]}
+          />
+          
+
           
           {/* Detailed Error Warning and Simulation Toggle Helper */}
           {walletLinkNotice && walletLinkNotice.kind !== "linked" && (
