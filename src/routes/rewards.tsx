@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw, Check, Circle } from "lucide-react";
+import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw, Check, Circle, Target } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { formatUsd } from "@/lib/format";
