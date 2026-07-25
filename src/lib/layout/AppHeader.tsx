@@ -44,6 +44,10 @@ interface AppHeaderProps {
   onSignOut?: () => void;
   /** Referral code the current session was captured under, if any. */
   referralAppliedCode?: string | null;
+  /** Read-only incentives payload used to render the FLOW pill. */
+  incentives?: any;
+  /** True while the incentives payload is still loading. */
+  incentivesLoading?: boolean;
 }
 
 export function AppHeader({
