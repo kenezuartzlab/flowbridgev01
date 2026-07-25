@@ -122,6 +122,18 @@ function withTimeout<T>(promise: Promise<T>, ms = SIGNATURE_TIMEOUT_MS): Promise
   });
 }
 
+async function signWithInjected(normalized: string, message: string, ms?: number): Promise<string> {
+  const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
+  if (!eth?.request) throw new Error("provider not found");
+  const signature = (await withTimeout(
+    eth.request({ method: "personal_sign", params: [message, normalized] }) as Promise<string>,
+    ms,
+  )) as string;
+  await assertActiveInjectedAccount(normalized);
+  if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
+  return signature;
+}
+
 export async function signMessageWithActiveWallet(
   address: string,
   message: string,
@@ -130,32 +142,41 @@ export async function signMessageWithActiveWallet(
   const normalized = address.toLowerCase();
   await assertActiveInjectedAccount(normalized);
 
-  // Prefer wagmi's active connector. It tracks the selected wallet better on
-  // mobile wallet browsers than a raw window.ethereum request.
-  if (wagmiSignMessageAsync) {
+  const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
+  // Inside wallet in-app browsers (TokenPocket, Bitget, Trust…) the injected
+  // provider is the wallet itself and answers reliably. wagmi's connector layer
+  // sometimes accepts the request there and never resolves it, so ask the
+  // injected provider first and keep wagmi as the fallback.
+  const injectedFirst = hasInjected && isInAppBrowser();
+
+  if (injectedFirst) {
     try {
-      const signature = await withTimeout(
-        wagmiSignMessageAsync({ message }),
-      );
-      await assertActiveInjectedAccount(normalized);
-      if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
-      return signature;
+      return await signWithInjected(normalized, message);
     } catch (err: any) {
-      if (!shouldFallbackToInjected(err)) {
+      if (!shouldFallbackToInjected(err) || !wagmiSignMessageAsync) {
         throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
       }
     }
   }
 
-  const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
-  if (eth?.request) {
+  if (wagmiSignMessageAsync) {
     try {
-      const signature = await withTimeout(
-        eth.request({ method: "personal_sign", params: [message, normalized] }) as Promise<string>,
-      );
+      // Shorter window: if the connector goes silent we still have time to
+      // retry through the injected provider before the user gives up.
+      const signature = await withTimeout(wagmiSignMessageAsync({ message }), hasInjected ? 15_000 : SIGNATURE_TIMEOUT_MS);
       await assertActiveInjectedAccount(normalized);
       if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
       return signature;
+    } catch (err: any) {
+      if (!shouldFallbackToInjected(err) || injectedFirst) {
+        throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
+      }
+    }
+  }
+
+  if (hasInjected) {
+    try {
+      return await signWithInjected(normalized, message);
     } catch (err: any) {
       throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
     }
@@ -163,6 +184,7 @@ export async function signMessageWithActiveWallet(
 
   throw new WalletVerificationRejectedError("No signing wallet provider was found. Open FlowBridge in your wallet browser or reconnect a signing wallet.");
 }
+
 
 /**
  * Ensure the given wallet address has proved key control this session.
