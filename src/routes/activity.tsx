@@ -72,7 +72,10 @@ function ActivityPage() {
           </div>
         ) : (
           <>
+            <EarningsSummary transactions={transactions} />
+
             <div className="mb-4 flex gap-2">
+
               {(["ALL", "SWAP", "BRIDGE"] as Filter[]).map((f) => (
                 <button
                   key={f}
