@@ -91,7 +91,7 @@ function harness(opts: HarnessOptions = {}) {
       calls.push('confirm');
       return opts.confirmed ?? true;
     }),
-    onStep: vi.fn((step) => calls.push(`step:${step}`)),
+    onStep: vi.fn((step: string) => calls.push(`step:${step}`)),
     // Deterministic: never actually wait in tests.
     sleep: vi.fn(async () => {}),
   };
