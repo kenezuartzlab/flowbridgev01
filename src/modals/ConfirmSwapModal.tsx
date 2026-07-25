@@ -15,6 +15,7 @@ interface ConfirmSwapModalProps {
   slippageTolerance?: string;
   minimumReceived?: string;
   tradingFee?: string;
+  platformFee?: string;
   isBridge?: boolean;
   fromChain?: string;
   toChain?: string;
@@ -33,6 +34,7 @@ export function ConfirmSwapModal({
   slippageTolerance = "0.50%",
   minimumReceived,
   tradingFee = "0.30%",
+  platformFee = "0.1%",
   isBridge = false,
   fromChain = "BOT Chain",
   toChain = "BNB Chain"
@@ -145,11 +147,16 @@ export function ConfirmSwapModal({
             <span className="font-bold text-[#32FF8B]">{tradingFee}</span>
           </div>
 
+          <div className="flex justify-between items-center text-[#C5C1B9]">
+            <span className="uppercase tracking-wider">Platform Fee</span>
+            <span className="font-bold text-[#32FF8B]">{platformFee}</span>
+          </div>
+
         </div>
 
         {/* Footnote disclaimer */}
         <p className="text-[12px] text-[#C5C1B9] text-center leading-relaxed px-2">
-          Output is estimated. You will receive at least <strong className="text-white font-mono">{minRec} {toSymbol}</strong> or the transaction will revert.
+          Output is estimated. A {platformFee} platform fee is charged by FlowBridge. You will receive at least <strong className="text-white font-mono">{minRec} {toSymbol}</strong> or the transaction will revert.
         </p>
 
         {/* Submit Button */}
