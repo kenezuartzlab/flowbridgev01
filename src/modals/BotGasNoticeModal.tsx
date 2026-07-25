@@ -18,8 +18,8 @@ export function BotGasNoticeModal({ isOpen, onClose, onConfirm }: BotGasNoticeMo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
-      <div className="bg-[#0B1521] border border-white/10 text-white rounded-[24px] w-full max-w-[380px] p-6 shadow-2xl relative flex flex-col space-y-5 animate-scale-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+      <div className="bg-[#0B1521] border border-white/10 text-white rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[380px] p-4 sm:p-6 shadow-2xl relative flex flex-col space-y-5 animate-scale-up">
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-bold text-white/95 font-mono uppercase tracking-wide flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-[#F6BA00]" />

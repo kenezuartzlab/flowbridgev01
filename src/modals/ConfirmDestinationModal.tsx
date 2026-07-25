@@ -63,10 +63,10 @@ export function ConfirmDestinationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="confirm_address_modal"
-        className="bg-[#0B1521] border border-white/10 text-white rounded-[24px] w-full max-w-[360px] p-6 shadow-2xl relative flex flex-col space-y-5 animate-scale-up"
+        className="bg-[#0B1521] border border-white/10 text-white rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-6 shadow-2xl relative flex flex-col space-y-5 animate-scale-up"
       >
         {/* Header containing Close Button */}
         <div className="flex justify-between items-center">

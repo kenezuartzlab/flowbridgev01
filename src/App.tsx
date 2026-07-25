@@ -2704,13 +2704,9 @@ export default function App() {
 
       {/* Very tiny footer centered at bottom of layout */}
       <footer className="relative z-10 text-center py-5 select-none transition-opacity duration-300 flex flex-col items-center gap-2 font-mono uppercase">
-        <button
-          onClick={() => setIsDonateModalOpen(true)}
-          className="text-[10px] tracking-[0.05em] text-[#32FF8B] hover:text-[#1FFF7D] font-black cursor-pointer transition-colors flex items-center justify-center gap-1.5 hover:underline bg-[#32FF8B]/5 hover:bg-[#32FF8B]/10 border border-[#32FF8B]/20 py-1 px-3.5 rounded-full shadow-sm active:scale-95"
-          title="Support decentralized builders & request new ecosystem tools!"
-        >
-          <span className="inline-block animate-pulse">💖</span> Support FlowBridge & Request Features
-        </button>
+        <span className="text-[10px] tracking-[0.05em] text-[#C5C1B9]/70 font-black">
+          Platform fee 0.1% · Non-custodial
+        </span>
         <div className="flex items-center gap-3 mt-1">
           <a
             href="https://x.com/flowbridgeweb3"
@@ -2878,7 +2874,6 @@ export default function App() {
           onClose={() => setIsReceiptModalOpen(false)}
           txHash={receiptTxHash}
           txUrlPrefix={receiptUrlPrefix}
-          onDonateClick={() => setIsDonateModalOpen(true)}
           txType={receiptTxType}
           status={receiptStatus}
         />
@@ -2938,7 +2933,6 @@ export default function App() {
             resetStep3();
             setIsRealtimeTrackerOpen(false);
           }}
-          onDonateClick={() => setIsDonateModalOpen(true)}
         />
       )}
 
