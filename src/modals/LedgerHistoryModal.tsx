@@ -38,10 +38,10 @@ export function LedgerHistoryModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div
         id="ledger_history_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[400px] p-5 shadow-2xl relative flex flex-col max-h-[540px] animate-scale-up border-b-[5px] border-b-[#32FF8B]"
+        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[400px] p-4 sm:p-5 shadow-2xl relative flex flex-col  animate-scale-up border-b-[5px] border-b-[#32FF8B]"
       >
         {/* Header */}
         <div className="flex justify-between items-center pb-3 border-b border-white/5 font-mono">

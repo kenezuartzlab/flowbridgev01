@@ -67,10 +67,10 @@ export function ReceiptModal({
   const href = txHash ? `${txUrlPrefix}${txHash}` : "#";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="receipt_modal"
-        className={`bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[360px] p-7 shadow-2xl relative flex flex-col items-center space-y-6 animate-scale-up border-b-[5px] ${status === 'success' ? 'border-b-[#32FF8B]' : 'border-b-red-400'}`}
+        className={`bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-5 sm:p-4 sm:p-6 shadow-2xl relative flex flex-col items-center space-y-6 animate-scale-up border-b-[5px] ${status === 'success' ? 'border-b-[#32FF8B]' : 'border-b-red-400'}`}
       >
         {/* Close Button */}
         <button 

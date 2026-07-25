@@ -22,10 +22,10 @@ export function RouteModal({
   const isCaryPactDirect = fromSymbol === 'CA' || toSymbol === 'CA';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="route_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[360px] p-6 shadow-2xl relative flex flex-col space-y-6 animate-scale-up border-b-[5px] border-b-[#32FF8B]"
+        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-6 shadow-2xl relative flex flex-col space-y-6 animate-scale-up border-b-[5px] border-b-[#32FF8B]"
       >
         {/* Header container */}
         <div className="flex justify-between items-center font-mono text-sm">

@@ -42,10 +42,10 @@ export function ConfirmSwapModal({
   const minRec = minimumReceived || (parseFloat(toAmount) * 0.995).toFixed(6);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="confirm_swap_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[360px] p-5 shadow-2xl relative space-y-5 animate-scale-up border-b-[5px] border-b-[#32FF8B]"
+        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-5 shadow-2xl relative space-y-5 animate-scale-up border-b-[5px] border-b-[#32FF8B]"
       >
         {/* Header decoration */}
         <div className="flex justify-between items-center font-mono">
