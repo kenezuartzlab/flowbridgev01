@@ -2514,7 +2514,7 @@ export default function App() {
               toUsdValue={getCaToBotDisplayUsd(false)}
               fromBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('CA') : getBalanceDisplay('BOT')}
               toBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('BOT') : getBalanceDisplay('CA')}
-              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? getExactBalanceAmount('CA') : getExactBalanceAmount('BOT')}
+              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? maxSwappableDisplay(getExactBalanceAmount('CA'), 18) : maxSwappableDisplay(getExactBalanceAmount('BOT'), 18)}
               onFromAmountChange={setCaAmount}
               onToggleDirection={handleToggleCaBot}
               buttonLabel={caButtonLabel}
