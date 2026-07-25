@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, ExternalLink, Loader2, Check, Heart } from 'lucide-react';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, fallback, erc20Abi } from 'viem';
+import { getContracts } from '../lib/contracts';
 import { cn } from '../lib/utils';
 import { TokenIcon } from '../components/TokenIcon';
 import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '../lib/wagmi';
