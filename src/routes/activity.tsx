@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, RefreshCw, ArrowUpRight } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
+import { TabBanner } from "@/components/banners/TabBanner";
+
 
 export const Route = createFileRoute("/activity")({
   head: () => ({
@@ -56,21 +58,25 @@ function ActivityPage() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-5">
+      <main className="mx-auto max-w-lg px-4 py-4 sm:py-5">
         {!user ? (
-          <div className="rounded-2xl border border-hairline bg-card p-6 text-center">
-            <h2 className="text-base font-black">Sign in to see your history</h2>
-            <p className="mt-2 text-[12px] leading-relaxed text-muted">
-              Activity is recorded only for a verified email and the wallet bound to it.
-            </p>
-            <Link
-              to="/"
-              className="mt-4 inline-block rounded-xl bg-primary px-5 py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground"
-            >
-              Go to Swap
-            </Link>
+          <div className="space-y-4">
+            <TabBanner variant="activity" />
+            <div className="rounded-2xl border border-hairline bg-card p-6 text-center">
+              <h2 className="text-base font-black text-foreground">Sign in to see your history</h2>
+              <p className="mt-2 text-[12px] leading-relaxed text-muted">
+                Activity is recorded only for a verified email and the wallet bound to it.
+              </p>
+              <Link
+                to="/"
+                className="mt-4 inline-block rounded-xl bg-primary px-5 py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground"
+              >
+                Go to Swap
+              </Link>
+            </div>
           </div>
         ) : (
+
           <>
             <EarningsSummary transactions={transactions} />
 
