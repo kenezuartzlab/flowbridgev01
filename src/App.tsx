@@ -1722,39 +1722,46 @@ export default function App() {
             throw new Error('Ethereum bridge is not configured on this network yet.');
           }
           const parsedAmount = parseUnits(usdtAmount, 6); // ERC-20 USDT = 6dp
-          const allowance = rawUsdtEthBridgeAllowance ? BigInt(rawUsdtEthBridgeAllowance.toString()) : 0n;
-          if (allowance < parsedAmount) {
-            setActionStep('approving_usdt');
-            await writeContractAsync({
-              address: contracts.usdtEth as `0x${string}`,
-              abi: ERC20_ABI,
-              functionName: 'approve',
-              args: [contracts.ethBridgeProxy as `0x${string}`, parsedAmount],
-              chainId: targetChainIdForTab(),
-              gas: 80000n
-            } as any);
-            await new Promise(r => setTimeout(r, 3000));
-            refetchUsdtEthBridgeAllowance();
-          }
-
-          setActionStep('bridging_usdt');
           const resourceId = "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d";
           const destChainIdForBridge = isMainnet ? 677n : 968n;
-          const useBotGasEth = receiveBotGas;
+          const ethFn = receiveBotGas ? 'depositWithBotGas' : 'deposit';
+          const ethAbi = [{
+            inputs: [
+              { internalType: "uint256", name: "destinationChainId", type: "uint256" },
+              { internalType: "bytes32", name: "resourceId", type: "bytes32" },
+              { internalType: "address", name: "recipient", type: "address" },
+              { internalType: "uint256", name: "amount", type: "uint256" }
+            ],
+            name: ethFn, outputs: [], stateMutability: "payable", type: "function"
+          }] as const;
+          const ethArgs = [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount];
+
+          await ensureBridgeAllowance({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtEth as `0x${string}`,
+            owner: address as `0x${string}`,
+            spender: contracts.ethBridgeProxy as `0x${string}`,
+            needed: parsedAmount,
+          });
+          refetchUsdtEthBridgeAllowance();
+
+          setActionStep('bridging_usdt');
+          await preflightBridgeDeposit({
+            chainId: targetChainIdForTab(),
+            token: contracts.usdtEth as `0x${string}`,
+            owner: address as `0x${string}`,
+            amount: parsedAmount,
+            bridge: contracts.ethBridgeProxy as `0x${string}`,
+            abi: ethAbi,
+            functionName: ethFn,
+            args: ethArgs,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.ethBridgeProxy as `0x${string}`,
-            abi: [{
-              inputs: [
-                { internalType: "uint256", name: "destinationChainId", type: "uint256" },
-                { internalType: "bytes32", name: "resourceId", type: "bytes32" },
-                { internalType: "address", name: "recipient", type: "address" },
-                { internalType: "uint256", name: "amount", type: "uint256" }
-              ],
-              name: useBotGasEth ? "depositWithBotGas" : "deposit",
-              outputs: [], stateMutability: "payable", type: "function"
-            }],
-            functionName: useBotGasEth ? 'depositWithBotGas' : 'deposit',
-            args: [destChainIdForBridge, resourceId as `0x${string}`, recipientAddr as `0x${string}`, parsedAmount],
+            abi: ethAbi,
+            functionName: ethFn,
+            args: ethArgs,
             chainId: targetChainIdForTab(),
             gas: 600000n
           } as any);
