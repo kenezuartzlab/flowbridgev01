@@ -260,4 +260,3 @@ function ActivityRow({ tx }: { tx: any }) {
   );
 }
 
-/** Presentational marker so unused-icon lint stays quiet if the roadmap rows land later. */
