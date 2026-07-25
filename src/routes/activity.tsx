@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, RefreshCw, ArrowUpRight } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
+import { TabBanner } from "@/components/banners/TabBanner";
+
 
 export const Route = createFileRoute("/activity")({
   head: () => ({
