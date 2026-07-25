@@ -5,14 +5,27 @@ export const Route = createFileRoute("/api/incentives/global")({
     handlers: {
       GET: async () => {
         const { jsonResponse } = await import("@/lib/api-auth.server");
-        const { getGlobalIncentiveStats } = await import("@/lib/flowbridge-db.server");
         try {
+          const { getGlobalIncentiveStats } = await import("@/lib/flowbridge-db.server");
           const stats = await getGlobalIncentiveStats();
           return jsonResponse({ success: true, stats });
         } catch (e: any) {
-          return jsonResponse({ error: e.message ?? "Failed to load community achievements" }, 500);
+          // Public, non-critical stats: never fail the page. Degrade to zeros.
+          console.error("[api/incentives/global] falling back to empty stats:", e?.message ?? e);
+          return jsonResponse({
+            success: true,
+            degraded: true,
+            stats: {
+              globalTotalEarned: 0,
+              globalTotalClaimed: 0,
+              totalUsers: 0,
+              totalTransactions: 0,
+              milestoneReached: false,
+            },
+          });
         }
       },
+
     },
   },
 });
