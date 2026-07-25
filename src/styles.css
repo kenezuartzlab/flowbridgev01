@@ -25,7 +25,11 @@
   --fb-danger: #F87171;
   --fb-warning: #FBBF24;
   --fb-success: #32FF8B;
+  --fb-banner-from: #1D4ED8;
+  --fb-banner-to: #0EA5E9;
+  --fb-banner-foreground: #FFFFFF;
 }
+
 
 html.light {
   --fb-background: #F0F7F3;
