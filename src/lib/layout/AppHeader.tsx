@@ -9,6 +9,7 @@ import {
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 import logoUrl from '@/assets/flowbridge-logo.png';
+import { FlowPointsPill } from '@/components/rewards/FlowPointsPill';
 
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -72,6 +73,8 @@ export function AppHeader({
   recipientLabel,
   onSignOut,
   referralAppliedCode,
+  incentives,
+  incentivesLoading,
 }: AppHeaderProps) {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -269,6 +272,7 @@ export function AppHeader({
 
         {/* Actions: wallet + one menu button */}
         <div className="flex items-center gap-1.5 shrink-0">
+          <FlowPointsPill googleUser={googleUser} incentives={incentives} loading={incentivesLoading} />
           {activeNetworkLabel === 'TRON' ? (
             <WalletPill
               address={tronAddress || null}
