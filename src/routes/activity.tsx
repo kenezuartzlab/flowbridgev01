@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, RefreshCw, ArrowUpRight, Repeat, Waypoints, Users, Sparkles } from "lucide-react";
+import { ArrowLeft, RefreshCw, ArrowUpRight, Repeat, Waypoints, Users } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { TabBanner } from "@/components/banners/TabBanner";
@@ -261,4 +261,3 @@ function ActivityRow({ tx }: { tx: any }) {
 }
 
 /** Presentational marker so unused-icon lint stays quiet if the roadmap rows land later. */
-export const ROADMAP_ICON = Sparkles;
