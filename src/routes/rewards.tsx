@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw } from "lucide-react";
+import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw, Check, Circle } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { formatUsd } from "@/lib/format";
+const bridgeHero = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
+
 
 export const Route = createFileRoute("/rewards")({
   head: () => ({
@@ -59,18 +61,65 @@ function RewardsPage() {
         ) : (
           <div className="space-y-4">
             {/* Balance hero */}
-            <section className="rounded-2xl border border-primary/25 bg-primary/5 p-5 text-center">
-              <p className="font-mono text-[10px] font-black uppercase tracking-[0.14em] text-muted">
+            <section className="relative overflow-hidden rounded-2xl border border-primary/25 bg-primary/5 p-5 text-center">
+              <img
+                src={bridgeHero}
+                alt=""
+                aria-hidden
+                className="pointer-events-none absolute -right-6 -top-4 h-28 w-28 select-none object-contain opacity-20"
+                draggable={false}
+              />
+              <p className="relative font-mono text-[10px] font-black uppercase tracking-[0.14em] text-muted">
                 Total FLOW Points
               </p>
-              <p className="mt-1 text-4xl font-black tabular-nums text-primary">
+              <p className="relative mt-1 text-4xl font-black tabular-nums text-primary">
                 {(incentives?.flowPoints ?? 0).toLocaleString()}
               </p>
-              <p className="mt-1 font-mono text-[11px] text-muted">
+              <p className="relative mt-1 font-mono text-[11px] text-muted">
                 Claimed: {(incentives?.claimedTokens ?? 0).toLocaleString()} FLOW · Claimable now:{" "}
                 {(incentives?.claimableTotal ?? 0).toLocaleString()}
               </p>
             </section>
+
+            {/* Claim checklist — mirrors the server-side claim requirements */}
+            <section className="rounded-2xl border border-hairline bg-card p-4">
+              <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">
+                Claim Checklist
+              </h2>
+              <ul className="mt-3 space-y-2">
+                <CheckRow
+                  done={!!(user?.emailVerified || user?.email_verified)}
+                  label="Email verified"
+                  hint="Verify the email you signed in with"
+                />
+                <CheckRow
+                  done={!!incentives?.walletAddress}
+                  label="Wallet bound to email"
+                  hint="Bind the wallet you swap with"
+                />
+                <CheckRow
+                  done={!!incentives?.socials?.youtube}
+                  label="Follow on YouTube"
+                  hint="Required before claiming"
+                />
+                <CheckRow
+                  done={!!incentives?.socials?.x}
+                  label="Follow on X"
+                  hint="Required before claiming"
+                />
+                <CheckRow
+                  done={!!incentives?.socials?.telegram}
+                  label="Join Telegram"
+                  hint="Required before claiming"
+                />
+                <CheckRow
+                  done={(incentives?.claimableTotal ?? 0) >= 1000}
+                  label="1,000 claimable FLOW"
+                  hint={`${(incentives?.claimableTotal ?? 0).toLocaleString()} available now`}
+                />
+              </ul>
+            </section>
+
 
             {/* Category split */}
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -156,7 +205,32 @@ function RewardsPage() {
   );
 }
 
+function CheckRow({ done, label, hint }: { done: boolean; label: string; hint: string }) {
+  return (
+    <li className="flex items-start gap-2.5">
+      <span
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+          done ? "border-primary/40 bg-primary/15 text-primary" : "border-hairline text-muted-soft"
+        }`}
+      >
+        {done ? <Check className="h-3 w-3" strokeWidth={3} /> : <Circle className="h-2 w-2" />}
+      </span>
+      <span className="min-w-0">
+        <span
+          className={`block text-[13px] font-bold ${done ? "text-foreground" : "text-muted"}`}
+        >
+          {label}
+        </span>
+        <span className="block font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
+          {done ? "Done" : hint}
+        </span>
+      </span>
+    </li>
+  );
+}
+
 function StatCard({
+
   Icon,
   label,
   value,

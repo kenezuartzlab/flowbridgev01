@@ -2251,7 +2251,7 @@ export default function App() {
   const activeTxPrefix = bridgeSrcExplorerPrefix;
 
   return (
-    <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-center font-sans overflow-y-auto relative py-6 sm:py-8 gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
+    <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-center font-sans overflow-y-auto relative py-0 sm:py-8 gap-0 sm:gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
       <SiteLoader />
       
       {/* Background grid + ambient glow of Ecosurge specification */}

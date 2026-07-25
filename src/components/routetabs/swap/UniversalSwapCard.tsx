@@ -602,6 +602,18 @@ export function UniversalSwapCard({
     return formatUsd(n * px);
   };
 
+  // Collapsible route details (collapsed by default, Uniswap-style summary row).
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  // USD notional of this swap — the amount that will count toward FLOW swap volume.
+  const swapUsd: number | null = (() => {
+    const n = parseFloat(amountIn);
+    const px = getUsdPrice?.(tokenIn.symbol);
+    if (!isFinite(n) || n <= 0 || px == null || !isFinite(px)) return null;
+    return n * px;
+  })();
+
+
 
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4 font-sans">
@@ -666,15 +678,49 @@ export function UniversalSwapCard({
         <span>{buttonLabel}</span>
       </button>
 
-      {/* Details */}
+      {/* Details — collapsed by default, summary row always visible */}
       {quote && !quoteError && (
-        <div className="bg-[#010C1B]/60 border border-white/10 rounded-xl p-3 space-y-1.5 text-[12px] font-mono text-[#C5C1B9]">
-          <Row label="Rate" value={`1 ${tokenIn.symbol} ≈ ${rate.toFixed(6)} ${tokenOut.symbol}`} />
-          <Row label="Min received" value={`${minReceived.toFixed(6)} ${tokenOut.symbol}`} />
-          <Row label="Slippage" value={`${slippage}%`} />
-          <Row label="Route" value={quote.symbolPath.join(" → ")} />
+        <div className="bg-[#010C1B]/60 border border-white/10 rounded-xl text-[12px] font-mono text-[#C5C1B9] overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setDetailsOpen((v) => !v)}
+            aria-expanded={detailsOpen}
+            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 cursor-pointer hover:bg-white/[0.03] transition-colors"
+          >
+            <span className="truncate text-left">
+              1 {tokenIn.symbol} ≈ {rate.toFixed(6)} {tokenOut.symbol}
+            </span>
+            <ChevronDown
+              className={cn("w-3.5 h-3.5 shrink-0 transition-transform duration-200", detailsOpen && "rotate-180")}
+            />
+          </button>
+          <div
+            className={cn(
+              "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+              detailsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+            )}
+          >
+            <div className="overflow-hidden">
+              <div className="px-3 pb-3 space-y-1.5 border-t border-white/5 pt-2.5">
+                <Row label="Min received" value={`${minReceived.toFixed(6)} ${tokenOut.symbol}`} />
+                <Row label="Slippage" value={`${slippage}%`} />
+                <Row label="Route" value={quote.symbolPath.join(" → ")} />
+                <Row label="Trading fee" value="0.30%" />
+                <Row
+                  label="FLOW volume credit"
+                  value={swapUsd != null ? `+${formatUsd(swapUsd)}` : "—"}
+                />
+                <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">
+                  Swap volume accrues FLOW rewards only when you are signed in with a verified email
+                  and the connected wallet bound to it. Every $100 of swap volume unlocks 1,000
+                  referral FLOW.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
+
 
       {nativeGasLow && !txError && (
         <WarningPanel
