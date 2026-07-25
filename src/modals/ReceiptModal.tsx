@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { X, ExternalLink, Sparkles, CheckCircle, Heart, XCircle } from 'lucide-react';
+import { X, ExternalLink, Sparkles, CheckCircle, XCircle } from 'lucide-react';
 
 interface ReceiptModalProps {
   isOpen: boolean;
   onClose: () => void;
   txHash: string;
   txUrlPrefix: string;
-  onDonateClick?: () => void;
   txType?: 'swap' | 'bridge';
   status?: 'success' | 'failed';
 }
@@ -17,7 +16,6 @@ export function ReceiptModal({
   onClose,
   txHash,
   txUrlPrefix,
-  onDonateClick,
   txType = 'swap',
   status = 'success'
 }: ReceiptModalProps) {
