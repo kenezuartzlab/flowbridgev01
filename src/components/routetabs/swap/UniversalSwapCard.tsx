@@ -814,6 +814,7 @@ export function UniversalSwapCard({
         slippageTolerance={`${slippage}%`}
         minimumReceived={minReceived ? minReceived.toFixed(6) : undefined}
         tradingFee="0.30%"
+        platformFee={PLATFORM_FEE_LABEL}
       />
     </div>
   );
