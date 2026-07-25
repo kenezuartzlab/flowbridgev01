@@ -1112,6 +1112,108 @@ export default function App() {
     }
   };
 
+  // ------------------------------------------------------------------
+  // Bridge preflight helpers
+  //
+  // Root cause of "it said confirming but nothing bridged, funds still on
+  // BNB": the deposit was broadcast before the ERC-20 approval had actually
+  // been mined (we only slept 3s), so the bridge's transferFrom reverted.
+  // The USDT never left the source chain. These helpers make the approval
+  // deterministic and simulate the deposit before asking the user to sign.
+  // ------------------------------------------------------------------
+  const publicClientFor = (chainId: number) =>
+    createPublicClient({ chain: getChainForId(chainId), transport: http() });
+
+  /** Approve `spender` for `token` (unlimited) and block until the allowance is really on-chain. */
+  const ensureBridgeAllowance = async (opts: {
+    chainId: number;
+    token: `0x${string}`;
+    owner: `0x${string}`;
+    spender: `0x${string}`;
+    needed: bigint;
+  }) => {
+    const client = publicClientFor(opts.chainId);
+    const readAllowance = async () =>
+      (await client.readContract({
+        address: opts.token,
+        abi: ERC20_ABI as any,
+        functionName: 'allowance',
+        args: [opts.owner, opts.spender],
+      })) as bigint;
+
+    let allowance = await readAllowance().catch(() => 0n);
+    if (allowance >= opts.needed) return;
+
+    setActionStep('approving_usdt');
+    const approveTx = await writeContractAsync({
+      address: opts.token,
+      abi: ERC20_ABI,
+      functionName: 'approve',
+      args: [opts.spender, maxUint256],
+      chainId: opts.chainId,
+      gas: 150000n,
+    } as any);
+
+    const receipt = await client.waitForTransactionReceipt({
+      hash: approveTx as `0x${string}`,
+      confirmations: 1,
+      pollingInterval: 2_000,
+      timeout: 180_000,
+    });
+    if (receipt.status !== 'success') {
+      throw new Error('The token approval transaction failed. No funds were moved — please try the approval again.');
+    }
+
+    // Some RPC nodes lag one block behind the receipt; poll until visible.
+    for (let i = 0; i < 10; i++) {
+      allowance = await readAllowance().catch(() => 0n);
+      if (allowance >= opts.needed) return;
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    throw new Error('Approval is not visible on-chain yet. Wait a few seconds and tap bridge again — no funds were sent.');
+  };
+
+  /** Balance + simulation guard. Throws a friendly message instead of letting the user sign a doomed tx. */
+  const preflightBridgeDeposit = async (opts: {
+    chainId: number;
+    token: `0x${string}`;
+    owner: `0x${string}`;
+    amount: bigint;
+    bridge: `0x${string}`;
+    abi: any;
+    functionName: string;
+    args: any[];
+    symbol?: string;
+  }) => {
+    const client = publicClientFor(opts.chainId);
+
+    const balance = (await client
+      .readContract({ address: opts.token, abi: ERC20_ABI as any, functionName: 'balanceOf', args: [opts.owner] })
+      .catch(() => null)) as bigint | null;
+    if (balance !== null && balance < opts.amount) {
+      throw new Error(`Not enough ${opts.symbol ?? 'USDT'} in your wallet for this bridge. Lower the amount and try again.`);
+    }
+
+    try {
+      await client.simulateContract({
+        account: opts.owner,
+        address: opts.bridge,
+        abi: opts.abi,
+        functionName: opts.functionName as any,
+        args: opts.args as any,
+      });
+    } catch (err: any) {
+      const msg = String(err?.shortMessage || err?.details || err?.message || '');
+      if (/insufficient funds|gas required|exceeds balance/i.test(msg)) {
+        throw new Error('Not enough gas on the source chain to pay for this bridge transaction.');
+      }
+      throw new Error(
+        'The bridge rejected this transfer before sending, so no funds left your wallet. Check the amount (minimum $10), that the destination chain is supported, and try again in a moment.',
+      );
+    }
+  };
+
+
   const isNetworkCorrect = !isConnected || currentChainId === targetChainIdForTab();
 
   const handleSwitchNetwork = async () => {
