@@ -251,6 +251,7 @@ export function SwapCard({
           <FeePanel 
             rows={[
               { label: 'Dex Swap Fee', value: '0.3%' },
+              { label: 'Platform Fee', value: '0.1%' },
               { label: 'Slippage Tolerance', value: '0.1%' },
               { label: 'Exchange Rate', value: `1 ${fromSymbol} ≈ ${(parseFloat(toAmount) / parseFloat(fromAmount)).toFixed(8)} ${toSymbol}` }
             ]}
