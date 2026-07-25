@@ -1124,57 +1124,88 @@ export default function App() {
   const publicClientFor = (chainId: number) =>
     createPublicClient({ chain: getChainForId(chainId), transport: http() });
 
+  /**
+   * Wallet/RPC bindings for the shared bridge pipeline in src/lib/bridge/evmBridge.ts.
+   * All ordering rules (chain switch → mined approval → simulation → confirm)
+   * live in that module so they can be tested end-to-end.
+   */
+  const makeBridgeDeps = (chainId: number, approveGas = 150000n): BridgeDeps => {
+    const client = publicClientFor(chainId);
+    return {
+      client: {
+        readAllowance: ({ token, owner, spender }) =>
+          client.readContract({
+            address: token,
+            abi: ERC20_ABI as any,
+            functionName: 'allowance',
+            args: [owner, spender],
+          }) as Promise<bigint>,
+        readBalance: ({ token, owner }) =>
+          client.readContract({
+            address: token,
+            abi: ERC20_ABI as any,
+            functionName: 'balanceOf',
+            args: [owner],
+          }) as Promise<bigint>,
+        waitForReceipt: async (hash) => {
+          const receipt = await client.waitForTransactionReceipt({
+            hash,
+            confirmations: 1,
+            pollingInterval: 2_000,
+            timeout: 180_000,
+          });
+          return { status: receipt.status as 'success' | 'reverted' };
+        },
+        simulateDeposit: async ({ account, bridge, abi, functionName, args }) => {
+          await client.simulateContract({
+            account,
+            address: bridge,
+            abi: abi as any,
+            functionName: functionName as any,
+            args: args as any,
+          });
+        },
+      },
+      sendApproval: ({ token, spender, chainId: cid }) =>
+        writeContractAsync({
+          address: token,
+          abi: ERC20_ABI,
+          functionName: 'approve',
+          args: [spender, maxUint256],
+          chainId: cid,
+          gas: approveGas,
+        } as any) as Promise<`0x${string}`>,
+      sendDeposit: ({ bridge, abi, functionName, args, chainId: cid, gas }) =>
+        writeContractAsync({
+          address: bridge,
+          abi: abi as any,
+          functionName: functionName as any,
+          args: args as any,
+          chainId: cid,
+          gas,
+        } as any) as Promise<`0x${string}`>,
+      getChainId: () => currentChainId,
+      switchChain: async (cid) => {
+        await switchChain({ chainId: cid });
+      },
+      confirm: (hash, cid) => confirmAndShowReceipt(hash, cid, 'bridge'),
+      onStep: (step) => {
+        if (step !== 'switching_network') setActionStep(step);
+      },
+    };
+  };
+
   /** Approve `spender` for `token` (unlimited) and block until the allowance is really on-chain. */
-  const ensureBridgeAllowance = async (opts: {
+  const ensureBridgeAllowance = (opts: {
     chainId: number;
     token: `0x${string}`;
     owner: `0x${string}`;
     spender: `0x${string}`;
     needed: bigint;
-  }) => {
-    const client = publicClientFor(opts.chainId);
-    const readAllowance = async () =>
-      (await client.readContract({
-        address: opts.token,
-        abi: ERC20_ABI as any,
-        functionName: 'allowance',
-        args: [opts.owner, opts.spender],
-      })) as bigint;
-
-    let allowance = await readAllowance().catch(() => 0n);
-    if (allowance >= opts.needed) return;
-
-    setActionStep('approving_usdt');
-    const approveTx = await writeContractAsync({
-      address: opts.token,
-      abi: ERC20_ABI,
-      functionName: 'approve',
-      args: [opts.spender, maxUint256],
-      chainId: opts.chainId,
-      gas: 150000n,
-    } as any);
-
-    const receipt = await client.waitForTransactionReceipt({
-      hash: approveTx as `0x${string}`,
-      confirmations: 1,
-      pollingInterval: 2_000,
-      timeout: 180_000,
-    });
-    if (receipt.status !== 'success') {
-      throw new Error('The token approval transaction failed. No funds were moved — please try the approval again.');
-    }
-
-    // Some RPC nodes lag one block behind the receipt; poll until visible.
-    for (let i = 0; i < 10; i++) {
-      allowance = await readAllowance().catch(() => 0n);
-      if (allowance >= opts.needed) return;
-      await new Promise((r) => setTimeout(r, 1500));
-    }
-    throw new Error('Approval is not visible on-chain yet. Wait a few seconds and tap bridge again — no funds were sent.');
-  };
+  }) => ensureBridgeAllowanceCore(makeBridgeDeps(opts.chainId), opts);
 
   /** Balance + simulation guard. Throws a friendly message instead of letting the user sign a doomed tx. */
-  const preflightBridgeDeposit = async (opts: {
+  const preflightBridgeDeposit = (opts: {
     chainId: number;
     token: `0x${string}`;
     owner: `0x${string}`;
@@ -1184,34 +1215,8 @@ export default function App() {
     functionName: string;
     args: any[];
     symbol?: string;
-  }) => {
-    const client = publicClientFor(opts.chainId);
+  }) => preflightBridgeDepositCore(makeBridgeDeps(opts.chainId), opts);
 
-    const balance = (await client
-      .readContract({ address: opts.token, abi: ERC20_ABI as any, functionName: 'balanceOf', args: [opts.owner] })
-      .catch(() => null)) as bigint | null;
-    if (balance !== null && balance < opts.amount) {
-      throw new Error(`Not enough ${opts.symbol ?? 'USDT'} in your wallet for this bridge. Lower the amount and try again.`);
-    }
-
-    try {
-      await client.simulateContract({
-        account: opts.owner,
-        address: opts.bridge,
-        abi: opts.abi,
-        functionName: opts.functionName as any,
-        args: opts.args as any,
-      });
-    } catch (err: any) {
-      const msg = String(err?.shortMessage || err?.details || err?.message || '');
-      if (/insufficient funds|gas required|exceeds balance/i.test(msg)) {
-        throw new Error('Not enough gas on the source chain to pay for this bridge transaction.');
-      }
-      throw new Error(
-        'The bridge rejected this transfer before sending, so no funds left your wallet. Check the amount (minimum $10), that the destination chain is supported, and try again in a moment.',
-      );
-    }
-  };
 
 
   const isNetworkCorrect = !isConnected || currentChainId === targetChainIdForTab();
