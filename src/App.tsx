@@ -2327,10 +2327,12 @@ export default function App() {
           showLimitTab={googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com'}
         />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col p-5 space-y-4 font-sans">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col items-stretch px-4 py-4 sm:px-5 sm:py-5 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
 
           {/* Tab hero banner (presentational) */}
           <TabBanner variant={activeTab === 'BRIDGE' ? 'bridge' : 'swap'} />
+
+
 
 
           
