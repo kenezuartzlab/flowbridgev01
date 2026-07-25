@@ -188,41 +188,46 @@ html.light {
 .presentation-mode .presentation-exempt .text-base { font-size: 16px !important; }
 
 /* ============================================================
-   LIGHT THEME — toggled via `.light` class on <html>. The app's
-   palette is heavily hand-tuned in hex, so we surgically remap
-   the most common surface / text colors to a warm off-white
-   scheme that keeps the FlowBridge accent green intact.
+   LIGHT THEME — toggled via `.light` class on <html>.
+   These rules are the LEGACY BRIDGE only: they remap the old
+   hardcoded hex utilities onto the semantic tokens above, so the
+   tokens stay the single source of truth. New components should
+   use bg-card / text-muted / border-hairline and need no entry
+   here. Delete a line below once its hex usage is migrated.
    ============================================================ */
-html.light body { background: #F0F7F3; color: #0D1C2A; }
-html.light .bg-\[\#010C1B\]        { background-color: #F0F7F3 !important; }
-html.light .bg-\[\#010C1B\]\/75    { background-color: rgba(255,255,255,0.85) !important; }
-html.light .bg-\[\#0D1C2A\]        { background-color: #FFFFFF !important; }
-html.light .bg-\[\#0D1C2A\]\/70    { background-color: rgba(255,255,255,0.90) !important; }
-html.light .bg-\[\#0D1C2A\]\/90    { background-color: rgba(255,255,255,0.95) !important; }
-html.light .bg-\[\#040E1A\]        { background-color: #E9F1EC !important; }
+html.light body,
+html:not(.light) body { background: var(--fb-background); color: var(--fb-foreground); }
 
-html.light .text-white             { color: #0D1C2A !important; }
-html.light .text-white\/40         { color: rgba(13,28,42,0.55) !important; }
-html.light .text-white\/50         { color: rgba(13,28,42,0.65) !important; }
-html.light .text-white\/60         { color: rgba(13,28,42,0.7)  !important; }
-html.light .text-white\/70         { color: rgba(13,28,42,0.75) !important; }
-html.light .text-white\/80         { color: rgba(13,28,42,0.85) !important; }
-html.light .text-\[\#FFFFFF\]      { color: #0D1C2A !important; }
-html.light .text-\[\#C5C1B9\]      { color: #4A5361 !important; }
+html.light .bg-\[\#010C1B\]        { background-color: var(--fb-background) !important; }
+html.light .bg-\[\#010C1B\]\/75    { background-color: color-mix(in srgb, var(--fb-card) 85%, transparent) !important; }
+html.light .bg-\[\#0D1C2A\]        { background-color: var(--fb-card) !important; }
+html.light .bg-\[\#0D1C2A\]\/70    { background-color: color-mix(in srgb, var(--fb-card) 90%, transparent) !important; }
+html.light .bg-\[\#0D1C2A\]\/90    { background-color: color-mix(in srgb, var(--fb-card) 95%, transparent) !important; }
+html.light .bg-\[\#040E1A\]        { background-color: var(--fb-background-elev) !important; }
+
+html.light .text-white             { color: var(--fb-foreground) !important; }
+html.light .text-white\/40         { color: color-mix(in srgb, var(--fb-foreground) 55%, transparent) !important; }
+html.light .text-white\/50         { color: color-mix(in srgb, var(--fb-foreground) 65%, transparent) !important; }
+html.light .text-white\/60         { color: color-mix(in srgb, var(--fb-foreground) 70%, transparent) !important; }
+html.light .text-white\/70         { color: color-mix(in srgb, var(--fb-foreground) 75%, transparent) !important; }
+html.light .text-white\/80         { color: color-mix(in srgb, var(--fb-foreground) 85%, transparent) !important; }
+html.light .text-\[\#FFFFFF\]      { color: var(--fb-foreground) !important; }
+html.light .text-\[\#C5C1B9\]      { color: var(--fb-muted) !important; }
 html.light .text-\[\#C5C1B9\]\/80,
 html.light .text-\[\#C5C1B9\]\/70,
 html.light .text-\[\#C5C1B9\]\/60,
-html.light .text-\[\#C5C1B9\]\/45  { color: #6B7480 !important; }
+html.light .text-\[\#C5C1B9\]\/45  { color: var(--fb-muted-soft) !important; }
 
-html.light .border-white\/5        { border-color: rgba(13,28,42,0.08) !important; }
-html.light .border-white\/10       { border-color: rgba(13,28,42,0.12) !important; }
-html.light .border-white\/15       { border-color: rgba(13,28,42,0.16) !important; }
-html.light .border-white\/20       { border-color: rgba(13,28,42,0.20) !important; }
-html.light .border-white\/25       { border-color: rgba(13,28,42,0.24) !important; }
+html.light .border-white\/5        { border-color: color-mix(in srgb, var(--fb-hairline) 70%, transparent) !important; }
+html.light .border-white\/10       { border-color: var(--fb-hairline) !important; }
+html.light .border-white\/15       { border-color: color-mix(in srgb, var(--fb-hairline-strong) 80%, transparent) !important; }
+html.light .border-white\/20       { border-color: var(--fb-hairline-strong) !important; }
+html.light .border-white\/25       { border-color: var(--fb-hairline-strong) !important; }
 
-/* Keep the green primary button legible on the light backdrop */
-html.light .bg-\[\#32FF8B\]        { background-color: #16A34A !important; }
-html.light .bg-\[\#32FF8B\]:hover  { background-color: #15803D !important; }
-html.light .text-\[\#010C1B\]      { color: #FFFFFF !important; }
-html.light .text-\[\#32FF8B\]      { color: #16A34A !important; }
+/* Keep the green primary legible on the light backdrop */
+html.light .bg-\[\#32FF8B\]        { background-color: var(--fb-primary) !important; }
+html.light .bg-\[\#32FF8B\]:hover  { background-color: var(--fb-primary-strong) !important; }
+html.light .text-\[\#010C1B\]      { color: var(--fb-primary-foreground) !important; }
+html.light .text-\[\#32FF8B\]      { color: var(--fb-primary) !important; }
+
 
