@@ -389,59 +389,52 @@ export function RealtimeBridgeTrackerModal({
           </h2>
         </div>
 
-        {/* Central Graphic Ring Overlay - Matches Page 1 and Page 2 Diagrams */}
-        <div className="relative flex justify-center py-6 h-[180px]">
+        {/* Central Graphic — real token/chain logos with ambient motion */}
+        <div className="relative flex justify-center py-6 min-h-[190px]">
           {/* Radial Glowing Ambient Circles */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-[170px] h-[170px] bg-gradient-to-r from-teal-500/10 to-[#32FF8B]/10 rounded-full blur-2xl animate-[pulse_4s_infinite]" />
-            <div className="absolute w-[140px] h-[140px] border border-slate-700/30 rounded-full" />
-            <div className="absolute w-[100px] h-[100px] border border-dashed border-teal-500/10 rounded-full animate-spin duration-[20s]" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-[190px] h-[190px] bg-gradient-to-r from-teal-500/15 to-[#32FF8B]/10 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
+            <div className="absolute w-[150px] h-[150px] border border-slate-700/30 rounded-full" />
+            <div className="absolute w-[110px] h-[110px] border border-dashed border-teal-500/20 rounded-full animate-[spin_18s_linear_infinite]" />
           </div>
 
-          <div className="relative flex items-center justify-center gap-10">
-            {/* Left Source Token Representation */}
-            <div className="flex flex-col items-center z-10 space-y-2">
-              <div className="relative p-1 bg-[#010C1B] rounded-2xl border border-white/5 shadow-lg group">
-                <TokenIcon symbol={symbol} size={48} className="translate-y-0.5" />
-                <span className="absolute -bottom-1 -right-1 bg-yellow-500/20 border border-yellow-500/40 rounded-full p-0.5">
-                  <div className="w-4 h-4 rounded-full bg-yellow-500 flex items-center justify-center text-[10px] font-black text-[#010C1B]">B</div>
-                </span>
-              </div>
+          <div className="relative flex items-start justify-between w-full px-1">
+            {/* Source */}
+            <div className="flex flex-col items-center z-10 space-y-2 w-[36%] animate-fade-in">
+              <TokenChainPair chain={fromChain} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{displayAmount(amount)}</span>
-                <span className="text-[12px] font-bold text-amber-500 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
+                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(amount)}</span>
+                <span className="text-[11px] font-bold text-amber-400 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
               </div>
             </div>
 
-            {/* Overlapping Central Exchange Arrows - Rotating loops */}
-            <div className="absolute flex flex-col items-center justify-center gap-1">
-              <div className="flex flex-col gap-1 items-center justify-center text-[#32FF8B]">
-                <span className="font-mono text-[10.5px] font-bold text-[#32FF8B]/70 uppercase animate-pulse">
-                  Relaying
-                </span>
-                <div className="flex gap-1">
-                  <span className="text-sm font-black animate-ping text-teal-400">↔</span>
-                </div>
+            {/* Center relay indicator */}
+            <div className="z-10 flex flex-col items-center justify-center gap-1.5 pt-3 w-[28%]">
+              <div className="flex items-center gap-1">
+                <span className={cn('text-lg font-black text-teal-400', !isCompleted && 'animate-bounce')}>↓</span>
+                <span className={cn('text-lg font-black text-[#32FF8B]', !isCompleted && 'animate-bounce')} style={{ animationDelay: '250ms' }}>↑</span>
+              </div>
+              <span className="font-mono text-[9.5px] font-bold text-[#32FF8B]/70 uppercase tracking-widest animate-pulse">
+                {isCompleted ? 'Settled' : 'Relaying'}
+              </span>
+              <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-amber-400/30 via-[#32FF8B]/60 to-teal-400/30 overflow-hidden">
+                <div className="h-full w-1/3 bg-[#32FF8B] animate-[slide-in-right_1.8s_ease-in-out_infinite]" />
               </div>
             </div>
 
-            {/* Right Destination Token Representation */}
-            <div className="flex flex-col items-center z-10 space-y-2">
-              <div className="relative p-1 bg-[#010C1B] rounded-2xl border border-white/5 shadow-lg">
-                <TokenIcon symbol={symbol} size={48} />
-                <span className="absolute -bottom-1 -right-1 bg-teal-500/20 border border-teal-500/40 rounded-full p-0.5">
-                  <div className="w-4 h-4 rounded-full bg-teal-500 flex items-center justify-center text-[10px] font-black text-[#010C1B]">₮</div>
-                </span>
-              </div>
+            {/* Destination */}
+            <div className="flex flex-col items-center z-10 space-y-2 w-[36%] animate-fade-in" style={{ animationDelay: '150ms' }}>
+              <TokenChainPair chain={toChain} delay={200} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[12px] font-black text-white/50 block tracking-wider font-mono">{displayAmount(amount)}</span>
-                <span className="text-[12px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
+                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(amount)}</span>
+                <span className="text-[11px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
               </div>
             </div>
           </div>
         </div>
+
 
         {/* Countdown Timer or Completed Status badge in the center */}
         <div className="flex justify-center flex-col items-center">
