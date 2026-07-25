@@ -33,17 +33,18 @@ html.light {
   --fb-card: #FFFFFF;
   --fb-card-alt: rgba(255, 255, 255, 0.9);
   --fb-foreground: #0D1C2A;
-  --fb-muted: #4A5361;
-  --fb-muted-soft: #6B7480;
-  --fb-primary: #16A34A;
-  --fb-primary-strong: #15803D;
+  --fb-muted: #414B58;
+  --fb-muted-soft: #5B6470;
+  --fb-primary: #15803D;
+  --fb-primary-strong: #166534;
   --fb-primary-foreground: #FFFFFF;
-  --fb-accent: #0F9488;
-  --fb-hairline: rgba(13, 28, 42, 0.12);
-  --fb-hairline-strong: rgba(13, 28, 42, 0.20);
-  --fb-danger: #DC2626;
-  --fb-warning: #B45309;
-  --fb-success: #16A34A;
+  --fb-accent: #0B7A70;
+  --fb-hairline: rgba(13, 28, 42, 0.14);
+  --fb-hairline-strong: rgba(13, 28, 42, 0.24);
+  --fb-danger: #B91C1C;
+  --fb-warning: #92400E;
+  --fb-success: #15803D;
+
 }
 
 @theme {
