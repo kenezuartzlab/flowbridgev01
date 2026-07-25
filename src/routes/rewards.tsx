@@ -282,6 +282,85 @@ function RewardsPage() {
   );
 }
 
+function OverviewTile({
+  label,
+  value,
+  unit,
+  accent,
+}: {
+  label: string;
+  value: string;
+  unit: string;
+  accent?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-2xl border p-3.5 ${
+        accent ? "border-primary/30 bg-primary/5" : "border-hairline bg-card"
+      }`}
+    >
+      <p className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted">
+        {label}
+      </p>
+      <p
+        className={`mt-1 text-xl font-black tabular-nums ${accent ? "text-primary" : "text-foreground"}`}
+      >
+        {value}
+      </p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">{unit}</p>
+    </div>
+  );
+}
+
+function TaskRow({
+  label,
+  hint,
+  progress,
+  detail,
+  cta,
+}: {
+  label: string;
+  hint: string;
+  progress: number;
+  detail: string;
+  cta?: string;
+}) {
+  const pct = Math.round(Math.min(1, Math.max(0, progress)) * 100);
+  const done = pct >= 100;
+
+  return (
+    <li className="rounded-xl border border-hairline bg-background-elev p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className={`text-[13px] font-bold ${done ? "text-foreground" : "text-muted"}`}>
+            {label}
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">{hint}</p>
+        </div>
+        {done ? (
+          <span className="shrink-0 rounded-md bg-primary/15 px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-primary">
+            Done
+          </span>
+        ) : cta ? (
+          <Link
+            to="/"
+            className="shrink-0 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-primary"
+          >
+            {cta}
+          </Link>
+        ) : null}
+      </div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-hairline">
+        <div
+          className="h-full rounded-full bg-primary transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-1 font-mono text-[10px] tabular-nums text-muted">{detail}</p>
+    </li>
+  );
+}
+
 function CheckRow({ done, label, hint }: { done: boolean; label: string; hint: string }) {
   return (
     <li className="flex items-start gap-2.5">
