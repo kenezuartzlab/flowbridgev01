@@ -18,15 +18,17 @@ type PillState = {
   label: string;
   title: string;
   tone: "muted" | "warn" | "accent" | "hot";
+  /** Hide the text label on very narrow screens (icon stays as the affordance). */
+  compact?: boolean;
 };
 
 function resolveState({ googleUser, incentives, loading }: FlowPointsPillProps): PillState {
   if (!googleUser) {
-    return { icon: <LogIn className="w-3 h-3" />, label: "SIGN IN", title: "Sign in to earn FLOW points from swaps", tone: "muted" };
+    return { icon: <LogIn className="w-3 h-3" />, label: "SIGN IN", compact: true, title: "Sign in to earn FLOW points from swaps", tone: "muted" };
   }
   const verified = !!(googleUser.emailVerified || googleUser.email_verified || googleUser.isDemo);
   if (!verified) {
-    return { icon: <MailWarning className="w-3 h-3" />, label: "VERIFY", title: "Verify your email to start accruing FLOW", tone: "warn" };
+    return { icon: <MailWarning className="w-3 h-3" />, label: "VERIFY", compact: true, title: "Verify your email to start accruing FLOW", tone: "warn" };
   }
   if (loading && !incentives) {
     return { icon: <Loader2 className="w-3 h-3 animate-spin" />, label: "FLOW", title: "Loading your FLOW balance", tone: "muted" };
@@ -35,7 +37,7 @@ function resolveState({ googleUser, incentives, loading }: FlowPointsPillProps):
     return { icon: <Gift className="w-3 h-3" />, label: "FLOW", title: "Open rewards", tone: "muted" };
   }
   if (!incentives.walletAddress) {
-    return { icon: <Wallet className="w-3 h-3" />, label: "BIND", title: "Bind your wallet to claim FLOW", tone: "warn" };
+    return { icon: <Wallet className="w-3 h-3" />, label: "BIND", compact: true, title: "Bind your wallet to claim FLOW", tone: "warn" };
   }
   const claimable = Number(incentives.claimableTotal ?? 0);
   const total = Number(incentives.flowPoints ?? 0);
@@ -72,7 +74,7 @@ export function FlowPointsPill(props: FlowPointsPillProps) {
       className={`flex shrink-0 items-center gap-1.5 rounded-xl border px-2 py-2 font-mono text-[10px] font-black uppercase tracking-[0.08em] transition-all active:scale-95 ${TONES[state.tone]}`}
     >
       {state.icon}
-      <span className="max-w-[92px] truncate">{state.label}</span>
+      <span className={`max-w-[92px] truncate ${state.compact ? "hidden sm:inline" : ""}`}>{state.label}</span>
     </Link>
   );
 }
