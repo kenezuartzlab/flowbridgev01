@@ -171,8 +171,11 @@ export function RealtimeBridgeTrackerModal({
     return () => clearInterval(interval);
   }, [isOpen, isCompleted]);
 
-  // Real source-chain tracker: poll for receipt + confirmations, then start
-  // the relay ETA countdown. Never mark "Completed" from a fixed timer.
+  // Baseline destination balance captured before the relayer credits funds.
+  const destBaseline = useRef<bigint | null>(null);
+
+  // Real source-chain tracker: poll for receipt + confirmations. Stage 2 flips
+  // only once the source chain has the required confirmations.
   useEffect(() => {
     if (!isOpen || !txHash || !bridgeDirection) return;
     let cancelled = false;
@@ -183,7 +186,7 @@ export function RealtimeBridgeTrackerModal({
 
     const pollEvm = async () => {
       try {
-        const client = createPublicClient({ chain: chainFor(srcId!), transport: http() });
+        const client = clientFor(srcId!);
         const receipt = await client.getTransactionReceipt({ hash: txHash as `0x${string}` }).catch(() => null);
         if (cancelled) return;
         if (!receipt) return; // still waiting for inclusion
@@ -195,7 +198,7 @@ export function RealtimeBridgeTrackerModal({
         const latest = await client.getBlockNumber();
         const conf = Number(latest - receipt.blockNumber) + 1;
         if (conf >= required) {
-          setStage2((s) => (s === 'done' ? s : 'done'));
+          setStage2('done');
           setStage3((s) => (s === 'pending' ? 'loading' : s));
           setRelaySecondsLeft((cur) => (cur > 0 ? cur : relayEta));
         } else {
@@ -227,21 +230,81 @@ export function RealtimeBridgeTrackerModal({
     return () => { cancelled = true; clearInterval(id); };
   }, [isOpen, txHash, bridgeDirection, isMainnet]);
 
-  // Relay countdown — only after source confirms — finally flips "Completed".
+  // Destination tracker: poll the recipient's USDT balance on the destination
+  // chain and flip "Received / Completed" only when funds actually land.
+  useEffect(() => {
+    if (!isOpen || !bridgeDirection || !recipientAddress) return;
+    const dstId = destChainId(bridgeDirection, isMainnet);
+    const token = destUsdt(bridgeDirection, isMainnet);
+    if (dstId === null || !token || !recipientAddress.startsWith('0x')) return; // Tron dest → ETA fallback
+
+    let cancelled = false;
+    destBaseline.current = null;
+    const client = clientFor(dstId);
+    const expected = (() => {
+      const n = Number(amount);
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    })();
+
+    const read = async () => {
+      try {
+        const [raw, decimals] = await Promise.all([
+          client.readContract({
+            address: token,
+            abi: erc20Abi,
+            functionName: 'balanceOf',
+            args: [recipientAddress as `0x${string}`],
+          }) as Promise<bigint>,
+          client.readContract({ address: token, abi: erc20Abi, functionName: 'decimals' }) as Promise<number>,
+        ]);
+        if (cancelled) return;
+        if (destBaseline.current === null) {
+          destBaseline.current = raw;
+          return;
+        }
+        const delta = Number(raw - destBaseline.current) / 10 ** decimals;
+        // 2% tolerance for relayer fees / partial rounding.
+        if (delta > 0 && (expected === 0 || delta >= expected * 0.9)) {
+          setStage1('done');
+          setStage2('done');
+          setStage3('done');
+          setIsCompleted(true);
+          setRelaySecondsLeft(0);
+        }
+      } catch {
+        // transient RPC failure — keep polling.
+      }
+    };
+
+    read();
+    const id = setInterval(read, 6000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isOpen, bridgeDirection, isMainnet, recipientAddress, amount, txHash]);
+
+  // Relay ETA countdown — display only. On non-EVM destinations (Tron), where
+  // the balance cannot be polled, it is also the completion fallback.
   useEffect(() => {
     if (!isOpen || relaySecondsLeft <= 0) return;
+    const canPollDest =
+      bridgeDirection != null &&
+      destChainId(bridgeDirection, isMainnet) !== null &&
+      recipientAddress.startsWith('0x');
     const id = setInterval(() => {
       setRelaySecondsLeft((s) => {
         if (s <= 1) {
-          setStage3('done');
-          setIsCompleted(true);
+          if (!canPollDest) {
+            setStage3('done');
+            setIsCompleted(true);
+          }
           return 0;
         }
         return s - 1;
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [isOpen, relaySecondsLeft]);
+  }, [isOpen, relaySecondsLeft, bridgeDirection, isMainnet, recipientAddress]);
+
+
 
 
   if (!isOpen) return null;
