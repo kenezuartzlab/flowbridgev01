@@ -151,14 +151,6 @@ export function ReceiptModal({
           </p>
         </div>
 
-        {/* Minimal platform fee disclosure */}
-        {status === 'success' && (
-          <div className="w-full rounded-xl border border-white/10 bg-[#010C1B]/60 px-3 py-2 text-center">
-            <p className="text-[11px] text-[#C5C1B9] leading-snug">
-              Platform fee applied: <strong className="text-[#32FF8B] font-mono">0.1%</strong>
-            </p>
-          </div>
-        )}
 
 
         {/* Block Explorer Link */}
