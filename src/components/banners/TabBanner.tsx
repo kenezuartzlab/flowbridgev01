@@ -1,19 +1,25 @@
+import { Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import swapHero from "@/assets/swap-hero.png";
 
 const bridgeHero = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
 
 type Variant = "swap" | "bridge" | "rewards" | "activity";
 
-const COPY: Record<Variant, { eyebrow: string; title: string; body: string; art: string }> = {
+const COPY: Record<
+  Variant,
+  { eyebrow: string; title: string; body: string; art: string; cta?: { label: string; to: string } }
+> = {
   swap: {
     eyebrow: "Earn FLOW",
-    title: "Swap & earn rewards",
-    body: "Every swap on BOT Chain accrues FLOW points to your verified email + bound wallet.",
+    title: "Swap & earn FLOW points",
+    body: "Every qualified swap on BOT Chain accrues FLOW to your verified email + bound wallet.",
     art: swapHero,
+    cta: { label: "View Rewards", to: "/rewards" },
   },
   bridge: {
     eyebrow: "Cross-chain",
-    title: "Bridge USDT in minutes",
+    title: "Fast. Secure. Multi-chain.",
     body: "BOT ↔ BNB, ETH and TRON with live confirmation tracking. Recorded in your activity.",
     art: bridgeHero,
   },
@@ -31,13 +37,12 @@ const COPY: Record<Variant, { eyebrow: string; title: string; body: string; art:
   },
 };
 
-
 /**
  * Presentational hero banner shown above the swap / bridge cards.
  * Never reads or writes execution state.
  */
 export function TabBanner({ variant, className = "" }: { variant: Variant; className?: string }) {
-  const { eyebrow, title, body, art } = COPY[variant];
+  const { eyebrow, title, body, art, cta } = COPY[variant];
 
   return (
     <section
@@ -56,6 +61,15 @@ export function TabBanner({ variant, className = "" }: { variant: Variant; class
             {title}
           </h2>
           <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted sm:text-[12.5px]">{body}</p>
+          {cta ? (
+            <Link
+              to={cta.to}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary transition-colors hover:bg-primary/20"
+            >
+              {cta.label}
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          ) : null}
         </div>
         <img
           src={art}
@@ -71,4 +85,3 @@ export function TabBanner({ variant, className = "" }: { variant: Variant; class
     </section>
   );
 }
-
