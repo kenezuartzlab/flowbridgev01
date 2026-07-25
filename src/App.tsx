@@ -1778,13 +1778,25 @@ export default function App() {
             args: bnbArgs,
           });
 
+          // Measured on BSC: deposit ≈651k gas, depositWithBotGas ≈707k.
+          // Never cap below that or the deposit mines as a failed tx.
+          const bnbDepositGas = await estimateDepositGas({
+            chainId: targetChainIdForTab(),
+            account: address as `0x${string}`,
+            bridge: contracts.bnbBridgeProxy as `0x${string}`,
+            abi: bnbAbi,
+            functionName: bnbFn,
+            args: bnbArgs,
+            fallback: useBotGas ? 1100000n : 1000000n,
+          });
+
           const txBridge = await writeContractAsync({
             address: contracts.bnbBridgeProxy as `0x${string}`,
             abi: bnbAbi,
             functionName: bnbFn,
             args: bnbArgs,
             chainId: targetChainIdForTab(),
-            gas: 350000n // BSC deposit ≈120k used; cap keeps max fee ≈0.002 BNB
+            gas: bnbDepositGas
           } as any);
 
           const finalConfirmed = await confirmAndShowReceipt(txBridge, targetChainIdForTab(), 'bridge');
