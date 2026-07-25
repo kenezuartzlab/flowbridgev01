@@ -491,28 +491,8 @@ export function RealtimeBridgeTrackerModal({
           </div>
         </div>
 
-        {/* Support CTA box */}
-        {onDonateClick && (
-          <div className="bg-[#122A26] border border-[#32FF8B]/15 rounded-xl p-3 text-left w-full relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-[#32FF8B]/10 to-transparent blur-md pointer-events-none" />
-            <p className="text-[12px] leading-relaxed font-semibold text-[#32FF8B] mb-1 flex items-center gap-1">
-              <Heart className="w-3 h-3 fill-[#32FF8B]" />
-              <span>FlowBridge is free and charges 0% fees!</span>
-            </p>
-            <p className="text-[12px] text-[#C5C1B9] leading-tight mb-2.5">
-              Support original open-source builders to bring you new cross-chain analytics & earnings trackers.
-            </p>
-            <button
-              onClick={() => {
-                onClose();
-                onDonateClick();
-              }}
-              className="w-full py-1.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/35 text-[#32FF8B] font-mono font-black text-[11px] uppercase tracking-widest rounded-lg transition-all duration-150 cursor-pointer text-center"
-            >
-              💖 Donate / Support
-            </button>
-          </div>
-        )}
+
+
 
         {/* Detail action and close paths */}
         <div className="flex flex-col gap-2 pt-2">
