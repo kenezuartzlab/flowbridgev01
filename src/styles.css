@@ -232,3 +232,21 @@ html.light .text-\[\#010C1B\]      { color: var(--fb-primary-foreground) !import
 html.light .text-\[\#32FF8B\]      { color: var(--fb-primary) !important; }
 
 
+
+/* ---------- LIGHT MODE contrast fixes (legacy hex/utility bridge) ---------- */
+html.light .bg-\[\#030E1A\]\/40 { background-color: var(--fb-card) !important; }
+html.light .text-blue-400  { color: #1D4ED8 !important; }
+html.light .text-amber-400 { color: #92400E !important; }
+html.light .text-amber-200 { color: #7C2D12 !important; }
+html.light .text-red-200   { color: #991B1B !important; }
+html.light .text-teal-200  { color: #0F5F58 !important; }
+html.light .text-emerald-200 { color: #14532D !important; }
+html.light .text-white\/85,
+html.light .text-white\/90 { color: color-mix(in srgb, var(--fb-foreground) 90%, transparent) !important; }
+html.light .text-\[\#C5C1B9\]\/50 { color: var(--fb-muted-soft) !important; }
+html.light .text-\[\#F6BA00\] { color: #92400E !important; }
+html.light .text-\[\#FC4447\] { color: #B91C1C !important; }
+html.light .bg-white\/10 { background-color: color-mix(in srgb, var(--fb-foreground) 8%, transparent) !important; }
+html.light .bg-white\/15:hover,
+html.light .bg-white\/15 { background-color: color-mix(in srgb, var(--fb-foreground) 12%, transparent) !important; }
+html.light .border-white\/15 { border-color: var(--fb-hairline-strong) !important; }
