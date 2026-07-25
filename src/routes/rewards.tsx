@@ -205,7 +205,32 @@ function RewardsPage() {
   );
 }
 
+function CheckRow({ done, label, hint }: { done: boolean; label: string; hint: string }) {
+  return (
+    <li className="flex items-start gap-2.5">
+      <span
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+          done ? "border-primary/40 bg-primary/15 text-primary" : "border-hairline text-muted-soft"
+        }`}
+      >
+        {done ? <Check className="h-3 w-3" strokeWidth={3} /> : <Circle className="h-2 w-2" />}
+      </span>
+      <span className="min-w-0">
+        <span
+          className={`block text-[13px] font-bold ${done ? "text-foreground" : "text-muted"}`}
+        >
+          {label}
+        </span>
+        <span className="block font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
+          {done ? "Done" : hint}
+        </span>
+      </span>
+    </li>
+  );
+}
+
 function StatCard({
+
   Icon,
   label,
   value,
