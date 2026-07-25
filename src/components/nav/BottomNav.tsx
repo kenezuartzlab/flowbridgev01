@@ -15,15 +15,16 @@ const ITEMS = [
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const cappedSafeArea = "min(env(safe-area-inset-bottom, 0px), 10px)";
 
   return (
     <>
       {/* Spacer so page content is never hidden behind the fixed bar */}
-      <div aria-hidden className="h-[76px] sm:h-[84px]" />
+      <div aria-hidden className="h-[72px] sm:h-[78px]" />
       <nav
         aria-label="Main navigation"
         className="fixed bottom-0 left-0 right-0 z-40 border-t border-hairline bg-card-alt backdrop-blur-xl"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        style={{ paddingBottom: cappedSafeArea }}
       >
         <ul className="mx-auto flex max-w-lg items-stretch justify-between px-2 py-1.5">
           {ITEMS.map(({ to, label, Icon }) => {
