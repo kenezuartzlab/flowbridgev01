@@ -1600,6 +1600,15 @@ export default function App() {
       try {
         setIsActionLoading(true);
 
+        // Make sure the wallet is really on the source chain before signing.
+        // Some mobile wallets silently ignore the chainId hint on writeContract.
+        if (bridgeDirection !== 'TRX_TO_BOT' && currentChainId !== targetChainIdForTab()) {
+          await switchChain({ chainId: targetChainIdForTab() });
+          await new Promise((r) => setTimeout(r, 800));
+        }
+
+
+
         // ============================================================
         // BOT → {BNB, ETH} : source = BOT Chain, use botBridgeProxy
         // (BOT_TO_TRX is gated above; do not send.)
