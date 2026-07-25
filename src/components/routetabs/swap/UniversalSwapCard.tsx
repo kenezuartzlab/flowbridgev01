@@ -602,6 +602,18 @@ export function UniversalSwapCard({
     return formatUsd(n * px);
   };
 
+  // Collapsible route details (collapsed by default, Uniswap-style summary row).
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  // USD notional of this swap — the amount that will count toward FLOW swap volume.
+  const swapUsd: number | null = (() => {
+    const n = parseFloat(amountIn);
+    const px = getUsdPrice?.(tokenIn.symbol);
+    if (!isFinite(n) || n <= 0 || px == null || !isFinite(px)) return null;
+    return n * px;
+  })();
+
+
 
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4 font-sans">
