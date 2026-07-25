@@ -3,7 +3,7 @@ import { ArrowLeft, Gift, Users, Repeat, Lock, RefreshCw, Check, Circle } from "
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { formatUsd } from "@/lib/format";
-import bridgeHero from "@/assets/bridge-hero.png";
+const bridgeHero = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
 
 
 export const Route = createFileRoute("/rewards")({
