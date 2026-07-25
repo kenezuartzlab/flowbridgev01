@@ -23,22 +23,26 @@ const COPY: Record<Variant, { eyebrow: string; title: string; body: string; art:
  * Presentational hero banner shown above the swap / bridge cards.
  * Never reads or writes execution state.
  */
-export function TabBanner({ variant }: { variant: Variant }) {
+export function TabBanner({ variant, className = "" }: { variant: Variant; className?: string }) {
   const { eyebrow, title, body, art } = COPY[variant];
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card-alt to-card px-4 py-3.5">
+    <section
+      className={`relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card-alt to-card px-4 py-4 sm:px-5 sm:py-5 ${className}`}
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl"
       />
-      <div className="relative flex items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="font-mono text-[9px] font-black uppercase tracking-[0.16em] text-primary">
+      <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <p className="font-mono text-[9px] font-black uppercase tracking-[0.16em] text-primary sm:text-[10px]">
             {eyebrow}
           </p>
-          <h2 className="mt-1 text-[15px] font-black leading-tight text-foreground">{title}</h2>
-          <p className="mt-1 text-[11px] leading-snug text-muted">{body}</p>
+          <h2 className="mt-1.5 text-[16px] font-black leading-tight tracking-tight text-foreground sm:text-[19px]">
+            {title}
+          </h2>
+          <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted sm:text-[12.5px]">{body}</p>
         </div>
         <img
           src={art}
@@ -48,9 +52,10 @@ export function TabBanner({ variant }: { variant: Variant }) {
           width={1024}
           height={700}
           draggable={false}
-          className="h-16 w-20 shrink-0 select-none object-contain drop-shadow-[0_6px_18px_rgba(50,255,139,0.25)] sm:h-20 sm:w-28 animate-fade-in"
+          className="h-16 w-20 shrink-0 select-none object-contain drop-shadow-[0_6px_18px_rgba(50,255,139,0.25)] sm:h-24 sm:w-32 animate-fade-in"
         />
       </div>
     </section>
   );
 }
+
