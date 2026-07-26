@@ -751,7 +751,7 @@ export function UniversalSwapCard({
                         ? "Price loading"
                         : rewardEligible
                           ? `+${estimatedFlowPoints.toLocaleString()} FLOW`
-                          : `Min ${formatUsd(FLOW_REWARD_MIN_USD)}`
+                          : `0 FLOW · min ${formatUsd(FLOW_REWARD_MIN_USD)}`
                   }
                 />
                 <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">

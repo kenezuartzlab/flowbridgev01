@@ -227,22 +227,14 @@ async function signWithInjected(normalized: string, message: string, ms?: number
 
 async function signPersonalWithTokenPocket(normalized: string, message: string): Promise<string> {
   // TokenPocket is most stable with one injected personal_sign request and the
-  // UTF-8 SIWE message encoded as hex. Do not use typed-data here: some builds
-  // display raw JSON and keep the dApp in a permanent waiting state.
-  const signableMessage = stringToHex(message);
+  // UTF-8 SIWE message encoded as hex. Use ethereum.request directly — some
+  // TokenPocket builds expose sendAsync but never resolve its callback after
+  // approval, which leaves FlowBridge waiting even though the wallet prompt was
+  // accepted. Do not use typed-data here: some builds display raw JSON and keep
+  // the dApp in a permanent waiting state.
   try {
-    const signature = await requestProviderSignature({
-      method: "personal_sign",
-      params: [signableMessage, normalized],
-      ms: TOKENPOCKET_SIGNATURE_TIMEOUT_MS,
-      preferCallback: true,
-    });
-    await assertActiveInjectedAccount(normalized);
-    return signature;
+    return await signWithInjected(normalized, message, TOKENPOCKET_SIGNATURE_TIMEOUT_MS);
   } catch (err: any) {
-    if (shouldFallbackFromTypedData(err)) {
-      return await signWithInjected(normalized, message, TOKENPOCKET_SIGNATURE_TIMEOUT_MS);
-    }
     throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
   }
 }
