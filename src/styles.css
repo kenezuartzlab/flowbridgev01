@@ -335,6 +335,7 @@ body {
    in-app browser toolbars push the bottom of the column out of reach and
    nothing can be scrolled to. */
 .fb-app-frame { height: min(100dvh, var(--fb-vvh)); }
+@media (min-width: 640px) { .fb-app-frame { height: 780px; } }
 
 /* Inner scroll region must own the touch gesture on mobile. */
 .fb-scroll-y {

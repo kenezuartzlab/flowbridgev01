@@ -2340,7 +2340,7 @@ export default function App() {
           showLimitTab={isLimitAdmin}
         />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col items-stretch px-4 py-4 sm:px-5 sm:py-5 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
+        <main className="fb-scroll-y flex-1 min-h-0 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col items-stretch px-4 py-4 sm:px-5 sm:py-5 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
 
           {/* Tab hero banner + status bar, cross-fading (presentational) */}
           <BannerRotator
