@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, RefreshCw, Loader2, Check } from 'lucide-react';
 import { TokenIcon } from '../components/TokenIcon';
+import { ModalPortal } from './ModalPortal';
 import { cn } from '../lib/utils';
+
 
 interface WaitingModalProps {
   isOpen: boolean;
@@ -66,11 +68,13 @@ export function WaitingModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="waiting_confirmation_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-6 shadow-2xl relative flex flex-col items-center justify-center space-y-5 text-center animate-scale-up border-b-[5px] border-b-[#32FF8B]"
+        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] w-full max-h-[88dvh] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center justify-center space-y-3.5 text-center animate-scale-up border-b-[4px] border-b-[#32FF8B]"
       >
+
         {/* Close Button */}
         <button 
           onClick={onClose}
@@ -80,7 +84,8 @@ export function WaitingModal({
         </button>
 
         {/* Glowing Coin Swap Animation with Ecosurge theme */}
-        <div className="relative w-28 h-28 flex items-center justify-center">
+        <div className="relative w-24 h-24 flex items-center justify-center">
+
           <div className="absolute inset-0 rounded-full border border-[#32FF8B]/15 animate-ping duration-1000" />
           <div className="absolute inset-2 rounded-full border border-[#00D7B2]/10 animate-[pulse_2s_infinite]" />
           <div className="absolute inset-0 w-full h-full border-2 border-dashed border-[#32FF8B]/20 rounded-full animate-spin duration-[15s]" />
@@ -113,7 +118,8 @@ export function WaitingModal({
         </div>
 
         {/* Live Swap Milestones Indicator Panel */}
-        <div className="w-full bg-[#010C1B]/80 border border-white/5 rounded-xl p-3.5 space-y-2.5 text-left font-mono text-[12px]">
+        <div className="w-full bg-[#010C1B]/80 border border-white/5 rounded-xl p-3 space-y-2 text-left font-mono text-[11px]">
+
           {/* Sign Transaction Milestone */}
           <div className="flex items-center justify-between">
             <span className="text-[#C5C1B9]">1. Wallet Signature approved</span>
@@ -144,10 +150,12 @@ export function WaitingModal({
           </div>
         </div>
 
-        <p className="text-[11px] text-[#C5C1B9] leading-relaxed uppercase tracking-wide font-mono">
+        <p className="text-[10px] text-[#C5C1B9] leading-snug uppercase tracking-wide font-mono">
           Please do not close this window while the chain confirms final success or fail status.
         </p>
       </div>
     </div>
+    </ModalPortal>
   );
 }
+

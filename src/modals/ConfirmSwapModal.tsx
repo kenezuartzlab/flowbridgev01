@@ -1,6 +1,8 @@
 import { X, ArrowDown, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TokenIcon } from '../components/TokenIcon';
+import { ModalPortal } from './ModalPortal';
+
 
 interface ConfirmSwapModalProps {
   isOpen: boolean;
@@ -44,13 +46,15 @@ export function ConfirmSwapModal({
   const minRec = minimumReceived || (parseFloat(toAmount) * 0.995).toFixed(6);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="confirm_swap_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-5 shadow-2xl relative space-y-5 animate-scale-up border-b-[5px] border-b-[#32FF8B]"
+        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] w-full max-h-[88dvh] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative space-y-3.5 animate-scale-up border-b-[4px] border-b-[#32FF8B]"
       >
         {/* Header decoration */}
         <div className="flex justify-between items-center font-mono">
+
           <h3 className="text-sm font-black text-white uppercase tracking-wider">
             {isBridge ? "Confirm Bridge Tx" : "Confirm swap Tx"}
           </h3>
@@ -63,53 +67,55 @@ export function ConfirmSwapModal({
         </div>
 
         {/* Swap Visual Grid */}
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {/* Pay Amount Box */}
-          <div className="flex justify-between items-center py-1 border-b border-white/5 pb-2">
-            <span className="text-3xl font-black text-white tracking-tight shrink-0 truncate max-w-[180px] font-mono">
+          <div className="flex justify-between items-center gap-2 border-b border-white/5 pb-1.5">
+            <span className="text-2xl font-black text-white tracking-tight truncate font-mono">
               {parseFloat(fromAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-black text-white tracking-widest uppercase font-mono">{fromSymbol}</span>
-              <TokenIcon symbol={fromSymbol} size={24} />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[13px] font-black text-white tracking-widest uppercase font-mono">{fromSymbol}</span>
+              <TokenIcon symbol={fromSymbol} size={20} />
             </div>
           </div>
 
           {/* Directional Downward Arrow */}
-          <div className="flex justify-center -my-3.5 relative z-10">
-            <div className="bg-[#010C1B] border border-white/10 p-1.5 rounded-full text-[#32FF8B] shadow-md animate-bounce-slow">
-              <ArrowDown className="w-4 h-4" />
+          <div className="flex justify-center -my-2.5 relative z-10">
+            <div className="bg-[#010C1B] border border-white/10 p-1 rounded-full text-[#32FF8B] shadow-md animate-bounce-slow">
+              <ArrowDown className="w-3.5 h-3.5" />
             </div>
           </div>
 
           {/* Receive Amount Box */}
-          <div className="flex justify-between items-center py-1 pt-2">
-            <span className="text-3xl font-black text-[#32FF8B] tracking-tight shrink-0 truncate max-w-[180px] font-mono">
+          <div className="flex justify-between items-center gap-2 pt-1.5">
+            <span className="text-2xl font-black text-[#32FF8B] tracking-tight truncate font-mono">
               {parseFloat(toAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-black text-white tracking-widest uppercase font-mono">{toSymbol}</span>
-              <TokenIcon symbol={toSymbol} size={24} />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[13px] font-black text-white tracking-widest uppercase font-mono">{toSymbol}</span>
+              <TokenIcon symbol={toSymbol} size={20} />
             </div>
           </div>
         </div>
 
+
         {/* Bridge specific chain information card */}
         {isBridge && (
-          <div className="bg-[#010C1B]/60 border border-white/5 rounded-xl p-3.5 space-y-1.5 text-sm font-sans">
-            <div className="flex justify-between text-[#C5C1B9]">
-              <span className="text-[12px] uppercase font-bold tracking-wider font-mono">Source network</span>
-              <span className="font-bold text-white uppercase font-mono text-[12px]">{fromChain}</span>
+          <div className="bg-[#010C1B]/60 border border-white/5 rounded-xl p-2.5 space-y-1 font-sans">
+            <div className="flex justify-between gap-2 text-[#C5C1B9]">
+              <span className="text-[11px] uppercase font-bold tracking-wider font-mono">Source network</span>
+              <span className="font-bold text-white uppercase font-mono text-[11px]">{fromChain}</span>
             </div>
-            <div className="flex justify-between text-[#C5C1B9]">
-              <span className="text-[12px] uppercase font-bold tracking-wider font-mono">Destination network</span>
-              <span className="font-bold text-[#32FF8B] uppercase font-mono text-[12px]">{toChain}</span>
+            <div className="flex justify-between gap-2 text-[#C5C1B9]">
+              <span className="text-[11px] uppercase font-bold tracking-wider font-mono">Destination network</span>
+              <span className="font-bold text-[#32FF8B] uppercase font-mono text-[11px]">{toChain}</span>
             </div>
           </div>
         )}
 
         {/* Transaction Summary Card */}
-        <div className="bg-[#010C1B]/80 border border-white/10 rounded-xl p-4.5 space-y-3 text-[13px] font-mono">
+        <div className="bg-[#010C1B]/80 border border-white/10 rounded-xl p-3 space-y-2 text-[12px] font-mono">
+
           <div className="flex justify-between items-center text-[#C5C1B9]">
             <span className="uppercase tracking-wider">Price Rate</span>
             <div className="flex items-center gap-1.5 font-bold text-white">
@@ -155,18 +161,20 @@ export function ConfirmSwapModal({
         </div>
 
         {/* Footnote disclaimer */}
-        <p className="text-[12px] text-[#C5C1B9] text-center leading-relaxed px-2">
+        <p className="text-[11px] text-[#C5C1B9] text-center leading-snug px-1">
           Output is estimated. A {platformFee} platform fee is charged by FlowBridge. You will receive at least <strong className="text-white font-mono">{minRec} {toSymbol}</strong> or the transaction will revert.
         </p>
 
         {/* Submit Button */}
         <button
           onClick={onConfirm}
-          className="w-full py-3.5 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-sm uppercase transition-all duration-200 active:scale-[0.98] shadow-md hover:shadow-[0_0_20px_rgba(50,255,139,0.3)] cursor-pointer"
+          className="w-full py-3 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-[13px] uppercase transition-all duration-200 active:scale-[0.98] shadow-md hover:shadow-[0_0_20px_rgba(50,255,139,0.3)] cursor-pointer"
         >
           {isBridge ? "Confirm Bridge" : "Confirm swap"}
         </button>
       </div>
     </div>
+    </ModalPortal>
   );
 }
+
