@@ -138,16 +138,16 @@ export function ReceiptModal({
         </div>
 
         {/* Dynamic content descriptors */}
-        <div className="space-y-1.5 text-center font-sans">
-          <span className="text-[12px] font-black uppercase text-[#C5C1B9] tracking-widest leading-none font-mono">
+        <div className="space-y-1 text-center font-sans">
+          <span className="text-[11px] font-black uppercase text-[#C5C1B9] tracking-widest leading-none font-mono">
             Final blockchain receipt
           </span>
-          <h3 className="text-base font-black text-white uppercase tracking-wider font-mono">
+          <h3 className="text-[15px] font-black text-white uppercase tracking-wide font-mono">
             {status === 'success'
               ? (txType === 'bridge' ? 'Bridge Confirmed On-Chain' : 'Swap Confirmed On-Chain')
               : (txType === 'bridge' ? 'Bridge Failed On-Chain' : 'Swap Failed On-Chain')}
           </h3>
-          <p className="text-sm text-[#C5C1B9] px-4 max-w-[280px] mx-auto leading-relaxed">
+          <p className="text-[12px] text-[#C5C1B9] px-2 max-w-[280px] mx-auto leading-snug">
             {status === 'success'
               ? (txType === 'bridge'
                   ? 'The bridge transaction was mined successfully and verified from the final chain receipt.'
@@ -156,37 +156,37 @@ export function ReceiptModal({
           </p>
         </div>
 
-
-
         {/* Block Explorer Link */}
         <a 
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full py-3.5 px-4 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] rounded-xl font-mono text-[12px] tracking-widest uppercase font-black transition-all text-center duration-150 flex flex-col items-center justify-center gap-1 cursor-pointer shadow-[0_0_12px_rgba(50,255,139,0.2)]"
+          className="w-full py-3 px-3 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] rounded-xl font-mono text-[11px] tracking-widest uppercase font-black transition-all text-center duration-150 flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-[0_0_12px_rgba(50,255,139,0.2)]"
         >
-          <span className="opacity-85 text-[10px] font-bold">Block Explorer hash URL</span>
-          <div className="flex items-center gap-1 text-[#010C1B]">
+          <span className="opacity-85 text-[9px] font-bold">Block Explorer hash URL</span>
+          <div className="flex items-center gap-1 text-[#010C1B] truncate max-w-full">
             {displayHash}
-            <ExternalLink className="w-3.5 h-3.5 text-[#010C1B]" />
+            <ExternalLink className="w-3.5 h-3.5 text-[#010C1B] shrink-0" />
           </div>
         </a>
 
         {/* Secondary close button */}
         <button
           onClick={onClose}
-          className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-[#C5C1B9] hover:text-white font-mono uppercase tracking-wider font-black text-[12px] transition-all border border-white/10 cursor-pointer"
+          className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-[#C5C1B9] hover:text-white font-mono uppercase tracking-wider font-black text-[11px] transition-all border border-white/10 cursor-pointer"
         >
           Close receipt
         </button>
 
-        <p className="text-[10px] text-[#C5C1B9]/60 text-center leading-relaxed px-2">
+        <p className="text-[10px] text-[#C5C1B9]/60 text-center leading-snug px-2">
           A 0.1% platform fee was charged by FlowBridge for this transaction.
         </p>
       </div>
     </div>
+    </ModalPortal>
   );
 }
+
 
 // Utility to verify active explorer
 function isMainnetExplorer(link: string) {
