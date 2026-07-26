@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { X, ExternalLink, Sparkles, CheckCircle, XCircle } from 'lucide-react';
+import { ModalPortal } from './ModalPortal';
+
 
 interface ReceiptModalProps {
   isOpen: boolean;
