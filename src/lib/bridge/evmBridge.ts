@@ -30,7 +30,7 @@ export interface BridgeDeps {
   /** RPC reader bound to the source chain. */
   client: BridgeReadClient;
   /** Sends an unlimited ERC-20 approval, returns the tx hash. */
-  sendApproval(args: { token: Hex; spender: Hex; chainId: number }): Promise<Hex>;
+  sendApproval(args: { token: Hex; spender: Hex; chainId: number; amount: bigint }): Promise<Hex>;
   /** Sends the bridge deposit, returns the tx hash. */
   sendDeposit(args: {
     bridge: Hex;
