@@ -5,6 +5,7 @@ import { getContracts } from '../lib/contracts';
 import { cn } from '../lib/utils';
 import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '../lib/wagmi';
 import { fetchTronConfirmations } from '../lib/tronBridge';
+import { ModalPortal } from './ModalPortal';
 
 type BridgeDirection =
   | 'BOT_TO_BNB' | 'BNB_TO_BOT'
@@ -366,10 +367,11 @@ export function RealtimeBridgeTrackerModal({
   const displayHash = txHash ? `${txHash.slice(0, 10)}...${txHash.slice(-8)}` : 'simulating_pipeline';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans text-white">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans text-white">
       <div 
         id="realtime_bridge_tracker"
-        className="bg-[#030E1A] border border-white/10 text-[#F0F7F3] rounded-[22px] sm:rounded-[28px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-6 shadow-2xl relative flex flex-col space-y-6 animate-scale-up"
+        className="bg-[#030E1A] border border-white/10 text-[#F0F7F3] rounded-[22px] w-full max-h-[88dvh] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col space-y-4 animate-scale-up"
       >
         {/* Top Close Button */}
         <button 
@@ -522,5 +524,6 @@ export function RealtimeBridgeTrackerModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }
