@@ -1155,12 +1155,13 @@ export default function App() {
           });
         },
       },
-      sendApproval: ({ token, spender, chainId: cid }) =>
+      sendApproval: ({ token, spender, chainId: cid, amount }) =>
         writeContractAsync({
           address: token,
           abi: ERC20_ABI,
           functionName: 'approve',
-          args: [spender, maxUint256],
+          // Approve only the amount required for this transaction (no unlimited allowance).
+          args: [spender, amount],
           chainId: cid,
           gas: approveGas,
         } as any) as Promise<`0x${string}`>,

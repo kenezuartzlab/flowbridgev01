@@ -3,7 +3,7 @@ import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useSignMessage, useWriteContract } from "wagmi";
 import { ensureWalletVerified, WalletVerificationRejectedError } from "@/lib/walletVerification";
-import { formatUnits, maxUint256, parseUnits, type Address } from "viem";
+import { formatUnits, parseUnits, type Address } from "viem";
 import { ConfirmSwapModal } from "@/modals/ConfirmSwapModal";
 import { toast } from "sonner";
 import { TokenIcon } from "@/components/TokenIcon";
@@ -297,9 +297,9 @@ export function UniversalSwapCard({
             address: tokenAddr,
             abi: ERC20_ABI,
             functionName: "approve",
-            // Unlimited approval so users don't pay approval gas on every swap.
-            // FlowBridgeRouter v3 is the trusted spender for all swaps here.
-            args: [flowRouter, maxUint256],
+            // Approve exactly the amount this swap needs (swap amount + protocol fee)
+            // instead of an unlimited allowance, per recommended wallet safety practice.
+            args: [flowRouter, totalIn],
             gas: 80000n,
           });
           const rcpt = await publicClient!.waitForTransactionReceipt({ hash: approveTx });
