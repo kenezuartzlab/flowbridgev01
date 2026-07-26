@@ -84,7 +84,8 @@ export function WaitingModal({
         </button>
 
         {/* Glowing Coin Swap Animation with Ecosurge theme */}
-        <div className="relative w-28 h-28 flex items-center justify-center">
+        <div className="relative w-24 h-24 flex items-center justify-center">
+
           <div className="absolute inset-0 rounded-full border border-[#32FF8B]/15 animate-ping duration-1000" />
           <div className="absolute inset-2 rounded-full border border-[#00D7B2]/10 animate-[pulse_2s_infinite]" />
           <div className="absolute inset-0 w-full h-full border-2 border-dashed border-[#32FF8B]/20 rounded-full animate-spin duration-[15s]" />
@@ -117,7 +118,8 @@ export function WaitingModal({
         </div>
 
         {/* Live Swap Milestones Indicator Panel */}
-        <div className="w-full bg-[#010C1B]/80 border border-white/5 rounded-xl p-3.5 space-y-2.5 text-left font-mono text-[12px]">
+        <div className="w-full bg-[#010C1B]/80 border border-white/5 rounded-xl p-3 space-y-2 text-left font-mono text-[11px]">
+
           {/* Sign Transaction Milestone */}
           <div className="flex items-center justify-between">
             <span className="text-[#C5C1B9]">1. Wallet Signature approved</span>
@@ -148,10 +150,12 @@ export function WaitingModal({
           </div>
         </div>
 
-        <p className="text-[11px] text-[#C5C1B9] leading-relaxed uppercase tracking-wide font-mono">
+        <p className="text-[10px] text-[#C5C1B9] leading-snug uppercase tracking-wide font-mono">
           Please do not close this window while the chain confirms final success or fail status.
         </p>
       </div>
     </div>
+    </ModalPortal>
   );
 }
+
