@@ -272,7 +272,20 @@ export async function createTransactionHistory(
     })
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    // Unique (user_id, tx_hash) index: a concurrent duplicate submission lost
+    // the race — return the stored row without awarding points twice.
+    if ((error as any).code === "23505" && normalizedTxHash) {
+      const { data: existing } = await supabaseAdmin
+        .from("transactions_history")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("tx_hash", normalizedTxHash)
+        .maybeSingle();
+      if (existing) return existing;
+    }
+    throw error;
+  }
 
   if (!isBridge && verifiedSwapUsd > 0) {
     await supabaseAdmin
@@ -283,6 +296,29 @@ export async function createTransactionHistory(
         flow_points: Number(user.flow_points ?? 0) + pointsToEarn,
       })
       .eq("id", userId);
+
+    // Referral activity share: the referrer earns a configurable % of the
+    // points their referee just earned from verified swap volume.
+    if (pointsToEarn > 0 && user.referred_by) {
+      const rules = await getRewardSettings();
+      const share = Math.floor((pointsToEarn * (rules.referralActivityPct ?? 0)) / 100);
+      if (share > 0) {
+        const { data: referrer } = await supabaseAdmin
+          .from("profiles")
+          .select("id, flow_points, points_referral_activity")
+          .eq("referral_code", user.referred_by)
+          .maybeSingle();
+        if (referrer && referrer.id !== userId) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({
+              points_referral_activity: Number(referrer.points_referral_activity ?? 0) + share,
+              flow_points: Number(referrer.flow_points ?? 0) + share,
+            })
+            .eq("id", referrer.id);
+        }
+      }
+    }
   }
 
   return tx;
