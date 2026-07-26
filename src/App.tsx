@@ -1984,11 +1984,10 @@ export default function App() {
   else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
     bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
   }
-  else if (session.step3.status === 'submitted') bridgeButtonLabel = `Bridge Confirmed ↗`;
   else if (belowBridgeMin) bridgeButtonLabel = `Minimum $10 to bridge`;
   else if (usdtAmount && !isApprovedForBridge) bridgeButtonLabel = "Approve USDT";
   else if (usdtAmount) bridgeButtonLabel = `Bridge to ${bridgeToName}`;
-  let bridgeButtonDisabled = isActionLoading || belowBridgeMin || (isConnected && !usdtAmount && session.step3.status !== 'submitted');
+  let bridgeButtonDisabled = isActionLoading || belowBridgeMin || (isConnected && !usdtAmount);
 
   // Dynamic formatting for real and mock balances
   const formatBalance = (raw: any, decimals = 18) => {
