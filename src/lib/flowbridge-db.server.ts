@@ -62,19 +62,40 @@ async function verifySwapReceipt(txHash: string | null, walletAddress: string) {
   return false;
 }
 
+/** Resolve the on-chain address for a swap symbol (built-ins + admin-published tokens). */
+async function resolveTokenAddress(symbol: string): Promise<string | null> {
+  const s = symbol.toUpperCase();
+  if (s === "USDT") return MAINNET_CONTRACTS.usdtBot;
+  if (s === "BOT" || s === "WBOT") return MAINNET_CONTRACTS.wbot;
+  if (s === "CA") return MAINNET_CONTRACTS.caToken;
+  const { data } = await supabaseAdmin
+    .from("swap_tokens")
+    .select("address, symbol, chain, is_active")
+    .eq("chain", "mainnet")
+    .ilike("symbol", s)
+    .maybeSingle();
+  return data?.address ?? null;
+}
+
+/**
+ * USD price for a swap input symbol. Unknown / unpriceable tokens return 0 so
+ * they never inflate swap volume or FLOW points.
+ */
 async function fetchTokenUsdPrice(symbol: string) {
-  if (symbol === "USDT") return 1;
-  const token = symbol === "CA" ? MAINNET_CONTRACTS.caToken : MAINNET_CONTRACTS.wbot;
+  const s = symbol.toUpperCase();
+  if (s === "USDT") return 1;
+  const token = await resolveTokenAddress(s);
+  if (!token) return 0;
   try {
     const res = await fetch(`https://dex-wallet.botchain.ai/api/v1/price?token=${token.toLowerCase()}&pool_type=all`);
     const json = await res.json().catch(() => null);
     const price = Number(json?.data?.price);
     if (Number.isFinite(price) && price > 0) return price;
   } catch {
-    // fall through to conservative local fallback
+    // fall through
   }
-  if (symbol === "BOT" || symbol === "WBOT") return 9.7482;
-  if (symbol === "CA") return 3.12405 * 9.7482;
+  // Conservative fallbacks exist only for the two core assets.
+  if (s === "BOT" || s === "WBOT") return 9.7482;
   return 0;
 }
 
