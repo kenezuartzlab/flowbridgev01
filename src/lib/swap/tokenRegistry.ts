@@ -1,5 +1,8 @@
-// Curated token list + persisted user-imported tokens for the universal Swap card.
+// Curated token list + admin-published tokens + persisted user-imported tokens
+// for the universal Swap card.
 import { getContracts } from "@/lib/contracts";
+import { getRemoteTokens } from "@/lib/config/appConfig";
+
 
 export const NATIVE_TOKEN_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" as const;
 
@@ -14,7 +17,7 @@ export interface Token {
 
 export function getCuratedTokens(isMainnet: boolean): Token[] {
   const c = getContracts(isMainnet);
-  return [
+  const base: Token[] = [
     {
       address: NATIVE_TOKEN_ADDRESS,
       symbol: "BOT",
@@ -41,7 +44,21 @@ export function getCuratedTokens(isMainnet: boolean): Token[] {
       decimals: 18,
     },
   ];
+
+  // Admin-published tokens (persisted server-side, visible to every user).
+  const known = new Set(base.map((t) => t.address.toLowerCase()));
+  const published = getRemoteTokens(isMainnet)
+    .filter((t) => !known.has(t.address.toLowerCase()))
+    .map<Token>((t) => ({
+      address: t.address.toLowerCase(),
+      symbol: t.symbol,
+      name: t.name,
+      decimals: t.decimals,
+    }));
+
+  return [...base, ...published];
 }
+
 
 const STORAGE_KEY = "flowbridge.imported_tokens.v1";
 

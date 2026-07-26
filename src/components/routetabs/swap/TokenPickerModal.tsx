@@ -9,6 +9,8 @@ import {
 } from "@/lib/swap/tokenRegistry";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
+import { useAppConfig } from "@/lib/config/appConfig";
+
 
 interface TokenPickerModalProps {
   isOpen: boolean;
@@ -39,8 +41,10 @@ export function TokenPickerModal({
     }
   }, [isOpen]);
 
-  const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet]);
+  const config = useAppConfig(); // admin-published tokens land here
+  const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet, config]);
   const imported = useMemo(() => getImportedTokens(isMainnet), [isMainnet, tick]);
+
 
   const list = useMemo(() => {
     const all = [...curated, ...imported];

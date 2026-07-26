@@ -16,11 +16,13 @@ import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiConfigRouteImport } from './routes/api/config'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
@@ -30,6 +32,9 @@ import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
+import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
+import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
+import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -74,6 +79,11 @@ const ArcadeflixRoute = ArcadeflixRouteImport.update({
   path: '/arcadeflix',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ActivityRoute = ActivityRouteImport.update({
   id: '/activity',
   path: '/activity',
@@ -97,6 +107,11 @@ const ApiProposalsRoute = ApiProposalsRouteImport.update({
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiConfigRoute = ApiConfigRouteImport.update({
+  id: '/api/config',
+  path: '/api/config',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -146,6 +161,21 @@ const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
   path: '/api/incentives/global',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
+  id: '/api/admin/whoami',
+  path: '/api/admin/whoami',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminTokensRoute = ApiAdminTokensRouteImport.update({
+  id: '/api/admin/tokens',
+  path: '/api/admin/tokens',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
+  id: '/api/admin/settings',
+  path: '/api/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -193,6 +223,7 @@ const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
+  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -202,10 +233,14 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/tokens': typeof ApiAdminTokensRoute
+  '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -224,6 +259,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
+  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -233,10 +269,14 @@ export interface FileRoutesByTo {
   '/rewards': typeof RewardsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/tokens': typeof ApiAdminTokensRoute
+  '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -256,6 +296,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
+  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -265,10 +306,14 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/tokens': typeof ApiAdminTokensRoute
+  '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -289,6 +334,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activity'
+    | '/admin'
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
@@ -298,10 +344,14 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/config'
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/settings'
+    | '/api/admin/tokens'
+    | '/api/admin/whoami'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -320,6 +370,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activity'
+    | '/admin'
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
@@ -329,10 +380,14 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/config'
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/settings'
+    | '/api/admin/tokens'
+    | '/api/admin/whoami'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -351,6 +406,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/activity'
+    | '/admin'
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
@@ -360,10 +416,14 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/config'
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/settings'
+    | '/api/admin/tokens'
+    | '/api/admin/whoami'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -383,6 +443,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivityRoute: typeof ActivityRoute
+  AdminRoute: typeof AdminRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
   EcosurgeRoute: typeof EcosurgeRoute
   FortuneRoute: typeof FortuneRoute
@@ -392,10 +453,14 @@ export interface RootRouteChildren {
   RewardsRoute: typeof RewardsRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiConfigRoute: typeof ApiConfigRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
   ApiTransactionsRoute: typeof ApiTransactionsRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
+  ApiAdminTokensRoute: typeof ApiAdminTokensRoute
+  ApiAdminWhoamiRoute: typeof ApiAdminWhoamiRoute
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
@@ -462,6 +527,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArcadeflixRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/activity': {
       id: '/activity'
       path: '/activity'
@@ -495,6 +567,13 @@ declare module '@tanstack/react-router' {
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/config': {
+      id: '/api/config'
+      path: '/api/config'
+      fullPath: '/api/config'
+      preLoaderRoute: typeof ApiConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/oauth-protected-resource': {
@@ -558,6 +637,27 @@ declare module '@tanstack/react-router' {
       path: '/api/incentives/global'
       fullPath: '/api/incentives/global'
       preLoaderRoute: typeof ApiIncentivesGlobalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/whoami': {
+      id: '/api/admin/whoami'
+      path: '/api/admin/whoami'
+      fullPath: '/api/admin/whoami'
+      preLoaderRoute: typeof ApiAdminWhoamiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/tokens': {
+      id: '/api/admin/tokens'
+      path: '/api/admin/tokens'
+      fullPath: '/api/admin/tokens'
+      preLoaderRoute: typeof ApiAdminTokensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/settings': {
+      id: '/api/admin/settings'
+      path: '/api/admin/settings'
+      fullPath: '/api/admin/settings'
+      preLoaderRoute: typeof ApiAdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
@@ -634,6 +734,7 @@ const ApiProposalsRouteWithChildren = ApiProposalsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivityRoute: ActivityRoute,
+  AdminRoute: AdminRoute,
   ArcadeflixRoute: ArcadeflixRoute,
   EcosurgeRoute: EcosurgeRoute,
   FortuneRoute: FortuneRoute,
@@ -644,10 +745,14 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiConfigRoute: ApiConfigRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
   ApiTransactionsRoute: ApiTransactionsRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiAdminSettingsRoute: ApiAdminSettingsRoute,
+  ApiAdminTokensRoute: ApiAdminTokensRoute,
+  ApiAdminWhoamiRoute: ApiAdminWhoamiRoute,
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,

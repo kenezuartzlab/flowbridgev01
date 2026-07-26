@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_admins: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -260,6 +296,57 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      swap_tokens: {
+        Row: {
+          address: string
+          chain: string
+          created_at: string
+          created_by: string | null
+          decimals: number
+          id: string
+          is_active: boolean
+          liquidity_verified: boolean
+          logo_url: string | null
+          name: string
+          router_id: number | null
+          sort_order: number
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          chain: string
+          created_at?: string
+          created_by?: string | null
+          decimals?: number
+          id?: string
+          is_active?: boolean
+          liquidity_verified?: boolean
+          logo_url?: string | null
+          name: string
+          router_id?: number | null
+          sort_order?: number
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          chain?: string
+          created_at?: string
+          created_by?: string | null
+          decimals?: number
+          id?: string
+          is_active?: boolean
+          liquidity_verified?: boolean
+          logo_url?: string | null
+          name?: string
+          router_id?: number | null
+          sort_order?: number
+          symbol?: string
+          updated_at?: string
         }
         Relationships: []
       }
