@@ -180,6 +180,7 @@ export function ConnectGuideModal({
   };
 
   if (!isOpen) return null;
+  const tokenPocketSigning = isTokenPocket && siweBusy;
 
   const copyUrlToClipboard = async () => {
     try {
@@ -217,10 +218,14 @@ export function ConnectGuideModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/90 backdrop-blur-md animate-fade-in font-sans">
+    <div className={`fixed inset-0 flex items-center justify-center p-3 sm:p-4 animate-fade-in font-sans ${
+      tokenPocketSigning ? 'z-0 pointer-events-none bg-transparent' : 'z-50 bg-[#010C1B]/90 backdrop-blur-md'
+    }`}>
       <div
         id="connect_guide_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[370px] p-6 shadow-2xl relative flex flex-col gap-5 animate-scale-up border-b-[5px] border-b-[#32FF8B] max-h-[90vh] overflow-y-auto"
+        className={`bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[370px] p-6 shadow-2xl relative flex flex-col gap-5 animate-scale-up border-b-[5px] border-b-[#32FF8B] max-h-[90vh] overflow-y-auto transition-opacity ${
+          tokenPocketSigning ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
       >
         {/* Header */}
         <div className="flex justify-between items-center pb-3 border-b border-white/5 font-mono">
