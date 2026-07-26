@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 
-import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http, maxUint256 } from 'viem';
+import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/wagmi';
 import {
   isTronLinkAvailable, requestTronLinkAccounts, isValidTronAddress,
@@ -1155,12 +1155,13 @@ export default function App() {
           });
         },
       },
-      sendApproval: ({ token, spender, chainId: cid }) =>
+      sendApproval: ({ token, spender, chainId: cid, amount }) =>
         writeContractAsync({
           address: token,
           abi: ERC20_ABI,
           functionName: 'approve',
-          args: [spender, maxUint256],
+          // Approve only the amount required for this transaction (no unlimited allowance).
+          args: [spender, amount],
           chainId: cid,
           gas: approveGas,
         } as any) as Promise<`0x${string}`>,
