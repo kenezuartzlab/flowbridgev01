@@ -331,5 +331,18 @@ body {
 .fb-vv-sheet { max-height: calc(var(--fb-vvh) - 1.5rem); }
 .fb-vv-overlay { height: var(--fb-vvh); }
 
+/* App frame: never taller than the *actually visible* viewport, otherwise
+   in-app browser toolbars push the bottom of the column out of reach and
+   nothing can be scrolled to. */
+.fb-app-frame { height: min(100dvh, var(--fb-vvh)); }
+
+/* Inner scroll region must own the touch gesture on mobile. */
+.fb-scroll-y {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
 /* Tap targets (Android-safe 48px) */
 .fb-tap-target { min-height: 3rem; min-width: 3rem; }
+
