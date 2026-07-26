@@ -144,13 +144,13 @@ export function ReceiptModal({
           </span>
           <h3 className="text-[15px] font-black text-white uppercase tracking-wide font-mono">
             {status === 'success'
-              ? (txType === 'bridge' ? 'Bridge Confirmed On-Chain' : 'Swap Confirmed On-Chain')
+              ? (txType === 'bridge' ? 'Bridge Submitted' : 'Swap Confirmed On-Chain')
               : (txType === 'bridge' ? 'Bridge Failed On-Chain' : 'Swap Failed On-Chain')}
           </h3>
           <p className="text-[12px] text-[#C5C1B9] px-2 max-w-[280px] mx-auto leading-snug">
             {status === 'success'
               ? (txType === 'bridge'
-                  ? 'The bridge transaction was mined successfully and verified from the final chain receipt.'
+                  ? 'Your bridge transaction was sent. Please wait and track your transaction until the funds arrive on the destination chain.'
                   : 'The swap transaction was mined successfully and verified from the final chain receipt.')
               : 'The transaction was mined but reverted on-chain. It was not saved as a successful transaction.'}
           </p>
