@@ -27,6 +27,11 @@ export function isInAppBrowser(): boolean {
   return patterns.some((re) => re.test(ua));
 }
 
+export function isTokenPocketBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /TokenPocket/i.test(navigator.userAgent || "");
+}
+
 export function inAppBrowserName(): string | null {
   if (typeof navigator === "undefined") return null;
   const ua = navigator.userAgent || "";

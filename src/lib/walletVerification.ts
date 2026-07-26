@@ -5,10 +5,11 @@
 // localStorage so a refresh does not force another signature. The cache is
 // explicitly cleared when the user disconnects or switches wallets.
 
-import { isInAppBrowser } from "@/lib/in-app-browser";
+import { isInAppBrowser, isTokenPocketBrowser } from "@/lib/in-app-browser";
 
 const STORAGE_PREFIX = "flowbridge:wallet-verified:";
 const SIGNATURE_TIMEOUT_MS = 45_000;
+const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 20_000;
 
 function storageKey(address: string) {
   return `${STORAGE_PREFIX}${address.toLowerCase()}`;
@@ -124,12 +125,24 @@ function withTimeout<T>(promise: Promise<T>, ms = SIGNATURE_TIMEOUT_MS): Promise
   });
 }
 
+function stringToHex(value: string): `0x${string}` {
+  const bytes = new TextEncoder().encode(value);
+  return `0x${Array.from(bytes)
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("")}`;
+}
+
 async function signWithInjected(normalized: string, message: string, ms?: number): Promise<string> {
   const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
   if (!eth?.request) throw new Error("provider not found");
+  const tokenPocket = isTokenPocketBrowser();
+  // TokenPocket's mobile in-app provider is more reliable when personal_sign
+  // receives UTF-8 data as hex bytes. Other wallets keep the existing raw text
+  // path that has been stable in Bitget, OKX, MetaMask, etc.
+  const signableMessage = tokenPocket ? stringToHex(message) : message;
   const signature = (await withTimeout(
-    eth.request({ method: "personal_sign", params: [message, normalized] }) as Promise<string>,
-    ms,
+    eth.request({ method: "personal_sign", params: [signableMessage, normalized] }) as Promise<string>,
+    ms ?? (tokenPocket ? TOKENPOCKET_SIGNATURE_TIMEOUT_MS : SIGNATURE_TIMEOUT_MS),
   )) as string;
   await assertActiveInjectedAccount(normalized);
   if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
@@ -145,6 +158,7 @@ export async function signMessageWithActiveWallet(
   await assertActiveInjectedAccount(normalized);
 
   const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
+  const tokenPocket = isTokenPocketBrowser();
   // Inside wallet in-app browsers (TokenPocket, Bitget, Trust…) the injected
   // provider is the wallet itself and answers reliably. wagmi's connector layer
   // sometimes accepts the request there and never resolves it, so ask the
@@ -153,8 +167,14 @@ export async function signMessageWithActiveWallet(
 
   if (injectedFirst) {
     try {
-      return await signWithInjected(normalized, message);
+      return await signWithInjected(normalized, message, tokenPocket ? TOKENPOCKET_SIGNATURE_TIMEOUT_MS : undefined);
     } catch (err: any) {
+      // TokenPocket often leaves connector-layer requests pending after an
+      // injected-provider timeout. Do not open a second wallet prompt; surface a
+      // clean retry message instead of leaving the UI stuck.
+      if (tokenPocket) {
+        throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
+      }
       if (!shouldFallbackToInjected(err) || !wagmiSignMessageAsync) {
         throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
       }
