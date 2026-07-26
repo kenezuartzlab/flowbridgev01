@@ -3,6 +3,8 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { MAINNET_CONTRACTS, TESTNET_CONTRACTS } from "@/lib/contracts";
 import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd } from "@/lib/rewards";
+import { getRewardSettings } from "@/lib/appConfig.server";
+
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const BOT_MAINNET_RPC = "https://rpc.botchain.ai";
@@ -226,10 +228,12 @@ export async function createTransactionHistory(
   if (!isBridge && isSuccessfulSwap && submittedWallet) {
     const receiptOk = await verifySwapReceipt(normalizedTxHash, submittedWallet);
     if (receiptOk) {
+      const rules = await getRewardSettings();
       verifiedSwapUsd = await estimateSwapUsd(payload.direction, payload.fromAmount);
-      pointsToEarn = estimateFlowPointsForUsd(verifiedSwapUsd);
+      pointsToEarn = estimateFlowPointsForUsd(verifiedSwapUsd, rules);
     }
   }
+
 
 
 
@@ -411,26 +415,33 @@ export async function confirmSocialFollow(userId: string, channel: SocialChannel
 }
 
 
-function computeClaimable(u: {
-  points_self?: number | null;
-  points_referral_activity?: number | null;
-  points_referral_signup?: number | null;
-  total_swap_volume_usd?: number | string | null;
-}) {
+function computeClaimable(
+  u: {
+    points_self?: number | null;
+    points_referral_activity?: number | null;
+    points_referral_signup?: number | null;
+    total_swap_volume_usd?: number | string | null;
+  },
+  rules?: { referralClaimMinSwapUsd: number; claimThreshold: number },
+) {
+  // Admin-configurable: swap volume needed to unlock each block of
+  // referral-signup points, and the size of that block.
+  const unlockUsd = rules?.referralClaimMinSwapUsd && rules.referralClaimMinSwapUsd > 0 ? rules.referralClaimMinSwapUsd : 100;
+  const block = rules?.claimThreshold && rules.claimThreshold > 0 ? rules.claimThreshold : 1000;
   const self = u.points_self ?? 0;
   const activity = u.points_referral_activity ?? 0;
   const signup = u.points_referral_signup ?? 0;
   const volume = Number(u.total_swap_volume_usd ?? 0);
-  // $100 total swaps unlocks 1000 signup-referral points
-  const maxSignupClaimable = Math.floor(volume / 100) * 1000;
+  const maxSignupClaimable = Math.floor(volume / unlockUsd) * block;
   const signupUnlocked = Math.min(signup, maxSignupClaimable);
   const signupLocked = Math.max(0, signup - signupUnlocked);
   const nextUnlockUsd = signupLocked > 0
-    ? Math.max(0, Math.ceil(((Math.floor(volume / 100) + 1) * 100) - volume))
+    ? Math.max(0, Math.ceil(((Math.floor(volume / unlockUsd) + 1) * unlockUsd) - volume))
     : 0;
   const claimable = self + activity + signupUnlocked;
-  return { self, activity, signup, signupUnlocked, signupLocked, volume, nextUnlockUsd, claimable };
+  return { self, activity, signup, signupUnlocked, signupLocked, volume, nextUnlockUsd, claimable, unlockUsd, claimThreshold: block };
 }
+
 
 export async function getUserPointsAndReferrals(userId: string) {
   const { data: user } = await supabaseAdmin
@@ -451,7 +462,7 @@ export async function getUserPointsAndReferrals(userId: string) {
 
   const totals = await globalTotals();
   const socials = await getSocialFollows(userId);
-  const breakdown = computeClaimable(user as any);
+  const breakdown = computeClaimable(user as any, await getRewardSettings());
   return {
     flowPoints: user.flow_points,
     claimedTokens: user.claimed_tokens,
@@ -518,15 +529,18 @@ export async function claimFlowPoints(userId: string, emailVerified: boolean) {
     );
   }
 
-  const b = computeClaimable(user as any);
-  if (b.claimable < 1000) {
+  const b = computeClaimable(user as any, await getRewardSettings());
+  if (b.claimable < b.claimThreshold) {
     if (b.signupLocked > 0) {
       throw new Error(
-        `Insufficient claimable FLOW. Referral-signup points unlock at $100 in swaps per 1,000. Trade $${b.nextUnlockUsd} more to unlock the next 1,000.`,
+        `Insufficient claimable FLOW. Referral-signup points unlock at $${b.unlockUsd} in swaps per ${b.claimThreshold.toLocaleString()}. Trade $${b.nextUnlockUsd} more to unlock the next ${b.claimThreshold.toLocaleString()}.`,
       );
     }
-    throw new Error("Insufficient FLOW points. A minimum of 1,000 claimable points is required.");
+    throw new Error(
+      `Insufficient FLOW points. A minimum of ${b.claimThreshold.toLocaleString()} claimable points is required.`,
+    );
   }
+
 
   const newSelf = 0;
   const newActivity = 0;

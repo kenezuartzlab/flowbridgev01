@@ -21,7 +21,9 @@ import {
 } from "@/lib/swap/tokenRegistry";
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
 import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
-import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
+import { estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
+import { useAppConfig } from "@/lib/config/appConfig";
+
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
@@ -87,11 +89,13 @@ export function UniversalSwapCard({
   // Router used for the token-in ERC20 allowance check (the first step's router).
   // Recomputed after a quote arrives.
 
-  const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet]);
+  const appConfig = useAppConfig(); // admin-published tokens + default slippage
+  const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet, appConfig]);
   const [tokenIn, setTokenIn] = useState<Token>(curated[0]); // BOT
   const [tokenOut, setTokenOut] = useState<Token>(curated[2]); // USDT
   const [amountIn, setAmountIn] = useState("");
-  const [slippage, setSlippage] = useState(0.5);
+  const [slippage, setSlippage] = useState(appConfig.fees.defaultSlippagePct);
+
   const [pickerOpen, setPickerOpen] = useState<"in" | "out" | null>(null);
 
   const [quoting, setQuoting] = useState(false);
@@ -644,8 +648,10 @@ export function UniversalSwapCard({
     if (!isFinite(n) || n <= 0 || px == null || !isFinite(px)) return null;
     return n * px;
   })();
-  const rewardEligible = isRewardEligibleUsd(swapUsd);
-  const estimatedFlowPoints = estimateFlowPointsForUsd(swapUsd);
+  const rewardRules = appConfig.rewards;
+  const rewardEligible = isRewardEligibleUsd(swapUsd, rewardRules);
+  const estimatedFlowPoints = estimateFlowPointsForUsd(swapUsd, rewardRules);
+
 
 
 
@@ -751,14 +757,14 @@ export function UniversalSwapCard({
                         ? "Price loading"
                         : rewardEligible
                           ? `+${estimatedFlowPoints.toLocaleString()} FLOW`
-                          : `0 FLOW · min ${formatUsd(FLOW_REWARD_MIN_USD)}`
+                          : `0 FLOW · min ${formatUsd(rewardRules.minUsd)}`
                   }
                 />
                 <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">
                   {rewardsActive
                     ? rewardEligible
                       ? `${formatUsd(swapUsd)} verified swap value qualifies for FLOW rewards after the transaction confirms.`
-                      : `FLOW rewards start at ${formatUsd(FLOW_REWARD_MIN_USD)} verified swap value. Smaller swaps can complete, but earn 0 FLOW.`
+                      : `FLOW rewards start at ${formatUsd(rewardRules.minUsd)} verified swap value. Smaller swaps can complete, but earn 0 FLOW.`
                     : "FLOW rewards require a verified email and the connected wallet bound to that account."}
                 </p>
               </div>

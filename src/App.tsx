@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
+import { useAppConfig } from './lib/config/appConfig';
+
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/wagmi';
@@ -450,11 +452,16 @@ export default function App() {
     return 'BRIDGE';
   });
 
-  // Admin-only gate for the LIMIT tab (still experimental, kept private)
-  const isLimitAdmin = googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com';
+  // LIMIT tab: private by default, opened to everyone only when the admin
+  // flips the published `limitTabPublic` flag.
+  const appConfig = useAppConfig();
+  const isLimitAdmin =
+    appConfig.flags.limitTabPublic ||
+    googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com';
   useEffect(() => {
     if (activeTab === 'LIMIT' && !isLimitAdmin) setActiveTab('BOT/USDT');
   }, [activeTab, isLimitAdmin]);
+
 
   // Form states
   const [caAmount, setCaAmount] = useState('');
@@ -1965,7 +1972,7 @@ export default function App() {
   // Bridge minimum: $10 USD. USDT ≈ $1, so require >= 10 USDT before
   // enabling the button (matches on-chain minimum enforced by BotBridge —
   // sending less reverts and wastes gas).
-  const BRIDGE_MIN_USDT = 10;
+  const BRIDGE_MIN_USDT = appConfig.fees.minBridgeUsd;
   const parsedUsdtAmt = parseFloat(usdtAmount || '0');
   const belowBridgeMin = !!usdtAmount && isFinite(parsedUsdtAmt) && parsedUsdtAmt > 0 && parsedUsdtAmt < BRIDGE_MIN_USDT;
 
@@ -2331,7 +2338,7 @@ export default function App() {
         <RouteTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          showLimitTab={googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com'}
+          showLimitTab={isLimitAdmin}
         />
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col items-stretch px-4 py-4 sm:px-5 sm:py-5 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
@@ -2743,9 +2750,18 @@ export default function App() {
             </svg>
           </a>
         </div>
+        {googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com' && (
+          <a
+            href="/admin"
+            className="text-[9px] tracking-[0.2em] font-black text-[#32FF8B]/80 hover:text-[#32FF8B] transition-colors"
+          >
+            ⚙ Admin console
+          </a>
+        )}
         <span className="text-[9px] text-[#C5C1B9]/70 tracking-[0.2em] font-medium">
           ⓒ 2026 FlowBridge. Built by Kenezu
         </span>
+
       </footer>
 
       {/* P1 persistent navigation to Markets / Rewards / Activity */}
