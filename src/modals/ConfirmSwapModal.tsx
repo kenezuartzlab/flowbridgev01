@@ -67,36 +67,37 @@ export function ConfirmSwapModal({
         </div>
 
         {/* Swap Visual Grid */}
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {/* Pay Amount Box */}
-          <div className="flex justify-between items-center py-1 border-b border-white/5 pb-2">
-            <span className="text-3xl font-black text-white tracking-tight shrink-0 truncate max-w-[180px] font-mono">
+          <div className="flex justify-between items-center gap-2 border-b border-white/5 pb-1.5">
+            <span className="text-2xl font-black text-white tracking-tight truncate font-mono">
               {parseFloat(fromAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-black text-white tracking-widest uppercase font-mono">{fromSymbol}</span>
-              <TokenIcon symbol={fromSymbol} size={24} />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[13px] font-black text-white tracking-widest uppercase font-mono">{fromSymbol}</span>
+              <TokenIcon symbol={fromSymbol} size={20} />
             </div>
           </div>
 
           {/* Directional Downward Arrow */}
-          <div className="flex justify-center -my-3.5 relative z-10">
-            <div className="bg-[#010C1B] border border-white/10 p-1.5 rounded-full text-[#32FF8B] shadow-md animate-bounce-slow">
-              <ArrowDown className="w-4 h-4" />
+          <div className="flex justify-center -my-2.5 relative z-10">
+            <div className="bg-[#010C1B] border border-white/10 p-1 rounded-full text-[#32FF8B] shadow-md animate-bounce-slow">
+              <ArrowDown className="w-3.5 h-3.5" />
             </div>
           </div>
 
           {/* Receive Amount Box */}
-          <div className="flex justify-between items-center py-1 pt-2">
-            <span className="text-3xl font-black text-[#32FF8B] tracking-tight shrink-0 truncate max-w-[180px] font-mono">
+          <div className="flex justify-between items-center gap-2 pt-1.5">
+            <span className="text-2xl font-black text-[#32FF8B] tracking-tight truncate font-mono">
               {parseFloat(toAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-black text-white tracking-widest uppercase font-mono">{toSymbol}</span>
-              <TokenIcon symbol={toSymbol} size={24} />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[13px] font-black text-white tracking-widest uppercase font-mono">{toSymbol}</span>
+              <TokenIcon symbol={toSymbol} size={20} />
             </div>
           </div>
         </div>
+
 
         {/* Bridge specific chain information card */}
         {isBridge && (
