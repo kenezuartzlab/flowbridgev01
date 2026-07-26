@@ -159,18 +159,20 @@ export function ConfirmSwapModal({
         </div>
 
         {/* Footnote disclaimer */}
-        <p className="text-[12px] text-[#C5C1B9] text-center leading-relaxed px-2">
+        <p className="text-[11px] text-[#C5C1B9] text-center leading-snug px-1">
           Output is estimated. A {platformFee} platform fee is charged by FlowBridge. You will receive at least <strong className="text-white font-mono">{minRec} {toSymbol}</strong> or the transaction will revert.
         </p>
 
         {/* Submit Button */}
         <button
           onClick={onConfirm}
-          className="w-full py-3.5 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-sm uppercase transition-all duration-200 active:scale-[0.98] shadow-md hover:shadow-[0_0_20px_rgba(50,255,139,0.3)] cursor-pointer"
+          className="w-full py-3 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-[13px] uppercase transition-all duration-200 active:scale-[0.98] shadow-md hover:shadow-[0_0_20px_rgba(50,255,139,0.3)] cursor-pointer"
         >
           {isBridge ? "Confirm Bridge" : "Confirm swap"}
         </button>
       </div>
     </div>
+    </ModalPortal>
   );
 }
+
