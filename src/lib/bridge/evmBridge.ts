@@ -73,7 +73,7 @@ export async function ensureSourceChain(deps: BridgeDeps, chainId: number): Prom
   );
 }
 
-/** Approve (unlimited) and block until the allowance is actually readable on-chain. */
+/** Approve exactly what this bridge needs and block until the allowance is actually readable on-chain. */
 export async function ensureBridgeAllowance(
   deps: BridgeDeps,
   opts: { chainId: number; token: Hex; owner: Hex; spender: Hex; needed: bigint },
@@ -87,7 +87,12 @@ export async function ensureBridgeAllowance(
   if ((await read()) >= opts.needed) return;
 
   deps.onStep?.('approving_usdt');
-  const hash = await deps.sendApproval({ token: opts.token, spender: opts.spender, chainId: opts.chainId });
+  const hash = await deps.sendApproval({
+    token: opts.token,
+    spender: opts.spender,
+    chainId: opts.chainId,
+    amount: opts.needed,
+  });
 
   const receipt = await deps.client.waitForReceipt(hash);
   if (receipt.status !== 'success') {
