@@ -297,3 +297,39 @@ html.light .bg-white\/10 { background-color: color-mix(in srgb, var(--fb-foregro
 html.light .bg-white\/15:hover,
 html.light .bg-white\/15 { background-color: color-mix(in srgb, var(--fb-foreground) 12%, transparent) !important; }
 html.light .border-white\/15 { border-color: var(--fb-hairline-strong) !important; }
+
+/* ============================================================
+   MOBILE RESPONSIVENESS BASELINE (320px → desktop)
+   - no horizontal pan / rubber-band on small screens
+   - no pinch-zoom or iOS text auto-inflation
+   - keyboard-aware modal height via --fb-vvh
+   ============================================================ */
+:root { --fb-vvh: 100dvh; }
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: contain;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: pan-y;
+}
+
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* iOS zooms the page when focusing inputs under 16px — keep them at 16px. */
+@media (max-width: 640px) {
+  input, select, textarea { font-size: max(16px, 1em); }
+}
+
+/* Keyboard-aware sheet: fits within the visible viewport when the
+   on-screen keyboard is open, so lists stay scrollable and visible. */
+.fb-vv-sheet { max-height: calc(var(--fb-vvh) - 1.5rem); }
+.fb-vv-overlay { height: var(--fb-vvh); }
+
+/* Tap targets (Android-safe 48px) */
+.fb-tap-target { min-height: 3rem; min-width: 3rem; }
