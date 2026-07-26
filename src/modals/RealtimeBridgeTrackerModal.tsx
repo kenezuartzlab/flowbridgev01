@@ -417,9 +417,6 @@ export function RealtimeBridgeTrackerModal({
               <span className="font-mono text-[9.5px] font-bold text-[#32FF8B]/70 uppercase tracking-widest animate-pulse">
                 {isCompleted ? 'Settled' : 'Relaying'}
               </span>
-              <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-amber-400/30 via-[#32FF8B]/60 to-teal-400/30 overflow-hidden">
-                <div className="h-full w-1/3 bg-[#32FF8B] animate-[slide-in-right_1.8s_ease-in-out_infinite]" />
-              </div>
             </div>
 
             {/* Destination */}

@@ -1984,11 +1984,10 @@ export default function App() {
   else if (isActionLoading && (actionStep === 'approving_usdt' || actionStep === 'bridging_usdt' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
     bridgeButtonLabel = actionStep === 'approving_usdt' ? "Approving USDT..." : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Submitting Bridge to ${bridgeToName}...`;
   }
-  else if (session.step3.status === 'submitted') bridgeButtonLabel = `Bridge Confirmed ↗`;
   else if (belowBridgeMin) bridgeButtonLabel = `Minimum $10 to bridge`;
   else if (usdtAmount && !isApprovedForBridge) bridgeButtonLabel = "Approve USDT";
   else if (usdtAmount) bridgeButtonLabel = `Bridge to ${bridgeToName}`;
-  let bridgeButtonDisabled = isActionLoading || belowBridgeMin || (isConnected && !usdtAmount && session.step3.status !== 'submitted');
+  let bridgeButtonDisabled = isActionLoading || belowBridgeMin || (isConnected && !usdtAmount);
 
   // Dynamic formatting for real and mock balances
   const formatBalance = (raw: any, decimals = 18) => {
@@ -2665,14 +2664,11 @@ export default function App() {
                 }
                 if (!isConnected) return handleConnect();
                 if (!isNetworkCorrect) return handleSwitchNetwork();
-                if (session.step3.status === 'submitted') {
-                  return window.open(`${bridgeSrcExplorerPrefix}${session.step3.tx_hash ?? 'pending'}`, '_blank');
-                }
                 if (usdtAmount) {
                   setIsConfirmDestinationOpen(true);
                 }
               }}
-              successMessage={session.step3.status === 'submitted' ? 'Source-chain transaction confirmed. USDT is being relayed to the destination chain by the bridge validators.' : undefined}
+              successMessage={session.step3.status === 'submitted' ? 'Bridge submitted. Please wait and track your transaction below until it completes on the destination chain.' : undefined}
               txHash={session.step3.status === 'submitted' ? session.step3.tx_hash ?? undefined : undefined}
               txUrlPrefix={bridgeSrcExplorerPrefix}
               gasFeeLabel={
@@ -2682,7 +2678,6 @@ export default function App() {
                 : '≈ 15 TRX'
               }
               bridgeDirection={bridgeDirection}
-              onReset={resetStep3}
               showReceiveBotGasOption={bridgeDirection === 'BNB_TO_BOT' || bridgeDirection === 'ETH_TO_BOT'}
               receiveBotGas={receiveBotGas}
               onReceiveBotGasChange={(checked) => {
