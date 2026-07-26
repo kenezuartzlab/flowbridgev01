@@ -3,7 +3,7 @@ import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock,
 import { useAccount, useSignMessage, useChainId, useSwitchChain } from 'wagmi';
 import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, getIdToken, reloadUser, requestPasswordReset, type AppUser } from '@/lib/auth';
-import { isInAppBrowser, inAppBrowserName } from '@/lib/in-app-browser';
+import { isInAppBrowser, inAppBrowserName, isTokenPocketBrowser } from '@/lib/in-app-browser';
 import { getWalletSignatureErrorMessage, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
 import { botMainnet } from '@/lib/wagmi';
 
@@ -40,6 +40,7 @@ export function ConnectGuideModal({
 
   const inApp = useMemo(() => isInAppBrowser(), []);
   const inAppName = useMemo(() => inAppBrowserName(), []);
+  const isTokenPocket = useMemo(() => isTokenPocketBrowser(), []);
   const { address: connectedAddress } = useAccount();
   const activeChainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
@@ -130,12 +131,16 @@ export function ConnectGuideModal({
 
       // Auto-recover chain: SIWE binds the signature to BOT Chain (677).
       // If the wallet is on the wrong network, try switching first.
-      let expectedChainId = botMainnet.id;
-      if (activeChainId !== expectedChainId) {
+      let expectedChainId = activeChainId || botMainnet.id;
+      if (!isTokenPocket && activeChainId !== botMainnet.id) {
         try {
-          await switchChainAsync({ chainId: expectedChainId });
+          await Promise.race([
+            switchChainAsync({ chainId: botMainnet.id }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Network switch timed out')), 10_000)),
+          ]);
+          expectedChainId = botMainnet.id;
         } catch {
-          throw new Error(`Switch your wallet to BOT Chain (id ${expectedChainId}) and try signing again.`);
+          throw new Error(`Switch your wallet to BOT Chain (id ${botMainnet.id}) and try signing again.`);
         }
       }
 
