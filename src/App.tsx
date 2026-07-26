@@ -2549,6 +2549,7 @@ export default function App() {
                 if (s === 'CA') return getLiveCaPrice();
                 return null;
               }}
+              rewardsActive={rewardsActive}
               onSwapPhaseChange={(e) => {
                 if (e.phase === 'approving' || e.phase === 'swapping') {
                   if (e.fromAmount && e.toAmount) {
@@ -2790,7 +2791,6 @@ export default function App() {
           onConfirm={async () => {
             const step = activeConfirmModal;
             setActiveConfirmModal(null);
-            setIsWaitingModalOpen(true);
             if (step === 'CA/BOT') await completeStep1();
             else if (step === 'BOT/USDT') await completeStep2();
             else if (step === 'BRIDGE') await completeStep3();

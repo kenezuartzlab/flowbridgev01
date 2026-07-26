@@ -43,9 +43,13 @@ export async function fetchActivityHistory(token: string) {
 }
 
 export async function logActivity(token: string, payload: ActivityLogPayload) {
-  await fetch('/api/transactions', {
+  const res = await fetch('/api/transactions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
     body: JSON.stringify(payload),
   });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? 'Failed to save transaction activity');
+  }
 }

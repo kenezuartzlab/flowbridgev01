@@ -131,7 +131,7 @@ export function WaitingModal({
 
           {/* Broadcast Contract Transaction Milestone */}
           <div className="flex items-center justify-between">
-            <span className="text-[#C5C1B9]">2. Routing Bohr swap request</span>
+            <span className="text-[#C5C1B9]">2. Routing BOT Chain swap request</span>
             <div className="shrink-0 ml-2">
               {subStage2 === 'loading' && <Loader2 className="w-3 h-3 text-amber-400 animate-spin" />}
               {subStage2 === 'done' && <Check className="w-3.5 h-3.5 text-[#32FF8B] bg-[#32FF8B]/10 rounded border border-[#32FF8B]/20 p-0.5" />}

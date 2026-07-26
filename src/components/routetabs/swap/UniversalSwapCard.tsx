@@ -21,6 +21,7 @@ import {
 } from "@/lib/swap/tokenRegistry";
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
 import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
+import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
@@ -64,6 +65,7 @@ interface UniversalSwapCardProps {
   onSwapPhaseChange?: (e: SwapPhase) => void;
   /** Resolve a USD price for a token symbol (BOT/WBOT/USDT/CA…). Return null/undefined if unknown. */
   getUsdPrice?: (symbol: string) => number | null | undefined;
+  rewardsActive?: boolean;
   txUrlPrefix: string;
 }
 
@@ -76,6 +78,7 @@ export function UniversalSwapCard({
   onSwapSuccess,
   onSwapPhaseChange,
   getUsdPrice,
+  rewardsActive = false,
   txUrlPrefix,
 }: UniversalSwapCardProps) {
   const { address } = useAccount();
@@ -641,6 +644,8 @@ export function UniversalSwapCard({
     if (!isFinite(n) || n <= 0 || px == null || !isFinite(px)) return null;
     return n * px;
   })();
+  const rewardEligible = isRewardEligibleUsd(swapUsd);
+  const estimatedFlowPoints = estimateFlowPointsForUsd(swapUsd);
 
 
 
@@ -738,13 +743,23 @@ export function UniversalSwapCard({
                 <Row label="Platform fee" value={PLATFORM_FEE_LABEL} />
                 
                 <Row
-                  label="FLOW volume credit"
-                  value={swapUsd != null ? `+${formatUsd(swapUsd)}` : "—"}
+                  label="FLOW reward status"
+                  value={
+                    !rewardsActive
+                      ? "Link email + wallet"
+                      : swapUsd == null
+                        ? "Price loading"
+                        : rewardEligible
+                          ? `+${estimatedFlowPoints.toLocaleString()} FLOW`
+                          : `Min ${formatUsd(FLOW_REWARD_MIN_USD)}`
+                  }
                 />
                 <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">
-                  Swap volume accrues FLOW rewards only when you are signed in with a verified email
-                  and the connected wallet bound to it. Every $100 of swap volume unlocks 1,000
-                  referral FLOW.
+                  {rewardsActive
+                    ? rewardEligible
+                      ? `${formatUsd(swapUsd)} verified swap value qualifies for FLOW rewards after the transaction confirms.`
+                      : `FLOW rewards start at ${formatUsd(FLOW_REWARD_MIN_USD)} verified swap value. Smaller swaps can complete, but earn 0 FLOW.`
+                    : "FLOW rewards require a verified email and the connected wallet bound to that account."}
                 </p>
               </div>
             </div>

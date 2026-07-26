@@ -10,7 +10,7 @@ import { buildFlowBridgeTypedData } from "@/lib/siweProof";
 
 const STORAGE_PREFIX = "flowbridge:wallet-verified:";
 const SIGNATURE_TIMEOUT_MS = 45_000;
-const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 20_000;
+const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 45_000;
 
 function storageKey(address: string) {
   return `${STORAGE_PREFIX}${address.toLowerCase()}`;
@@ -225,6 +225,28 @@ async function signWithInjected(normalized: string, message: string, ms?: number
   return signature;
 }
 
+async function signPersonalWithTokenPocket(normalized: string, message: string): Promise<string> {
+  // TokenPocket is most stable with one injected personal_sign request and the
+  // UTF-8 SIWE message encoded as hex. Do not use typed-data here: some builds
+  // display raw JSON and keep the dApp in a permanent waiting state.
+  const signableMessage = stringToHex(message);
+  try {
+    const signature = await requestProviderSignature({
+      method: "personal_sign",
+      params: [signableMessage, normalized],
+      ms: TOKENPOCKET_SIGNATURE_TIMEOUT_MS,
+      preferCallback: true,
+    });
+    await assertActiveInjectedAccount(normalized);
+    return signature;
+  } catch (err: any) {
+    if (shouldFallbackFromTypedData(err)) {
+      return await signWithInjected(normalized, message, TOKENPOCKET_SIGNATURE_TIMEOUT_MS);
+    }
+    throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
+  }
+}
+
 async function signTypedDataWithTokenPocket(normalized: string, message: string): Promise<string> {
   const nonce = extractNonceFromMessage(message);
   const typedData = buildFlowBridgeTypedData({
@@ -270,7 +292,7 @@ export async function signMessageWithActiveWallet(
   const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
   const tokenPocket = isTokenPocketBrowser();
   if (tokenPocket && hasInjected) {
-    return await signTypedDataWithTokenPocket(normalized, message);
+    return await signPersonalWithTokenPocket(normalized, message);
   }
   // Inside wallet in-app browsers (TokenPocket, Bitget, Trust…) the injected
   // provider is the wallet itself and answers reliably. wagmi's connector layer

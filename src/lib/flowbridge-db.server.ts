@@ -1,12 +1,87 @@
 // Server-only DB helpers that replicate the original FlowBridge Express/Drizzle
 // queries against Lovable Cloud (Supabase) using the service-role client.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { MAINNET_CONTRACTS, TESTNET_CONTRACTS } from "@/lib/contracts";
+import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd } from "@/lib/rewards";
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const BOT_MAINNET_RPC = "https://rpc.botchain.ai";
+const BOT_TESTNET_RPC = "https://rpc.bohr.life";
+
 function generateReferralCode() {
   let code = "FB-";
   for (let i = 0; i < 5; i++) code += CHARS.charAt(Math.floor(Math.random() * CHARS.length));
   return code;
+}
+
+function parsePositiveAmount(value: string) {
+  const n = Number(String(value).replace(/,/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+function inputSymbolFromDirection(direction: string) {
+  return String(direction).split("_TO_")[0]?.trim().toUpperCase() || "";
+}
+
+async function rpc<T>(url: string, method: string, params: unknown[]): Promise<T | null> {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+    });
+    const json = await res.json().catch(() => null);
+    return json?.result ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function verifySwapReceipt(txHash: string | null, walletAddress: string) {
+  const hash = txHash?.trim();
+  if (!hash || !/^0x[a-fA-F0-9]{64}$/.test(hash)) return false;
+  const wallet = walletAddress.toLowerCase();
+  const candidates = [
+    { rpcUrl: BOT_MAINNET_RPC, router: MAINNET_CONTRACTS.flowBridgeRouterV3.toLowerCase() },
+    { rpcUrl: BOT_TESTNET_RPC, router: TESTNET_CONTRACTS.flowBridgeRouterV3.toLowerCase() },
+  ];
+
+  for (const candidate of candidates) {
+    const [receipt, tx] = await Promise.all([
+      rpc<any>(candidate.rpcUrl, "eth_getTransactionReceipt", [hash]),
+      rpc<any>(candidate.rpcUrl, "eth_getTransactionByHash", [hash]),
+    ]);
+    if (!receipt || !tx) continue;
+    const statusOk = String(receipt.status).toLowerCase() === "0x1";
+    const fromOk = String(tx.from ?? receipt.from ?? "").toLowerCase() === wallet;
+    const toOk = String(tx.to ?? receipt.to ?? "").toLowerCase() === candidate.router;
+    if (statusOk && fromOk && toOk) return true;
+  }
+  return false;
+}
+
+async function fetchTokenUsdPrice(symbol: string) {
+  if (symbol === "USDT") return 1;
+  const token = symbol === "CA" ? MAINNET_CONTRACTS.caToken : MAINNET_CONTRACTS.wbot;
+  try {
+    const res = await fetch(`https://dex-wallet.botchain.ai/api/v1/price?token=${token.toLowerCase()}&pool_type=all`);
+    const json = await res.json().catch(() => null);
+    const price = Number(json?.data?.price);
+    if (Number.isFinite(price) && price > 0) return price;
+  } catch {
+    // fall through to conservative local fallback
+  }
+  if (symbol === "BOT" || symbol === "WBOT") return 9.7482;
+  if (symbol === "CA") return 3.12405 * 9.7482;
+  return 0;
+}
+
+async function estimateSwapUsd(direction: string, fromAmount: string) {
+  const amount = parsePositiveAmount(fromAmount);
+  if (amount <= 0) return 0;
+  const symbol = inputSymbolFromDirection(direction);
+  const price = await fetchTokenUsdPrice(symbol);
+  return amount * price;
 }
 
 export async function ensureProfile(userId: string, email: string, referredByCode?: string) {
@@ -129,18 +204,32 @@ export async function createTransactionHistory(
     throw new Error("Rewards require the connected wallet to be linked to this signed-in email.");
   }
 
+  const normalizedTxHash = payload.txHash?.trim() || null;
+  if (normalizedTxHash) {
+    const { data: existing } = await supabaseAdmin
+      .from("transactions_history")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("tx_hash", normalizedTxHash)
+      .maybeSingle();
+    if (existing) return existing;
+  }
+
   // Bridge transactions are RECORDED for the user's activity history (tied to
   // their verified email + bound wallet) but are never reward-eligible — only
   // FlowBridgeRouter swap activity can accrue rewards / swap volume.
   const isBridge = String(payload.txType).toUpperCase() === "BRIDGE";
+  const isSuccessfulSwap = String(payload.txType).toUpperCase() === "SWAP" && String(payload.status).toUpperCase() === "SUCCESS";
 
-  // SECURITY: Do not award points from client-supplied transaction data.
-  // Points must only be awarded by server-side on-chain verification (e.g., a
-  // trusted webhook or RPC-verified txHash). Recording the transaction row is
-  // still allowed for user history, but points_earned is always 0 here — and
-  // for BRIDGE rows it must stay 0 permanently.
-  const pointsToEarn = 0;
-  void isBridge;
+  let verifiedSwapUsd = 0;
+  let pointsToEarn = 0;
+  if (!isBridge && isSuccessfulSwap && submittedWallet) {
+    const receiptOk = await verifySwapReceipt(normalizedTxHash, submittedWallet);
+    if (receiptOk) {
+      verifiedSwapUsd = await estimateSwapUsd(payload.direction, payload.fromAmount);
+      pointsToEarn = estimateFlowPointsForUsd(verifiedSwapUsd);
+    }
+  }
 
 
 
@@ -152,7 +241,7 @@ export async function createTransactionHistory(
       direction: payload.direction,
       from_amount: payload.fromAmount,
       to_amount: payload.toAmount,
-      tx_hash: payload.txHash,
+      tx_hash: normalizedTxHash,
       status: payload.status,
       points_earned: pointsToEarn,
     })
@@ -160,8 +249,16 @@ export async function createTransactionHistory(
     .single();
   if (error) throw error;
 
-  // No client-driven point awards; verified on-chain flows should update
-  // profiles.flow_points server-side after verification.
+  if (!isBridge && verifiedSwapUsd > 0) {
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        total_swap_volume_usd: Number(user.total_swap_volume_usd ?? 0) + verifiedSwapUsd,
+        points_self: Number(user.points_self ?? 0) + pointsToEarn,
+        flow_points: Number(user.flow_points ?? 0) + pointsToEarn,
+      })
+      .eq("id", userId);
+  }
 
   return tx;
 }
@@ -169,7 +266,7 @@ export async function createTransactionHistory(
 export async function getTransactionHistory(userId: string) {
   const { data } = await supabaseAdmin
     .from("transactions_history")
-    .select("id, tx_type, direction, from_amount, to_amount, tx_hash, status, created_at")
+    .select("id, tx_type, direction, from_amount, to_amount, tx_hash, status, points_earned, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
   return data ?? [];
