@@ -2274,7 +2274,7 @@ export default function App() {
       <div className="fixed bottom-[-20%] right-[-10%] w-[65%] h-[65%] rounded-full bg-[#00D7B2]/5 blur-[120px] pointer-events-none" />
 
       {/* Styled Phone/DApp Frame container matching Ecosurge Tech-Forward theme */}
-      <div className="w-full sm:w-[410px] h-[100dvh] sm:h-[780px] bg-[#010C1B] sm:rounded-[36px] sm:border-[8px] border-[#0D1C2A] shadow-[0_0_60px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col relative z-10">
+      <div className="fb-app-frame w-full sm:w-[410px] sm:h-[780px] bg-[#010C1B] sm:rounded-[36px] sm:border-[8px] border-[#0D1C2A] shadow-[0_0_60px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col relative z-10">
         {(() => {
           const isBridgeTab = activeTab === 'BRIDGE';
           const isTronSource = isBridgeTab && bridgeDirection === 'TRX_TO_BOT';
