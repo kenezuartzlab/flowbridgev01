@@ -532,6 +532,9 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
           {numField("Claim threshold (FLOW)", cfg.rewards.claimThreshold, (n) =>
             setCfg({ ...cfg, rewards: { ...cfg.rewards, claimThreshold: n } }),
           )}
+          {numField("Referral activity share (% of referee swap points)", cfg.rewards.referralActivityPct, (n) =>
+            setCfg({ ...cfg, rewards: { ...cfg.rewards, referralActivityPct: n } }),
+          )}
         </>
       );
     }
