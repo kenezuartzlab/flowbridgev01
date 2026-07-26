@@ -223,7 +223,7 @@ export function ConnectGuideModal({
     }`}>
       <div
         id="connect_guide_modal"
-        className={`fb-vv-sheet bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[370px] p-5 sm:p-6 shadow-2xl relative flex flex-col gap-5 animate-scale-up border-b-[5px] border-b-[#32FF8B] overflow-y-auto overscroll-contain transition-opacity ${
+        className={`bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[24px] w-full max-w-[370px] p-6 shadow-2xl relative flex flex-col gap-5 animate-scale-up border-b-[5px] border-b-[#32FF8B] max-h-[90vh] overflow-y-auto transition-opacity ${
           tokenPocketSigning ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
