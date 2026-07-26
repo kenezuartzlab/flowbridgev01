@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyMessage } from "viem";
+import { verifyMessage, verifyTypedData } from "viem";
+import { buildFlowBridgeTypedData } from "@/lib/siweProof";
 
 // Verifies a SIWE-style signature and, if the wallet is already linked to a
 // registered email, returns a single-use OTP token_hash the client can exchange
@@ -57,6 +58,21 @@ export const Route = createFileRoute("/api/public/siwe/verify")({
             });
           } catch {
             valid = false;
+          }
+          if (!valid) {
+            try {
+              const typedData = buildFlowBridgeTypedData({ walletAddress: normalized, message, nonce });
+              valid = await verifyTypedData({
+                address: normalized as `0x${string}`,
+                domain: typedData.domain,
+                types: typedData.types,
+                primaryType: typedData.primaryType,
+                message: typedData.message,
+                signature: signature as `0x${string}`,
+              });
+            } catch {
+              valid = false;
+            }
           }
           if (!valid) return Response.json({ error: "Invalid signature" }, { status: 401 });
 

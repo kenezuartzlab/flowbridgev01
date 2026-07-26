@@ -6,6 +6,7 @@
 // explicitly cleared when the user disconnects or switches wallets.
 
 import { isInAppBrowser, isTokenPocketBrowser } from "@/lib/in-app-browser";
+import { buildFlowBridgeTypedData } from "@/lib/siweProof";
 
 const STORAGE_PREFIX = "flowbridge:wallet-verified:";
 const SIGNATURE_TIMEOUT_MS = 45_000;
@@ -90,6 +91,16 @@ function shouldFallbackToInjected(err: any) {
   );
 }
 
+function shouldFallbackFromTypedData(err: any) {
+  const msg = String(err?.shortMessage || err?.details || err?.message || err || "");
+  const code = Number(err?.code ?? err?.cause?.code);
+  return (
+    code === -32601 ||
+    code === -32004 ||
+    /method.*not.*found|method.*not.*supported|unsupported|unknown.*method|not implemented/i.test(msg)
+  );
+}
+
 
 async function assertActiveInjectedAccount(expectedAddress: string): Promise<void> {
   if (typeof window === "undefined") return;
@@ -125,6 +136,71 @@ function withTimeout<T>(promise: Promise<T>, ms = SIGNATURE_TIMEOUT_MS): Promise
   });
 }
 
+function extractNonceFromMessage(message: string): string {
+  const match = message.match(/Nonce:\s*([^\s]+)/i);
+  const nonce = match?.[1]?.trim();
+  if (!nonce) {
+    throw new WalletVerificationRejectedError("Could not prepare the wallet signature. Close the wallet prompt and try again.");
+  }
+  return nonce;
+}
+
+function normalizeSignatureResult(result: any): string {
+  const signature = typeof result === "string" ? result : result?.result;
+  if (!signature || typeof signature !== "string") throw new Error("Empty wallet signature");
+  return signature;
+}
+
+async function requestProviderSignature(args: {
+  method: string;
+  params: unknown[];
+  ms: number;
+  preferCallback?: boolean;
+}): Promise<string> {
+  const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
+  if (!eth) throw new Error("provider not found");
+
+  if (args.preferCallback && typeof eth.sendAsync === "function") {
+    const signature = await withTimeout(
+      new Promise<string>((resolve, reject) => {
+        eth.sendAsync(
+          {
+            id: Date.now(),
+            jsonrpc: "2.0",
+            method: args.method,
+            params: args.params,
+          },
+          (error: any, response: any) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            if (response?.error) {
+              reject(response.error);
+              return;
+            }
+            try {
+              resolve(normalizeSignatureResult(response));
+            } catch (err) {
+              reject(err);
+            }
+          },
+        );
+      }),
+      args.ms,
+    );
+    return signature;
+  }
+
+  if (!eth.request) throw new Error("provider not found");
+  return normalizeSignatureResult(
+    await withTimeout(
+      eth.request({ method: args.method, params: args.params }) as Promise<unknown>,
+      args.ms,
+    ),
+  );
+}
+
 function stringToHex(value: string): `0x${string}` {
   const bytes = new TextEncoder().encode(value);
   return `0x${Array.from(bytes)
@@ -149,6 +225,40 @@ async function signWithInjected(normalized: string, message: string, ms?: number
   return signature;
 }
 
+async function signTypedDataWithTokenPocket(normalized: string, message: string): Promise<string> {
+  const nonce = extractNonceFromMessage(message);
+  const typedData = buildFlowBridgeTypedData({
+    walletAddress: normalized,
+    message,
+    nonce,
+  });
+  const params = [normalized, JSON.stringify(typedData)];
+
+  try {
+    const signature = await requestProviderSignature({
+      method: "eth_signTypedData_v4",
+      params,
+      ms: TOKENPOCKET_SIGNATURE_TIMEOUT_MS,
+      preferCallback: true,
+    });
+    await assertActiveInjectedAccount(normalized);
+    return signature;
+  } catch (err: any) {
+    if (!shouldFallbackFromTypedData(err)) {
+      throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
+    }
+  }
+
+  // Older TokenPocket builds may not expose typed-data signing. Only then do we
+  // fall back to personal_sign; never open a second prompt after a timeout or a
+  // user rejection, because TokenPocket can leave the first prompt pending.
+  try {
+    return await signWithInjected(normalized, message, TOKENPOCKET_SIGNATURE_TIMEOUT_MS);
+  } catch (err: any) {
+    throw new WalletVerificationRejectedError(getWalletSignatureErrorMessage(err));
+  }
+}
+
 export async function signMessageWithActiveWallet(
   address: string,
   message: string,
@@ -159,6 +269,9 @@ export async function signMessageWithActiveWallet(
 
   const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
   const tokenPocket = isTokenPocketBrowser();
+  if (tokenPocket && hasInjected) {
+    return await signTypedDataWithTokenPocket(normalized, message);
+  }
   // Inside wallet in-app browsers (TokenPocket, Bitget, Trust…) the injected
   // provider is the wallet itself and answers reliably. wagmi's connector layer
   // sometimes accepts the request there and never resolves it, so ask the
