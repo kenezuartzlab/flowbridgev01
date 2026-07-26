@@ -138,7 +138,7 @@ export function TokenPickerModal({
           </button>
         )}
 
-        <div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-1.5">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain -mx-1 px-1 space-y-1.5">
           {list.length === 0 && !isUnknownAddress && (
             <div className="text-center text-[13px] text-[#C5C1B9] py-8 font-mono">
               No tokens match.
