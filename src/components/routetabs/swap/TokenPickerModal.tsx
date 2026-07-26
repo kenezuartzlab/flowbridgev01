@@ -94,8 +94,8 @@ export function TokenPickerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
-      <div className="bg-[#0D1C2A] border border-white/10 rounded-[24px] w-full max-w-[400px] p-5 shadow-2xl flex flex-col gap-4 animate-scale-up border-b-[5px] border-b-[#32FF8B] max-h-[80vh]">
+    <div className="fb-vv-overlay fixed inset-x-0 top-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+      <div className="fb-vv-sheet bg-[#0D1C2A] border border-white/10 rounded-t-[24px] sm:rounded-[24px] w-full max-w-[400px] p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl flex flex-col gap-3 sm:gap-4 animate-scale-up border-b-[5px] border-b-[#32FF8B] overflow-hidden">
         <div className="flex justify-between items-center font-mono">
           <h3 className="text-white font-black uppercase tracking-wider text-sm">
             {title}
