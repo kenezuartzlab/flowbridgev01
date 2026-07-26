@@ -16,6 +16,8 @@ export interface RewardSettings {
   pointsPerBlock: number;
   referralClaimMinSwapUsd: number;
   claimThreshold: number;
+  /** % of a referee's earned swap points credited to their referrer. */
+  referralActivityPct: number;
 }
 
 export interface FlagSettings {
@@ -53,6 +55,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     pointsPerBlock: 1,
     referralClaimMinSwapUsd: 100,
     claimThreshold: 1000,
+    referralActivityPct: 10,
   },
   flags: { limitTabPublic: false, showBanners: true, maintenanceNotice: "" },
   tokens: [],
@@ -81,6 +84,10 @@ export function mergeAppConfig(partial: any): AppConfig {
         d.rewards.referralClaimMinSwapUsd,
       ),
       claimThreshold: num(p.rewards?.claimThreshold, d.rewards.claimThreshold),
+      referralActivityPct: Math.min(
+        100,
+        Math.max(0, num(p.rewards?.referralActivityPct, d.rewards.referralActivityPct)),
+      ),
     },
     flags: {
       limitTabPublic: !!p.flags?.limitTabPublic,
