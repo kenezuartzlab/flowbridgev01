@@ -101,20 +101,21 @@ export function ConfirmSwapModal({
 
         {/* Bridge specific chain information card */}
         {isBridge && (
-          <div className="bg-[#010C1B]/60 border border-white/5 rounded-xl p-3.5 space-y-1.5 text-sm font-sans">
-            <div className="flex justify-between text-[#C5C1B9]">
-              <span className="text-[12px] uppercase font-bold tracking-wider font-mono">Source network</span>
-              <span className="font-bold text-white uppercase font-mono text-[12px]">{fromChain}</span>
+          <div className="bg-[#010C1B]/60 border border-white/5 rounded-xl p-2.5 space-y-1 font-sans">
+            <div className="flex justify-between gap-2 text-[#C5C1B9]">
+              <span className="text-[11px] uppercase font-bold tracking-wider font-mono">Source network</span>
+              <span className="font-bold text-white uppercase font-mono text-[11px]">{fromChain}</span>
             </div>
-            <div className="flex justify-between text-[#C5C1B9]">
-              <span className="text-[12px] uppercase font-bold tracking-wider font-mono">Destination network</span>
-              <span className="font-bold text-[#32FF8B] uppercase font-mono text-[12px]">{toChain}</span>
+            <div className="flex justify-between gap-2 text-[#C5C1B9]">
+              <span className="text-[11px] uppercase font-bold tracking-wider font-mono">Destination network</span>
+              <span className="font-bold text-[#32FF8B] uppercase font-mono text-[11px]">{toChain}</span>
             </div>
           </div>
         )}
 
         {/* Transaction Summary Card */}
-        <div className="bg-[#010C1B]/80 border border-white/10 rounded-xl p-4.5 space-y-3 text-[13px] font-mono">
+        <div className="bg-[#010C1B]/80 border border-white/10 rounded-xl p-3 space-y-2 text-[12px] font-mono">
+
           <div className="flex justify-between items-center text-[#C5C1B9]">
             <span className="uppercase tracking-wider">Price Rate</span>
             <div className="flex items-center gap-1.5 font-bold text-white">
