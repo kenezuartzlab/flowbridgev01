@@ -62,19 +62,40 @@ async function verifySwapReceipt(txHash: string | null, walletAddress: string) {
   return false;
 }
 
+/** Resolve the on-chain address for a swap symbol (built-ins + admin-published tokens). */
+async function resolveTokenAddress(symbol: string): Promise<string | null> {
+  const s = symbol.toUpperCase();
+  if (s === "USDT") return MAINNET_CONTRACTS.usdtBot;
+  if (s === "BOT" || s === "WBOT") return MAINNET_CONTRACTS.wbot;
+  if (s === "CA") return MAINNET_CONTRACTS.caToken;
+  const { data } = await supabaseAdmin
+    .from("swap_tokens")
+    .select("address, symbol, chain, is_active")
+    .eq("chain", "mainnet")
+    .ilike("symbol", s)
+    .maybeSingle();
+  return data?.address ?? null;
+}
+
+/**
+ * USD price for a swap input symbol. Unknown / unpriceable tokens return 0 so
+ * they never inflate swap volume or FLOW points.
+ */
 async function fetchTokenUsdPrice(symbol: string) {
-  if (symbol === "USDT") return 1;
-  const token = symbol === "CA" ? MAINNET_CONTRACTS.caToken : MAINNET_CONTRACTS.wbot;
+  const s = symbol.toUpperCase();
+  if (s === "USDT") return 1;
+  const token = await resolveTokenAddress(s);
+  if (!token) return 0;
   try {
     const res = await fetch(`https://dex-wallet.botchain.ai/api/v1/price?token=${token.toLowerCase()}&pool_type=all`);
     const json = await res.json().catch(() => null);
     const price = Number(json?.data?.price);
     if (Number.isFinite(price) && price > 0) return price;
   } catch {
-    // fall through to conservative local fallback
+    // fall through
   }
-  if (symbol === "BOT" || symbol === "WBOT") return 9.7482;
-  if (symbol === "CA") return 3.12405 * 9.7482;
+  // Conservative fallbacks exist only for the two core assets.
+  if (s === "BOT" || s === "WBOT") return 9.7482;
   return 0;
 }
 
@@ -251,7 +272,20 @@ export async function createTransactionHistory(
     })
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    // Unique (user_id, tx_hash) index: a concurrent duplicate submission lost
+    // the race — return the stored row without awarding points twice.
+    if ((error as any).code === "23505" && normalizedTxHash) {
+      const { data: existing } = await supabaseAdmin
+        .from("transactions_history")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("tx_hash", normalizedTxHash)
+        .maybeSingle();
+      if (existing) return existing;
+    }
+    throw error;
+  }
 
   if (!isBridge && verifiedSwapUsd > 0) {
     await supabaseAdmin
@@ -262,6 +296,29 @@ export async function createTransactionHistory(
         flow_points: Number(user.flow_points ?? 0) + pointsToEarn,
       })
       .eq("id", userId);
+
+    // Referral activity share: the referrer earns a configurable % of the
+    // points their referee just earned from verified swap volume.
+    if (pointsToEarn > 0 && user.referred_by) {
+      const rules = await getRewardSettings();
+      const share = Math.floor((pointsToEarn * (rules.referralActivityPct ?? 0)) / 100);
+      if (share > 0) {
+        const { data: referrer } = await supabaseAdmin
+          .from("profiles")
+          .select("id, flow_points, points_referral_activity")
+          .eq("referral_code", user.referred_by)
+          .maybeSingle();
+        if (referrer && referrer.id !== userId) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({
+              points_referral_activity: Number(referrer.points_referral_activity ?? 0) + share,
+              flow_points: Number(referrer.flow_points ?? 0) + share,
+            })
+            .eq("id", referrer.id);
+        }
+      }
+    }
   }
 
   return tx;

@@ -13,6 +13,7 @@ const rewardsSchema = z.object({
   pointsPerBlock: z.number().int().min(0).max(100000),
   referralClaimMinSwapUsd: z.number().min(0).max(1000000),
   claimThreshold: z.number().int().min(1).max(10000000),
+  referralActivityPct: z.number().min(0).max(100).optional(),
 });
 
 const flagsSchema = z.object({
