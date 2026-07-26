@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, RefreshCw, Loader2, Check } from 'lucide-react';
 import { TokenIcon } from '../components/TokenIcon';
+import { ModalPortal } from './ModalPortal';
 import { cn } from '../lib/utils';
+
 
 interface WaitingModalProps {
   isOpen: boolean;
