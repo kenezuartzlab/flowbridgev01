@@ -69,22 +69,24 @@ export function ReceiptModal({
   const href = txHash ? `${txUrlPrefix}${txHash}` : "#";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="receipt_modal"
-        className={`bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-5 sm:p-4 sm:p-6 shadow-2xl relative flex flex-col items-center space-y-6 animate-scale-up border-b-[5px] ${status === 'success' ? 'border-b-[#32FF8B]' : 'border-b-red-400'}`}
+        className={`bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] w-full max-h-[88dvh] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center space-y-4 animate-scale-up border-b-[4px] ${status === 'success' ? 'border-b-[#32FF8B]' : 'border-b-red-400'}`}
       >
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 hover:bg-white/5 rounded-xl text-[#C5C1B9] hover:text-white transition-colors cursor-pointer"
+          className="absolute top-3 right-3 p-1.5 hover:bg-white/5 rounded-xl text-[#C5C1B9] hover:text-white transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Hand-Crafted Premium CSS Mascot: Gold OK-Sign Coin with Sunglasses */}
-        <div className="relative w-44 h-40 flex items-center justify-center mt-3 select-none">
+        <div className="relative w-36 h-32 flex items-center justify-center mt-2 select-none">
           {/* Sparkle indicators around head */}
+
           <div className="absolute top-1 right-6 text-[#32FF8B] animate-pulse duration-1000">
             <Sparkles className="w-5 h-5 fill-[#32FF8B]" />
           </div>
@@ -93,7 +95,8 @@ export function ReceiptModal({
           </div>
 
           {/* Main 3D Gold Character Coin */}
-          <div className="relative w-28 h-28 rounded-full bg-gradient-to-tr from-[#32FF8B] via-[#00D7B2] to-teal-300 border-4 border-white/20 shadow-2xl flex flex-col items-center justify-center overflow-hidden">
+          <div className="relative w-24 h-24 rounded-full bg-gradient-to-tr from-[#32FF8B] via-[#00D7B2] to-teal-300 border-4 border-white/20 shadow-2xl flex flex-col items-center justify-center overflow-hidden">
+
             {/* Embedded inner coin rim */}
             <div className="absolute inset-1.5 rounded-full border-2 border-dashed border-white/20 animate-spin duration-[20s]" />
             
