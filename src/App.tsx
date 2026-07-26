@@ -2664,14 +2664,11 @@ export default function App() {
                 }
                 if (!isConnected) return handleConnect();
                 if (!isNetworkCorrect) return handleSwitchNetwork();
-                if (session.step3.status === 'submitted') {
-                  return window.open(`${bridgeSrcExplorerPrefix}${session.step3.tx_hash ?? 'pending'}`, '_blank');
-                }
                 if (usdtAmount) {
                   setIsConfirmDestinationOpen(true);
                 }
               }}
-              successMessage={session.step3.status === 'submitted' ? 'Source-chain transaction confirmed. USDT is being relayed to the destination chain by the bridge validators.' : undefined}
+              successMessage={session.step3.status === 'submitted' ? 'Bridge submitted. Please wait and track your transaction below until it completes on the destination chain.' : undefined}
               txHash={session.step3.status === 'submitted' ? session.step3.tx_hash ?? undefined : undefined}
               txUrlPrefix={bridgeSrcExplorerPrefix}
               gasFeeLabel={
