@@ -290,6 +290,7 @@ describe('ETH → BOT bridging', () => {
       token: USDT_ETH,
       spender: ETH_BRIDGE,
       chainId: ETH_MAINNET,
+      amount,
     });
     expect(deps.sendDeposit).toHaveBeenCalledWith(
       expect.objectContaining({ bridge: ETH_BRIDGE, chainId: ETH_MAINNET, gas: 600_000n }),
