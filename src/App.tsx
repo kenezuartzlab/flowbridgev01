@@ -2818,6 +2818,9 @@ export default function App() {
           onConfirm={async () => {
             const step = activeConfirmModal;
             setActiveConfirmModal(null);
+            // Swap tabs show the step-by-step progress modal; BRIDGE uses the
+            // realtime tracker instead.
+            if (step === 'CA/BOT' || step === 'BOT/USDT') setIsWaitingModalOpen(true);
             if (step === 'CA/BOT') await completeStep1();
             else if (step === 'BOT/USDT') await completeStep2();
             else if (step === 'BRIDGE') await completeStep3();
