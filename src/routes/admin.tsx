@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useAccount } from "wagmi";
+import { useAccount, WagmiProvider } from "wagmi";
+import { wagmiConfig } from "@/lib/wagmi";
 import { AlertTriangle, Check, Loader2, Plus, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import { initAuth } from "@/lib/auth";
 import {
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/admin")({
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
-  component: AdminPage,
+  component: AdminRoute,
 });
 
 type Tab = "tokens" | "fees" | "rewards" | "flags";
@@ -53,6 +54,16 @@ const btnPrimary =
   "px-4 py-2.5 rounded-xl bg-[#32FF8B] text-[#010C1B] text-[12px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#1FFF7D] transition disabled:opacity-50";
 const btnGhost =
   "px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-white/10 transition disabled:opacity-50";
+
+// Wallet hooks in AdminPage require a WagmiProvider; without it SSR throws
+// WagmiProviderNotFoundError and the route fails to render.
+function AdminRoute() {
+  return (
+    <WagmiProvider config={wagmiConfig}>
+      <AdminPage />
+    </WagmiProvider>
+  );
+}
 
 function AdminPage() {
   const { address, isConnected } = useAccount();
