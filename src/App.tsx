@@ -1632,6 +1632,9 @@ export default function App() {
         step3: { ...session.step3, status: 'submitted', tx_hash: simulatedHash, timestamp: Date.now() }
       });
       logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, simulatedHash, 'SUCCESS');
+      // Clear the input after a submitted bridge so the same amount can't be
+      // accidentally re-sent by tapping the button again.
+      setUsdtAmount('');
       setIsActionLoading(false);
 
       // TRIGGER RECEIPT
@@ -1729,6 +1732,9 @@ export default function App() {
             step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
+          // Clear the input after a submitted bridge so the same amount can't be
+          // accidentally re-sent by tapping the button again.
+          setUsdtAmount('');
 
         } else if (bridgePeer === 'BNB') {
           // ================= BNB → BOT (existing path) =================
@@ -1797,6 +1803,9 @@ export default function App() {
             step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
+          // Clear the input after a submitted bridge so the same amount can't be
+          // accidentally re-sent by tapping the button again.
+          setUsdtAmount('');
 
         } else if (bridgePeer === 'ETH') {
           // ================= ETH → BOT (new) =================
@@ -1866,6 +1875,9 @@ export default function App() {
             step3: { ...session.step3, status: 'submitted', tx_hash: txBridge, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txBridge, 'SUCCESS');
+          // Clear the input after a submitted bridge so the same amount can't be
+          // accidentally re-sent by tapping the button again.
+          setUsdtAmount('');
 
         } else {
           // ================= TRX → BOT (non-EVM, TronLink) =================
@@ -1894,6 +1906,9 @@ export default function App() {
             step3: { ...session.step3, status: 'submitted', tx_hash: txid, timestamp: Date.now() }
           });
           logTransactionToDb('BRIDGE', bridgeDirection, usdtAmount, usdtAmount, txid, 'SUCCESS');
+          // Clear the input after a submitted bridge so the same amount can't be
+          // accidentally re-sent by tapping the button again.
+          setUsdtAmount('');
 
           setReceiptTxHash(txid);
           setReceiptUrlPrefix(TRON_EXPLORER_TX_PREFIX);
