@@ -10,32 +10,19 @@ interface SiteLoaderProps {
  * Full-screen splash loader with animated FlowBridge circuit logo.
  * Auto-fades out after `minDurationMs` and calls onDone.
  */
-const SPLASH_SEEN_KEY = 'fb_splash_seen';
-
-/** True only on the first mount of a fresh page load (not on client-side nav). */
-function shouldShowSplash() {
-  if (typeof window === 'undefined') return false;
-  try {
-    return !window.sessionStorage.getItem(SPLASH_SEEN_KEY);
-  } catch {
-    return true;
-  }
-}
+// Module-level flag: resets on a full page load (first visit / refresh) but
+// persists across client-side navigation, so the splash only plays once per load.
+let splashPlayed = false;
 
 export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
-  // Skip the splash when navigating back to this page within the same session;
-  // it only plays on a first visit or a hard reload.
-  const [phase, setPhase] = useState<'in' | 'out' | 'gone'>(() =>
-    shouldShowSplash() ? 'in' : 'gone',
-  );
+  // Starts hidden so SSR and hydration match, then plays on the first mount
+  // of a fresh page load only.
+  const [phase, setPhase] = useState<'in' | 'out' | 'gone'>('gone');
 
   useEffect(() => {
-    if (phase === 'gone') return;
-    try {
-      window.sessionStorage.setItem(SPLASH_SEEN_KEY, '1');
-    } catch {
-      /* storage unavailable — splash simply plays again */
-    }
+    if (splashPlayed) return;
+    splashPlayed = true;
+    setPhase('in');
     const t1 = setTimeout(() => setPhase('out'), minDurationMs);
     const t2 = setTimeout(() => {
       setPhase('gone');
