@@ -10,10 +10,32 @@ interface SiteLoaderProps {
  * Full-screen splash loader with animated FlowBridge circuit logo.
  * Auto-fades out after `minDurationMs` and calls onDone.
  */
+const SPLASH_SEEN_KEY = 'fb_splash_seen';
+
+/** True only on the first mount of a fresh page load (not on client-side nav). */
+function shouldShowSplash() {
+  if (typeof window === 'undefined') return false;
+  try {
+    return !window.sessionStorage.getItem(SPLASH_SEEN_KEY);
+  } catch {
+    return true;
+  }
+}
+
 export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
-  const [phase, setPhase] = useState<'in' | 'out' | 'gone'>('in');
+  // Skip the splash when navigating back to this page within the same session;
+  // it only plays on a first visit or a hard reload.
+  const [phase, setPhase] = useState<'in' | 'out' | 'gone'>(() =>
+    shouldShowSplash() ? 'in' : 'gone',
+  );
 
   useEffect(() => {
+    if (phase === 'gone') return;
+    try {
+      window.sessionStorage.setItem(SPLASH_SEEN_KEY, '1');
+    } catch {
+      /* storage unavailable — splash simply plays again */
+    }
     const t1 = setTimeout(() => setPhase('out'), minDurationMs);
     const t2 = setTimeout(() => {
       setPhase('gone');
@@ -23,6 +45,7 @@ export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
       clearTimeout(t1);
       clearTimeout(t2);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [minDurationMs, onDone]);
 
   if (phase === 'gone') return null;

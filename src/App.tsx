@@ -223,6 +223,10 @@ export default function App() {
     // server rejects activity logging for them.
     if (!emailVerified || !normalizedWallet) return;
 
+    // Testnet is fully isolated from mainnet: testnet activity is never
+    // recorded in history and never credits FLOW points.
+    if (!isMainnet) return;
+
     // NOTE: bridges are recorded for history/attribution only — the server
     // always stores 0 points for them. Rewards remain swap-only.
     try {
