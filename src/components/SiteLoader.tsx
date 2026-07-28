@@ -10,10 +10,19 @@ interface SiteLoaderProps {
  * Full-screen splash loader with animated FlowBridge circuit logo.
  * Auto-fades out after `minDurationMs` and calls onDone.
  */
+// Module-level flag: resets on a full page load (first visit / refresh) but
+// persists across client-side navigation, so the splash only plays once per load.
+let splashPlayed = false;
+
 export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
-  const [phase, setPhase] = useState<'in' | 'out' | 'gone'>('in');
+  // Starts hidden so SSR and hydration match, then plays on the first mount
+  // of a fresh page load only.
+  const [phase, setPhase] = useState<'in' | 'out' | 'gone'>('gone');
 
   useEffect(() => {
+    if (splashPlayed) return;
+    splashPlayed = true;
+    setPhase('in');
     const t1 = setTimeout(() => setPhase('out'), minDurationMs);
     const t2 = setTimeout(() => {
       setPhase('gone');
@@ -23,6 +32,7 @@ export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
       clearTimeout(t1);
       clearTimeout(t2);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [minDurationMs, onDone]);
 
   if (phase === 'gone') return null;

@@ -1,14 +1,13 @@
 // Server-only DB helpers that replicate the original FlowBridge Express/Drizzle
 // queries against Lovable Cloud (Supabase) using the service-role client.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { MAINNET_CONTRACTS, TESTNET_CONTRACTS } from "@/lib/contracts";
+import { MAINNET_CONTRACTS } from "@/lib/contracts";
 import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd } from "@/lib/rewards";
 import { getRewardSettings } from "@/lib/appConfig.server";
 
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const BOT_MAINNET_RPC = "https://rpc.botchain.ai";
-const BOT_TESTNET_RPC = "https://rpc.bohr.life";
 
 function generateReferralCode() {
   let code = "FB-";
@@ -43,9 +42,10 @@ async function verifySwapReceipt(txHash: string | null, walletAddress: string) {
   const hash = txHash?.trim();
   if (!hash || !/^0x[a-fA-F0-9]{64}$/.test(hash)) return false;
   const wallet = walletAddress.toLowerCase();
+  // Mainnet only: testnet activity is intentionally never recorded or rewarded,
+  // so testnet swaps can never credit FLOW points.
   const candidates = [
     { rpcUrl: BOT_MAINNET_RPC, router: MAINNET_CONTRACTS.flowBridgeRouterV3.toLowerCase() },
-    { rpcUrl: BOT_TESTNET_RPC, router: TESTNET_CONTRACTS.flowBridgeRouterV3.toLowerCase() },
   ];
 
   for (const candidate of candidates) {
