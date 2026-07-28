@@ -1,5 +1,5 @@
 export const FLOW_REWARD_MIN_USD = 5;
-export const FLOW_REWARD_USD_BLOCK = 5;
+export const FLOW_REWARD_USD_BLOCK = 1;
 export const FLOW_REWARD_POINTS_PER_BLOCK = 1;
 
 export interface RewardRules {

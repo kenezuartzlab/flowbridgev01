@@ -51,11 +51,11 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
   rewards: {
     minUsd: 5,
-    usdBlock: 5,
+    usdBlock: 1,
     pointsPerBlock: 1,
     referralClaimMinSwapUsd: 100,
     claimThreshold: 1000,
-    referralActivityPct: 10,
+    referralActivityPct: 20,
   },
   flags: { limitTabPublic: false, showBanners: true, maintenanceNotice: "" },
   tokens: [],
