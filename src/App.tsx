@@ -6,6 +6,7 @@ import { useAppConfig } from './lib/config/appConfig';
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
 import { botTestnet, bscTestnet, botMainnet, bscMainnet, ethereum, sepolia } from './lib/wagmi';
+import { isTokenPocketBrowser } from './lib/in-app-browser';
 import {
   isTronLinkAvailable, requestTronLinkAccounts, isValidTronAddress,
   fetchTronUsdtBalance, fetchTronUsdtAllowance, tronApproveUsdt, tronBridgeDepositToBot,
@@ -591,6 +592,13 @@ export default function App() {
     if (!address) {
       setErrorMessage("Connect a wallet before continuing.");
       return false;
+    }
+    if (isTokenPocketBrowser()) {
+      // TokenPocket transaction signing works, but its message-sign prompt can
+      // freeze behind a native "Waiting" overlay. Do not block swaps/bridges on
+      // that extra pre-signature; the actual transaction still requires the
+      // wallet's signing confirmation and watch-only wallets cannot send it.
+      return true;
     }
     try {
       await ensureWalletVerified(address, signMessageAsync as any);
