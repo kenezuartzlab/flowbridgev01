@@ -4,7 +4,7 @@ import { useAccount, useSignMessage, useChainId, useSwitchChain } from 'wagmi';
 import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, getIdToken, reloadUser, requestPasswordReset, type AppUser } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName, isTokenPocketBrowser } from '@/lib/in-app-browser';
-import { getWalletSignatureErrorMessage, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
+import { getWalletSignatureErrorMessage, hasWalletSignatureInFlight, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
 import { botMainnet } from '@/lib/wagmi';
 
 interface ConnectGuideModalProps {
@@ -102,9 +102,11 @@ export function ConnectGuideModal({
   const handleSiwe = async () => {
     if (!connectedAddress) return;
     if (siweBusy) {
-      siweRequestId.current += 1;
-      setSiweBusy(false);
-      setErr('Signature request cancelled. Tap “Sign in with wallet” to request a fresh signature.');
+      setErr('A wallet signature request is already open. Approve or close it in your wallet first.');
+      return;
+    }
+    if (hasWalletSignatureInFlight(connectedAddress)) {
+      setErr('A wallet signature request is already open. Approve or close it in your wallet first.');
       return;
     }
     const requestId = siweRequestId.current + 1;
@@ -373,10 +375,11 @@ export function ConnectGuideModal({
                 {isWalletConnected && connectedAddress && (
                   <button
                     onClick={handleSiwe}
-                    className="w-full flex items-center justify-center gap-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
+                    disabled={siweBusy}
+                    className="w-full flex items-center justify-center gap-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-wait disabled:active:scale-100"
                   >
                     <KeyRound className="w-3.5 h-3.5" />
-                    {siweBusy ? 'Cancel / retry signing' : 'Sign wallet to link email'}
+                    {siweBusy ? 'Approve in wallet…' : 'Sign wallet to link email'}
                   </button>
                 )}
               </div>
@@ -385,10 +388,11 @@ export function ConnectGuideModal({
                 {isWalletConnected && connectedAddress && (
                   <button
                     onClick={handleSiwe}
-                    className="w-full flex items-center justify-center gap-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
+                    disabled={siweBusy}
+                    className="w-full flex items-center justify-center gap-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-wait disabled:active:scale-100"
                   >
                     <KeyRound className="w-3.5 h-3.5" />
-                    {siweBusy ? 'Cancel / retry signing' : 'Sign in with wallet'}
+                    {siweBusy ? 'Approve in wallet…' : 'Sign in with wallet'}
                   </button>
                 )}
                 {isWalletConnected && (
