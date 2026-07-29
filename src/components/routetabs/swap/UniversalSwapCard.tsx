@@ -957,7 +957,7 @@ function TokenSide({
       <div className="flex justify-between items-center text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
-          <span className="text-[#C5C1B9] normal-case font-mono font-bold">
+          <span className="text-[#C5C1B9] normal-case font-mono font-bold" title={maxHint}>
             Balance: {shortBalance}
           </span>
           {!readOnly && onMax && (
