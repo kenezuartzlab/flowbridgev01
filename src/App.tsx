@@ -716,7 +716,7 @@ export default function App() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: currentEthChainId,
-    query: { enabled: !!address && !!contracts.usdtEth && !isDemoMode }
+    query: { enabled: !!address && !!contracts.usdtEth && !isDemoMode, refetchInterval: 15_000 }
   });
   const { data: rawUsdtEthBridgeAllowance, refetch: refetchUsdtEthBridgeAllowance } = useReadContract({
     address: contracts.usdtEth as `0x${string}` | undefined,
