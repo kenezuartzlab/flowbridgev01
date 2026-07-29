@@ -3004,6 +3004,7 @@ export default function App() {
             setCustomDestinationAddress(confirmedAddress);
             setTrackerRecipientAddress(confirmedAddress);
             setIsConfirmDestinationOpen(false);
+            setTrackerAmount(usdtAmount);
             setIsRealtimeTrackerOpen(true);
             await completeStep3(confirmedAddress);
           }}
@@ -3024,7 +3025,7 @@ export default function App() {
           onClose={() => setIsRealtimeTrackerOpen(false)}
           fromChain={bridgeFromName}
           toChain={bridgeToName}
-          amount={usdtAmount}
+          amount={trackerAmount || usdtAmount}
           symbol="USDT"
           recipientAddress={trackerRecipientAddress || customDestinationAddress || address || ''}
           txHash={receiptTxHash || undefined}
