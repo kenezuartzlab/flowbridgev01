@@ -615,13 +615,15 @@ export default function App() {
   // 1. Native BOT balance
   const { data: botBalance, refetch: refetchBotBalance } = useBalance({
     address,
-    chainId: currentBotChainId
+    chainId: currentBotChainId,
+    query: { enabled: !!address, refetchInterval: 15_000 },
   });
 
   // 2. Native BNB balance (on BSC)
   const { data: bnbBalance, refetch: refetchBnbBalance } = useBalance({
     address,
-    chainId: currentBscChainId
+    chainId: currentBscChainId,
+    query: { enabled: !!address, refetchInterval: 15_000 },
   });
 
   // 3. CA Token balance (on BOT Chain)
@@ -631,7 +633,7 @@ export default function App() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: currentBotChainId,
-    query: { enabled: !!address }
+    query: { enabled: !!address, refetchInterval: 15_000 }
   });
 
   // 4. USDT Token balance (on BOT Chain)
@@ -641,7 +643,7 @@ export default function App() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: currentBotChainId,
-    query: { enabled: !!address }
+    query: { enabled: !!address, refetchInterval: 15_000 }
   });
 
   // 5. USDT Token balance (on BNB Chain)
@@ -651,7 +653,7 @@ export default function App() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: currentBscChainId,
-    query: { enabled: !!address }
+    query: { enabled: !!address, refetchInterval: 15_000 }
   });
 
   // Allowance Reads
