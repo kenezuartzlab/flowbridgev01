@@ -2068,28 +2068,30 @@ export default function App() {
   else if (usdtAmount) bridgeButtonLabel = `Bridge to ${bridgeToName}`;
   let bridgeButtonDisabled = isActionLoading || belowBridgeMin || (isConnected && !usdtAmount);
 
-  // Dynamic formatting for real and mock balances
+  // Dynamic formatting for real and mock balances.
+  // Truncated (never rounded) to 4 decimals so the displayed number is always
+  // actually spendable — e.g. 0.04717811 shows as 0.0471.
   const formatBalance = (raw: any, decimals = 18) => {
-    if (!raw) return "0.00";
-    return parseFloat(formatUnits(BigInt(raw.toString()), decimals)).toFixed(4);
+    if (!raw) return "0.0000";
+    return formatBalance4(formatUnits(BigInt(raw.toString()), decimals));
   };
 
   type BalanceType = 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB' | 'USDT_ETH' | 'USDT_TRX';
   const getBalanceDisplay = (type: BalanceType) => {
     if (isDemoMode) {
       if (type === 'CA') return "100.0000";
-      if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "50.0000";
-      if (type === 'USDT_BOT') return "250.00";
-      return "1000.00";
+      if (type === 'BOT') return botBalance ? formatBalance4(formatUnits(botBalance.value, botBalance.decimals)) : "50.0000";
+      if (type === 'USDT_BOT') return "250.0000";
+      return "1000.0000";
     }
 
-    if (type === 'CA') return rawCaBalance ? formatBalance(rawCaBalance, 18) : "0.00";
-    if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "0.00";
-    if (type === 'USDT_BOT') return rawUsdtBotBalance ? formatBalance(rawUsdtBotBalance, 6) : "0.00";
-    if (type === 'USDT_BNB') return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.00";
-    if (type === 'USDT_ETH') return rawUsdtEthBalance ? formatBalance(rawUsdtEthBalance, 6) : "0.00";
-    if (type === 'USDT_TRX') return tronUsdtBalance || "0.00";
-    return "0.00";
+    if (type === 'CA') return rawCaBalance ? formatBalance(rawCaBalance, 18) : "0.0000";
+    if (type === 'BOT') return botBalance ? formatBalance4(formatUnits(botBalance.value, botBalance.decimals)) : "0.0000";
+    if (type === 'USDT_BOT') return rawUsdtBotBalance ? formatBalance(rawUsdtBotBalance, 6) : "0.0000";
+    if (type === 'USDT_BNB') return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.0000";
+    if (type === 'USDT_ETH') return rawUsdtEthBalance ? formatBalance(rawUsdtEthBalance, 6) : "0.0000";
+    if (type === 'USDT_TRX') return tronUsdtBalance ? formatBalance4(tronUsdtBalance) : "0.0000";
+    return "0.0000";
   };
 
   const getExactBalanceAmount = (type: BalanceType) => {
