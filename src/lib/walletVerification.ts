@@ -390,6 +390,8 @@ async function signMessageWithActiveWalletInner(
  * Skips the round-trip if already verified. Throws on rejection/failure so
  * callers can abort the swap/bridge before writing a transaction.
  */
+const inFlightVerifications = new Map<string, Promise<void>>();
+
 export async function ensureWalletVerified(
   address: string,
   signMessageAsync: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
@@ -397,6 +399,20 @@ export async function ensureWalletVerified(
   if (!address) throw new Error("Wallet address required for verification");
   const normalized = address.toLowerCase();
   if (isWalletVerified(normalized)) return;
+  const running = inFlightVerifications.get(normalized);
+  if (running) return running;
+  const promise = ensureWalletVerifiedInner(normalized, signMessageAsync).finally(() => {
+    if (inFlightVerifications.get(normalized) === promise) inFlightVerifications.delete(normalized);
+  });
+  inFlightVerifications.set(normalized, promise);
+  return promise;
+}
+
+async function ensureWalletVerifiedInner(
+  normalized: string,
+  signMessageAsync: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
+): Promise<void> {
+
 
   // 1) Get nonce
   const nonceRes = await fetch("/api/public/siwe/nonce", {
