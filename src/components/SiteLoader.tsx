@@ -65,6 +65,10 @@ export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
             <img
               src={logo}
               alt="FlowBridge"
+              width={128}
+              height={128}
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-full object-contain animate-logo-pulse"
               draggable={false}
             />
