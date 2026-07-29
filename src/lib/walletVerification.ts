@@ -21,6 +21,11 @@ const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 180_000;
 // swap guard both ask, or when the user taps twice. Re-use the live request.
 const inFlightSignatures = new Map<string, { message: string; promise: Promise<string> }>();
 
+export function hasWalletSignatureInFlight(address?: string | null): boolean {
+  if (!address) return inFlightSignatures.size > 0;
+  return inFlightSignatures.has(address.toLowerCase());
+}
+
 function dedupeSignature(
   address: string,
   message: string,
@@ -31,14 +36,17 @@ function dedupeSignature(
   // Identical request already open in the wallet → attach to it, never prompt twice.
   if (existing && existing.message === message) return existing.promise;
 
-  // Different message: wait for the open prompt to settle first so we never
-  // stack two requests on the wallet.
-  const start = existing
-    ? existing.promise.then(
-        () => run(),
-        () => run(),
-      )
-    : run();
+  // Different message while the wallet prompt is open: do not queue a second
+  // prompt. TokenPocket can keep its Confirm button behind a permanent
+  // "Waiting" layer when a later SIWE nonce is queued before the first prompt
+  // finishes. Let the user finish or close the current wallet sheet first.
+  if (existing) {
+    throw new WalletVerificationRejectedError(
+      "A wallet signature request is already open. Finish or close the wallet prompt first, then tap retry.",
+    );
+  }
+
+  const start = run();
   const entry = {
     message,
     promise: start.finally(() => {
@@ -104,7 +112,7 @@ export class WalletVerificationRejectedError extends Error {
 export function getWalletSignatureErrorMessage(err: any) {
   const msg = String(err?.shortMessage || err?.details || err?.message || err || "");
   if (/request.*pending|already.*pending|already processing|resource unavailable|request already/i.test(msg)) {
-    return "A wallet signature request is already open. Close the old wallet prompt, reopen/unlock your wallet, then tap retry.";
+    return "A wallet signature request is already open. Finish or close the wallet prompt first, then tap retry.";
   }
   if (/reject|denied|cancel|user rejected/i.test(msg)) {
     return "Wallet signature was rejected. Approve the signature request to continue.";

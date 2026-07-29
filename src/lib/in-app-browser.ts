@@ -28,8 +28,11 @@ export function isInAppBrowser(): boolean {
 }
 
 export function isTokenPocketBrowser(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return /TokenPocket/i.test(navigator.userAgent || "");
+  if (typeof navigator === "undefined" && typeof window === "undefined") return false;
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
+  const tp = typeof window !== "undefined" ? (window as any).tokenpocket : null;
+  return /TokenPocket|TPAndroid|TPiOS/i.test(ua) || !!eth?.isTokenPocket || !!tp;
 }
 
 export function inAppBrowserName(): string | null {
