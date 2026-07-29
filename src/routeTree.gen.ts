@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -44,6 +45,11 @@ import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe
 import { Route as ApiPublicHooksKeeperTickRouteImport } from './routes/api/public/hooks/keeper-tick'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RewardsRoute = RewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/config': typeof ApiConfigRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/config': typeof ApiConfigRoute
@@ -304,6 +312,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/config': typeof ApiConfigRoute
@@ -342,6 +351,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/reset-password'
     | '/rewards'
+    | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/config'
@@ -378,6 +388,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/reset-password'
     | '/rewards'
+    | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/config'
@@ -414,6 +425,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/reset-password'
     | '/rewards'
+    | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/config'
@@ -451,6 +463,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiConfigRoute: typeof ApiConfigRoute
@@ -478,6 +491,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rewards': {
       id: '/rewards'
       path: '/rewards'
@@ -742,6 +762,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,

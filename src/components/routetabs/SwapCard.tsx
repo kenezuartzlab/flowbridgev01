@@ -214,7 +214,9 @@ export function SwapCard({
             onClick={onToggleDirection}
             className="bg-[#0D1C2A] border border-white/25 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/35 p-2 rounded-xl shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
             title="Switch direction"
+            aria-label="Switch swap direction"
           >
+
             <ArrowDownUp className="w-4 h-4" />
           </button>
         </div>
