@@ -10,7 +10,28 @@ import { buildFlowBridgeTypedData } from "@/lib/siweProof";
 
 const STORAGE_PREFIX = "flowbridge:wallet-verified:";
 const SIGNATURE_TIMEOUT_MS = 45_000;
-const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 45_000;
+// TokenPocket's in-app prompt often sits behind its own "Waiting" overlay for a
+// while (network/keystore unlock). Give the user real time to tap Confirm
+// instead of abandoning the request underneath them.
+const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 180_000;
+
+// A single in-flight signature request per address. TokenPocket deadlocks (its
+// prompt freezes on "Waiting") as soon as a second personal_sign arrives while
+// the first is still pending — which happens when the connect modal and the
+// swap guard both ask, or when the user taps twice. Re-use the live request.
+const inFlightSignatures = new Map<string, Promise<string>>();
+
+function dedupeSignature(address: string, run: () => Promise<string>): Promise<string> {
+  const key = address.toLowerCase();
+  const existing = inFlightSignatures.get(key);
+  if (existing) return existing;
+  const promise = run().finally(() => {
+    if (inFlightSignatures.get(key) === promise) inFlightSignatures.delete(key);
+  });
+  inFlightSignatures.set(key, promise);
+  return promise;
+}
+
 
 function storageKey(address: string) {
   return `${STORAGE_PREFIX}${address.toLowerCase()}`;
