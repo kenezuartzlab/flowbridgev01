@@ -11,10 +11,14 @@ export function buildFlowBridgeTypedData(opts: {
   message: string;
   nonce: string;
 }) {
+  const chainIdMatch = opts.message.match(/Chain ID:\s*(\d+)/i);
+  const chainId = chainIdMatch?.[1] ? Number(chainIdMatch[1]) : 677;
+
   return {
     domain: {
       name: "FlowBridge",
       version: "1",
+      chainId,
     },
     types: FLOWBRIDGE_TYPED_DATA_TYPES,
     primaryType: "WalletProof" as const,

@@ -95,6 +95,15 @@ export function markWalletVerified(address: string): void {
 }
 
 function buildMessage(opts: { address: string; nonce: string; domain: string; uri: string }) {
+  if (isTokenPocketBrowser()) {
+    return [
+      "FlowBridge wallet check",
+      `Wallet: ${opts.address}`,
+      `Nonce: ${opts.nonce}`,
+      "Free signature. No transaction.",
+    ].join("\n");
+  }
+
   const issuedAt = new Date().toISOString();
   return [
     `${opts.domain} wants you to sign in with your Ethereum account:`,
