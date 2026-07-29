@@ -894,13 +894,9 @@ function TokenSide({
   quoting,
   usdValue,
 }: TokenSideProps) {
-  const shortBalance = (() => {
-    const n = parseFloat(balanceDisplay);
-    if (!isFinite(n)) return "0";
-    if (n === 0) return "0";
-    if (n < 0.0001) return n.toExponential(2);
-    return n.toFixed(n < 1 ? 6 : 4);
-  })();
+  // Truncated to 4 decimals (never rounded up) so the shown balance is always
+  // spendable — e.g. 0.04717811 renders as 0.0471.
+  const shortBalance = formatBalance4(balanceDisplay);
 
   return (
     <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
