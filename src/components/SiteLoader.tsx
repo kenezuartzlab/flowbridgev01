@@ -27,7 +27,7 @@ export function SiteLoader({ onDone, minDurationMs = 900 }: SiteLoaderProps) {
     const t2 = setTimeout(() => {
       setPhase('gone');
       onDone?.();
-    }, minDurationMs + 550);
+    }, minDurationMs + 350);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -39,7 +39,7 @@ export function SiteLoader({ onDone, minDurationMs = 900 }: SiteLoaderProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#010C1B] transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#010C1B] transition-opacity duration-300 ${
         phase === 'out' ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
       aria-hidden={phase !== 'in'}
