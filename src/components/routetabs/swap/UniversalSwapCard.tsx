@@ -930,6 +930,8 @@ interface TokenSideProps {
   readOnly?: boolean;
   quoting?: boolean;
   usdValue?: string;
+  maxHint?: string;
+  clampedNotice?: string;
 }
 
 function TokenSide({
@@ -943,6 +945,8 @@ function TokenSide({
   readOnly,
   quoting,
   usdValue,
+  maxHint,
+  clampedNotice,
 }: TokenSideProps) {
   // Truncated to 4 decimals (never rounded up) so the shown balance is always
   // spendable — e.g. 0.04717811 renders as 0.0471.
