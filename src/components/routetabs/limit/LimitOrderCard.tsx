@@ -7,6 +7,7 @@ import { toFriendlyError } from "@/lib/friendlyError";
 
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
+import { formatBalance4 } from "@/lib/format";
 import {
   ERC20_ABI,
   FLOW_LIMIT_ORDER_EXECUTOR_ABI,
@@ -86,8 +87,12 @@ export function LimitOrderCard({
   }, [curated]);
 
   // ── Wallet balance for the input token (native or ERC20) ──────────────
+  // Pinned to BOT Chain so a wallet connected to another network still reads
+  // the real BOT Chain balance.
+  const balanceChainId = isMainnet ? 677 : 968;
   const nativeBalance = useBalance({
     address,
+    chainId: balanceChainId,
     query: { enabled: !!address && tokenIn.isNative, refetchInterval: 15_000 },
   });
   const erc20Balance = useReadContract({
@@ -95,6 +100,7 @@ export function LimitOrderCard({
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
+    chainId: balanceChainId,
     query: {
       enabled: !!address && !tokenIn.isNative && !!tokenIn.address,
       refetchInterval: 15_000,
@@ -375,13 +381,7 @@ export function LimitOrderCard({
           onAmountChange={setAmountIn}
           onPickToken={() => setPickerOpen("in")}
           editable
-          balanceLabel={
-            balanceNum != null
-              ? balanceNum.toLocaleString(undefined, {
-                  maximumFractionDigits: balanceNum < 1 ? 6 : 4,
-                })
-              : null
-          }
+          balanceLabel={balanceFmt != null ? formatBalance4(balanceFmt) : null}
           balanceUsd={
             balanceNum != null && balanceUsd != null ? balanceNum * balanceUsd : null
           }

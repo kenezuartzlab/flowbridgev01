@@ -23,6 +23,7 @@ import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter
 import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
 import { estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
 import { useAppConfig } from "@/lib/config/appConfig";
+import { formatBalance4 } from "@/lib/format";
 
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
@@ -117,9 +118,16 @@ export function UniversalSwapCard({
   }, [isMainnet, curated]);
 
   // ── Balances ──────────────────────────────────────────────────────────────
+  // Pin every balance read to BOT Chain. Without an explicit chainId these
+  // resolve against whatever chain the wallet happens to be on (e.g. BSC),
+  // which returned wrong/zero balances. Poll so post-tx balances stay accurate.
+  const balanceChainId = isMainnet ? 677 : 968;
+  const balanceQuery = { enabled: !!address, refetchInterval: 12_000 } as const;
+
   const nativeBalance = useBalance({
     address,
-    query: { enabled: !!address && tokenIn.isNative },
+    chainId: balanceChainId,
+    query: { ...balanceQuery, enabled: !!address && tokenIn.isNative },
   });
 
   const tokenInBalanceRead = useReadContract({
@@ -127,19 +135,22 @@ export function UniversalSwapCard({
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !tokenIn.isNative },
+    chainId: balanceChainId,
+    query: { ...balanceQuery, enabled: !!address && !tokenIn.isNative },
   });
 
   const nativeOutBalance = useBalance({
     address,
-    query: { enabled: !!address && tokenOut.isNative },
+    chainId: balanceChainId,
+    query: { ...balanceQuery, enabled: !!address && tokenOut.isNative },
   });
   const tokenOutBalanceRead = useReadContract({
     address: tokenOut.isNative ? undefined : (tokenOut.address as Address),
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !tokenOut.isNative },
+    chainId: balanceChainId,
+    query: { ...balanceQuery, enabled: !!address && !tokenOut.isNative },
   });
 
   const inBalanceRaw: bigint = tokenIn.isNative
@@ -158,7 +169,7 @@ export function UniversalSwapCard({
 
   // Always-on native BOT balance for the low-gas warning banner (independent
   // of whichever token the user is spending).
-  const nativeGasBalance = useBalance({ address, query: { enabled: !!address } });
+  const nativeGasBalance = useBalance({ address, chainId: balanceChainId, query: balanceQuery });
   const nativeGasLow = !!address && isNativeGasLow(nativeGasBalance.data?.value, 18, "BOT");
   const [gasSettingsOpen, setGasSettingsOpen] = useState(false);
 
@@ -894,13 +905,9 @@ function TokenSide({
   quoting,
   usdValue,
 }: TokenSideProps) {
-  const shortBalance = (() => {
-    const n = parseFloat(balanceDisplay);
-    if (!isFinite(n)) return "0";
-    if (n === 0) return "0";
-    if (n < 0.0001) return n.toExponential(2);
-    return n.toFixed(n < 1 ? 6 : 4);
-  })();
+  // Truncated to 4 decimals (never rounded up) so the shown balance is always
+  // spendable — e.g. 0.04717811 renders as 0.0471.
+  const shortBalance = formatBalance4(balanceDisplay);
 
   return (
     <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">

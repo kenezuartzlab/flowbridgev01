@@ -47,7 +47,7 @@ import { ConnectGuideModal } from './modals/ConnectGuideModal';
 import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
-import { formatUsd } from './lib/format';
+import { formatUsd, formatBalance4 } from './lib/format';
 import { toFriendlyError } from './lib/friendlyError';
 import { SiteLoader } from './components/SiteLoader';
 import { fetchActivityHistory, fetchGlobalIncentiveStats, fetchUserIncentives, logActivity } from './lib/app/activityApi';
@@ -615,13 +615,15 @@ export default function App() {
   // 1. Native BOT balance
   const { data: botBalance, refetch: refetchBotBalance } = useBalance({
     address,
-    chainId: currentBotChainId
+    chainId: currentBotChainId,
+    query: { enabled: !!address, refetchInterval: 15_000 },
   });
 
   // 2. Native BNB balance (on BSC)
   const { data: bnbBalance, refetch: refetchBnbBalance } = useBalance({
     address,
-    chainId: currentBscChainId
+    chainId: currentBscChainId,
+    query: { enabled: !!address, refetchInterval: 15_000 },
   });
 
   // 3. CA Token balance (on BOT Chain)
@@ -631,7 +633,7 @@ export default function App() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: currentBotChainId,
-    query: { enabled: !!address }
+    query: { enabled: !!address, refetchInterval: 15_000 }
   });
 
   // 4. USDT Token balance (on BOT Chain)
@@ -641,7 +643,7 @@ export default function App() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: currentBotChainId,
-    query: { enabled: !!address }
+    query: { enabled: !!address, refetchInterval: 15_000 }
   });
 
   // 5. USDT Token balance (on BNB Chain)
@@ -651,7 +653,7 @@ export default function App() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: currentBscChainId,
-    query: { enabled: !!address }
+    query: { enabled: !!address, refetchInterval: 15_000 }
   });
 
   // Allowance Reads
@@ -714,7 +716,7 @@ export default function App() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: currentEthChainId,
-    query: { enabled: !!address && !!contracts.usdtEth && !isDemoMode }
+    query: { enabled: !!address && !!contracts.usdtEth && !isDemoMode, refetchInterval: 15_000 }
   });
   const { data: rawUsdtEthBridgeAllowance, refetch: refetchUsdtEthBridgeAllowance } = useReadContract({
     address: contracts.usdtEth as `0x${string}` | undefined,
@@ -2068,28 +2070,30 @@ export default function App() {
   else if (usdtAmount) bridgeButtonLabel = `Bridge to ${bridgeToName}`;
   let bridgeButtonDisabled = isActionLoading || belowBridgeMin || (isConnected && !usdtAmount);
 
-  // Dynamic formatting for real and mock balances
+  // Dynamic formatting for real and mock balances.
+  // Truncated (never rounded) to 4 decimals so the displayed number is always
+  // actually spendable — e.g. 0.04717811 shows as 0.0471.
   const formatBalance = (raw: any, decimals = 18) => {
-    if (!raw) return "0.00";
-    return parseFloat(formatUnits(BigInt(raw.toString()), decimals)).toFixed(4);
+    if (!raw) return "0.0000";
+    return formatBalance4(formatUnits(BigInt(raw.toString()), decimals));
   };
 
   type BalanceType = 'CA' | 'BOT' | 'USDT_BOT' | 'USDT_BNB' | 'USDT_ETH' | 'USDT_TRX';
   const getBalanceDisplay = (type: BalanceType) => {
     if (isDemoMode) {
       if (type === 'CA') return "100.0000";
-      if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "50.0000";
-      if (type === 'USDT_BOT') return "250.00";
-      return "1000.00";
+      if (type === 'BOT') return botBalance ? formatBalance4(formatUnits(botBalance.value, botBalance.decimals)) : "50.0000";
+      if (type === 'USDT_BOT') return "250.0000";
+      return "1000.0000";
     }
 
-    if (type === 'CA') return rawCaBalance ? formatBalance(rawCaBalance, 18) : "0.00";
-    if (type === 'BOT') return botBalance ? parseFloat(formatUnits(botBalance.value, botBalance.decimals)).toFixed(4) : "0.00";
-    if (type === 'USDT_BOT') return rawUsdtBotBalance ? formatBalance(rawUsdtBotBalance, 6) : "0.00";
-    if (type === 'USDT_BNB') return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.00";
-    if (type === 'USDT_ETH') return rawUsdtEthBalance ? formatBalance(rawUsdtEthBalance, 6) : "0.00";
-    if (type === 'USDT_TRX') return tronUsdtBalance || "0.00";
-    return "0.00";
+    if (type === 'CA') return rawCaBalance ? formatBalance(rawCaBalance, 18) : "0.0000";
+    if (type === 'BOT') return botBalance ? formatBalance4(formatUnits(botBalance.value, botBalance.decimals)) : "0.0000";
+    if (type === 'USDT_BOT') return rawUsdtBotBalance ? formatBalance(rawUsdtBotBalance, 6) : "0.0000";
+    if (type === 'USDT_BNB') return rawUsdtBnbBalance ? formatBalance(rawUsdtBnbBalance, 18) : "0.0000";
+    if (type === 'USDT_ETH') return rawUsdtEthBalance ? formatBalance(rawUsdtEthBalance, 6) : "0.0000";
+    if (type === 'USDT_TRX') return tronUsdtBalance ? formatBalance4(tronUsdtBalance) : "0.0000";
+    return "0.0000";
   };
 
   const getExactBalanceAmount = (type: BalanceType) => {

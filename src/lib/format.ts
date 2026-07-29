@@ -31,3 +31,20 @@ export function formatUsd(v: number | null | undefined): string {
     maximumFractionDigits: max,
   })}`;
 }
+
+/**
+ * Truncate (never round) a decimal amount string/number to 4 decimal places.
+ * e.g. "0.04717811" -> "0.0471", "12.9" -> "12.9000"
+ * Operates on the string form so large/small values keep full precision.
+ */
+export function formatBalance4(value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "0.0000";
+  let s = typeof value === "number" ? (Number.isFinite(value) ? value.toFixed(18) : "0") : String(value).trim();
+  if (!/^-?\d*\.?\d*$/.test(s) || s === "" || s === "." || s === "-") return "0.0000";
+  const neg = s.startsWith("-");
+  if (neg) s = s.slice(1);
+  const [intRaw, fracRaw = ""] = s.split(".");
+  const int = intRaw === "" ? "0" : intRaw;
+  const frac = (fracRaw + "0000").slice(0, 4);
+  return `${neg ? "-" : ""}${int}.${frac}`;
+}
