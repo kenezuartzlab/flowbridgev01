@@ -574,18 +574,46 @@ export function UniversalSwapCard({
     setQuote(null);
   };
 
-  const onMax = () => {
-    if (!inBalanceRaw) return;
-    // The router pulls `amount + platform fee`, so a MAX of the full balance would
-    // revert (SafeERC20: call failed). Reserve the fee (and native gas) here.
+  // Largest amount the user can actually swap: the router pulls `amount + 0.1% fee`,
+  // and native BOT also needs gas head-room. Everything above this reverts on-chain.
+  const maxSpendableRaw = (() => {
+    if (!inBalanceRaw) return 0n;
     if (tokenIn.isNative) {
       const buf = parseUnits("0.001", tokenIn.decimals);
       const spendable = inBalanceRaw > buf ? inBalanceRaw - buf : 0n;
-      setAmountIn(formatUnits(maxSwappableFromBalance(spendable), tokenIn.decimals));
-    } else {
-      setAmountIn(formatUnits(maxSwappableFromBalance(inBalanceRaw), tokenIn.decimals));
+      return maxSwappableFromBalance(spendable);
     }
+    return maxSwappableFromBalance(inBalanceRaw);
+  })();
+  const maxSpendableDisplay = formatUnits(maxSpendableRaw, tokenIn.decimals);
+
+  const [clamped, setClamped] = useState(false);
+
+  // Hard-clamp typed input so a user can never submit more than their wallet
+  // can cover (swap amount + platform fee + gas reserve).
+  const onAmountInChange = (v: string) => {
+    setClamped(false);
+    if (v === "" || v === ".") return setAmountIn(v);
+    let raw: bigint;
+    try {
+      raw = parseUnits(v, tokenIn.decimals);
+    } catch {
+      return setAmountIn(v);
+    }
+    if (maxSpendableRaw > 0n && raw > maxSpendableRaw) {
+      setAmountIn(maxSpendableDisplay);
+      setClamped(true);
+      return;
+    }
+    setAmountIn(v);
   };
+
+  const onMax = () => {
+    if (!inBalanceRaw) return;
+    setClamped(false);
+    setAmountIn(maxSpendableDisplay);
+  };
+
 
   // ── Button label ──────────────────────────────────────────────────────────
   const parsedAmount = (() => {
