@@ -712,11 +712,22 @@ export function UniversalSwapCard({
           label="Sell"
           token={tokenIn}
           amount={amountIn}
-          onAmountChange={setAmountIn}
+          onAmountChange={onAmountInChange}
           balanceDisplay={inBalanceDisplay}
           onPickToken={() => setPickerOpen("in")}
           onMax={onMax}
           usdValue={usdValueFor(tokenIn, amountIn)}
+          maxHint={
+            maxSpendableRaw > 0n
+              ? `Max swappable ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} — the 0.1% platform fee${tokenIn.isNative ? " and gas reserve are" : " is"} taken on top of your amount.`
+              : undefined
+          }
+          clampedNotice={
+            clamped
+              ? `Amount capped to your spendable balance (${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol}).`
+              : undefined
+          }
+
         />
 
         <div className="flex justify-center -my-6.5 relative z-20">
