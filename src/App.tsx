@@ -1968,12 +1968,25 @@ export default function App() {
   // Determine button displays and loading templates
   const caPaySymbol = caToBotDirection === 'CA_TO_BOT' ? 'CA' : 'BOT';
   const caRecSymbol = caToBotDirection === 'CA_TO_BOT' ? 'BOT' : 'CA';
+  const caInputExceedsSpendableBalance = (() => {
+    if (isDemoMode || !caAmount) return false;
+    try {
+      const required = totalRouterDebit(parseUnits(caAmount, 18));
+      const held = caToBotDirection === 'CA_TO_BOT'
+        ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
+        : (botBalance?.value ?? 0n);
+      return held < required;
+    } catch {
+      return false;
+    }
+  })();
   let caButtonLabel = "Enter amount";
   if (!isConnected) caButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) caButtonLabel = "Switch Chain to BOT Chain";
   else if (isActionLoading && (actionStep === 'approving_ca' || actionStep === 'swapping_ca' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
     caButtonLabel = actionStep === 'approving_ca' ? `Approving ${caPaySymbol}...` : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${caPaySymbol} to ${caRecSymbol}...`;
   }
+  else if (caInputExceedsSpendableBalance) caButtonLabel = `Lower ${caPaySymbol} amount`;
   else if (session.step1.status === 'done' && !caAmount) caButtonLabel = "✅ Step 1 Complete - Next →";
   else if (caAmount && !isDemoMode && caToBotDirection === 'CA_TO_BOT' && rawCaAllowance !== undefined && (() => {
     try { return BigInt(rawCaAllowance.toString()) < totalRouterDebit(parseUnits(caAmount, 18)); }
@@ -1982,7 +1995,7 @@ export default function App() {
     caButtonLabel = `Approve ${caPaySymbol}`;
   }
   else if (caAmount) caButtonLabel = `Swap ${caPaySymbol} to ${caRecSymbol}`;
-  let caButtonDisabled = isActionLoading || (isConnected && !caAmount && session.step1.status !== 'done');
+  let caButtonDisabled = isActionLoading || caInputExceedsSpendableBalance || (isConnected && !caAmount && session.step1.status !== 'done');
   
   const botPaySymbol = botToUsdtDirection === 'BOT_TO_USDT' ? 'BOT' : 'USDT';
   const botRecSymbol = botToUsdtDirection === 'BOT_TO_USDT' ? 'USDT' : 'BOT';
