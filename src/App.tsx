@@ -511,6 +511,9 @@ export default function App() {
   const [isConfirmDestinationOpen, setIsConfirmDestinationOpen] = useState(false);
   const [isRealtimeTrackerOpen, setIsRealtimeTrackerOpen] = useState(false);
   const [trackerRecipientAddress, setTrackerRecipientAddress] = useState<string>('');
+  // Snapshot of the bridged amount taken when the tracker opens, so clearing the
+  // input after submission never changes what the tracker displays/polls for.
+  const [trackerAmount, setTrackerAmount] = useState<string>('');
 
   // Populate default destination address from wallet address
   useEffect(() => {
