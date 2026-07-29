@@ -53,7 +53,7 @@ export function ConnectGuideModal({
   // Clear busy state so the button re-enables and the user can retry.
   useEffect(() => {
     if (hasWalletSignatureInFlight()) {
-      setSiweBusy(true);
+      setSiweBusy(false);
       setErr('A wallet signature request is already open. Approve or close it in your wallet first.');
       return;
     }
@@ -68,7 +68,7 @@ export function ConnectGuideModal({
   useEffect(() => {
     if (!isOpen) return;
     if (hasWalletSignatureInFlight()) {
-      setSiweBusy(true);
+      setSiweBusy(false);
       setErr('A wallet signature request is already open. Approve or close it in your wallet first.');
       return;
     }
