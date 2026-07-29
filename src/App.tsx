@@ -1980,6 +1980,18 @@ export default function App() {
       return false;
     }
   })();
+  const caBalanceWarning = caInputExceedsSpendableBalance ? (() => {
+    try {
+      const amount = parseUnits(caAmount, 18);
+      const fee = totalRouterDebit(amount) - amount;
+      const held = caToBotDirection === 'CA_TO_BOT'
+        ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
+        : (botBalance?.value ?? 0n);
+      return getFixedSwapBalanceTooLowMessage(caPaySymbol as 'CA' | 'BOT', amount, fee, held);
+    } catch {
+      return `Lower the ${caPaySymbol} amount slightly to leave room for the 0.1% platform fee.`;
+    }
+  })() : undefined;
   let caButtonLabel = "Enter amount";
   if (!isConnected) caButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) caButtonLabel = "Switch Chain to BOT Chain";
@@ -2597,7 +2609,8 @@ export default function App() {
                 if (caAmount) setActiveConfirmModal('CA/BOT');
               }}
               networkWarning={!isConnected ? "Please connect your wallet first." : undefined}
-              successMessage={session.step1.status === 'done' ? 'Swap transaction was successfully executed in the Bohr VM.' : undefined}
+              warningMessage={caBalanceWarning}
+              successMessage={session.step1.status === 'done' ? 'Swap transaction was successfully executed on BOT Chain.' : undefined}
               txHash={session.step1.status === 'done' ? session.step1.tx_hash : undefined}
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
               onReset={resetStep1}
