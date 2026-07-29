@@ -10,7 +10,46 @@ import { buildFlowBridgeTypedData } from "@/lib/siweProof";
 
 const STORAGE_PREFIX = "flowbridge:wallet-verified:";
 const SIGNATURE_TIMEOUT_MS = 45_000;
-const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 45_000;
+// TokenPocket's in-app prompt often sits behind its own "Waiting" overlay for a
+// while (network/keystore unlock). Give the user real time to tap Confirm
+// instead of abandoning the request underneath them.
+const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 180_000;
+
+// A single in-flight signature request per address. TokenPocket deadlocks (its
+// prompt freezes on "Waiting") as soon as a second personal_sign arrives while
+// the first is still pending — which happens when the connect modal and the
+// swap guard both ask, or when the user taps twice. Re-use the live request.
+const inFlightSignatures = new Map<string, { message: string; promise: Promise<string> }>();
+
+function dedupeSignature(
+  address: string,
+  message: string,
+  run: () => Promise<string>,
+): Promise<string> {
+  const key = address.toLowerCase();
+  const existing = inFlightSignatures.get(key);
+  // Identical request already open in the wallet → attach to it, never prompt twice.
+  if (existing && existing.message === message) return existing.promise;
+
+  // Different message: wait for the open prompt to settle first so we never
+  // stack two requests on the wallet.
+  const start = existing
+    ? existing.promise.then(
+        () => run(),
+        () => run(),
+      )
+    : run();
+  const entry = {
+    message,
+    promise: start.finally(() => {
+      if (inFlightSignatures.get(key) === entry) inFlightSignatures.delete(key);
+    }),
+  };
+  inFlightSignatures.set(key, entry);
+  return entry.promise;
+}
+
+
 
 function storageKey(address: string) {
   return `${STORAGE_PREFIX}${address.toLowerCase()}`;
@@ -278,8 +317,19 @@ export async function signMessageWithActiveWallet(
   message: string,
   wagmiSignMessageAsync?: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
 ): Promise<string> {
+  return dedupeSignature(address, message, () =>
+    signMessageWithActiveWalletInner(address, message, wagmiSignMessageAsync),
+  );
+}
+
+async function signMessageWithActiveWalletInner(
+  address: string,
+  message: string,
+  wagmiSignMessageAsync?: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
+): Promise<string> {
   const normalized = address.toLowerCase();
   await assertActiveInjectedAccount(normalized);
+
 
   const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
   const tokenPocket = isTokenPocketBrowser();
@@ -340,6 +390,8 @@ export async function signMessageWithActiveWallet(
  * Skips the round-trip if already verified. Throws on rejection/failure so
  * callers can abort the swap/bridge before writing a transaction.
  */
+const inFlightVerifications = new Map<string, Promise<void>>();
+
 export async function ensureWalletVerified(
   address: string,
   signMessageAsync: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
@@ -347,6 +399,20 @@ export async function ensureWalletVerified(
   if (!address) throw new Error("Wallet address required for verification");
   const normalized = address.toLowerCase();
   if (isWalletVerified(normalized)) return;
+  const running = inFlightVerifications.get(normalized);
+  if (running) return running;
+  const promise = ensureWalletVerifiedInner(normalized, signMessageAsync).finally(() => {
+    if (inFlightVerifications.get(normalized) === promise) inFlightVerifications.delete(normalized);
+  });
+  inFlightVerifications.set(normalized, promise);
+  return promise;
+}
+
+async function ensureWalletVerifiedInner(
+  normalized: string,
+  signMessageAsync: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
+): Promise<void> {
+
 
   // 1) Get nonce
   const nonceRes = await fetch("/api/public/siwe/nonce", {
