@@ -13,7 +13,7 @@ import {
   type TronStatus,
 } from './lib/tronBridge';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
-import { maxSwappableDisplay } from './lib/swap/platformFee';
+import { maxSwappableDisplay, totalRouterDebit } from './lib/swap/platformFee';
 import type { BridgeDeps } from './lib/bridge/evmBridge';
 import {
   ensureBridgeAllowance as ensureBridgeAllowanceCore,
@@ -1290,6 +1290,12 @@ export default function App() {
     return toFriendlyError(err, { action: activeTab === 'BRIDGE' ? 'bridge' : 'swap', gasSymbol: sym });
   };
 
+  const getFixedSwapBalanceTooLowMessage = (symbol: 'CA' | 'BOT', amount: bigint, fee: bigint, balance: bigint) => {
+    const total = amount + fee;
+    const decimals = 18;
+    return `Not enough ${symbol} for this swap plus the 0.1% platform fee. Your balance is ${formatUnits(balance, decimals)} ${symbol}, but this swap needs ${formatUnits(total, decimals)} ${symbol}. Tap MAX again or lower the amount slightly.`;
+  };
+
   // Live and simulated swap step logic
   const completeStep1 = async () => {
     setErrorMessage(null);
@@ -1346,6 +1352,29 @@ export default function App() {
           }
         } catch { fee = 0n; }
         const totalIn = parsedAmount + fee;
+
+        let heldBalance = caToBotDirection === 'CA_TO_BOT'
+          ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
+          : (botBalance?.value ?? 0n);
+        try {
+          if (botPublicClient && address) {
+            heldBalance = caToBotDirection === 'CA_TO_BOT'
+              ? ((await botPublicClient.readContract({
+                  address: caToken,
+                  abi: ERC20_ABI,
+                  functionName: 'balanceOf',
+                  args: [address as `0x${string}`],
+                })) as bigint)
+              : await botPublicClient.getBalance({ address: address as `0x${string}` });
+          }
+        } catch {
+          // Cached balance fallback above is enough to block obvious over-spends.
+        }
+        if (heldBalance < totalIn) {
+          setErrorMessage(getFixedSwapBalanceTooLowMessage(caPaySymbol as 'CA' | 'BOT', parsedAmount, fee, heldBalance));
+          setIsWaitingModalOpen(false);
+          return;
+        }
 
         if (caToBotDirection === 'CA_TO_BOT') {
           // 1. Approve FlowBridgeRouter v3 for CA if allowance too low.
@@ -1939,18 +1968,46 @@ export default function App() {
   // Determine button displays and loading templates
   const caPaySymbol = caToBotDirection === 'CA_TO_BOT' ? 'CA' : 'BOT';
   const caRecSymbol = caToBotDirection === 'CA_TO_BOT' ? 'BOT' : 'CA';
+  const caInputExceedsSpendableBalance = (() => {
+    if (isDemoMode || !caAmount) return false;
+    try {
+      const required = totalRouterDebit(parseUnits(caAmount, 18));
+      const held = caToBotDirection === 'CA_TO_BOT'
+        ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
+        : (botBalance?.value ?? 0n);
+      return held < required;
+    } catch {
+      return false;
+    }
+  })();
+  const caBalanceWarning = caInputExceedsSpendableBalance ? (() => {
+    try {
+      const amount = parseUnits(caAmount, 18);
+      const fee = totalRouterDebit(amount) - amount;
+      const held = caToBotDirection === 'CA_TO_BOT'
+        ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
+        : (botBalance?.value ?? 0n);
+      return getFixedSwapBalanceTooLowMessage(caPaySymbol as 'CA' | 'BOT', amount, fee, held);
+    } catch {
+      return `Lower the ${caPaySymbol} amount slightly to leave room for the 0.1% platform fee.`;
+    }
+  })() : undefined;
   let caButtonLabel = "Enter amount";
   if (!isConnected) caButtonLabel = "Connect Wallet";
   else if (!isNetworkCorrect) caButtonLabel = "Switch Chain to BOT Chain";
   else if (isActionLoading && (actionStep === 'approving_ca' || actionStep === 'swapping_ca' || actionStep === 'confirming_chain' || actionStep === 'sending_fee')) {
     caButtonLabel = actionStep === 'approving_ca' ? `Approving ${caPaySymbol}...` : actionStep === 'confirming_chain' ? 'Confirming on-chain...' : actionStep === 'sending_fee' ? 'Sending Fee (0.08%)...' : `Swapping ${caPaySymbol} to ${caRecSymbol}...`;
   }
+  else if (caInputExceedsSpendableBalance) caButtonLabel = `Lower ${caPaySymbol} amount`;
   else if (session.step1.status === 'done' && !caAmount) caButtonLabel = "✅ Step 1 Complete - Next →";
-  else if (caAmount && !isDemoMode && caToBotDirection === 'CA_TO_BOT' && rawCaAllowance !== undefined && BigInt(rawCaAllowance.toString()) < parseUnits(caAmount, 18)) {
+  else if (caAmount && !isDemoMode && caToBotDirection === 'CA_TO_BOT' && rawCaAllowance !== undefined && (() => {
+    try { return BigInt(rawCaAllowance.toString()) < totalRouterDebit(parseUnits(caAmount, 18)); }
+    catch { return BigInt(rawCaAllowance.toString()) < parseUnits(caAmount, 18); }
+  })()) {
     caButtonLabel = `Approve ${caPaySymbol}`;
   }
   else if (caAmount) caButtonLabel = `Swap ${caPaySymbol} to ${caRecSymbol}`;
-  let caButtonDisabled = isActionLoading || (isConnected && !caAmount && session.step1.status !== 'done');
+  let caButtonDisabled = isActionLoading || caInputExceedsSpendableBalance || (isConnected && !caAmount && session.step1.status !== 'done');
   
   const botPaySymbol = botToUsdtDirection === 'BOT_TO_USDT' ? 'BOT' : 'USDT';
   const botRecSymbol = botToUsdtDirection === 'BOT_TO_USDT' ? 'USDT' : 'BOT';
@@ -2552,7 +2609,8 @@ export default function App() {
                 if (caAmount) setActiveConfirmModal('CA/BOT');
               }}
               networkWarning={!isConnected ? "Please connect your wallet first." : undefined}
-              successMessage={session.step1.status === 'done' ? 'Swap transaction was successfully executed in the Bohr VM.' : undefined}
+              warningMessage={caBalanceWarning}
+              successMessage={session.step1.status === 'done' ? 'Swap transaction was successfully executed on BOT Chain.' : undefined}
               txHash={session.step1.status === 'done' ? session.step1.tx_hash : undefined}
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
               onReset={resetStep1}
