@@ -52,6 +52,11 @@ export function ConnectGuideModal({
   // in-flight signMessage promise can hang against the previous connector.
   // Clear busy state so the button re-enables and the user can retry.
   useEffect(() => {
+    if (hasWalletSignatureInFlight()) {
+      setSiweBusy(true);
+      setErr('A wallet signature request is already open. Approve or close it in your wallet first.');
+      return;
+    }
     siweRequestId.current += 1;
     setSiweBusy(false);
     setErr(null);
@@ -62,6 +67,11 @@ export function ConnectGuideModal({
   // must always start fresh and clickable when the user reopens the modal.
   useEffect(() => {
     if (!isOpen) return;
+    if (hasWalletSignatureInFlight()) {
+      setSiweBusy(true);
+      setErr('A wallet signature request is already open. Approve or close it in your wallet first.');
+      return;
+    }
     siweRequestId.current += 1;
     setSiweBusy(false);
     setErr(null);

@@ -32,9 +32,16 @@ function dedupeSignature(
   run: () => Promise<string>,
 ): Promise<string> {
   const key = address.toLowerCase();
+  const globalExisting = Array.from(inFlightSignatures.entries())[0];
   const existing = inFlightSignatures.get(key);
   // Identical request already open in the wallet → attach to it, never prompt twice.
   if (existing && existing.message === message) return existing.promise;
+
+  if (globalExisting) {
+    throw new WalletVerificationRejectedError(
+      "A wallet signature request is already open. Finish or close the wallet prompt first, then tap retry.",
+    );
+  }
 
   // Different message while the wallet prompt is open: do not queue a second
   // prompt. TokenPocket can keep its Confirm button behind a permanent
