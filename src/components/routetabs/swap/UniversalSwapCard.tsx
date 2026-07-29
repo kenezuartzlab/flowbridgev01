@@ -1016,8 +1016,20 @@ function TokenSide({
         </span>
         {usdValue && <span className="text-[#C5C1B9] shrink-0">≈ {usdValue}</span>}
       </div>
+
+      {!readOnly && (clampedNotice || maxHint) && (
+        <p
+          className={cn(
+            "text-[11px] font-mono leading-snug",
+            clampedNotice ? "text-[#FFC46B]" : "text-[#C5C1B9]/70",
+          )}
+        >
+          {clampedNotice ?? maxHint}
+        </p>
+      )}
     </div>
   );
+
 }
 
 function Row({ label, value }: { label: string; value: string }) {
