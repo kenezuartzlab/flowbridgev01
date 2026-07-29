@@ -375,13 +375,7 @@ export function LimitOrderCard({
           onAmountChange={setAmountIn}
           onPickToken={() => setPickerOpen("in")}
           editable
-          balanceLabel={
-            balanceNum != null
-              ? balanceNum.toLocaleString(undefined, {
-                  maximumFractionDigits: balanceNum < 1 ? 6 : 4,
-                })
-              : null
-          }
+          balanceLabel={balanceFmt != null ? formatBalance4(balanceFmt) : null}
           balanceUsd={
             balanceNum != null && balanceUsd != null ? balanceNum * balanceUsd : null
           }
