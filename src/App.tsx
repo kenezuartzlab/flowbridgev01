@@ -511,6 +511,9 @@ export default function App() {
   const [isConfirmDestinationOpen, setIsConfirmDestinationOpen] = useState(false);
   const [isRealtimeTrackerOpen, setIsRealtimeTrackerOpen] = useState(false);
   const [trackerRecipientAddress, setTrackerRecipientAddress] = useState<string>('');
+  // Snapshot of the bridged amount taken when the tracker opens, so clearing the
+  // input after submission never changes what the tracker displays/polls for.
+  const [trackerAmount, setTrackerAmount] = useState<string>('');
 
   // Populate default destination address from wallet address
   useEffect(() => {
@@ -3001,6 +3004,7 @@ export default function App() {
             setCustomDestinationAddress(confirmedAddress);
             setTrackerRecipientAddress(confirmedAddress);
             setIsConfirmDestinationOpen(false);
+            setTrackerAmount(usdtAmount);
             setIsRealtimeTrackerOpen(true);
             await completeStep3(confirmedAddress);
           }}
@@ -3021,7 +3025,7 @@ export default function App() {
           onClose={() => setIsRealtimeTrackerOpen(false)}
           fromChain={bridgeFromName}
           toChain={bridgeToName}
-          amount={usdtAmount}
+          amount={trackerAmount || usdtAmount}
           symbol="USDT"
           recipientAddress={trackerRecipientAddress || customDestinationAddress || address || ''}
           txHash={receiptTxHash || undefined}
