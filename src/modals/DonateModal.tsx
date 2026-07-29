@@ -8,6 +8,7 @@ import { cn } from '../lib/utils';
 import { useAccount, useSendTransaction, useBalance, useSignMessage, useConnect, useSwitchChain, useWriteContract, useChainId } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { parseEther, parseUnits, encodeFunctionData } from 'viem';
+import { getWalletSignatureErrorMessage, signMessageWithActiveWallet } from '../lib/walletVerification';
 
 // Per-coin chain routing metadata for direct EVM donations.
 // Chain IDs and USDT contracts are pinned so the "Send direct" button
@@ -98,15 +99,8 @@ export function DonateModal({
   const [directSendError, setDirectSendError] = useState<string | null>(null);
 
   const signPromptWithTimeout = async (message: string) => {
-    return Promise.race([
-      signMessageAsync({ message }),
-      new Promise<string>((_, reject) =>
-        setTimeout(
-          () => reject(new Error('No wallet signature received. Unlock your wallet, approve the signature prompt, then try again.')),
-          35_000,
-        ),
-      ),
-    ]);
+    if (!connectedAddress) throw new Error('Wallet not connected');
+    return signMessageWithActiveWallet(connectedAddress, message, signMessageAsync as any);
   };
 
   // Basic component state
@@ -469,7 +463,7 @@ export function DonateModal({
       setHasSigned(true);
     } catch (err: any) {
       console.warn("Signature failed:", err);
-      setSignError(err?.message || "Signature request was rejected by your wallet connector.");
+      setSignError(getWalletSignatureErrorMessage(err));
     } finally {
       setIsSigningMessage(false);
     }
@@ -705,7 +699,7 @@ export function DonateModal({
 
     } catch (err: any) {
       console.warn("Vote signature failed:", err);
-      setVoteError(err?.message || "Signature request was rejected by your wallet connector.");
+      setVoteError(getWalletSignatureErrorMessage(err));
       setTimeout(() => setVoteError(null), 4000);
     } finally {
       setIsVotingId(null);
