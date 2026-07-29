@@ -7,6 +7,7 @@ import { toFriendlyError } from "@/lib/friendlyError";
 
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
+import { formatBalance4 } from "@/lib/format";
 import {
   ERC20_ABI,
   FLOW_LIMIT_ORDER_EXECUTOR_ABI,
