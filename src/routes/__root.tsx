@@ -78,6 +78,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "9zbQqs8Bva-Q_A-5jjOApUAwMVGaHLD-1sQcnMpJ_fg" },
+
       { title: "FlowBridge Community Helper Tools" },
       { name: "description", content: "FlowBridge is a community Web3 toolkit for swapping tokens on BOT Chain and bridging USDT across BNB, Ethereum and TRON." },
       { name: "author", content: "FlowBridge" },
