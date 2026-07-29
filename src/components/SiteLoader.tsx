@@ -14,7 +14,7 @@ interface SiteLoaderProps {
 // persists across client-side navigation, so the splash only plays once per load.
 let splashPlayed = false;
 
-export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
+export function SiteLoader({ onDone, minDurationMs = 900 }: SiteLoaderProps) {
   // Starts hidden so SSR and hydration match, then plays on the first mount
   // of a fresh page load only.
   const [phase, setPhase] = useState<'in' | 'out' | 'gone'>('gone');
@@ -27,7 +27,7 @@ export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
     const t2 = setTimeout(() => {
       setPhase('gone');
       onDone?.();
-    }, minDurationMs + 550);
+    }, minDurationMs + 350);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -39,7 +39,7 @@ export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#010C1B] transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#010C1B] transition-opacity duration-300 ${
         phase === 'out' ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
       aria-hidden={phase !== 'in'}
@@ -65,6 +65,10 @@ export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
             <img
               src={logo}
               alt="FlowBridge"
+              width={128}
+              height={128}
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-full object-contain animate-logo-pulse"
               draggable={false}
             />
