@@ -317,8 +317,19 @@ export async function signMessageWithActiveWallet(
   message: string,
   wagmiSignMessageAsync?: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
 ): Promise<string> {
+  return dedupeSignature(address, message, () =>
+    signMessageWithActiveWalletInner(address, message, wagmiSignMessageAsync),
+  );
+}
+
+async function signMessageWithActiveWalletInner(
+  address: string,
+  message: string,
+  wagmiSignMessageAsync?: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
+): Promise<string> {
   const normalized = address.toLowerCase();
   await assertActiveInjectedAccount(normalized);
+
 
   const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
   const tokenPocket = isTokenPocketBrowser();
