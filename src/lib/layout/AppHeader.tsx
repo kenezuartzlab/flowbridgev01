@@ -257,7 +257,9 @@ export function AppHeader({
             <img src={logoUrl} alt="" className="w-6 h-6 rounded-md shrink-0" draggable={false} />
             <h1 className="text-sm font-black tracking-widest text-foreground uppercase leading-none truncate">
               FlowBridge<span className="text-primary">.</span>
+              <span className="sr-only"> — Cross-Chain Bridge &amp; Swap for BOT Chain</span>
             </h1>
+
           </div>
           <div className="flex items-center gap-2 mt-2 min-w-0">
             <button

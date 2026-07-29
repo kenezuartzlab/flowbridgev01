@@ -18,9 +18,12 @@ export const Route = createFileRoute("/markets")({
       { property: "og:title", content: "FlowBridge Markets" },
       { property: "og:description", content: "BOT Chain + top cross-chain token prices, updated live." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://flowbridge.space/markets" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://flowbridge.space/markets" }],
   }),
+
   component: MarketsPage,
 });
 

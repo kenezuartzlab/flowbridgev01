@@ -6,8 +6,15 @@ export const Route = createFileRoute("/fortune")({
     meta: [
       { title: "Flow Fortune Wheel — Coming Soon | FlowBridge" },
       { name: "description", content: "Spin daily for FLOW points. 2 free spins per day. Jackpot up to 50 FLOW." },
+      { property: "og:title", content: "Flow Fortune Wheel — Daily FLOW Point Spins" },
+      { property: "og:description", content: "Two free daily spins with a 50 FLOW jackpot, server-authoritative RNG and verified-account gating. Launching soon on FlowBridge." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://flowbridge.space/fortune" },
+      { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://flowbridge.space/fortune" }],
   }),
+
   component: () => (
     <SoonPage
       title="Flow Fortune Wheel"
