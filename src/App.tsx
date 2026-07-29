@@ -13,7 +13,7 @@ import {
   type TronStatus,
 } from './lib/tronBridge';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
-import { maxSwappableDisplay } from './lib/swap/platformFee';
+import { maxSwappableDisplay, totalRouterDebit } from './lib/swap/platformFee';
 import type { BridgeDeps } from './lib/bridge/evmBridge';
 import {
   ensureBridgeAllowance as ensureBridgeAllowanceCore,
@@ -1353,9 +1353,23 @@ export default function App() {
         } catch { fee = 0n; }
         const totalIn = parsedAmount + fee;
 
-        const heldBalance = caToBotDirection === 'CA_TO_BOT'
+        let heldBalance = caToBotDirection === 'CA_TO_BOT'
           ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
           : (botBalance?.value ?? 0n);
+        try {
+          if (botPublicClient && address) {
+            heldBalance = caToBotDirection === 'CA_TO_BOT'
+              ? ((await botPublicClient.readContract({
+                  address: caToken,
+                  abi: ERC20_ABI,
+                  functionName: 'balanceOf',
+                  args: [address as `0x${string}`],
+                })) as bigint)
+              : await botPublicClient.getBalance({ address: address as `0x${string}` });
+          }
+        } catch {
+          // Cached balance fallback above is enough to block obvious over-spends.
+        }
         if (heldBalance < totalIn) {
           setErrorMessage(getFixedSwapBalanceTooLowMessage(caPaySymbol as 'CA' | 'BOT', parsedAmount, fee, heldBalance));
           setIsWaitingModalOpen(false);
@@ -1962,7 +1976,7 @@ export default function App() {
   }
   else if (session.step1.status === 'done' && !caAmount) caButtonLabel = "✅ Step 1 Complete - Next →";
   else if (caAmount && !isDemoMode && caToBotDirection === 'CA_TO_BOT' && rawCaAllowance !== undefined && (() => {
-    try { return BigInt(rawCaAllowance.toString()) < parseUnits(maxSwappableDisplay(caAmount, 18), 18); }
+    try { return BigInt(rawCaAllowance.toString()) < totalRouterDebit(parseUnits(caAmount, 18)); }
     catch { return BigInt(rawCaAllowance.toString()) < parseUnits(caAmount, 18); }
   })()) {
     caButtonLabel = `Approve ${caPaySymbol}`;
