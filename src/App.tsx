@@ -47,7 +47,7 @@ import { ConnectGuideModal } from './modals/ConnectGuideModal';
 import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
-import { formatUsd } from './lib/format';
+import { formatUsd, formatBalance4 } from './lib/format';
 import { toFriendlyError } from './lib/friendlyError';
 import { SiteLoader } from './components/SiteLoader';
 import { fetchActivityHistory, fetchGlobalIncentiveStats, fetchUserIncentives, logActivity } from './lib/app/activityApi';
