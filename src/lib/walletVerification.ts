@@ -349,7 +349,7 @@ async function signMessageWithActiveWalletInner(
   const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
   const tokenPocket = isTokenPocketBrowser();
   if (tokenPocket && hasInjected) {
-    return await signPersonalWithTokenPocket(normalized, message);
+    return await signTypedDataWithTokenPocket(normalized, message);
   }
   // Inside wallet in-app browsers (TokenPocket, Bitget, Trust…) the injected
   // provider is the wallet itself and answers reliably. wagmi's connector layer
