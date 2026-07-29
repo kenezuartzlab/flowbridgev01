@@ -19,18 +19,36 @@ const TOKENPOCKET_SIGNATURE_TIMEOUT_MS = 180_000;
 // prompt freezes on "Waiting") as soon as a second personal_sign arrives while
 // the first is still pending — which happens when the connect modal and the
 // swap guard both ask, or when the user taps twice. Re-use the live request.
-const inFlightSignatures = new Map<string, Promise<string>>();
+const inFlightSignatures = new Map<string, { message: string; promise: Promise<string> }>();
 
-function dedupeSignature(address: string, run: () => Promise<string>): Promise<string> {
+function dedupeSignature(
+  address: string,
+  message: string,
+  run: () => Promise<string>,
+): Promise<string> {
   const key = address.toLowerCase();
   const existing = inFlightSignatures.get(key);
-  if (existing) return existing;
-  const promise = run().finally(() => {
-    if (inFlightSignatures.get(key) === promise) inFlightSignatures.delete(key);
-  });
-  inFlightSignatures.set(key, promise);
-  return promise;
+  // Identical request already open in the wallet → attach to it, never prompt twice.
+  if (existing && existing.message === message) return existing.promise;
+
+  // Different message: wait for the open prompt to settle first so we never
+  // stack two requests on the wallet.
+  const start = existing
+    ? existing.promise.then(
+        () => run(),
+        () => run(),
+      )
+    : run();
+  const entry = {
+    message,
+    promise: start.finally(() => {
+      if (inFlightSignatures.get(key) === entry) inFlightSignatures.delete(key);
+    }),
+  };
+  inFlightSignatures.set(key, entry);
+  return entry.promise;
 }
+
 
 
 function storageKey(address: string) {
