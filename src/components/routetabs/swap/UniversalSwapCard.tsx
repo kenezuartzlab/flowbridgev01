@@ -23,6 +23,7 @@ import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter
 import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
 import { estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
 import { useAppConfig } from "@/lib/config/appConfig";
+import { formatBalance4 } from "@/lib/format";
 
 import { TokenPickerModal } from "./TokenPickerModal";
 import { SlippagePopover } from "./SlippagePopover";
