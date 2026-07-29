@@ -118,9 +118,16 @@ export function UniversalSwapCard({
   }, [isMainnet, curated]);
 
   // ── Balances ──────────────────────────────────────────────────────────────
+  // Pin every balance read to BOT Chain. Without an explicit chainId these
+  // resolve against whatever chain the wallet happens to be on (e.g. BSC),
+  // which returned wrong/zero balances. Poll so post-tx balances stay accurate.
+  const balanceChainId = isMainnet ? 677 : 968;
+  const balanceQuery = { enabled: !!address, refetchInterval: 12_000 } as const;
+
   const nativeBalance = useBalance({
     address,
-    query: { enabled: !!address && tokenIn.isNative },
+    chainId: balanceChainId,
+    query: { ...balanceQuery, enabled: !!address && tokenIn.isNative },
   });
 
   const tokenInBalanceRead = useReadContract({
@@ -128,19 +135,22 @@ export function UniversalSwapCard({
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !tokenIn.isNative },
+    chainId: balanceChainId,
+    query: { ...balanceQuery, enabled: !!address && !tokenIn.isNative },
   });
 
   const nativeOutBalance = useBalance({
     address,
-    query: { enabled: !!address && tokenOut.isNative },
+    chainId: balanceChainId,
+    query: { ...balanceQuery, enabled: !!address && tokenOut.isNative },
   });
   const tokenOutBalanceRead = useReadContract({
     address: tokenOut.isNative ? undefined : (tokenOut.address as Address),
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !tokenOut.isNative },
+    chainId: balanceChainId,
+    query: { ...balanceQuery, enabled: !!address && !tokenOut.isNative },
   });
 
   const inBalanceRaw: bigint = tokenIn.isNative
