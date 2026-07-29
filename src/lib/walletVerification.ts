@@ -95,6 +95,15 @@ export function markWalletVerified(address: string): void {
 }
 
 function buildMessage(opts: { address: string; nonce: string; domain: string; uri: string }) {
+  if (isTokenPocketBrowser()) {
+    return [
+      "FlowBridge wallet check",
+      `Wallet: ${opts.address}`,
+      `Nonce: ${opts.nonce}`,
+      "Free signature. No transaction.",
+    ].join("\n");
+  }
+
   const issuedAt = new Date().toISOString();
   return [
     `${opts.domain} wants you to sign in with your Ethereum account:`,
@@ -349,7 +358,7 @@ async function signMessageWithActiveWalletInner(
   const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
   const tokenPocket = isTokenPocketBrowser();
   if (tokenPocket && hasInjected) {
-    return await signTypedDataWithTokenPocket(normalized, message);
+    return await signPersonalWithTokenPocket(normalized, message);
   }
   // Inside wallet in-app browsers (TokenPocket, Bitget, Trust…) the injected
   // provider is the wallet itself and answers reliably. wagmi's connector layer

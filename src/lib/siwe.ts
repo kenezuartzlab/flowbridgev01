@@ -2,6 +2,7 @@
 // message and exchanges the signature for a Supabase session when the wallet
 // is already linked to a registered email.
 import { supabase } from "@/integrations/supabase/client";
+import { isTokenPocketBrowser } from "@/lib/in-app-browser";
 import { markWalletVerified } from "@/lib/walletVerification";
 
 export type SiweResult =
@@ -12,6 +13,16 @@ type VerifyOtpType = "signup" | "invite" | "magiclink" | "recovery" | "email_cha
 
 function buildMessage(opts: { address: string; nonce: string; domain: string; uri: string; chainId: number }) {
   const issuedAt = new Date().toISOString();
+  if (isTokenPocketBrowser()) {
+    return [
+      "FlowBridge sign-in",
+      `Wallet: ${opts.address}`,
+      `Chain: ${opts.chainId}`,
+      `Nonce: ${opts.nonce}`,
+      "Free signature. No transaction.",
+    ].join("\n");
+  }
+
   return [
     `${opts.domain} wants you to sign in with your Ethereum account:`,
     opts.address,
