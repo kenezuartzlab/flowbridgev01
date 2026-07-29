@@ -574,18 +574,46 @@ export function UniversalSwapCard({
     setQuote(null);
   };
 
-  const onMax = () => {
-    if (!inBalanceRaw) return;
-    // The router pulls `amount + platform fee`, so a MAX of the full balance would
-    // revert (SafeERC20: call failed). Reserve the fee (and native gas) here.
+  // Largest amount the user can actually swap: the router pulls `amount + 0.1% fee`,
+  // and native BOT also needs gas head-room. Everything above this reverts on-chain.
+  const maxSpendableRaw = (() => {
+    if (!inBalanceRaw) return 0n;
     if (tokenIn.isNative) {
       const buf = parseUnits("0.001", tokenIn.decimals);
       const spendable = inBalanceRaw > buf ? inBalanceRaw - buf : 0n;
-      setAmountIn(formatUnits(maxSwappableFromBalance(spendable), tokenIn.decimals));
-    } else {
-      setAmountIn(formatUnits(maxSwappableFromBalance(inBalanceRaw), tokenIn.decimals));
+      return maxSwappableFromBalance(spendable);
     }
+    return maxSwappableFromBalance(inBalanceRaw);
+  })();
+  const maxSpendableDisplay = formatUnits(maxSpendableRaw, tokenIn.decimals);
+
+  const [clamped, setClamped] = useState(false);
+
+  // Hard-clamp typed input so a user can never submit more than their wallet
+  // can cover (swap amount + platform fee + gas reserve).
+  const onAmountInChange = (v: string) => {
+    setClamped(false);
+    if (v === "" || v === ".") return setAmountIn(v);
+    let raw: bigint;
+    try {
+      raw = parseUnits(v, tokenIn.decimals);
+    } catch {
+      return setAmountIn(v);
+    }
+    if (maxSpendableRaw > 0n && raw > maxSpendableRaw) {
+      setAmountIn(maxSpendableDisplay);
+      setClamped(true);
+      return;
+    }
+    setAmountIn(v);
   };
+
+  const onMax = () => {
+    if (!inBalanceRaw) return;
+    setClamped(false);
+    setAmountIn(maxSpendableDisplay);
+  };
+
 
   // ── Button label ──────────────────────────────────────────────────────────
   const parsedAmount = (() => {
@@ -684,11 +712,22 @@ export function UniversalSwapCard({
           label="Sell"
           token={tokenIn}
           amount={amountIn}
-          onAmountChange={setAmountIn}
+          onAmountChange={onAmountInChange}
           balanceDisplay={inBalanceDisplay}
           onPickToken={() => setPickerOpen("in")}
           onMax={onMax}
           usdValue={usdValueFor(tokenIn, amountIn)}
+          maxHint={
+            maxSpendableRaw > 0n
+              ? `Max swappable ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} — the 0.1% platform fee${tokenIn.isNative ? " and gas reserve are" : " is"} taken on top of your amount.`
+              : undefined
+          }
+          clampedNotice={
+            clamped
+              ? `Amount capped to your spendable balance (${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol}).`
+              : undefined
+          }
+
         />
 
         <div className="flex justify-center -my-6.5 relative z-20">
@@ -891,6 +930,8 @@ interface TokenSideProps {
   readOnly?: boolean;
   quoting?: boolean;
   usdValue?: string;
+  maxHint?: string;
+  clampedNotice?: string;
 }
 
 function TokenSide({
@@ -904,6 +945,8 @@ function TokenSide({
   readOnly,
   quoting,
   usdValue,
+  maxHint,
+  clampedNotice,
 }: TokenSideProps) {
   // Truncated to 4 decimals (never rounded up) so the shown balance is always
   // spendable — e.g. 0.04717811 renders as 0.0471.
@@ -914,7 +957,7 @@ function TokenSide({
       <div className="flex justify-between items-center text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
-          <span className="text-[#C5C1B9] normal-case font-mono font-bold">
+          <span className="text-[#C5C1B9] normal-case font-mono font-bold" title={maxHint}>
             Balance: {shortBalance}
           </span>
           {!readOnly && onMax && (
@@ -973,8 +1016,20 @@ function TokenSide({
         </span>
         {usdValue && <span className="text-[#C5C1B9] shrink-0">≈ {usdValue}</span>}
       </div>
+
+      {!readOnly && (clampedNotice || maxHint) && (
+        <p
+          className={cn(
+            "text-[11px] font-mono leading-snug",
+            clampedNotice ? "text-[#FFC46B]" : "text-[#C5C1B9]/70",
+          )}
+        >
+          {clampedNotice ?? maxHint}
+        </p>
+      )}
     </div>
   );
+
 }
 
 function Row({ label, value }: { label: string; value: string }) {

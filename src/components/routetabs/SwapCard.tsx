@@ -18,11 +18,16 @@ interface TokenInputProps {
 }
 
 function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onChange, readOnly }: TokenInputProps) {
+  const [clamped, setClamped] = useState(false);
+  const maxNum = maxAmount != null ? parseFloat(maxAmount) : NaN;
+  const hasMax = isFinite(maxNum) && maxNum > 0;
+
   const handleMaxClick = () => {
     if (!readOnly && onChange) {
       // Use the exact spendable amount when supplied; display balances can be rounded/truncated.
       const nextValue = maxAmount || balance;
       const parsed = parseFloat(nextValue);
+      setClamped(false);
       if (!isNaN(parsed)) {
         onChange(nextValue);
       } else {
@@ -31,6 +36,28 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
     }
   };
 
+  // Hard-clamp typed input to the spendable maximum (balance minus the 0.1%
+  // platform fee the router charges on top) so a swap can never be submitted
+  // for more than the wallet can cover.
+  const handleInputChange = (val: string) => {
+    if (!onChange) return;
+    setClamped(false);
+    if (hasMax) {
+      const n = parseFloat(val);
+      if (isFinite(n) && n > maxNum) {
+        setClamped(true);
+        onChange(maxAmount as string);
+        return;
+      }
+    }
+    onChange(val);
+  };
+
+  const maxHint = hasMax
+    ? `Max swappable ${maxNum.toFixed(6)} ${symbol} — the 0.1% platform fee is charged on top of your amount.`
+    : undefined;
+
+
   return (
     <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
       {/* Top Row: Label and Balance */}
@@ -38,6 +65,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
           <span 
+            title={maxHint}
             onClick={!readOnly ? handleMaxClick : undefined}
             className={cn(
               "text-[#C5C1B9] normal-case font-mono font-bold",
@@ -86,7 +114,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               inputMode="decimal"
               placeholder="0.00"
               value={amount}
-              onChange={(e) => onChange?.(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
               className={cn(
                 'bg-transparent text-white font-black w-full min-w-0 focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono',
                 amount.length > 16 ? 'text-xl sm:text-2xl' : amount.length > 12 ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl',
@@ -106,8 +134,17 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
       <div className="text-[#C5C1B9] font-medium flex items-center text-[12px] font-mono leading-none">
         <span>≈ {usdValue}</span>
       </div>
+
+      {!readOnly && (clamped || maxHint) && (
+        <p className={cn('text-[11px] font-mono leading-snug', clamped ? 'text-[#FFC46B]' : 'text-[#C5C1B9]/70')}>
+          {clamped
+            ? `Amount capped to your spendable balance (${maxNum.toFixed(6)} ${symbol}).`
+            : maxHint}
+        </p>
+      )}
     </div>
   );
+
 }
 
 interface SwapCardProps {
