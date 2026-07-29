@@ -87,8 +87,12 @@ export function LimitOrderCard({
   }, [curated]);
 
   // ── Wallet balance for the input token (native or ERC20) ──────────────
+  // Pinned to BOT Chain so a wallet connected to another network still reads
+  // the real BOT Chain balance.
+  const balanceChainId = isMainnet ? 677 : 968;
   const nativeBalance = useBalance({
     address,
+    chainId: balanceChainId,
     query: { enabled: !!address && tokenIn.isNative, refetchInterval: 15_000 },
   });
   const erc20Balance = useReadContract({
@@ -96,6 +100,7 @@ export function LimitOrderCard({
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
+    chainId: balanceChainId,
     query: {
       enabled: !!address && !tokenIn.isNative && !!tokenIn.address,
       refetchInterval: 15_000,
