@@ -113,7 +113,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               inputMode="decimal"
               placeholder="0.00"
               value={amount}
-              onChange={(e) => onChange?.(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
               className={cn(
                 'bg-transparent text-white font-black w-full min-w-0 focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono',
                 amount.length > 16 ? 'text-xl sm:text-2xl' : amount.length > 12 ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl',
