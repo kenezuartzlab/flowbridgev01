@@ -14,7 +14,7 @@ interface SiteLoaderProps {
 // persists across client-side navigation, so the splash only plays once per load.
 let splashPlayed = false;
 
-export function SiteLoader({ onDone, minDurationMs = 1600 }: SiteLoaderProps) {
+export function SiteLoader({ onDone, minDurationMs = 900 }: SiteLoaderProps) {
   // Starts hidden so SSR and hydration match, then plays on the first mount
   // of a fresh page load only.
   const [phase, setPhase] = useState<'in' | 'out' | 'gone'>('gone');
