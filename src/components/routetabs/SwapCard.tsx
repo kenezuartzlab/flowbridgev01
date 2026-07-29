@@ -133,8 +133,17 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
       <div className="text-[#C5C1B9] font-medium flex items-center text-[12px] font-mono leading-none">
         <span>≈ {usdValue}</span>
       </div>
+
+      {!readOnly && (clamped || maxHint) && (
+        <p className={cn('text-[11px] font-mono leading-snug', clamped ? 'text-[#FFC46B]' : 'text-[#C5C1B9]/70')}>
+          {clamped
+            ? `Amount capped to your spendable balance (${maxNum.toFixed(6)} ${symbol}).`
+            : maxHint}
+        </p>
+      )}
     </div>
   );
+
 }
 
 interface SwapCardProps {
