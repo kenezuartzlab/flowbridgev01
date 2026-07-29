@@ -215,6 +215,15 @@ export function RealtimeBridgeTrackerModal({
   // Baseline destination balance captured before the relayer credits funds.
   const destBaseline = useRef<bigint | null>(null);
 
+  // Freeze the bridged amount for the lifetime of the tracker: the form input is
+  // cleared right after submission, and a shifting amount would both blank the UI
+  // and reset the destination-balance baseline mid-flight.
+  const frozenAmount = useRef<string>(amount);
+  useEffect(() => {
+    if (isOpen && amount && Number(amount) > 0) frozenAmount.current = amount;
+  }, [isOpen, amount]);
+  const trackedAmount = Number(amount) > 0 ? amount : frozenAmount.current;
+
   // Real source-chain tracker: poll for receipt + confirmations. Stage 2 flips
   // only once the source chain has the required confirmations.
   useEffect(() => {
@@ -283,7 +292,7 @@ export function RealtimeBridgeTrackerModal({
     destBaseline.current = null;
     const client = clientFor(dstId);
     const expected = (() => {
-      const n = Number(amount);
+      const n = Number(trackedAmount);
       return Number.isFinite(n) && n > 0 ? n : 0;
     })();
 
@@ -320,7 +329,7 @@ export function RealtimeBridgeTrackerModal({
     read();
     const id = setInterval(read, 6000);
     return () => { cancelled = true; clearInterval(id); };
-  }, [isOpen, bridgeDirection, isMainnet, recipientAddress, amount, txHash]);
+  }, [isOpen, bridgeDirection, isMainnet, recipientAddress, trackedAmount, txHash]);
 
   // Relay ETA countdown — display only. On non-EVM destinations (Tron), where
   // the balance cannot be polled, it is also the completion fallback.
@@ -403,7 +412,7 @@ export function RealtimeBridgeTrackerModal({
               <TokenChainPair chain={fromChain} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(amount)}</span>
+                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(trackedAmount)}</span>
                 <span className="text-[11px] font-bold text-amber-400 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
               </div>
             </div>
@@ -424,7 +433,7 @@ export function RealtimeBridgeTrackerModal({
               <TokenChainPair chain={toChain} delay={200} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(amount)}</span>
+                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(trackedAmount)}</span>
                 <span className="text-[11px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
               </div>
             </div>
