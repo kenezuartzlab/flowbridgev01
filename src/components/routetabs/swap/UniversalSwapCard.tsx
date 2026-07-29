@@ -169,7 +169,7 @@ export function UniversalSwapCard({
 
   // Always-on native BOT balance for the low-gas warning banner (independent
   // of whichever token the user is spending).
-  const nativeGasBalance = useBalance({ address, query: { enabled: !!address } });
+  const nativeGasBalance = useBalance({ address, chainId: balanceChainId, query: balanceQuery });
   const nativeGasLow = !!address && isNativeGasLow(nativeGasBalance.data?.value, 18, "BOT");
   const [gasSettingsOpen, setGasSettingsOpen] = useState(false);
 
