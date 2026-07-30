@@ -451,7 +451,33 @@ const USDT_TOKEN = (isMainnet: boolean): Token => {
   };
 };
 
+// Identical quote requests fired within a short window (swap card + confirm
+// modal + preview panel all ask for the same route) share a single search
+// instead of each doing a full round of RPC reads.
+const QUOTE_INFLIGHT = new Map<string, { at: number; p: Promise<QuoteResult | null> }>();
+const QUOTE_DEDUPE_MS = 1_200;
+
 export async function getBestRoute(
+  tokenIn: Token,
+  tokenOut: Token,
+  amountIn: bigint,
+  isMainnet: boolean,
+): Promise<QuoteResult | null> {
+  const key = `${isMainnet ? "m" : "t"}:${tokenIn.address.toLowerCase()}:${!!tokenIn.isNative}:${tokenOut.address.toLowerCase()}:${!!tokenOut.isNative}:${amountIn}`;
+  const hit = QUOTE_INFLIGHT.get(key);
+  if (hit && Date.now() - hit.at < QUOTE_DEDUPE_MS) return hit.p;
+  const p = computeBestRoute(tokenIn, tokenOut, amountIn, isMainnet).finally(() => {
+    setTimeout(() => {
+      const cur = QUOTE_INFLIGHT.get(key);
+      if (cur && cur.p === p) QUOTE_INFLIGHT.delete(key);
+    }, QUOTE_DEDUPE_MS);
+  });
+  QUOTE_INFLIGHT.set(key, { at: Date.now(), p });
+  return p;
+}
+
+async function computeBestRoute(
+
   tokenIn: Token,
   tokenOut: Token,
   amountIn: bigint,
