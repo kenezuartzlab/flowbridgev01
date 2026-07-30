@@ -67,12 +67,23 @@ interface ActiveRouter {
   addr: Address;
 }
 
+// One shared client per chain. JSON-RPC batching collapses the dozens of
+// read calls a route search makes into a handful of HTTP round-trips, which
+// is the single biggest win for quote latency on mobile networks.
+const CLIENT_CACHE = new Map<string, ReturnType<typeof createPublicClient>>();
+
 function publicClient(isMainnet: boolean) {
-  return createPublicClient({
+  const key = isMainnet ? "main" : "test";
+  const existing = CLIENT_CACHE.get(key);
+  if (existing) return existing as any;
+  const client = createPublicClient({
     chain: isMainnet ? botMainnet : botTestnet,
-    transport: http(),
+    transport: http(undefined, { batch: { wait: 16, batchSize: 40 } }),
   });
+  CLIENT_CACHE.set(key, client);
+  return client as any;
 }
+
 
 // ── Dynamic router registry ──────────────────────────────────────────────
 // Cache getActiveRouters() for 5 minutes per chain. Falls back to the known
@@ -140,26 +151,21 @@ async function resolveRouterMeta(
   if (cached) return cached;
   let factory = fallback.factory;
   let wnative = fallback.wnative;
-  try {
-    const f = (await client.readContract({
-      address: router,
-      abi: ROUTER_FACTORY_ABI,
-      functionName: "factory",
-    })) as Address;
-    if (f && f !== ZERO) factory = f.toLowerCase() as Address;
-  } catch { /* keep fallback */ }
-  try {
-    const w = (await client.readContract({
-      address: router,
-      abi: ROUTER_FACTORY_ABI,
-      functionName: "WETH",
-    })) as Address;
-    if (w && w !== ZERO) wnative = w.toLowerCase() as Address;
-  } catch { /* keep fallback */ }
+  const [f, w] = await Promise.all([
+    client
+      .readContract({ address: router, abi: ROUTER_FACTORY_ABI, functionName: "factory" })
+      .catch(() => null) as Promise<Address | null>,
+    client
+      .readContract({ address: router, abi: ROUTER_FACTORY_ABI, functionName: "WETH" })
+      .catch(() => null) as Promise<Address | null>,
+  ]);
+  if (f && f !== ZERO) factory = f.toLowerCase() as Address;
+  if (w && w !== ZERO) wnative = w.toLowerCase() as Address;
   const meta = { factory, wnative };
   ROUTER_META_CACHE.set(key, meta);
   return meta;
 }
+
 
 async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
   const c = getContracts(isMainnet);
@@ -205,12 +211,24 @@ async function bdexV3RouterId(isMainnet: boolean): Promise<number> {
 }
 
 
+// Pair existence never flips back to "missing", and new pairs are rare, so we
+// memoise the lookups for the lifetime of the tab. Positive results are cached
+// forever; negatives are re-checked after 2 minutes so newly created pools are
+// picked up without hammering the RPC on every keystroke.
+const PAIR_CACHE = new Map<string, { exists: boolean; at: number }>();
+const PAIR_NEGATIVE_TTL_MS = 120_000;
+
 async function pairExists(
   client: ReturnType<typeof publicClient>,
   factory: Address,
   a: Address,
   b: Address,
 ): Promise<boolean> {
+  const key = `${factory}:${a}:${b}`;
+  const cached = PAIR_CACHE.get(key);
+  if (cached && (cached.exists || Date.now() - cached.at < PAIR_NEGATIVE_TTL_MS)) {
+    return cached.exists;
+  }
   try {
     const pair = (await client.readContract({
       address: factory,
@@ -218,11 +236,15 @@ async function pairExists(
       functionName: "getPair",
       args: [a, b],
     })) as Address;
-    return pair.toLowerCase() !== ZERO;
+    const exists = pair.toLowerCase() !== ZERO;
+    PAIR_CACHE.set(key, { exists, at: Date.now() });
+    return exists;
   } catch {
+    PAIR_CACHE.set(key, { exists: false, at: Date.now() });
     return false;
   }
 }
+
 
 async function getAmountsOut(
   client: ReturnType<typeof publicClient>,
@@ -359,40 +381,57 @@ async function bestOnV2Dex(
   const outA = addrFor(tokenOut, dex);
   if (inA === outA) return null;
 
-  const candidates: { path: Address[]; symbolPath: string[] }[] = [];
-
-  if (await pairExists(client, dex.factory, inA, outA)) {
-    candidates.push({ path: [inA, outA], symbolPath: [tokenIn.symbol, tokenOut.symbol] });
-  }
-
   // De-dupe hop addresses; skip hops that equal the endpoints.
+  const hopList: { addr: Address; symbol: string }[] = [];
   const seen = new Set<string>();
   for (const hop of hops) {
     const h = hop.addr.toLowerCase() as Address;
     if (h === inA || h === outA || seen.has(h)) continue;
     seen.add(h);
-    if (
-      (await pairExists(client, dex.factory, inA, h)) &&
-      (await pairExists(client, dex.factory, h, outA))
-    ) {
-      // Display symbol: wrapped-native shows as "BOT".
-      const hopSym = h === dex.wnative ? "BOT" : hop.symbol;
-      candidates.push({
-        path: [inA, h, outA],
-        symbolPath: [tokenIn.symbol, hopSym, tokenOut.symbol],
-      });
-    }
+    hopList.push({ addr: h, symbol: hop.symbol });
   }
 
+  // All pair lookups fire together (and are cached), instead of one RPC
+  // round-trip at a time.
+  const [direct, ...hopChecks] = await Promise.all([
+    pairExists(client, dex.factory, inA, outA),
+    ...hopList.map(async (hop) => {
+      const [a, b] = await Promise.all([
+        pairExists(client, dex.factory, inA, hop.addr),
+        pairExists(client, dex.factory, hop.addr, outA),
+      ]);
+      return a && b;
+    }),
+  ]);
+
+  const candidates: { path: Address[]; symbolPath: string[] }[] = [];
+  if (direct) {
+    candidates.push({ path: [inA, outA], symbolPath: [tokenIn.symbol, tokenOut.symbol] });
+  }
+  hopList.forEach((hop, i) => {
+    if (!hopChecks[i]) return;
+    // Display symbol: wrapped-native shows as "BOT".
+    const hopSym = hop.addr === dex.wnative ? "BOT" : hop.symbol;
+    candidates.push({
+      path: [inA, hop.addr, outA],
+      symbolPath: [tokenIn.symbol, hopSym, tokenOut.symbol],
+    });
+  });
+
+  const outs = await Promise.all(
+    candidates.map((c) => getAmountsOut(client, dex.router, amountIn, c.path)),
+  );
+
   let best: { amountOut: bigint; path: Address[]; symbolPath: string[] } | null = null;
-  for (const c of candidates) {
-    const out = await getAmountsOut(client, dex.router, amountIn, c.path);
+  candidates.forEach((c, i) => {
+    const out = outs[i];
     if (out !== null && out > 0n && (!best || out > best.amountOut)) {
       best = { amountOut: out, path: c.path, symbolPath: c.symbolPath };
     }
-  }
+  });
   return best;
 }
+
 
 const NATIVE_BOT: Token = {
   address: NATIVE_TOKEN_ADDRESS,
@@ -412,7 +451,33 @@ const USDT_TOKEN = (isMainnet: boolean): Token => {
   };
 };
 
+// Identical quote requests fired within a short window (swap card + confirm
+// modal + preview panel all ask for the same route) share a single search
+// instead of each doing a full round of RPC reads.
+const QUOTE_INFLIGHT = new Map<string, { at: number; p: Promise<QuoteResult | null> }>();
+const QUOTE_DEDUPE_MS = 1_200;
+
 export async function getBestRoute(
+  tokenIn: Token,
+  tokenOut: Token,
+  amountIn: bigint,
+  isMainnet: boolean,
+): Promise<QuoteResult | null> {
+  const key = `${isMainnet ? "m" : "t"}:${tokenIn.address.toLowerCase()}:${!!tokenIn.isNative}:${tokenOut.address.toLowerCase()}:${!!tokenOut.isNative}:${amountIn}`;
+  const hit = QUOTE_INFLIGHT.get(key);
+  if (hit && Date.now() - hit.at < QUOTE_DEDUPE_MS) return hit.p;
+  const p = computeBestRoute(tokenIn, tokenOut, amountIn, isMainnet).finally(() => {
+    setTimeout(() => {
+      const cur = QUOTE_INFLIGHT.get(key);
+      if (cur && cur.p === p) QUOTE_INFLIGHT.delete(key);
+    }, QUOTE_DEDUPE_MS);
+  });
+  QUOTE_INFLIGHT.set(key, { at: Date.now(), p });
+  return p;
+}
+
+async function computeBestRoute(
+
   tokenIn: Token,
   tokenOut: Token,
   amountIn: bigint,
@@ -455,101 +520,129 @@ export async function getBestRoute(
 
   const candidates: QuoteResult[] = [];
 
-  // ── 1. Direct BOT↔USDT via Bohr V3 ─────────────────────────────────────
-  {
-    const v3 = await botUsdtStep(client, isMainnet, tokenIn, tokenOut, amountIn);
-    if (v3) {
-      candidates.push({
-        amountOut: v3.expectedOut,
-        path: v3.path,
-        symbolPath: v3.symbolPath,
-        steps: [v3],
-      });
-    }
-  }
-
-  // ── 2. Single-DEX V2 routes ────────────────────────────────────────────
-  for (const dex of allV2) {
-    const r = await bestOnV2Dex(client, dex, hopBases, tokenIn, tokenOut, amountIn);
-    if (r) {
-      candidates.push({
-        amountOut: r.amountOut,
-        path: r.path,
-        symbolPath: r.symbolPath,
-        steps: [
-          {
-            dex: dex.id,
-            routerId: dex.routerId,
-            router: dex.router,
-            path: r.path,
-            symbolPath: r.symbolPath,
-            inIsNative: !!tokenIn.isNative,
-            outIsNative: !!tokenOut.isNative,
-            expectedOut: r.amountOut,
-          },
-
-        ],
-      });
-    }
-  }
-
-  // ── 3. Cross-DEX split via native BOT (V2 ↔ V2) ────────────────────────
-  if (!(tokenIn.isNative || tokenOut.isNative)) {
-    for (const dexA of allV2) {
-      for (const dexB of allV2) {
-        if (dexA.routerId === dexB.routerId) continue;
-        const leg1 = await bestOnV2Dex(client, dexA, hopBases, tokenIn, NATIVE_BOT, amountIn);
-        if (!leg1) continue;
-        const leg2 = await bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.amountOut);
-        if (!leg2) continue;
-        candidates.push({
-          amountOut: leg2.amountOut,
-          path: leg1.path,
-          symbolPath: [...leg1.symbolPath, ...leg2.symbolPath.slice(1)],
-          steps: [
-            {
-              dex: dexA.id,
-              routerId: dexA.routerId,
-              router: dexA.router,
-              path: leg1.path,
-              symbolPath: leg1.symbolPath,
-              inIsNative: !!tokenIn.isNative,
-              outIsNative: true,
-              expectedOut: leg1.amountOut,
-            },
-            {
-              dex: dexB.id,
-              routerId: dexB.routerId,
-              router: dexB.router,
-              path: leg2.path,
-              symbolPath: leg2.symbolPath,
-              inIsNative: true,
-              outIsNative: !!tokenOut.isNative,
-              expectedOut: leg2.amountOut,
-            },
-
-          ],
-        });
-      }
-    }
-  }
-
-  // ── 4. Split via BOT where one side is USDT (uses V3 for BOT↔USDT) ─────
-  //   e.g. CA → USDT  :  CA → BOT (CaSwap V2)  +  BOT → USDT (Bohr V3)
-  //        USDT → CA  :  USDT → BOT (Bohr V3)  +  BOT → CA (CaSwap V2)
   const tokenInIsUsdt =
     !tokenIn.isNative && tokenIn.address.toLowerCase() === usdt;
   const tokenOutIsUsdt =
     !tokenOut.isNative && tokenOut.address.toLowerCase() === usdt;
   const usdtToken = USDT_TOKEN(isMainnet);
 
+  const needsLegOne =
+    (!tokenIn.isNative && !tokenOut.isNative) ||
+    (tokenOutIsUsdt && !tokenIn.isNative && tokenIn.address.toLowerCase() !== usdt);
+
+  // ── Phase A: everything that only depends on `amountIn` runs together ──
+  const [v3, singleDex, legOnes] = await Promise.all([
+    // 1. Direct BOT↔USDT via BDex V3
+    botUsdtStep(client, isMainnet, tokenIn, tokenOut, amountIn),
+    // 2. Single-DEX V2 routes — one probe per active router, in parallel
+    Promise.all(
+      allV2.map((dex) => bestOnV2Dex(client, dex, hopBases, tokenIn, tokenOut, amountIn)),
+    ),
+    // tokenIn → BOT on each V2 dex (shared by the split-route sections below)
+    needsLegOne
+      ? Promise.all(
+          allV2.map((dex) => bestOnV2Dex(client, dex, hopBases, tokenIn, NATIVE_BOT, amountIn)),
+        )
+      : Promise.resolve([] as (Awaited<ReturnType<typeof bestOnV2Dex>>)[]),
+  ]);
+
+  if (v3) {
+    candidates.push({
+      amountOut: v3.expectedOut,
+      path: v3.path,
+      symbolPath: v3.symbolPath,
+      steps: [v3],
+    });
+  }
+
+  allV2.forEach((dex, i) => {
+    const r = singleDex[i];
+    if (!r) return;
+    candidates.push({
+      amountOut: r.amountOut,
+      path: r.path,
+      symbolPath: r.symbolPath,
+      steps: [
+        {
+          dex: dex.id,
+          routerId: dex.routerId,
+          router: dex.router,
+          path: r.path,
+          symbolPath: r.symbolPath,
+          inIsNative: !!tokenIn.isNative,
+          outIsNative: !!tokenOut.isNative,
+          expectedOut: r.amountOut,
+        },
+      ],
+    });
+  });
+
+  // ── Phase B: split routes, all second legs issued concurrently ─────────
+  // 3. Cross-DEX split via native BOT (V2 ↔ V2)
+  if (!(tokenIn.isNative || tokenOut.isNative)) {
+    const pairs: { a: number; b: number }[] = [];
+    allV2.forEach((_, a) =>
+      allV2.forEach((_, b) => {
+        if (allV2[a].routerId !== allV2[b].routerId && legOnes[a]) pairs.push({ a, b });
+      }),
+    );
+    const legTwos = await Promise.all(
+      pairs.map(({ a, b }) =>
+        bestOnV2Dex(client, allV2[b], hopBases, NATIVE_BOT, tokenOut, legOnes[a]!.amountOut),
+      ),
+    );
+    pairs.forEach(({ a, b }, i) => {
+      const leg1 = legOnes[a]!;
+      const leg2 = legTwos[i];
+      if (!leg2) return;
+      const dexA = allV2[a];
+      const dexB = allV2[b];
+      candidates.push({
+        amountOut: leg2.amountOut,
+        path: leg1.path,
+        symbolPath: [...leg1.symbolPath, ...leg2.symbolPath.slice(1)],
+        steps: [
+          {
+            dex: dexA.id,
+            routerId: dexA.routerId,
+            router: dexA.router,
+            path: leg1.path,
+            symbolPath: leg1.symbolPath,
+            inIsNative: !!tokenIn.isNative,
+            outIsNative: true,
+            expectedOut: leg1.amountOut,
+          },
+          {
+            dex: dexB.id,
+            routerId: dexB.routerId,
+            router: dexB.router,
+            path: leg2.path,
+            symbolPath: leg2.symbolPath,
+            inIsNative: true,
+            outIsNative: !!tokenOut.isNative,
+            expectedOut: leg2.amountOut,
+          },
+        ],
+      });
+    });
+  }
+
+  // ── 4. Split via BOT where one side is USDT (uses V3 for BOT↔USDT) ─────
+  //   e.g. CA → USDT  :  CA → BOT (CaSwap V2)  +  BOT → USDT (BDex V3)
+  //        USDT → CA  :  USDT → BOT (BDex V3)  +  BOT → CA (CaSwap V2)
   if (tokenOutIsUsdt && !tokenIn.isNative && tokenIn.address.toLowerCase() !== usdt) {
-    // tokenIn → BOT on each V2 dex, then BOT → USDT via V3
-    for (const dexA of allV2) {
-      const leg1 = await bestOnV2Dex(client, dexA, hopBases, tokenIn, NATIVE_BOT, amountIn);
-      if (!leg1) continue;
-      const leg2 = await botUsdtStep(client, isMainnet, NATIVE_BOT, usdtToken, leg1.amountOut);
-      if (!leg2) continue;
+    // tokenIn → BOT on each V2 dex (already fetched), then BOT → USDT via V3
+    const legTwos = await Promise.all(
+      allV2.map((_, i) =>
+        legOnes[i]
+          ? botUsdtStep(client, isMainnet, NATIVE_BOT, usdtToken, legOnes[i]!.amountOut)
+          : Promise.resolve(null),
+      ),
+    );
+    allV2.forEach((dexA, i) => {
+      const leg1 = legOnes[i];
+      const leg2 = legTwos[i];
+      if (!leg1 || !leg2) return;
       candidates.push({
         amountOut: leg2.expectedOut,
         path: leg1.path,
@@ -565,20 +658,25 @@ export async function getBestRoute(
             outIsNative: true,
             expectedOut: leg1.amountOut,
           },
-
           leg2,
         ],
       });
-    }
+    });
   }
+
 
   if (tokenInIsUsdt && !tokenOut.isNative && tokenOut.address.toLowerCase() !== usdt) {
     // USDT → BOT via V3, then BOT → tokenOut on each V2 dex
     const leg1 = await botUsdtStep(client, isMainnet, usdtToken, NATIVE_BOT, amountIn);
     if (leg1) {
-      for (const dexB of allV2) {
-        const leg2 = await bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.expectedOut);
-        if (!leg2) continue;
+      const legTwos = await Promise.all(
+        allV2.map((dexB) =>
+          bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.expectedOut),
+        ),
+      );
+      allV2.forEach((dexB, i) => {
+        const leg2 = legTwos[i];
+        if (!leg2) return;
         candidates.push({
           amountOut: leg2.amountOut,
           path: leg1.path,
@@ -595,10 +693,10 @@ export async function getBestRoute(
               outIsNative: !!tokenOut.isNative,
               expectedOut: leg2.amountOut,
             },
-
           ],
         });
-      }
+      });
+
     }
   }
 
@@ -672,4 +770,18 @@ export async function hasAnyLiquidity(
   return false;
 }
 
+/**
+ * Warm the router registry + per-router factory/wrapped-native metadata so the
+ * user's very first quote doesn't pay for that discovery. Safe to call often.
+ */
+export function prewarmQuoter(isMainnet = true): void {
+  void v2Dexes(isMainnet).catch(() => {});
+}
+
+if (typeof window !== "undefined") {
+  // Kick off registry discovery as soon as the bundle loads in the browser.
+  setTimeout(() => prewarmQuoter(true), 0);
+}
+
 export { NATIVE_TOKEN_ADDRESS };
+
