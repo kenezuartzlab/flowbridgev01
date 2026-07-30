@@ -216,12 +216,24 @@ async function bdexV3RouterId(isMainnet: boolean): Promise<number> {
 }
 
 
+// Pair existence never flips back to "missing", and new pairs are rare, so we
+// memoise the lookups for the lifetime of the tab. Positive results are cached
+// forever; negatives are re-checked after 2 minutes so newly created pools are
+// picked up without hammering the RPC on every keystroke.
+const PAIR_CACHE = new Map<string, { exists: boolean; at: number }>();
+const PAIR_NEGATIVE_TTL_MS = 120_000;
+
 async function pairExists(
   client: ReturnType<typeof publicClient>,
   factory: Address,
   a: Address,
   b: Address,
 ): Promise<boolean> {
+  const key = `${factory}:${a}:${b}`;
+  const cached = PAIR_CACHE.get(key);
+  if (cached && (cached.exists || Date.now() - cached.at < PAIR_NEGATIVE_TTL_MS)) {
+    return cached.exists;
+  }
   try {
     const pair = (await client.readContract({
       address: factory,
@@ -229,11 +241,15 @@ async function pairExists(
       functionName: "getPair",
       args: [a, b],
     })) as Address;
-    return pair.toLowerCase() !== ZERO;
+    const exists = pair.toLowerCase() !== ZERO;
+    PAIR_CACHE.set(key, { exists, at: Date.now() });
+    return exists;
   } catch {
+    PAIR_CACHE.set(key, { exists: false, at: Date.now() });
     return false;
   }
 }
+
 
 async function getAmountsOut(
   client: ReturnType<typeof publicClient>,
