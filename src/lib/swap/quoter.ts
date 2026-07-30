@@ -499,101 +499,129 @@ export async function getBestRoute(
 
   const candidates: QuoteResult[] = [];
 
-  // ── 1. Direct BOT↔USDT via Bohr V3 ─────────────────────────────────────
-  {
-    const v3 = await botUsdtStep(client, isMainnet, tokenIn, tokenOut, amountIn);
-    if (v3) {
-      candidates.push({
-        amountOut: v3.expectedOut,
-        path: v3.path,
-        symbolPath: v3.symbolPath,
-        steps: [v3],
-      });
-    }
-  }
-
-  // ── 2. Single-DEX V2 routes ────────────────────────────────────────────
-  for (const dex of allV2) {
-    const r = await bestOnV2Dex(client, dex, hopBases, tokenIn, tokenOut, amountIn);
-    if (r) {
-      candidates.push({
-        amountOut: r.amountOut,
-        path: r.path,
-        symbolPath: r.symbolPath,
-        steps: [
-          {
-            dex: dex.id,
-            routerId: dex.routerId,
-            router: dex.router,
-            path: r.path,
-            symbolPath: r.symbolPath,
-            inIsNative: !!tokenIn.isNative,
-            outIsNative: !!tokenOut.isNative,
-            expectedOut: r.amountOut,
-          },
-
-        ],
-      });
-    }
-  }
-
-  // ── 3. Cross-DEX split via native BOT (V2 ↔ V2) ────────────────────────
-  if (!(tokenIn.isNative || tokenOut.isNative)) {
-    for (const dexA of allV2) {
-      for (const dexB of allV2) {
-        if (dexA.routerId === dexB.routerId) continue;
-        const leg1 = await bestOnV2Dex(client, dexA, hopBases, tokenIn, NATIVE_BOT, amountIn);
-        if (!leg1) continue;
-        const leg2 = await bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.amountOut);
-        if (!leg2) continue;
-        candidates.push({
-          amountOut: leg2.amountOut,
-          path: leg1.path,
-          symbolPath: [...leg1.symbolPath, ...leg2.symbolPath.slice(1)],
-          steps: [
-            {
-              dex: dexA.id,
-              routerId: dexA.routerId,
-              router: dexA.router,
-              path: leg1.path,
-              symbolPath: leg1.symbolPath,
-              inIsNative: !!tokenIn.isNative,
-              outIsNative: true,
-              expectedOut: leg1.amountOut,
-            },
-            {
-              dex: dexB.id,
-              routerId: dexB.routerId,
-              router: dexB.router,
-              path: leg2.path,
-              symbolPath: leg2.symbolPath,
-              inIsNative: true,
-              outIsNative: !!tokenOut.isNative,
-              expectedOut: leg2.amountOut,
-            },
-
-          ],
-        });
-      }
-    }
-  }
-
-  // ── 4. Split via BOT where one side is USDT (uses V3 for BOT↔USDT) ─────
-  //   e.g. CA → USDT  :  CA → BOT (CaSwap V2)  +  BOT → USDT (Bohr V3)
-  //        USDT → CA  :  USDT → BOT (Bohr V3)  +  BOT → CA (CaSwap V2)
   const tokenInIsUsdt =
     !tokenIn.isNative && tokenIn.address.toLowerCase() === usdt;
   const tokenOutIsUsdt =
     !tokenOut.isNative && tokenOut.address.toLowerCase() === usdt;
   const usdtToken = USDT_TOKEN(isMainnet);
 
+  const needsLegOne =
+    (!tokenIn.isNative && !tokenOut.isNative) ||
+    (tokenOutIsUsdt && !tokenIn.isNative && tokenIn.address.toLowerCase() !== usdt);
+
+  // ── Phase A: everything that only depends on `amountIn` runs together ──
+  const [v3, singleDex, legOnes] = await Promise.all([
+    // 1. Direct BOT↔USDT via BDex V3
+    botUsdtStep(client, isMainnet, tokenIn, tokenOut, amountIn),
+    // 2. Single-DEX V2 routes — one probe per active router, in parallel
+    Promise.all(
+      allV2.map((dex) => bestOnV2Dex(client, dex, hopBases, tokenIn, tokenOut, amountIn)),
+    ),
+    // tokenIn → BOT on each V2 dex (shared by the split-route sections below)
+    needsLegOne
+      ? Promise.all(
+          allV2.map((dex) => bestOnV2Dex(client, dex, hopBases, tokenIn, NATIVE_BOT, amountIn)),
+        )
+      : Promise.resolve([] as (Awaited<ReturnType<typeof bestOnV2Dex>>)[]),
+  ]);
+
+  if (v3) {
+    candidates.push({
+      amountOut: v3.expectedOut,
+      path: v3.path,
+      symbolPath: v3.symbolPath,
+      steps: [v3],
+    });
+  }
+
+  allV2.forEach((dex, i) => {
+    const r = singleDex[i];
+    if (!r) return;
+    candidates.push({
+      amountOut: r.amountOut,
+      path: r.path,
+      symbolPath: r.symbolPath,
+      steps: [
+        {
+          dex: dex.id,
+          routerId: dex.routerId,
+          router: dex.router,
+          path: r.path,
+          symbolPath: r.symbolPath,
+          inIsNative: !!tokenIn.isNative,
+          outIsNative: !!tokenOut.isNative,
+          expectedOut: r.amountOut,
+        },
+      ],
+    });
+  });
+
+  // ── Phase B: split routes, all second legs issued concurrently ─────────
+  // 3. Cross-DEX split via native BOT (V2 ↔ V2)
+  if (!(tokenIn.isNative || tokenOut.isNative)) {
+    const pairs: { a: number; b: number }[] = [];
+    allV2.forEach((_, a) =>
+      allV2.forEach((_, b) => {
+        if (allV2[a].routerId !== allV2[b].routerId && legOnes[a]) pairs.push({ a, b });
+      }),
+    );
+    const legTwos = await Promise.all(
+      pairs.map(({ a, b }) =>
+        bestOnV2Dex(client, allV2[b], hopBases, NATIVE_BOT, tokenOut, legOnes[a]!.amountOut),
+      ),
+    );
+    pairs.forEach(({ a, b }, i) => {
+      const leg1 = legOnes[a]!;
+      const leg2 = legTwos[i];
+      if (!leg2) return;
+      const dexA = allV2[a];
+      const dexB = allV2[b];
+      candidates.push({
+        amountOut: leg2.amountOut,
+        path: leg1.path,
+        symbolPath: [...leg1.symbolPath, ...leg2.symbolPath.slice(1)],
+        steps: [
+          {
+            dex: dexA.id,
+            routerId: dexA.routerId,
+            router: dexA.router,
+            path: leg1.path,
+            symbolPath: leg1.symbolPath,
+            inIsNative: !!tokenIn.isNative,
+            outIsNative: true,
+            expectedOut: leg1.amountOut,
+          },
+          {
+            dex: dexB.id,
+            routerId: dexB.routerId,
+            router: dexB.router,
+            path: leg2.path,
+            symbolPath: leg2.symbolPath,
+            inIsNative: true,
+            outIsNative: !!tokenOut.isNative,
+            expectedOut: leg2.amountOut,
+          },
+        ],
+      });
+    });
+  }
+
+  // ── 4. Split via BOT where one side is USDT (uses V3 for BOT↔USDT) ─────
+  //   e.g. CA → USDT  :  CA → BOT (CaSwap V2)  +  BOT → USDT (BDex V3)
+  //        USDT → CA  :  USDT → BOT (BDex V3)  +  BOT → CA (CaSwap V2)
   if (tokenOutIsUsdt && !tokenIn.isNative && tokenIn.address.toLowerCase() !== usdt) {
-    // tokenIn → BOT on each V2 dex, then BOT → USDT via V3
-    for (const dexA of allV2) {
-      const leg1 = await bestOnV2Dex(client, dexA, hopBases, tokenIn, NATIVE_BOT, amountIn);
-      if (!leg1) continue;
-      const leg2 = await botUsdtStep(client, isMainnet, NATIVE_BOT, usdtToken, leg1.amountOut);
-      if (!leg2) continue;
+    // tokenIn → BOT on each V2 dex (already fetched), then BOT → USDT via V3
+    const legTwos = await Promise.all(
+      allV2.map((_, i) =>
+        legOnes[i]
+          ? botUsdtStep(client, isMainnet, NATIVE_BOT, usdtToken, legOnes[i]!.amountOut)
+          : Promise.resolve(null),
+      ),
+    );
+    allV2.forEach((dexA, i) => {
+      const leg1 = legOnes[i];
+      const leg2 = legTwos[i];
+      if (!leg1 || !leg2) return;
       candidates.push({
         amountOut: leg2.expectedOut,
         path: leg1.path,
@@ -609,12 +637,12 @@ export async function getBestRoute(
             outIsNative: true,
             expectedOut: leg1.amountOut,
           },
-
           leg2,
         ],
       });
-    }
+    });
   }
+
 
   if (tokenInIsUsdt && !tokenOut.isNative && tokenOut.address.toLowerCase() !== usdt) {
     // USDT → BOT via V3, then BOT → tokenOut on each V2 dex
