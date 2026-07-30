@@ -151,26 +151,21 @@ async function resolveRouterMeta(
   if (cached) return cached;
   let factory = fallback.factory;
   let wnative = fallback.wnative;
-  try {
-    const f = (await client.readContract({
-      address: router,
-      abi: ROUTER_FACTORY_ABI,
-      functionName: "factory",
-    })) as Address;
-    if (f && f !== ZERO) factory = f.toLowerCase() as Address;
-  } catch { /* keep fallback */ }
-  try {
-    const w = (await client.readContract({
-      address: router,
-      abi: ROUTER_FACTORY_ABI,
-      functionName: "WETH",
-    })) as Address;
-    if (w && w !== ZERO) wnative = w.toLowerCase() as Address;
-  } catch { /* keep fallback */ }
+  const [f, w] = await Promise.all([
+    client
+      .readContract({ address: router, abi: ROUTER_FACTORY_ABI, functionName: "factory" })
+      .catch(() => null) as Promise<Address | null>,
+    client
+      .readContract({ address: router, abi: ROUTER_FACTORY_ABI, functionName: "WETH" })
+      .catch(() => null) as Promise<Address | null>,
+  ]);
+  if (f && f !== ZERO) factory = f.toLowerCase() as Address;
+  if (w && w !== ZERO) wnative = w.toLowerCase() as Address;
   const meta = { factory, wnative };
   ROUTER_META_CACHE.set(key, meta);
   return meta;
 }
+
 
 async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
   const c = getContracts(isMainnet);
