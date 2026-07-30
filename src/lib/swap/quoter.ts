@@ -770,4 +770,18 @@ export async function hasAnyLiquidity(
   return false;
 }
 
+/**
+ * Warm the router registry + per-router factory/wrapped-native metadata so the
+ * user's very first quote doesn't pay for that discovery. Safe to call often.
+ */
+export function prewarmQuoter(isMainnet = true): void {
+  void v2Dexes(isMainnet).catch(() => {});
+}
+
+if (typeof window !== "undefined") {
+  // Kick off registry discovery as soon as the bundle loads in the browser.
+  setTimeout(() => prewarmQuoter(true), 0);
+}
+
 export { NATIVE_TOKEN_ADDRESS };
+
