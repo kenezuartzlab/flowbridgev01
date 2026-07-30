@@ -648,9 +648,14 @@ export async function getBestRoute(
     // USDT → BOT via V3, then BOT → tokenOut on each V2 dex
     const leg1 = await botUsdtStep(client, isMainnet, usdtToken, NATIVE_BOT, amountIn);
     if (leg1) {
-      for (const dexB of allV2) {
-        const leg2 = await bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.expectedOut);
-        if (!leg2) continue;
+      const legTwos = await Promise.all(
+        allV2.map((dexB) =>
+          bestOnV2Dex(client, dexB, hopBases, NATIVE_BOT, tokenOut, leg1.expectedOut),
+        ),
+      );
+      allV2.forEach((dexB, i) => {
+        const leg2 = legTwos[i];
+        if (!leg2) return;
         candidates.push({
           amountOut: leg2.amountOut,
           path: leg1.path,
@@ -667,10 +672,10 @@ export async function getBestRoute(
               outIsNative: !!tokenOut.isNative,
               expectedOut: leg2.amountOut,
             },
-
           ],
         });
-      }
+      });
+
     }
   }
 
