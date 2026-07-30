@@ -67,12 +67,23 @@ interface ActiveRouter {
   addr: Address;
 }
 
+// One shared client per chain. JSON-RPC batching collapses the dozens of
+// read calls a route search makes into a handful of HTTP round-trips, which
+// is the single biggest win for quote latency on mobile networks.
+const CLIENT_CACHE = new Map<string, ReturnType<typeof createPublicClient>>();
+
 function publicClient(isMainnet: boolean) {
-  return createPublicClient({
+  const key = isMainnet ? "main" : "test";
+  const existing = CLIENT_CACHE.get(key);
+  if (existing) return existing as any;
+  const client = createPublicClient({
     chain: isMainnet ? botMainnet : botTestnet,
-    transport: http(),
+    transport: http(undefined, { batch: { wait: 16, batchSize: 40 } }),
   });
+  CLIENT_CACHE.set(key, client);
+  return client as any;
 }
+
 
 // ── Dynamic router registry ──────────────────────────────────────────────
 // Cache getActiveRouters() for 5 minutes per chain. Falls back to the known
