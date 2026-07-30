@@ -386,40 +386,57 @@ async function bestOnV2Dex(
   const outA = addrFor(tokenOut, dex);
   if (inA === outA) return null;
 
-  const candidates: { path: Address[]; symbolPath: string[] }[] = [];
-
-  if (await pairExists(client, dex.factory, inA, outA)) {
-    candidates.push({ path: [inA, outA], symbolPath: [tokenIn.symbol, tokenOut.symbol] });
-  }
-
   // De-dupe hop addresses; skip hops that equal the endpoints.
+  const hopList: { addr: Address; symbol: string }[] = [];
   const seen = new Set<string>();
   for (const hop of hops) {
     const h = hop.addr.toLowerCase() as Address;
     if (h === inA || h === outA || seen.has(h)) continue;
     seen.add(h);
-    if (
-      (await pairExists(client, dex.factory, inA, h)) &&
-      (await pairExists(client, dex.factory, h, outA))
-    ) {
-      // Display symbol: wrapped-native shows as "BOT".
-      const hopSym = h === dex.wnative ? "BOT" : hop.symbol;
-      candidates.push({
-        path: [inA, h, outA],
-        symbolPath: [tokenIn.symbol, hopSym, tokenOut.symbol],
-      });
-    }
+    hopList.push({ addr: h, symbol: hop.symbol });
   }
 
+  // All pair lookups fire together (and are cached), instead of one RPC
+  // round-trip at a time.
+  const [direct, ...hopChecks] = await Promise.all([
+    pairExists(client, dex.factory, inA, outA),
+    ...hopList.map(async (hop) => {
+      const [a, b] = await Promise.all([
+        pairExists(client, dex.factory, inA, hop.addr),
+        pairExists(client, dex.factory, hop.addr, outA),
+      ]);
+      return a && b;
+    }),
+  ]);
+
+  const candidates: { path: Address[]; symbolPath: string[] }[] = [];
+  if (direct) {
+    candidates.push({ path: [inA, outA], symbolPath: [tokenIn.symbol, tokenOut.symbol] });
+  }
+  hopList.forEach((hop, i) => {
+    if (!hopChecks[i]) return;
+    // Display symbol: wrapped-native shows as "BOT".
+    const hopSym = hop.addr === dex.wnative ? "BOT" : hop.symbol;
+    candidates.push({
+      path: [inA, hop.addr, outA],
+      symbolPath: [tokenIn.symbol, hopSym, tokenOut.symbol],
+    });
+  });
+
+  const outs = await Promise.all(
+    candidates.map((c) => getAmountsOut(client, dex.router, amountIn, c.path)),
+  );
+
   let best: { amountOut: bigint; path: Address[]; symbolPath: string[] } | null = null;
-  for (const c of candidates) {
-    const out = await getAmountsOut(client, dex.router, amountIn, c.path);
+  candidates.forEach((c, i) => {
+    const out = outs[i];
     if (out !== null && out > 0n && (!best || out > best.amountOut)) {
       best = { amountOut: out, path: c.path, symbolPath: c.symbolPath };
     }
-  }
+  });
   return best;
 }
+
 
 const NATIVE_BOT: Token = {
   address: NATIVE_TOKEN_ADDRESS,
