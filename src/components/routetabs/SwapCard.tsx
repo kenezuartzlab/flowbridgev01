@@ -53,9 +53,6 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
     onChange(val);
   };
 
-  const maxHint = hasMax
-    ? `Max swappable ${maxNum.toFixed(6)} ${symbol} — the 0.1% platform fee is charged on top of your amount.`
-    : undefined;
 
 
   return (
