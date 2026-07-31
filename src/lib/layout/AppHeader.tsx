@@ -346,32 +346,62 @@ export function AppHeader({
                     Menu
                   </p>
                 </div>
-                <ul className="py-1">
-                  {menuItems.map((item) => (
-                    <li key={item.id}>
-                      <button
-                        role="menuitem"
-                        onClick={item.onClick}
-                        className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
-                          item.accent
-                            ? "text-primary hover:bg-primary/10"
-                            : "text-foreground hover:bg-white/5 hover:text-primary"
-                        )}
-                      >
-                        <span className={cn(
-                          "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
-                          item.accent
-                            ? "bg-primary/10 border-primary/30"
-                            : "bg-white/5 border-hairline"
-                        )}>
-                          {item.icon}
-                        </span>
-                        <span className="font-semibold truncate">{item.label}</span>
-                      </button>
-                    </li>
+                <div className="py-1 max-h-[70vh] overflow-y-auto">
+                  {sections.map((section, si) => (
+                    <div key={section.id} className={si > 0 ? "border-t border-hairline mt-1 pt-1" : ""}>
+                      <p className="px-3 pt-1.5 pb-1 text-[9px] tracking-[0.22em] uppercase text-muted-soft font-black">
+                        {section.title}
+                      </p>
+                      <ul>
+                        {section.items.map((item) => (
+                          <li key={item.id}>
+                            <button
+                              role="menuitem"
+                              onClick={item.onClick}
+                              aria-expanded={item.children ? roadmapOpen : undefined}
+                              className={cn(
+                                "w-full flex items-center gap-3 px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
+                                item.accent
+                                  ? "text-primary hover:bg-primary/10"
+                                  : "text-foreground hover:bg-white/5 hover:text-primary"
+                              )}
+                            >
+                              <span className={cn(
+                                "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
+                                item.accent
+                                  ? "bg-primary/10 border-primary/30"
+                                  : "bg-white/5 border-hairline"
+                              )}>
+                                {item.icon}
+                              </span>
+                              <span className="font-semibold truncate flex-1">{item.label}</span>
+                              {item.children && (
+                                <ChevronDown className={cn("w-3.5 h-3.5 shrink-0 transition-transform", roadmapOpen && "rotate-180")} />
+                              )}
+                            </button>
+                            {item.children && roadmapOpen && (
+                              <ul className="pb-1">
+                                {item.children.map((child) => (
+                                  <li key={child.id}>
+                                    <button
+                                      role="menuitem"
+                                      onClick={child.onClick}
+                                      className="w-full flex items-center gap-2 pl-[52px] pr-3 py-2 text-left text-[12px] text-muted hover:text-primary hover:bg-white/5 transition-colors cursor-pointer"
+                                    >
+                                      <span className="w-1 h-1 rounded-full bg-current shrink-0" />
+                                      <span className="font-semibold truncate">{child.label}</span>
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
+
               </div>
             )}
           </div>
