@@ -81,6 +81,7 @@ export function AppHeader({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [cooldownSec, setCooldownSec] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [roadmapOpen, setRoadmapOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigate = useNavigate();
