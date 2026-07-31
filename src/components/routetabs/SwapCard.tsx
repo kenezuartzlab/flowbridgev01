@@ -53,9 +53,6 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
     onChange(val);
   };
 
-  const maxHint = hasMax
-    ? `Max swappable ${maxNum.toFixed(6)} ${symbol} — the 0.1% platform fee is charged on top of your amount.`
-    : undefined;
 
 
   return (
@@ -65,7 +62,6 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
           <span 
-            title={maxHint}
             onClick={!readOnly ? handleMaxClick : undefined}
             className={cn(
               "text-[#C5C1B9] normal-case font-mono font-bold",
@@ -135,11 +131,9 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
         <span>≈ {usdValue}</span>
       </div>
 
-      {!readOnly && (clamped || maxHint) && (
-        <p className={cn('text-[11px] font-mono leading-snug', clamped ? 'text-[#FFC46B]' : 'text-[#C5C1B9]/70')}>
-          {clamped
-            ? `Amount capped to your spendable balance (${maxNum.toFixed(6)} ${symbol}).`
-            : maxHint}
+      {!readOnly && clamped && (
+        <p className="text-[11px] font-mono leading-snug text-[#FFC46B]">
+          Amount capped to your spendable balance ({maxNum.toFixed(6)} {symbol}).
         </p>
       )}
     </div>
