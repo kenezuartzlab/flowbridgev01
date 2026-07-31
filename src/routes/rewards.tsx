@@ -48,6 +48,12 @@ function RewardsPage() {
   const { user, incentives, transactions, loading, refresh } = useAccountData();
   const [tab, setTab] = useState<Tab>("OVERVIEW");
 
+  /** Deep-link support: /rewards#games opens the Games tab. */
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "").toUpperCase();
+    if (["OVERVIEW", "EARN", "REFERRALS", "GIFTS", "GAMES"].includes(hash)) setTab(hash as Tab);
+  }, []);
+
   const referralLink =
     typeof window !== "undefined" && incentives?.referralCode
       ? `${window.location.origin}/?ref=${incentives.referralCode}`
