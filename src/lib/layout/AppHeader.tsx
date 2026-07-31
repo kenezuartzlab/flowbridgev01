@@ -171,82 +171,111 @@ export function AppHeader({
     onClick: () => void;
     accent?: boolean;
     show: boolean;
+    /** Nested links (rendered indented under the parent). */
+    children?: { id: string; label: string; onClick: () => void }[];
   };
-  const menuItems: MenuItem[] = [
-    {
-      id: 'markets',
-      label: 'Markets',
-      icon: <BarChart3 className="w-4 h-4" />,
-      onClick: () => { navigate({ to: '/markets' }); setMenuOpen(false); },
-      show: true,
-    },
-    {
-      id: 'fortune',
-      label: 'Flow Fortune Wheel',
-      icon: <Sparkles className="w-4 h-4" />,
-      onClick: () => { navigate({ to: '/fortune' }); setMenuOpen(false); },
-      accent: true,
-      show: true,
-    },
-    {
-      id: 'ecosurge',
-      label: 'Ecosurge Growth Hub',
-      icon: <Rocket className="w-4 h-4" />,
-      onClick: () => { navigate({ to: '/ecosurge' }); setMenuOpen(false); },
-      show: true,
-    },
-    {
-      id: 'arcadeflix',
-      label: 'ArcadeFlix P2E',
-      icon: <Gamepad2 className="w-4 h-4" />,
-      onClick: () => { navigate({ to: '/arcadeflix' }); setMenuOpen(false); },
-      show: true,
-    },
-    {
-      id: 'rewards',
-      label: 'Rewards',
-      icon: <Gift className="w-4 h-4" />,
-      onClick: () => { onRewardsClick?.(); setMenuOpen(false); },
-      accent: true,
-      show: !!onRewardsClick,
-    },
+  type MenuSection = { id: string; title: string; items: MenuItem[] };
 
+  const go = (to: string) => () => { navigate({ to }); setMenuOpen(false); };
+
+  const sections: MenuSection[] = [
     {
-      id: 'donate',
-      label: 'Support',
-      icon: <Heart className="w-4 h-4 fill-primary/20 text-primary/80" />,
-      onClick: () => { onDonateClick?.(); setMenuOpen(false); },
-      show: !!onDonateClick,
+      id: 'explore',
+      title: 'Explore',
+      items: [
+        {
+          id: 'markets',
+          label: 'Markets',
+          icon: <BarChart3 className="w-4 h-4" />,
+          onClick: go('/markets'),
+          show: true,
+        },
+        {
+          id: 'rewards',
+          label: 'Rewards',
+          icon: <Gift className="w-4 h-4" />,
+          onClick: () => { onRewardsClick?.(); setMenuOpen(false); },
+          accent: true,
+          show: !!onRewardsClick,
+        },
+        {
+          id: 'history',
+          label: 'History',
+          icon: <History className="w-4 h-4" />,
+          onClick: () => { onShowHistory?.(); setMenuOpen(false); },
+          show: !!(walletAddress && onShowHistory),
+        },
+      ],
     },
     {
-      id: 'history',
-      label: 'History',
-      icon: <History className="w-4 h-4" />,
-      onClick: () => { onShowHistory?.(); setMenuOpen(false); },
-      show: !!(walletAddress && onShowHistory),
+      id: 'roadmap',
+      title: 'Project Roadmap',
+      items: [
+        {
+          id: 'roadmap-root',
+          label: 'Project Roadmap',
+          icon: <Rocket className="w-4 h-4" />,
+          onClick: () => setRoadmapOpen((v) => !v),
+          show: true,
+          children: [
+            { id: 'games', label: 'Games [Play2Earn]', onClick: () => { navigate({ to: '/rewards', hash: 'games' }); setMenuOpen(false); } },
+            { id: 'fortune', label: 'Flow Fortune Wheel', onClick: go('/fortune') },
+            { id: 'arcadeflix', label: 'ArcadeFlix P2E', onClick: go('/arcadeflix') },
+            { id: 'ecosurge', label: 'Ecosurge Growth Hub', onClick: go('/ecosurge') },
+          ],
+        },
+      ],
     },
     {
-      id: 'theme',
-      label: theme === 'light' ? 'Dark mode' : 'Light mode',
-      icon: theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />,
-      onClick: () => { onToggleTheme?.(); setMenuOpen(false); },
-      show: !!onToggleTheme,
+      id: 'support',
+      title: 'Support',
+      items: [
+        {
+          id: 'donate',
+          label: 'Support',
+          icon: <Heart className="w-4 h-4 fill-primary/20 text-primary/80" />,
+          onClick: () => { onDonateClick?.(); setMenuOpen(false); },
+          show: !!onDonateClick,
+        },
+      ],
     },
     {
-      id: 'demo',
-      label: isPresentationMode ? 'Exit demo mode' : 'Demo mode',
-      icon: <Video className="w-4 h-4" />,
-      onClick: () => { onTogglePresentationMode?.(); setMenuOpen(false); },
-      show: !!onTogglePresentationMode,
+      id: 'preferences',
+      title: 'Preferences',
+      items: [
+        {
+          id: 'theme',
+          label: theme === 'light' ? 'Dark mode' : 'Light mode',
+          icon: theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />,
+          onClick: () => { onToggleTheme?.(); setMenuOpen(false); },
+          show: !!onToggleTheme,
+        },
+        {
+          id: 'demo',
+          label: isPresentationMode ? 'Exit demo mode' : 'Demo mode',
+          icon: <Video className="w-4 h-4" />,
+          onClick: () => { onTogglePresentationMode?.(); setMenuOpen(false); },
+          show: !!onTogglePresentationMode,
+        },
+      ],
     },
     {
-      id: 'signout',
-      label: 'Sign out',
-      icon: <LogOut className="w-4 h-4" />,
-      onClick: () => { onSignOut?.(); setMenuOpen(false); },
-      show: !!(onSignOut && isUserLoggedIn),
+      id: 'account',
+      title: 'Account',
+      items: [
+        {
+          id: 'signout',
+          label: 'Sign out',
+          icon: <LogOut className="w-4 h-4" />,
+          onClick: () => { onSignOut?.(); setMenuOpen(false); },
+          show: !!(onSignOut && isUserLoggedIn),
+        },
+      ],
     },
-  ].filter(m => m.show);
+  ]
+    .map((s) => ({ ...s, items: s.items.filter((i) => i.show) }))
+    .filter((s) => s.items.length > 0);
+
 
   return (
     <header className="presentation-exempt flex flex-col border-b border-hairline bg-background relative z-20 w-full font-mono">
