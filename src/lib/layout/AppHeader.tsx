@@ -4,7 +4,7 @@ import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut,
-  BarChart3, Sparkles, Rocket, Gamepad2,
+  BarChart3, Rocket, ChevronDown,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
@@ -81,6 +81,7 @@ export function AppHeader({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [cooldownSec, setCooldownSec] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [roadmapOpen, setRoadmapOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigate = useNavigate();
@@ -171,82 +172,111 @@ export function AppHeader({
     onClick: () => void;
     accent?: boolean;
     show: boolean;
+    /** Nested links (rendered indented under the parent). */
+    children?: { id: string; label: string; onClick: () => void }[];
   };
-  const menuItems: MenuItem[] = [
-    {
-      id: 'markets',
-      label: 'Markets',
-      icon: <BarChart3 className="w-4 h-4" />,
-      onClick: () => { navigate({ to: '/markets' }); setMenuOpen(false); },
-      show: true,
-    },
-    {
-      id: 'fortune',
-      label: 'Flow Fortune Wheel',
-      icon: <Sparkles className="w-4 h-4" />,
-      onClick: () => { navigate({ to: '/fortune' }); setMenuOpen(false); },
-      accent: true,
-      show: true,
-    },
-    {
-      id: 'ecosurge',
-      label: 'Ecosurge Growth Hub',
-      icon: <Rocket className="w-4 h-4" />,
-      onClick: () => { navigate({ to: '/ecosurge' }); setMenuOpen(false); },
-      show: true,
-    },
-    {
-      id: 'arcadeflix',
-      label: 'ArcadeFlix P2E',
-      icon: <Gamepad2 className="w-4 h-4" />,
-      onClick: () => { navigate({ to: '/arcadeflix' }); setMenuOpen(false); },
-      show: true,
-    },
-    {
-      id: 'rewards',
-      label: 'Rewards',
-      icon: <Gift className="w-4 h-4" />,
-      onClick: () => { onRewardsClick?.(); setMenuOpen(false); },
-      accent: true,
-      show: !!onRewardsClick,
-    },
+  type MenuSection = { id: string; title: string; items: MenuItem[] };
 
+  const go = (to: string) => () => { navigate({ to }); setMenuOpen(false); };
+
+  const sections: MenuSection[] = [
     {
-      id: 'donate',
-      label: 'Support',
-      icon: <Heart className="w-4 h-4 fill-primary/20 text-primary/80" />,
-      onClick: () => { onDonateClick?.(); setMenuOpen(false); },
-      show: !!onDonateClick,
+      id: 'explore',
+      title: 'Explore',
+      items: [
+        {
+          id: 'markets',
+          label: 'Markets',
+          icon: <BarChart3 className="w-4 h-4" />,
+          onClick: go('/markets'),
+          show: true,
+        },
+        {
+          id: 'rewards',
+          label: 'Rewards',
+          icon: <Gift className="w-4 h-4" />,
+          onClick: () => { onRewardsClick?.(); setMenuOpen(false); },
+          accent: true,
+          show: !!onRewardsClick,
+        },
+        {
+          id: 'history',
+          label: 'History',
+          icon: <History className="w-4 h-4" />,
+          onClick: () => { onShowHistory?.(); setMenuOpen(false); },
+          show: !!(walletAddress && onShowHistory),
+        },
+      ],
     },
     {
-      id: 'history',
-      label: 'History',
-      icon: <History className="w-4 h-4" />,
-      onClick: () => { onShowHistory?.(); setMenuOpen(false); },
-      show: !!(walletAddress && onShowHistory),
+      id: 'roadmap',
+      title: 'Project Roadmap',
+      items: [
+        {
+          id: 'roadmap-root',
+          label: 'Project Roadmap',
+          icon: <Rocket className="w-4 h-4" />,
+          onClick: () => setRoadmapOpen((v) => !v),
+          show: true,
+          children: [
+            { id: 'games', label: 'Games [Play2Earn]', onClick: () => { navigate({ to: '/rewards', hash: 'games' }); setMenuOpen(false); } },
+            { id: 'fortune', label: 'Flow Fortune Wheel', onClick: go('/fortune') },
+            { id: 'arcadeflix', label: 'ArcadeFlix P2E', onClick: go('/arcadeflix') },
+            { id: 'ecosurge', label: 'Ecosurge Growth Hub', onClick: go('/ecosurge') },
+          ],
+        },
+      ],
     },
     {
-      id: 'theme',
-      label: theme === 'light' ? 'Dark mode' : 'Light mode',
-      icon: theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />,
-      onClick: () => { onToggleTheme?.(); setMenuOpen(false); },
-      show: !!onToggleTheme,
+      id: 'support',
+      title: 'Support',
+      items: [
+        {
+          id: 'donate',
+          label: 'Support',
+          icon: <Heart className="w-4 h-4 fill-primary/20 text-primary/80" />,
+          onClick: () => { onDonateClick?.(); setMenuOpen(false); },
+          show: !!onDonateClick,
+        },
+      ],
     },
     {
-      id: 'demo',
-      label: isPresentationMode ? 'Exit demo mode' : 'Demo mode',
-      icon: <Video className="w-4 h-4" />,
-      onClick: () => { onTogglePresentationMode?.(); setMenuOpen(false); },
-      show: !!onTogglePresentationMode,
+      id: 'preferences',
+      title: 'Preferences',
+      items: [
+        {
+          id: 'theme',
+          label: theme === 'light' ? 'Dark mode' : 'Light mode',
+          icon: theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />,
+          onClick: () => { onToggleTheme?.(); setMenuOpen(false); },
+          show: !!onToggleTheme,
+        },
+        {
+          id: 'demo',
+          label: isPresentationMode ? 'Exit demo mode' : 'Demo mode',
+          icon: <Video className="w-4 h-4" />,
+          onClick: () => { onTogglePresentationMode?.(); setMenuOpen(false); },
+          show: !!onTogglePresentationMode,
+        },
+      ],
     },
     {
-      id: 'signout',
-      label: 'Sign out',
-      icon: <LogOut className="w-4 h-4" />,
-      onClick: () => { onSignOut?.(); setMenuOpen(false); },
-      show: !!(onSignOut && isUserLoggedIn),
+      id: 'account',
+      title: 'Account',
+      items: [
+        {
+          id: 'signout',
+          label: 'Sign out',
+          icon: <LogOut className="w-4 h-4" />,
+          onClick: () => { onSignOut?.(); setMenuOpen(false); },
+          show: !!(onSignOut && isUserLoggedIn),
+        },
+      ],
     },
-  ].filter(m => m.show);
+  ]
+    .map((s) => ({ ...s, items: s.items.filter((i) => i.show) }))
+    .filter((s) => s.items.length > 0);
+
 
   return (
     <header className="presentation-exempt flex flex-col border-b border-hairline bg-background relative z-20 w-full font-mono">
@@ -317,32 +347,62 @@ export function AppHeader({
                     Menu
                   </p>
                 </div>
-                <ul className="py-1">
-                  {menuItems.map((item) => (
-                    <li key={item.id}>
-                      <button
-                        role="menuitem"
-                        onClick={item.onClick}
-                        className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
-                          item.accent
-                            ? "text-primary hover:bg-primary/10"
-                            : "text-foreground hover:bg-white/5 hover:text-primary"
-                        )}
-                      >
-                        <span className={cn(
-                          "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
-                          item.accent
-                            ? "bg-primary/10 border-primary/30"
-                            : "bg-white/5 border-hairline"
-                        )}>
-                          {item.icon}
-                        </span>
-                        <span className="font-semibold truncate">{item.label}</span>
-                      </button>
-                    </li>
+                <div className="py-1 max-h-[70vh] overflow-y-auto">
+                  {sections.map((section, si) => (
+                    <div key={section.id} className={si > 0 ? "border-t border-hairline mt-1 pt-1" : ""}>
+                      <p className="px-3 pt-1.5 pb-1 text-[9px] tracking-[0.22em] uppercase text-muted-soft font-black">
+                        {section.title}
+                      </p>
+                      <ul>
+                        {section.items.map((item) => (
+                          <li key={item.id}>
+                            <button
+                              role="menuitem"
+                              onClick={item.onClick}
+                              aria-expanded={item.children ? roadmapOpen : undefined}
+                              className={cn(
+                                "w-full flex items-center gap-3 px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
+                                item.accent
+                                  ? "text-primary hover:bg-primary/10"
+                                  : "text-foreground hover:bg-white/5 hover:text-primary"
+                              )}
+                            >
+                              <span className={cn(
+                                "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
+                                item.accent
+                                  ? "bg-primary/10 border-primary/30"
+                                  : "bg-white/5 border-hairline"
+                              )}>
+                                {item.icon}
+                              </span>
+                              <span className="font-semibold truncate flex-1">{item.label}</span>
+                              {item.children && (
+                                <ChevronDown className={cn("w-3.5 h-3.5 shrink-0 transition-transform", roadmapOpen && "rotate-180")} />
+                              )}
+                            </button>
+                            {item.children && roadmapOpen && (
+                              <ul className="pb-1">
+                                {item.children.map((child) => (
+                                  <li key={child.id}>
+                                    <button
+                                      role="menuitem"
+                                      onClick={child.onClick}
+                                      className="w-full flex items-center gap-2 pl-[52px] pr-3 py-2 text-left text-[12px] text-muted hover:text-primary hover:bg-white/5 transition-colors cursor-pointer"
+                                    >
+                                      <span className="w-1 h-1 rounded-full bg-current shrink-0" />
+                                      <span className="font-semibold truncate">{child.label}</span>
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
+
               </div>
             )}
           </div>

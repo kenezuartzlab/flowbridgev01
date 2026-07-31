@@ -4,6 +4,7 @@ import {
   ThumbsUp, Code, GraduationCap, DollarSign, Gift, Mail, Lock, User as UserIcon, 
   RefreshCw, AlertTriangle, CheckCircle 
 } from 'lucide-react';
+import { GoogleIcon } from '@/components/icons/GoogleIcon';
 import { cn } from '../lib/utils';
 import { useAccount, useSendTransaction, useBalance, useSignMessage, useConnect, useSwitchChain, useWriteContract, useChainId } from 'wagmi';
 import { injected } from 'wagmi/connectors';
@@ -112,6 +113,8 @@ export function DonateModal({
   const [suggestionCategory, setSuggestionCategory] = useState<'learning' | 'earning' | 'developer_tools' | 'arbitrage_bot' | 'other'>('learning');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [activeTab, setActiveTab] = useState<'donate' | 'feedback' | 'incentives'>(initialTab || 'donate');
+  /** Rewards entry point shows only the FLOW incentive portal; Support entry point hides it. */
+  const isRewardsMode = initialTab === 'incentives';
   const [donationSuccessState, setDonationSuccessState] = useState(false);
 
   // Email-password authentication state variables
@@ -781,6 +784,7 @@ export function DonateModal({
         </div>
 
         {/* Modal Sub-Tabs selector */}
+        {!isRewardsMode && (
         <div className="flex border-b border-white/5 bg-[#010C1B]">
           <button
             onClick={() => setActiveTab('donate')}
@@ -807,20 +811,9 @@ export function DonateModal({
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Feedback ({suggestions.length})</span>
           </button>
-
-          <button
-            onClick={() => setActiveTab('incentives')}
-            className={cn(
-               "flex-1 py-3 text-sm font-black uppercase tracking-wider font-mono transition-all border-b-2 flex items-center justify-center gap-2",
-               activeTab === 'incentives' 
-                 ? "border-[#32FF8B] text-[#32FF8B] bg-white/[0.02]" 
-                 : "border-transparent text-[#C5C1B9] hover:text-white hover:bg-white/[0.01]"
-            )}
-          >
-            <Gift className="w-3.5 h-3.5" />
-            <span>FLOW Rewards</span>
-          </button>
         </div>
+        )}
+
 
         {/* Tab Body Contents. Added responsive scrolling flex-1 layout to prevent overflow on mobile devices */}
         <div className="p-3 sm:p-6 overflow-y-auto flex-1 min-h-0 scrollbar-thin">
@@ -1509,8 +1502,8 @@ export function DonateModal({
                       disabled={authLocalLoading}
                       className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl py-2.5 text-sm font-bold font-mono cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
-                      <Sparkles className="w-4 h-4 text-amber-400" />
-                      Google Authenticator
+                      <GoogleIcon className="w-4 h-4" />
+                      Sign in with Google
                     </button>
                   </div>
                 </div>
