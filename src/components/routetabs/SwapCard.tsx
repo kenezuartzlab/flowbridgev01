@@ -62,7 +62,6 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
           <span 
-            title={maxHint}
             onClick={!readOnly ? handleMaxClick : undefined}
             className={cn(
               "text-[#C5C1B9] normal-case font-mono font-bold",
