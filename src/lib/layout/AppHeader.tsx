@@ -220,8 +220,6 @@ export function AppHeader({
           show: true,
           children: [
             { id: 'games', label: 'Games [Play2Earn]', onClick: () => { navigate({ to: '/rewards', hash: 'games' }); setMenuOpen(false); } },
-            { id: 'fortune', label: 'Flow Fortune Wheel', onClick: go('/fortune') },
-            { id: 'arcadeflix', label: 'ArcadeFlix P2E', onClick: go('/arcadeflix') },
             { id: 'ecosurge', label: 'Ecosurge Growth Hub', onClick: go('/ecosurge') },
           ],
         },
