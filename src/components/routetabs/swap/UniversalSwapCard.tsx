@@ -730,16 +730,17 @@ export function UniversalSwapCard({
 
         />
 
-        <div className="flex justify-center -my-6.5 relative z-20">
+        <div className="flex justify-center -my-5 relative z-20">
           <button
             type="button"
             onClick={onToggle}
-            className="bg-[#0D1C2A] border border-white/25 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/35 p-2 rounded-xl shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
+            className="bg-[#0D1C2A] border border-white/20 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/35 p-1.5 rounded-lg shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
             title="Switch direction"
           >
-            <ArrowDownUp className="w-4 h-4" />
+            <ArrowDownUp className="w-3.5 h-3.5" />
           </button>
         </div>
+
 
         <TokenSide
           label="Buy"
