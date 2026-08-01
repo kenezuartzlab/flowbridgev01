@@ -614,6 +614,17 @@ export function UniversalSwapCard({
     setAmountIn(maxSpendableDisplay);
   };
 
+  // Quick percentage chips (25/50/75) — always derived from the spendable max
+  // so the fee/gas head-room is respected.
+  const onPercent = (pct: number) => {
+    if (maxSpendableRaw <= 0n) return;
+    setClamped(false);
+    if (pct >= 1) return setAmountIn(maxSpendableDisplay);
+    const part = (maxSpendableRaw * BigInt(Math.round(pct * 10000))) / 10000n;
+    setAmountIn(formatUnits(part, tokenIn.decimals));
+  };
+
+
 
   // ── Button label ──────────────────────────────────────────────────────────
   const parsedAmount = (() => {
