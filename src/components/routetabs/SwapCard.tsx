@@ -19,8 +19,21 @@ interface TokenInputProps {
 
 function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onChange, readOnly }: TokenInputProps) {
   const [clamped, setClamped] = useState(false);
+  // Percentage chips reveal on focus and disappear on blur.
+  const [focused, setFocused] = useState(false);
   const maxNum = maxAmount != null ? parseFloat(maxAmount) : NaN;
   const hasMax = isFinite(maxNum) && maxNum > 0;
+  const showPercents = !readOnly && !!onChange && focused && hasMax;
+
+  const applyPercent = (pct: number) => {
+    if (!onChange || !hasMax) return;
+    setClamped(false);
+    if (pct >= 1) return onChange(maxAmount as string);
+    // Truncate (never round up) so the result stays spendable.
+    const val = Math.floor(maxNum * pct * 1e8) / 1e8;
+    onChange(val > 0 ? String(val) : '');
+  };
+
 
   const handleMaxClick = () => {
     if (!readOnly && onChange) {
@@ -110,6 +123,8 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               type="number"
               inputMode="decimal"
               placeholder="0.00"
+              onFocus={() => setFocused(true)}
+              onBlur={() => setTimeout(() => setFocused(false), 150)}
               value={amount}
               onChange={(e) => handleInputChange(e.target.value)}
               className={cn(
@@ -126,6 +141,24 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
           <span className="font-black text-[13px] text-[#FFFFFF] tracking-wide uppercase truncate">{symbol}</span>
         </div>
       </div>
+
+      {showPercents && (
+        <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+          {[0.25, 0.5, 0.75, 1].map((p) => (
+            <button
+              key={p}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => applyPercent(p)}
+              className="flex-1 py-1 rounded-lg bg-[#0D1C2A] border border-white/15 text-[10px] font-black tracking-widest uppercase text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30 active:scale-95 transition font-mono cursor-pointer"
+            >
+              {p === 1 ? 'Max' : `${p * 100}%`}
+            </button>
+          ))}
+        </div>
+      )}
+
+
 
 
       {/* Bottom Row: Estimated USD value */}

@@ -614,6 +614,17 @@ export function UniversalSwapCard({
     setAmountIn(maxSpendableDisplay);
   };
 
+  // Quick percentage chips (25/50/75) — always derived from the spendable max
+  // so the fee/gas head-room is respected.
+  const onPercent = (pct: number) => {
+    if (maxSpendableRaw <= 0n) return;
+    setClamped(false);
+    if (pct >= 1) return setAmountIn(maxSpendableDisplay);
+    const part = (maxSpendableRaw * BigInt(Math.round(pct * 10000))) / 10000n;
+    setAmountIn(formatUnits(part, tokenIn.decimals));
+  };
+
+
 
   // ── Button label ──────────────────────────────────────────────────────────
   const parsedAmount = (() => {
@@ -716,6 +727,9 @@ export function UniversalSwapCard({
           balanceDisplay={inBalanceDisplay}
           onPickToken={() => setPickerOpen("in")}
           onMax={onMax}
+          onPercent={onPercent}
+
+
           usdValue={usdValueFor(tokenIn, amountIn)}
           maxHint={
             maxSpendableRaw > 0n
@@ -928,6 +942,7 @@ interface TokenSideProps {
   balanceDisplay: string;
   onPickToken: () => void;
   onMax?: () => void;
+  onPercent?: (pct: number) => void;
   readOnly?: boolean;
   quoting?: boolean;
   usdValue?: string;
@@ -943,6 +958,7 @@ function TokenSide({
   balanceDisplay,
   onPickToken,
   onMax,
+  onPercent,
   readOnly,
   quoting,
   usdValue,
@@ -952,6 +968,12 @@ function TokenSide({
   // Truncated to 4 decimals (never rounded up) so the shown balance is always
   // spendable — e.g. 0.04717811 renders as 0.0471.
   const shortBalance = formatBalance4(balanceDisplay);
+  // Percentage chips only appear while the amount field is active (they fade
+  // away on blur), mirroring the compact reference UI.
+  const [focused, setFocused] = useState(false);
+  const showPercents = !readOnly && !!onPercent && focused;
+
+
 
   return (
     <div className="bg-[#010C1B]/75 border border-white/15 px-3 py-2.5 rounded-xl space-y-1.5 font-sans shadow-inner">
@@ -990,6 +1012,8 @@ function TokenSide({
               type="number"
               placeholder="0.00"
               value={amount}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setTimeout(() => setFocused(false), 150)}
               onChange={(e) => onAmountChange?.(e.target.value)}
               className="bg-transparent text-white text-3xl sm:text-4xl font-black w-full min-w-0 focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[40px] font-mono"
             />
@@ -1008,6 +1032,24 @@ function TokenSide({
           <ChevronDown className="w-3 h-3 text-white/60 shrink-0" />
         </button>
       </div>
+
+      {showPercents && (
+        <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+          {[0.25, 0.5, 0.75, 1].map((p) => (
+            <button
+              key={p}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onPercent?.(p)}
+              className="flex-1 py-1 rounded-lg bg-[#0D1C2A] border border-white/15 text-[10px] font-black tracking-widest uppercase text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30 active:scale-95 transition font-mono cursor-pointer"
+            >
+              {p === 1 ? "Max" : `${p * 100}%`}
+            </button>
+          ))}
+        </div>
+      )}
+
+
 
 
       <div className="text-[#C5C1B9] font-medium flex items-center justify-between gap-2 text-[12px] font-mono leading-none">
