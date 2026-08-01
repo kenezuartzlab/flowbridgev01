@@ -942,6 +942,7 @@ interface TokenSideProps {
   balanceDisplay: string;
   onPickToken: () => void;
   onMax?: () => void;
+  onPercent?: (pct: number) => void;
   readOnly?: boolean;
   quoting?: boolean;
   usdValue?: string;
