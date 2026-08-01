@@ -56,9 +56,10 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
 
 
   return (
-    <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
+    <div className="bg-[#010C1B]/75 border border-white/15 px-3 py-2.5 rounded-xl space-y-1.5 font-sans shadow-inner">
       {/* Top Row: Label and Balance */}
-      <div className="flex justify-between items-center text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
+      <div className="flex justify-between items-center text-[11px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
+
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
           <span 
@@ -83,7 +84,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
       </div>
 
       {/* Middle Row: Value & Token Symbol */}
-      <div className="flex justify-between items-center gap-2.5 sm:gap-3">
+      <div className="flex justify-between items-center gap-2">
         <div className="flex-1 min-w-0">
           {readOnly ? (
             (() => {
@@ -96,7 +97,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
                 <div
                   title={display}
                   className={cn(
-                    'font-black text-white leading-none h-[44px] flex items-center truncate font-mono',
+                    'font-black text-white leading-none h-[40px] flex items-center truncate font-mono',
                     size,
                   )}
                 >
@@ -112,7 +113,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               value={amount}
               onChange={(e) => handleInputChange(e.target.value)}
               className={cn(
-                'bg-transparent text-white font-black w-full min-w-0 focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono',
+                'bg-transparent text-white font-black w-full min-w-0 focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[40px] font-mono',
                 amount.length > 16 ? 'text-xl sm:text-2xl' : amount.length > 12 ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl',
               )}
             />
@@ -120,11 +121,12 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
         </div>
 
 
-        <div className="bg-[#0D1C2A]/90 px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 shadow-sm font-mono">
-          <TokenIcon symbol={symbol} size={22} />
-          <span className="font-black text-sm text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
+        <div className="bg-[#0D1C2A]/90 pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-white/15 font-mono max-w-[46%]">
+          <TokenIcon symbol={symbol} size={20} />
+          <span className="font-black text-[13px] text-[#FFFFFF] tracking-wide uppercase truncate">{symbol}</span>
         </div>
       </div>
+
 
       {/* Bottom Row: Estimated USD value */}
       <div className="text-[#C5C1B9] font-medium flex items-center text-[12px] font-mono leading-none">
@@ -227,7 +229,7 @@ export function SwapCard({
 
 
       {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}
-      <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-4.5 relative space-y-2.5">
+      <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-3 sm:p-3.5 relative space-y-2">
         <TokenInput
           label="You pay"
           amount={fromAmount}
@@ -239,18 +241,19 @@ export function SwapCard({
         />
         
         {/* Switch pair button centered between boxes */}
-        <div className="flex justify-center -my-6.5 relative z-20">
+        <div className="flex justify-center -my-5 relative z-20">
           <button 
             type="button"
             onClick={onToggleDirection}
-            className="bg-[#0D1C2A] border border-white/25 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/35 p-2 rounded-xl shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
+            className="bg-[#0D1C2A] border border-white/20 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/35 p-1.5 rounded-lg shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
             title="Switch direction"
             aria-label="Switch swap direction"
           >
 
-            <ArrowDownUp className="w-4 h-4" />
+            <ArrowDownUp className="w-3.5 h-3.5" />
           </button>
         </div>
+
 
         <TokenInput
           label="You receive"

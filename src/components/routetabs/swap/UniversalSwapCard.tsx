@@ -707,7 +707,7 @@ export function UniversalSwapCard({
       </div>
 
       {/* Card */}
-      <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-4.5 relative space-y-2.5">
+      <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-3 sm:p-3.5 relative space-y-2">
         <TokenSide
           label="Sell"
           token={tokenIn}
@@ -730,16 +730,17 @@ export function UniversalSwapCard({
 
         />
 
-        <div className="flex justify-center -my-6.5 relative z-20">
+        <div className="flex justify-center -my-5 relative z-20">
           <button
             type="button"
             onClick={onToggle}
-            className="bg-[#0D1C2A] border border-white/25 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/35 p-2 rounded-xl shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
+            className="bg-[#0D1C2A] border border-white/20 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/35 p-1.5 rounded-lg shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
             title="Switch direction"
           >
-            <ArrowDownUp className="w-4 h-4" />
+            <ArrowDownUp className="w-3.5 h-3.5" />
           </button>
         </div>
+
 
         <TokenSide
           label="Buy"
@@ -953,18 +954,18 @@ function TokenSide({
   const shortBalance = formatBalance4(balanceDisplay);
 
   return (
-    <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
-      <div className="flex justify-between items-center text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
+    <div className="bg-[#010C1B]/75 border border-white/15 px-3 py-2.5 rounded-xl space-y-1.5 font-sans shadow-inner">
+      <div className="flex justify-between items-center text-[11px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
         <span>{label}</span>
-        <div className="flex items-center gap-1.5 font-bold">
-          <span className="text-[#C5C1B9] normal-case font-mono font-bold" title={maxHint}>
+        <div className="flex items-center gap-1.5 font-bold min-w-0">
+          <span className="text-[#C5C1B9] normal-case font-mono font-bold truncate">
             Balance: {shortBalance}
           </span>
           {!readOnly && onMax && (
             <button
               type="button"
               onClick={onMax}
-              className="bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 active:scale-95 text-[#32FF8B] border border-[#32FF8B]/25 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase cursor-pointer"
+              className="bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 active:scale-95 text-[#32FF8B] border border-[#32FF8B]/25 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase cursor-pointer shrink-0"
             >
               Max
             </button>
@@ -972,10 +973,10 @@ function TokenSide({
         </div>
       </div>
 
-      <div className="flex justify-between items-center gap-3">
+      <div className="flex justify-between items-center gap-2">
         <div className="flex-1 min-w-0">
           {readOnly ? (
-            <div className="text-4xl font-black text-white leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
+            <div className="text-3xl sm:text-4xl font-black text-white leading-none h-[40px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
               {quoting ? (
                 <Loader2 className="w-5 h-5 animate-spin text-[#C5C1B9]" />
               ) : amount ? (
@@ -990,7 +991,7 @@ function TokenSide({
               placeholder="0.00"
               value={amount}
               onChange={(e) => onAmountChange?.(e.target.value)}
-              className="bg-transparent text-white text-4xl font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono"
+              className="bg-transparent text-white text-3xl sm:text-4xl font-black w-full min-w-0 focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[40px] font-mono"
             />
           )}
         </div>
@@ -998,15 +999,16 @@ function TokenSide({
         <button
           type="button"
           onClick={onPickToken}
-          className="bg-[#0D1C2A]/90 hover:bg-[#0D1C2A] px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 hover:border-[#32FF8B]/40 shadow-sm font-mono cursor-pointer transition-colors"
+          className="bg-[#0D1C2A]/90 hover:bg-[#0D1C2A] pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-white/15 hover:border-[#32FF8B]/40 font-mono cursor-pointer transition-colors max-w-[46%]"
         >
-          <TokenIcon symbol={token.symbol} size={22} />
-          <span className="font-black text-sm text-white tracking-widest uppercase">
+          <TokenIcon symbol={token.symbol} size={20} />
+          <span className="font-black text-[13px] text-white tracking-wide uppercase truncate">
             {token.symbol}
           </span>
-          <ChevronDown className="w-3.5 h-3.5 text-white/60" />
+          <ChevronDown className="w-3 h-3 text-white/60 shrink-0" />
         </button>
       </div>
+
 
       <div className="text-[#C5C1B9] font-medium flex items-center justify-between gap-2 text-[12px] font-mono leading-none">
         <span className="truncate">
@@ -1017,15 +1019,8 @@ function TokenSide({
         {usdValue && <span className="text-[#C5C1B9] shrink-0">≈ {usdValue}</span>}
       </div>
 
-      {!readOnly && (clampedNotice || maxHint) && (
-        <p
-          className={cn(
-            "text-[11px] font-mono leading-snug",
-            clampedNotice ? "text-[#FFC46B]" : "text-[#C5C1B9]/70",
-          )}
-        >
-          {clampedNotice ?? maxHint}
-        </p>
+      {!readOnly && clampedNotice && (
+        <p className="text-[11px] font-mono leading-snug text-[#FFC46B]">{clampedNotice}</p>
       )}
     </div>
   );
