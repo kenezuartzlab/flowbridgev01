@@ -19,8 +19,21 @@ interface TokenInputProps {
 
 function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onChange, readOnly }: TokenInputProps) {
   const [clamped, setClamped] = useState(false);
+  // Percentage chips reveal on focus and disappear on blur.
+  const [focused, setFocused] = useState(false);
   const maxNum = maxAmount != null ? parseFloat(maxAmount) : NaN;
   const hasMax = isFinite(maxNum) && maxNum > 0;
+  const showPercents = !readOnly && !!onChange && focused && hasMax;
+
+  const applyPercent = (pct: number) => {
+    if (!onChange || !hasMax) return;
+    setClamped(false);
+    if (pct >= 1) return onChange(maxAmount as string);
+    // Truncate (never round up) so the result stays spendable.
+    const val = Math.floor(maxNum * pct * 1e8) / 1e8;
+    onChange(val > 0 ? String(val) : '');
+  };
+
 
   const handleMaxClick = () => {
     if (!readOnly && onChange) {
