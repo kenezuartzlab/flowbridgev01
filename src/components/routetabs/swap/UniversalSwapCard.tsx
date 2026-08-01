@@ -968,6 +968,12 @@ function TokenSide({
   // Truncated to 4 decimals (never rounded up) so the shown balance is always
   // spendable — e.g. 0.04717811 renders as 0.0471.
   const shortBalance = formatBalance4(balanceDisplay);
+  // Percentage chips only appear while the amount field is active (they fade
+  // away on blur), mirroring the compact reference UI.
+  const [focused, setFocused] = useState(false);
+  const showPercents = !readOnly && !!onPercent && focused;
+
+
 
   return (
     <div className="bg-[#010C1B]/75 border border-white/15 px-3 py-2.5 rounded-xl space-y-1.5 font-sans shadow-inner">
