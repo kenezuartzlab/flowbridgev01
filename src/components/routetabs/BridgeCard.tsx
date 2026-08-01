@@ -257,9 +257,9 @@ export function BridgeCard({
                 Balance: {balance} {symbol} <span className="text-[11px] text-[#32FF8B] font-black ml-1 uppercase hover:underline">(Max)</span>
               </div>
             </div>
-            <div className="bg-[#0D1C2A]/90 px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 shadow-sm font-mono">
-              <TokenIcon symbol={symbol} size={22} />
-              <span className="font-black text-sm text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
+            <div className="bg-[#0D1C2A]/90 pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-white/15 font-mono">
+              <TokenIcon symbol={symbol} size={20} />
+              <span className="font-black text-[13px] text-[#FFFFFF] tracking-wide uppercase truncate">{symbol}</span>
             </div>
           </div>
         </div>
@@ -291,9 +291,9 @@ export function BridgeCard({
                 {estimatedStr}
               </div>
             </div>
-            <div className="bg-[#0D1C2A]/90 px-3 py-1.5 rounded-xl flex items-center gap-2 shrink-0 border border-white/15 shadow-sm font-mono opacity-90">
-               <TokenIcon symbol={symbol} size={22} />
-               <span className="font-black text-sm text-[#FFFFFF] tracking-widest uppercase">{symbol}</span>
+            <div className="bg-[#0D1C2A]/90 pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-white/15 font-mono opacity-90">
+               <TokenIcon symbol={symbol} size={20} />
+               <span className="font-black text-[13px] text-[#FFFFFF] tracking-wide uppercase truncate">{symbol}</span>
             </div>
           </div>
         </div>
