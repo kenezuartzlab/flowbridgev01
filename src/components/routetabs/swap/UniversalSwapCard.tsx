@@ -726,7 +726,8 @@ export function UniversalSwapCard({
           onAmountChange={onAmountInChange}
           balanceDisplay={inBalanceDisplay}
           onPickToken={() => setPickerOpen("in")}
-          onMax={onMax}
+          onPercent={onPercent}
+
           usdValue={usdValueFor(tokenIn, amountIn)}
           maxHint={
             maxSpendableRaw > 0n
