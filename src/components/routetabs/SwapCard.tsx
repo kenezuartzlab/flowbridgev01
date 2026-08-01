@@ -123,6 +123,8 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               type="number"
               inputMode="decimal"
               placeholder="0.00"
+              onFocus={() => setFocused(true)}
+              onBlur={() => setTimeout(() => setFocused(false), 150)}
               value={amount}
               onChange={(e) => handleInputChange(e.target.value)}
               className={cn(
