@@ -958,6 +958,7 @@ function TokenSide({
   balanceDisplay,
   onPickToken,
   onMax,
+  onPercent,
   readOnly,
   quoting,
   usdValue,
