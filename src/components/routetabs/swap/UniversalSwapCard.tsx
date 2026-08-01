@@ -707,7 +707,7 @@ export function UniversalSwapCard({
       </div>
 
       {/* Card */}
-      <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-4.5 relative space-y-2.5">
+      <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-3 sm:p-3.5 relative space-y-2">
         <TokenSide
           label="Sell"
           token={tokenIn}
