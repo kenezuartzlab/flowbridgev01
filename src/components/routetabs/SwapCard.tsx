@@ -56,9 +56,10 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
 
 
   return (
-    <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
+    <div className="bg-[#010C1B]/75 border border-white/15 px-3 py-2.5 rounded-xl space-y-1.5 font-sans shadow-inner">
       {/* Top Row: Label and Balance */}
-      <div className="flex justify-between items-center text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
+      <div className="flex justify-between items-center text-[11px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
+
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
           <span 
