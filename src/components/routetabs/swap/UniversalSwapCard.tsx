@@ -1012,6 +1012,8 @@ function TokenSide({
               type="number"
               placeholder="0.00"
               value={amount}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setTimeout(() => setFocused(false), 150)}
               onChange={(e) => onAmountChange?.(e.target.value)}
               className="bg-transparent text-white text-3xl sm:text-4xl font-black w-full min-w-0 focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[40px] font-mono"
             />
@@ -1030,6 +1032,24 @@ function TokenSide({
           <ChevronDown className="w-3 h-3 text-white/60 shrink-0" />
         </button>
       </div>
+
+      {showPercents && (
+        <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+          {[0.25, 0.5, 0.75, 1].map((p) => (
+            <button
+              key={p}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onPercent?.(p)}
+              className="flex-1 py-1 rounded-lg bg-[#0D1C2A] border border-white/15 text-[10px] font-black tracking-widest uppercase text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30 active:scale-95 transition font-mono cursor-pointer"
+            >
+              {p === 1 ? "Max" : `${p * 100}%`}
+            </button>
+          ))}
+        </div>
+      )}
+
+
 
 
       <div className="text-[#C5C1B9] font-medium flex items-center justify-between gap-2 text-[12px] font-mono leading-none">
