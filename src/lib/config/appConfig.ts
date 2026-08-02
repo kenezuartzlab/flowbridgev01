@@ -40,6 +40,17 @@ export interface RemoteToken {
   sortOrder?: number;
 }
 
+/** Optional publish window for a slide. Times are ISO strings (UTC). */
+export interface BannerSchedule {
+  startAt?: string | null;
+  endAt?: string | null;
+  /** Allowed weekdays, 0 = Sunday … 6 = Saturday. Empty/undefined = every day. */
+  days?: number[] | null;
+}
+
+/** How the artwork fills the banner card. */
+export type BannerLayout = "compact" | "logo" | "full";
+
 /** One rotating promo slide. Purely presentational + a link target. */
 export interface BannerSlide {
   id: string;
@@ -50,6 +61,9 @@ export interface BannerSlide {
   href?: string | null;
   theme?: "swap" | "bridge";
   isActive?: boolean;
+  /** compact = small icon, logo = larger logo, full = edge-to-edge artwork. */
+  layout?: BannerLayout;
+  schedule?: BannerSchedule | null;
 }
 
 export interface BannerSurface {
@@ -60,6 +74,7 @@ export interface BannerSurface {
 export type BannerSurfaceKey = "cabot" | "swap" | "bridge";
 
 export type BannerSettings = Record<BannerSurfaceKey, BannerSurface>;
+
 
 export interface AppConfig {
   fees: FeeSettings;
