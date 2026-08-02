@@ -2528,8 +2528,13 @@ export default function App() {
               <BannerRotator
                 intervalMs={surface.intervalMs}
                 slides={[...promoSlides, statusSlide]}
+                slideKeys={[...promoKeys, "status"]}
+                onSlideVisible={(key) => {
+                  if (key !== "status") trackBannerImpression(surfaceKey, key);
+                }}
               />
             );
+
           })()}
 
           
