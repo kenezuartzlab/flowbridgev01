@@ -13,9 +13,12 @@ import {
   saveAdminToken,
 } from "@/lib/admin/adminApi";
 import {
+  BANNER_SURFACES,
   DEFAULT_APP_CONFIG,
   loadAppConfig,
   type AppConfig,
+  type BannerSlide,
+  type BannerSurfaceKey,
 } from "@/lib/config/appConfig";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
@@ -43,7 +46,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminRoute,
 });
 
-type Tab = "tokens" | "fees" | "rewards" | "flags";
+type Tab = "tokens" | "banners" | "fees" | "rewards" | "flags";
 
 const cardCls =
   "rounded-2xl border border-white/10 bg-[#0D1C2A]/70 p-4 space-y-3 font-mono text-[13px]";
@@ -141,6 +144,7 @@ function AdminPage() {
         {(
           [
             ["tokens", "Tokens"],
+            ["banners", "Banners"],
             ["fees", "Fees & Slippage"],
             ["rewards", "Rewards"],
             ["flags", "Feature Flags"],
@@ -161,7 +165,13 @@ function AdminPage() {
         ))}
       </div>
 
-      {tab === "tokens" ? <TokensPanel wallet={wallet!} /> : <SettingsPanel wallet={wallet!} tab={tab} />}
+      {tab === "tokens" ? (
+        <TokensPanel wallet={wallet!} />
+      ) : tab === "banners" ? (
+        <BannersPanel wallet={wallet!} />
+      ) : (
+        <SettingsPanel wallet={wallet!} tab={tab} />
+      )}
     </Shell>
   );
 }
@@ -447,7 +457,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
 
 /* ------------------------------ Settings ------------------------------ */
 
-function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens"> }) {
+function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners"> }) {
   const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
