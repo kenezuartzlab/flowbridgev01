@@ -40,12 +40,78 @@ export interface RemoteToken {
   sortOrder?: number;
 }
 
+/** One rotating promo slide. Purely presentational + a link target. */
+export interface BannerSlide {
+  id: string;
+  title: string;
+  body?: string;
+  imageUrl?: string | null;
+  /** Internal route ("/rewards") or absolute URL. Empty = not clickable. */
+  href?: string | null;
+  theme?: "swap" | "bridge";
+  isActive?: boolean;
+}
+
+export interface BannerSurface {
+  intervalMs: number;
+  slides: BannerSlide[];
+}
+
+export type BannerSurfaceKey = "cabot" | "swap" | "bridge";
+
+export type BannerSettings = Record<BannerSurfaceKey, BannerSurface>;
+
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
   flags: FlagSettings;
+  banners: BannerSettings;
   tokens: RemoteToken[];
 }
+
+export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge"];
+
+export const DEFAULT_BANNERS: BannerSettings = {
+  cabot: {
+    intervalMs: 4000,
+    slides: [
+      {
+        id: "cabot-default",
+        title: "CA / BOT Instant Swap",
+        body: "Fixed pair routing with live quotes.",
+        imageUrl: null,
+        href: "/rewards",
+        theme: "swap",
+      },
+    ],
+  },
+  swap: {
+    intervalMs: 4000,
+    slides: [
+      {
+        id: "swap-default",
+        title: "Swap & Earn FLOW Points",
+        body: "Earn points on every qualified swap.",
+        imageUrl: null,
+        href: "/rewards",
+        theme: "swap",
+      },
+    ],
+  },
+  bridge: {
+    intervalMs: 4000,
+    slides: [
+      {
+        id: "bridge-default",
+        title: "Cross-Chain Bridge",
+        body: "Fast. Secure. Multi-chain.",
+        imageUrl: null,
+        href: "/activity",
+        theme: "bridge",
+      },
+    ],
+  },
+};
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
@@ -58,6 +124,8 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     referralActivityPct: 20,
   },
   flags: { limitTabPublic: false, showBanners: true, maintenanceNotice: "" },
+  banners: DEFAULT_BANNERS,
+
   tokens: [],
 };
 
@@ -65,6 +133,45 @@ function num(v: unknown, fallback: number): number {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
+
+function str(v: unknown, fallback = ""): string {
+  return typeof v === "string" ? v : fallback;
+}
+
+function mergeSlide(raw: any, index: number, surface: string): BannerSlide | null {
+  if (!raw || typeof raw !== "object") return null;
+  const title = str(raw.title).trim();
+  if (!title) return null;
+  return {
+    id: str(raw.id).trim() || `${surface}-${index}`,
+    title,
+    body: str(raw.body).trim() || undefined,
+    imageUrl: str(raw.imageUrl ?? raw.image_url).trim() || null,
+    href: str(raw.href ?? raw.link).trim() || null,
+    theme: raw.theme === "bridge" ? "bridge" : "swap",
+    isActive: raw.isActive !== false,
+  };
+}
+
+/** Normalizes admin-published banner settings, falling back to defaults. */
+export function mergeBanners(partial: any): BannerSettings {
+  const out = {} as BannerSettings;
+  for (const key of BANNER_SURFACES) {
+    const raw = partial?.[key];
+    const fallback = DEFAULT_BANNERS[key];
+    const slides = Array.isArray(raw?.slides)
+      ? raw.slides
+          .map((s: any, i: number) => mergeSlide(s, i, key))
+          .filter((s: BannerSlide | null): s is BannerSlide => !!s)
+      : fallback.slides;
+    out[key] = {
+      intervalMs: Math.min(60000, Math.max(1500, num(raw?.intervalMs, fallback.intervalMs))),
+      slides,
+    };
+  }
+  return out;
+}
+
 
 export function mergeAppConfig(partial: any): AppConfig {
   const p = partial ?? {};
@@ -94,6 +201,8 @@ export function mergeAppConfig(partial: any): AppConfig {
       showBanners: p.flags?.showBanners !== false,
       maintenanceNotice: typeof p.flags?.maintenanceNotice === "string" ? p.flags.maintenanceNotice : "",
     },
+    banners: mergeBanners(p.banners),
+
     tokens: Array.isArray(p.tokens)
       ? p.tokens
           .filter((t: any) => t && typeof t.address === "string" && typeof t.symbol === "string")
@@ -159,4 +268,13 @@ export function getRemoteTokens(isMainnet: boolean): RemoteToken[] {
   return current.tokens
     .filter((t) => t.chain === chain && t.isActive !== false)
     .sort((a, b) => (a.sortOrder ?? 100) - (b.sortOrder ?? 100));
+}
+
+/** Active banner slides + delay for a tab surface. */
+export function getBannerSurface(config: AppConfig, key: BannerSurfaceKey): BannerSurface {
+  const surface = config.banners?.[key] ?? DEFAULT_BANNERS[key];
+  return {
+    intervalMs: surface.intervalMs,
+    slides: surface.slides.filter((s) => s.isActive !== false),
+  };
 }

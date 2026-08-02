@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
-import { useAppConfig } from './lib/config/appConfig';
+import {
+  useAppConfig,
+  getBannerSurface,
+  type BannerSlide,
+  type BannerSurfaceKey,
+} from './lib/config/appConfig';
 
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
@@ -2433,17 +2438,20 @@ export default function App() {
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col items-stretch px-4 py-4 sm:px-5 sm:py-5 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
 
-          {/* Tab hero banner + status bar, cross-fading (presentational) */}
-          <BannerRotator
-            slides={[
-              <TabBanner key="hero" variant={activeTab === 'BRIDGE' ? 'bridge' : 'swap'} />,
-              (() => {
-                const tone = !googleUser ? 'info' : !signedInEmailVerified ? 'warn' : rewardsActive ? 'ok' : 'warn';
-                const accent = `var(--fb-status-${tone}-accent)`;
-                return (
+          {/* Tab hero banners (admin-managed) + status bar, swipeable */}
+          {(() => {
+            const surfaceKey: BannerSurfaceKey =
+              activeTab === 'BRIDGE' ? 'bridge' : activeTab === 'CA/BOT' ? 'cabot' : 'swap';
+            const surface = getBannerSurface(appConfig, surfaceKey);
+            const promoSlides = appConfig.flags.showBanners
+              ? surface.slides.map((s: BannerSlide) => <TabBanner key={s.id} slide={s} />)
+              : [];
+            const tone = !googleUser ? 'info' : !signedInEmailVerified ? 'warn' : rewardsActive ? 'ok' : 'warn';
+            const accent = `var(--fb-status-${tone}-accent)`;
+            const statusSlide = (
               <div
                 key="status"
-                className="relative flex min-h-[92px] items-center justify-between gap-2.5 overflow-hidden rounded-2xl px-3.5 py-3 text-left shadow-[0_8px_24px_-16px_rgba(0,0,0,0.6)] sm:gap-3 sm:px-4"
+                className="relative flex min-h-[58px] items-center justify-between gap-2 overflow-hidden rounded-xl px-3 py-2 text-left shadow-[0_6px_18px_-14px_rgba(0,0,0,0.6)] sm:min-h-[62px] sm:px-3.5"
                 style={{
                   background: `linear-gradient(110deg, var(--fb-status-${tone}-from), var(--fb-status-${tone}-to))`,
                   borderTop: `1px solid ${accent}33`,
@@ -2451,111 +2459,124 @@ export default function App() {
               >
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -right-6 -top-10 h-28 w-28 rounded-full blur-2xl"
+                  className="pointer-events-none absolute -right-5 -top-8 h-20 w-20 rounded-full blur-2xl"
                   style={{ background: `${accent}30` }}
                 />
 
-            <div className="relative flex min-w-0 items-center gap-2.5">
-              <div
-                className="shrink-0 rounded-lg border p-2"
-                style={{ background: `${accent}1F`, borderColor: `${accent}3D`, color: accent }}
-              >
-                <Gift className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 space-y-1 font-mono">
-                <div className="text-[11px] font-bold uppercase leading-tight tracking-wide text-white [overflow-wrap:anywhere]">
-                  {!googleUser 
-                    ? "Guest Mode Active"
-                    : !signedInEmailVerified
-                      ? "Verification Pending"
-                      : rewardsActive
-                        ? "Earnings Activated"
-                        : "Wallet Link Needed"
-                  }
+                <div className="relative flex min-w-0 items-center gap-2">
+                  <div
+                    className="shrink-0 rounded-lg border p-1.5"
+                    style={{ background: `${accent}1F`, borderColor: `${accent}3D`, color: accent }}
+                  >
+                    <Gift className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0 font-mono">
+                    <div className="truncate text-[10.5px] font-bold uppercase leading-tight tracking-wide text-white sm:text-[11px]">
+                      {!googleUser
+                        ? "Guest Mode Active"
+                        : !signedInEmailVerified
+                          ? "Verification Pending"
+                          : rewardsActive
+                            ? "Earnings Activated"
+                            : "Wallet Link Needed"
+                      }
+                    </div>
+                    <div className="mt-0.5 line-clamp-1 text-[9.5px] leading-snug text-[#C5C1B9] sm:text-[10px]">
+                      {!googleUser
+                        ? "Verify email to earn FLOW rewards."
+                        : !signedInEmailVerified
+                          ? "Points paused. Verify email."
+                          : rewardsActive
+                            ? "Verified swaps $5+ earn FLOW."
+                            : "Sign this wallet to link it."
+                      }
+                    </div>
+                  </div>
                 </div>
-                <div className="line-clamp-2 text-[10px] leading-snug text-[#C5C1B9] [overflow-wrap:anywhere]">
-                  {!googleUser 
-                    ? "Verify email in REWARDS to earn FLOW rewards."
-                    : !signedInEmailVerified
-                      ? "Points paused. Verify email to activate."
-                      : rewardsActive
-                        ? "Verified swaps $5+ earn FLOW points."
-                        : "Sign this wallet to link it before earning."
-                  }
-                </div>
-              </div>
-            </div>
-            
-            <button
-              onClick={() => {
-                if (googleUser && signedInEmailVerified && !rewardsActive) {
-                  setIsConnectGuideOpen(true);
-                  return;
-                }
-                setDonateModalInitialTab('incentives');
-                setIsDonateModalOpen(true);
-              }}
-              className="relative shrink-0 cursor-pointer rounded-lg border px-2.5 py-1.5 text-center font-mono text-[9px] font-bold uppercase leading-tight tracking-wider transition-all active:scale-95"
-              style={{ background: `${accent}26`, borderColor: `${accent}40`, color: accent }}
-            >
-              {!googleUser 
-                ? "Sign In"
-                : !signedInEmailVerified
-                  ? "Verify"
-                  : rewardsActive
-                    ? "View Perks"
-                    : "Link"
-              }
-            </button>
-              </div>
-                );
-              })(),
 
-            ]}
-          />
+                <button
+                  onClick={() => {
+                    if (googleUser && signedInEmailVerified && !rewardsActive) {
+                      setIsConnectGuideOpen(true);
+                      return;
+                    }
+                    setDonateModalInitialTab('incentives');
+                    setIsDonateModalOpen(true);
+                  }}
+                  className="relative shrink-0 cursor-pointer rounded-lg border px-2 py-1 text-center font-mono text-[9px] font-bold uppercase leading-tight tracking-wider transition-all active:scale-95"
+                  style={{ background: `${accent}26`, borderColor: `${accent}40`, color: accent }}
+                >
+                  {!googleUser
+                    ? "Sign In"
+                    : !signedInEmailVerified
+                      ? "Verify"
+                      : rewardsActive
+                        ? "View Perks"
+                        : "Link"
+                  }
+                </button>
+              </div>
+            );
+
+            return (
+              <BannerRotator
+                intervalMs={surface.intervalMs}
+                slides={[...promoSlides, statusSlide]}
+              />
+            );
+          })()}
+
           
 
           
           {/* Detailed Error Warning and Simulation Toggle Helper */}
           {walletLinkNotice && walletLinkNotice.kind !== "linked" && (
-            <div className="p-3.5 bg-[#32FF8B]/5 border border-[#32FF8B]/25 rounded-2xl space-y-2">
-              <div className="text-[11px] text-white/90 leading-snug">
+            <div
+              role={walletLinkNotice.kind === "signin-needed" ? "button" : undefined}
+              tabIndex={walletLinkNotice.kind === "signin-needed" ? 0 : undefined}
+              onClick={
+                walletLinkNotice.kind === "signin-needed"
+                  ? () => setIsConnectGuideOpen(true)
+                  : undefined
+              }
+              className={`flex min-h-[46px] items-center gap-2 rounded-xl border border-[#32FF8B]/25 bg-[#32FF8B]/5 px-3 py-2 ${
+                walletLinkNotice.kind === "signin-needed" ? "cursor-pointer active:scale-[0.99]" : ""
+              }`}
+            >
+              <div className="min-w-0 flex-1 text-[10.5px] leading-snug text-white/90">
                 {walletLinkNotice.kind === "signin-needed" ? (
                   <>
-                    This wallet is already linked to{" "}
-                    <span className="text-[#32FF8B] font-mono">{walletLinkNotice.emailHint}</span>.
-                    Sign in to that account to keep earning FlowPoints and referrals on this address.
+                    Sign in to{" "}
+                    <span className="font-mono text-[#32FF8B]">{walletLinkNotice.emailHint}</span> to
+                    keep earning FlowPoints and referrals.
                   </>
                 ) : walletLinkNotice.kind === "mismatch" ? (
                   <>
-                    Heads up — this wallet is bound to a different account{" "}
-                    <span className="text-[#F6BA00] font-mono">{walletLinkNotice.emailHint}</span>.
-                    FlowPoints will accrue to that account, not the one you're signed into.
+                    Wallet bound to{" "}
+                    <span className="font-mono text-[#F6BA00]">{walletLinkNotice.emailHint}</span> —
+                    FlowPoints accrue there.
                   </>
                 ) : (
-                  <>
-                    This wallet is not linked to your signed-in email yet. Sign once with the wallet to activate FlowPoints for this address.
-                  </>
+                  <>Sign once with this wallet to activate FlowPoints.</>
                 )}
               </div>
-              <div className="flex gap-2 justify-end font-mono">
-                {walletLinkNotice.kind === "signin-needed" && (
-                  <button
-                    onClick={() => setIsConnectGuideOpen(true)}
-                    className="px-3 py-1.5 bg-[#32FF8B] hover:bg-[#32FF8B]/90 text-[#010C1B] rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
-                  >
-                    Sign in to linked account
-                  </button>
-                )}
-                <button
-                  onClick={() => setWalletLinkNotice(null)}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
-                >
-                  Dismiss
-                </button>
-              </div>
+              {walletLinkNotice.kind === "signin-needed" && (
+                <span className="shrink-0 rounded-lg bg-[#32FF8B] px-2 py-1 font-mono text-[9px] font-black uppercase tracking-widest text-[#010C1B]">
+                  Sign in
+                </span>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setWalletLinkNotice(null);
+                }}
+                className="shrink-0 rounded-lg bg-white/10 px-2 py-1 font-mono text-[9px] font-black uppercase tracking-widest text-white transition-colors hover:bg-white/15"
+              >
+                Dismiss
+              </button>
             </div>
           )}
+
 
           {errorMessage && (
             <div className="p-3.5 bg-red-950/20 border border-red-500/25 rounded-2xl space-y-2">

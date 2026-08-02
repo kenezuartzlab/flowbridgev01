@@ -22,10 +22,32 @@ const flagsSchema = z.object({
   maintenanceNotice: z.string().trim().max(300),
 });
 
+const slideSchema = z.object({
+  id: z.string().trim().max(64).optional(),
+  title: z.string().trim().min(1).max(80),
+  body: z.string().trim().max(160).optional(),
+  imageUrl: z.string().trim().max(500).nullable().optional(),
+  href: z.string().trim().max(500).nullable().optional(),
+  theme: z.enum(["swap", "bridge"]).optional(),
+  isActive: z.boolean().optional(),
+});
+
+const surfaceSchema = z.object({
+  intervalMs: z.number().min(1500).max(60000),
+  slides: z.array(slideSchema).max(12),
+});
+
+const bannersSchema = z.object({
+  cabot: surfaceSchema,
+  swap: surfaceSchema,
+  bridge: surfaceSchema,
+});
+
 const bodySchema = z.object({
   fees: feesSchema.optional(),
   rewards: rewardsSchema.optional(),
   flags: flagsSchema.optional(),
+  banners: bannersSchema.optional(),
 });
 
 export const Route = createFileRoute("/api/admin/settings")({
@@ -54,7 +76,7 @@ export const Route = createFileRoute("/api/admin/settings")({
 
         const { writeSetting, buildPublicConfig } = await import("@/lib/appConfig.server");
         try {
-          for (const key of ["fees", "rewards", "flags"] as const) {
+          for (const key of ["fees", "rewards", "flags", "banners"] as const) {
             const value = parsed.data[key];
             if (value) await writeSetting(key, value, gate.admin.userId);
           }

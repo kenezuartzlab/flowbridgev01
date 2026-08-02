@@ -13,9 +13,12 @@ import {
   saveAdminToken,
 } from "@/lib/admin/adminApi";
 import {
+  BANNER_SURFACES,
   DEFAULT_APP_CONFIG,
   loadAppConfig,
   type AppConfig,
+  type BannerSlide,
+  type BannerSurfaceKey,
 } from "@/lib/config/appConfig";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
@@ -43,7 +46,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminRoute,
 });
 
-type Tab = "tokens" | "fees" | "rewards" | "flags";
+type Tab = "tokens" | "banners" | "fees" | "rewards" | "flags";
 
 const cardCls =
   "rounded-2xl border border-white/10 bg-[#0D1C2A]/70 p-4 space-y-3 font-mono text-[13px]";
@@ -141,6 +144,7 @@ function AdminPage() {
         {(
           [
             ["tokens", "Tokens"],
+            ["banners", "Banners"],
             ["fees", "Fees & Slippage"],
             ["rewards", "Rewards"],
             ["flags", "Feature Flags"],
@@ -161,7 +165,13 @@ function AdminPage() {
         ))}
       </div>
 
-      {tab === "tokens" ? <TokensPanel wallet={wallet!} /> : <SettingsPanel wallet={wallet!} tab={tab} />}
+      {tab === "tokens" ? (
+        <TokensPanel wallet={wallet!} />
+      ) : tab === "banners" ? (
+        <BannersPanel wallet={wallet!} />
+      ) : (
+        <SettingsPanel wallet={wallet!} tab={tab} />
+      )}
     </Shell>
   );
 }
@@ -447,7 +457,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
 
 /* ------------------------------ Settings ------------------------------ */
 
-function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens"> }) {
+function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners"> }) {
   const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -639,5 +649,232 @@ function Toggle({
         />
       </span>
     </button>
+  );
+}
+
+/* ------------------------------- Banners ------------------------------ */
+
+const SURFACE_LABEL: Record<BannerSurfaceKey, string> = {
+  cabot: "CA / BOT tab",
+  swap: "SWAP tab",
+  bridge: "BRIDGE tab",
+};
+
+function BannersPanel({ wallet }: { wallet: string }) {
+  const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
+  const [surface, setSurface] = useState<BannerSurfaceKey>("cabot");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetchAdminConfig(wallet)
+      .then((c) => alive && setCfg(c))
+      .catch((e) => alive && setError(e?.message ?? "Failed to load banners"))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [wallet]);
+
+  const current = cfg.banners[surface];
+
+  const patchSurface = (next: Partial<{ intervalMs: number; slides: BannerSlide[] }>) =>
+    setCfg({
+      ...cfg,
+      banners: { ...cfg.banners, [surface]: { ...current, ...next } },
+    });
+
+  const patchSlide = (index: number, next: Partial<BannerSlide>) =>
+    patchSurface({
+      slides: current.slides.map((s, i) => (i === index ? { ...s, ...next } : s)),
+    });
+
+  const addSlide = () =>
+    patchSurface({
+      slides: [
+        ...current.slides,
+        {
+          id: `${surface}-${Date.now()}`,
+          title: "New banner",
+          body: "",
+          imageUrl: "",
+          href: "",
+          theme: surface === "bridge" ? "bridge" : "swap",
+          isActive: true,
+        },
+      ],
+    });
+
+  const removeSlide = (index: number) =>
+    patchSurface({ slides: current.slides.filter((_, i) => i !== index) });
+
+  const move = (index: number, dir: -1 | 1) => {
+    const next = [...current.slides];
+    const to = index + dir;
+    if (to < 0 || to >= next.length) return;
+    [next[index], next[to]] = [next[to], next[index]];
+    patchSurface({ slides: next });
+  };
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await saveAdminSettings(wallet, { banners: cfg.banners });
+      await loadAppConfig(true);
+      setSaved(true);
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to save banners");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className={cardCls}>Loading banners…</div>;
+
+  return (
+    <div className="space-y-4">
+      <div className={cardCls}>
+        <span className={labelCls}>Banner surface</span>
+        <div className="flex flex-wrap gap-2">
+          {BANNER_SURFACES.map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setSurface(key)}
+              className={`px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition ${
+                surface === key
+                  ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                  : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+              }`}
+            >
+              {SURFACE_LABEL[key]}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-1">
+          <div className={labelCls}>Rotation delay (seconds)</div>
+          <input
+            type="number"
+            step="0.5"
+            min="1.5"
+            value={String(current.intervalMs / 1000)}
+            onChange={(e) =>
+              patchSurface({ intervalMs: Math.round((Number(e.target.value) || 4) * 1000) })
+            }
+            className={inputCls}
+          />
+          <div className="text-[11px] text-[#C5C1B9]">
+            Users can also swipe left/right or tap the dots.
+          </div>
+        </div>
+      </div>
+
+      {current.slides.map((slide, i) => (
+        <div key={slide.id} className={cardCls}>
+          <div className="flex items-center justify-between">
+            <span className={labelCls}>
+              Banner {i + 1} · {SURFACE_LABEL[surface]}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button type="button" onClick={() => move(i, -1)} className={btnGhost}>
+                ↑
+              </button>
+              <button type="button" onClick={() => move(i, 1)} className={btnGhost}>
+                ↓
+              </button>
+              <button
+                type="button"
+                onClick={() => removeSlide(i)}
+                className="p-2 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 cursor-pointer hover:bg-red-500/20"
+                aria-label="Delete banner"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <div className={labelCls}>Title (max 80)</div>
+            <input
+              value={slide.title}
+              maxLength={80}
+              onChange={(e) => patchSlide(i, { title: e.target.value })}
+              className={inputCls}
+            />
+          </div>
+          <div className="space-y-1">
+            <div className={labelCls}>Body (max 160, optional)</div>
+            <input
+              value={slide.body ?? ""}
+              maxLength={160}
+              onChange={(e) => patchSlide(i, { body: e.target.value })}
+              className={inputCls}
+            />
+          </div>
+          <div className="space-y-1">
+            <div className={labelCls}>Image URL (optional)</div>
+            <input
+              value={slide.imageUrl ?? ""}
+              placeholder="https://… or /uploads/banner.png"
+              onChange={(e) => patchSlide(i, { imageUrl: e.target.value })}
+              className={inputCls}
+            />
+          </div>
+          <div className="space-y-1">
+            <div className={labelCls}>Click link (route or URL, optional)</div>
+            <input
+              value={slide.href ?? ""}
+              placeholder="/rewards or https://…"
+              onChange={(e) => patchSlide(i, { href: e.target.value })}
+              className={inputCls}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2 items-end">
+            <div className="space-y-1">
+              <div className={labelCls}>Theme</div>
+              <select
+                value={slide.theme ?? "swap"}
+                onChange={(e) => patchSlide(i, { theme: e.target.value as "swap" | "bridge" })}
+                className={`${inputCls} cursor-pointer`}
+              >
+                <option value="swap">Swap (violet/blue)</option>
+                <option value="bridge">Bridge (teal)</option>
+              </select>
+            </div>
+            <Toggle
+              label={slide.isActive === false ? "Hidden" : "Live"}
+              value={slide.isActive !== false}
+              onChange={(v) => patchSlide(i, { isActive: v })}
+            />
+          </div>
+        </div>
+      ))}
+
+      <div className={cardCls}>
+        <button type="button" onClick={addSlide} className={btnGhost}>
+          <Plus className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Add banner
+        </button>
+        {error && (
+          <div className="flex items-start gap-2 text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
+            <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+        {saved && (
+          <div className="flex items-center gap-2 text-[#32FF8B]">
+            <Check className="w-3.5 h-3.5" /> Saved — live for all users.
+          </div>
+        )}
+        <button type="button" onClick={save} disabled={saving} className={btnPrimary}>
+          {saving ? "Saving…" : "Save banners"}
+        </button>
+      </div>
+    </div>
   );
 }
