@@ -153,10 +153,29 @@ function str(v: unknown, fallback = ""): string {
   return typeof v === "string" ? v : fallback;
 }
 
+function mergeSchedule(raw: any): BannerSchedule | null {
+  if (!raw || typeof raw !== "object") return null;
+  const startAt = str(raw.startAt ?? raw.start_at).trim() || null;
+  const endAt = str(raw.endAt ?? raw.end_at).trim() || null;
+  const days = Array.isArray(raw.days)
+    ? Array.from(
+        new Set(
+          raw.days
+            .map((d: any) => Number(d))
+            .filter((d: number) => Number.isInteger(d) && d >= 0 && d <= 6),
+        ),
+      ).sort()
+    : null;
+  if (!startAt && !endAt && (!days || days.length === 0 || days.length === 7)) return null;
+  return { startAt, endAt, days: days && days.length ? (days as number[]) : null };
+}
+
 function mergeSlide(raw: any, index: number, surface: string): BannerSlide | null {
   if (!raw || typeof raw !== "object") return null;
   const title = str(raw.title).trim();
   if (!title) return null;
+  const layout: BannerLayout =
+    raw.layout === "full" || raw.layout === "logo" ? raw.layout : "compact";
   return {
     id: str(raw.id).trim() || `${surface}-${index}`,
     title,
@@ -165,8 +184,29 @@ function mergeSlide(raw: any, index: number, surface: string): BannerSlide | nul
     href: str(raw.href ?? raw.link).trim() || null,
     theme: raw.theme === "bridge" ? "bridge" : "swap",
     isActive: raw.isActive !== false,
+    layout,
+    schedule: mergeSchedule(raw.schedule),
   };
 }
+
+/** True when the slide is live now (enabled + inside its schedule window). */
+export function isSlideVisible(slide: BannerSlide, now: Date = new Date()): boolean {
+  if (slide.isActive === false) return false;
+  const s = slide.schedule;
+  if (!s) return true;
+  const t = now.getTime();
+  if (s.startAt) {
+    const start = Date.parse(s.startAt);
+    if (Number.isFinite(start) && t < start) return false;
+  }
+  if (s.endAt) {
+    const end = Date.parse(s.endAt);
+    if (Number.isFinite(end) && t > end) return false;
+  }
+  if (s.days && s.days.length && !s.days.includes(now.getDay())) return false;
+  return true;
+}
+
 
 /** Normalizes admin-published banner settings, falling back to defaults. */
 export function mergeBanners(partial: any): BannerSettings {
