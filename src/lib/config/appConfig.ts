@@ -40,12 +40,81 @@ export interface RemoteToken {
   sortOrder?: number;
 }
 
+/** One rotating promo slide. Purely presentational + a link target. */
+export interface BannerSlide {
+  id: string;
+  title: string;
+  body?: string;
+  imageUrl?: string | null;
+  /** Internal route ("/rewards") or absolute URL. Empty = not clickable. */
+  href?: string | null;
+  theme?: "swap" | "bridge";
+  isActive?: boolean;
+}
+
+export interface BannerSurface {
+  intervalMs: number;
+  slides: BannerSlide[];
+}
+
+export type BannerSurfaceKey = "cabot" | "swap" | "bridge";
+
+export type BannerSettings = Record<BannerSurfaceKey, BannerSurface>;
+
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
   flags: FlagSettings;
+  banners: BannerSettings;
   tokens: RemoteToken[];
 }
+
+export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge"];
+
+const BRIDGE_ART = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
+const GIFT_ART = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/gift-1.png";
+
+export const DEFAULT_BANNERS: BannerSettings = {
+  cabot: {
+    intervalMs: 4000,
+    slides: [
+      {
+        id: "cabot-default",
+        title: "CA / BOT Instant Swap",
+        body: "Fixed pair routing with live quotes.",
+        imageUrl: GIFT_ART,
+        href: "/rewards",
+        theme: "swap",
+      },
+    ],
+  },
+  swap: {
+    intervalMs: 4000,
+    slides: [
+      {
+        id: "swap-default",
+        title: "Swap & Earn FLOW Points",
+        body: "Earn points on every qualified swap.",
+        imageUrl: GIFT_ART,
+        href: "/rewards",
+        theme: "swap",
+      },
+    ],
+  },
+  bridge: {
+    intervalMs: 4000,
+    slides: [
+      {
+        id: "bridge-default",
+        title: "Cross-Chain Bridge",
+        body: "Fast. Secure. Multi-chain.",
+        imageUrl: BRIDGE_ART,
+        href: "/activity",
+        theme: "bridge",
+      },
+    ],
+  },
+};
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
@@ -58,6 +127,8 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     referralActivityPct: 20,
   },
   flags: { limitTabPublic: false, showBanners: true, maintenanceNotice: "" },
+  banners: DEFAULT_BANNERS,
+
   tokens: [],
 };
 
