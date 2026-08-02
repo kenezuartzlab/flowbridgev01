@@ -108,7 +108,21 @@ html.light {
   --fb-status-ok-from: #DCF6E6;
   --fb-status-ok-to: #F5FDF8;
   --fb-status-ok-accent: #15803D;
+
+  /* ---- Redesign pass: glass, elevation, glow (light) ---- */
+  --fb-glass-from: rgba(255, 255, 255, 0.96);
+  --fb-glass-to: rgba(233, 241, 236, 0.88);
+  --fb-glass-border: rgba(13, 28, 42, 0.10);
+  --fb-glass-border-hover: rgba(21, 128, 61, 0.35);
+  --fb-glass-highlight: rgba(255, 255, 255, 0.9);
+  --fb-inset: rgba(13, 28, 42, 0.04);
+  --fb-inset-border: rgba(13, 28, 42, 0.08);
+  --fb-shadow-sm: 0 2px 8px -4px rgba(13, 28, 42, 0.16);
+  --fb-shadow-md: 0 10px 30px -12px rgba(13, 28, 42, 0.18);
+  --fb-shadow-lg: 0 24px 60px -24px rgba(13, 28, 42, 0.22);
+  --fb-glow-primary: 0 0 0 1px rgba(21, 128, 61, 0.3), 0 8px 24px -14px rgba(21, 128, 61, 0.4);
 }
+
 
 
 @theme {
