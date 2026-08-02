@@ -71,9 +71,6 @@ export interface AppConfig {
 
 export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge"];
 
-const BRIDGE_ART = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
-const GIFT_ART = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/gift-1.png";
-
 export const DEFAULT_BANNERS: BannerSettings = {
   cabot: {
     intervalMs: 4000,
@@ -82,7 +79,7 @@ export const DEFAULT_BANNERS: BannerSettings = {
         id: "cabot-default",
         title: "CA / BOT Instant Swap",
         body: "Fixed pair routing with live quotes.",
-        imageUrl: GIFT_ART,
+        imageUrl: null,
         href: "/rewards",
         theme: "swap",
       },
@@ -95,7 +92,7 @@ export const DEFAULT_BANNERS: BannerSettings = {
         id: "swap-default",
         title: "Swap & Earn FLOW Points",
         body: "Earn points on every qualified swap.",
-        imageUrl: GIFT_ART,
+        imageUrl: null,
         href: "/rewards",
         theme: "swap",
       },
@@ -108,7 +105,7 @@ export const DEFAULT_BANNERS: BannerSettings = {
         id: "bridge-default",
         title: "Cross-Chain Bridge",
         body: "Fast. Secure. Multi-chain.",
-        imageUrl: BRIDGE_ART,
+        imageUrl: null,
         href: "/activity",
         theme: "bridge",
       },

@@ -72,9 +72,12 @@ export function TabBanner({
   const base = COPY[variant];
   const title = slide?.title ?? base.title;
   const body = slide?.body ?? base.body;
-  const art = slide?.imageUrl || base.art;
+  const themeKey = slide?.theme ?? toneOf(variant);
+  const art = slide
+    ? slide.imageUrl || (themeKey === "bridge" ? bridgeHero : giftAsset.url)
+    : base.art;
   const href = slide ? slide.href || undefined : base.href;
-  const t = THEME[slide?.theme ?? toneOf(variant)];
+  const t = THEME[themeKey];
 
   const inner = (
     <>
