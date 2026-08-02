@@ -41,6 +41,7 @@ export async function buildPublicConfig(): Promise<AppConfig> {
     fees: settings.fees,
     rewards: settings.rewards,
     flags: settings.flags,
+    banners: settings.banners,
     tokens: tokens.filter((t: any) => t.is_active !== false),
   });
 }
