@@ -69,3 +69,30 @@ export async function deleteAdminToken(wallet: string, id: string) {
     }),
   );
 }
+
+/** Uploads banner artwork; returns the served image URL. */
+export async function uploadBannerImage(wallet: string, file: File): Promise<{ url: string }> {
+  const h = await headers(wallet);
+  delete (h as any)["content-type"];
+  const form = new FormData();
+  form.append("file", file);
+  return parse(await fetch("/api/admin/banner-upload", { method: "POST", headers: h, body: form }));
+}
+
+export interface BannerStat {
+  surface: string;
+  slideId: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+}
+
+export async function fetchBannerStats(
+  wallet: string,
+  days = 30,
+): Promise<{ days: number; stats: BannerStat[] }> {
+  return parse(
+    await fetch(`/api/admin/banner-stats?days=${days}`, { headers: await headers(wallet) }),
+  );
+}
+

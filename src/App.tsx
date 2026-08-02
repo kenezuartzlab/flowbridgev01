@@ -30,6 +30,8 @@ import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
 import { TabBanner } from './components/banners/TabBanner';
 import { BannerRotator } from './components/banners/BannerRotator';
+import { trackBannerImpression } from './lib/banners/analytics';
+
 
 import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
@@ -2444,8 +2446,14 @@ export default function App() {
               activeTab === 'BRIDGE' ? 'bridge' : activeTab === 'CA/BOT' ? 'cabot' : 'swap';
             const surface = getBannerSurface(appConfig, surfaceKey);
             const promoSlides = appConfig.flags.showBanners
-              ? surface.slides.map((s: BannerSlide) => <TabBanner key={s.id} slide={s} />)
+              ? surface.slides.map((s: BannerSlide) => (
+                  <TabBanner key={s.id} slide={s} surface={surfaceKey} />
+                ))
               : [];
+            const promoKeys = appConfig.flags.showBanners
+              ? surface.slides.map((s: BannerSlide) => s.id)
+              : [];
+
             const tone = !googleUser ? 'info' : !signedInEmailVerified ? 'warn' : rewardsActive ? 'ok' : 'warn';
             const accent = `var(--fb-status-${tone}-accent)`;
             const statusSlide = (
@@ -2522,8 +2530,13 @@ export default function App() {
               <BannerRotator
                 intervalMs={surface.intervalMs}
                 slides={[...promoSlides, statusSlide]}
+                slideKeys={[...promoKeys, "status"]}
+                onSlideVisible={(key) => {
+                  if (key !== "status") trackBannerImpression(surfaceKey, key);
+                }}
               />
             );
+
           })()}
 
           

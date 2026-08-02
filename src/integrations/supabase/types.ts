@@ -50,6 +50,30 @@ export type Database = {
         }
         Relationships: []
       }
+      banner_events: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          slide_id: string
+          surface: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          slide_id: string
+          surface: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          slide_id?: string
+          surface?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string

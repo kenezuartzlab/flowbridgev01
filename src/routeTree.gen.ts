@@ -24,6 +24,7 @@ import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
+import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
@@ -33,9 +34,12 @@ import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
+import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-image.$'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
+import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
+import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -120,6 +124,11 @@ const ApiConfigRoute = ApiConfigRouteImport.update({
   path: '/api/config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBannerEventsRoute = ApiBannerEventsRouteImport.update({
+  id: '/api/banner-events',
+  path: '/api/banner-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -167,6 +176,11 @@ const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
   path: '/api/incentives/global',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBannerImageSplatRoute = ApiBannerImageSplatRouteImport.update({
+  id: '/api/banner-image/$',
+  path: '/api/banner-image/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
   id: '/api/admin/whoami',
   path: '/api/admin/whoami',
@@ -180,6 +194,16 @@ const ApiAdminTokensRoute = ApiAdminTokensRouteImport.update({
 const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
   id: '/api/admin/settings',
   path: '/api/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
+  id: '/api/admin/banner-upload',
+  path: '/api/admin/banner-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminBannerStatsRoute = ApiAdminBannerStatsRouteImport.update({
+  id: '/api/admin/banner-stats',
+  path: '/api/admin/banner-stats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
@@ -240,14 +264,18 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
+  '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -277,14 +305,18 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
+  '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -315,14 +347,18 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
+  '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -354,14 +390,18 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/banner-events'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/banner-stats'
+    | '/api/admin/banner-upload'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/banner-image/$'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -391,14 +431,18 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/banner-events'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/banner-stats'
+    | '/api/admin/banner-upload'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/banner-image/$'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -428,14 +472,18 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/banner-events'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/banner-stats'
+    | '/api/admin/banner-upload'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/banner-image/$'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -466,14 +514,18 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiBannerEventsRoute: typeof ApiBannerEventsRoute
   ApiConfigRoute: typeof ApiConfigRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
   ApiTransactionsRoute: typeof ApiTransactionsRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
+  ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
   ApiAdminWhoamiRoute: typeof ApiAdminWhoamiRoute
+  ApiBannerImageSplatRoute: typeof ApiBannerImageSplatRoute
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
@@ -596,6 +648,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/banner-events': {
+      id: '/api/banner-events'
+      path: '/api/banner-events'
+      fullPath: '/api/banner-events'
+      preLoaderRoute: typeof ApiBannerEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -659,6 +718,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIncentivesGlobalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/banner-image/$': {
+      id: '/api/banner-image/$'
+      path: '/api/banner-image/$'
+      fullPath: '/api/banner-image/$'
+      preLoaderRoute: typeof ApiBannerImageSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/whoami': {
       id: '/api/admin/whoami'
       path: '/api/admin/whoami'
@@ -678,6 +744,20 @@ declare module '@tanstack/react-router' {
       path: '/api/admin/settings'
       fullPath: '/api/admin/settings'
       preLoaderRoute: typeof ApiAdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/banner-upload': {
+      id: '/api/admin/banner-upload'
+      path: '/api/admin/banner-upload'
+      fullPath: '/api/admin/banner-upload'
+      preLoaderRoute: typeof ApiAdminBannerUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/banner-stats': {
+      id: '/api/admin/banner-stats'
+      path: '/api/admin/banner-stats'
+      fullPath: '/api/admin/banner-stats'
+      preLoaderRoute: typeof ApiAdminBannerStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
@@ -766,14 +846,18 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiBannerEventsRoute: ApiBannerEventsRoute,
   ApiConfigRoute: ApiConfigRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
   ApiTransactionsRoute: ApiTransactionsRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
+  ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
   ApiAdminWhoamiRoute: ApiAdminWhoamiRoute,
+  ApiBannerImageSplatRoute: ApiBannerImageSplatRoute,
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,

@@ -22,6 +22,15 @@ const flagsSchema = z.object({
   maintenanceNotice: z.string().trim().max(300),
 });
 
+const scheduleSchema = z
+  .object({
+    startAt: z.string().trim().max(40).nullable().optional(),
+    endAt: z.string().trim().max(40).nullable().optional(),
+    days: z.array(z.number().int().min(0).max(6)).max(7).nullable().optional(),
+  })
+  .nullable()
+  .optional();
+
 const slideSchema = z.object({
   id: z.string().trim().max(64).optional(),
   title: z.string().trim().min(1).max(80),
@@ -30,7 +39,10 @@ const slideSchema = z.object({
   href: z.string().trim().max(500).nullable().optional(),
   theme: z.enum(["swap", "bridge"]).optional(),
   isActive: z.boolean().optional(),
+  layout: z.enum(["compact", "logo", "full"]).optional(),
+  schedule: scheduleSchema,
 });
+
 
 const surfaceSchema = z.object({
   intervalMs: z.number().min(1500).max(60000),

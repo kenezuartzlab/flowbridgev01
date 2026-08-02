@@ -2,7 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAccount, WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
-import { AlertTriangle, Check, Loader2, Plus, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  CalendarClock,
+  Check,
+  Image as ImageIcon,
+  Loader2,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { initAuth } from "@/lib/auth";
 import {
   checkAdmin,
@@ -11,15 +22,21 @@ import {
   fetchAdminTokens,
   saveAdminSettings,
   saveAdminToken,
+  uploadBannerImage,
+  fetchBannerStats,
+  type BannerStat,
 } from "@/lib/admin/adminApi";
 import {
   BANNER_SURFACES,
   DEFAULT_APP_CONFIG,
+  isSlideVisible,
   loadAppConfig,
   type AppConfig,
+  type BannerLayout,
   type BannerSlide,
   type BannerSurfaceKey,
 } from "@/lib/config/appConfig";
+import { TabBanner } from "@/components/banners/TabBanner";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
 import { TokenIcon } from "@/components/TokenIcon";
@@ -660,6 +677,25 @@ const SURFACE_LABEL: Record<BannerSurfaceKey, string> = {
   bridge: "BRIDGE tab",
 };
 
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/** ISO string -> value for <input type="datetime-local"> (local time). */
+function isoToLocalInput(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(
+    d.getMinutes(),
+  )}`;
+}
+
+function localInputToIso(value: string): string | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 function BannersPanel({ wallet }: { wallet: string }) {
   const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
   const [surface, setSurface] = useState<BannerSurfaceKey>("cabot");
@@ -667,6 +703,10 @@ function BannersPanel({ wallet }: { wallet: string }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState<number | null>(null);
+  const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop" | null>("mobile");
+  const [stats, setStats] = useState<BannerStat[] | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -678,6 +718,17 @@ function BannersPanel({ wallet }: { wallet: string }) {
       alive = false;
     };
   }, [wallet]);
+
+  const loadStats = useCallback(() => {
+    setStatsError(null);
+    fetchBannerStats(wallet, 30)
+      .then((r) => setStats(r.stats))
+      .catch((e) => setStatsError(e?.message ?? "Failed to load analytics"));
+  }, [wallet]);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
 
   const current = cfg.banners[surface];
 
@@ -692,6 +743,13 @@ function BannersPanel({ wallet }: { wallet: string }) {
       slides: current.slides.map((s, i) => (i === index ? { ...s, ...next } : s)),
     });
 
+  const patchSchedule = (index: number, next: Partial<NonNullable<BannerSlide["schedule"]>>) => {
+    const slide = current.slides[index];
+    const merged = { ...(slide.schedule ?? {}), ...next };
+    const empty = !merged.startAt && !merged.endAt && !(merged.days && merged.days.length);
+    patchSlide(index, { schedule: empty ? null : merged });
+  };
+
   const addSlide = () =>
     patchSurface({
       slides: [
@@ -704,6 +762,8 @@ function BannersPanel({ wallet }: { wallet: string }) {
           href: "",
           theme: surface === "bridge" ? "bridge" : "swap",
           isActive: true,
+          layout: "compact",
+          schedule: null,
         },
       ],
     });
@@ -717,6 +777,28 @@ function BannersPanel({ wallet }: { wallet: string }) {
     if (to < 0 || to >= next.length) return;
     [next[index], next[to]] = [next[to], next[index]];
     patchSurface({ slides: next });
+  };
+
+  const upload = async (index: number, file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    if (!/^image\/(png|jpeg|webp|gif|svg\+xml)$/.test(file.type)) {
+      setError("Use a PNG, JPG, WebP, GIF or SVG image.");
+      return;
+    }
+    if (file.size > 2_000_000) {
+      setError("Image is larger than 2 MB — please compress it first.");
+      return;
+    }
+    setUploading(index);
+    try {
+      const { url } = await uploadBannerImage(wallet, file);
+      patchSlide(index, { imageUrl: url });
+    } catch (e: any) {
+      setError(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(null);
+    }
   };
 
   const save = async () => {
@@ -734,7 +816,12 @@ function BannersPanel({ wallet }: { wallet: string }) {
     }
   };
 
+  const statFor = (slideId: string) =>
+    stats?.find((s) => s.surface === surface && s.slideId === slideId);
+
   if (loading) return <div className={cardCls}>Loading banners…</div>;
+
+  const livePreviewSlides = current.slides.filter((s) => isSlideVisible(s));
 
   return (
     <div className="space-y-4">
@@ -770,91 +857,291 @@ function BannersPanel({ wallet }: { wallet: string }) {
             className={inputCls}
           />
           <div className="text-[11px] text-[#C5C1B9]">
-            Users can also swipe left/right or tap the dots.
+            Users can swipe, tap the dots or use ← / → keys. Auto-rotation is disabled for
+            visitors who prefer reduced motion.
           </div>
         </div>
       </div>
 
-      {current.slides.map((slide, i) => (
-        <div key={slide.id} className={cardCls}>
-          <div className="flex items-center justify-between">
-            <span className={labelCls}>
-              Banner {i + 1} · {SURFACE_LABEL[surface]}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button type="button" onClick={() => move(i, -1)} className={btnGhost}>
-                ↑
-              </button>
-              <button type="button" onClick={() => move(i, 1)} className={btnGhost}>
-                ↓
-              </button>
+      {/* Live preview */}
+      <div className={cardCls}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className={labelCls}>Preview · {SURFACE_LABEL[surface]}</span>
+          <div className="flex gap-1.5">
+            {(
+              [
+                ["mobile", "Mobile"],
+                ["desktop", "Desktop"],
+              ] as ["mobile" | "desktop", string][]
+            ).map(([id, label]) => (
               <button
+                key={id}
                 type="button"
-                onClick={() => removeSlide(i)}
-                className="p-2 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 cursor-pointer hover:bg-red-500/20"
-                aria-label="Delete banner"
+                onClick={() => setPreviewDevice(previewDevice === id ? null : id)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
+                  previewDevice === id
+                    ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                    : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                }`}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                {label}
               </button>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className={labelCls}>Title (max 80)</div>
-            <input
-              value={slide.title}
-              maxLength={80}
-              onChange={(e) => patchSlide(i, { title: e.target.value })}
-              className={inputCls}
-            />
-          </div>
-          <div className="space-y-1">
-            <div className={labelCls}>Body (max 160, optional)</div>
-            <input
-              value={slide.body ?? ""}
-              maxLength={160}
-              onChange={(e) => patchSlide(i, { body: e.target.value })}
-              className={inputCls}
-            />
-          </div>
-          <div className="space-y-1">
-            <div className={labelCls}>Image URL (optional)</div>
-            <input
-              value={slide.imageUrl ?? ""}
-              placeholder="https://… or /uploads/banner.png"
-              onChange={(e) => patchSlide(i, { imageUrl: e.target.value })}
-              className={inputCls}
-            />
-          </div>
-          <div className="space-y-1">
-            <div className={labelCls}>Click link (route or URL, optional)</div>
-            <input
-              value={slide.href ?? ""}
-              placeholder="/rewards or https://…"
-              onChange={(e) => patchSlide(i, { href: e.target.value })}
-              className={inputCls}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2 items-end">
-            <div className="space-y-1">
-              <div className={labelCls}>Theme</div>
-              <select
-                value={slide.theme ?? "swap"}
-                onChange={(e) => patchSlide(i, { theme: e.target.value as "swap" | "bridge" })}
-                className={`${inputCls} cursor-pointer`}
-              >
-                <option value="swap">Swap (violet/blue)</option>
-                <option value="bridge">Bridge (teal)</option>
-              </select>
-            </div>
-            <Toggle
-              label={slide.isActive === false ? "Hidden" : "Live"}
-              value={slide.isActive !== false}
-              onChange={(v) => patchSlide(i, { isActive: v })}
-            />
+            ))}
           </div>
         </div>
-      ))}
+
+        {previewDevice && (
+          <div className="overflow-x-auto">
+            <div
+              className="mx-auto rounded-2xl border border-white/10 bg-[#010C1B] p-3 space-y-3"
+              style={{ width: previewDevice === "mobile" ? 360 : 640, maxWidth: "100%" }}
+            >
+              {livePreviewSlides.length === 0 ? (
+                <div className="text-[11px] text-[#C5C1B9]">
+                  No banner is live right now for this surface (check schedules / visibility).
+                </div>
+              ) : (
+                livePreviewSlides.map((s) => <TabBanner key={s.id} slide={s} />)
+              )}
+            </div>
+          </div>
+        )}
+        <div className="text-[11px] text-[#C5C1B9]">
+          Shows only slides that are live at this moment, exactly as users see them.
+        </div>
+      </div>
+
+      {current.slides.map((slide, i) => {
+        const stat = statFor(slide.id);
+        const live = isSlideVisible(slide);
+        return (
+          <div key={slide.id} className={cardCls}>
+            <div className="flex items-center justify-between">
+              <span className={labelCls}>
+                Banner {i + 1} · {SURFACE_LABEL[surface]}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button type="button" onClick={() => move(i, -1)} className={btnGhost}>
+                  ↑
+                </button>
+                <button type="button" onClick={() => move(i, 1)} className={btnGhost}>
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeSlide(i)}
+                  className="p-2 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 cursor-pointer hover:bg-red-500/20"
+                  aria-label="Delete banner"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-[10.5px]">
+              <span
+                className={`px-2 py-1 rounded-lg border ${
+                  live
+                    ? "border-[#32FF8B]/40 bg-[#32FF8B]/10 text-[#32FF8B]"
+                    : "border-white/15 bg-white/5 text-[#C5C1B9]"
+                }`}
+              >
+                {live ? "Live now" : "Not showing"}
+              </span>
+              <span className="text-[#C5C1B9]">
+                {stat
+                  ? `${stat.impressions} views · ${stat.clicks} clicks · ${stat.ctr.toFixed(1)}% CTR (30d)`
+                  : "No engagement data yet (30d)"}
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <div className={labelCls}>Title (max 80)</div>
+              <input
+                value={slide.title}
+                maxLength={80}
+                onChange={(e) => patchSlide(i, { title: e.target.value })}
+                className={inputCls}
+              />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Body (max 160, optional)</div>
+              <input
+                value={slide.body ?? ""}
+                maxLength={160}
+                onChange={(e) => patchSlide(i, { body: e.target.value })}
+                className={inputCls}
+              />
+            </div>
+
+            {/* Artwork: upload or URL */}
+            <div className="space-y-1.5">
+              <div className={labelCls}>Artwork</div>
+              <div className="flex items-center gap-2.5">
+                <div className="h-14 w-20 shrink-0 rounded-lg border border-white/10 bg-[#010C1B] overflow-hidden flex items-center justify-center">
+                  {slide.imageUrl ? (
+                    <img
+                      src={slide.imageUrl}
+                      alt={`${slide.title} artwork preview`}
+                      className={`h-full w-full ${
+                        slide.layout === "full" ? "object-cover" : "object-contain"
+                      }`}
+                    />
+                  ) : (
+                    <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+                  )}
+                </div>
+                <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
+                  {uploading === i ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Upload className="w-3.5 h-3.5" />
+                  )}
+                  {uploading === i ? "Uploading…" : "Upload image"}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                    className="hidden"
+                    onChange={(e) => {
+                      void upload(i, e.target.files?.[0]);
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </label>
+                {slide.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => patchSlide(i, { imageUrl: "" })}
+                    className={btnGhost}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              <input
+                value={slide.imageUrl ?? ""}
+                placeholder="…or paste an image URL"
+                onChange={(e) => patchSlide(i, { imageUrl: e.target.value })}
+                className={inputCls}
+              />
+              <div className="text-[11px] text-[#C5C1B9]">PNG, JPG, WebP, GIF or SVG · max 2 MB.</div>
+            </div>
+
+            <div className="space-y-1">
+              <div className={labelCls}>Image size / fill</div>
+              <select
+                value={slide.layout ?? "compact"}
+                onChange={(e) => patchSlide(i, { layout: e.target.value as BannerLayout })}
+                className={`${inputCls} cursor-pointer`}
+              >
+                <option value="compact">Compact icon (32–36px)</option>
+                <option value="logo">Large logo (44–48px)</option>
+                <option value="full">Full-bleed background</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <div className={labelCls}>Click link (route or URL, optional)</div>
+              <input
+                value={slide.href ?? ""}
+                placeholder="/rewards or https://…"
+                onChange={(e) => patchSlide(i, { href: e.target.value })}
+                className={inputCls}
+              />
+            </div>
+
+            {/* Scheduling */}
+            <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+              <div className="flex items-center gap-1.5">
+                <CalendarClock className="w-3.5 h-3.5 text-[#32FF8B]" />
+                <span className={labelCls}>Schedule (optional)</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <div className="text-[10.5px] text-[#C5C1B9] uppercase tracking-widest">Start</div>
+                  <input
+                    type="datetime-local"
+                    value={isoToLocalInput(slide.schedule?.startAt)}
+                    onChange={(e) =>
+                      patchSchedule(i, { startAt: localInputToIso(e.target.value) })
+                    }
+                    className={inputCls}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-[10.5px] text-[#C5C1B9] uppercase tracking-widest">End</div>
+                  <input
+                    type="datetime-local"
+                    value={isoToLocalInput(slide.schedule?.endAt)}
+                    onChange={(e) => patchSchedule(i, { endAt: localInputToIso(e.target.value) })}
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-[10.5px] text-[#C5C1B9] uppercase tracking-widest">
+                  Days of week (none selected = every day)
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {DAY_LABELS.map((d, day) => {
+                    const on = !!slide.schedule?.days?.includes(day);
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => {
+                          const days = new Set(slide.schedule?.days ?? []);
+                          if (on) days.delete(day);
+                          else days.add(day);
+                          patchSchedule(i, {
+                            days: days.size ? [...days].sort((a, b) => a - b) : null,
+                          });
+                        }}
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
+                          on
+                            ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                            : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                        }`}
+                      >
+                        {d}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              {(slide.schedule?.startAt || slide.schedule?.endAt || slide.schedule?.days) && (
+                <button
+                  type="button"
+                  onClick={() => patchSlide(i, { schedule: null })}
+                  className={btnGhost}
+                >
+                  Clear schedule
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 items-end">
+              <div className="space-y-1">
+                <div className={labelCls}>Theme</div>
+                <select
+                  value={slide.theme ?? "swap"}
+                  onChange={(e) => patchSlide(i, { theme: e.target.value as "swap" | "bridge" })}
+                  className={`${inputCls} cursor-pointer`}
+                >
+                  <option value="swap">Swap (violet/blue)</option>
+                  <option value="bridge">Bridge (teal)</option>
+                </select>
+              </div>
+              <Toggle
+                label={slide.isActive === false ? "Hidden" : "Live"}
+                value={slide.isActive !== false}
+                onChange={(v) => patchSlide(i, { isActive: v })}
+              />
+            </div>
+          </div>
+        );
+      })}
 
       <div className={cardCls}>
         <button type="button" onClick={addSlide} className={btnGhost}>
@@ -874,6 +1161,52 @@ function BannersPanel({ wallet }: { wallet: string }) {
         <button type="button" onClick={save} disabled={saving} className={btnPrimary}>
           {saving ? "Saving…" : "Save banners"}
         </button>
+      </div>
+
+      {/* Engagement analytics */}
+      <div className={cardCls}>
+        <div className="flex items-center justify-between">
+          <span className={labelCls}>Engagement · last 30 days</span>
+          <button type="button" onClick={loadStats} className={btnGhost}>
+            <RefreshCw className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Refresh
+          </button>
+        </div>
+        {statsError && (
+          <div className="flex items-start gap-2 text-amber-400">
+            <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <span>{statsError}</span>
+          </div>
+        )}
+        {!stats ? (
+          <div className="text-[#C5C1B9]">Loading analytics…</div>
+        ) : stats.length === 0 ? (
+          <div className="text-[#C5C1B9]">No banner views recorded yet.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[12px]">
+              <thead className="text-[10.5px] uppercase tracking-widest text-[#C5C1B9]">
+                <tr>
+                  <th scope="col" className="py-1.5 pr-3">Surface</th>
+                  <th scope="col" className="py-1.5 pr-3">Banner</th>
+                  <th scope="col" className="py-1.5 pr-3">Views</th>
+                  <th scope="col" className="py-1.5 pr-3">Clicks</th>
+                  <th scope="col" className="py-1.5">CTR</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.map((s) => (
+                  <tr key={`${s.surface}-${s.slideId}`} className="border-t border-white/5">
+                    <td className="py-1.5 pr-3 text-[#C5C1B9]">{s.surface}</td>
+                    <td className="py-1.5 pr-3 text-white break-all">{s.slideId}</td>
+                    <td className="py-1.5 pr-3">{s.impressions}</td>
+                    <td className="py-1.5 pr-3">{s.clicks}</td>
+                    <td className="py-1.5 text-[#32FF8B]">{s.ctr.toFixed(1)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
