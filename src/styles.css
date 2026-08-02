@@ -48,7 +48,24 @@
   --fb-status-ok-to: #04121A;
   --fb-status-ok-accent: #32FF8B;
 
+  /* ---- Redesign pass: glass, elevation, glow, radii (dark) ---- */
+  --fb-glass-from: rgba(13, 28, 42, 0.72);
+  --fb-glass-to: rgba(4, 14, 26, 0.52);
+  --fb-glass-border: rgba(255, 255, 255, 0.09);
+  --fb-glass-border-hover: rgba(50, 255, 139, 0.28);
+  --fb-glass-highlight: rgba(255, 255, 255, 0.05);
+  --fb-inset: rgba(0, 0, 0, 0.35);
+  --fb-inset-border: rgba(255, 255, 255, 0.06);
+  --fb-shadow-sm: 0 2px 8px -4px rgba(0, 0, 0, 0.6);
+  --fb-shadow-md: 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+  --fb-shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
+  --fb-glow-primary: 0 0 0 1px rgba(50, 255, 139, 0.28), 0 8px 28px -12px rgba(50, 255, 139, 0.35);
+  --fb-radius-sm: 0.625rem;
+  --fb-radius-md: 0.875rem;
+  --fb-radius-lg: 1.125rem;
+  --fb-radius-xl: 1.5rem;
 }
+
 
 
 
