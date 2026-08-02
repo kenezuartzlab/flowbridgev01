@@ -30,6 +30,8 @@ import { AppHeader } from './lib/layout/AppHeader';
 import { RouteTabs, TabId } from './components/routetabs/RouteTabs';
 import { TabBanner } from './components/banners/TabBanner';
 import { BannerRotator } from './components/banners/BannerRotator';
+import { trackBannerImpression } from './lib/banners/analytics';
+
 
 import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
