@@ -14,6 +14,7 @@ import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketsRouteImport } from './routes/markets'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
@@ -72,6 +73,11 @@ const McpRoute = McpRouteImport.update({
 const MarketsRoute = MarketsRouteImport.update({
   id: '/markets',
   path: '/markets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FortuneRoute = FortuneRouteImport.update({
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/arcadeflix': typeof ArcadeflixRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -383,6 +392,7 @@ export interface FileRouteTypes {
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
+    | '/home'
     | '/markets'
     | '/mcp'
     | '/reset-password'
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
+    | '/home'
     | '/markets'
     | '/mcp'
     | '/reset-password'
@@ -465,6 +476,7 @@ export interface FileRouteTypes {
     | '/arcadeflix'
     | '/ecosurge'
     | '/fortune'
+    | '/home'
     | '/markets'
     | '/mcp'
     | '/reset-password'
@@ -507,6 +519,7 @@ export interface RootRouteChildren {
   ArcadeflixRoute: typeof ArcadeflixRoute
   EcosurgeRoute: typeof EcosurgeRoute
   FortuneRoute: typeof FortuneRoute
+  HomeRoute: typeof HomeRoute
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -576,6 +589,13 @@ declare module '@tanstack/react-router' {
       path: '/markets'
       fullPath: '/markets'
       preLoaderRoute: typeof MarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fortune': {
@@ -838,6 +858,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArcadeflixRoute: ArcadeflixRoute,
   EcosurgeRoute: EcosurgeRoute,
   FortuneRoute: FortuneRoute,
+  HomeRoute: HomeRoute,
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,

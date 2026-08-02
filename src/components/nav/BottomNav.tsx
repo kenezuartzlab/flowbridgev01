@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeftRight, LineChart, Gift, History } from "lucide-react";
+import { ArrowLeftRight, Home, LineChart, Gift, History } from "lucide-react";
 
 /**
  * Persistent bottom bar. Redesign pass: each item is a 44px tap target with
@@ -12,6 +12,7 @@ import { ArrowLeftRight, LineChart, Gift, History } from "lucide-react";
  * built for five slots.
  */
 const ITEMS = [
+  { to: "/home", label: "Home", Icon: Home },
   { to: "/", label: "Swap", Icon: ArrowLeftRight },
   { to: "/markets", label: "Markets", Icon: LineChart },
   { to: "/rewards", label: "Rewards", Icon: Gift },
