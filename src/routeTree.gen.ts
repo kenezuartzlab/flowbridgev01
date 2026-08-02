@@ -24,6 +24,7 @@ import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
+import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
@@ -118,6 +119,11 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
 const ApiConfigRoute = ApiConfigRouteImport.update({
   id: '/api/config',
   path: '/api/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBannerEventsRoute = ApiBannerEventsRouteImport.update({
+  id: '/api/banner-events',
+  path: '/api/banner-events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
@@ -277,6 +284,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
@@ -354,6 +363,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/banner-events'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/banner-events'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/banner-events'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
@@ -466,6 +478,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiBannerEventsRoute: typeof ApiBannerEventsRoute
   ApiConfigRoute: typeof ApiConfigRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
@@ -594,6 +607,13 @@ declare module '@tanstack/react-router' {
       path: '/api/config'
       fullPath: '/api/config'
       preLoaderRoute: typeof ApiConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/banner-events': {
+      id: '/api/banner-events'
+      path: '/api/banner-events'
+      fullPath: '/api/banner-events'
+      preLoaderRoute: typeof ApiBannerEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/oauth-protected-resource': {
@@ -766,6 +786,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiBannerEventsRoute: ApiBannerEventsRoute,
   ApiConfigRoute: ApiConfigRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
