@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import giftAsset from "@/assets/gift-1.png.asset.json";
-import type { BannerSlide } from "@/lib/config/appConfig";
+import type { BannerSlide, BannerSurfaceKey } from "@/lib/config/appConfig";
+import { trackBannerClick } from "@/lib/banners/analytics";
 
 const bridgeHero = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
 
@@ -56,46 +57,76 @@ function toneOf(v: Variant): "swap" | "bridge" {
 
 /**
  * Compact presentational hero banner shown above the swap / bridge cards.
- * Accepts either a static variant or an admin-published slide. The whole
- * card is clickable when a link target exists. Never reads or writes
- * execution state.
+ * Accepts either a static variant or an admin-published slide. Supports
+ * compact icon, larger logo and full-bleed artwork layouts. The whole card is
+ * clickable when a link target exists. Never reads or writes execution state.
  */
 export function TabBanner({
   variant = "swap",
   slide,
   className = "",
+  surface,
 }: {
   variant?: Variant;
   slide?: BannerSlide;
   className?: string;
+  /** Enables click analytics for admin-published slides. */
+  surface?: BannerSurfaceKey;
 }) {
   const base = COPY[variant];
   const title = slide?.title ?? base.title;
   const body = slide?.body ?? base.body;
   const themeKey = slide?.theme ?? toneOf(variant);
+  const layout = slide?.layout ?? "compact";
   const art = slide
-    ? slide.imageUrl || (themeKey === "bridge" ? bridgeHero : giftAsset.url)
+    ? slide.imageUrl ||
+      (layout === "full" ? null : themeKey === "bridge" ? bridgeHero : giftAsset.url)
     : base.art;
   const href = slide ? slide.href || undefined : base.href;
   const t = THEME[themeKey];
+  const full = layout === "full" && !!art;
+  const artSize =
+    layout === "logo" ? "h-11 w-11 sm:h-12 sm:w-12" : "h-8 w-8 sm:h-9 sm:w-9";
+
+  const onActivate = () => {
+    if (slide && surface) trackBannerClick(surface, slide.id);
+  };
 
   const inner = (
     <>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-5 -top-8 h-20 w-20 rounded-full blur-2xl"
-        style={{ background: `${t.accent}40` }}
-      />
+      {full ? (
+        <img
+          src={art!}
+          alt=""
+          aria-hidden
+          loading="lazy"
+          draggable={false}
+          className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover opacity-70"
+        />
+      ) : (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-5 -top-8 h-20 w-20 rounded-full blur-2xl"
+          style={{ background: `${t.accent}40` }}
+        />
+      )}
+      {full && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{ background: `linear-gradient(100deg, ${t.from}E6, ${t.to}66)` }}
+        />
+      )}
       <div className="relative flex w-full items-center justify-between gap-2 sm:gap-2.5">
         <div className="flex min-w-0 items-center gap-2">
-          {art && (
+          {art && !full && (
             <img
               src={art}
               alt=""
               aria-hidden
               loading="lazy"
               draggable={false}
-              className="h-8 w-8 shrink-0 select-none object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)] sm:h-9 sm:w-9"
+              className={`${artSize} shrink-0 select-none object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]`}
             />
           )}
           <div className="min-w-0 font-mono">
@@ -120,7 +151,7 @@ export function TabBanner({
     </>
   );
 
-  const cls = `relative flex min-h-[58px] w-full items-center overflow-hidden rounded-xl px-3 py-2 text-left shadow-[0_6px_18px_-14px_rgba(0,0,0,0.6)] transition-transform sm:min-h-[62px] sm:px-3.5 ${
+  const cls = `relative flex min-h-[58px] w-full items-center overflow-hidden rounded-xl px-3 py-2 text-left shadow-[0_6px_18px_-14px_rgba(0,0,0,0.6)] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32FF8B]/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B] sm:min-h-[62px] sm:px-3.5 ${
     href ? "cursor-pointer active:scale-[0.99]" : ""
   } ${className}`;
   const style = {
@@ -128,23 +159,32 @@ export function TabBanner({
     color: t.fg,
     borderTop: `1px solid ${t.accent}33`,
   };
+  const ariaLabel = body ? `${title} — ${body}` : title;
 
   if (href && /^https?:\/\//i.test(href)) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={cls} style={style}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={ariaLabel}
+        onClick={onActivate}
+        className={cls}
+        style={style}
+      >
         {inner}
       </a>
     );
   }
   if (href) {
     return (
-      <Link to={href} className={cls} style={style}>
+      <Link to={href} aria-label={ariaLabel} onClick={onActivate} className={cls} style={style}>
         {inner}
       </Link>
     );
   }
   return (
-    <section className={cls} style={style}>
+    <section className={cls} style={style} aria-label={ariaLabel}>
       {inner}
     </section>
   );
