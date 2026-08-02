@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
-import { useAppConfig } from './lib/config/appConfig';
+import {
+  useAppConfig,
+  getBannerSurface,
+  type BannerSlide,
+  type BannerSurfaceKey,
+} from './lib/config/appConfig';
 
 
 import { formatUnits, parseUnits, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
@@ -2435,10 +2440,11 @@ export default function App() {
 
           {/* Tab hero banners (admin-managed) + status bar, swipeable */}
           {(() => {
-            const surfaceKey = activeTab === 'BRIDGE' ? 'bridge' : activeTab === 'SWAP' ? 'swap' : 'cabot';
+            const surfaceKey: BannerSurfaceKey =
+              activeTab === 'BRIDGE' ? 'bridge' : activeTab === 'CA/BOT' ? 'cabot' : 'swap';
             const surface = getBannerSurface(appConfig, surfaceKey);
             const promoSlides = appConfig.flags.showBanners
-              ? surface.slides.map((s) => <TabBanner key={s.id} slide={s} />)
+              ? surface.slides.map((s: BannerSlide) => <TabBanner key={s.id} slide={s} />)
               : [];
             const tone = !googleUser ? 'info' : !signedInEmailVerified ? 'warn' : rewardsActive ? 'ok' : 'warn';
             const accent = `var(--fb-status-${tone}-accent)`;
