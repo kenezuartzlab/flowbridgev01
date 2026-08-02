@@ -15,25 +15,36 @@ const ALL_TABS: { id: TabId; label: string }[] = [
   { id: 'BRIDGE', label: 'BRIDGE' },
 ];
 
+/**
+ * Redesign pass: the underlined tab strip becomes a recessed segmented
+ * control, so the active route reads as a raised pill instead of a border.
+ * Uses the shared .fb-segment-track / .fb-segment tokens.
+ */
 export function RouteTabs({ activeTab, onTabChange, showLimitTab = false }: RouteTabsProps) {
   const TABS = ALL_TABS.filter((t) => t.id !== 'LIMIT' || showLimitTab);
 
   return (
-    <nav className="flex bg-[#010C1B] border-b border-white/10 relative z-10 w-full mb-0 font-mono">
-      {TABS.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onTabChange(tab.id)}
-          className={cn(
-            "flex-1 py-3.5 text-[12px] font-black tracking-widest transition-all border-b-2 uppercase cursor-pointer",
-            activeTab === tab.id
-              ? "text-[#32FF8B] border-[#32FF8B] bg-[#32FF8B]/5"
-              : "text-[#C5C1B9] border-transparent hover:text-[#32FF8B] hover:bg-white/5"
-          )}
-        >
-          {tab.label}
-        </button>
-      ))}
-    </nav>
+    <div className="w-full px-2.5 pb-2.5 pt-2.5 sm:px-3">
+      <nav className="fb-segment-track font-mono" role="tablist" aria-label="Trade route">
+        {TABS.map((tab) => {
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              role="tab"
+              type="button"
+              aria-selected={active}
+              onClick={() => onTabChange(tab.id)}
+              className={cn(
+                'fb-segment min-h-[38px] cursor-pointer truncate px-1.5 py-2 text-[11px] font-black uppercase tracking-[0.1em] outline-none focus-visible:ring-2 focus-visible:ring-primary/70 sm:text-[12px]',
+                !active && 'text-muted hover:bg-foreground/5 hover:text-foreground',
+              )}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
