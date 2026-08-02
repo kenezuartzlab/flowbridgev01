@@ -272,3 +272,12 @@ export function getRemoteTokens(isMainnet: boolean): RemoteToken[] {
     .filter((t) => t.chain === chain && t.isActive !== false)
     .sort((a, b) => (a.sortOrder ?? 100) - (b.sortOrder ?? 100));
 }
+
+/** Active banner slides + delay for a tab surface. */
+export function getBannerSurface(config: AppConfig, key: BannerSurfaceKey): BannerSurface {
+  const surface = config.banners?.[key] ?? DEFAULT_BANNERS[key];
+  return {
+    intervalMs: surface.intervalMs,
+    slides: surface.slides.filter((s) => s.isActive !== false),
+  };
+}
