@@ -39,6 +39,7 @@ import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
+import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -200,6 +201,11 @@ const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
   path: '/api/admin/banner-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminBannerStatsRoute = ApiAdminBannerStatsRouteImport.update({
+  id: '/api/admin/banner-stats',
+  path: '/api/admin/banner-stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -264,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -387,6 +396,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -427,6 +437,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -467,6 +478,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/transactions'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -508,6 +520,7 @@ export interface RootRouteChildren {
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
   ApiTransactionsRoute: typeof ApiTransactionsRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
@@ -740,6 +753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminBannerUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/banner-stats': {
+      id: '/api/admin/banner-stats'
+      path: '/api/admin/banner-stats'
+      fullPath: '/api/admin/banner-stats'
+      preLoaderRoute: typeof ApiAdminBannerStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -832,6 +852,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
   ApiTransactionsRoute: ApiTransactionsRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
