@@ -137,6 +137,45 @@ function num(v: unknown, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function str(v: unknown, fallback = ""): string {
+  return typeof v === "string" ? v : fallback;
+}
+
+function mergeSlide(raw: any, index: number, surface: string): BannerSlide | null {
+  if (!raw || typeof raw !== "object") return null;
+  const title = str(raw.title).trim();
+  if (!title) return null;
+  return {
+    id: str(raw.id).trim() || `${surface}-${index}`,
+    title,
+    body: str(raw.body).trim() || undefined,
+    imageUrl: str(raw.imageUrl ?? raw.image_url).trim() || null,
+    href: str(raw.href ?? raw.link).trim() || null,
+    theme: raw.theme === "bridge" ? "bridge" : "swap",
+    isActive: raw.isActive !== false,
+  };
+}
+
+/** Normalizes admin-published banner settings, falling back to defaults. */
+export function mergeBanners(partial: any): BannerSettings {
+  const out = {} as BannerSettings;
+  for (const key of BANNER_SURFACES) {
+    const raw = partial?.[key];
+    const fallback = DEFAULT_BANNERS[key];
+    const slides = Array.isArray(raw?.slides)
+      ? raw.slides
+          .map((s: any, i: number) => mergeSlide(s, i, key))
+          .filter((s: BannerSlide | null): s is BannerSlide => !!s)
+      : fallback.slides;
+    out[key] = {
+      intervalMs: Math.min(60000, Math.max(1500, num(raw?.intervalMs, fallback.intervalMs))),
+      slides,
+    };
+  }
+  return out;
+}
+
+
 export function mergeAppConfig(partial: any): AppConfig {
   const p = partial ?? {};
   const d = DEFAULT_APP_CONFIG;
