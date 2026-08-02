@@ -165,6 +165,8 @@ export function mergeAppConfig(partial: any): AppConfig {
       showBanners: p.flags?.showBanners !== false,
       maintenanceNotice: typeof p.flags?.maintenanceNotice === "string" ? p.flags.maintenanceNotice : "",
     },
+    banners: mergeBanners(p.banners),
+
     tokens: Array.isArray(p.tokens)
       ? p.tokens
           .filter((t: any) => t && typeof t.address === "string" && typeof t.symbol === "string")
