@@ -2444,8 +2444,14 @@ export default function App() {
               activeTab === 'BRIDGE' ? 'bridge' : activeTab === 'CA/BOT' ? 'cabot' : 'swap';
             const surface = getBannerSurface(appConfig, surfaceKey);
             const promoSlides = appConfig.flags.showBanners
-              ? surface.slides.map((s: BannerSlide) => <TabBanner key={s.id} slide={s} />)
+              ? surface.slides.map((s: BannerSlide) => (
+                  <TabBanner key={s.id} slide={s} surface={surfaceKey} />
+                ))
               : [];
+            const promoKeys = appConfig.flags.showBanners
+              ? surface.slides.map((s: BannerSlide) => s.id)
+              : [];
+
             const tone = !googleUser ? 'info' : !signedInEmailVerified ? 'warn' : rewardsActive ? 'ok' : 'warn';
             const accent = `var(--fb-status-${tone}-accent)`;
             const statusSlide = (
