@@ -31,7 +31,12 @@ export function BannerRotator({
     return () => clearInterval(id);
   }, [items.length, intervalMs, paused]);
 
-  useEffect(() => () => resumeTimer.current && clearTimeout(resumeTimer.current), []);
+  useEffect(() => {
+    return () => {
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    };
+  }, []);
+
 
   const nudge = (dir: 1 | -1) => {
     setIndex((i) => (i + dir + items.length) % items.length);
