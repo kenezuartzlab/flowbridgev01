@@ -2433,17 +2433,19 @@ export default function App() {
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-[#010C1B] flex flex-col items-stretch px-4 py-4 sm:px-5 sm:py-5 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
 
-          {/* Tab hero banner + status bar, cross-fading (presentational) */}
-          <BannerRotator
-            slides={[
-              <TabBanner key="hero" variant={activeTab === 'BRIDGE' ? 'bridge' : 'swap'} />,
-              (() => {
-                const tone = !googleUser ? 'info' : !signedInEmailVerified ? 'warn' : rewardsActive ? 'ok' : 'warn';
-                const accent = `var(--fb-status-${tone}-accent)`;
-                return (
+          {/* Tab hero banners (admin-managed) + status bar, swipeable */}
+          {(() => {
+            const surfaceKey = activeTab === 'BRIDGE' ? 'bridge' : activeTab === 'SWAP' ? 'swap' : 'cabot';
+            const surface = getBannerSurface(appConfig, surfaceKey);
+            const promoSlides = appConfig.flags.showBanners
+              ? surface.slides.map((s) => <TabBanner key={s.id} slide={s} />)
+              : [];
+            const tone = !googleUser ? 'info' : !signedInEmailVerified ? 'warn' : rewardsActive ? 'ok' : 'warn';
+            const accent = `var(--fb-status-${tone}-accent)`;
+            const statusSlide = (
               <div
                 key="status"
-                className="relative flex min-h-[92px] items-center justify-between gap-2.5 overflow-hidden rounded-2xl px-3.5 py-3 text-left shadow-[0_8px_24px_-16px_rgba(0,0,0,0.6)] sm:gap-3 sm:px-4"
+                className="relative flex min-h-[58px] items-center justify-between gap-2 overflow-hidden rounded-xl px-3 py-2 text-left shadow-[0_6px_18px_-14px_rgba(0,0,0,0.6)] sm:min-h-[62px] sm:px-3.5"
                 style={{
                   background: `linear-gradient(110deg, var(--fb-status-${tone}-from), var(--fb-status-${tone}-to))`,
                   borderTop: `1px solid ${accent}33`,
@@ -2451,68 +2453,73 @@ export default function App() {
               >
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -right-6 -top-10 h-28 w-28 rounded-full blur-2xl"
+                  className="pointer-events-none absolute -right-5 -top-8 h-20 w-20 rounded-full blur-2xl"
                   style={{ background: `${accent}30` }}
                 />
 
-            <div className="relative flex min-w-0 items-center gap-2.5">
-              <div
-                className="shrink-0 rounded-lg border p-2"
-                style={{ background: `${accent}1F`, borderColor: `${accent}3D`, color: accent }}
-              >
-                <Gift className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 space-y-1 font-mono">
-                <div className="text-[11px] font-bold uppercase leading-tight tracking-wide text-white [overflow-wrap:anywhere]">
-                  {!googleUser 
-                    ? "Guest Mode Active"
-                    : !signedInEmailVerified
-                      ? "Verification Pending"
-                      : rewardsActive
-                        ? "Earnings Activated"
-                        : "Wallet Link Needed"
-                  }
+                <div className="relative flex min-w-0 items-center gap-2">
+                  <div
+                    className="shrink-0 rounded-lg border p-1.5"
+                    style={{ background: `${accent}1F`, borderColor: `${accent}3D`, color: accent }}
+                  >
+                    <Gift className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0 font-mono">
+                    <div className="truncate text-[10.5px] font-bold uppercase leading-tight tracking-wide text-white sm:text-[11px]">
+                      {!googleUser
+                        ? "Guest Mode Active"
+                        : !signedInEmailVerified
+                          ? "Verification Pending"
+                          : rewardsActive
+                            ? "Earnings Activated"
+                            : "Wallet Link Needed"
+                      }
+                    </div>
+                    <div className="mt-0.5 line-clamp-1 text-[9.5px] leading-snug text-[#C5C1B9] sm:text-[10px]">
+                      {!googleUser
+                        ? "Verify email to earn FLOW rewards."
+                        : !signedInEmailVerified
+                          ? "Points paused. Verify email."
+                          : rewardsActive
+                            ? "Verified swaps $5+ earn FLOW."
+                            : "Sign this wallet to link it."
+                      }
+                    </div>
+                  </div>
                 </div>
-                <div className="line-clamp-2 text-[10px] leading-snug text-[#C5C1B9] [overflow-wrap:anywhere]">
-                  {!googleUser 
-                    ? "Verify email in REWARDS to earn FLOW rewards."
-                    : !signedInEmailVerified
-                      ? "Points paused. Verify email to activate."
-                      : rewardsActive
-                        ? "Verified swaps $5+ earn FLOW points."
-                        : "Sign this wallet to link it before earning."
-                  }
-                </div>
-              </div>
-            </div>
-            
-            <button
-              onClick={() => {
-                if (googleUser && signedInEmailVerified && !rewardsActive) {
-                  setIsConnectGuideOpen(true);
-                  return;
-                }
-                setDonateModalInitialTab('incentives');
-                setIsDonateModalOpen(true);
-              }}
-              className="relative shrink-0 cursor-pointer rounded-lg border px-2.5 py-1.5 text-center font-mono text-[9px] font-bold uppercase leading-tight tracking-wider transition-all active:scale-95"
-              style={{ background: `${accent}26`, borderColor: `${accent}40`, color: accent }}
-            >
-              {!googleUser 
-                ? "Sign In"
-                : !signedInEmailVerified
-                  ? "Verify"
-                  : rewardsActive
-                    ? "View Perks"
-                    : "Link"
-              }
-            </button>
-              </div>
-                );
-              })(),
 
-            ]}
-          />
+                <button
+                  onClick={() => {
+                    if (googleUser && signedInEmailVerified && !rewardsActive) {
+                      setIsConnectGuideOpen(true);
+                      return;
+                    }
+                    setDonateModalInitialTab('incentives');
+                    setIsDonateModalOpen(true);
+                  }}
+                  className="relative shrink-0 cursor-pointer rounded-lg border px-2 py-1 text-center font-mono text-[9px] font-bold uppercase leading-tight tracking-wider transition-all active:scale-95"
+                  style={{ background: `${accent}26`, borderColor: `${accent}40`, color: accent }}
+                >
+                  {!googleUser
+                    ? "Sign In"
+                    : !signedInEmailVerified
+                      ? "Verify"
+                      : rewardsActive
+                        ? "View Perks"
+                        : "Link"
+                  }
+                </button>
+              </div>
+            );
+
+            return (
+              <BannerRotator
+                intervalMs={surface.intervalMs}
+                slides={[...promoSlides, statusSlide]}
+              />
+            );
+          })()}
+
           
 
           
