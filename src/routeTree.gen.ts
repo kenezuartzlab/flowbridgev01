@@ -34,6 +34,7 @@ import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
+import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-image.$'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
@@ -174,6 +175,11 @@ const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
   path: '/api/incentives/global',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBannerImageSplatRoute = ApiBannerImageSplatRouteImport.update({
+  id: '/api/banner-image/$',
+  path: '/api/banner-image/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
   id: '/api/admin/whoami',
   path: '/api/admin/whoami',
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -301,6 +308,7 @@ export interface FileRoutesByTo {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -341,6 +349,7 @@ export interface FileRoutesById {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -382,6 +391,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/banner-image/$'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -421,6 +431,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/banner-image/$'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -460,6 +471,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/banner-image/$'
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/users/bind-wallet'
@@ -500,6 +512,7 @@ export interface RootRouteChildren {
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
   ApiAdminWhoamiRoute: typeof ApiAdminWhoamiRoute
+  ApiBannerImageSplatRoute: typeof ApiBannerImageSplatRoute
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
@@ -692,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIncentivesGlobalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/banner-image/$': {
+      id: '/api/banner-image/$'
+      path: '/api/banner-image/$'
+      fullPath: '/api/banner-image/$'
+      preLoaderRoute: typeof ApiBannerImageSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/whoami': {
       id: '/api/admin/whoami'
       path: '/api/admin/whoami'
@@ -816,6 +836,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
   ApiAdminWhoamiRoute: ApiAdminWhoamiRoute,
+  ApiBannerImageSplatRoute: ApiBannerImageSplatRoute,
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,
