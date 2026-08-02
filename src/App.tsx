@@ -2531,44 +2531,52 @@ export default function App() {
           
           {/* Detailed Error Warning and Simulation Toggle Helper */}
           {walletLinkNotice && walletLinkNotice.kind !== "linked" && (
-            <div className="p-3.5 bg-[#32FF8B]/5 border border-[#32FF8B]/25 rounded-2xl space-y-2">
-              <div className="text-[11px] text-white/90 leading-snug">
+            <div
+              role={walletLinkNotice.kind === "signin-needed" ? "button" : undefined}
+              tabIndex={walletLinkNotice.kind === "signin-needed" ? 0 : undefined}
+              onClick={
+                walletLinkNotice.kind === "signin-needed"
+                  ? () => setIsConnectGuideOpen(true)
+                  : undefined
+              }
+              className={`flex min-h-[46px] items-center gap-2 rounded-xl border border-[#32FF8B]/25 bg-[#32FF8B]/5 px-3 py-2 ${
+                walletLinkNotice.kind === "signin-needed" ? "cursor-pointer active:scale-[0.99]" : ""
+              }`}
+            >
+              <div className="min-w-0 flex-1 text-[10.5px] leading-snug text-white/90">
                 {walletLinkNotice.kind === "signin-needed" ? (
                   <>
-                    This wallet is already linked to{" "}
-                    <span className="text-[#32FF8B] font-mono">{walletLinkNotice.emailHint}</span>.
-                    Sign in to that account to keep earning FlowPoints and referrals on this address.
+                    Sign in to{" "}
+                    <span className="font-mono text-[#32FF8B]">{walletLinkNotice.emailHint}</span> to
+                    keep earning FlowPoints and referrals.
                   </>
                 ) : walletLinkNotice.kind === "mismatch" ? (
                   <>
-                    Heads up — this wallet is bound to a different account{" "}
-                    <span className="text-[#F6BA00] font-mono">{walletLinkNotice.emailHint}</span>.
-                    FlowPoints will accrue to that account, not the one you're signed into.
+                    Wallet bound to{" "}
+                    <span className="font-mono text-[#F6BA00]">{walletLinkNotice.emailHint}</span> —
+                    FlowPoints accrue there.
                   </>
                 ) : (
-                  <>
-                    This wallet is not linked to your signed-in email yet. Sign once with the wallet to activate FlowPoints for this address.
-                  </>
+                  <>Sign once with this wallet to activate FlowPoints.</>
                 )}
               </div>
-              <div className="flex gap-2 justify-end font-mono">
-                {walletLinkNotice.kind === "signin-needed" && (
-                  <button
-                    onClick={() => setIsConnectGuideOpen(true)}
-                    className="px-3 py-1.5 bg-[#32FF8B] hover:bg-[#32FF8B]/90 text-[#010C1B] rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
-                  >
-                    Sign in to linked account
-                  </button>
-                )}
-                <button
-                  onClick={() => setWalletLinkNotice(null)}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
-                >
-                  Dismiss
-                </button>
-              </div>
+              {walletLinkNotice.kind === "signin-needed" && (
+                <span className="shrink-0 rounded-lg bg-[#32FF8B] px-2 py-1 font-mono text-[9px] font-black uppercase tracking-widest text-[#010C1B]">
+                  Sign in
+                </span>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setWalletLinkNotice(null);
+                }}
+                className="shrink-0 rounded-lg bg-white/10 px-2 py-1 font-mono text-[9px] font-black uppercase tracking-widest text-white transition-colors hover:bg-white/15"
+              >
+                Dismiss
+              </button>
             </div>
           )}
+
 
           {errorMessage && (
             <div className="p-3.5 bg-red-950/20 border border-red-500/25 rounded-2xl space-y-2">
