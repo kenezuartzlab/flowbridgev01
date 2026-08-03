@@ -463,16 +463,6 @@ export default function App() {
     return 'BRIDGE';
   });
 
-  // LIMIT tab: private by default, opened to everyone only when the admin
-  // flips the published `limitTabPublic` flag.
-  const appConfig = useAppConfig();
-  const isLimitAdmin =
-    appConfig.flags.limitTabPublic ||
-    googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com';
-  useEffect(() => {
-    if (activeTab === 'LIMIT' && !isLimitAdmin) setActiveTab('BOT/USDT');
-  }, [activeTab, isLimitAdmin]);
-
 
   // Form states
   const [caAmount, setCaAmount] = useState('');
