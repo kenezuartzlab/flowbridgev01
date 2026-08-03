@@ -146,7 +146,6 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   tronBridgeProxy: "TGhXbQpjBgC6bDp5jAexzeQPHEXXsx5f35", // base58, requires TronLink
   flowBridgeRouter: "0x19784e19546307af427902a75771434df831d882",
   flowBridgeRouterV3: "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
-  flowLimitOrderExecutor: "0x7FE51363C6694ACddf3EBBF64B2d4A7Ef970ecB4",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
 };
 
