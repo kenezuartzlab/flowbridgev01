@@ -251,7 +251,6 @@ export function mergeAppConfig(partial: any): AppConfig {
       ),
     },
     flags: {
-      limitTabPublic: !!p.flags?.limitTabPublic,
       showBanners: p.flags?.showBanners !== false,
       maintenanceNotice: typeof p.flags?.maintenanceNotice === "string" ? p.flags.maintenanceNotice : "",
     },
