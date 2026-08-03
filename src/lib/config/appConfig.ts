@@ -21,7 +21,6 @@ export interface RewardSettings {
 }
 
 export interface FlagSettings {
-  limitTabPublic: boolean;
   showBanners: boolean;
   maintenanceNotice: string;
 }
