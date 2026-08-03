@@ -19,6 +19,7 @@ import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
+import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivityRouteImport } from './routes/activity'
@@ -28,6 +29,7 @@ import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
 import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
+import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
@@ -102,6 +104,11 @@ const EcosurgeRoute = EcosurgeRouteImport.update({
   path: '/ecosurge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssistantRoute = AssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArcadeflixRoute = ArcadeflixRouteImport.update({
   id: '/arcadeflix',
   path: '/arcadeflix',
@@ -145,6 +152,11 @@ const ApiConfigRoute = ApiConfigRouteImport.update({
 const ApiBannerEventsRoute = ApiBannerEventsRouteImport.update({
   id: '/api/banner-events',
   path: '/api/banner-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAssistantRoute = ApiAssistantRouteImport.update({
+  id: '/api/assistant',
+  path: '/api/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -273,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
+  '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
   '/home': typeof HomeRoute
@@ -285,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
@@ -317,6 +331,7 @@ export interface FileRoutesByTo {
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
+  '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
   '/home': typeof HomeRoute
@@ -329,6 +344,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
@@ -362,6 +378,7 @@ export interface FileRoutesById {
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
+  '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
   '/home': typeof HomeRoute
@@ -374,6 +391,7 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
@@ -408,6 +426,7 @@ export interface FileRouteTypes {
     | '/activity'
     | '/admin'
     | '/arcadeflix'
+    | '/assistant'
     | '/ecosurge'
     | '/fortune'
     | '/home'
@@ -420,6 +439,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/assistant'
     | '/api/banner-events'
     | '/api/config'
     | '/api/health'
@@ -452,6 +472,7 @@ export interface FileRouteTypes {
     | '/activity'
     | '/admin'
     | '/arcadeflix'
+    | '/assistant'
     | '/ecosurge'
     | '/fortune'
     | '/home'
@@ -464,6 +485,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/assistant'
     | '/api/banner-events'
     | '/api/config'
     | '/api/health'
@@ -496,6 +518,7 @@ export interface FileRouteTypes {
     | '/activity'
     | '/admin'
     | '/arcadeflix'
+    | '/assistant'
     | '/ecosurge'
     | '/fortune'
     | '/home'
@@ -508,6 +531,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/assistant'
     | '/api/banner-events'
     | '/api/config'
     | '/api/health'
@@ -541,6 +565,7 @@ export interface RootRouteChildren {
   ActivityRoute: typeof ActivityRoute
   AdminRoute: typeof AdminRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
+  AssistantRoute: typeof AssistantRoute
   EcosurgeRoute: typeof EcosurgeRoute
   FortuneRoute: typeof FortuneRoute
   HomeRoute: typeof HomeRoute
@@ -553,6 +578,7 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiAssistantRoute: typeof ApiAssistantRoute
   ApiBannerEventsRoute: typeof ApiBannerEventsRoute
   ApiConfigRoute: typeof ApiConfigRoute
   ApiHealthRoute: typeof ApiHealthRoute
@@ -652,6 +678,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EcosurgeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/arcadeflix': {
       id: '/arcadeflix'
       path: '/arcadeflix'
@@ -713,6 +746,13 @@ declare module '@tanstack/react-router' {
       path: '/api/banner-events'
       fullPath: '/api/banner-events'
       preLoaderRoute: typeof ApiBannerEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/assistant': {
+      id: '/api/assistant'
+      path: '/api/assistant'
+      fullPath: '/api/assistant'
+      preLoaderRoute: typeof ApiAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/oauth-protected-resource': {
@@ -896,6 +936,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActivityRoute: ActivityRoute,
   AdminRoute: AdminRoute,
   ArcadeflixRoute: ArcadeflixRoute,
+  AssistantRoute: AssistantRoute,
   EcosurgeRoute: EcosurgeRoute,
   FortuneRoute: FortuneRoute,
   HomeRoute: HomeRoute,
@@ -909,6 +950,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiAssistantRoute: ApiAssistantRoute,
   ApiBannerEventsRoute: ApiBannerEventsRoute,
   ApiConfigRoute: ApiConfigRoute,
   ApiHealthRoute: ApiHealthRoute,
