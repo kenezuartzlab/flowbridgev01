@@ -181,7 +181,7 @@ function MarketsPage() {
                     (chain === c ? "" : "text-muted hover:bg-foreground/5 hover:text-foreground")
                   }
                 >
-                  {c === "BOT" ? "BOT Chain" : c}
+                  {c}
                 </button>
               ))}
             </div>
