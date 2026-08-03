@@ -172,7 +172,6 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   tronBridgeProxy: "",                                          // not published for testnet — disable TRX bridge on testnet
   flowBridgeRouter: "0x72c7d69f44cf0ce056b1c39032c41ee97e09bc8e",
   flowBridgeRouterV3: "0x6a8C4ce7544A75fEc6E577b990e44fe621D8a5ac",
-  flowLimitOrderExecutor: "",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
 };
 
