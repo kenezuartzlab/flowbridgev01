@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { createPublicClient, http, isAddress, parseUnits, type Address } from "viem";
+import { createPublicClient, http, isAddress, parseAbi, parseUnits, type Address } from "viem";
 import { useAccount, useChainId, useSwitchChain, useWalletClient } from "wagmi";
 import { ArrowUpRight, Loader2, X, CheckCircle2, AlertTriangle, ExternalLink } from "lucide-react";
 import { botMainnet } from "@/lib/wagmi";
-import { ERC20_ABI } from "@/lib/contracts";
 import { NATIVE_TOKEN_ADDRESS } from "@/lib/swap/tokenRegistry";
 import { formatBalance4, formatUsd } from "@/lib/format";
 import { TokenIcon } from "@/components/TokenIcon";
 import type { HoldingRow } from "@/lib/wallet/portfolio";
-import { friendlyError } from "@/lib/friendlyError";
+import { toFriendlyError } from "@/lib/friendlyError";
+
+const ERC20_TRANSFER_ABI = parseAbi([
+  "function transfer(address to, uint256 value) returns (bool)",
+]);
 
 /** Keep a little native BOT behind for gas when sending the native asset. */
 const GAS_RESERVE_WEI = 2_000_000_000_000_000n; // 0.002 BOT
@@ -113,7 +116,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
           })
         : await walletClient.writeContract({
             address: selected.token.address as Address,
-            abi: ERC20_ABI,
+            abi: ERC20_TRANSFER_ABI,
             functionName: "transfer",
             args: [to.trim() as Address, amountRaw],
           });
@@ -130,7 +133,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
       }
     } catch (e) {
       setPhase("error");
-      setError(friendlyError(e));
+      setError(toFriendlyError(e));
     }
   };
 
