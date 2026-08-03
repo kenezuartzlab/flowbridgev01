@@ -2425,7 +2425,6 @@ export default function App() {
         <RouteTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          showLimitTab={isLimitAdmin}
         />
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-background flex flex-col items-stretch px-3.5 pb-4 pt-1.5 sm:px-5 sm:pb-5 sm:pt-2 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
