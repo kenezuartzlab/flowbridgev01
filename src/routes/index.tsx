@@ -10,7 +10,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Swap BOT, CA and USDT on BOT Chain and bridge to BNB, Ethereum and TRON with live quotes, a 0.1% fee and FLOW point rewards.",
+          "Swap BOT, CA and USDT on BOT Chain with a 0.1% fee, bridge to BNB, Ethereum and TRON, and earn FLOW point rewards.",
       },
       { property: "og:title", content: "FlowBridge — Swap & Cross-Chain Bridge for BOT Chain" },
       {
