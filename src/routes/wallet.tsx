@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { WagmiProvider } from "wagmi";
 import { useAccount } from "wagmi";
 import {
+  AlertTriangle,
+  ArrowDownLeft,
   ArrowLeftRight,
   ArrowUpRight,
   Check,
@@ -16,6 +18,9 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
 import { formatUsd, formatBalance4 } from "@/lib/format";
 import { fetchPortfolio, type Portfolio } from "@/lib/wallet/portfolio";
+import { SendModal } from "@/components/wallet/SendModal";
+import { ReceiveModal } from "@/components/wallet/ReceiveModal";
+import { useAccountData } from "@/lib/app/useAccountData";
 
 export const Route = createFileRoute("/wallet")({
   head: () => ({
@@ -24,12 +29,12 @@ export const Route = createFileRoute("/wallet")({
       {
         name: "description",
         content:
-          "See every BOT Chain token you hold with live USD values, total portfolio worth and one-tap swap or bridge from your FlowBridge wallet tab.",
+          "See every BOT Chain token you hold with live USD values, send and receive assets, and review your full swap and bridge history in the FlowBridge wallet tab.",
       },
       { property: "og:title", content: "FlowBridge Wallet" },
       {
         property: "og:description",
-        content: "Live BOT Chain token balances and portfolio value in one screen.",
+        content: "Live BOT Chain balances, send/receive and transaction history in one screen.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/wallet" },
@@ -48,17 +53,56 @@ function WalletRoute() {
   );
 }
 
+function timeAgo(ts: number) {
+  const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
+  if (s < 5) return "just now";
+  if (s < 60) return `${s}s ago`;
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m ago`;
+  return `${Math.round(m / 60)}h ago`;
+}
+
+function statusTone(status: string) {
+  const s = (status || "").toLowerCase();
+  if (s.includes("fail") || s.includes("revert") || s.includes("error"))
+    return "border-destructive/30 bg-destructive/10 text-destructive";
+  if (s.includes("pend") || s.includes("progress") || s.includes("wait"))
+    return "border-warning/30 bg-warning/10 text-warning";
+  return "border-success/30 bg-success/10 text-success";
+}
+
+function formatDirection(direction: string) {
+  if (!direction) return "";
+  const parts = direction.replace(/_TO_/g, "_").replace(/^TO_/, "").split("_").filter(Boolean);
+  return parts.length >= 2 ? `${parts[0]} → ${parts[parts.length - 1]}` : direction;
+}
+
 function WalletPage() {
   const { address, isConnected } = useAccount();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [sendOpen, setSendOpen] = useState(false);
+  const [receiveOpen, setReceiveOpen] = useState(false);
+  const [, setTick] = useState(0);
+
+  const {
+    user,
+    authReady,
+    transactions,
+    loading: historyLoading,
+    refresh: refreshHistory,
+  } = useAccountData();
 
   const load = useCallback(async () => {
     if (!address) return;
     setLoading(true);
+    setLoadError("");
     try {
       setPortfolio(await fetchPortfolio(address, true));
+    } catch {
+      setLoadError("Could not reach the BOT Chain network. Check your connection and retry.");
     } finally {
       setLoading(false);
     }
@@ -72,6 +116,12 @@ function WalletPage() {
     void load();
   }, [address, load]);
 
+  // Keep the "updated Xs ago" label honest without refetching.
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 15_000);
+    return () => clearInterval(id);
+  }, []);
+
   const copy = async () => {
     if (!address) return;
     try {
@@ -84,7 +134,9 @@ function WalletPage() {
   };
 
   const shortAddr = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "";
-  const held = (portfolio?.rows ?? []).filter((r) => r.amount > 0);
+  const rows = portfolio?.rows ?? [];
+  const held = useMemo(() => rows.filter((r) => r.amount > 0 || r.balanceFailed), [rows]);
+  const recent = useMemo(() => (transactions ?? []).slice(0, 8), [transactions]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -100,9 +152,12 @@ function WalletPage() {
           </div>
           <button
             type="button"
-            onClick={() => void load()}
+            onClick={() => {
+              void load();
+              void refreshHistory();
+            }}
             disabled={!address || loading}
-            aria-label="Refresh balances"
+            aria-label="Refresh balances and history"
             className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-40"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
@@ -111,9 +166,21 @@ function WalletPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4">
+      <main className="mx-auto max-w-2xl space-y-4 p-3 pb-24 sm:p-4">
         <section className="fb-surface p-4">
-          <p className="fb-eyebrow">Portfolio value</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="fb-eyebrow">Portfolio value</p>
+            {isConnected && portfolio && !loading && (
+              <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+                Updated {timeAgo(portfolio.fetchedAt)}
+              </p>
+            )}
+            {isConnected && loading && (
+              <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+                Refreshing…
+              </p>
+            )}
+          </div>
           <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
             <p className="font-mono text-3xl font-black leading-none tabular-nums">
               {!isConnected ? "—" : loading && !portfolio ? "…" : formatUsd(portfolio?.totalUsd ?? 0)}
@@ -127,25 +194,70 @@ function WalletPage() {
             </Link>
           </div>
 
-          {isConnected ? (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+          {isConnected && (portfolio?.partial || portfolio?.pricesPartial) && (
+            <p className="mt-2 flex items-start gap-1.5 font-mono text-[10px] leading-relaxed text-warning">
+              <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+              {portfolio?.partial
+                ? "Some balances could not be read from the network — this total is partial."
+                : "Some tokens have no USD price right now, so they are excluded from the total."}
+            </p>
+          )}
+
+          {isConnected && loadError && (
+            <div className="mt-2 space-y-2">
+              <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed text-destructive">
+                <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+                {loadError}
+              </p>
               <button
                 type="button"
-                onClick={copy}
-                className="fb-inset inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em] text-muted transition-colors hover:text-foreground"
+                onClick={() => void load()}
+                className="fb-inset inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10px] font-black uppercase tracking-[0.08em] text-foreground"
               >
-                {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
-                {shortAddr}
+                <RefreshCw className="h-3 w-3" /> Retry
               </button>
-              <a
-                href={`https://scan.botchain.ai/address/${address}`}
-                target="_blank"
-                rel="noreferrer"
-                className="fb-inset inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em] text-muted transition-colors hover:text-foreground"
-              >
-                Explorer <ExternalLink className="h-3 w-3" />
-              </a>
             </div>
+          )}
+
+          {isConnected ? (
+            <>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSendOpen(true)}
+                  disabled={!portfolio}
+                  className="fb-inset inline-flex min-h-[42px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-foreground disabled:opacity-40"
+                >
+                  <ArrowUpRight className="h-3.5 w-3.5 text-primary" /> Send
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReceiveOpen(true)}
+                  className="fb-inset inline-flex min-h-[42px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-foreground"
+                >
+                  <ArrowDownLeft className="h-3.5 w-3.5 text-primary" /> Receive
+                </button>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={copy}
+                  className="fb-inset inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em] text-muted transition-colors hover:text-foreground"
+                >
+                  {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+                  {shortAddr}
+                </button>
+                <a
+                  href={`https://scan.botchain.ai/address/${address}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="fb-inset inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em] text-muted transition-colors hover:text-foreground"
+                >
+                  Explorer <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </>
           ) : (
             <p className="mt-3 font-mono text-[10.5px] leading-relaxed text-muted">
               Connect your wallet on the trade screen to see your BOT Chain balances here.
@@ -186,22 +298,23 @@ function WalletPage() {
           ) : (
             <ul className="divide-y divide-hairline">
               {held.map((row) => (
-                <li
-                  key={row.token.address}
-                  className="flex items-center gap-3 px-4 py-2.5"
-                >
+                <li key={row.token.address} className="flex items-center gap-3 px-4 py-2.5">
                   <TokenIcon symbol={row.token.symbol} className="h-7 w-7 shrink-0" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-mono text-[12px] font-black uppercase tracking-[0.06em]">
                       {row.token.symbol}
                     </p>
                     <p className="truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-                      {row.priceUsd > 0 ? formatUsd(row.priceUsd) : row.token.name}
+                      {row.balanceFailed
+                        ? "Balance unavailable"
+                        : row.priceUsd > 0
+                          ? formatUsd(row.priceUsd)
+                          : "No price feed"}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="font-mono text-[12px] font-black tabular-nums">
-                      {formatBalance4(row.amount)}
+                      {row.balanceFailed ? "—" : formatBalance4(row.amount)}
                     </p>
                     <p className="font-mono text-[9.5px] font-black tabular-nums text-muted">
                       {row.valueUsd > 0 ? formatUsd(row.valueUsd) : "—"}
@@ -212,7 +325,92 @@ function WalletPage() {
             </ul>
           )}
         </section>
+
+        <section className="fb-surface overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
+            <p className="fb-eyebrow">Transaction history</p>
+            <Link
+              to="/activity"
+              className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary"
+            >
+              All activity
+            </Link>
+          </div>
+
+          {!authReady || (user && historyLoading && recent.length === 0) ? (
+            <div className="space-y-2 p-4">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="fb-inset h-11 animate-pulse" />
+              ))}
+            </div>
+          ) : !user ? (
+            <p className="p-4 font-mono text-[11px] leading-relaxed text-muted">
+              Sign in on the trade screen to keep a permanent record of your swaps and bridges.
+            </p>
+          ) : recent.length === 0 ? (
+            <p className="p-4 font-mono text-[11px] leading-relaxed text-muted">
+              No transactions yet. Your swaps and bridges appear here automatically.
+            </p>
+          ) : (
+            <ul className="divide-y divide-hairline">
+              {recent.map((tx: any) => {
+                const type = tx.tx_type ?? tx.txType ?? "SWAP";
+                const status = tx.status ?? "";
+                const hash = tx.tx_hash ?? tx.txHash ?? "";
+                const created = tx.created_at ?? tx.createdAt;
+                return (
+                  <li key={tx.id ?? hash} className="flex items-start gap-3 px-4 py-2.5">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="rounded border border-primary/25 bg-primary/10 px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-primary">
+                          {type}
+                        </span>
+                        <span className="truncate font-mono text-[11.5px] font-black uppercase tracking-[0.06em]">
+                          {formatDirection(tx.direction ?? "")}
+                        </span>
+                      </div>
+                      <p className="mt-1 font-mono text-[10px] tabular-nums text-muted">
+                        {tx.from_amount ?? tx.fromAmount ?? "—"} → {tx.to_amount ?? tx.toAmount ?? "—"}
+                        {created ? ` · ${new Date(created).toLocaleString()}` : ""}
+                      </p>
+                      {hash && (
+                        <a
+                          href={`https://scan.botchain.ai/tx/${hash}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 font-mono text-[9.5px] font-black uppercase tracking-[0.08em] text-primary"
+                        >
+                          {hash.slice(0, 8)}…{hash.slice(-6)} <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      )}
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] ${statusTone(status)}`}
+                    >
+                      {status || "Recorded"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
       </main>
+
+      <SendModal
+        isOpen={sendOpen}
+        onClose={() => setSendOpen(false)}
+        rows={rows}
+        onSent={() => {
+          void load();
+          void refreshHistory();
+        }}
+      />
+      <ReceiveModal
+        isOpen={receiveOpen}
+        onClose={() => setReceiveOpen(false)}
+        address={address}
+      />
 
       <BottomNav />
     </div>
