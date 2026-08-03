@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeftRight,
   ArrowUpRight,
+  Compass,
   Gift,
+
   LineChart,
   History,
   Sparkles,
