@@ -20,12 +20,10 @@ import {
   MAINNET_CONTRACTS,
 } from "@/lib/contracts";
 
-const RPC_URLS = [
-  "https://rpc.botchain.ai",
-  "https://rpc.bot-chain.io",
-];
+const RPC_URLS = ["https://rpc.botchain.ai"];
 const RPC_URL = RPC_URLS[0];
 const CHAIN_ID = 5150;
+
 
 const chain = {
   id: CHAIN_ID,
