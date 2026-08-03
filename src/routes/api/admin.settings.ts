@@ -17,7 +17,6 @@ const rewardsSchema = z.object({
 });
 
 const flagsSchema = z.object({
-  limitTabPublic: z.boolean(),
   showBanners: z.boolean(),
   maintenanceNotice: z.string().trim().max(300),
 });
