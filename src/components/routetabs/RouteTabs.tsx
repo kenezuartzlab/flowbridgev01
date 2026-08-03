@@ -1,17 +1,15 @@
 import { cn } from '../../lib/utils';
 
-export type TabId = 'CA/BOT' | 'BOT/USDT' | 'LIMIT' | 'BRIDGE';
+export type TabId = 'CA/BOT' | 'BOT/USDT' | 'BRIDGE';
 
 interface RouteTabsProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
-  showLimitTab?: boolean;
 }
 
-const ALL_TABS: { id: TabId; label: string }[] = [
+const TABS: { id: TabId; label: string }[] = [
   { id: 'CA/BOT', label: 'CA / BOT' },
   { id: 'BOT/USDT', label: 'SWAP' },
-  { id: 'LIMIT', label: 'LIMIT' },
   { id: 'BRIDGE', label: 'BRIDGE' },
 ];
 
@@ -20,9 +18,7 @@ const ALL_TABS: { id: TabId; label: string }[] = [
  * control, so the active route reads as a raised pill instead of a border.
  * Uses the shared .fb-segment-track / .fb-segment tokens.
  */
-export function RouteTabs({ activeTab, onTabChange, showLimitTab = false }: RouteTabsProps) {
-  const TABS = ALL_TABS.filter((t) => t.id !== 'LIMIT' || showLimitTab);
-
+export function RouteTabs({ activeTab, onTabChange }: RouteTabsProps) {
   return (
     <div className="w-full px-2.5 pb-2.5 pt-2.5 sm:px-3">
       <nav className="fb-segment-track font-mono" role="tablist" aria-label="Trade route">
@@ -48,3 +44,4 @@ export function RouteTabs({ activeTab, onTabChange, showLimitTab = false }: Rout
     </div>
   );
 }
+
