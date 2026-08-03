@@ -20,8 +20,10 @@ import {
   MAINNET_CONTRACTS,
 } from "@/lib/contracts";
 
-const RPC_URL = "https://rpc.botchain.ai";
+const RPC_URLS = ["https://rpc.botchain.ai"];
+const RPC_URL = RPC_URLS[0];
 const CHAIN_ID = 5150;
+
 
 const chain = {
   id: CHAIN_ID,
@@ -29,6 +31,30 @@ const chain = {
   nativeCurrency: { name: "BOT", symbol: "BOT", decimals: 18 },
   rpcUrls: { default: { http: [RPC_URL] } },
 } as const;
+
+// The BOT Chain public RPC occasionally answers eth_call with an empty "0x"
+// body (edge egress / node warm-up). Retry across endpoints before failing so
+// a transient blip does not abort the whole keeper tick.
+async function readWithFallback<T>(
+  read: (client: ReturnType<typeof createPublicClient>) => Promise<T>,
+): Promise<T> {
+  let lastErr: unknown;
+  for (const url of RPC_URLS) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const client = createPublicClient({
+          chain: { ...chain, rpcUrls: { default: { http: [url] } } },
+          transport: http(url, { retryCount: 2, timeout: 15_000 }),
+        });
+        return await read(client);
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+  }
+  throw lastErr;
+}
+
 
 interface Attempt {
   orderId: string;
