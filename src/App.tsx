@@ -37,7 +37,6 @@ import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
-import { LimitOrderCard } from './components/routetabs/limit/LimitOrderCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeStatusPanel } from './components/routetabs/BridgeStatusPanel';
 import { WarningPanel } from './components/routetabs/WarningPanel';
