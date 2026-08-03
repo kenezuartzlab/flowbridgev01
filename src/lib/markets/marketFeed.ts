@@ -16,6 +16,9 @@ export interface MarketRow {
   priceUsd: number;
   change24h: number | null;
   marketCap: number | null;
+  volume24h?: number | null;
+  /** 7d price points, oldest → newest (external tokens only). */
+  sparkline?: number[] | null;
 }
 
 // ── BOT Chain ─────────────────────────────────────────────────────────────
