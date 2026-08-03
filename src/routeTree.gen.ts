@@ -13,6 +13,7 @@ import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as HomeRouteImport } from './routes/home'
@@ -69,6 +70,11 @@ const RewardsRoute = RewardsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnersRoute = PartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -272,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
+  '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -315,6 +322,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
+  '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -359,6 +367,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
+  '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/markets'
     | '/mcp'
+    | '/partners'
     | '/reset-password'
     | '/rewards'
     | '/sitemap.xml'
@@ -447,6 +457,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/markets'
     | '/mcp'
+    | '/partners'
     | '/reset-password'
     | '/rewards'
     | '/sitemap.xml'
@@ -490,6 +501,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/markets'
     | '/mcp'
+    | '/partners'
     | '/reset-password'
     | '/rewards'
     | '/sitemap.xml'
@@ -534,6 +546,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
+  PartnersRoute: typeof PartnersRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -595,6 +608,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partners': {
+      id: '/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof PartnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -881,6 +901,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
+  PartnersRoute: PartnersRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

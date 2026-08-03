@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeftRight,
   ArrowUpRight,
+  Compass,
   Gift,
+
   LineChart,
   History,
   Sparkles,
@@ -43,9 +45,10 @@ export const Route = createFileRoute("/home")({
 const QUICK_ACTIONS = [
   { to: "/", label: "Swap", hint: "Best route", Icon: ArrowLeftRight },
   { to: "/markets", label: "Markets", hint: "Live prices", Icon: LineChart },
+  { to: "/partners", label: "Partners", hint: "Quests & apps", Icon: Compass },
   { to: "/rewards", label: "Rewards", hint: "FLOW points", Icon: Gift },
-  { to: "/activity", label: "Activity", hint: "Your history", Icon: History },
 ] as const;
+
 
 function HomePage() {
   const { user, incentives, transactions, loading } = useAccountData();
