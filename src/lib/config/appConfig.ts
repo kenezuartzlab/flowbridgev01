@@ -137,7 +137,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     claimThreshold: 1000,
     referralActivityPct: 20,
   },
-  flags: { limitTabPublic: false, showBanners: true, maintenanceNotice: "" },
+  flags: { showBanners: true, maintenanceNotice: "" },
   banners: DEFAULT_BANNERS,
 
   tokens: [],
