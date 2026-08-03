@@ -116,6 +116,8 @@ interface CgCoin {
   current_price: number;
   price_change_percentage_24h: number | null;
   market_cap: number | null;
+  total_volume: number | null;
+  sparkline_in_7d?: { price: number[] } | null;
 }
 
 let cache: { at: number; rows: MarketRow[] } | null = null;
@@ -124,21 +126,28 @@ const CACHE_MS = 60_000;
 export async function fetchExternalMarkets(): Promise<MarketRow[]> {
   if (cache && Date.now() - cache.at < CACHE_MS) return cache.rows;
   const ids = CG_IDS.map((c) => c.id).join(",");
-  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h`;
+  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h`;
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error("cg http " + res.status);
     const data = (await res.json()) as CgCoin[];
     const chainById = new Map(CG_IDS.map((c) => [c.id, c.chain]));
-    const rows: MarketRow[] = data.map((c) => ({
-      id: c.id,
-      symbol: (c.symbol ?? "").toUpperCase(),
-      name: c.name,
-      chain: chainById.get(c.id) ?? "ETH",
-      priceUsd: Number(c.current_price ?? 0),
-      change24h: c.price_change_percentage_24h ?? null,
-      marketCap: c.market_cap ?? null,
-    }));
+    const rows: MarketRow[] = data.map((c) => {
+      const pts = c.sparkline_in_7d?.price ?? [];
+      // Downsample to ~24 points to keep the inline chart cheap to render.
+      const step = pts.length > 24 ? Math.ceil(pts.length / 24) : 1;
+      return {
+        id: c.id,
+        symbol: (c.symbol ?? "").toUpperCase(),
+        name: c.name,
+        chain: chainById.get(c.id) ?? "ETH",
+        priceUsd: Number(c.current_price ?? 0),
+        change24h: c.price_change_percentage_24h ?? null,
+        marketCap: c.market_cap ?? null,
+        volume24h: c.total_volume ?? null,
+        sparkline: pts.length ? pts.filter((_, i) => i % step === 0) : null,
+      };
+    });
     cache = { at: Date.now(), rows };
     return rows;
   } catch {
