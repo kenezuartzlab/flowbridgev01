@@ -178,9 +178,11 @@ export function ReceiptModal({
           Close receipt
         </button>
 
-        <p className="text-[10px] text-[#C5C1B9]/60 text-center leading-snug px-2">
-          A 0.1% platform fee was charged by FlowBridge for this transaction.
-        </p>
+        {txType === 'swap' && (
+          <p className="text-[10px] text-[#C5C1B9]/60 text-center leading-snug px-2">
+            A 0.1% platform fee was charged by FlowBridge for this swap.
+          </p>
+        )}
       </div>
     </div>
     </ModalPortal>

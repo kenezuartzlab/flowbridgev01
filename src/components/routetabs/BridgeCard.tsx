@@ -320,7 +320,6 @@ export function BridgeCard({
         receiveAddress={receiveAddress}
         rows={[
           { label: 'Bridge Fee', value: bridgeDirection === 'BOT_TO_BNB' ? '1 USDT' : '0 USDT (No Fee)' },
-          { label: 'Platform Fee', value: '0.1%' },
           { label: 'Gas fee', value: gasFeeLabel },
           { label: 'Estimated completion time', value: '≈ 7 min' },
           { label: 'Receive (estimated)', value: estimatedReceive ? `${parseFloat(estimatedReceive).toFixed(8)} USDT` : '0.00000000 USDT', isImportant: true }
