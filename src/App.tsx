@@ -463,6 +463,7 @@ export default function App() {
     return 'BRIDGE';
   });
 
+  const appConfig = useAppConfig();
 
   // Form states
   const [caAmount, setCaAmount] = useState('');
