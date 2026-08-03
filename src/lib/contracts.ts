@@ -110,7 +110,6 @@ export interface ChainContracts {
   usdtTron: string;
   flowBridgeRouter: string;
   flowBridgeRouterV3: string;
-  flowLimitOrderExecutor: string;
   usdtBotPoolV3: string;
 }
 
