@@ -37,7 +37,6 @@ import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
-import { LimitOrderCard } from './components/routetabs/limit/LimitOrderCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeStatusPanel } from './components/routetabs/BridgeStatusPanel';
 import { WarningPanel } from './components/routetabs/WarningPanel';
@@ -464,16 +463,7 @@ export default function App() {
     return 'BRIDGE';
   });
 
-  // LIMIT tab: private by default, opened to everyone only when the admin
-  // flips the published `limitTabPublic` flag.
   const appConfig = useAppConfig();
-  const isLimitAdmin =
-    appConfig.flags.limitTabPublic ||
-    googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com';
-  useEffect(() => {
-    if (activeTab === 'LIMIT' && !isLimitAdmin) setActiveTab('BOT/USDT');
-  }, [activeTab, isLimitAdmin]);
-
 
   // Form states
   const [caAmount, setCaAmount] = useState('');
@@ -1058,7 +1048,7 @@ export default function App() {
 
   // Determine needed chain based on active screen and directions
   const targetChainIdForTab = (): number => {
-    if (activeTab === 'CA/BOT' || activeTab === 'BOT/USDT' || activeTab === 'LIMIT') {
+    if (activeTab === 'CA/BOT' || activeTab === 'BOT/USDT') {
       return isMainnet ? 677 : 968; // BOT Chain
     }
     // BRIDGE tab
@@ -2435,7 +2425,6 @@ export default function App() {
         <RouteTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          showLimitTab={isLimitAdmin}
         />
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-background flex flex-col items-stretch px-3.5 pb-4 pt-1.5 sm:px-5 sm:pb-5 sm:pt-2 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
@@ -2723,24 +2712,6 @@ export default function App() {
                   txHash,
                   'SUCCESS',
                 );
-              }}
-            />
-          )}
-
-          {activeTab === 'LIMIT' && isLimitAdmin && (
-            <LimitOrderCard
-              isMainnet={isMainnet}
-              isConnected={isConnected}
-              onConnect={handleConnect}
-              isNetworkCorrect={isNetworkCorrect}
-              onSwitchNetwork={handleSwitchNetwork}
-              txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
-              getUsdPrice={(sym) => {
-                const s = sym.toUpperCase();
-                if (s === 'USDT') return 1;
-                if (s === 'BOT' || s === 'WBOT' || s === 'CAWBOT') return getLiveBotPrice();
-                if (s === 'CA') return getLiveCaPrice();
-                return null;
               }}
             />
           )}

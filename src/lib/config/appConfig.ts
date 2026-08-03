@@ -21,7 +21,6 @@ export interface RewardSettings {
 }
 
 export interface FlagSettings {
-  limitTabPublic: boolean;
   showBanners: boolean;
   maintenanceNotice: string;
 }
@@ -138,7 +137,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     claimThreshold: 1000,
     referralActivityPct: 20,
   },
-  flags: { limitTabPublic: false, showBanners: true, maintenanceNotice: "" },
+  flags: { showBanners: true, maintenanceNotice: "" },
   banners: DEFAULT_BANNERS,
 
   tokens: [],
@@ -252,7 +251,6 @@ export function mergeAppConfig(partial: any): AppConfig {
       ),
     },
     flags: {
-      limitTabPublic: !!p.flags?.limitTabPublic,
       showBanners: p.flags?.showBanners !== false,
       maintenanceNotice: typeof p.flags?.maintenanceNotice === "string" ? p.flags.maintenanceNotice : "",
     },

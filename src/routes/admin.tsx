@@ -579,12 +579,6 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
     return (
       <>
         <Toggle
-          label="Show LIMIT tab to everyone"
-          hint="Off = admin-only (current behaviour)."
-          value={cfg.flags.limitTabPublic}
-          onChange={(v) => setCfg({ ...cfg, flags: { ...cfg.flags, limitTabPublic: v } })}
-        />
-        <Toggle
           label="Show hero banners"
           value={cfg.flags.showBanners}
           onChange={(v) => setCfg({ ...cfg, flags: { ...cfg.flags, showBanners: v } })}

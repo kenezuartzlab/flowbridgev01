@@ -75,36 +75,7 @@ export const FLOW_BRIDGE_ROUTER_V3_ABI = parseAbi([
   'function bridgeWithFee(uint256 bridgeId, address token, uint256 bridgeAmount) returns (bool)'
 ]);
 
-// FlowLimitOrderExecutor v3 — registry-integrated limit orders. Uses the same
-// routerIds as FlowBridgeRouter v3 (0 = CaSwap V2, 1 = BDex V2, 2 = BDex V3).
-// tokenIn is safeTransferFrom'd (no native BOT input — wrap first).
-// msg.value on placeOrder = keeper bounty (native BOT); NOT a protocol fee.
-export const FLOW_LIMIT_ORDER_EXECUTOR_ABI = parseAbi([
-  'function paused() view returns (bool)',
-  'function placementFeeBps() view returns (uint256)',
-  'function maxPlacementFeeBps() view returns (uint256)',
-  'function maxOrdersPerUser() view returns (uint256)',
-  'function openOrderCount(address user) view returns (uint256)',
-  'function nextOrderId() view returns (uint256)',
-  'function feeExempt(address account) view returns (bool)',
-  'function feeTreasury() view returns (address)',
-  'function flowBridgeRouter() view returns (address)',
-  'function availableRouterCount() view returns (uint256)',
-  'function computePlacementFee(address user, uint256 amountIn) view returns (uint256 fee, uint256 effectiveBps)',
-  'function getActiveUserOrders(address user) view returns (uint256[])',
-  'function getUserOrders(address user) view returns (uint256[])',
-  'function getOrder(uint256 orderId) view returns ((uint256 id, address creator, address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 executionFee, uint256 expiry, uint8 status, uint256 routerId, uint24 feePoolV3, address recipient, uint256 placedAt))',
-  'function getOrderRouterName(uint256 orderId) view returns (string)',
-  'function placeOrder(address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 expiry, uint256 routerId, uint24 feePoolV3, address recipient) payable returns (uint256 orderId)',
-  'function cancelOrder(uint256 orderId)',
-  'function executeOrder(uint256 orderId, address[] v2Path)',
-  'function executeOrderMultiHop(uint256 orderId, uint256[] routerIds, address[][] paths, uint256[] minAmountsPerHop)',
-  'event OrderPlaced(uint256 indexed orderId, address indexed creator, address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 executionFee, uint256 expiry, uint256 routerId, address recipient, uint256 placementFee)',
-  'event OrderFilled(uint256 indexed orderId, address indexed executor, uint256 amountOut, uint256 routerId)',
-  'event OrderCancelled(uint256 indexed orderId, address indexed creator, address tokenIn, uint256 amountIn, uint256 executionFee)',
-]);
-
-// Canonical Wrapped BOT (WETH9-shaped) — used to wrap/unwrap for limit orders.
+// Canonical Wrapped BOT (WETH9-shaped) — used to wrap/unwrap for native BOT swaps.
 export const WBOT_ABI = parseAbi([
   'function deposit() payable',
   'function withdraw(uint256 wad)',
@@ -139,7 +110,6 @@ export interface ChainContracts {
   usdtTron: string;
   flowBridgeRouter: string;
   flowBridgeRouterV3: string;
-  flowLimitOrderExecutor: string;
   usdtBotPoolV3: string;
 }
 
@@ -176,7 +146,6 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   tronBridgeProxy: "TGhXbQpjBgC6bDp5jAexzeQPHEXXsx5f35", // base58, requires TronLink
   flowBridgeRouter: "0x19784e19546307af427902a75771434df831d882",
   flowBridgeRouterV3: "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
-  flowLimitOrderExecutor: "0x7FE51363C6694ACddf3EBBF64B2d4A7Ef970ecB4",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
 };
 
@@ -203,7 +172,6 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   tronBridgeProxy: "",                                          // not published for testnet — disable TRX bridge on testnet
   flowBridgeRouter: "0x72c7d69f44cf0ce056b1c39032c41ee97e09bc8e",
   flowBridgeRouterV3: "0x6a8C4ce7544A75fEc6E577b990e44fe621D8a5ac",
-  flowLimitOrderExecutor: "",
   usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
 };
 
