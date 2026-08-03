@@ -1,23 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeftRight, Home, LineChart, Gift, History } from "lucide-react";
+import { ArrowLeftRight, Home, Wallet, Gift, History } from "lucide-react";
 
 /**
  * Persistent bottom bar. Redesign pass: each item is a 44px tap target with
  * the icon sitting in its own rounded plate, an active plate fill plus a top
  * indicator bar, and labels that never wrap. Purely presentational — it never
  * touches swap/bridge execution state.
- *
- * The mockup's five-tab shape (Home / Wallet / Swap / Rewards / Profile)
- * lands once the Home and Wallet routes exist; the styling here is already
- * built for five slots.
  */
 const ITEMS = [
   { to: "/home", label: "Home", Icon: Home },
+  { to: "/wallet", label: "Wallet", Icon: Wallet },
   { to: "/", label: "Swap", Icon: ArrowLeftRight },
-  { to: "/markets", label: "Markets", Icon: LineChart },
   { to: "/rewards", label: "Rewards", Icon: Gift },
   { to: "/activity", label: "Activity", Icon: History },
 ] as const;
+
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
