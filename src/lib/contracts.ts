@@ -75,8 +75,7 @@ export const FLOW_BRIDGE_ROUTER_V3_ABI = parseAbi([
   'function bridgeWithFee(uint256 bridgeId, address token, uint256 bridgeAmount) returns (bool)'
 ]);
 
-
-// Canonical Wrapped BOT (WETH9-shaped) — used to wrap/unwrap for limit orders.
+// Canonical Wrapped BOT (WETH9-shaped) — used to wrap/unwrap for native BOT swaps.
 export const WBOT_ABI = parseAbi([
   'function deposit() payable',
   'function withdraw(uint256 wad)',
