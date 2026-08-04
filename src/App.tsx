@@ -2416,6 +2416,7 @@ export default function App() {
               recipientAddress={recipientAddress}
               recipientLabel={recipientLabel}
               onSignOut={googleUser ? handleGoogleLogout : undefined}
+              onSignIn={googleUser ? undefined : handleGoogleSignIn}
               referralAppliedCode={referralAppliedCode}
               incentives={incentives}
             />

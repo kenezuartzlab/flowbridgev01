@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowLeft, RefreshCw, ArrowUpRight, Repeat, Waypoints, Users } from "lucide-react";
+import { SignInButton } from "@/components/auth/SignInButton";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { TabBanner } from "@/components/banners/TabBanner";
@@ -96,12 +97,9 @@ function ActivityPage() {
               <p className="mt-2 text-[12px] leading-relaxed text-muted">
                 Activity is recorded only for a verified email and the wallet bound to it.
               </p>
-              <Link
-                to="/"
-                className="mt-4 inline-block rounded-xl bg-primary px-5 py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground"
-              >
-                Go to Swap
-              </Link>
+              <div className="mt-4">
+                <SignInButton label="Sign in" />
+              </div>
             </div>
           </div>
         ) : (
