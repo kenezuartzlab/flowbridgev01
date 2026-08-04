@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
+import { SignInButton } from "@/components/auth/SignInButton";
 import { TabBanner } from "@/components/banners/TabBanner";
 import giftArt from "@/assets/gift-1.png.asset.json";
 
@@ -100,8 +101,11 @@ function RewardsPage() {
             <TabBanner variant="rewards" />
             <EmptyState
               title="Sign in to see your FLOW"
-              body="FLOW points are tied to a verified email plus the wallet bound to it. Sign in on the swap screen to start tracking rewards."
+              body="FLOW points are tied to a verified email plus the wallet bound to it. Sign in to start tracking rewards."
             />
+            <div className="flex justify-center">
+              <SignInButton label="Sign in" />
+            </div>
           </div>
         ) : (
           <div className="space-y-4">

@@ -4,7 +4,7 @@ import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut,
-  BarChart3, Rocket, ChevronDown,
+  BarChart3, Rocket, ChevronDown, LogIn,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
@@ -43,6 +43,8 @@ interface AppHeaderProps {
   recipientLabel?: string;
   /** Sign out the current Google/email user. */
   onSignOut?: () => void;
+  /** Start Google sign-in for a guest. */
+  onSignIn?: () => void;
   /** Referral code the current session was captured under, if any. */
   referralAppliedCode?: string | null;
   /** Read-only incentives payload used to render the FLOW pill. */
@@ -72,6 +74,7 @@ export function AppHeader({
   recipientAddress,
   recipientLabel,
   onSignOut,
+  onSignIn,
   referralAppliedCode,
   incentives,
   incentivesLoading,
@@ -262,6 +265,13 @@ export function AppHeader({
       id: 'account',
       title: 'Account',
       items: [
+        {
+          id: 'signin',
+          label: 'Sign in',
+          icon: <LogIn className="w-4 h-4" />,
+          onClick: () => { onSignIn?.(); setMenuOpen(false); },
+          show: !!(onSignIn && !isUserLoggedIn),
+        },
         {
           id: 'signout',
           label: 'Sign out',

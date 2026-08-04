@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Waves,
 } from "lucide-react";
+import { SignInButton } from "@/components/auth/SignInButton";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
@@ -140,10 +141,13 @@ function HomePage() {
           </div>
 
           {!user && (
-            <p className="mt-3 flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed text-muted">
-              <Sparkles className="mt-[1px] h-3 w-3 shrink-0 text-primary" />
-              Sign in from the trade screen to start accruing FLOW on every swap.
-            </p>
+            <div className="mt-3 space-y-2.5">
+              <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed text-muted">
+                <Sparkles className="mt-[1px] h-3 w-3 shrink-0 text-primary" />
+                Sign in to start accruing FLOW on every swap.
+              </p>
+              <SignInButton label="Sign in" />
+            </div>
           )}
         </section>
 
