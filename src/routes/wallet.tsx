@@ -14,6 +14,7 @@ import {
   Wallet as WalletIcon,
 } from "lucide-react";
 import { wagmiConfig } from "@/lib/wagmi";
+import { SignInButton } from "@/components/auth/SignInButton";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
 import { formatUsd, formatBalance4 } from "@/lib/format";
@@ -353,9 +354,12 @@ function WalletPage() {
               ))}
             </div>
           ) : !user ? (
-            <p className="p-4 font-mono text-[11px] leading-relaxed text-muted">
-              Sign in on the trade screen to keep a permanent record of your swaps and bridges.
-            </p>
+            <div className="space-y-3 p-4">
+              <p className="font-mono text-[11px] leading-relaxed text-muted">
+                Sign in to keep a permanent record of your swaps and bridges.
+              </p>
+              <SignInButton label="Sign in" />
+            </div>
           ) : recent.length === 0 ? (
             <p className="p-4 font-mono text-[11px] leading-relaxed text-muted">
               No transactions yet. Your swaps and bridges appear here automatically.
