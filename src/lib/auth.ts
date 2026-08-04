@@ -72,10 +72,18 @@ export const initAuth = (
   return () => sub.subscription.unsubscribe();
 };
 
-export const googleSignIn = async (): Promise<{ user: AppUser; accessToken: string } | null> => {
-  const result = await lovable.auth.signInWithOAuth("google", {
-    redirect_uri: window.location.origin,
-  });
+export const googleSignIn = async (
+  returnTo?: string,
+): Promise<{ user: AppUser; accessToken: string } | null> => {
+  // Same-origin only: never hand an external URL to the OAuth redirect.
+  let redirect_uri = window.location.origin;
+  if (returnTo) {
+    try {
+      const url = new URL(returnTo, window.location.origin);
+      if (url.origin === window.location.origin) redirect_uri = url.toString();
+    } catch { /* fall back to origin */ }
+  }
+  const result = await lovable.auth.signInWithOAuth("google", { redirect_uri });
   if (result.error) throw result.error;
   if (result.redirected) return null; // browser will redirect
   const { data } = await supabase.auth.getSession();
