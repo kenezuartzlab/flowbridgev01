@@ -146,9 +146,18 @@ function WalletPage() {
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary">
               <WalletIcon className="h-4 w-4" />
             </span>
-            <h1 className="truncate font-mono text-[13px] font-black uppercase tracking-[0.14em]">
-              Wallet<span className="text-primary">.</span>
-            </h1>
+            <div className="min-w-0">
+              <h1 className="truncate font-mono text-[13px] font-black uppercase tracking-[0.14em]">
+                Wallet<span className="text-primary">.</span>
+              </h1>
+              <span className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-2 py-[2px] font-mono text-[9px] font-black uppercase tracking-[0.12em] text-success">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                </span>
+                BOT Chain · Mainnet
+              </span>
+            </div>
           </div>
           <button
             type="button"
