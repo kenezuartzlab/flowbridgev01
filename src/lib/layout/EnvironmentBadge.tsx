@@ -4,15 +4,35 @@ interface EnvironmentBadgeProps {
   isMainnet?: boolean;
 }
 
+/**
+ * Subtle, Apple-style network indicator: quiet by default on mainnet,
+ * clearly warm-toned when the app is pointed anywhere else.
+ */
 export function EnvironmentBadge({ isMainnet = false }: EnvironmentBadgeProps) {
   return (
-    <div className="flex items-center gap-2 mt-0.5 font-mono">
-      <span className={cn(
-        "text-[11px] px-2 py-0.5 rounded font-black tracking-widest uppercase transition-all",
-        isMainnet 
-          ? "bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/30" 
-          : "bg-[#00D7B2]/10 text-[#00D7B2] border border-[#00D7B2]/30"
-      )}>
+    <div className="mt-0.5 flex items-center font-mono">
+      <span
+        className={cn(
+          'inline-flex items-center gap-1.5 rounded-full border px-2 py-[2px] text-[10px] font-black uppercase tracking-[0.12em] transition-colors',
+          isMainnet
+            ? 'border-success/25 bg-success/10 text-success'
+            : 'border-warning/30 bg-warning/10 text-warning',
+        )}
+      >
+        <span className="relative flex h-1.5 w-1.5">
+          <span
+            className={cn(
+              'absolute inline-flex h-full w-full rounded-full opacity-60',
+              isMainnet ? 'animate-ping bg-success' : 'bg-warning',
+            )}
+          />
+          <span
+            className={cn(
+              'relative inline-flex h-1.5 w-1.5 rounded-full',
+              isMainnet ? 'bg-success' : 'bg-warning',
+            )}
+          />
+        </span>
         {isMainnet ? 'Mainnet' : 'Testnet'}
       </span>
     </div>
