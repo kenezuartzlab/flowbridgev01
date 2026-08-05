@@ -28,6 +28,7 @@ import { useTheme } from "@/lib/theme";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { logout } from "@/lib/auth";
 import { readPlayState } from "@/lib/games/playState";
+import { usePrefs } from "@/lib/prefs";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -60,44 +61,16 @@ const LANGUAGES = [
   { code: "ja", label: "日本語" },
 ] as const;
 
-const PREF_KEY = "fb_prefs_v1";
-
-type Prefs = { notifications: boolean; marketing: boolean; currency: string; language: string };
-const DEFAULT_PREFS: Prefs = {
-  notifications: true,
-  marketing: false,
-  currency: "USD",
-  language: "en",
-};
-
 function AccountPage() {
   const { user, authReady, incentives, transactions } = useAccountData();
   const [theme, setTheme] = useTheme();
-  const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
+  const [prefs, savePrefs] = usePrefs();
   const [open, setOpen] = useState<string | null>(null);
   const [play, setPlay] = useState(0);
 
   useEffect(() => {
     setPlay(readPlayState().points);
-    try {
-      const raw = window.localStorage.getItem(PREF_KEY);
-      if (raw) setPrefs({ ...DEFAULT_PREFS, ...JSON.parse(raw) });
-    } catch {
-      /* storage unavailable */
-    }
   }, []);
-
-  const savePrefs = (next: Partial<Prefs>) => {
-    setPrefs((prev) => {
-      const merged = { ...prev, ...next };
-      try {
-        window.localStorage.setItem(PREF_KEY, JSON.stringify(merged));
-      } catch {
-        /* storage unavailable */
-      }
-      return merged;
-    });
-  };
 
   const toggleTheme = () => setTheme();
 
