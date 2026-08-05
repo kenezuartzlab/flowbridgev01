@@ -200,6 +200,21 @@ function HomePage() {
           </div>
         </section>
 
+        {/* Featured campaign — admin-managed, 4s cross-fade */}
+        {campaignSlides.length > 0 && (
+          <BannerRotator
+            slides={campaignSlides.map((s) => (
+              <FeaturedBanner key={s.id} slide={s} surface="home" />
+            ))}
+            slideKeys={campaignSlides.map((s) => s.id)}
+            onSlideVisible={(key) => trackBannerImpression("home", key)}
+            intervalMs={campaigns.intervalMs}
+            label="Featured campaigns"
+            className="pb-1"
+          />
+        )}
+
+
         {/* Markets snapshot */}
         <section className="fb-surface overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
