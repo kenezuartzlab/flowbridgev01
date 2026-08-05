@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { Check, Copy, Download, ExternalLink, Share2, X } from "lucide-react";
 import QRCode from "qrcode";
+import { DEFAULT_WALLET_NETWORK, findWalletNetwork } from "@/lib/wallet/networks";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   address?: string;
+  /** Human label of the auto-detected network, e.g. "BOT Chain" */
+  networkLabel?: string;
+  /** Chain id of the auto-detected network */
+  chainId?: number;
 }
 
-export function ReceiveModal({ isOpen, onClose, address }: Props) {
+export function ReceiveModal({ isOpen, onClose, address, networkLabel, chainId }: Props) {
+  const network = findWalletNetwork(chainId) ?? DEFAULT_WALLET_NETWORK;
+  const label = networkLabel ?? network.label;
+
   const [copied, setCopied] = useState(false);
   const [qr, setQr] = useState<string>("");
 
