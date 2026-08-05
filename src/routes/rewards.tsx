@@ -325,6 +325,23 @@ function RewardsPage() {
                     />
                   </ul>
 
+                  {!incentives?.walletAddress && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTab("EARN");
+                        setTimeout(
+                          () => document.getElementById("bind-wallet")?.scrollIntoView({ behavior: "smooth" }),
+                          80,
+                        );
+                      }}
+                      className="mt-3 flex min-h-[44px] w-full items-center justify-between gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary"
+                    >
+                      Bind your wallet
+                      <span className="tabular-nums">0/1</span>
+                    </button>
+                  )}
+
                   {!socialsDone && (
                     <button
                       type="button"
