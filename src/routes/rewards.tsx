@@ -22,6 +22,8 @@ import { TabBanner } from "@/components/banners/TabBanner";
 import giftArt from "@/assets/gift-1.png.asset.json";
 
 import { formatUsd } from "@/lib/format";
+import { getIdToken } from "@/lib/auth";
+
 
 export const Route = createFileRoute("/rewards")({
   head: () => ({
