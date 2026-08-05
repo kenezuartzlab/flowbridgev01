@@ -105,31 +105,42 @@ function HomePage() {
       />
 
       <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4">
-        {/* Summary */}
-        <section className="fb-surface p-4">
-          <p className="fb-eyebrow">FLOW balance</p>
-          <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
-            <p className="font-mono text-3xl font-black leading-none tabular-nums">
-              {loading && !incentives ? "—" : flowPoints.toLocaleString("en-US")}
-              <span className="ml-1.5 align-baseline text-[12px] font-black text-muted">FLOW</span>
+        {/* Summary — Archon-style hero balance card */}
+        <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-primary via-primary to-[color-mix(in_srgb,var(--fb-primary)_70%,#0b3b22)] p-5 text-primary-foreground shadow-[0_24px_50px_-30px_color-mix(in_srgb,var(--fb-primary)_75%,transparent)]">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full bg-primary-foreground/10 blur-2xl"
+          />
+          <div className="relative flex items-start justify-between gap-3">
+            <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-70">
+              FLOW balance
             </p>
             <Link
               to="/rewards"
-              className="inline-flex min-h-[36px] items-center gap-1 rounded-xl border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+              className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-primary-foreground/15 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-primary-foreground/25"
             >
               Rewards <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="fb-inset px-3 py-2">
-              <p className="fb-eyebrow">Claimable</p>
-              <p className="mt-0.5 font-mono text-[15px] font-black tabular-nums text-primary">
+          <p className="relative mt-2 font-mono text-[40px] font-black leading-none tabular-nums tracking-[-0.02em] sm:text-[46px]">
+            {loading && !incentives ? "—" : flowPoints.toLocaleString("en-US")}
+            <span className="ml-2 align-baseline text-[13px] font-black opacity-70">FLOW</span>
+          </p>
+
+          <div className="relative mt-4 grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-primary-foreground/12 px-3 py-2.5 backdrop-blur-sm">
+              <p className="font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-70">
+                Claimable
+              </p>
+              <p className="mt-0.5 font-mono text-[15px] font-black tabular-nums">
                 {claimable.toLocaleString("en-US")}
               </p>
             </div>
-            <div className="fb-inset px-3 py-2">
-              <p className="fb-eyebrow">Swap volume</p>
+            <div className="rounded-2xl bg-primary-foreground/12 px-3 py-2.5 backdrop-blur-sm">
+              <p className="font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-70">
+                Swap volume
+              </p>
               <p className="mt-0.5 font-mono text-[15px] font-black tabular-nums">
                 {volumeUsd > 0 ? formatUsd(volumeUsd) : "—"}
               </p>
@@ -137,12 +148,12 @@ function HomePage() {
           </div>
 
           {!user && (
-            <div className="mt-3 space-y-2.5">
-              <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed text-muted">
-                <Sparkles className="mt-[1px] h-3 w-3 shrink-0 text-primary" />
+            <div className="relative mt-4 space-y-2.5 rounded-2xl bg-primary-foreground/12 p-3">
+              <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed">
+                <Sparkles className="mt-[1px] h-3 w-3 shrink-0" />
                 Sign in to start accruing FLOW on every swap.
               </p>
-              <SignInButton label="Sign in" />
+              <SignInButton label="Sign in" returnTo="/home" />
             </div>
           )}
         </section>
