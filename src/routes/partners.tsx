@@ -1,15 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import {
   ArrowUpRight,
   Compass,
   Gamepad2,
-  Gift,
   Sparkles,
   Target,
   TrendingUp,
   Users,
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
+import { KitIcon } from "@/components/kit/KitIcon";
+import { PartnerProfileModal } from "@/components/partners/PartnerProfileModal";
+import { getPartners, useAppConfig, type PartnerCard } from "@/lib/config/appConfig";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { formatUsd } from "@/lib/format";
 
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/partners")({
       {
         name: "description",
         content:
-          "Browse FlowBridge partner mini-apps — Flow Fortune Wheel, ArcadeFlix P2E and Ecosurge Growth Hub — and track your open FLOW quests in one place.",
+          "Browse FlowBridge partner mini-apps and campaigns — BOT Chain, CaryPact, Flow Fortune Wheel and more — and track your open FLOW quests in one place.",
       },
       { property: "og:title", content: "FlowBridge Partners & Quest Center" },
       {
@@ -36,35 +39,23 @@ export const Route = createFileRoute("/partners")({
   component: PartnersPage,
 });
 
-const PARTNERS = [
-  {
-    to: "/fortune",
-    name: "Flow Fortune Wheel",
-    tag: "Daily spins",
-    blurb: "Two free spins a day with a 50 FLOW jackpot.",
-    status: "Launching soon",
-    Icon: Gift,
-  },
-  {
-    to: "/arcadeflix",
-    name: "ArcadeFlix P2E",
-    tag: "Play to earn",
-    blurb: "Skill-based arcade with weekly FLOW prize pools.",
-    status: "In development",
-    Icon: Gamepad2,
-  },
-  {
-    to: "/ecosurge",
-    name: "Ecosurge Growth Hub",
-    tag: "Ecosystem quests",
-    blurb: "Partner campaigns that stack FLOW multipliers.",
-    status: "Partner onboarding",
-    Icon: TrendingUp,
-  },
-] as const;
-
 function PartnersPage() {
   const { incentives } = useAccountData();
+  const config = useAppConfig();
+  const [active, setActive] = useState<PartnerCard | null>(null);
+
+  const partners = useMemo(() => getPartners(config), [config]);
+  const featured = partners.filter((p) => p.featured);
+  const rest = partners.filter((p) => !p.featured);
+
+  const categories = useMemo(() => {
+    const map = new Map<string, number>();
+    partners.forEach((p) => {
+      const key = p.category?.trim();
+      if (key) map.set(key, (map.get(key) ?? 0) + 1);
+    });
+    return [...map.entries()];
+  }, [partners]);
 
   const socials = (["youtube", "x", "telegram"] as const).filter(
     (k) => incentives?.socials?.[k],
@@ -122,38 +113,56 @@ function PartnersPage() {
       </header>
 
       <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4">
-        {/* Marketplace */}
-        <section>
-          <p className="fb-eyebrow mb-2 px-1">Mini-app marketplace</p>
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {PARTNERS.map(({ to, name, tag, blurb, status, Icon }) => (
-              <li key={to}>
-                <Link
-                  to={to}
-                  className="glass-card flex h-full flex-col gap-2 rounded-[var(--fb-radius-md)] p-3.5"
+        {/* Featured partner cards */}
+        {featured.length > 0 && (
+          <section>
+            <p className="fb-eyebrow mb-2 px-1">Featured</p>
+            <ul className="space-y-2.5">
+              {featured.map((p) => (
+                <li key={p.id}>
+                  <FeaturedPartnerCard partner={p} onOpen={() => setActive(p)} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* Top categories */}
+        {categories.length > 0 && (
+          <section>
+            <p className="fb-eyebrow mb-2 px-1">Top categories</p>
+            <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {categories.map(([name, count]) => (
+                <li
+                  key={name}
+                  className="glass-card flex flex-col items-center gap-1.5 rounded-[var(--fb-radius-md)] p-3 text-center"
                 >
-                  <span className="flex items-center gap-2">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary">
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate font-mono text-[12px] font-black uppercase tracking-[0.07em]">
-                        {name}
-                      </span>
-                      <span className="block truncate font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
-                        {tag}
-                      </span>
-                    </span>
+                  <KitIcon name="network" size={30} />
+                  <span className="block w-full truncate font-mono text-[10px] font-black uppercase tracking-[0.08em]">
+                    {name}
                   </span>
-                  <span className="font-mono text-[10.5px] leading-relaxed text-muted">{blurb}</span>
-                  <span className="mt-auto inline-flex w-fit items-center rounded-lg bg-primary/12 px-2 py-1 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-primary">
-                    {status}
+                  <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted">
+                    {count} app{count > 1 ? "s" : ""}
                   </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* All partners */}
+        {rest.length > 0 && (
+          <section>
+            <p className="fb-eyebrow mb-2 px-1">Mini-app marketplace</p>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {rest.map((p) => (
+                <li key={p.id}>
+                  <PartnerListCard partner={p} onOpen={() => setActive(p)} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Quest center */}
         <section className="fb-surface overflow-hidden">
@@ -203,7 +212,112 @@ function PartnersPage() {
         </section>
       </main>
 
+      {active && <PartnerProfileModal partner={active} onClose={() => setActive(null)} />}
+
       <BottomNav />
     </div>
+  );
+}
+
+function FeaturedPartnerCard({
+  partner,
+  onOpen,
+}: {
+  partner: PartnerCard;
+  onOpen: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="fb-surface relative block w-full overflow-hidden p-4 text-left transition-transform active:scale-[0.995]"
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-primary/25 blur-3xl"
+      />
+      <span className="relative flex items-center gap-3">
+        {partner.imageUrl ? (
+          <img
+            src={partner.imageUrl}
+            alt={`${partner.name} logo`}
+            loading="lazy"
+            className="h-16 w-16 shrink-0 rounded-2xl border border-hairline object-cover"
+          />
+        ) : (
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-primary/12">
+            <KitIcon name="handshake" size={38} />
+          </span>
+        )}
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-1.5">
+            {partner.category && (
+              <span className="rounded-lg bg-primary/12 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-primary">
+                {partner.category}
+              </span>
+            )}
+            {partner.status && (
+              <span className="rounded-lg border border-hairline px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted">
+                {partner.status}
+              </span>
+            )}
+          </span>
+          <span className="mt-1.5 block truncate text-[15px] font-black leading-tight">
+            {partner.name}
+          </span>
+          {partner.tagline && (
+            <span className="mt-0.5 block line-clamp-2 font-mono text-[10.5px] leading-relaxed text-muted">
+              {partner.tagline}
+            </span>
+          )}
+          <span className="mt-2.5 inline-flex min-h-[34px] items-center gap-1.5 rounded-full bg-primary px-3.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary-foreground">
+            {partner.ctaLabel || "Participate"}
+            <ArrowUpRight className="h-3 w-3" />
+          </span>
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function PartnerListCard({ partner, onOpen }: { partner: PartnerCard; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="glass-card flex h-full w-full flex-col gap-2 rounded-[var(--fb-radius-md)] p-3.5 text-left"
+    >
+      <span className="flex items-center gap-2">
+        {partner.imageUrl ? (
+          <img
+            src={partner.imageUrl}
+            alt={`${partner.name} logo`}
+            loading="lazy"
+            className="h-9 w-9 shrink-0 rounded-lg border border-hairline object-cover"
+          />
+        ) : (
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary">
+            <Gamepad2 className="h-4 w-4" />
+          </span>
+        )}
+        <span className="min-w-0">
+          <span className="block truncate font-mono text-[12px] font-black uppercase tracking-[0.07em]">
+            {partner.name}
+          </span>
+          <span className="block truncate font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+            {partner.category || "Partner"}
+          </span>
+        </span>
+      </span>
+      {partner.tagline && (
+        <span className="line-clamp-2 font-mono text-[10.5px] leading-relaxed text-muted">
+          {partner.tagline}
+        </span>
+      )}
+      <span className="mt-auto inline-flex w-fit items-center gap-1 rounded-lg bg-primary/12 px-2 py-1 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-primary">
+        {partner.status || "View profile"}
+        <TrendingUp className="h-3 w-3" />
+      </span>
+    </button>
   );
 }

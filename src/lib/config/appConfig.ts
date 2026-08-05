@@ -70,20 +70,52 @@ export interface BannerSurface {
   slides: BannerSlide[];
 }
 
-export type BannerSurfaceKey = "cabot" | "swap" | "bridge";
+export type BannerSurfaceKey = "cabot" | "swap" | "bridge" | "home";
 
 export type BannerSettings = Record<BannerSurfaceKey, BannerSurface>;
 
+/** One external/social link on a partner profile. */
+export interface PartnerLink {
+  label: string;
+  url: string;
+}
+
+/** One active campaign row on a partner profile. */
+export interface PartnerCampaign {
+  title: string;
+  reward?: string;
+  href?: string | null;
+}
+
+/** Admin-managed partner card + profile shown on /partners. */
+export interface PartnerCard {
+  id: string;
+  name: string;
+  tagline?: string;
+  category?: string;
+  status?: string;
+  imageUrl?: string | null;
+  ctaLabel?: string;
+  href?: string | null;
+  about?: string;
+  totalRewards?: string;
+  featured?: boolean;
+  isActive?: boolean;
+  links?: PartnerLink[];
+  campaigns?: PartnerCampaign[];
+}
 
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
   flags: FlagSettings;
   banners: BannerSettings;
+  partners: PartnerCard[];
   tokens: RemoteToken[];
 }
 
-export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge"];
+export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge", "home"];
+
 
 export const DEFAULT_BANNERS: BannerSettings = {
   cabot: {
@@ -125,7 +157,96 @@ export const DEFAULT_BANNERS: BannerSettings = {
       },
     ],
   },
+  home: {
+    intervalMs: 4000,
+    slides: [
+      {
+        id: "home-campaign",
+        title: "BOT Chain Campaign",
+        body: "Swap on BOT Chain and earn bonus FLOW points.",
+        imageUrl: null,
+        href: "/rewards",
+        theme: "swap",
+        layout: "logo",
+      },
+    ],
+  },
 };
+
+/** Seed partner cards — replaced entirely once an admin publishes a list. */
+export const DEFAULT_PARTNERS: PartnerCard[] = [
+  {
+    id: "bot-chain",
+    name: "BOT Chain",
+    tagline: "Layer-1 powering FlowBridge routing",
+    category: "Infrastructure",
+    status: "Live",
+    ctaLabel: "Participate",
+    href: "/markets",
+    about:
+      "BOT Chain is the EVM-compatible network FlowBridge routes on. Low fees and fast finality make it ideal for high-frequency swaps and cross-chain settlement.",
+    totalRewards: "—",
+    featured: true,
+    isActive: true,
+    links: [],
+    campaigns: [{ title: "Swap & earn FLOW", reward: "1 FLOW / $1", href: "/" }],
+  },
+  {
+    id: "carypact",
+    name: "CaryPact",
+    tagline: "CA token ecosystem & community rewards",
+    category: "Community",
+    status: "Live",
+    ctaLabel: "Participate",
+    href: "/",
+    about:
+      "CaryPact drives the CA token community with recurring quests and liquidity campaigns. CA/BOT is a first-class pair inside FlowBridge.",
+    totalRewards: "—",
+    featured: true,
+    isActive: true,
+    links: [],
+    campaigns: [{ title: "CA / BOT liquidity quest", reward: "Bonus FLOW", href: "/" }],
+  },
+  {
+    id: "flow-fortune",
+    name: "Flow Fortune Wheel",
+    tagline: "Two free spins a day, 50 FLOW jackpot",
+    category: "Games",
+    status: "Launching soon",
+    ctaLabel: "Preview",
+    href: "/fortune",
+    about: "A daily spin mini-app with FLOW prizes. Demo only — no points are awarded yet.",
+    isActive: true,
+    links: [],
+    campaigns: [],
+  },
+  {
+    id: "arcadeflix",
+    name: "ArcadeFlix P2E",
+    tagline: "Skill arcade with weekly prize pools",
+    category: "Games",
+    status: "In development",
+    ctaLabel: "Preview",
+    href: "/arcadeflix",
+    about: "Skill-based arcade titles with weekly FLOW prize pools. Currently in development.",
+    isActive: true,
+    links: [],
+    campaigns: [],
+  },
+  {
+    id: "ecosurge",
+    name: "Ecosurge Growth Hub",
+    tagline: "Partner campaigns that stack multipliers",
+    category: "Growth",
+    status: "Partner onboarding",
+    ctaLabel: "Preview",
+    href: "/ecosurge",
+    about: "Ecosystem growth campaigns that stack FLOW multipliers across partner apps.",
+    isActive: true,
+    links: [],
+    campaigns: [],
+  },
+];
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
@@ -139,8 +260,10 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   },
   flags: { showBanners: true, maintenanceNotice: "" },
   banners: DEFAULT_BANNERS,
+  partners: DEFAULT_PARTNERS,
 
   tokens: [],
+
 };
 
 function num(v: unknown, fallback: number): number {
@@ -226,6 +349,54 @@ export function mergeBanners(partial: any): BannerSettings {
   return out;
 }
 
+/** Normalizes an admin-published partner list (empty list = use defaults). */
+export function mergePartners(raw: any): PartnerCard[] {
+  if (!Array.isArray(raw)) return DEFAULT_PARTNERS;
+  const list = raw
+    .map((p: any, i: number): PartnerCard | null => {
+      if (!p || typeof p !== "object") return null;
+      const name = str(p.name).trim();
+      if (!name) return null;
+      return {
+        id: str(p.id).trim() || `partner-${i}`,
+        name,
+        tagline: str(p.tagline).trim() || undefined,
+        category: str(p.category).trim() || undefined,
+        status: str(p.status).trim() || undefined,
+        imageUrl: str(p.imageUrl ?? p.image_url).trim() || null,
+        ctaLabel: str(p.ctaLabel).trim() || "Participate",
+        href: str(p.href).trim() || null,
+        about: str(p.about).trim() || undefined,
+        totalRewards: str(p.totalRewards).trim() || undefined,
+        featured: p.featured === true,
+        isActive: p.isActive !== false,
+        links: Array.isArray(p.links)
+          ? p.links
+              .map((l: any) => ({ label: str(l?.label).trim(), url: str(l?.url).trim() }))
+              .filter((l: PartnerLink) => l.label && l.url)
+          : [],
+        campaigns: Array.isArray(p.campaigns)
+          ? p.campaigns
+              .map((c: any) => ({
+                title: str(c?.title).trim(),
+                reward: str(c?.reward).trim() || undefined,
+                href: str(c?.href).trim() || null,
+              }))
+              .filter((c: PartnerCampaign) => !!c.title)
+          : [],
+      };
+    })
+    .filter((p: PartnerCard | null): p is PartnerCard => !!p);
+  return list.length ? list : DEFAULT_PARTNERS;
+}
+
+/** Partner cards visible to users, featured first. */
+export function getPartners(config: AppConfig): PartnerCard[] {
+  return (config.partners ?? DEFAULT_PARTNERS).filter((p) => p.isActive !== false);
+}
+
+
+
 
 export function mergeAppConfig(partial: any): AppConfig {
   const p = partial ?? {};
@@ -255,6 +426,8 @@ export function mergeAppConfig(partial: any): AppConfig {
       maintenanceNotice: typeof p.flags?.maintenanceNotice === "string" ? p.flags.maintenanceNotice : "",
     },
     banners: mergeBanners(p.banners),
+    partners: mergePartners(p.partners),
+
 
     tokens: Array.isArray(p.tokens)
       ? p.tokens

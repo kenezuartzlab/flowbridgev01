@@ -52,6 +52,36 @@ const bannersSchema = z.object({
   cabot: surfaceSchema,
   swap: surfaceSchema,
   bridge: surfaceSchema,
+  home: surfaceSchema,
+});
+
+const partnerSchema = z.object({
+  id: z.string().trim().max(64).optional(),
+  name: z.string().trim().min(1).max(60),
+  tagline: z.string().trim().max(120).optional(),
+  category: z.string().trim().max(40).optional(),
+  status: z.string().trim().max(40).optional(),
+  imageUrl: z.string().trim().max(500).nullable().optional(),
+  ctaLabel: z.string().trim().max(24).optional(),
+  href: z.string().trim().max(500).nullable().optional(),
+  about: z.string().trim().max(1200).optional(),
+  totalRewards: z.string().trim().max(40).optional(),
+  featured: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+  links: z
+    .array(z.object({ label: z.string().trim().max(40), url: z.string().trim().max(500) }))
+    .max(8)
+    .optional(),
+  campaigns: z
+    .array(
+      z.object({
+        title: z.string().trim().max(80),
+        reward: z.string().trim().max(60).optional(),
+        href: z.string().trim().max(500).nullable().optional(),
+      }),
+    )
+    .max(12)
+    .optional(),
 });
 
 const bodySchema = z.object({
@@ -59,7 +89,9 @@ const bodySchema = z.object({
   rewards: rewardsSchema.optional(),
   flags: flagsSchema.optional(),
   banners: bannersSchema.optional(),
+  partners: z.array(partnerSchema).max(40).optional(),
 });
+
 
 export const Route = createFileRoute("/api/admin/settings")({
   server: {
@@ -87,7 +119,7 @@ export const Route = createFileRoute("/api/admin/settings")({
 
         const { writeSetting, buildPublicConfig } = await import("@/lib/appConfig.server");
         try {
-          for (const key of ["fees", "rewards", "flags", "banners"] as const) {
+          for (const key of ["fees", "rewards", "flags", "banners", "partners"] as const) {
             const value = parsed.data[key];
             if (value) await writeSetting(key, value, gate.admin.userId);
           }

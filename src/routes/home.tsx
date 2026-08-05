@@ -18,9 +18,14 @@ import { useGreeting } from "@/lib/greetings";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
 import { KitIcon } from "@/components/kit/KitIcon";
+import { BannerRotator } from "@/components/banners/BannerRotator";
+import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
+import { trackBannerImpression } from "@/lib/banners/analytics";
+import { getBannerSurface, useAppConfig } from "@/lib/config/appConfig";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
+
 
 export const Route = createFileRoute("/home")({
   head: () => ({
@@ -57,6 +62,10 @@ const QUICK_ACTIONS = [
 function HomePage() {
   const { user, incentives, transactions, loading } = useAccountData();
   const { greeting, next: nextGreeting, canCycle } = useGreeting();
+  const config = useAppConfig();
+  const campaigns = useMemo(() => getBannerSurface(config, "home"), [config]);
+  const campaignSlides = config.flags.showBanners ? campaigns.slides : [];
+
   const [markets, setMarkets] = useState<MarketRow[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
 
@@ -199,6 +208,21 @@ function HomePage() {
             ))}
           </div>
         </section>
+
+        {/* Featured campaign — admin-managed, 4s cross-fade */}
+        {campaignSlides.length > 0 && (
+          <BannerRotator
+            slides={campaignSlides.map((s) => (
+              <FeaturedBanner key={s.id} slide={s} surface="home" />
+            ))}
+            slideKeys={campaignSlides.map((s) => s.id)}
+            onSlideVisible={(key) => trackBannerImpression("home", key)}
+            intervalMs={campaigns.intervalMs}
+            label="Featured campaigns"
+            className="pb-1"
+          />
+        )}
+
 
         {/* Markets snapshot */}
         <section className="fb-surface overflow-hidden">
