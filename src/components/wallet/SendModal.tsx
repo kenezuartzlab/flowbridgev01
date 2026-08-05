@@ -16,6 +16,7 @@ import { formatBalance4, formatUsd } from "@/lib/format";
 import { TokenIcon } from "@/components/TokenIcon";
 import type { HoldingRow } from "@/lib/wallet/portfolio";
 import { toFriendlyError } from "@/lib/friendlyError";
+import { QrScanButton } from "@/components/wallet/QrScanButton";
 
 const ERC20_TRANSFER_ABI = parseAbi([
   "function transfer(address to, uint256 value) returns (bool)",
@@ -217,7 +218,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
                     onClick={() => setPickerOpen(true)}
                     className="fb-inset flex min-h-[56px] w-full items-center gap-3 rounded-2xl px-3 text-left"
                   >
-                    {selected && <TokenIcon symbol={selected.token.symbol} className="h-8 w-8 shrink-0" />}
+                    {selected && <TokenIcon symbol={selected.token.symbol} preset="md" />}
                     <span className="text-[15px] font-black">${selected?.token.symbol}</span>
                     <ChevronDown className="h-4 w-4 text-muted" />
                   </button>
@@ -258,14 +259,17 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
 
                 <div className="space-y-1.5">
                   <p className="fb-eyebrow">Recipient address</p>
-                  <input
-                    value={to}
-                    onChange={(e) => setTo(e.target.value)}
-                    placeholder="0x…"
-                    spellCheck={false}
-                    aria-label="Recipient address"
-                    className="fb-inset min-h-[56px] w-full rounded-2xl px-3 font-mono text-[13px] outline-none"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={to}
+                      onChange={(e) => setTo(e.target.value)}
+                      placeholder="0x… or scan a QR code"
+                      spellCheck={false}
+                      aria-label="Recipient address"
+                      className="fb-inset min-h-[56px] w-full min-w-0 flex-1 rounded-2xl px-3 font-mono text-[13px] outline-none"
+                    />
+                    <QrScanButton onResult={(addr) => setTo(addr)} />
+                  </div>
                 </div>
 
                 {(validationHint || error) && (
@@ -328,7 +332,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
                       }}
                       className="flex w-full items-center gap-3 py-3 text-left"
                     >
-                      <TokenIcon symbol={r.token.symbol} className="h-9 w-9 shrink-0" />
+                      <TokenIcon symbol={r.token.symbol} preset="lg" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[14px] font-black">${r.token.symbol}</span>
                         <span className="block truncate text-[12px] font-semibold text-muted">

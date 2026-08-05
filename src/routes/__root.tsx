@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
 import { THEME_BOOTSTRAP } from "../lib/theme";
 import { ReturnToRedirect } from "../components/auth/ReturnToRedirect";
+import { readPrefs } from "../lib/prefs";
 
 function NotFoundComponent() {
   return (
@@ -131,6 +132,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Hydrate display currency / locale preferences before any formatted value renders.
+  useEffect(() => {
+    readPrefs();
+  }, []);
+
+
 
   return (
     <QueryClientProvider client={queryClient}>

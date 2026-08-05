@@ -17,6 +17,7 @@ import { SignInButton } from "@/components/auth/SignInButton";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
+import { KitIcon } from "@/components/kit/KitIcon";
 import { formatUsd, formatBalance4 } from "@/lib/format";
 import { fetchPortfolio, type Portfolio } from "@/lib/wallet/portfolio";
 import { SendModal } from "@/components/wallet/SendModal";
@@ -163,27 +164,38 @@ function WalletPage() {
       />
 
       <main className="mx-auto max-w-2xl space-y-4 p-3 pb-24 sm:p-4">
-        <section className="fb-surface p-4">
-          <div className="flex items-center justify-between gap-2">
-            <p className="fb-eyebrow">Portfolio value</p>
+        <section className="fb-hero fb-hero-wallet p-5">
+          <KitIcon
+            name="vault"
+            size={130}
+            className="pointer-events-none absolute -right-6 -top-7 opacity-20"
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -bottom-16 -left-12 h-44 w-44 rounded-full bg-white/10 blur-2xl"
+          />
+          <div className="relative flex items-center justify-between gap-2">
+            <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
+              Portfolio value
+            </p>
             {isConnected && portfolio && !loading && (
-              <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+              <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] opacity-75">
                 Updated {timeAgo(portfolio.fetchedAt)}
               </p>
             )}
             {isConnected && loading && (
-              <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+              <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] opacity-75">
                 Refreshing…
               </p>
             )}
           </div>
-          <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
-            <p className="font-mono text-3xl font-black leading-none tabular-nums">
+          <div className="relative mt-2 flex flex-wrap items-end justify-between gap-3">
+            <p className="font-mono text-[38px] font-black leading-none tabular-nums tracking-[-0.02em] sm:text-[44px]">
               {!isConnected ? "—" : loading && !portfolio ? "…" : formatUsd(portfolio?.totalUsd ?? 0)}
             </p>
             <Link
               to="/"
-              className="fb-glow inline-flex min-h-[36px] items-center gap-1.5 rounded-xl bg-primary px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground"
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-white/20 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-white/30"
             >
               <ArrowLeftRight className="h-3.5 w-3.5" />
               Swap
@@ -191,7 +203,7 @@ function WalletPage() {
           </div>
 
           {isConnected && (portfolio?.partial || portfolio?.pricesPartial) && (
-            <p className="mt-2 flex items-start gap-1.5 font-mono text-[10px] leading-relaxed text-warning">
+            <p className="relative mt-2 flex items-start gap-1.5 font-mono text-[10px] leading-relaxed opacity-90">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
               {portfolio?.partial
                 ? "Some balances could not be read from the network — this total is partial."
@@ -200,15 +212,15 @@ function WalletPage() {
           )}
 
           {isConnected && loadError && (
-            <div className="mt-2 space-y-2">
-              <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed text-destructive">
+            <div className="relative mt-2 space-y-2">
+              <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed opacity-95">
                 <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
                 {loadError}
               </p>
               <button
                 type="button"
                 onClick={() => void load()}
-                className="fb-inset inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10px] font-black uppercase tracking-[0.08em] text-foreground"
+                className="fb-hero-tile inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10px] font-black uppercase tracking-[0.08em]"
               >
                 <RefreshCw className="h-3 w-3" /> Retry
               </button>
@@ -217,49 +229,50 @@ function WalletPage() {
 
           {isConnected ? (
             <>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="relative mt-4 grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setSendOpen(true)}
                   disabled={!portfolio}
-                  className="fb-inset inline-flex min-h-[42px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-foreground disabled:opacity-40"
+                  className="fb-hero-tile inline-flex min-h-[46px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] disabled:opacity-40"
                 >
-                  <ArrowUpRight className="h-3.5 w-3.5 text-primary" /> Send
+                  <ArrowUpRight className="h-3.5 w-3.5" /> Send
                 </button>
                 <button
                   type="button"
                   onClick={() => setReceiveOpen(true)}
-                  className="fb-inset inline-flex min-h-[42px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-foreground"
+                  className="fb-hero-tile inline-flex min-h-[46px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em]"
                 >
-                  <ArrowDownLeft className="h-3.5 w-3.5 text-primary" /> Receive
+                  <ArrowDownLeft className="h-3.5 w-3.5" /> Receive
                 </button>
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="relative mt-3 flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={copy}
-                  className="fb-inset inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em] text-muted transition-colors hover:text-foreground"
+                  className="fb-hero-tile inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em]"
                 >
-                  {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                   {shortAddr}
                 </button>
                 <a
                   href={`https://scan.botchain.ai/address/${address}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="fb-inset inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em] text-muted transition-colors hover:text-foreground"
+                  className="fb-hero-tile inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em]"
                 >
                   Explorer <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
             </>
           ) : (
-            <p className="mt-3 font-mono text-[10.5px] leading-relaxed text-muted">
+            <p className="relative mt-3 font-mono text-[10.5px] leading-relaxed opacity-90">
               Connect your wallet on the trade screen to see your BOT Chain balances here.
             </p>
           )}
         </section>
+
 
         <section className="fb-surface overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
@@ -295,7 +308,7 @@ function WalletPage() {
             <ul className="divide-y divide-hairline">
               {held.map((row) => (
                 <li key={row.token.address} className="flex items-center gap-3 px-4 py-2.5">
-                  <TokenIcon symbol={row.token.symbol} className="h-7 w-7 shrink-0" />
+                  <TokenIcon symbol={row.token.symbol} preset="md" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-mono text-[12px] font-black uppercase tracking-[0.06em]">
                       {row.token.symbol}

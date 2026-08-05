@@ -34,10 +34,10 @@ export function AppTopBar({
           loading="lazy"
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-mono text-[10px] font-black uppercase tracking-[0.18em] text-muted-soft">
+          <p className="truncate font-mono text-[10.5px] font-black uppercase tracking-[0.18em] text-muted">
             {eyebrow}
           </p>
-          <p className="truncate text-[18px] font-black leading-tight tracking-[-0.01em] sm:text-[20px]">
+          <p className="truncate text-[20px] font-black leading-tight tracking-[-0.01em] sm:text-[24px]">
             {title}
           </p>
         </div>

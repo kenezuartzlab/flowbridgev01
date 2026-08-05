@@ -57,7 +57,6 @@ const TILES: Tile[] = [
   { id: "spin", label: "Lucky Spin", hint: "Daily wheel of fortune", icon: "gem", live: true },
   { id: "challenges", label: "Challenges", hint: "Daily quests + streaks", icon: "target", live: true },
   { id: "higher", label: "Higher / Lower", hint: "Guess the next roll", icon: "bolt", live: true },
-  { id: "mystery", label: "Mystery Box", hint: "Open boxes, win prizes", icon: "vault" },
   { id: "quiz", label: "Crypto Quiz", hint: "Answer fast, score big", icon: "robot" },
   { id: "referrals", label: "Referrals", hint: "Invite friends, earn", icon: "community" },
 ];
@@ -113,8 +112,13 @@ function GamesPage() {
 
         <p className="flex items-start gap-2 px-1 font-mono text-[10px] leading-relaxed text-muted">
           <LockIcon className="mt-[1px] h-3 w-3 shrink-0 text-primary" />
-          Play Points are a local arcade score. FLOW rewards stay tied to real swap and bridge
-          volume — playing games never changes your FLOW balance.
+          <span>
+            <span className="mr-1.5 inline-flex items-center rounded-full border border-hairline bg-card px-1.5 py-0.5 font-black uppercase tracking-[0.1em] text-foreground">
+              Demo only
+            </span>
+            Play Points are a local arcade score and cannot be claimed. FLOW rewards stay tied to
+            real swap and bridge volume — playing games never changes your FLOW balance.
+          </span>
         </p>
 
         {/* Arcade tiles */}
@@ -147,6 +151,8 @@ function GamesPage() {
           {panel === "higher" && <HigherLower update={update} />}
         </div>
 
+        <Leaderboard points={state.points} />
+
         <Link
           to="/rewards"
           className="fb-surface flex items-center gap-3 p-4 transition-colors hover:border-primary/40"
@@ -164,6 +170,73 @@ function GamesPage() {
 
       <BottomNav />
     </div>
+  );
+}
+
+/* ------------------------------- Leaderboard ------------------------------ */
+
+const DEMO_BOARD: { name: string; points: number }[] = [
+  { name: "0xArchon", points: 18450 },
+  { name: "botmaxi.eth", points: 15220 },
+  { name: "caryfan", points: 12980 },
+  { name: "flowsurfer", points: 9310 },
+  { name: "bridgewhale", points: 7640 },
+  { name: "spin.king", points: 5120 },
+];
+
+function Leaderboard({ points }: { points: number }) {
+  const rows = useMemo(() => {
+    const all = [...DEMO_BOARD, { name: "You", points }].sort((a, b) => b.points - a.points);
+    return all.map((r, i) => ({ ...r, rank: i + 1 }));
+  }, [points]);
+
+  const medal = (rank: number) =>
+    rank === 1 ? "trophy" : rank === 2 ? "medal" : rank === 3 ? "badge" : null;
+
+  return (
+    <section className="fb-surface overflow-hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
+        <p className="fb-eyebrow">Leaderboard</p>
+        <span className="rounded-full border border-hairline px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+          Demo only
+        </span>
+      </div>
+      <ul className="divide-y divide-hairline">
+        {rows.map((r) => {
+          const kit = medal(r.rank) as KitName | null;
+          const isYou = r.name === "You";
+          return (
+            <li
+              key={r.name}
+              className={`flex items-center gap-3 px-4 py-2.5 ${isYou ? "bg-primary/8" : ""}`}
+            >
+              <span className="w-6 shrink-0 font-mono text-[11px] font-black tabular-nums text-muted">
+                {r.rank}
+              </span>
+              {kit ? (
+                <KitIcon name={kit} size={26} />
+              ) : (
+                <span className="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-full bg-primary/12 font-mono text-[10px] font-black text-primary">
+                  {r.name.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+              <p
+                className={`min-w-0 flex-1 truncate text-[12.5px] font-black ${isYou ? "text-primary" : ""}`}
+              >
+                {r.name}
+              </p>
+              <p className="shrink-0 font-mono text-[12px] font-black tabular-nums">
+                {r.points.toLocaleString("en-US")}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="border-t border-hairline px-4 py-2.5 font-mono text-[9.5px] leading-relaxed text-muted">
+        Standings are illustrative sample data — arcade Play Points are stored on your device and are
+        not claimable.
+      </p>
+    </section>
   );
 }
 

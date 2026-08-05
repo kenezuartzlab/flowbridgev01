@@ -402,3 +402,85 @@ html.light .bg-white\/10 { background-color: color-mix(in srgb, var(--fb-foregro
 html.light .bg-white\/15:hover,
 html.light .bg-white\/15 { background-color: color-mix(in srgb, var(--fb-foreground) 12%, transparent) !important; }
 html.light .border-white\/15 { border-color: var(--fb-hairline-strong) !important; }
+
+/* ============================================================
+   HERO CARDS — one distinct gradient per primary tab.
+   Glass-morphic: gradient base + blurred highlight + hairline.
+   Both themes are covered; light variants are lighter/softer so
+   foreground text stays legible in either mode.
+   ============================================================ */
+:root {
+  --fb-hero-home-from: #064e3b;
+  --fb-hero-home-via: #0d9488;
+  --fb-hero-home-to: #052e2b;
+  --fb-hero-wallet-from: #312e81;
+  --fb-hero-wallet-via: #6d28d9;
+  --fb-hero-wallet-to: #1e1b4b;
+  --fb-hero-rewards-from: #7c2d12;
+  --fb-hero-rewards-via: #db2777;
+  --fb-hero-rewards-to: #4c0519;
+  --fb-hero-account-from: #0f172a;
+  --fb-hero-account-via: #0e7490;
+  --fb-hero-account-to: #082f49;
+  --fb-hero-foreground: #ffffff;
+}
+
+html.light {
+  --fb-hero-home-from: #10b981;
+  --fb-hero-home-via: #14b8a6;
+  --fb-hero-home-to: #047857;
+  --fb-hero-wallet-from: #6366f1;
+  --fb-hero-wallet-via: #8b5cf6;
+  --fb-hero-wallet-to: #4338ca;
+  --fb-hero-rewards-from: #f59e0b;
+  --fb-hero-rewards-via: #ec4899;
+  --fb-hero-rewards-to: #db2777;
+  --fb-hero-account-from: #0ea5e9;
+  --fb-hero-account-via: #06b6d4;
+  --fb-hero-account-to: #0369a1;
+  --fb-hero-foreground: #ffffff;
+}
+
+@utility fb-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  color: var(--fb-hero-foreground);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+    0 26px 60px -30px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(14px) saturate(130%);
+}
+
+@utility fb-hero-home {
+  background:
+    radial-gradient(120% 130% at 12% 0%, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
+    linear-gradient(135deg, var(--fb-hero-home-from) 0%, var(--fb-hero-home-via) 55%, var(--fb-hero-home-to) 100%);
+}
+
+@utility fb-hero-wallet {
+  background:
+    radial-gradient(120% 130% at 12% 0%, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
+    linear-gradient(135deg, var(--fb-hero-wallet-from) 0%, var(--fb-hero-wallet-via) 55%, var(--fb-hero-wallet-to) 100%);
+}
+
+@utility fb-hero-rewards {
+  background:
+    radial-gradient(120% 130% at 12% 0%, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
+    linear-gradient(135deg, var(--fb-hero-rewards-from) 0%, var(--fb-hero-rewards-via) 55%, var(--fb-hero-rewards-to) 100%);
+}
+
+@utility fb-hero-account {
+  background:
+    radial-gradient(120% 130% at 12% 0%, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
+    linear-gradient(135deg, var(--fb-hero-account-from) 0%, var(--fb-hero-account-via) 55%, var(--fb-hero-account-to) 100%);
+}
+
+/* Frosted stat tile used inside hero cards. */
+@utility fb-hero-tile {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+}

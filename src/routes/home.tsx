@@ -16,6 +16,7 @@ import { SignInButton } from "@/components/auth/SignInButton";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
+import { KitIcon } from "@/components/kit/KitIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
@@ -105,19 +106,24 @@ function HomePage() {
       />
 
       <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4">
-        {/* Summary — Archon-style hero balance card */}
-        <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-primary via-primary to-[color-mix(in_srgb,var(--fb-primary)_70%,#0b3b22)] p-5 text-primary-foreground shadow-[0_24px_50px_-30px_color-mix(in_srgb,var(--fb-primary)_75%,transparent)]">
+        {/* Summary — gradient glass hero balance card */}
+        <section className="fb-hero fb-hero-home p-5">
+          <KitIcon
+            name="flowbridge"
+            size={132}
+            className="pointer-events-none absolute -right-6 -top-8 opacity-20"
+          />
           <span
             aria-hidden
-            className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full bg-primary-foreground/10 blur-2xl"
+            className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-white/10 blur-2xl"
           />
           <div className="relative flex items-start justify-between gap-3">
-            <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-70">
+            <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
               FLOW balance
             </p>
             <Link
               to="/rewards"
-              className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-primary-foreground/15 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-primary-foreground/25"
+              className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-white/20 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-white/30"
             >
               Rewards <ArrowUpRight className="h-3 w-3" />
             </Link>
@@ -125,30 +131,36 @@ function HomePage() {
 
           <p className="relative mt-2 font-mono text-[40px] font-black leading-none tabular-nums tracking-[-0.02em] sm:text-[46px]">
             {loading && !incentives ? "—" : flowPoints.toLocaleString("en-US")}
-            <span className="ml-2 align-baseline text-[13px] font-black opacity-70">FLOW</span>
+            <span className="ml-2 align-baseline text-[13px] font-black opacity-80">FLOW</span>
           </p>
 
           <div className="relative mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-2xl bg-primary-foreground/12 px-3 py-2.5 backdrop-blur-sm">
-              <p className="font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-70">
-                Claimable
-              </p>
-              <p className="mt-0.5 font-mono text-[15px] font-black tabular-nums">
-                {claimable.toLocaleString("en-US")}
-              </p>
+            <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
+              <KitIcon name="gift" size={26} />
+              <span className="min-w-0">
+                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
+                  Claimable
+                </span>
+                <span className="block font-mono text-[15px] font-black tabular-nums">
+                  {claimable.toLocaleString("en-US")}
+                </span>
+              </span>
             </div>
-            <div className="rounded-2xl bg-primary-foreground/12 px-3 py-2.5 backdrop-blur-sm">
-              <p className="font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-70">
-                Swap volume
-              </p>
-              <p className="mt-0.5 font-mono text-[15px] font-black tabular-nums">
-                {volumeUsd > 0 ? formatUsd(volumeUsd) : "—"}
-              </p>
+            <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
+              <KitIcon name="bolt" size={26} />
+              <span className="min-w-0">
+                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
+                  Swap volume
+                </span>
+                <span className="block font-mono text-[15px] font-black tabular-nums">
+                  {volumeUsd > 0 ? formatUsd(volumeUsd) : "—"}
+                </span>
+              </span>
             </div>
           </div>
 
           {!user && (
-            <div className="relative mt-4 space-y-2.5 rounded-2xl bg-primary-foreground/12 p-3">
+            <div className="fb-hero-tile relative mt-4 space-y-2.5 p-3">
               <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed">
                 <Sparkles className="mt-[1px] h-3 w-3 shrink-0" />
                 Sign in to start accruing FLOW on every swap.
@@ -157,6 +169,7 @@ function HomePage() {
             </div>
           )}
         </section>
+
 
         {/* Quick actions */}
         <section>
@@ -207,7 +220,7 @@ function HomePage() {
             <ul className="divide-y divide-hairline">
               {markets.map((row) => (
                 <li key={row.id} className="flex items-center gap-3 px-4 py-2.5">
-                  <TokenIcon symbol={row.symbol} className="h-7 w-7 shrink-0" />
+                  <TokenIcon symbol={row.symbol} preset="md" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-mono text-[12px] font-black uppercase tracking-[0.06em]">
                       {row.symbol}

@@ -151,7 +151,7 @@ export function TokenPickerModal({
               onClick={() => onSelect(t)}
               className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-[#010C1B]/60 hover:bg-[#32FF8B]/5 border border-white/5 hover:border-[#32FF8B]/25 cursor-pointer transition-colors text-left"
             >
-              <TokenIcon symbol={t.symbol} size={32} />
+              <TokenIcon symbol={t.symbol} preset="md" />
               <div className="flex-1 min-w-0">
                 <div className="text-white text-sm font-black tracking-wider font-mono">
                   {t.symbol}

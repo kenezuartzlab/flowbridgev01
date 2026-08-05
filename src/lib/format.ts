@@ -1,5 +1,29 @@
-// Centralized USD formatting so every token price/quote renders consistently
-// (thousands separators + adaptive decimals) across Swap, Bridge, and Limit UI.
+// Centralized money formatting so every token price/quote renders consistently
+// (thousands separators + adaptive decimals) across Swap, Bridge and Wallet UI.
+//
+// Values are always computed in USD; the user's display currency + locale
+// preference (see src/lib/prefs.ts) is applied at render time via an
+// approximate FX rate.
+
+let displayCurrency = "USD";
+let displayRate = 1;
+let displayLocale = "en-US";
+
+/** Set the display currency and its USD→currency rate (called by prefs). */
+export function setDisplayCurrency(code: string, rate: number) {
+  displayCurrency = code || "USD";
+  displayRate = Number.isFinite(rate) && rate > 0 ? rate : 1;
+}
+
+/** Set the locale used for number/date grouping (called by prefs). */
+export function setDisplayLocale(locale: string) {
+  displayLocale = locale || "en-US";
+}
+
+export function getDisplayCurrency() {
+  return { code: displayCurrency, rate: displayRate, locale: displayLocale };
+}
+
 
 /**
  * Format a USD amount with locale thousands separators and adaptive decimals.
@@ -10,25 +34,30 @@
  */
 export function formatUsd(v: number | null | undefined): string {
   if (v == null || !isFinite(v)) return "—";
-  const n = Number(v);
-  if (n === 0) return "$0.00";
+  const n = Number(v) * displayRate;
+  const zero = (0).toLocaleString(displayLocale, {
+    style: "currency",
+    currency: displayCurrency,
+  });
+  if (n === 0) return zero;
   const abs = Math.abs(n);
   const sign = n < 0 ? "-" : "";
 
   if (abs < 0.0001) {
     // Use significant digits for very small amounts
-    return `${sign}$${abs.toPrecision(4)}`;
+    return `${sign}${zero.replace(/[\d.,]+/, abs.toPrecision(4))}`;
   }
   let min = 2;
   let max = 2;
   if (abs < 1) { min = 4; max = 4; }
   else if (abs < 100) { min = 2; max = 4; }
 
-  return `${sign}${abs.toLocaleString("en-US", {
+  return `${sign}${abs.toLocaleString(displayLocale, {
     style: "currency",
-    currency: "USD",
+    currency: displayCurrency,
     minimumFractionDigits: min,
     maximumFractionDigits: max,
+
   })}`;
 }
 

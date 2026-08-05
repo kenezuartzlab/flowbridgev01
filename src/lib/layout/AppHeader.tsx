@@ -4,7 +4,7 @@ import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut,
-  BarChart3, Rocket, ChevronDown, LogIn, Gamepad2, CircleUser,
+  ChevronDown, LogIn, CircleUser,
 } from 'lucide-react';
 
 import { cn } from '../utils';
@@ -85,7 +85,7 @@ export function AppHeader({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [cooldownSec, setCooldownSec] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [roadmapOpen, setRoadmapOpen] = useState(false);
+  const [roadmapOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigate = useNavigate();
@@ -186,30 +186,8 @@ export function AppHeader({
   const sections: MenuSection[] = [
     {
       id: 'explore',
-      title: 'Explore',
+      title: 'Trade',
       items: [
-        {
-          id: 'markets',
-          label: 'Markets',
-          icon: <BarChart3 className="w-4 h-4" />,
-          onClick: go('/markets'),
-          show: true,
-        },
-        {
-          id: 'games',
-          label: 'Games',
-          icon: <Gamepad2 className="w-4 h-4" />,
-          onClick: go('/games'),
-          show: true,
-        },
-        {
-          id: 'account',
-          label: 'Account',
-          icon: <CircleUser className="w-4 h-4" />,
-          onClick: go('/account'),
-          show: true,
-        },
-
         {
           id: 'rewards',
           label: 'Rewards',
@@ -225,29 +203,6 @@ export function AppHeader({
           onClick: () => { onShowHistory?.(); setMenuOpen(false); },
           show: !!(walletAddress && onShowHistory),
         },
-      ],
-    },
-    {
-      id: 'roadmap',
-      title: 'Project Roadmap',
-      items: [
-        {
-          id: 'roadmap-root',
-          label: 'Project Roadmap',
-          icon: <Rocket className="w-4 h-4" />,
-          onClick: () => setRoadmapOpen((v) => !v),
-          show: true,
-          children: [
-            { id: 'games', label: 'Games [Play2Earn]', onClick: () => { navigate({ to: '/rewards', hash: 'games' }); setMenuOpen(false); } },
-            { id: 'ecosurge', label: 'Ecosurge Growth Hub', onClick: go('/ecosurge') },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'support',
-      title: 'Support',
-      items: [
         {
           id: 'donate',
           label: 'Support',
@@ -255,8 +210,16 @@ export function AppHeader({
           onClick: () => { onDonateClick?.(); setMenuOpen(false); },
           show: !!onDonateClick,
         },
+        {
+          id: 'account',
+          label: 'Settings & more',
+          icon: <CircleUser className="w-4 h-4" />,
+          onClick: go('/account'),
+          show: true,
+        },
       ],
     },
+
     {
       id: 'preferences',
       title: 'Preferences',
