@@ -176,7 +176,7 @@ function AccountPage() {
               <p className="font-mono text-[10.5px] leading-relaxed text-muted">
                 Sign in to sync your FLOW balance, referrals and transaction history.
               </p>
-              <SignInButton label="Sign in" />
+              <SignInButton label="Sign in" returnTo="/account" />
             </div>
           )}
         </section>

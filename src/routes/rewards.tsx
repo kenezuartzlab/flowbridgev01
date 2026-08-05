@@ -104,7 +104,7 @@ function RewardsPage() {
               body="FLOW points are tied to a verified email plus the wallet bound to it. Sign in to start tracking rewards."
             />
             <div className="flex justify-center">
-              <SignInButton label="Sign in" />
+              <SignInButton label="Sign in" returnTo="/rewards" />
             </div>
           </div>
         ) : (

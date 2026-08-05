@@ -344,7 +344,7 @@ function WalletPage() {
               <p className="font-mono text-[11px] leading-relaxed text-muted">
                 Sign in to keep a permanent record of your swaps and bridges.
               </p>
-              <SignInButton label="Sign in" />
+              <SignInButton label="Sign in" returnTo="/wallet" />
             </div>
           ) : recent.length === 0 ? (
             <p className="p-4 font-mono text-[11px] leading-relaxed text-muted">
