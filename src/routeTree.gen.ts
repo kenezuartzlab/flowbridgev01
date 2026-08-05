@@ -17,6 +17,7 @@ import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as AssistantRouteImport } from './routes/assistant'
@@ -91,6 +92,11 @@ const MarketsRoute = MarketsRouteImport.update({
 const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FortuneRoute = FortuneRouteImport.update({
@@ -281,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
@@ -372,6 +380,7 @@ export interface FileRoutesById {
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
@@ -419,6 +428,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/ecosurge'
     | '/fortune'
+    | '/games'
     | '/home'
     | '/markets'
     | '/mcp'
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/ecosurge'
     | '/fortune'
+    | '/games'
     | '/home'
     | '/markets'
     | '/mcp'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/ecosurge'
     | '/fortune'
+    | '/games'
     | '/home'
     | '/markets'
     | '/mcp'
@@ -555,6 +567,7 @@ export interface RootRouteChildren {
   AssistantRoute: typeof AssistantRoute
   EcosurgeRoute: typeof EcosurgeRoute
   FortuneRoute: typeof FortuneRoute
+  GamesRoute: typeof GamesRoute
   HomeRoute: typeof HomeRoute
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
@@ -648,6 +661,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fortune': {
@@ -918,6 +938,7 @@ const rootRouteChildren: RootRouteChildren = {
   AssistantRoute: AssistantRoute,
   EcosurgeRoute: EcosurgeRoute,
   FortuneRoute: FortuneRoute,
+  GamesRoute: GamesRoute,
   HomeRoute: HomeRoute,
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
