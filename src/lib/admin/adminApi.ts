@@ -35,8 +35,9 @@ export async function fetchAdminConfig(wallet: string): Promise<AppConfig> {
 
 export async function saveAdminSettings(
   wallet: string,
-  payload: Partial<Pick<AppConfig, "fees" | "rewards" | "flags" | "banners">>,
+  payload: Partial<Pick<AppConfig, "fees" | "rewards" | "flags" | "banners" | "partners">>,
 ) {
+
   return parse(
     await fetch("/api/admin/settings", {
       method: "PUT",
