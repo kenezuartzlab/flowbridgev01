@@ -70,20 +70,52 @@ export interface BannerSurface {
   slides: BannerSlide[];
 }
 
-export type BannerSurfaceKey = "cabot" | "swap" | "bridge";
+export type BannerSurfaceKey = "cabot" | "swap" | "bridge" | "home";
 
 export type BannerSettings = Record<BannerSurfaceKey, BannerSurface>;
 
+/** One external/social link on a partner profile. */
+export interface PartnerLink {
+  label: string;
+  url: string;
+}
+
+/** One active campaign row on a partner profile. */
+export interface PartnerCampaign {
+  title: string;
+  reward?: string;
+  href?: string | null;
+}
+
+/** Admin-managed partner card + profile shown on /partners. */
+export interface PartnerCard {
+  id: string;
+  name: string;
+  tagline?: string;
+  category?: string;
+  status?: string;
+  imageUrl?: string | null;
+  ctaLabel?: string;
+  href?: string | null;
+  about?: string;
+  totalRewards?: string;
+  featured?: boolean;
+  isActive?: boolean;
+  links?: PartnerLink[];
+  campaigns?: PartnerCampaign[];
+}
 
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
   flags: FlagSettings;
   banners: BannerSettings;
+  partners: PartnerCard[];
   tokens: RemoteToken[];
 }
 
-export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge"];
+export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge", "home"];
+
 
 export const DEFAULT_BANNERS: BannerSettings = {
   cabot: {
