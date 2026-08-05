@@ -56,6 +56,7 @@ const QUICK_ACTIONS = [
 
 function HomePage() {
   const { user, incentives, transactions, loading } = useAccountData();
+  const { greeting, next: nextGreeting, canCycle } = useGreeting();
   const [markets, setMarkets] = useState<MarketRow[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
 
