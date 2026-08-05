@@ -402,6 +402,7 @@ function RewardsPage() {
 
             {tab === "EARN" ? (
               <>
+              <BindWalletCard boundAddress={incentives?.walletAddress} onDone={refresh} signedIn={!!user} />
               <SocialTasksCard socials={incentives?.socials} onDone={refresh} />
               <section className="rounded-2xl border border-hairline bg-card p-4">
 
