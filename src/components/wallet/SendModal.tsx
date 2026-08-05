@@ -217,7 +217,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
                     onClick={() => setPickerOpen(true)}
                     className="fb-inset flex min-h-[56px] w-full items-center gap-3 rounded-2xl px-3 text-left"
                   >
-                    {selected && <TokenIcon symbol={selected.token.symbol} className="h-8 w-8 shrink-0" />}
+                    {selected && <TokenIcon symbol={selected.token.symbol} preset="md" />}
                     <span className="text-[15px] font-black">${selected?.token.symbol}</span>
                     <ChevronDown className="h-4 w-4 text-muted" />
                   </button>
@@ -328,7 +328,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
                       }}
                       className="flex w-full items-center gap-3 py-3 text-left"
                     >
-                      <TokenIcon symbol={r.token.symbol} className="h-9 w-9 shrink-0" />
+                      <TokenIcon symbol={r.token.symbol} preset="lg" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[14px] font-black">${r.token.symbol}</span>
                         <span className="block truncate text-[12px] font-semibold text-muted">

@@ -207,7 +207,7 @@ function HomePage() {
             <ul className="divide-y divide-hairline">
               {markets.map((row) => (
                 <li key={row.id} className="flex items-center gap-3 px-4 py-2.5">
-                  <TokenIcon symbol={row.symbol} className="h-7 w-7 shrink-0" />
+                  <TokenIcon symbol={row.symbol} preset="md" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-mono text-[12px] font-black uppercase tracking-[0.06em]">
                       {row.symbol}
