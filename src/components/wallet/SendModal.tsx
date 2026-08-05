@@ -10,7 +10,9 @@ import {
   ExternalLink,
   ChevronDown,
 } from "lucide-react";
-import { botMainnet } from "@/lib/wagmi";
+import { DEFAULT_WALLET_NETWORK, type WalletNetwork } from "@/lib/wallet/networks";
+import { getIdToken } from "@/lib/auth";
+import { logActivity } from "@/lib/app/activityApi";
 import { NATIVE_TOKEN_ADDRESS } from "@/lib/swap/tokenRegistry";
 import { formatBalance4, formatUsd } from "@/lib/format";
 import { TokenIcon } from "@/components/TokenIcon";
@@ -22,8 +24,8 @@ const ERC20_TRANSFER_ABI = parseAbi([
   "function transfer(address to, uint256 value) returns (bool)",
 ]);
 
-/** Keep a little native BOT behind for gas when sending the native asset. */
-const GAS_RESERVE_WEI = 2_000_000_000_000_000n; // 0.002 BOT
+/** Keep a little native gas behind when sending the native asset. */
+const GAS_RESERVE_WEI = 2_000_000_000_000_000n; // 0.002 native units
 
 type Phase = "idle" | "signing" | "pending" | "done" | "error";
 
@@ -31,10 +33,13 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   rows: HoldingRow[];
+  /** Auto-detected network the balances were read from. */
+  network?: WalletNetwork;
   onSent: () => void;
 }
 
-export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
+export function SendModal({ isOpen, onClose, rows, network, onSent }: Props) {
+  const net = network ?? DEFAULT_WALLET_NETWORK;
   const { address } = useAccount();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
@@ -97,7 +102,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
   const validationHint = !selected
     ? "No tokens available to send."
     : !to
-      ? "Enter the recipient's BOT Chain address."
+      ? `Enter the recipient's ${net.label} address.`
       : !toValid
         ? "That doesn't look like a valid address."
         : !amount
@@ -108,7 +113,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
               ? "Amount must be greater than zero."
               : overBalance
                 ? isNative
-                  ? "Amount exceeds your balance minus the 0.002 BOT gas reserve."
+                  ? `Amount exceeds your balance minus the 0.002 ${net.nativeSymbol} gas reserve.`
                   : "Amount exceeds your available balance."
                 : "";
 
@@ -123,8 +128,8 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
     setHash("");
     setPhase("signing");
     try {
-      if (chainId !== botMainnet.id) {
-        await switchChainAsync({ chainId: botMainnet.id });
+      if (chainId !== net.id) {
+        await switchChainAsync({ chainId: net.id });
       }
       const txHash = isNative
         ? await walletClient.sendTransaction({
@@ -139,10 +144,27 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
           });
       setHash(txHash);
       setPhase("pending");
-      const pub = createPublicClient({ chain: botMainnet, transport: http() });
+      const pub = createPublicClient({ chain: net.chain, transport: http() });
       const receipt = await pub.waitForTransactionReceipt({ hash: txHash, timeout: 120_000 });
       if (receipt.status === "success") {
         setPhase("done");
+        // Record the transfer so it shows in the wallet / activity history.
+        try {
+          const token = await getIdToken();
+          if (token) {
+            await logActivity(token, {
+              txType: "SEND",
+              direction: `${selected.token.symbol}_TO_${to.trim().slice(0, 10)}`,
+              fromAmount: `${amount} ${selected.token.symbol}`,
+              toAmount: `${amount} ${selected.token.symbol}`,
+              txHash,
+              status: "SUCCESS",
+              walletAddress: address.toLowerCase(),
+            });
+          }
+        } catch {
+          /* history logging is best-effort; the transfer already succeeded */
+        }
         onSent();
       } else {
         setPhase("error");
@@ -187,7 +209,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
             </p>
             {hash && (
               <a
-                href={`https://scan.botchain.ai/tx/${hash}`}
+                href={`${net.explorer}/tx/${hash}`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 text-[12px] font-black text-primary"
@@ -207,7 +229,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
           <div className="space-y-4 pt-4">
             {held.length === 0 ? (
               <p className="text-[13px] leading-relaxed text-muted">
-                No spendable balances found on BOT Chain for this wallet.
+                No spendable balances found on {net.label} for this wallet.
               </p>
             ) : (
               <>
@@ -253,7 +275,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
                   </div>
                   <p className="text-[12px] font-semibold text-muted">
                     ≈ {formatUsd(usdPreview)}
-                    {isNative ? " · 0.002 BOT kept for gas" : ""}
+                    {isNative ? ` · 0.002 ${net.nativeSymbol} kept for gas` : ""}
                   </p>
                 </div>
 
