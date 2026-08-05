@@ -157,7 +157,96 @@ export const DEFAULT_BANNERS: BannerSettings = {
       },
     ],
   },
+  home: {
+    intervalMs: 4000,
+    slides: [
+      {
+        id: "home-campaign",
+        title: "BOT Chain Campaign",
+        body: "Swap on BOT Chain and earn bonus FLOW points.",
+        imageUrl: null,
+        href: "/rewards",
+        theme: "swap",
+        layout: "logo",
+      },
+    ],
+  },
 };
+
+/** Seed partner cards — replaced entirely once an admin publishes a list. */
+export const DEFAULT_PARTNERS: PartnerCard[] = [
+  {
+    id: "bot-chain",
+    name: "BOT Chain",
+    tagline: "Layer-1 powering FlowBridge routing",
+    category: "Infrastructure",
+    status: "Live",
+    ctaLabel: "Participate",
+    href: "/markets",
+    about:
+      "BOT Chain is the EVM-compatible network FlowBridge routes on. Low fees and fast finality make it ideal for high-frequency swaps and cross-chain settlement.",
+    totalRewards: "—",
+    featured: true,
+    isActive: true,
+    links: [],
+    campaigns: [{ title: "Swap & earn FLOW", reward: "1 FLOW / $1", href: "/" }],
+  },
+  {
+    id: "carypact",
+    name: "CaryPact",
+    tagline: "CA token ecosystem & community rewards",
+    category: "Community",
+    status: "Live",
+    ctaLabel: "Participate",
+    href: "/",
+    about:
+      "CaryPact drives the CA token community with recurring quests and liquidity campaigns. CA/BOT is a first-class pair inside FlowBridge.",
+    totalRewards: "—",
+    featured: true,
+    isActive: true,
+    links: [],
+    campaigns: [{ title: "CA / BOT liquidity quest", reward: "Bonus FLOW", href: "/" }],
+  },
+  {
+    id: "flow-fortune",
+    name: "Flow Fortune Wheel",
+    tagline: "Two free spins a day, 50 FLOW jackpot",
+    category: "Games",
+    status: "Launching soon",
+    ctaLabel: "Preview",
+    href: "/fortune",
+    about: "A daily spin mini-app with FLOW prizes. Demo only — no points are awarded yet.",
+    isActive: true,
+    links: [],
+    campaigns: [],
+  },
+  {
+    id: "arcadeflix",
+    name: "ArcadeFlix P2E",
+    tagline: "Skill arcade with weekly prize pools",
+    category: "Games",
+    status: "In development",
+    ctaLabel: "Preview",
+    href: "/arcadeflix",
+    about: "Skill-based arcade titles with weekly FLOW prize pools. Currently in development.",
+    isActive: true,
+    links: [],
+    campaigns: [],
+  },
+  {
+    id: "ecosurge",
+    name: "Ecosurge Growth Hub",
+    tagline: "Partner campaigns that stack multipliers",
+    category: "Growth",
+    status: "Partner onboarding",
+    ctaLabel: "Preview",
+    href: "/ecosurge",
+    about: "Ecosystem growth campaigns that stack FLOW multipliers across partner apps.",
+    isActive: true,
+    links: [],
+    campaigns: [],
+  },
+];
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
@@ -171,8 +260,10 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   },
   flags: { showBanners: true, maintenanceNotice: "" },
   banners: DEFAULT_BANNERS,
+  partners: DEFAULT_PARTNERS,
 
   tokens: [],
+
 };
 
 function num(v: unknown, fallback: number): number {
