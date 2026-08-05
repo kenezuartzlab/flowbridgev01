@@ -63,7 +63,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminRoute,
 });
 
-type Tab = "tokens" | "banners" | "fees" | "rewards" | "flags";
+type Tab = "tokens" | "banners" | "partners" | "fees" | "rewards" | "flags";
 
 const cardCls =
   "rounded-2xl border border-white/10 bg-[#0D1C2A]/70 p-4 space-y-3 font-mono text-[13px]";
