@@ -15,6 +15,7 @@ import {
   Info,
   LogOut,
   Moon,
+  Pencil,
   QrCode,
   ShieldCheck,
   Sun,
@@ -24,6 +25,7 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { KitIcon } from "@/components/kit/KitIcon";
 import { SignInButton } from "@/components/auth/SignInButton";
+import { ProfileEditModal } from "@/components/account/ProfileEditModal";
 import { useTheme } from "@/lib/theme";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { logout } from "@/lib/auth";
@@ -67,6 +69,7 @@ function AccountPage() {
   const [prefs, savePrefs] = usePrefs();
   const [open, setOpen] = useState<string | null>(null);
   const [play, setPlay] = useState(0);
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
     setPlay(readPlayState().points);
@@ -129,6 +132,15 @@ function AccountPage() {
               <p className="truncate font-mono text-[10.5px] opacity-80">
                 {user?.email ?? "Not signed in"}
               </p>
+              {user && (
+                <button
+                  type="button"
+                  onClick={() => setEditOpen(true)}
+                  className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/15 px-2.5 py-1 font-mono text-[9.5px] font-black uppercase tracking-[0.12em]"
+                >
+                  <Pencil className="h-3 w-3" /> Edit profile
+                </button>
+              )}
             </div>
           </div>
 
@@ -313,6 +325,16 @@ function AccountPage() {
           FlowBridge · BOT Chain Mainnet
         </p>
       </main>
+
+      {user && (
+        <ProfileEditModal
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          currentName={user.displayName || ""}
+          currentPhoto={avatar}
+          onSaved={() => window.location.reload()}
+        />
+      )}
 
       <BottomNav />
     </div>

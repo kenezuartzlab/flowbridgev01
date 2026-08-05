@@ -90,8 +90,8 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppTopBar
-        eyebrow="FlowBridge"
-        title={`Good day, ${user?.displayName || user?.email?.split("@")[0] || "there"}`}
+        eyebrow="Good day"
+        title={user?.displayName || user?.email?.split("@")[0] || "Welcome to FlowBridge"}
         avatar={user?.photoURL ?? null}
         initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
         actions={
