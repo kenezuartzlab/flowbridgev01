@@ -16,6 +16,7 @@ import { formatBalance4, formatUsd } from "@/lib/format";
 import { TokenIcon } from "@/components/TokenIcon";
 import type { HoldingRow } from "@/lib/wallet/portfolio";
 import { toFriendlyError } from "@/lib/friendlyError";
+import { QrScanButton } from "@/components/wallet/QrScanButton";
 
 const ERC20_TRANSFER_ABI = parseAbi([
   "function transfer(address to, uint256 value) returns (bool)",
@@ -258,14 +259,17 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
 
                 <div className="space-y-1.5">
                   <p className="fb-eyebrow">Recipient address</p>
-                  <input
-                    value={to}
-                    onChange={(e) => setTo(e.target.value)}
-                    placeholder="0x…"
-                    spellCheck={false}
-                    aria-label="Recipient address"
-                    className="fb-inset min-h-[56px] w-full rounded-2xl px-3 font-mono text-[13px] outline-none"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={to}
+                      onChange={(e) => setTo(e.target.value)}
+                      placeholder="0x… or scan a QR code"
+                      spellCheck={false}
+                      aria-label="Recipient address"
+                      className="fb-inset min-h-[56px] w-full min-w-0 flex-1 rounded-2xl px-3 font-mono text-[13px] outline-none"
+                    />
+                    <QrScanButton onResult={(addr) => setTo(addr)} />
+                  </div>
                 </div>
 
                 {(validationHint || error) && (
