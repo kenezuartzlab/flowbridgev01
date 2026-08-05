@@ -115,6 +115,8 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/* Applies the persisted light/dark theme before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
         <HeadContent />
       </head>
       <body>
