@@ -129,42 +129,46 @@ function AccountPage() {
 
       <main className="mx-auto max-w-2xl space-y-3 p-3 sm:p-4">
         {/* Profile card */}
-        <section className="fb-surface p-4">
-          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+        <section className="fb-hero fb-hero-account p-5">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -bottom-16 -right-10 h-44 w-44 rounded-full bg-white/10 blur-2xl"
+          />
+          <div className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
             {avatar ? (
               <img
                 src={avatar}
                 alt=""
-                className="h-14 w-14 shrink-0 rounded-full border border-primary/40 object-cover"
+                className="h-14 w-14 shrink-0 rounded-full border border-white/40 object-cover"
               />
             ) : (
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/12 text-xl font-black text-primary">
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-white/40 bg-white/15 text-xl font-black">
                 {initial}
               </span>
             )}
             <div className="min-w-0">
               <p className="truncate text-[19px] font-black leading-tight">{displayName}</p>
-              <p className="truncate font-mono text-[10.5px] text-muted">
+              <p className="truncate font-mono text-[10.5px] opacity-80">
                 {user?.email ?? "Not signed in"}
               </p>
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="fb-inset flex items-center gap-2 px-3 py-2">
+          <div className="relative mt-4 grid grid-cols-2 gap-2">
+            <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
               <KitIcon name="starCoin" size={28} />
               <span className="min-w-0">
-                <span className="fb-eyebrow block">FLOW</span>
-                <span className="block font-mono text-[14px] font-black tabular-nums text-primary">
+                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">FLOW</span>
+                <span className="block font-mono text-[15px] font-black tabular-nums">
                   {flow.toLocaleString("en-US")}
                 </span>
               </span>
             </div>
-            <div className="fb-inset flex items-center gap-2 px-3 py-2">
+            <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
               <KitIcon name="gem" size={28} />
               <span className="min-w-0">
-                <span className="fb-eyebrow block">Play points</span>
-                <span className="block font-mono text-[14px] font-black tabular-nums">
+                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">Play points</span>
+                <span className="block font-mono text-[15px] font-black tabular-nums">
                   {play.toLocaleString("en-US")}
                 </span>
               </span>
@@ -172,8 +176,8 @@ function AccountPage() {
           </div>
 
           {authReady && !user && (
-            <div className="mt-3 space-y-2">
-              <p className="font-mono text-[10.5px] leading-relaxed text-muted">
+            <div className="fb-hero-tile relative mt-3 space-y-2 p-3">
+              <p className="font-mono text-[10.5px] leading-relaxed">
                 Sign in to sync your FLOW balance, referrals and transaction history.
               </p>
               <SignInButton label="Sign in" returnTo="/account" />
