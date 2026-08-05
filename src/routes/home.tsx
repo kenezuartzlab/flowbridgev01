@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Compass,
   Gift,
+  Heart,
 
   LineChart,
   History,
@@ -55,6 +56,7 @@ const QUICK_ACTIONS = [
   { to: "/markets", label: "Markets", hint: "Live prices", Icon: LineChart },
   { to: "/partners", label: "Partners", hint: "Quests & apps", Icon: Compass },
   { to: "/rewards", label: "Rewards", hint: "FLOW points", Icon: Gift },
+  { to: "/rewards", label: "Social tasks", hint: "Earn & claim", Icon: Heart, hash: "social" },
   { to: "/assistant", label: "Assistant", hint: "Ask anything", Icon: Sparkles },
 ] as const;
 
@@ -187,10 +189,11 @@ function HomePage() {
         <section>
           <p className="fb-eyebrow mb-2 px-1">Quick actions</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {QUICK_ACTIONS.map(({ to, label, hint, Icon }) => (
+            {QUICK_ACTIONS.map(({ to, label, hint, Icon, hash }: any) => (
               <Link
-                key={to}
+                key={`${to}${hash ?? ""}`}
                 to={to}
+                hash={hash}
                 className="glass-card flex min-h-[76px] flex-col justify-between rounded-[var(--fb-radius-md)] p-3"
               >
                 <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/12 text-primary">
