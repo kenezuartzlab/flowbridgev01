@@ -478,7 +478,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
 
 /* ------------------------------ Settings ------------------------------ */
 
-function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners"> }) {
+function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners" | "partners"> }) {
   const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1207,6 +1207,321 @@ function BannersPanel({ wallet }: { wallet: string }) {
             </table>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------- Partners ------------------------------ */
+
+function PartnersPanel({ wallet }: { wallet: string }) {
+  const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState<number | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetchAdminConfig(wallet)
+      .then((c) => alive && setCfg(c))
+      .catch((e) => alive && setError(e?.message ?? "Failed to load partners"))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [wallet]);
+
+  const partners = cfg.partners ?? [];
+  const patchList = (next: PartnerCard[]) => setCfg({ ...cfg, partners: next });
+  const patch = (i: number, next: Partial<PartnerCard>) =>
+    patchList(partners.map((p, idx) => (idx === i ? { ...p, ...next } : p)));
+
+  const add = () =>
+    patchList([
+      ...partners,
+      {
+        id: `partner-${Date.now()}`,
+        name: "New partner",
+        tagline: "",
+        category: "",
+        status: "",
+        imageUrl: "",
+        ctaLabel: "Participate",
+        href: "",
+        about: "",
+        totalRewards: "",
+        featured: false,
+        isActive: true,
+        links: [],
+        campaigns: [],
+      },
+    ]);
+
+  const remove = (i: number) => patchList(partners.filter((_, idx) => idx !== i));
+
+  const move = (i: number, dir: -1 | 1) => {
+    const next = [...partners];
+    const to = i + dir;
+    if (to < 0 || to >= next.length) return;
+    [next[i], next[to]] = [next[to], next[i]];
+    patchList(next);
+  };
+
+  const upload = async (i: number, file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    if (file.size > 2_000_000) {
+      setError("Image is larger than 2 MB — please compress it first.");
+      return;
+    }
+    setUploading(i);
+    try {
+      const { url } = await uploadBannerImage(wallet, file);
+      patch(i, { imageUrl: url });
+    } catch (e: any) {
+      setError(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await saveAdminSettings(wallet, { partners });
+      await loadAppConfig(true);
+      setSaved(true);
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to save partners");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className={cardCls}>Loading partners…</div>;
+
+  return (
+    <div className="space-y-4">
+      <div className={cardCls}>
+        <span className={labelCls}>Partner cards</span>
+        <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+          Cards render top-to-bottom on /partners. Mark a card “Featured” to show it as a large
+          hero card with a CTA. Every card opens a profile with links, campaigns and about copy.
+        </div>
+      </div>
+
+      {partners.map((p, i) => (
+        <div key={p.id} className={cardCls}>
+          <div className="flex items-center justify-between">
+            <span className={labelCls}>
+              {i + 1} · {p.name || "Untitled"}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button type="button" onClick={() => move(i, -1)} className={btnGhost}>
+                ↑
+              </button>
+              <button type="button" onClick={() => move(i, 1)} className={btnGhost}>
+                ↓
+              </button>
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                className="p-2 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 cursor-pointer hover:bg-red-500/20"
+                aria-label={`Remove ${p.name}`}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <div className={labelCls}>Name</div>
+              <input value={p.name} maxLength={60} onChange={(e) => patch(i, { name: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Category</div>
+              <input value={p.category ?? ""} maxLength={40} onChange={(e) => patch(i, { category: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Tagline</div>
+              <input value={p.tagline ?? ""} maxLength={120} onChange={(e) => patch(i, { tagline: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Status badge</div>
+              <input value={p.status ?? ""} maxLength={40} onChange={(e) => patch(i, { status: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>CTA label</div>
+              <input value={p.ctaLabel ?? ""} maxLength={24} onChange={(e) => patch(i, { ctaLabel: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>CTA link (route or URL)</div>
+              <input value={p.href ?? ""} placeholder="/fortune or https://…" onChange={(e) => patch(i, { href: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Total rewards (display)</div>
+              <input value={p.totalRewards ?? ""} maxLength={40} onChange={(e) => patch(i, { totalRewards: e.target.value })} className={inputCls} />
+            </div>
+            <Toggle label={p.featured ? "Featured card" : "Standard card"} value={!!p.featured} onChange={(v) => patch(i, { featured: v })} />
+          </div>
+
+          <div className="space-y-1.5">
+            <div className={labelCls}>Logo / artwork</div>
+            <div className="flex items-center gap-2.5">
+              <div className="h-14 w-14 shrink-0 rounded-lg border border-white/10 bg-[#010C1B] overflow-hidden flex items-center justify-center">
+                {p.imageUrl ? (
+                  <img src={p.imageUrl} alt={`${p.name} logo preview`} className="h-full w-full object-cover" />
+                ) : (
+                  <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+                )}
+              </div>
+              <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
+                {uploading === i ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                {uploading === i ? "Uploading…" : "Upload image"}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                  className="hidden"
+                  onChange={(e) => {
+                    void upload(i, e.target.files?.[0]);
+                    e.currentTarget.value = "";
+                  }}
+                />
+              </label>
+              {p.imageUrl && (
+                <button type="button" onClick={() => patch(i, { imageUrl: "" })} className={btnGhost}>
+                  Remove
+                </button>
+              )}
+            </div>
+            <input value={p.imageUrl ?? ""} placeholder="…or paste an image URL" onChange={(e) => patch(i, { imageUrl: e.target.value })} className={inputCls} />
+          </div>
+
+          <div className="space-y-1">
+            <div className={labelCls}>About (shown in the profile modal)</div>
+            <textarea
+              value={p.about ?? ""}
+              maxLength={1200}
+              onChange={(e) => patch(i, { about: e.target.value })}
+              className={`${inputCls} min-h-[92px]`}
+            />
+          </div>
+
+          {/* Links */}
+          <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+            <span className={labelCls}>Social / external links</span>
+            {(p.links ?? []).map((l, li) => (
+              <div key={li} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_auto] gap-2">
+                <input
+                  value={l.label}
+                  placeholder="Label"
+                  onChange={(e) =>
+                    patch(i, { links: (p.links ?? []).map((x, xi) => (xi === li ? { ...x, label: e.target.value } : x)) })
+                  }
+                  className={inputCls}
+                />
+                <input
+                  value={l.url}
+                  placeholder="https://…"
+                  onChange={(e) =>
+                    patch(i, { links: (p.links ?? []).map((x, xi) => (xi === li ? { ...x, url: e.target.value } : x)) })
+                  }
+                  className={inputCls}
+                />
+                <button
+                  type="button"
+                  onClick={() => patch(i, { links: (p.links ?? []).filter((_, xi) => xi !== li) })}
+                  className={btnGhost}
+                  aria-label="Remove link"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => patch(i, { links: [...(p.links ?? []), { label: "", url: "" }] })}
+              className={btnGhost}
+            >
+              <Plus className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Add link
+            </button>
+          </div>
+
+          {/* Campaigns */}
+          <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+            <span className={labelCls}>Active campaigns</span>
+            {(p.campaigns ?? []).map((c, ci) => (
+              <div key={ci} className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2">
+                <input
+                  value={c.title}
+                  placeholder="Title"
+                  onChange={(e) =>
+                    patch(i, { campaigns: (p.campaigns ?? []).map((x, xi) => (xi === ci ? { ...x, title: e.target.value } : x)) })
+                  }
+                  className={inputCls}
+                />
+                <input
+                  value={c.reward ?? ""}
+                  placeholder="Reward"
+                  onChange={(e) =>
+                    patch(i, { campaigns: (p.campaigns ?? []).map((x, xi) => (xi === ci ? { ...x, reward: e.target.value } : x)) })
+                  }
+                  className={inputCls}
+                />
+                <input
+                  value={c.href ?? ""}
+                  placeholder="Link"
+                  onChange={(e) =>
+                    patch(i, { campaigns: (p.campaigns ?? []).map((x, xi) => (xi === ci ? { ...x, href: e.target.value } : x)) })
+                  }
+                  className={inputCls}
+                />
+                <button
+                  type="button"
+                  onClick={() => patch(i, { campaigns: (p.campaigns ?? []).filter((_, xi) => xi !== ci) })}
+                  className={btnGhost}
+                  aria-label="Remove campaign"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => patch(i, { campaigns: [...(p.campaigns ?? []), { title: "", reward: "", href: "" }] })}
+              className={btnGhost}
+            >
+              <Plus className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Add campaign
+            </button>
+          </div>
+
+          <Toggle label={p.isActive === false ? "Hidden" : "Live"} value={p.isActive !== false} onChange={(v) => patch(i, { isActive: v })} />
+        </div>
+      ))}
+
+      <div className={cardCls}>
+        <button type="button" onClick={add} className={btnGhost}>
+          <Plus className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Add partner
+        </button>
+        {error && (
+          <div className="flex items-start gap-2 text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
+            <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+        {saved && (
+          <div className="flex items-center gap-2 text-[#32FF8B]">
+            <Check className="w-3.5 h-3.5" /> Saved — live for all users.
+          </div>
+        )}
+        <button type="button" onClick={save} disabled={saving} className={btnPrimary}>
+          {saving ? "Saving…" : "Save partners"}
+        </button>
       </div>
     </div>
   );
