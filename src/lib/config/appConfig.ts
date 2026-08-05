@@ -426,6 +426,8 @@ export function mergeAppConfig(partial: any): AppConfig {
       maintenanceNotice: typeof p.flags?.maintenanceNotice === "string" ? p.flags.maintenanceNotice : "",
     },
     banners: mergeBanners(p.banners),
+    partners: mergePartners(p.partners),
+
 
     tokens: Array.isArray(p.tokens)
       ? p.tokens
