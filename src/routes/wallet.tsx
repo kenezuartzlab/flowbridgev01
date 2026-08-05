@@ -141,25 +141,12 @@ function WalletPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 border-b border-hairline bg-card-alt px-4 py-3 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary">
-              <WalletIcon className="h-4 w-4" />
-            </span>
-            <div className="min-w-0">
-              <h1 className="truncate font-mono text-[13px] font-black uppercase tracking-[0.14em]">
-                Wallet<span className="text-primary">.</span>
-              </h1>
-              <span className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-2 py-[2px] font-mono text-[9px] font-black uppercase tracking-[0.12em] text-success">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-                </span>
-                BOT Chain · Mainnet
-              </span>
-            </div>
-          </div>
+      <AppTopBar
+        eyebrow="BOT Chain · Mainnet"
+        title="Wallet"
+        avatar={user?.photoURL ?? null}
+        initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
+        actions={
           <button
             type="button"
             onClick={() => {
@@ -168,13 +155,12 @@ function WalletPage() {
             }}
             disabled={!address || loading}
             aria-label="Refresh balances and history"
-            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-40"
+            className="grid h-10 w-10 place-items-center rounded-2xl border border-hairline bg-card text-muted transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-40"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="mx-auto max-w-2xl space-y-4 p-3 pb-24 sm:p-4">
         <section className="fb-surface p-4">
