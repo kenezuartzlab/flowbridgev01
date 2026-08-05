@@ -14,7 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
 import { THEME_BOOTSTRAP } from "../lib/theme";
 import { ReturnToRedirect } from "../components/auth/ReturnToRedirect";
-import { readPrefs } from "../lib/prefs";
+import { readPrefs, unlockPrefsFormatting } from "../lib/prefs";
 
 function NotFoundComponent() {
   return (
@@ -136,6 +136,9 @@ function RootComponent() {
   // Hydrate display currency / locale preferences before any formatted value renders.
   useEffect(() => {
     readPrefs();
+    // Apply currency/locale only after hydration (see unlockPrefsFormatting).
+    const t = window.setTimeout(unlockPrefsFormatting, 0);
+    void t;
   }, []);
 
 
