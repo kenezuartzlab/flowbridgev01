@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { wagmiConfig } from "@/lib/wagmi";
 import { SignInButton } from "@/components/auth/SignInButton";
+import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
 import { formatUsd, formatBalance4 } from "@/lib/format";
