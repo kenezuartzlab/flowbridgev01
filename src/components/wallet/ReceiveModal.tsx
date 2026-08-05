@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Copy, ExternalLink, Share2, X } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, Share2, X } from "lucide-react";
 import QRCode from "qrcode";
 
 interface Props {
