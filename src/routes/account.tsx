@@ -332,6 +332,9 @@ function AccountPage() {
           onClose={() => setEditOpen(false)}
           currentName={user.displayName || ""}
           currentPhoto={avatar}
+          providerName={user.providerName ?? null}
+          providerPhoto={user.providerPhoto ?? null}
+          hasCustom={!!(user.hasCustomPhoto || user.hasCustomName)}
           onSaved={() => window.location.reload()}
         />
       )}

@@ -13,12 +13,18 @@ export function ProfileEditModal({
   onClose,
   currentName,
   currentPhoto,
+  providerName,
+  providerPhoto,
+  hasCustom,
   onSaved,
 }: {
   open: boolean;
   onClose: () => void;
   currentName: string;
   currentPhoto: string | null;
+  providerName?: string | null;
+  providerPhoto?: string | null;
+  hasCustom?: boolean;
   onSaved?: () => void;
 }) {
   const [name, setName] = useState(currentName);
@@ -61,11 +67,27 @@ export function ProfileEditModal({
     setBusy(true);
     setError(null);
     const { error: err } = await supabase.auth.updateUser({
-      data: { full_name: name.trim(), name: name.trim(), avatar_url: photo },
+      data: { display_name_custom: name.trim() || null, avatar_custom: photo },
     });
     setBusy(false);
     if (err) {
       setError(err.message || "Could not save your profile.");
+      return;
+    }
+    onSaved?.();
+    onClose();
+  };
+
+  /** Clear the custom overrides so the Google name/photo (or initial) returns. */
+  const resetToDefault = async () => {
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase.auth.updateUser({
+      data: { display_name_custom: null, avatar_custom: null },
+    });
+    setBusy(false);
+    if (err) {
+      setError(err.message || "Could not reset your profile.");
       return;
     }
     onSaved?.();
@@ -141,15 +163,27 @@ export function ProfileEditModal({
             }}
           />
 
-          {photo && (
-            <button
-              type="button"
-              onClick={() => setPhoto(null)}
-              className="font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-danger"
-            >
-              Remove photo
-            </button>
-          )}
+          <div className="flex flex-wrap items-center gap-3">
+            {photo && (
+              <button
+                type="button"
+                onClick={() => setPhoto(null)}
+                className="font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-danger"
+              >
+                Remove photo
+              </button>
+            )}
+            {(hasCustom || providerPhoto || providerName) && (
+              <button
+                type="button"
+                onClick={() => void resetToDefault()}
+                disabled={busy}
+                className="font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-muted underline disabled:opacity-50"
+              >
+                Use default avatar{providerName ? " & Google name" : ""}
+              </button>
+            )}
+          </div>
 
           {error && (
             <p className="rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 font-mono text-[10.5px] text-danger">
