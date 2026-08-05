@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, Loader2, X } from "lucide-react";
 import { ModalPortal } from "@/modals/ModalPortal";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,15 @@ export function ProfileEditModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Account data loads async, so re-sync the fields whenever the modal opens.
+  useEffect(() => {
+    if (open) {
+      setName(currentName);
+      setPhoto(currentPhoto);
+      setError(null);
+    }
+  }, [open, currentName, currentPhoto]);
 
   if (!open) return null;
 
@@ -207,7 +216,7 @@ export function ProfileEditModal({
             <button
               type="button"
               onClick={() => void save()}
-              disabled={busy || !name.trim()}
+              disabled={busy}
               className="grid min-h-[44px] flex-1 place-items-center rounded-xl border border-primary/40 bg-primary/20 text-[13px] font-black text-primary disabled:opacity-50"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
