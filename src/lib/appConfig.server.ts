@@ -42,9 +42,11 @@ export async function buildPublicConfig(): Promise<AppConfig> {
     rewards: settings.rewards,
     flags: settings.flags,
     banners: settings.banners,
+    partners: settings.partners,
     tokens: tokens.filter((t: any) => t.is_active !== false),
   });
 }
+
 
 /** Server-side reward rules with safe defaults. */
 export async function getRewardSettings() {
