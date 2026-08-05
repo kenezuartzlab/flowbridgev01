@@ -162,6 +162,7 @@ function AdminPage() {
           [
             ["tokens", "Tokens"],
             ["banners", "Banners"],
+            ["partners", "Partners"],
             ["fees", "Fees & Slippage"],
             ["rewards", "Rewards"],
             ["flags", "Feature Flags"],
@@ -186,9 +187,12 @@ function AdminPage() {
         <TokensPanel wallet={wallet!} />
       ) : tab === "banners" ? (
         <BannersPanel wallet={wallet!} />
+      ) : tab === "partners" ? (
+        <PartnersPanel wallet={wallet!} />
       ) : (
         <SettingsPanel wallet={wallet!} tab={tab} />
       )}
+
     </Shell>
   );
 }
