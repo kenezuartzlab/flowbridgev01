@@ -37,9 +37,33 @@ export function ReceiveModal({ isOpen, onClose, address }: Props) {
     }
   };
 
+  const download = () => {
+    if (!qr) return;
+    const a = document.createElement("a");
+    a.href = qr;
+    a.download = `flowbridge-${address.slice(0, 10)}.png`;
+    a.click();
+  };
+
   const share = async () => {
+    const text = `My BOT Chain (chain ID 677) address: ${address}`;
     try {
-      await navigator.share?.({ title: "My BOT Chain address", text: address });
+      // Share the QR image itself when the platform supports file sharing.
+      if (qr && navigator.canShare) {
+        const blob = await (await fetch(qr)).blob();
+        const file = new File([blob], "flowbridge-address.png", { type: "image/png" });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: "My BOT Chain address", text, files: [file] });
+          return;
+        }
+      }
+      if (navigator.share) {
+        await navigator.share({ title: "My BOT Chain address", text });
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
     } catch {
       /* share cancelled or unsupported */
     }
@@ -83,6 +107,23 @@ export function ReceiveModal({ isOpen, onClose, address }: Props) {
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {copied ? "Copied" : "Copy"}
             </button>
+            <button
+              type="button"
+              onClick={() => void share()}
+              className="fb-surface inline-flex min-h-[46px] items-center justify-center gap-1.5 rounded-2xl px-3 text-[13px] font-black"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </button>
+            <button
+              type="button"
+              onClick={download}
+              disabled={!qr}
+              className="fb-surface inline-flex min-h-[46px] items-center justify-center gap-1.5 rounded-2xl px-3 text-[13px] font-black disabled:opacity-40"
+            >
+              <Download className="h-4 w-4" />
+              Save QR
+            </button>
             <a
               href={`https://scan.botchain.ai/address/${address}`}
               target="_blank"
@@ -92,16 +133,8 @@ export function ReceiveModal({ isOpen, onClose, address }: Props) {
               Explorer <ExternalLink className="h-3.5 w-3.5" />
             </a>
           </div>
-
-          <button
-            type="button"
-            onClick={() => void share()}
-            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-muted hover:text-foreground"
-          >
-            <Share2 className="h-3.5 w-3.5" />
-            Share address
-          </button>
         </div>
+
 
         <p className="mt-3 rounded-2xl border border-hairline px-3 py-2.5 text-[12px] font-semibold leading-relaxed text-muted">
           Only send BOT Chain (chain ID 677) assets to this address. Tokens sent from other networks
