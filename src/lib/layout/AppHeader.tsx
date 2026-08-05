@@ -4,7 +4,7 @@ import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut,
-  BarChart3, Rocket, ChevronDown, LogIn, Gamepad2, CircleUser,
+  ChevronDown, LogIn, CircleUser,
 } from 'lucide-react';
 
 import { cn } from '../utils';
@@ -85,7 +85,7 @@ export function AppHeader({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [cooldownSec, setCooldownSec] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [roadmapOpen, setRoadmapOpen] = useState(false);
+  const [roadmapOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigate = useNavigate();

@@ -2,6 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
+  Compass,
+  Gamepad2,
+  LineChart,
+  Rocket,
+  Sparkles,
   ChevronRight,
   Coins,
   Download,
@@ -222,6 +227,18 @@ function AccountPage() {
           <RowLink to="/wallet" icon={<QrCode className="h-4 w-4" />} label="Wallet address & QR" />
           <RowLink to="/rewards" icon={<Users className="h-4 w-4" />} label="Referrals & rewards" />
           <RowLink to="/games" icon={<ShieldCheck className="h-4 w-4" />} label="Games & challenges" />
+        </Group>
+
+        <Group title="Explore FlowBridge">
+          <RowLink to="/markets" icon={<LineChart className="h-4 w-4" />} label="Markets" />
+          <RowLink to="/partners" icon={<Compass className="h-4 w-4" />} label="Partners & quests" />
+          <RowLink to="/assistant" icon={<Sparkles className="h-4 w-4" />} label="AI assistant" />
+        </Group>
+
+        <Group title="Roadmap">
+          <RowLink to="/ecosurge" icon={<Rocket className="h-4 w-4" />} label="Ecosurge Growth Hub" />
+          <RowLink to="/arcadeflix" icon={<Gamepad2 className="h-4 w-4" />} label="ArcadeFlix" />
+          <RowLink to="/fortune" icon={<Coins className="h-4 w-4" />} label="Fortune Wheel" />
         </Group>
 
         <Group title="Preferences">
