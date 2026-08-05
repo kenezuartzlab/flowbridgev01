@@ -21,6 +21,7 @@ import { SignInButton } from "@/components/auth/SignInButton";
 import { TabBanner } from "@/components/banners/TabBanner";
 import giftArt from "@/assets/gift-1.png.asset.json";
 import { SocialTasksCard } from "@/components/rewards/SocialTasksCard";
+import { BindWalletCard } from "@/components/rewards/BindWalletCard";
 
 import { formatUsd } from "@/lib/format";
 import { getIdToken } from "@/lib/auth";
