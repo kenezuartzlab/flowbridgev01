@@ -24,7 +24,7 @@ export function BottomNav() {
   return (
     <>
       {/* Spacer so page content is never hidden behind the fixed bar */}
-      <div aria-hidden className="h-[76px] sm:h-[82px]" />
+      <div aria-hidden className="h-[66px] sm:h-[70px]" />
       <nav
         aria-label="Main navigation"
         className="fixed bottom-0 left-0 right-0 z-40 border-t border-hairline bg-card-alt backdrop-blur-xl"
