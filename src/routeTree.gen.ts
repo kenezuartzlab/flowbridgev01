@@ -17,12 +17,14 @@ import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivityRouteImport } from './routes/activity'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
@@ -93,6 +95,11 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FortuneRoute = FortuneRouteImport.update({
   id: '/fortune',
   path: '/fortune',
@@ -121,6 +128,11 @@ const AdminRoute = AdminRouteImport.update({
 const ActivityRoute = ActivityRouteImport.update({
   id: '/activity',
   path: '/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -275,12 +287,14 @@ const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
@@ -320,12 +334,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
@@ -366,12 +382,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
+  '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
@@ -413,12 +431,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/activity'
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
     | '/fortune'
+    | '/games'
     | '/home'
     | '/markets'
     | '/mcp'
@@ -458,12 +478,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/activity'
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
     | '/fortune'
+    | '/games'
     | '/home'
     | '/markets'
     | '/mcp'
@@ -503,12 +525,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/activity'
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
     | '/fortune'
+    | '/games'
     | '/home'
     | '/markets'
     | '/mcp'
@@ -549,12 +573,14 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   ActivityRoute: typeof ActivityRoute
   AdminRoute: typeof AdminRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
   AssistantRoute: typeof AssistantRoute
   EcosurgeRoute: typeof EcosurgeRoute
   FortuneRoute: typeof FortuneRoute
+  GamesRoute: typeof GamesRoute
   HomeRoute: typeof HomeRoute
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
@@ -650,6 +676,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fortune': {
       id: '/fortune'
       path: '/fortune'
@@ -690,6 +723,13 @@ declare module '@tanstack/react-router' {
       path: '/activity'
       fullPath: '/activity'
       preLoaderRoute: typeof ActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -912,12 +952,14 @@ const ApiProposalsRouteWithChildren = ApiProposalsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   ActivityRoute: ActivityRoute,
   AdminRoute: AdminRoute,
   ArcadeflixRoute: ArcadeflixRoute,
   AssistantRoute: AssistantRoute,
   EcosurgeRoute: EcosurgeRoute,
   FortuneRoute: FortuneRoute,
+  GamesRoute: GamesRoute,
   HomeRoute: HomeRoute,
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
