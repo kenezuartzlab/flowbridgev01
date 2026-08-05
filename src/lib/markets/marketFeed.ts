@@ -92,6 +92,10 @@ async function safeCall<T>(fn: () => Promise<T> | T): Promise<T | null> {
 // ── Cross-chain via CoinGecko ─────────────────────────────────────────────
 // Top popular tokens per chain — mixed L1s + majors on each chain.
 const CG_IDS = [
+  // Majors (multi-chain / L1 references, incl. BTC)
+  { id: "bitcoin", chain: "ETH" as Chain },
+  { id: "solana", chain: "ETH" as Chain },
+  { id: "dogecoin", chain: "ETH" as Chain },
   // ETH ecosystem
   { id: "ethereum", chain: "ETH" as Chain },
   { id: "usd-coin", chain: "ETH" as Chain },
