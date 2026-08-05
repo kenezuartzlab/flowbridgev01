@@ -312,12 +312,12 @@ function AccountPage() {
             <button
               type="button"
               onClick={() => void logout()}
-              className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-destructive/10"
+              className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-danger/10"
             >
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-destructive/30 bg-destructive/10 text-destructive">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-danger/30 bg-danger/10 text-danger">
                 <LogOut className="h-4 w-4" />
               </span>
-              <span className="min-w-0 flex-1 truncate text-[13.5px] font-black text-destructive">
+              <span className="min-w-0 flex-1 truncate text-[13.5px] font-black text-danger">
                 Log out
               </span>
             </button>
