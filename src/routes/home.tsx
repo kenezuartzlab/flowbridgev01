@@ -88,25 +88,21 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 border-b border-hairline bg-card-alt px-4 py-3 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary">
-              <Waves className="h-4 w-4" />
-            </span>
-            <h1 className="truncate font-mono text-[13px] font-black uppercase tracking-[0.14em]">
-              Home<span className="text-primary">.</span>
-            </h1>
-          </div>
+      <AppTopBar
+        eyebrow="FlowBridge"
+        title={`Good day, ${user?.displayName || user?.email?.split("@")[0] || "there"}`}
+        avatar={user?.photoURL ?? null}
+        initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
+        actions={
           <Link
             to="/"
-            className="fb-glow inline-flex min-h-[36px] items-center gap-1.5 rounded-xl bg-primary px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground"
+            aria-label="Trade"
+            className="grid h-10 w-10 place-items-center rounded-2xl border border-hairline bg-card text-muted transition-colors hover:border-primary/40 hover:text-foreground"
           >
-            <ArrowLeftRight className="h-3.5 w-3.5" />
-            Trade
+            <ArrowLeftRight className="h-4 w-4" />
           </Link>
-        </div>
-      </header>
+        }
+      />
 
       <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4">
         {/* Summary */}
