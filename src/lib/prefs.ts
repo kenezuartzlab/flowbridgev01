@@ -52,6 +52,20 @@ function apply(p: Prefs) {
   setDisplayLocale(lang.locale);
 }
 
+/**
+ * Server-rendered markup always formats money in USD, so the currency/locale
+ * preference is only applied to the formatter *after* hydration finishes —
+ * otherwise the first client render would disagree with the SSR HTML.
+ */
+let formatterUnlocked = false;
+
+export function unlockPrefsFormatting() {
+  if (formatterUnlocked) return;
+  formatterUnlocked = true;
+  apply(current);
+  listeners.forEach((fn) => fn(current));
+}
+
 export function readPrefs(): Prefs {
   if (hydrated || typeof window === "undefined") return current;
   try {
@@ -61,13 +75,13 @@ export function readPrefs(): Prefs {
     /* storage unavailable */
   }
   hydrated = true;
-  apply(current);
+  if (formatterUnlocked) apply(current);
   return current;
 }
 
 export function writePrefs(patch: Partial<Prefs>): Prefs {
   current = { ...readPrefs(), ...patch };
-  apply(current);
+  if (formatterUnlocked) apply(current);
   if (typeof window !== "undefined") {
     try {
       window.localStorage.setItem(PREF_KEY, JSON.stringify(current));
