@@ -349,6 +349,54 @@ export function mergeBanners(partial: any): BannerSettings {
   return out;
 }
 
+/** Normalizes an admin-published partner list (empty list = use defaults). */
+export function mergePartners(raw: any): PartnerCard[] {
+  if (!Array.isArray(raw)) return DEFAULT_PARTNERS;
+  const list = raw
+    .map((p: any, i: number): PartnerCard | null => {
+      if (!p || typeof p !== "object") return null;
+      const name = str(p.name).trim();
+      if (!name) return null;
+      return {
+        id: str(p.id).trim() || `partner-${i}`,
+        name,
+        tagline: str(p.tagline).trim() || undefined,
+        category: str(p.category).trim() || undefined,
+        status: str(p.status).trim() || undefined,
+        imageUrl: str(p.imageUrl ?? p.image_url).trim() || null,
+        ctaLabel: str(p.ctaLabel).trim() || "Participate",
+        href: str(p.href).trim() || null,
+        about: str(p.about).trim() || undefined,
+        totalRewards: str(p.totalRewards).trim() || undefined,
+        featured: p.featured === true,
+        isActive: p.isActive !== false,
+        links: Array.isArray(p.links)
+          ? p.links
+              .map((l: any) => ({ label: str(l?.label).trim(), url: str(l?.url).trim() }))
+              .filter((l: PartnerLink) => l.label && l.url)
+          : [],
+        campaigns: Array.isArray(p.campaigns)
+          ? p.campaigns
+              .map((c: any) => ({
+                title: str(c?.title).trim(),
+                reward: str(c?.reward).trim() || undefined,
+                href: str(c?.href).trim() || null,
+              }))
+              .filter((c: PartnerCampaign) => !!c.title)
+          : [],
+      };
+    })
+    .filter((p: PartnerCard | null): p is PartnerCard => !!p);
+  return list.length ? list : DEFAULT_PARTNERS;
+}
+
+/** Partner cards visible to users, featured first. */
+export function getPartners(config: AppConfig): PartnerCard[] {
+  return (config.partners ?? DEFAULT_PARTNERS).filter((p) => p.isActive !== false);
+}
+
+
+
 
 export function mergeAppConfig(partial: any): AppConfig {
   const p = partial ?? {};
