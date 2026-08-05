@@ -311,7 +311,7 @@ function MarketRowView({ row }: { row: MarketRow }) {
   return (
     <div className="grid grid-cols-[1fr_auto] items-center gap-2 border-b border-hairline px-4 py-2.5 transition-colors last:border-0 hover:bg-foreground/[0.03] sm:grid-cols-[1fr_78px_104px_88px_104px]">
       <div className="flex min-w-0 items-center gap-3">
-        <TokenIcon symbol={row.symbol} size={30} />
+        <TokenIcon symbol={row.symbol} preset="md" />
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-1.5">
             <span className="truncate font-mono text-[12.5px] font-black uppercase tracking-[0.06em]">
