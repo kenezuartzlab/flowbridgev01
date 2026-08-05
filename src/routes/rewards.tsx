@@ -379,7 +379,10 @@ function RewardsPage() {
             ) : null}
 
             {tab === "EARN" ? (
+              <>
+              <SocialTasksCard socials={incentives?.socials} onDone={refresh} />
               <section className="rounded-2xl border border-hairline bg-card p-4">
+
                 <div className="flex items-center gap-2">
                   <Target className="h-3.5 w-3.5 text-primary" />
                   <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">Daily Tasks</h2>
