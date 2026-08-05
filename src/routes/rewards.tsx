@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
+import { KitIcon } from "@/components/kit/KitIcon";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { TabBanner } from "@/components/banners/TabBanner";
 import giftArt from "@/assets/gift-1.png.asset.json";
