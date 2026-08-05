@@ -115,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Applies the persisted light/dark theme before first paint. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
