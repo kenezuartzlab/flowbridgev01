@@ -195,6 +195,21 @@ export function AppHeader({
           show: true,
         },
         {
+          id: 'games',
+          label: 'Games',
+          icon: <Gamepad2 className="w-4 h-4" />,
+          onClick: go('/games'),
+          show: true,
+        },
+        {
+          id: 'account',
+          label: 'Account',
+          icon: <CircleUser className="w-4 h-4" />,
+          onClick: go('/account'),
+          show: true,
+        },
+
+        {
           id: 'rewards',
           label: 'Rewards',
           icon: <Gift className="w-4 h-4" />,
