@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeftRight, Home, Wallet, Gift, History } from "lucide-react";
+import { ArrowLeftRight, Home, Wallet, Gift, CircleUser } from "lucide-react";
 
 /**
  * Persistent bottom bar. Redesign pass: each item is a 44px tap target with
@@ -12,8 +12,9 @@ const ITEMS = [
   { to: "/wallet", label: "Wallet", Icon: Wallet },
   { to: "/", label: "Swap", Icon: ArrowLeftRight },
   { to: "/rewards", label: "Rewards", Icon: Gift },
-  { to: "/activity", label: "Activity", Icon: History },
+  { to: "/account", label: "Account", Icon: CircleUser },
 ] as const;
+
 
 
 export function BottomNav() {
