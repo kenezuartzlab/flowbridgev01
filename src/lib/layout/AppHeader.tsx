@@ -4,8 +4,9 @@ import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut,
-  BarChart3, Rocket, ChevronDown, LogIn,
+  BarChart3, Rocket, ChevronDown, LogIn, Gamepad2, CircleUser,
 } from 'lucide-react';
+
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 import logoUrl from '@/assets/flowbridge-logo.png';
