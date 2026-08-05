@@ -186,30 +186,8 @@ export function AppHeader({
   const sections: MenuSection[] = [
     {
       id: 'explore',
-      title: 'Explore',
+      title: 'Trade',
       items: [
-        {
-          id: 'markets',
-          label: 'Markets',
-          icon: <BarChart3 className="w-4 h-4" />,
-          onClick: go('/markets'),
-          show: true,
-        },
-        {
-          id: 'games',
-          label: 'Games',
-          icon: <Gamepad2 className="w-4 h-4" />,
-          onClick: go('/games'),
-          show: true,
-        },
-        {
-          id: 'account',
-          label: 'Account',
-          icon: <CircleUser className="w-4 h-4" />,
-          onClick: go('/account'),
-          show: true,
-        },
-
         {
           id: 'rewards',
           label: 'Rewards',
@@ -225,29 +203,6 @@ export function AppHeader({
           onClick: () => { onShowHistory?.(); setMenuOpen(false); },
           show: !!(walletAddress && onShowHistory),
         },
-      ],
-    },
-    {
-      id: 'roadmap',
-      title: 'Project Roadmap',
-      items: [
-        {
-          id: 'roadmap-root',
-          label: 'Project Roadmap',
-          icon: <Rocket className="w-4 h-4" />,
-          onClick: () => setRoadmapOpen((v) => !v),
-          show: true,
-          children: [
-            { id: 'games', label: 'Games [Play2Earn]', onClick: () => { navigate({ to: '/rewards', hash: 'games' }); setMenuOpen(false); } },
-            { id: 'ecosurge', label: 'Ecosurge Growth Hub', onClick: go('/ecosurge') },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'support',
-      title: 'Support',
-      items: [
         {
           id: 'donate',
           label: 'Support',
@@ -255,8 +210,16 @@ export function AppHeader({
           onClick: () => { onDonateClick?.(); setMenuOpen(false); },
           show: !!onDonateClick,
         },
+        {
+          id: 'account',
+          label: 'Settings & more',
+          icon: <CircleUser className="w-4 h-4" />,
+          onClick: go('/account'),
+          show: true,
+        },
       ],
     },
+
     {
       id: 'preferences',
       title: 'Preferences',
