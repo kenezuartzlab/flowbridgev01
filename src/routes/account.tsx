@@ -213,6 +213,13 @@ function AccountPage() {
           <RowLink to="/activity" icon={<History className="h-4 w-4" />} label="Activity" />
           <RowLink to="/wallet" icon={<QrCode className="h-4 w-4" />} label="Wallet address & QR" />
           <RowLink to="/rewards" icon={<Users className="h-4 w-4" />} label="Referrals & rewards" />
+          <RowLink
+            to="/rewards"
+            hash="social"
+            icon={<Heart className="h-4 w-4" />}
+            label="Social tasks & FLOW incentives"
+          />
+
           <RowLink to="/games" icon={<ShieldCheck className="h-4 w-4" />} label="Games & challenges" />
         </Group>
 
