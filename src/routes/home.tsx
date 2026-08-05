@@ -18,9 +18,14 @@ import { useGreeting } from "@/lib/greetings";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
 import { KitIcon } from "@/components/kit/KitIcon";
+import { BannerRotator } from "@/components/banners/BannerRotator";
+import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
+import { trackBannerImpression } from "@/lib/banners/analytics";
+import { getBannerSurface, useAppConfig } from "@/lib/config/appConfig";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
+
 
 export const Route = createFileRoute("/home")({
   head: () => ({
