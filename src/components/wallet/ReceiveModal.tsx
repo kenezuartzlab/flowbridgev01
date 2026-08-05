@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { Check, Copy, Download, ExternalLink, Share2, X } from "lucide-react";
 import QRCode from "qrcode";
+import { DEFAULT_WALLET_NETWORK, findWalletNetwork } from "@/lib/wallet/networks";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   address?: string;
+  /** Human label of the auto-detected network, e.g. "BOT Chain" */
+  networkLabel?: string;
+  /** Chain id of the auto-detected network */
+  chainId?: number;
 }
 
-export function ReceiveModal({ isOpen, onClose, address }: Props) {
+export function ReceiveModal({ isOpen, onClose, address, networkLabel, chainId }: Props) {
+  const network = findWalletNetwork(chainId) ?? DEFAULT_WALLET_NETWORK;
+  const label = networkLabel ?? network.label;
+
   const [copied, setCopied] = useState(false);
   const [qr, setQr] = useState<string>("");
 
@@ -46,19 +54,19 @@ export function ReceiveModal({ isOpen, onClose, address }: Props) {
   };
 
   const share = async () => {
-    const text = `My BOT Chain (chain ID 677) address: ${address}`;
+    const text = `My ${label} (chain ID ${network.id}) address: ${address}`;
     try {
       // Share the QR image itself when the platform supports file sharing.
       if (qr && navigator.canShare) {
         const blob = await (await fetch(qr)).blob();
         const file = new File([blob], "flowbridge-address.png", { type: "image/png" });
         if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ title: "My BOT Chain address", text, files: [file] });
+          await navigator.share({ title: `My ${label} address`, text, files: [file] });
           return;
         }
       }
       if (navigator.share) {
-        await navigator.share({ title: "My BOT Chain address", text });
+        await navigator.share({ title: `My ${label} address`, text });
         return;
       }
       await navigator.clipboard.writeText(text);
@@ -94,7 +102,7 @@ export function ReceiveModal({ isOpen, onClose, address }: Props) {
           </div>
 
           <div className="space-y-1">
-            <p className="fb-eyebrow">Your address</p>
+            <p className="fb-eyebrow">Your {label} address</p>
             <p className="break-all font-mono text-[12px] font-bold leading-relaxed">{address}</p>
           </div>
 
@@ -125,7 +133,7 @@ export function ReceiveModal({ isOpen, onClose, address }: Props) {
               Save QR
             </button>
             <a
-              href={`https://scan.botchain.ai/address/${address}`}
+              href={`${network.explorer}/address/${address}`}
               target="_blank"
               rel="noreferrer"
               className="fb-surface inline-flex min-h-[46px] items-center justify-center gap-1.5 rounded-2xl px-3 text-[13px] font-black"
@@ -137,8 +145,8 @@ export function ReceiveModal({ isOpen, onClose, address }: Props) {
 
 
         <p className="mt-3 rounded-2xl border border-hairline px-3 py-2.5 text-[12px] font-semibold leading-relaxed text-muted">
-          Only send BOT Chain (chain ID 677) assets to this address. Tokens sent from other networks
-          without bridging will be lost.
+          This address receives {label} (chain ID {network.id}) assets. Tokens sent from other
+          networks without bridging will be lost.
         </p>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { WagmiProvider } from "wagmi";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import {
   AlertTriangle,
   ArrowDownLeft,
@@ -20,6 +20,11 @@ import { TokenIcon } from "@/components/TokenIcon";
 import { KitIcon } from "@/components/kit/KitIcon";
 import { formatUsd, formatBalance4 } from "@/lib/format";
 import { fetchPortfolio, type Portfolio } from "@/lib/wallet/portfolio";
+import {
+  DEFAULT_WALLET_NETWORK,
+  WALLET_NETWORKS,
+  findWalletNetwork,
+} from "@/lib/wallet/networks";
 import { SendModal } from "@/components/wallet/SendModal";
 import { ReceiveModal } from "@/components/wallet/ReceiveModal";
 import { useAccountData } from "@/lib/app/useAccountData";
@@ -27,16 +32,17 @@ import { useAccountData } from "@/lib/app/useAccountData";
 export const Route = createFileRoute("/wallet")({
   head: () => ({
     meta: [
-      { title: "Wallet — Your BOT Chain Balances | FlowBridge" },
+      { title: "Wallet — Multi-Chain Balances & History | FlowBridge" },
       {
         name: "description",
         content:
-          "See every BOT Chain token you hold with live USD values, send and receive assets, and review your full swap and bridge history in the FlowBridge wallet tab.",
+          "FlowBridge auto-detects your connected network and shows live balances, USD values, send and receive, plus a filterable swap, bridge and transfer history.",
       },
       { property: "og:title", content: "FlowBridge Wallet" },
       {
         property: "og:description",
-        content: "Live BOT Chain balances, send/receive and transaction history in one screen.",
+        content:
+          "Auto-detected network balances, send/receive and filterable transaction history in one screen.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/wallet" },
@@ -79,8 +85,22 @@ function formatDirection(direction: string) {
   return parts.length >= 2 ? `${parts[0]} → ${parts[parts.length - 1]}` : direction;
 }
 
+const TYPE_FILTERS = ["ALL", "SWAP", "BRIDGE", "SEND", "RECEIVE"] as const;
+type TypeFilter = (typeof TYPE_FILTERS)[number];
+
+const RANGE_FILTERS = [
+  { key: "ALL", label: "All time", days: 0 },
+  { key: "7D", label: "7 days", days: 7 },
+  { key: "30D", label: "30 days", days: 30 },
+  { key: "90D", label: "90 days", days: 90 },
+  { key: "CUSTOM", label: "Custom", days: -1 },
+] as const;
+type RangeFilter = (typeof RANGE_FILTERS)[number]["key"];
+
 function WalletPage() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
@@ -88,6 +108,12 @@ function WalletPage() {
   const [sendOpen, setSendOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [, setTick] = useState(0);
+
+  // History filters
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
+  const [range, setRange] = useState<RangeFilter>("ALL");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const {
     user,
@@ -97,26 +123,31 @@ function WalletPage() {
     refresh: refreshHistory,
   } = useAccountData();
 
+  const detected = findWalletNetwork(chainId);
+  const network = portfolio?.network ?? detected ?? DEFAULT_WALLET_NETWORK;
+  const unsupported = isConnected && !detected;
+
   const load = useCallback(async () => {
     if (!address) return;
     setLoading(true);
     setLoadError("");
     try {
-      setPortfolio(await fetchPortfolio(address, true));
+      setPortfolio(await fetchPortfolio(address, chainId));
     } catch {
-      setLoadError("Could not reach the BOT Chain network. Check your connection and retry.");
+      setLoadError("Could not reach the network RPC. Check your connection and retry.");
     } finally {
       setLoading(false);
     }
-  }, [address]);
+  }, [address, chainId]);
 
   useEffect(() => {
     if (!address) {
       setPortfolio(null);
       return;
     }
+    setPortfolio(null);
     void load();
-  }, [address, load]);
+  }, [address, chainId, load]);
 
   // Keep the "updated Xs ago" label honest without refetching.
   useEffect(() => {
@@ -138,12 +169,34 @@ function WalletPage() {
   const shortAddr = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "";
   const rows = portfolio?.rows ?? [];
   const held = useMemo(() => rows.filter((r) => r.amount > 0 || r.balanceFailed), [rows]);
-  const recent = useMemo(() => (transactions ?? []).slice(0, 8), [transactions]);
+
+  const filtered = useMemo(() => {
+    const list = transactions ?? [];
+    const preset = RANGE_FILTERS.find((r) => r.key === range)!;
+    let start = 0;
+    let end = Infinity;
+    if (preset.days > 0) start = Date.now() - preset.days * 86_400_000;
+    if (range === "CUSTOM") {
+      if (fromDate) start = new Date(`${fromDate}T00:00:00`).getTime();
+      if (toDate) end = new Date(`${toDate}T23:59:59`).getTime();
+    }
+    return list.filter((tx: any) => {
+      const type = String(tx.tx_type ?? tx.txType ?? "SWAP").toUpperCase();
+      if (typeFilter !== "ALL" && type !== typeFilter) return false;
+      const created = tx.created_at ?? tx.createdAt;
+      if (!created) return start === 0 && end === Infinity;
+      const t = new Date(created).getTime();
+      if (Number.isNaN(t)) return true;
+      return t >= start && t <= end;
+    });
+  }, [transactions, typeFilter, range, fromDate, toDate]);
+
+  const recent = useMemo(() => filtered.slice(0, 12), [filtered]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppTopBar
-        eyebrow="BOT Chain · Mainnet"
+        eyebrow={isConnected ? (detected ? detected.eyebrow : "Unsupported network") : "Multi-chain wallet"}
         title="Wallet"
         avatar={user?.photoURL ?? null}
         initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
@@ -176,7 +229,7 @@ function WalletPage() {
           />
           <div className="relative flex items-center justify-between gap-2">
             <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
-              Portfolio value
+              Portfolio value · {network.label}
             </p>
             {isConnected && portfolio && !loading && (
               <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] opacity-75">
@@ -202,7 +255,29 @@ function WalletPage() {
             </Link>
           </div>
 
-          {isConnected && (portfolio?.partial || portfolio?.pricesPartial) && (
+          {unsupported && (
+            <div className="relative mt-2 space-y-2">
+              <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed opacity-95">
+                <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+                Your wallet is on a network FlowBridge does not track yet. Switch to a supported
+                network to see balances and send.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {WALLET_NETWORKS.map((n) => (
+                  <button
+                    key={n.id}
+                    type="button"
+                    onClick={() => void switchChainAsync({ chainId: n.id }).catch(() => {})}
+                    className="fb-hero-tile inline-flex min-h-[34px] items-center px-3 font-mono text-[10px] font-black uppercase tracking-[0.08em]"
+                  >
+                    {n.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {isConnected && !unsupported && (portfolio?.partial || portfolio?.pricesPartial) && (
             <p className="relative mt-2 flex items-start gap-1.5 font-mono text-[10px] leading-relaxed opacity-90">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
               {portfolio?.partial
@@ -233,7 +308,7 @@ function WalletPage() {
                 <button
                   type="button"
                   onClick={() => setSendOpen(true)}
-                  disabled={!portfolio}
+                  disabled={!portfolio || unsupported}
                   className="fb-hero-tile inline-flex min-h-[46px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] disabled:opacity-40"
                 >
                   <ArrowUpRight className="h-3.5 w-3.5" /> Send
@@ -257,7 +332,7 @@ function WalletPage() {
                   {shortAddr}
                 </button>
                 <a
-                  href={`https://scan.botchain.ai/address/${address}`}
+                  href={`${network.explorer}/address/${address}`}
                   target="_blank"
                   rel="noreferrer"
                   className="fb-hero-tile inline-flex min-h-[34px] items-center gap-1.5 px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.08em]"
@@ -268,15 +343,15 @@ function WalletPage() {
             </>
           ) : (
             <p className="relative mt-3 font-mono text-[10.5px] leading-relaxed opacity-90">
-              Connect your wallet on the trade screen to see your BOT Chain balances here.
+              Connect your wallet on the trade screen — FlowBridge detects your network
+              automatically and shows those balances here.
             </p>
           )}
         </section>
 
-
         <section className="fb-surface overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
-            <p className="fb-eyebrow">Holdings</p>
+            <p className="fb-eyebrow">Holdings · {network.label}</p>
             <Link
               to="/markets"
               className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary"
@@ -302,7 +377,7 @@ function WalletPage() {
             </div>
           ) : held.length === 0 ? (
             <p className="p-4 font-mono text-[11px] leading-relaxed text-muted">
-              No token balances found on BOT Chain for this wallet.
+              No token balances found on {network.label} for this wallet.
             </p>
           ) : (
             <ul className="divide-y divide-hairline">
@@ -346,6 +421,68 @@ function WalletPage() {
             </Link>
           </div>
 
+          {user && (
+            <div className="space-y-2 border-b border-hairline px-4 py-3">
+              <div className="flex flex-wrap gap-1.5">
+                {TYPE_FILTERS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTypeFilter(t)}
+                    className={`rounded-full border px-2.5 py-1 font-mono text-[9.5px] font-black uppercase tracking-[0.08em] transition-colors ${
+                      typeFilter === t
+                        ? "border-primary/40 bg-primary/15 text-primary"
+                        : "border-hairline text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {RANGE_FILTERS.map((r) => (
+                  <button
+                    key={r.key}
+                    type="button"
+                    onClick={() => setRange(r.key)}
+                    className={`rounded-full border px-2.5 py-1 font-mono text-[9.5px] font-black uppercase tracking-[0.08em] transition-colors ${
+                      range === r.key
+                        ? "border-primary/40 bg-primary/15 text-primary"
+                        : "border-hairline text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+              {range === "CUSTOM" && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+                    From
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                      className="fb-inset min-h-[34px] rounded-xl px-2 font-mono text-[11px] text-foreground outline-none"
+                    />
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+                    To
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                      className="fb-inset min-h-[34px] rounded-xl px-2 font-mono text-[11px] text-foreground outline-none"
+                    />
+                  </label>
+                </div>
+              )}
+              <p className="font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+                {filtered.length} match{filtered.length === 1 ? "" : "es"}
+              </p>
+            </div>
+          )}
+
           {!authReady || (user && historyLoading && recent.length === 0) ? (
             <div className="space-y-2 p-4">
               {[0, 1, 2].map((i) => (
@@ -355,18 +492,18 @@ function WalletPage() {
           ) : !user ? (
             <div className="space-y-3 p-4">
               <p className="font-mono text-[11px] leading-relaxed text-muted">
-                Sign in to keep a permanent record of your swaps and bridges.
+                Sign in to keep a permanent record of your swaps, bridges and transfers.
               </p>
               <SignInButton label="Sign in" returnTo="/wallet" />
             </div>
           ) : recent.length === 0 ? (
             <p className="p-4 font-mono text-[11px] leading-relaxed text-muted">
-              No transactions yet. Your swaps and bridges appear here automatically.
+              No transactions match these filters yet.
             </p>
           ) : (
             <ul className="divide-y divide-hairline">
               {recent.map((tx: any) => {
-                const type = tx.tx_type ?? tx.txType ?? "SWAP";
+                const type = String(tx.tx_type ?? tx.txType ?? "SWAP").toUpperCase();
                 const status = tx.status ?? "";
                 const hash = tx.tx_hash ?? tx.txHash ?? "";
                 const created = tx.created_at ?? tx.createdAt;
@@ -387,7 +524,7 @@ function WalletPage() {
                       </p>
                       {hash && (
                         <a
-                          href={`https://scan.botchain.ai/tx/${hash}`}
+                          href={`${network.explorer}/tx/${hash}`}
                           target="_blank"
                           rel="noreferrer"
                           className="mt-1 inline-flex items-center gap-1 font-mono text-[9.5px] font-black uppercase tracking-[0.08em] text-primary"
@@ -413,6 +550,7 @@ function WalletPage() {
         isOpen={sendOpen}
         onClose={() => setSendOpen(false)}
         rows={rows}
+        network={network}
         onSent={() => {
           void load();
           void refreshHistory();
@@ -422,6 +560,8 @@ function WalletPage() {
         isOpen={receiveOpen}
         onClose={() => setReceiveOpen(false)}
         address={address}
+        networkLabel={network.label}
+        chainId={network.id}
       />
 
       <BottomNav />

@@ -1,8 +1,8 @@
 // Read-only portfolio reader for the /wallet tab.
-// Balances come from the BOT Chain RPC (native + ERC-20 reads),
-// USD prices reuse the existing quoter so no pricing rules are duplicated.
+// The network is auto-detected from the connected wallet: BOT Chain balances are
+// priced with the existing on-chain quoter, other supported chains use a public
+// USD price feed. No pricing rules are duplicated.
 import { createPublicClient, http, type Address } from "viem";
-import { botMainnet, botTestnet } from "@/lib/wagmi";
 import { ERC20_ABI, getContracts } from "@/lib/contracts";
 import { getBestRoute } from "@/lib/swap/quoter";
 import {
@@ -11,6 +11,11 @@ import {
   getImportedTokens,
   type Token,
 } from "@/lib/swap/tokenRegistry";
+import {
+  DEFAULT_WALLET_NETWORK,
+  findWalletNetwork,
+  type WalletNetwork,
+} from "@/lib/wallet/networks";
 
 export interface HoldingRow {
   token: Token;
@@ -34,6 +39,8 @@ export interface Portfolio {
   partial: boolean;
   /** some prices are missing — total understates the real value */
   pricesPartial: boolean;
+  /** the network these balances were read from */
+  network: WalletNetwork;
 }
 
 const READ_TIMEOUT_MS = 12_000;
@@ -66,16 +73,12 @@ async function retry<T>(fn: () => Promise<T>, attempts = 2): Promise<T> {
   throw lastErr;
 }
 
-function client(isMainnet: boolean) {
-  return createPublicClient({
-    chain: isMainnet ? botMainnet : botTestnet,
-    transport: http(undefined, { batch: true }),
-  });
-}
-
-export function walletTokens(isMainnet: boolean): Token[] {
+export function walletTokens(network: WalletNetwork): Token[] {
+  const list = network.useQuoterPricing
+    ? [...getCuratedTokens(true), ...getImportedTokens(true)]
+    : network.tokens;
   const seen = new Set<string>();
-  return [...getCuratedTokens(isMainnet), ...getImportedTokens(isMainnet)].filter((t) => {
+  return list.filter((t) => {
     const key = t.address.toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);
@@ -83,19 +86,39 @@ export function walletTokens(isMainnet: boolean): Token[] {
   });
 }
 
+/** Public USD prices for non-BOT chains, keyed by token symbol. */
+async function fetchFeedPrices(network: WalletNetwork): Promise<Record<string, number>> {
+  const ids = Array.from(new Set(Object.values(network.priceIds)));
+  if (!ids.length) return {};
+  try {
+    const res = await withTimeout(
+      fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(",")}&vs_currencies=usd`,
+      ),
+      8_000,
+    );
+    const data = (await res.json()) as Record<string, { usd?: number }>;
+    const out: Record<string, number> = {};
+    for (const [symbol, id] of Object.entries(network.priceIds)) {
+      const p = Number(data?.[id]?.usd ?? 0);
+      if (p > 0) out[symbol] = p;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
 export async function fetchPortfolio(
   address: string,
-  isMainnet: boolean,
+  chainId?: number,
 ): Promise<Portfolio> {
-  const tokens = walletTokens(isMainnet);
-  const pub = client(isMainnet);
-  const c = getContracts(isMainnet);
-  const usdt: Token = {
-    address: c.usdtBot.toLowerCase(),
-    symbol: "USDT",
-    name: "Tether USD",
-    decimals: 6,
-  };
+  const network = findWalletNetwork(chainId) ?? DEFAULT_WALLET_NETWORK;
+  const tokens = walletTokens(network);
+  const pub = createPublicClient({
+    chain: network.chain,
+    transport: http(undefined, { batch: true }),
+  });
 
   const balances = await Promise.all(
     tokens.map(async (t): Promise<{ raw: bigint; failed: boolean }> => {
@@ -122,21 +145,39 @@ export async function fetchPortfolio(
 
   const amounts = balances.map((b, i) => Number(b.raw) / 10 ** tokens[i].decimals);
 
-  const prices = await Promise.all(
-    tokens.map(async (t, i): Promise<number | null> => {
+  let prices: (number | null)[];
+
+  if (network.useQuoterPricing) {
+    const c = getContracts(true);
+    const usdt: Token = {
+      address: c.usdtBot.toLowerCase(),
+      symbol: "USDT",
+      name: "Tether USD",
+      decimals: 6,
+    };
+    prices = await Promise.all(
+      tokens.map(async (t, i): Promise<number | null> => {
+        if (amounts[i] <= 0) return 0;
+        if (t.address === usdt.address) return 1;
+        try {
+          const r = await withTimeout(
+            getBestRoute(t, usdt, 10n ** BigInt(t.decimals), true),
+          );
+          if (!r || r.amountOut <= 0n) return null;
+          return Number(r.amountOut) / 1e6;
+        } catch {
+          return null;
+        }
+      }),
+    );
+  } else {
+    const feed = await fetchFeedPrices(network);
+    prices = tokens.map((t, i) => {
       if (amounts[i] <= 0) return 0;
-      if (t.address === usdt.address) return 1;
-      try {
-        const r = await withTimeout(
-          getBestRoute(t, usdt, 10n ** BigInt(t.decimals), isMainnet),
-        );
-        if (!r || r.amountOut <= 0n) return null;
-        return Number(r.amountOut) / 1e6;
-      } catch {
-        return null;
-      }
-    }),
-  );
+      const p = feed[t.symbol.toUpperCase()] ?? feed[t.symbol];
+      return p && p > 0 ? p : null;
+    });
+  }
 
   const rows: HoldingRow[] = tokens.map((token, i) => {
     const price = prices[i];
@@ -160,5 +201,6 @@ export async function fetchPortfolio(
     fetchedAt: Date.now(),
     partial: rows.some((r) => r.balanceFailed),
     pricesPartial: rows.some((r) => r.amount > 0 && r.priceUnavailable),
+    network,
   };
 }
