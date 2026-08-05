@@ -1,5 +1,29 @@
-// Centralized USD formatting so every token price/quote renders consistently
-// (thousands separators + adaptive decimals) across Swap, Bridge, and Limit UI.
+// Centralized money formatting so every token price/quote renders consistently
+// (thousands separators + adaptive decimals) across Swap, Bridge and Wallet UI.
+//
+// Values are always computed in USD; the user's display currency + locale
+// preference (see src/lib/prefs.ts) is applied at render time via an
+// approximate FX rate.
+
+let displayCurrency = "USD";
+let displayRate = 1;
+let displayLocale = "en-US";
+
+/** Set the display currency and its USD→currency rate (called by prefs). */
+export function setDisplayCurrency(code: string, rate: number) {
+  displayCurrency = code || "USD";
+  displayRate = Number.isFinite(rate) && rate > 0 ? rate : 1;
+}
+
+/** Set the locale used for number/date grouping (called by prefs). */
+export function setDisplayLocale(locale: string) {
+  displayLocale = locale || "en-US";
+}
+
+export function getDisplayCurrency() {
+  return { code: displayCurrency, rate: displayRate, locale: displayLocale };
+}
+
 
 /**
  * Format a USD amount with locale thousands separators and adaptive decimals.
