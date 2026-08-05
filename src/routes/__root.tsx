@@ -132,6 +132,13 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // Hydrate display currency / locale preferences before any formatted value renders.
+  useEffect(() => {
+    readPrefs();
+  }, []);
+
+
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
