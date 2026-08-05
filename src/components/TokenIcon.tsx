@@ -1,85 +1,77 @@
-import React from 'react';
-import { Coins } from 'lucide-react';
-import { cn } from '../lib/utils';
+import React from "react";
+import { cn } from "../lib/utils";
+import { logoCandidates, normalizeSymbol, symbolHue } from "../lib/tokenLogos";
+
+/** Shared size scale so every surface renders identical token circles. */
+export const TOKEN_ICON_SIZES = { sm: 24, md: 32, lg: 40, xl: 56 } as const;
+export type TokenIconSize = keyof typeof TOKEN_ICON_SIZES;
 
 interface TokenIconProps {
   symbol: string;
-  size?: number; // width & height in pixels (default: 24)
+  /** Explicit pixel size — wins over `preset`. */
+  size?: number;
+  /** Named size from the shared scale (default: `sm`, 24px). */
+  preset?: TokenIconSize;
   className?: string;
 }
 
-export function TokenIcon({ symbol, size = 24, className }: TokenIconProps) {
-  const normSymbol = symbol.trim().toUpperCase();
-  const id = React.useId();
+/**
+ * Single source of truth for token artwork.
+ *
+ * Renders a real token logo when one is known (local brand PNG for BOT Chain
+ * assets, CDN logo for majors like BTC/ETH/USDT), otherwise a lettered circle.
+ * The outer box is always a fixed square, so lists never shift while logos load.
+ */
+export function TokenIcon({ symbol, size, preset = "sm", className }: TokenIconProps) {
+  const px = size ?? TOKEN_ICON_SIZES[preset];
+  const candidates = React.useMemo(() => logoCandidates(symbol), [symbol]);
+  const [idx, setIdx] = React.useState(0);
 
-  const [caSrc, setCaSrc] = React.useState('/carypact-logo.png');
-  const [botSrc, setBotSrc] = React.useState('/bot-icon.png');
+  React.useEffect(() => {
+    setIdx(0);
+  }, [symbol]);
 
-  // 1. CARY (CA) Token Icon - Elegant original PNG with instant SVG fallback
-  if (normSymbol === 'CA') {
+  const src = candidates[idx];
+  const letters = (normalizeSymbol(symbol) || "?").slice(0, 3).toUpperCase();
+  const hue = symbolHue(symbol);
+
+  const box = cn(
+    "inline-grid shrink-0 place-items-center overflow-hidden rounded-full select-none",
+    className,
+  );
+  const style = { width: px, height: px, minWidth: px, minHeight: px } as const;
+
+  if (src) {
     return (
-      <img
-        src={caSrc}
-        width={size}
-        height={size}
-        alt="CaryPact Logo"
-        className={cn("select-none shrink-0 drop-shadow-sm pointer-events-none object-contain", className)}
-        referrerPolicy="no-referrer"
-        onError={() => {
-          if (caSrc !== '/carypact-logo.svg') {
-            setCaSrc('/carypact-logo.svg');
-          }
-        }}
-      />
+      <span className={cn(box, "bg-card")} style={style}>
+        <img
+          src={src}
+          width={px}
+          height={px}
+          alt={`${letters} logo`}
+          loading="lazy"
+          draggable={false}
+          referrerPolicy="no-referrer"
+          className="h-full w-full object-contain"
+          onError={() => setIdx((i) => i + 1)}
+        />
+      </span>
     );
   }
 
-  // 2. BOT Token Icon - Elegant original PNG with instant SVG fallback
-  if (normSymbol === 'BOT' || normSymbol === 'WBOT' || normSymbol === 'CAWBOT') {
-    return (
-      <img
-        src={botSrc}
-        width={size}
-        height={size}
-        alt="BOT Icon"
-        className={cn("select-none shrink-0 drop-shadow-sm pointer-events-none object-contain", className)}
-        referrerPolicy="no-referrer"
-        onError={() => {
-          if (botSrc !== '/bot-icon.svg') {
-            setBotSrc('/bot-icon.svg');
-          }
-        }}
-      />
-    );
-  }
-
-  // 3. USDT Token Icon - Reverted to the clean, original solid circular green-teal badge containing the white ₮ symbol
-  if (normSymbol === 'USDT') {
-    return (
-      <div 
-        className={cn(
-          "rounded-full bg-teal-500 text-white flex items-center justify-center font-bold shadow-sm border border-teal-300 select-none shrink-0", 
-          className
-        )}
-        style={{ 
-          width: `${size}px`, 
-          height: `${size}px`, 
-          fontSize: `${Math.floor(size * 0.55)}px`,
-          lineHeight: 1
-        }}
-      >
-        ₮
-      </div>
-    );
-  }
-
-  // Standard generic fallback coins (e.g. BTC, generic chain)
   return (
-    <div 
-      className={cn("rounded-full bg-amber-500 text-white flex items-center justify-center font-black shadow border border-amber-400 select-none", className)}
-      style={{ width: size, height: size, fontSize: Math.floor(size * 0.45) }}
+    <span
+      className={cn(box, "border font-black tabular-nums")}
+      style={{
+        ...style,
+        fontSize: Math.max(8, Math.floor(px * (letters.length > 2 ? 0.3 : 0.4))),
+        background: `oklch(0.62 0.13 ${hue} / 0.18)`,
+        borderColor: `oklch(0.62 0.13 ${hue} / 0.4)`,
+        color: `oklch(0.72 0.14 ${hue})`,
+      }}
+      aria-label={`${letters} token`}
     >
-      <Coins className="w-1/2 h-1/2" />
-    </div>
+      {letters}
+    </span>
   );
 }
