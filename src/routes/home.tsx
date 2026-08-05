@@ -62,6 +62,10 @@ const QUICK_ACTIONS = [
 function HomePage() {
   const { user, incentives, transactions, loading } = useAccountData();
   const { greeting, next: nextGreeting, canCycle } = useGreeting();
+  const config = useAppConfig();
+  const campaigns = useMemo(() => getBannerSurface(config, "home"), [config]);
+  const campaignSlides = config.flags.showBanners ? campaigns.slides : [];
+
   const [markets, setMarkets] = useState<MarketRow[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
 
