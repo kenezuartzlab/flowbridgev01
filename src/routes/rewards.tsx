@@ -274,12 +274,38 @@ function RewardsPage() {
                       hint="Required before claiming"
                     />
                     <CheckRow
-                      done={(incentives?.claimableTotal ?? 0) >= 1000}
-                      label="1,000 claimable FLOW"
+                      done={(incentives?.claimableTotal ?? 0) >= claimThreshold}
+                      label={`${claimThreshold.toLocaleString()} claimable FLOW`}
                       hint={`${(incentives?.claimableTotal ?? 0).toLocaleString()} available now`}
                     />
                   </ul>
+
+                  {/* Primary claim action sits directly under the checklist */}
+                  <div className="mt-4 space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => void claim()}
+                      disabled={!canClaim || claiming}
+                      className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-primary font-mono text-[12px] font-black uppercase tracking-[0.12em] text-primary-foreground transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {claiming ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Gift className="h-4 w-4" />
+                      )}
+                      {claiming
+                        ? "Claiming…"
+                        : `Claim available (${claimableNow.toLocaleString()} FLOW)`}
+                    </button>
+                    <p className="text-center font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
+                      {claimMessage ??
+                        (canClaim
+                          ? "All requirements met — claim now"
+                          : `Complete the checklist and reach ${claimThreshold.toLocaleString()} claimable FLOW`)}
+                    </p>
+                  </div>
                 </section>
+
 
                 {/* Volume gate */}
                 <section className="rounded-2xl border border-hairline bg-card p-4">
