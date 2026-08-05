@@ -423,7 +423,9 @@ function RewardsPage() {
                   Bridge activity is tracked for history only — no task credit
                 </p>
               </section>
+              </>
             ) : null}
+
 
             {tab === "REFERRALS" ? (
               <>
