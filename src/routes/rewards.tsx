@@ -49,12 +49,48 @@ const XP_PER_LEVEL = 1000;
 function RewardsPage() {
   const { user, incentives, transactions, loading, refresh } = useAccountData();
   const [tab, setTab] = useState<Tab>("OVERVIEW");
+  const [claiming, setClaiming] = useState(false);
+  const [claimMessage, setClaimMessage] = useState<string | null>(null);
 
   /** Deep-link support: /rewards#games opens the Games tab. */
   useEffect(() => {
     const hash = window.location.hash.replace("#", "").toUpperCase();
     if (["OVERVIEW", "EARN", "REFERRALS", "GIFTS", "GAMES"].includes(hash)) setTab(hash as Tab);
   }, []);
+
+  const claimThreshold = Number(incentives?.claimThreshold ?? 1000);
+  const claimableNow = Number(incentives?.claimableTotal ?? 0);
+  const socialsDone = (["youtube", "x", "telegram"] as const).every(
+    (k) => !!incentives?.socials?.[k],
+  );
+  const canClaim =
+    !!user &&
+    !!(user?.emailVerified || user?.email_verified) &&
+    !!incentives?.walletAddress &&
+    socialsDone &&
+    claimableNow >= claimThreshold;
+
+  const claim = async () => {
+    setClaiming(true);
+    setClaimMessage(null);
+    try {
+      const token = await getIdToken();
+      if (!token) throw new Error("Sign in again to claim.");
+      const res = await fetch("/api/users/claim", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) throw new Error(data?.error ?? "Claim failed.");
+      setClaimMessage(`Claimed ${claimableNow.toLocaleString()} FLOW`);
+      await refresh();
+    } catch (e: any) {
+      setClaimMessage(e?.message ?? "Claim failed.");
+    } finally {
+      setClaiming(false);
+    }
+  };
+
 
   const referralLink =
     typeof window !== "undefined" && incentives?.referralCode
