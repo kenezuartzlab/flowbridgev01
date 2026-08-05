@@ -16,6 +16,7 @@ import { SignInButton } from "@/components/auth/SignInButton";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
+import { KitIcon } from "@/components/kit/KitIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
