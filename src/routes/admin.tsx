@@ -669,7 +669,9 @@ const SURFACE_LABEL: Record<BannerSurfaceKey, string> = {
   cabot: "CA / BOT tab",
   swap: "SWAP tab",
   bridge: "BRIDGE tab",
+  home: "HOME featured",
 };
+
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
