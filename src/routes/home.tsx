@@ -56,7 +56,7 @@ const QUICK_ACTIONS = [
   { to: "/markets", label: "Markets", hint: "Live prices", Icon: LineChart },
   { to: "/partners", label: "Partners", hint: "Quests & apps", Icon: Compass },
   { to: "/rewards", label: "Rewards", hint: "FLOW points", Icon: Gift },
-  { to: "/rewards", label: "Social tasks", hint: "Earn & claim", Icon: Heart, hash: "social" },
+  { to: "/rewards", label: "FLOW Portal", hint: "Incentive tasks", Icon: Heart, hash: "earn" },
   { to: "/assistant", label: "Assistant", hint: "Ask anything", Icon: Sparkles },
 ] as const;
 
