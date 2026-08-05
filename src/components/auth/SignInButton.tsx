@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LogIn } from "lucide-react";
 import { googleSignIn } from "@/lib/auth";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
+import { rememberReturnTo, sanitizeReturnTo } from "@/lib/authReturn";
 
 /**
  * Inline "Sign in" affordance for pages that require an account.
@@ -12,10 +13,13 @@ export function SignInButton({
   label = "Sign in",
   className = "",
   variant = "primary",
+  returnTo,
 }: {
   label?: string;
   className?: string;
   variant?: "primary" | "ghost";
+  /** Same-origin URL/path to land on after auth. Defaults to the current page. */
+  returnTo?: string;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +28,9 @@ export function SignInButton({
     setLoading(true);
     setError(null);
     try {
-      await googleSignIn(window.location.href);
+      const target = sanitizeReturnTo(returnTo);
+      rememberReturnTo(target);
+      await googleSignIn(target);
     } catch (err: any) {
       setError(err?.message || "Sign-in failed. Please try again.");
     } finally {

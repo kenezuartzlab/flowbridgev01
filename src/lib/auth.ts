@@ -3,6 +3,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
+import { rememberReturnTo } from "@/lib/authReturn";
 
 export interface AppUser {
   uid: string;
@@ -83,6 +84,7 @@ export const googleSignIn = async (
       if (url.origin === window.location.origin) redirect_uri = url.toString();
     } catch { /* fall back to origin */ }
   }
+  rememberReturnTo(redirect_uri);
   const result = await lovable.auth.signInWithOAuth("google", { redirect_uri });
   if (result.error) throw result.error;
   if (result.redirected) return null; // browser will redirect

@@ -606,12 +606,6 @@ function EmptyState({ title, body }: { title: string; body: string }) {
     <div className="rounded-2xl border border-hairline bg-card p-6 text-center">
       <h2 className="text-base font-black text-foreground">{title}</h2>
       <p className="mt-2 text-[12px] leading-relaxed text-muted">{body}</p>
-      <Link
-        to="/"
-        className="mt-4 inline-block rounded-xl bg-primary px-5 py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground"
-      >
-        Go to Swap
-      </Link>
     </div>
   );
 }
