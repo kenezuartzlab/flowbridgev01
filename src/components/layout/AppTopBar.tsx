@@ -42,20 +42,20 @@ export function AppTopBar({
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5">
           {actions}
           <button
             type="button"
             onClick={() => setTheme()}
             aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-            className="grid h-10 w-10 place-items-center rounded-2xl border border-hairline bg-card text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+            className="grid h-9 w-9 place-items-center rounded-2xl border border-hairline bg-card text-muted transition-colors hover:border-primary/40 hover:text-foreground"
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
           <Link
             to="/account"
             aria-label="Account"
-            className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-primary/40 bg-primary/12 font-black text-primary"
+            className="grid h-9 w-9 place-items-center overflow-hidden rounded-full border border-primary/40 bg-primary/12 font-black text-primary"
           >
             {avatar ? (
               <img src={avatar} alt="" className="h-full w-full object-cover" />
