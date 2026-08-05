@@ -13,24 +13,40 @@ export interface AppUser {
   email_verified: boolean;
   displayName: string | null;
   photoURL: string | null;
+  /** Provider (e.g. Google) name/photo, used when a custom override is cleared. */
+  providerName: string | null;
+  providerPhoto: string | null;
+  hasCustomPhoto: boolean;
+  hasCustomName: boolean;
   isDemo?: boolean;
 }
 
 function toAppUser(u: SupabaseUser): AppUser {
   const verified = !!u.email_confirmed_at || !!(u as any).confirmed_at;
+  const m = (u.user_metadata ?? {}) as Record<string, unknown>;
+  // Provider identity (Google) stays untouched in full_name / name / picture;
+  // user edits live in *_custom keys so "remove photo" can revert cleanly.
+  const providerName =
+    (m['full_name'] as string | undefined) ?? (m['name'] as string | undefined) ?? null;
+  const providerPhoto =
+    (m['picture'] as string | undefined) ?? (m['avatar_url'] as string | undefined) ?? null;
+  const customName = (m['display_name_custom'] as string | undefined) || null;
+  const customPhoto = (m['avatar_custom'] as string | undefined) || null;
   return {
     uid: u.id,
     id: u.id,
     email: u.email ?? "",
     emailVerified: verified,
     email_verified: verified,
-    displayName:
-      (u.user_metadata?.full_name as string | undefined) ??
-      (u.user_metadata?.name as string | undefined) ??
-      null,
-    photoURL: (u.user_metadata?.avatar_url as string | undefined) ?? null,
+    displayName: customName ?? providerName,
+    photoURL: customPhoto ?? providerPhoto,
+    providerName,
+    providerPhoto,
+    hasCustomPhoto: !!customPhoto,
+    hasCustomName: !!customName,
   };
 }
+
 
 export const initAuth = (
   onAuthSuccess?: (user: AppUser, token: string) => void,
