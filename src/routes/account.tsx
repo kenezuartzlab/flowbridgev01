@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Sun,
   Users,
+  Heart,
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -390,9 +391,9 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-function RowLink({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function RowLink({ to, icon, label, hash }: { to: string; icon: React.ReactNode; label: string; hash?: string }) {
   return (
-    <Link to={to} className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-foreground/5">
+    <Link to={to} hash={hash} className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-foreground/5">
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-hairline bg-primary/10 text-primary">
         {icon}
       </span>
