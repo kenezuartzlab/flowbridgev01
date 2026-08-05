@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { AppTopBar } from "@/components/layout/AppTopBar";
+import { useGreeting } from "@/lib/greetings";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
 import { KitIcon } from "@/components/kit/KitIcon";
@@ -55,6 +56,7 @@ const QUICK_ACTIONS = [
 
 function HomePage() {
   const { user, incentives, transactions, loading } = useAccountData();
+  const { greeting, next: nextGreeting, canCycle } = useGreeting();
   const [markets, setMarkets] = useState<MarketRow[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
 
@@ -90,7 +92,8 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppTopBar
-        eyebrow="Good day"
+        eyebrow={greeting}
+        onEyebrowClick={canCycle ? nextGreeting : undefined}
         title={user?.displayName || user?.email?.split("@")[0] || "Welcome to FlowBridge"}
         avatar={user?.photoURL ?? null}
         initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}

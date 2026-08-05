@@ -14,6 +14,7 @@ import {
   History,
   Info,
   LogOut,
+  MessageSquare,
   Moon,
   Pencil,
   QrCode,
@@ -31,6 +32,7 @@ import { useAccountData } from "@/lib/app/useAccountData";
 import { logout } from "@/lib/auth";
 import { readPlayState } from "@/lib/games/playState";
 import { usePrefs } from "@/lib/prefs";
+import { GREETING_STYLES, greetingVariants, type GreetingStyleId } from "@/lib/greetings";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -254,6 +256,34 @@ function AccountPage() {
             </div>
           )}
           <RowButton
+            icon={<MessageSquare className="h-4 w-4" />}
+            label="Greeting"
+            value={
+              GREETING_STYLES.find((g) => g.id === prefs.greeting)?.label ?? "Time of day"
+            }
+            onClick={() => setOpen(open === "greet" ? null : "greet")}
+          />
+          {open === "greet" && (
+            <div className="space-y-2 border-t border-hairline px-4 py-3">
+              <div className="flex flex-wrap gap-2">
+                {GREETING_STYLES.map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => savePrefs({ greeting: g.id })}
+                    data-active={prefs.greeting === g.id}
+                    className="fb-segment fb-inset min-h-[36px] flex-none px-3 font-mono text-[10.5px] font-black tracking-[0.06em]"
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+              <p className="font-mono text-[10px] leading-relaxed text-muted">
+                e.g. “{greetingVariants((prefs.greeting as GreetingStyleId) || "timeOfDay").join(" · ")}” — tap the greeting on Home to cycle variants.
+              </p>
+            </div>
+          )}
+          <RowButton
             icon={<Coins className="h-4 w-4" />}
             label="Display currency"
             value={prefs.currency}
@@ -332,6 +362,9 @@ function AccountPage() {
           onClose={() => setEditOpen(false)}
           currentName={user.displayName || ""}
           currentPhoto={avatar}
+          providerName={user.providerName ?? null}
+          providerPhoto={user.providerPhoto ?? null}
+          hasCustom={!!(user.hasCustomPhoto || user.hasCustomName)}
           onSaved={() => window.location.reload()}
         />
       )}

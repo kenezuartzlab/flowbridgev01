@@ -32,6 +32,7 @@ export type Prefs = {
   marketing: boolean;
   currency: string;
   language: string;
+  greeting: string;
 };
 
 export const DEFAULT_PREFS: Prefs = {
@@ -39,6 +40,7 @@ export const DEFAULT_PREFS: Prefs = {
   marketing: false,
   currency: "USD",
   language: "en",
+  greeting: "timeOfDay",
 };
 
 let current: Prefs = DEFAULT_PREFS;
