@@ -19,6 +19,7 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { KitIcon } from "@/components/kit/KitIcon";
 import { SignInButton } from "@/components/auth/SignInButton";
+import { useTheme } from "@/lib/theme";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { logout } from "@/lib/auth";
 import { readPlayState } from "@/lib/games/playState";
@@ -66,13 +67,12 @@ const DEFAULT_PREFS: Prefs = {
 
 function AccountPage() {
   const { user, authReady, incentives, transactions } = useAccountData();
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useTheme();
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
   const [open, setOpen] = useState<string | null>(null);
   const [play, setPlay] = useState(0);
 
   useEffect(() => {
-    setTheme(document.documentElement.classList.contains("light") ? "light" : "dark");
     setPlay(readPlayState().points);
     try {
       const raw = window.localStorage.getItem(PREF_KEY);
@@ -94,16 +94,7 @@ function AccountPage() {
     });
   };
 
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    document.documentElement.classList.toggle("light", next === "light");
-    try {
-      window.localStorage.setItem("fb_theme", next);
-    } catch {
-      /* storage unavailable */
-    }
-  };
+  const toggleTheme = () => setTheme();
 
   const flow = Number(incentives?.flowPoints ?? 0);
   const displayName = user?.displayName || user?.name || user?.email?.split("@")[0] || "Guest";

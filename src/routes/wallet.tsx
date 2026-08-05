@@ -11,7 +11,6 @@ import {
   Copy,
   ExternalLink,
   RefreshCw,
-  Wallet as WalletIcon,
 } from "lucide-react";
 import { wagmiConfig } from "@/lib/wagmi";
 import { SignInButton } from "@/components/auth/SignInButton";

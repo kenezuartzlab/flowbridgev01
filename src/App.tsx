@@ -336,7 +336,7 @@ export default function App() {
     setIsAuthLoading(true);
     setAuthError(null);
     try {
-      const res = await googleSignIn();
+      const res = await googleSignIn(window.location.href);
       if (res) {
         setGoogleUser(res.user);
       }
