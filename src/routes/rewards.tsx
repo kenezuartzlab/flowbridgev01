@@ -56,7 +56,7 @@ function RewardsPage() {
   const [claiming, setClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState<string | null>(null);
 
-  /** Deep-link support: /rewards#games opens the Games tab, #social the task portal. */
+  /** Deep-link support: #games opens Games, #social the task portal, #bind the wallet task. */
   useEffect(() => {
     const hash = window.location.hash.replace("#", "").toUpperCase();
     if (["OVERVIEW", "EARN", "REFERRALS", "GIFTS", "GAMES"].includes(hash)) setTab(hash as Tab);
@@ -64,7 +64,13 @@ function RewardsPage() {
       setTab("EARN");
       setTimeout(() => document.getElementById("social-tasks")?.scrollIntoView({ behavior: "smooth" }), 250);
     }
+    if (hash === "BIND" || hash === "BIND-WALLET" || hash === "WALLET") {
+      setTab("EARN");
+      setTimeout(() => document.getElementById("bind-wallet")?.scrollIntoView({ behavior: "smooth" }), 250);
+    }
   }, []);
+
+
 
 
   const claimThreshold = Number(incentives?.claimThreshold ?? 1000);
