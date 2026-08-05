@@ -98,7 +98,7 @@ function ActivityPage() {
                 Activity is recorded only for a verified email and the wallet bound to it.
               </p>
               <div className="mt-4">
-                <SignInButton label="Sign in" />
+                <SignInButton label="Sign in" returnTo="/activity" />
               </div>
             </div>
           </div>

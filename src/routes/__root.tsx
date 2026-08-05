@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
+import { THEME_BOOTSTRAP } from "../lib/theme";
+import { ReturnToRedirect } from "../components/auth/ReturnToRedirect";
 
 function NotFoundComponent() {
   return (
@@ -113,8 +115,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Applies the persisted light/dark theme before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
         <HeadContent />
       </head>
       <body>
@@ -131,6 +135,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <ReturnToRedirect />
       <Outlet />
       <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
