@@ -22,6 +22,8 @@ import { TabBanner } from "@/components/banners/TabBanner";
 import giftArt from "@/assets/gift-1.png.asset.json";
 import { SocialTasksCard } from "@/components/rewards/SocialTasksCard";
 import { BindWalletCard } from "@/components/rewards/BindWalletCard";
+import { WagmiProvider } from "wagmi";
+import { wagmiConfig } from "@/lib/wagmi";
 
 import { formatUsd } from "@/lib/format";
 import { getIdToken } from "@/lib/auth";
@@ -42,13 +44,23 @@ export const Route = createFileRoute("/rewards")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: RewardsPage,
+  component: RewardsRoute,
 });
 
 type Tab = "OVERVIEW" | "EARN" | "REFERRALS" | "GIFTS" | "GAMES";
 
 const LEVEL_NAMES = ["Newcomer", "Trader", "Explorer", "Voyager", "Architect", "Legend"];
 const XP_PER_LEVEL = 1000;
+
+/** Wallet hooks (bind-wallet task) need a WagmiProvider in this route's tree. */
+function RewardsRoute() {
+  return (
+    <WagmiProvider config={wagmiConfig}>
+      <RewardsPage />
+    </WagmiProvider>
+  );
+}
+
 
 function RewardsPage() {
   const { user, incentives, transactions, loading, refresh } = useAccountData();
