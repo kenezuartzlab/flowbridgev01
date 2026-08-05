@@ -42,6 +42,7 @@ import { BridgeStatusPanel } from './components/routetabs/BridgeStatusPanel';
 import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
 import { initAuth, googleSignIn, logout as googleLogout, getIdToken } from './lib/auth';
+import { useTheme } from './lib/theme';
 import { LogOut, Database, Gift } from 'lucide-react';
 import { cn } from './lib/utils';
 import { ConfirmSwapModal } from './modals/ConfirmSwapModal';
