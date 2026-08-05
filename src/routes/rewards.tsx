@@ -110,38 +110,44 @@ function RewardsPage() {
         ) : (
           <div className="space-y-4">
             {/* Points hero + level progress */}
-            <section className="relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/25 via-primary/10 to-accent/15 p-5">
+            <section className="fb-hero fb-hero-rewards p-5">
+              <KitIcon
+                name="trophy"
+                size={128}
+                className="pointer-events-none absolute -right-5 -top-6 opacity-20"
+              />
               <div
                 aria-hidden
-                className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-primary/25 blur-3xl"
+                className="pointer-events-none absolute -bottom-16 -left-12 h-44 w-44 rounded-full bg-white/10 blur-2xl"
               />
-              <p className="relative font-mono text-[10px] font-black uppercase tracking-[0.16em] text-muted">
+              <p className="relative font-mono text-[10px] font-black uppercase tracking-[0.16em] opacity-80">
                 Total FLOW Points
               </p>
-              <p className="relative mt-1 text-[44px] font-black leading-none tabular-nums text-foreground">
+              <p className="relative mt-1 text-[44px] font-black leading-none tabular-nums">
                 {lifetime.toLocaleString()}
               </p>
-              <p className="relative mt-1.5 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary">
+              <p className="relative mt-1.5 font-mono text-[11px] font-black uppercase tracking-[0.1em] opacity-90">
                 +{weeklyPoints.toLocaleString()} this week
               </p>
 
-              <div className="relative mt-4 rounded-2xl border border-hairline bg-card-alt p-3">
-                <div className="flex items-baseline justify-between gap-2 font-mono text-[10px] font-black uppercase tracking-[0.1em]">
-                  <span className="text-foreground">
+              <div className="fb-hero-tile relative mt-4 p-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2 font-mono text-[10px] font-black uppercase tracking-[0.1em]">
+                  <span>
                     Level {levelIndex + 1} · {LEVEL_NAMES[levelIndex]}
                   </span>
-                  <span className="tabular-nums text-muted">
+                  <span className="tabular-nums opacity-80">
                     {levelXp.toLocaleString()} / {XP_PER_LEVEL.toLocaleString()} XP
                   </span>
                 </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-hairline">
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/25">
                   <div
-                    className="h-full rounded-full bg-primary transition-all duration-700"
+                    className="h-full rounded-full bg-white/90 transition-all duration-700"
                     style={{ width: `${(levelXp / XP_PER_LEVEL) * 100}%` }}
                   />
                 </div>
               </div>
             </section>
+
 
             {/* Stat tiles */}
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
