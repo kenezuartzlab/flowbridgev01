@@ -83,7 +83,12 @@ export function ProfileEditModal({
     setBusy(true);
     setError(null);
     const { error: err } = await supabase.auth.updateUser({
-      data: { display_name_custom: null, avatar_custom: null },
+      data: {
+        display_name_custom: null,
+        avatar_custom: null,
+        // legacy: earlier versions stored the cropped photo directly here
+        ...(providerPhoto?.startsWith("data:") ? { avatar_url: null } : {}),
+      },
     });
     setBusy(false);
     if (err) {

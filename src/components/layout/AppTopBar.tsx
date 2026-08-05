@@ -14,12 +14,15 @@ export function AppTopBar({
   actions,
   avatar,
   initial = "G",
+  onEyebrowClick,
 }: {
   eyebrow?: string;
   title: string;
   actions?: ReactNode;
   avatar?: string | null;
   initial?: string;
+  /** When provided the eyebrow becomes a button (used to cycle greetings). */
+  onEyebrowClick?: () => void;
 }) {
   const [theme, setTheme] = useTheme();
 
@@ -34,9 +37,20 @@ export function AppTopBar({
           loading="lazy"
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-mono text-[9.5px] font-black uppercase tracking-[0.16em] text-muted">
-            {eyebrow}
-          </p>
+          {onEyebrowClick ? (
+            <button
+              type="button"
+              onClick={onEyebrowClick}
+              title="Tap to change greeting"
+              className="block max-w-full truncate font-mono text-[9.5px] font-black uppercase tracking-[0.16em] text-muted transition-colors hover:text-primary"
+            >
+              {eyebrow}
+            </button>
+          ) : (
+            <p className="truncate font-mono text-[9.5px] font-black uppercase tracking-[0.16em] text-muted">
+              {eyebrow}
+            </p>
+          )}
           <p className="truncate text-[15px] font-black leading-tight tracking-[-0.01em] sm:text-[17px]">
             {title}
           </p>
