@@ -6,7 +6,7 @@ import { getBestRoute } from "@/lib/swap/quoter";
 import { getContracts } from "@/lib/contracts";
 import { NATIVE_TOKEN_ADDRESS, type Token } from "@/lib/swap/tokenRegistry";
 
-export type Chain = "BOT" | "ETH" | "BSC" | "TRON";
+export type Chain = "BOT" | "MAJOR" | "ETH" | "BSC" | "TRON";
 
 export interface MarketRow {
   id: string;
@@ -93,9 +93,9 @@ async function safeCall<T>(fn: () => Promise<T> | T): Promise<T | null> {
 // Top popular tokens per chain — mixed L1s + majors on each chain.
 const CG_IDS = [
   // Majors (multi-chain / L1 references, incl. BTC)
-  { id: "bitcoin", chain: "ETH" as Chain },
-  { id: "solana", chain: "ETH" as Chain },
-  { id: "dogecoin", chain: "ETH" as Chain },
+  { id: "bitcoin", chain: "MAJOR" as Chain },
+  { id: "solana", chain: "MAJOR" as Chain },
+  { id: "dogecoin", chain: "MAJOR" as Chain },
   // ETH ecosystem
   { id: "ethereum", chain: "ETH" as Chain },
   { id: "usd-coin", chain: "ETH" as Chain },

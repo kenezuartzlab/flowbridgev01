@@ -27,7 +27,7 @@ export const Route = createFileRoute("/markets")({
   component: MarketsPage,
 });
 
-type ChainFilter = "ALL" | "BOT" | "ETH" | "BSC" | "TRON";
+type ChainFilter = "ALL" | "BOT" | "MAJOR" | "ETH" | "BSC" | "TRON";
 type SortKey = "price" | "change" | "mcap";
 
 function MarketsPage() {
@@ -136,7 +136,7 @@ function MarketsPage() {
                     key={`mv-${m.chain}-${m.id}`}
                     className="fb-inset flex shrink-0 snap-start items-center gap-2 px-3 py-2"
                   >
-                    <TokenIcon symbol={m.symbol} size={24} />
+                    <TokenIcon symbol={m.symbol} preset="sm" />
                     <div className="min-w-0">
                       <p className="font-mono text-[11px] font-black uppercase tracking-[0.06em]">
                         {m.symbol}
@@ -170,7 +170,7 @@ function MarketsPage() {
 
           <div className="flex flex-wrap items-center gap-2">
             <div className="fb-segment-track font-mono">
-              {(["ALL", "BOT", "ETH", "BSC", "TRON"] as ChainFilter[]).map((c) => (
+              {(["ALL", "BOT", "MAJOR", "ETH", "BSC", "TRON"] as ChainFilter[]).map((c) => (
                 <button
                   key={c}
                   type="button"
