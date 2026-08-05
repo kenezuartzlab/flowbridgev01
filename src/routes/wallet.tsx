@@ -17,6 +17,7 @@ import { SignInButton } from "@/components/auth/SignInButton";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
+import { KitIcon } from "@/components/kit/KitIcon";
 import { formatUsd, formatBalance4 } from "@/lib/format";
 import { fetchPortfolio, type Portfolio } from "@/lib/wallet/portfolio";
 import { SendModal } from "@/components/wallet/SendModal";
