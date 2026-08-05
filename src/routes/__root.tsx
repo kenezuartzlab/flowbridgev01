@@ -137,8 +137,20 @@ function RootComponent() {
   useEffect(() => {
     readPrefs();
     // Apply currency/locale only after hydration (see unlockPrefsFormatting).
-    const t = window.setTimeout(unlockPrefsFormatting, 0);
-    void t;
+    // Wait until hydration has settled (load + two frames) so lazily hydrated
+    // subtrees never see a currency switch mid-hydration.
+    let raf = 0;
+    const start = () => {
+      raf = requestAnimationFrame(() => {
+        raf = requestAnimationFrame(unlockPrefsFormatting);
+      });
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => {
+      window.removeEventListener("load", start);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
 
