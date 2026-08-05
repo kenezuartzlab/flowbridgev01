@@ -35,6 +35,8 @@ import {
   type BannerLayout,
   type BannerSlide,
   type BannerSurfaceKey,
+  type PartnerCard,
+
 } from "@/lib/config/appConfig";
 import { TabBanner } from "@/components/banners/TabBanner";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
