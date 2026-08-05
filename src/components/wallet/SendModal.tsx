@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPublicClient, http, isAddress, parseAbi, parseUnits, type Address } from "viem";
 import { useAccount, useChainId, useSwitchChain, useWalletClient } from "wagmi";
-import { ArrowUpRight, Loader2, X, CheckCircle2, AlertTriangle, ExternalLink } from "lucide-react";
+import {
+  ArrowUpRight,
+  Loader2,
+  X,
+  CheckCircle2,
+  AlertTriangle,
+  ExternalLink,
+  ChevronDown,
+} from "lucide-react";
 import { botMainnet } from "@/lib/wagmi";
 import { NATIVE_TOKEN_ADDRESS } from "@/lib/swap/tokenRegistry";
 import { formatBalance4, formatUsd } from "@/lib/format";
@@ -33,6 +41,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
 
   const held = useMemo(() => rows.filter((r) => r.amount > 0 && !r.balanceFailed), [rows]);
   const [tokenAddr, setTokenAddr] = useState<string>("");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
@@ -54,12 +63,14 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
       setError("");
       setAmount("");
       setTo("");
+      setPickerOpen(false);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const isNative = !!selected && (selected.token.isNative || selected.token.address === NATIVE_TOKEN_ADDRESS);
+  const isNative =
+    !!selected && (selected.token.isNative || selected.token.address === NATIVE_TOKEN_ADDRESS);
   const maxRaw = selected
     ? isNative
       ? selected.raw > GAS_RESERVE_WEI
@@ -100,6 +111,11 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
                   : "Amount exceeds your available balance."
                 : "";
 
+  const usdPreview =
+    selected && selected.priceUsd > 0 && amountRaw
+      ? (Number(amountRaw) / 10 ** selected.token.decimals) * selected.priceUsd
+      : 0;
+
   const send = async () => {
     if (!selected || !amountRaw || !walletClient || !address) return;
     setError("");
@@ -137,26 +153,35 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
     }
   };
 
+  const ctaLabel =
+    phase === "signing"
+      ? "Confirm in wallet"
+      : phase === "pending"
+        ? "Confirming"
+        : canSend
+          ? "Send"
+          : "Enter details";
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-3 backdrop-blur-md sm:items-center">
-      <div className="fb-surface w-full max-w-[420px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4">
-        <div className="flex items-center justify-between gap-3 border-b border-hairline pb-3">
-          <p className="fb-eyebrow">Send on BOT Chain</p>
+      <div className="fb-surface relative w-full max-w-[420px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[15px] font-black tracking-tight">Send</p>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close send dialog"
-            className="grid h-8 w-8 place-items-center rounded-xl text-muted hover:text-foreground"
+            className="fb-inset grid h-9 w-9 place-items-center rounded-full text-muted hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {phase === "done" ? (
-          <div className="space-y-3 py-6 text-center">
+          <div className="space-y-3 py-8 text-center">
             <CheckCircle2 className="mx-auto h-10 w-10 text-success" />
-            <p className="font-mono text-[13px] font-black uppercase tracking-[0.1em]">Sent</p>
-            <p className="font-mono text-[11px] leading-relaxed text-muted">
+            <p className="text-[15px] font-black tracking-tight">Sent</p>
+            <p className="text-[13px] leading-relaxed text-muted">
               {amount} {selected?.token.symbol} was delivered to {to.slice(0, 6)}…{to.slice(-4)}.
             </p>
             {hash && (
@@ -164,7 +189,7 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
                 href={`https://scan.botchain.ai/tx/${hash}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 font-mono text-[10.5px] font-black uppercase tracking-[0.08em] text-primary"
+                className="inline-flex items-center gap-1 text-[12px] font-black text-primary"
               >
                 View on explorer <ExternalLink className="h-3 w-3" />
               </a>
@@ -172,90 +197,91 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="fb-glow mt-2 inline-flex min-h-[42px] w-full items-center justify-center rounded-xl bg-primary px-4 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground"
+              className="fb-glow mt-2 inline-flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground"
             >
               Done
             </button>
           </div>
         ) : (
-          <div className="space-y-3 pt-3">
+          <div className="space-y-4 pt-4">
             {held.length === 0 ? (
-              <p className="font-mono text-[11px] leading-relaxed text-muted">
+              <p className="text-[13px] leading-relaxed text-muted">
                 No spendable balances found on BOT Chain for this wallet.
               </p>
             ) : (
               <>
-                <label className="block">
-                  <span className="fb-eyebrow">Token</span>
-                  <div className="fb-inset mt-1 flex items-center gap-2 px-3 py-2">
-                    {selected && <TokenIcon symbol={selected.token.symbol} className="h-6 w-6 shrink-0" />}
-                    <select
-                      value={selected?.token.address ?? ""}
-                      onChange={(e) => setTokenAddr(e.target.value)}
-                      className="min-h-[32px] w-full bg-transparent font-mono text-[12px] font-black uppercase tracking-[0.06em] outline-none"
-                    >
-                      {held.map((r) => (
-                        <option key={r.token.address} value={r.token.address} className="bg-card text-foreground">
-                          {r.token.symbol} — {formatBalance4(r.amount)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </label>
+                <div className="space-y-1.5">
+                  <p className="fb-eyebrow">Asset</p>
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen(true)}
+                    className="fb-inset flex min-h-[56px] w-full items-center gap-3 rounded-2xl px-3 text-left"
+                  >
+                    {selected && <TokenIcon symbol={selected.token.symbol} className="h-8 w-8 shrink-0" />}
+                    <span className="text-[15px] font-black">${selected?.token.symbol}</span>
+                    <ChevronDown className="h-4 w-4 text-muted" />
+                  </button>
+                  <p className="text-[12px] font-semibold text-muted">
+                    Balance: {formatBalance4(selected?.amount ?? 0)} ${selected?.token.symbol}
+                  </p>
+                </div>
 
-                <label className="block">
-                  <span className="fb-eyebrow">Recipient address</span>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="fb-eyebrow">Amount</p>
+                    <button
+                      type="button"
+                      onClick={() => setAmount(maxAmount > 0 ? String(maxAmount) : "0")}
+                      className="rounded-full bg-primary/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.1em] text-primary"
+                    >
+                      Max
+                    </button>
+                  </div>
+                  <div className="fb-inset flex min-h-[56px] items-center gap-2 rounded-2xl px-3">
+                    <input
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+                      inputMode="decimal"
+                      placeholder="0.000000"
+                      aria-label="Amount to send"
+                      className="min-h-[52px] w-full bg-transparent text-[22px] font-black tabular-nums tracking-tight outline-none placeholder:text-muted/50"
+                    />
+                    <span className="shrink-0 text-[13px] font-black text-muted">
+                      ${selected?.token.symbol}
+                    </span>
+                  </div>
+                  <p className="text-[12px] font-semibold text-muted">
+                    ≈ {formatUsd(usdPreview)}
+                    {isNative ? " · 0.002 BOT kept for gas" : ""}
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <p className="fb-eyebrow">Recipient address</p>
                   <input
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
                     placeholder="0x…"
                     spellCheck={false}
-                    className="fb-inset mt-1 min-h-[42px] w-full px-3 font-mono text-[12px] outline-none"
+                    aria-label="Recipient address"
+                    className="fb-inset min-h-[56px] w-full rounded-2xl px-3 font-mono text-[13px] outline-none"
                   />
-                </label>
-
-                <label className="block">
-                  <span className="fb-eyebrow">Amount</span>
-                  <div className="fb-inset mt-1 flex items-center gap-2 px-3">
-                    <input
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
-                      inputMode="decimal"
-                      placeholder="0.0"
-                      className="min-h-[42px] w-full bg-transparent font-mono text-[14px] font-black tabular-nums outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setAmount(maxAmount > 0 ? String(maxAmount) : "0")}
-                      className="shrink-0 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary"
-                    >
-                      Max
-                    </button>
-                  </div>
-                  <span className="mt-1 block font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-                    Available {formatBalance4(maxAmount)} {selected?.token.symbol}
-                    {selected && selected.priceUsd > 0 && amountRaw
-                      ? ` · ≈ ${formatUsd((Number(amountRaw) / 10 ** selected.token.decimals) * selected.priceUsd)}`
-                      : ""}
-                    {isNative ? " · 0.002 BOT kept for gas" : ""}
-                  </span>
-                </label>
+                </div>
 
                 {(validationHint || error) && (
                   <p
-                    className={`flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed ${
+                    className={`flex items-start gap-1.5 text-[12px] font-semibold leading-relaxed ${
                       error ? "text-destructive" : "text-muted"
                     }`}
                   >
-                    {error && <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />}
+                    {error && <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />}
                     {error || validationHint}
                   </p>
                 )}
 
                 {phase === "pending" && (
-                  <p className="font-mono text-[10.5px] leading-relaxed text-muted">
-                    Waiting for on-chain confirmation…
-                    {hash ? ` Tx ${hash.slice(0, 8)}…` : ""}
+                  <p className="text-[12px] font-semibold leading-relaxed text-muted">
+                    Waiting for on-chain confirmation…{hash ? ` Tx ${hash.slice(0, 8)}…` : ""}
                   </p>
                 )}
 
@@ -263,13 +289,65 @@ export function SendModal({ isOpen, onClose, rows, onSent }: Props) {
                   type="button"
                   onClick={() => void send()}
                   disabled={!canSend}
-                  className="fb-glow inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground disabled:opacity-40"
+                  className="fb-glow inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground disabled:opacity-40"
                 >
-                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUpRight className="h-4 w-4" />}
-                  {phase === "signing" ? "Confirm in wallet" : phase === "pending" ? "Confirming" : "Send"}
+                  {busy ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : canSend ? (
+                    <ArrowUpRight className="h-4 w-4" />
+                  ) : null}
+                  {ctaLabel}
                 </button>
               </>
             )}
+          </div>
+        )}
+
+        {pickerOpen && (
+          <div className="absolute inset-0 z-10 flex items-end rounded-[inherit] bg-background/70 backdrop-blur-sm">
+            <div className="fb-surface max-h-full w-full overflow-y-auto rounded-t-3xl p-4">
+              <div className="flex items-center justify-between gap-3 pb-2">
+                <p className="text-[15px] font-black tracking-tight">Send Token</p>
+                <button
+                  type="button"
+                  onClick={() => setPickerOpen(false)}
+                  aria-label="Close token picker"
+                  className="fb-inset grid h-9 w-9 place-items-center rounded-full text-muted hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <ul className="divide-y divide-hairline">
+                {held.map((r) => (
+                  <li key={r.token.address}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTokenAddr(r.token.address);
+                        setPickerOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 py-3 text-left"
+                    >
+                      <TokenIcon symbol={r.token.symbol} className="h-9 w-9 shrink-0" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[14px] font-black">${r.token.symbol}</span>
+                        <span className="block truncate text-[12px] font-semibold text-muted">
+                          {r.token.name ?? r.token.symbol}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <span className="block text-[14px] font-black tabular-nums">
+                          {formatBalance4(r.amount)}
+                        </span>
+                        <span className="block text-[12px] font-semibold text-muted tabular-nums">
+                          {formatUsd(r.amount * r.priceUsd)}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         )}
       </div>

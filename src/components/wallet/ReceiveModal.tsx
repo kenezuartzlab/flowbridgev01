@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Copy, ExternalLink, Share2, X } from "lucide-react";
+import QRCode from "qrcode";
 
 interface Props {
   isOpen: boolean;
@@ -9,6 +10,21 @@ interface Props {
 
 export function ReceiveModal({ isOpen, onClose, address }: Props) {
   const [copied, setCopied] = useState(false);
+  const [qr, setQr] = useState<string>("");
+
+  useEffect(() => {
+    if (!isOpen || !address) return;
+    let alive = true;
+    QRCode.toDataURL(address, { margin: 1, width: 480, errorCorrectionLevel: "M" })
+      .then((url) => {
+        if (alive) setQr(url);
+      })
+      .catch(() => setQr(""));
+    return () => {
+      alive = false;
+    };
+  }, [isOpen, address]);
+
   if (!isOpen || !address) return null;
 
   const copy = async () => {
@@ -31,55 +47,66 @@ export function ReceiveModal({ isOpen, onClose, address }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-3 backdrop-blur-md sm:items-center">
-      <div className="fb-surface w-full max-w-[420px] p-4">
-        <div className="flex items-center justify-between gap-3 border-b border-hairline pb-3">
-          <p className="fb-eyebrow">Receive on BOT Chain</p>
+      <div className="fb-surface w-full max-w-[420px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[15px] font-black tracking-tight">Receive</p>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close receive dialog"
-            className="grid h-8 w-8 place-items-center rounded-xl text-muted hover:text-foreground"
+            className="fb-inset grid h-9 w-9 place-items-center rounded-full text-muted hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="space-y-3 pt-3">
-          <p className="font-mono text-[10.5px] leading-relaxed text-muted">
-            Only send BOT Chain (chain ID 677) assets to this address. Tokens sent from other
-            networks without bridging will be lost.
-          </p>
+        <div className="fb-inset mt-4 space-y-4 rounded-3xl p-4 text-center">
+          <div className="mx-auto w-full max-w-[240px] rounded-2xl bg-white p-3">
+            {qr ? (
+              <img src={qr} alt={`QR code for wallet address ${address}`} className="h-auto w-full" />
+            ) : (
+              <div className="aspect-square w-full animate-pulse rounded-xl bg-black/10" />
+            )}
+          </div>
 
-          <p className="fb-inset break-all px-3 py-3 font-mono text-[12px] font-black">{address}</p>
+          <div className="space-y-1">
+            <p className="fb-eyebrow">Your address</p>
+            <p className="break-all font-mono text-[12px] font-bold leading-relaxed">{address}</p>
+          </div>
 
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => void copy()}
-              className="fb-glow inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl bg-primary px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground"
+              className="fb-glow inline-flex min-h-[46px] items-center justify-center gap-1.5 rounded-2xl bg-primary px-3 text-[13px] font-black text-primary-foreground"
             >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {copied ? "Copied" : "Copy"}
             </button>
-            <button
-              type="button"
-              onClick={() => void share()}
-              className="fb-inset inline-flex min-h-[42px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-muted"
+            <a
+              href={`https://scan.botchain.ai/address/${address}`}
+              target="_blank"
+              rel="noreferrer"
+              className="fb-surface inline-flex min-h-[46px] items-center justify-center gap-1.5 rounded-2xl px-3 text-[13px] font-black"
             >
-              <Share2 className="h-3.5 w-3.5" />
-              Share
-            </button>
+              Explorer <ExternalLink className="h-3.5 w-3.5" />
+            </a>
           </div>
 
-          <a
-            href={`https://scan.botchain.ai/address/${address}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 font-mono text-[10.5px] font-black uppercase tracking-[0.08em] text-primary"
+          <button
+            type="button"
+            onClick={() => void share()}
+            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-muted hover:text-foreground"
           >
-            View on explorer <ExternalLink className="h-3 w-3" />
-          </a>
+            <Share2 className="h-3.5 w-3.5" />
+            Share address
+          </button>
         </div>
+
+        <p className="mt-3 rounded-2xl border border-hairline px-3 py-2.5 text-[12px] font-semibold leading-relaxed text-muted">
+          Only send BOT Chain (chain ID 677) assets to this address. Tokens sent from other networks
+          without bridging will be lost.
+        </p>
       </div>
     </div>
   );
