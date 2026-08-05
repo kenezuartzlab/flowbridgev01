@@ -324,6 +324,27 @@ function RewardsPage() {
                     />
                   </ul>
 
+                  {!socialsDone && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTab("EARN");
+                        setTimeout(
+                          () => document.getElementById("social-tasks")?.scrollIntoView({ behavior: "smooth" }),
+                          80,
+                        );
+                      }}
+                      className="mt-3 flex min-h-[44px] w-full items-center justify-between gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary"
+                    >
+                      Complete social tasks
+                      <span className="tabular-nums">
+                        {(["youtube", "x", "telegram"] as const).filter((k) => incentives?.socials?.[k]).length}/3
+                      </span>
+                    </button>
+                  )}
+
+
+
                   {/* Primary claim action sits directly under the checklist */}
                   <div className="mt-4 space-y-2">
                     <button
