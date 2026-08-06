@@ -212,7 +212,6 @@ function HomePage() {
                 </Link>
               );
             })}
-            ))}
           </div>
         </section>
 
