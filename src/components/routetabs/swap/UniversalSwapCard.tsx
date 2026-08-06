@@ -626,7 +626,9 @@ export function UniversalSwapCard({
   // Total debited by FlowBridgeRouter = swap amount + protocol fee (charged on top).
   const totalDebit = parsedAmount + routerFeeOnTop(parsedAmount);
   const needsApproval = !tokenIn.isNative && parsedAmount > 0n && allowanceRaw < totalDebit;
-  const insufficient = totalDebit > inBalanceRaw;
+  // Not submittable when the amount + 0.1% fee (+ native gas reserve) exceeds balance.
+  const insufficient =
+    totalDebit > inBalanceRaw || (maxSpendableRaw > 0n && parsedAmount > maxSpendableRaw);
 
   let buttonLabel = "Swap";
   let buttonDisabled = false;
