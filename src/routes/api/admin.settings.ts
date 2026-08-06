@@ -161,7 +161,7 @@ export const Route = createFileRoute("/api/admin/settings")({
 
         const { writeSetting, buildPublicConfig } = await import("@/lib/appConfig.server");
         try {
-          for (const key of ["fees", "rewards", "flags", "social", "content", "banners", "partners"] as const) {
+          for (const key of ["fees", "rewards", "flags", "social", "content", "banners", "partners", "quickActions"] as const) {
             const value = parsed.data[key];
             if (value) await writeSetting(key, value, gate.admin.userId);
           }
