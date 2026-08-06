@@ -2009,12 +2009,27 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
               </div>
             )}
 
+            {(a.iconKind === "image" || a.iconKind === "kit") && (
+              <label className="flex items-center gap-2 text-[11px] text-[#C5C1B9]">
+                <input
+                  type="checkbox"
+                  checked={a.iconFit === "cover"}
+                  onChange={(e) => patch(i, { iconFit: e.target.checked ? "cover" : "contain" })}
+                />
+                Full-bleed artwork (fills the tile icon edge-to-edge)
+              </label>
+            )}
+
             {a.iconKind === "image" && (
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2.5">
                   <div className="h-12 w-12 shrink-0 rounded-lg border border-white/10 bg-[#010C1B] overflow-hidden flex items-center justify-center">
                     {a.imageUrl ? (
-                      <img src={a.imageUrl} alt={`${a.label} icon preview`} className="h-full w-full object-contain" />
+                      <img
+                        src={a.imageUrl}
+                        alt={`${a.label} icon preview`}
+                        className={`h-full w-full ${a.iconFit === "cover" ? "object-cover" : "object-contain"}`}
+                      />
                     ) : (
                       <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
                     )}
@@ -2046,6 +2061,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
                 />
               </div>
             )}
+
           </div>
         </div>
       ))}
