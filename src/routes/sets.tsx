@@ -533,7 +533,13 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
     setError(null);
     setSaved(false);
     try {
-      await saveAdminSettings(wallet, { fees: cfg.fees, rewards: cfg.rewards, flags: cfg.flags });
+      await saveAdminSettings(wallet, {
+        fees: cfg.fees,
+        rewards: cfg.rewards,
+        flags: cfg.flags,
+        social: cfg.social,
+        content: cfg.content,
+      });
       await loadAppConfig(true);
       setSaved(true);
     } catch (e: any) {
@@ -562,7 +568,62 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
     </div>
   );
 
+  const textField = (
+    label: string,
+    value: string,
+    onChange: (v: string) => void,
+    hint?: string,
+    placeholder?: string,
+  ) => (
+    <div className="space-y-1">
+      <div className={labelCls}>{label}</div>
+      <input
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className={inputCls}
+      />
+      {hint && <div className="text-[11px] text-[#C5C1B9]">{hint}</div>}
+    </div>
+  );
+
   const body = useMemo(() => {
+    if (tab === "social") {
+      const set = (k: keyof AppConfig["social"]) => (v: string) =>
+        setCfg({ ...cfg, social: { ...cfg.social, [k]: v } });
+      return (
+        <>
+          <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+            Used by the footer icons, social tasks and support links. Leave a field empty to hide it.
+          </div>
+          {textField("X / Twitter URL", cfg.social.x, set("x"), undefined, "https://x.com/…")}
+          {textField("Telegram URL", cfg.social.telegram, set("telegram"), undefined, "https://t.me/…")}
+          {textField("YouTube URL", cfg.social.youtube, set("youtube"), undefined, "https://youtube.com/@…")}
+          {textField("Discord URL", cfg.social.discord, set("discord"))}
+          {textField("Website URL", cfg.social.website, set("website"))}
+          {textField("Docs / Whitepaper URL", cfg.social.docs, set("docs"))}
+          {textField("Support email", cfg.social.supportEmail, set("supportEmail"))}
+        </>
+      );
+    }
+    if (tab === "content") {
+      const set = (k: keyof AppConfig["content"]) => (v: string) =>
+        setCfg({ ...cfg, content: { ...cfg.content, [k]: v } });
+      return (
+        <>
+          {textField("Brand name", cfg.content.brandName, set("brandName"))}
+          {textField("Tagline", cfg.content.tagline, set("tagline"))}
+          {textField(
+            "Announcement text (empty = hidden)",
+            cfg.content.announcement,
+            set("announcement"),
+            "Shown as a slim strip above the app content.",
+          )}
+          {textField("Announcement link", cfg.content.announcementHref, set("announcementHref"))}
+          {textField("Footer note", cfg.content.footerNote, set("footerNote"))}
+        </>
+      );
+    }
     if (tab === "fees") {
       return (
         <>
@@ -612,13 +673,24 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
         </>
       );
     }
+    const flag = (k: keyof AppConfig["flags"], label: string, hint?: string) => (
+      <Toggle
+        label={label}
+        hint={hint}
+        value={cfg.flags[k] as boolean}
+        onChange={(v) => setCfg({ ...cfg, flags: { ...cfg.flags, [k]: v } })}
+      />
+    );
     return (
       <>
-        <Toggle
-          label="Show hero banners"
-          value={cfg.flags.showBanners}
-          onChange={(v) => setCfg({ ...cfg, flags: { ...cfg.flags, showBanners: v } })}
-        />
+        {flag("showBanners", "Show hero banners")}
+        {flag("swapEnabled", "Swap enabled", "Off disables the swap action app-wide.")}
+        {flag("bridgeEnabled", "Bridge enabled", "Off disables cross-chain bridging.")}
+        {flag("showMarkets", "Show Markets section")}
+        {flag("showPartners", "Show Partners section")}
+        {flag("showGames", "Show Games section")}
+        {flag("showActivity", "Show Activity section")}
+        {flag("showAssistant", "Show AI Assistant")}
         <div className="space-y-1">
           <div className={labelCls}>Maintenance notice (empty = hidden)</div>
           <textarea
