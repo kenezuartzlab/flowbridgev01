@@ -157,6 +157,94 @@ export interface QuickAction {
   isActive?: boolean;
 }
 
+/** Pages that expose an admin-editable hero + label set. */
+export type PageKey =
+  | "home"
+  | "wallet"
+  | "rewards"
+  | "account"
+  | "markets"
+  | "partners"
+  | "activity"
+  | "swap";
+
+export const PAGE_KEYS: PageKey[] = [
+  "home",
+  "wallet",
+  "rewards",
+  "account",
+  "markets",
+  "partners",
+  "activity",
+  "swap",
+];
+
+/** Look-and-feel of a page's top hero/dashboard card. */
+export interface PageHeroSettings {
+  /** Small uppercase line above the title in the top bar / header. */
+  eyebrow?: string;
+  /** Big header title (top bar / page header). */
+  title?: string;
+  /** Optional supporting line. */
+  subtitle?: string;
+  /** Gradient override — leave blank to keep the built-in theme gradient. */
+  gradientFrom?: string | null;
+  gradientVia?: string | null;
+  gradientTo?: string | null;
+  /** Background artwork behind the whole card. */
+  backgroundImageUrl?: string | null;
+  /** 0-100 opacity of the background artwork. */
+  backgroundOpacity?: number;
+  /** Corner illustration: 3D kit asset, uploaded image, or none. */
+  artworkKind?: "kit" | "image" | "none";
+  artworkName?: string;
+  artworkUrl?: string | null;
+  /** Corner illustration size in px and 0-100 opacity. */
+  artworkSize?: number;
+  artworkOpacity?: number;
+}
+
+/** Editable hero + free-form label overrides for one page. */
+export interface PageSettings {
+  hero: PageHeroSettings;
+  /** slot key → replacement text. Unset slots keep the built-in copy. */
+  labels: Record<string, string>;
+}
+
+export type PagesSettings = Record<PageKey, PageSettings>;
+
+/** Label slots each page exposes to the control panel. */
+export const PAGE_LABEL_SLOTS: Record<PageKey, [string, string][]> = {
+  home: [
+    ["balance", "FLOW balance"],
+    ["rewardsCta", "Rewards"],
+    ["claimable", "Claimable"],
+    ["volume", "Swap volume"],
+    ["quickActions", "Quick actions"],
+    ["markets", "BOT Chain prices"],
+    ["activity", "Recent activity"],
+  ],
+  wallet: [
+    ["portfolio", "Portfolio value"],
+    ["holdings", "Holdings"],
+    ["history", "Transaction history"],
+  ],
+  rewards: [
+    ["points", "Total FLOW Points"],
+    ["available", "Available"],
+    ["pending", "Pending"],
+  ],
+  account: [
+    ["flow", "FLOW"],
+    ["play", "Play points"],
+    ["activity", "Your activity"],
+  ],
+  markets: [["heading", "Markets"]],
+  partners: [["heading", "Partners"]],
+  activity: [["heading", "Activity"]],
+  swap: [["heading", "Trade"]],
+};
+
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
@@ -166,8 +254,10 @@ export interface AppConfig {
   banners: BannerSettings;
   partners: PartnerCard[];
   quickActions: QuickAction[];
+  pages: PagesSettings;
   tokens: RemoteToken[];
 }
+
 
 
 
