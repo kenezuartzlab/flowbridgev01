@@ -118,6 +118,8 @@ const quickActionSchema = z.object({
   iconKind: z.enum(["lucide", "kit", "image"]).optional(),
   icon: z.string().trim().max(60).optional(),
   imageUrl: z.string().trim().max(500).nullable().optional(),
+  iconFit: z.enum(["contain", "cover"]).optional(),
+
   flag: z.string().trim().max(40).nullable().optional(),
   isActive: z.boolean().optional(),
 });

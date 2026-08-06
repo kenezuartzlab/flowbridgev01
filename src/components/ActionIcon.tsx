@@ -88,19 +88,26 @@ export const KIT_ICON_NAMES = Object.keys(KIT) as KitName[];
 
 export type IconKind = "lucide" | "kit" | "image";
 
+/** How artwork fills its slot: "contain" = padded, "cover" = full-bleed. */
+export type IconFit = "contain" | "cover";
+
 export function ActionIcon({
   kind = "lucide",
   name,
   imageUrl,
   className = "h-4 w-4",
   label,
+  fit = "contain",
 }: {
   kind?: IconKind;
   name?: string;
   imageUrl?: string | null;
   className?: string;
   label?: string;
+  fit?: IconFit;
 }) {
+  const objectCls = fit === "cover" ? "object-cover" : "object-contain";
+
   if (kind === "image" && imageUrl) {
     return (
       <img
@@ -109,7 +116,7 @@ export function ActionIcon({
         aria-hidden={label ? undefined : true}
         loading="lazy"
         draggable={false}
-        className={`${className} select-none object-contain`}
+        className={`${className} select-none ${objectCls}`}
       />
     );
   }
@@ -123,7 +130,7 @@ export function ActionIcon({
         aria-hidden={label ? undefined : true}
         loading="lazy"
         draggable={false}
-        className={`${className} select-none object-contain`}
+        className={`${className} select-none ${objectCls}`}
       />
     );
   }
@@ -131,3 +138,4 @@ export function ActionIcon({
   const Icon = ACTION_ICONS[(name as ActionIconName) ?? "Sparkles"] ?? Sparkles;
   return <Icon className={className} aria-hidden />;
 }
+

@@ -185,11 +185,23 @@ function HomePage() {
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {quickActions.map((a) => {
               const external = /^https?:\/\//i.test(a.to);
+              const bleed = a.iconFit === "cover" && (a.iconKind === "image" || a.iconKind === "kit");
               const inner = (
                 <>
-                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/12 text-primary">
-                    <ActionIcon kind={a.iconKind} name={a.icon} imageUrl={a.imageUrl} className="h-4 w-4" />
+                  <span
+                    className={`grid h-7 w-7 place-items-center overflow-hidden rounded-lg ${
+                      bleed ? "" : "bg-primary/12 p-0 text-primary"
+                    }`}
+                  >
+                    <ActionIcon
+                      kind={a.iconKind}
+                      name={a.icon}
+                      imageUrl={a.imageUrl}
+                      fit={a.iconFit}
+                      className={bleed ? "h-7 w-7" : "h-4 w-4"}
+                    />
                   </span>
+
                   <span className="min-w-0">
                     <span className="block truncate font-mono text-[11px] font-black uppercase tracking-[0.08em]">
                       {a.label}
