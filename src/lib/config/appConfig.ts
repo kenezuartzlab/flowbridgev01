@@ -302,7 +302,18 @@ export const DEFAULT_PARTNERS: PartnerCard[] = [
   },
 ];
 
+/** Seed Home quick actions — restored whenever an admin publishes an empty list. */
+export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
+  { id: "qa-swap", label: "Swap", hint: "Best route", to: "/", iconKind: "lucide", icon: "ArrowLeftRight", isActive: true },
+  { id: "qa-markets", label: "Markets", hint: "Live prices", to: "/markets", iconKind: "lucide", icon: "LineChart", flag: "showMarkets", isActive: true },
+  { id: "qa-partners", label: "Partners", hint: "Quests & apps", to: "/partners", iconKind: "lucide", icon: "Compass", flag: "showPartners", isActive: true },
+  { id: "qa-rewards", label: "Rewards", hint: "FLOW points", to: "/rewards", iconKind: "lucide", icon: "Gift", isActive: true },
+  { id: "qa-portal", label: "FLOW Portal", hint: "Incentive tasks", to: "/rewards", hash: "earn", iconKind: "lucide", icon: "Heart", isActive: true },
+  { id: "qa-assistant", label: "Assistant", hint: "Ask anything", to: "/assistant", iconKind: "lucide", icon: "Sparkles", flag: "showAssistant", isActive: true },
+];
+
 export const DEFAULT_APP_CONFIG: AppConfig = {
+
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
   rewards: {
     minUsd: 5,
