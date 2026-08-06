@@ -638,6 +638,71 @@ export function getQuickActions(config: AppConfig): QuickAction[] {
   );
 }
 
+/** Normalizes admin-published per-page hero/label settings. */
+export function mergePages(raw: any): PagesSettings {
+  const out = {} as PagesSettings;
+  for (const key of PAGE_KEYS) {
+    const src = raw?.[key] ?? {};
+    const fb = DEFAULT_PAGES[key];
+    const h = src.hero ?? {};
+    const kind =
+      h.artworkKind === "image" || h.artworkKind === "none" || h.artworkKind === "kit"
+        ? h.artworkKind
+        : fb.hero.artworkKind ?? "none";
+    const labels: Record<string, string> = {};
+    if (src.labels && typeof src.labels === "object") {
+      Object.entries(src.labels).forEach(([k, v]) => {
+        const text = str(v).trim();
+        if (k && text) labels[k.slice(0, 40)] = text.slice(0, 120);
+      });
+    }
+    out[key] = {
+      hero: {
+        eyebrow: str(h.eyebrow).trim() || undefined,
+        title: str(h.title).trim() || undefined,
+        subtitle: str(h.subtitle).trim() || undefined,
+        gradientFrom: str(h.gradientFrom).trim() || null,
+        gradientVia: str(h.gradientVia).trim() || null,
+        gradientTo: str(h.gradientTo).trim() || null,
+        backgroundImageUrl: str(h.backgroundImageUrl).trim() || null,
+        backgroundOpacity: Math.min(100, Math.max(0, num(h.backgroundOpacity, 35))),
+        artworkKind: kind,
+        artworkName: str(h.artworkName).trim() || fb.hero.artworkName,
+        artworkUrl: str(h.artworkUrl).trim() || null,
+        artworkSize: Math.min(320, Math.max(40, num(h.artworkSize, fb.hero.artworkSize ?? 128))),
+        artworkOpacity: Math.min(100, Math.max(0, num(h.artworkOpacity, fb.hero.artworkOpacity ?? 20))),
+      },
+      labels,
+    };
+  }
+  return out;
+}
+
+/** Resolved page settings (never undefined). */
+export function getPage(config: AppConfig, key: PageKey): PageSettings {
+  return config.pages?.[key] ?? DEFAULT_PAGES[key];
+}
+
+/** Admin label override for a slot, falling back to the built-in copy. */
+export function pageLabel(config: AppConfig, key: PageKey, slot: string, fallback: string): string {
+  const v = getPage(config, key).labels?.[slot];
+  return v && v.trim() ? v : fallback;
+}
+
+/** Inline gradient style for a hero card when the admin overrode the colors. */
+export function heroStyle(hero: PageHeroSettings): React.CSSProperties | undefined {
+  const from = hero.gradientFrom;
+  const to = hero.gradientTo;
+  if (!from && !to) return undefined;
+  const a = from || to!;
+  const b = to || from!;
+  const via = hero.gradientVia || undefined;
+  const stops = via ? `${a} 0%, ${via} 55%, ${b} 100%` : `${a} 0%, ${b} 100%`;
+  return {
+    background: `radial-gradient(120% 130% at 12% 0%, rgba(255,255,255,0.22) 0%, transparent 55%), linear-gradient(135deg, ${stops})`,
+  };
+}
+
 
 export function mergeAppConfig(partial: any): AppConfig {
   const p = partial ?? {};
