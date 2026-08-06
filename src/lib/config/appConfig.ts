@@ -136,6 +136,24 @@ export interface PartnerCard {
   campaigns?: PartnerCampaign[];
 }
 
+/** One admin-managed tile in Home → Quick actions. */
+export interface QuickAction {
+  id: string;
+  label: string;
+  hint?: string;
+  /** Internal route ("/rewards") or absolute URL. */
+  to: string;
+  /** Optional in-page hash for internal routes. */
+  hash?: string | null;
+  /** Icon source: built-in line icon, 3D asset kit, or uploaded image. */
+  iconKind?: "lucide" | "kit" | "image";
+  icon?: string;
+  imageUrl?: string | null;
+  /** Optional feature-flag key that hides the tile when disabled. */
+  flag?: string | null;
+  isActive?: boolean;
+}
+
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
@@ -144,8 +162,10 @@ export interface AppConfig {
   content: ContentSettings;
   banners: BannerSettings;
   partners: PartnerCard[];
+  quickActions: QuickAction[];
   tokens: RemoteToken[];
 }
+
 
 
 export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge", "home"];
@@ -282,7 +302,18 @@ export const DEFAULT_PARTNERS: PartnerCard[] = [
   },
 ];
 
+/** Seed Home quick actions — restored whenever an admin publishes an empty list. */
+export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
+  { id: "qa-swap", label: "Swap", hint: "Best route", to: "/", iconKind: "lucide", icon: "ArrowLeftRight", isActive: true },
+  { id: "qa-markets", label: "Markets", hint: "Live prices", to: "/markets", iconKind: "lucide", icon: "LineChart", flag: "showMarkets", isActive: true },
+  { id: "qa-partners", label: "Partners", hint: "Quests & apps", to: "/partners", iconKind: "lucide", icon: "Compass", flag: "showPartners", isActive: true },
+  { id: "qa-rewards", label: "Rewards", hint: "FLOW points", to: "/rewards", iconKind: "lucide", icon: "Gift", isActive: true },
+  { id: "qa-portal", label: "FLOW Portal", hint: "Incentive tasks", to: "/rewards", hash: "earn", iconKind: "lucide", icon: "Heart", isActive: true },
+  { id: "qa-assistant", label: "Assistant", hint: "Ask anything", to: "/assistant", iconKind: "lucide", icon: "Sparkles", flag: "showAssistant", isActive: true },
+];
+
 export const DEFAULT_APP_CONFIG: AppConfig = {
+
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
   rewards: {
     minUsd: 5,
@@ -321,6 +352,8 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   },
   banners: DEFAULT_BANNERS,
   partners: DEFAULT_PARTNERS,
+  quickActions: DEFAULT_QUICK_ACTIONS,
+
 
 
   tokens: [],
@@ -456,7 +489,40 @@ export function getPartners(config: AppConfig): PartnerCard[] {
   return (config.partners ?? DEFAULT_PARTNERS).filter((p) => p.isActive !== false);
 }
 
+/** Normalizes an admin-published quick-action list (empty list = use defaults). */
+export function mergeQuickActions(raw: any): QuickAction[] {
+  if (!Array.isArray(raw)) return DEFAULT_QUICK_ACTIONS;
+  const list = raw
+    .map((a: any, i: number): QuickAction | null => {
+      if (!a || typeof a !== "object") return null;
+      const label = str(a.label).trim();
+      const to = str(a.to ?? a.href).trim();
+      if (!label || !to) return null;
+      const kind = a.iconKind === "kit" || a.iconKind === "image" ? a.iconKind : "lucide";
+      return {
+        id: str(a.id).trim() || `qa-${i}`,
+        label,
+        hint: str(a.hint).trim() || undefined,
+        to,
+        hash: str(a.hash).trim().replace(/^#/, "") || null,
+        iconKind: kind,
+        icon: str(a.icon).trim() || undefined,
+        imageUrl: str(a.imageUrl ?? a.image_url).trim() || null,
+        flag: str(a.flag).trim() || null,
+        isActive: a.isActive !== false,
+      };
+    })
+    .filter((a: QuickAction | null): a is QuickAction => !!a);
+  return list.length ? list : DEFAULT_QUICK_ACTIONS;
+}
 
+/** Quick-action tiles visible to users (active + feature flag satisfied). */
+export function getQuickActions(config: AppConfig): QuickAction[] {
+  const list = config.quickActions?.length ? config.quickActions : DEFAULT_QUICK_ACTIONS;
+  return list.filter(
+    (a) => a.isActive !== false && (!a.flag || (config.flags as any)[a.flag] !== false),
+  );
+}
 
 
 export function mergeAppConfig(partial: any): AppConfig {
@@ -512,6 +578,8 @@ export function mergeAppConfig(partial: any): AppConfig {
 
     banners: mergeBanners(p.banners),
     partners: mergePartners(p.partners),
+    quickActions: mergeQuickActions(p.quickActions),
+
 
 
     tokens: Array.isArray(p.tokens)

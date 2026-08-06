@@ -45,6 +45,8 @@ export async function buildPublicConfig(): Promise<AppConfig> {
     content: settings.content,
     banners: settings.banners,
     partners: settings.partners,
+    quickActions: settings.quickActions,
+
     tokens: tokens.filter((t: any) => t.is_active !== false),
   });
 }

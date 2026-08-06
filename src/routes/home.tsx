@@ -22,7 +22,8 @@ import { KitIcon } from "@/components/kit/KitIcon";
 import { BannerRotator } from "@/components/banners/BannerRotator";
 import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
 import { trackBannerImpression } from "@/lib/banners/analytics";
-import { getBannerSurface, useAppConfig } from "@/lib/config/appConfig";
+import { getBannerSurface, getQuickActions, useAppConfig } from "@/lib/config/appConfig";
+import { ActionIcon } from "@/components/ActionIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
@@ -51,15 +52,6 @@ export const Route = createFileRoute("/home")({
   component: HomePage,
 });
 
-/** `flag` gates the tile against an admin feature flag when present. */
-const QUICK_ACTIONS = [
-  { to: "/", label: "Swap", hint: "Best route", Icon: ArrowLeftRight },
-  { to: "/markets", label: "Markets", hint: "Live prices", Icon: LineChart, flag: "showMarkets" },
-  { to: "/partners", label: "Partners", hint: "Quests & apps", Icon: Compass, flag: "showPartners" },
-  { to: "/rewards", label: "Rewards", hint: "FLOW points", Icon: Gift },
-  { to: "/rewards", label: "FLOW Portal", hint: "Incentive tasks", Icon: Heart, hash: "earn" },
-  { to: "/assistant", label: "Assistant", hint: "Ask anything", Icon: Sparkles, flag: "showAssistant" },
-] as const;
 
 
 function HomePage() {
@@ -67,6 +59,7 @@ function HomePage() {
   const { greeting, next: nextGreeting, canCycle } = useGreeting();
   const config = useAppConfig();
   const campaigns = useMemo(() => getBannerSurface(config, "home"), [config]);
+  const quickActions = useMemo(() => getQuickActions(config), [config]);
   const campaignSlides = config.flags.showBanners ? campaigns.slides : [];
 
   const [markets, setMarkets] = useState<MarketRow[]>([]);
@@ -190,26 +183,35 @@ function HomePage() {
         <section>
           <p className="fb-eyebrow mb-2 px-1">Quick actions</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {QUICK_ACTIONS.filter((a: any) => !a.flag || (config.flags as any)[a.flag] !== false).map(({ to, label, hint, Icon, hash }: any) => (
-              <Link
-                key={`${to}${hash ?? ""}`}
-                to={to}
-                hash={hash}
-                className="glass-card flex min-h-[76px] flex-col justify-between rounded-[var(--fb-radius-md)] p-3"
-              >
-                <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/12 text-primary">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate font-mono text-[11px] font-black uppercase tracking-[0.08em]">
-                    {label}
+            {quickActions.map((a) => {
+              const external = /^https?:\/\//i.test(a.to);
+              const inner = (
+                <>
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/12 text-primary">
+                    <ActionIcon kind={a.iconKind} name={a.icon} imageUrl={a.imageUrl} className="h-4 w-4" />
                   </span>
-                  <span className="block truncate font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
-                    {hint}
+                  <span className="min-w-0">
+                    <span className="block truncate font-mono text-[11px] font-black uppercase tracking-[0.08em]">
+                      {a.label}
+                    </span>
+                    <span className="block truncate font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+                      {a.hint}
+                    </span>
                   </span>
-                </span>
-              </Link>
-            ))}
+                </>
+              );
+              const cls =
+                "glass-card flex min-h-[76px] flex-col justify-between rounded-[var(--fb-radius-md)] p-3";
+              return external ? (
+                <a key={a.id} href={a.to} target="_blank" rel="noreferrer" className={cls}>
+                  {inner}
+                </a>
+              ) : (
+                <Link key={a.id} to={a.to} hash={a.hash ?? undefined} className={cls}>
+                  {inner}
+                </Link>
+              );
+            })}
           </div>
         </section>
 
