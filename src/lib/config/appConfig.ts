@@ -511,9 +511,11 @@ export function mergeQuickActions(raw: any): QuickAction[] {
         iconKind: kind,
         icon: str(a.icon).trim() || undefined,
         imageUrl: str(a.imageUrl ?? a.image_url).trim() || null,
+        iconFit: (a.iconFit ?? a.icon_fit) === "cover" ? "cover" : "contain",
         flag: str(a.flag).trim() || null,
         isActive: a.isActive !== false,
       };
+
     })
     .filter((a: QuickAction | null): a is QuickAction => !!a);
   return list.length ? list : DEFAULT_QUICK_ACTIONS;
