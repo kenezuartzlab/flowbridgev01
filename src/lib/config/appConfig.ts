@@ -463,6 +463,8 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   banners: DEFAULT_BANNERS,
   partners: DEFAULT_PARTNERS,
   quickActions: DEFAULT_QUICK_ACTIONS,
+  pages: DEFAULT_PAGES,
+
 
 
 
