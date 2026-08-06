@@ -1969,6 +1969,21 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
               ))}
             </div>
 
+            {(a.iconKind === "image" || a.iconKind === "kit") && (
+              <div className="rounded-xl border border-[#32FF8B]/25 bg-[#32FF8B]/[0.06] p-2.5">
+                <Toggle
+                  label={
+                    a.iconFit === "cover"
+                      ? "Full-bleed artwork — fills the tile edge-to-edge"
+                      : "Padded artwork — small icon inside a background"
+                  }
+                  value={a.iconFit === "cover"}
+                  onChange={(v) => patch(i, { iconFit: v ? "cover" : "contain" })}
+                />
+              </div>
+            )}
+
+
             {(a.iconKind ?? "lucide") === "lucide" && (
               <div className="grid grid-cols-8 gap-1.5">
                 {ACTION_ICON_NAMES.map((name) => (
