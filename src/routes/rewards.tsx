@@ -17,6 +17,8 @@ import {
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { KitIcon } from "@/components/kit/KitIcon";
+import { HeroCard } from "@/components/layout/HeroCard";
+import { getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { TabBanner } from "@/components/banners/TabBanner";
 import giftArt from "@/assets/gift-1.png.asset.json";
@@ -149,7 +151,9 @@ function RewardsPage() {
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        <h1 className="font-mono text-[13px] font-black uppercase tracking-[0.12em]">FLOW Rewards</h1>
+        <h1 className="font-mono text-[13px] font-black uppercase tracking-[0.12em]">
+          {page.hero.title || "FLOW Rewards"}
+        </h1>
         <button
           onClick={() => void refresh()}
           className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg border border-hairline text-muted hover:text-foreground"
@@ -174,18 +178,9 @@ function RewardsPage() {
         ) : (
           <div className="space-y-4">
             {/* Points hero + level progress */}
-            <section className="fb-hero fb-hero-rewards p-5">
-              <KitIcon
-                name="trophy"
-                size={128}
-                className="pointer-events-none absolute -right-5 -top-6 opacity-20"
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -bottom-16 -left-12 h-44 w-44 rounded-full bg-white/10 blur-2xl"
-              />
+            <HeroCard hero={page.hero} variant="rewards" className="p-5">
               <p className="relative font-mono text-[10px] font-black uppercase tracking-[0.16em] opacity-80">
-                Total FLOW Points
+                {L("points", "Total FLOW Points")}
               </p>
               <p className="relative mt-1 text-[44px] font-black leading-none tabular-nums">
                 {lifetime.toLocaleString()}
@@ -210,19 +205,19 @@ function RewardsPage() {
                   />
                 </div>
               </div>
-            </section>
+            </HeroCard>
 
 
             {/* Stat tiles */}
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <OverviewTile
-                label="Available"
+                label={L("available", "Available")}
                 value={(incentives?.claimableTotal ?? 0).toLocaleString()}
                 unit="FLOW"
                 accent
               />
               <OverviewTile
-                label="Pending"
+                label={L("pending", "Pending")}
                 value={(incentives?.signupLocked ?? 0).toLocaleString()}
                 unit="locked"
               />
