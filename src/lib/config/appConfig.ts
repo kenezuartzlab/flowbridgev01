@@ -3,6 +3,7 @@
 // Defaults mirror the previous hardcoded values so behaviour never regresses
 // when the backend is unreachable.
 import { useEffect, useState } from "react";
+import { setLogoOverrides } from "@/lib/tokenLogos";
 
 export interface FeeSettings {
   defaultSlippagePct: number;
@@ -23,7 +24,37 @@ export interface RewardSettings {
 export interface FlagSettings {
   showBanners: boolean;
   maintenanceNotice: string;
+  /** Surface toggles — hide sections app-wide without a code change. */
+  showMarkets: boolean;
+  showPartners: boolean;
+  showGames: boolean;
+  showAssistant: boolean;
+  showActivity: boolean;
+  /** Global kill switches for the trade surfaces. */
+  swapEnabled: boolean;
+  bridgeEnabled: boolean;
 }
+
+/** Public brand/social links surfaced in the footer, tasks and partner pages. */
+export interface SocialSettings {
+  x: string;
+  telegram: string;
+  youtube: string;
+  discord: string;
+  website: string;
+  docs: string;
+  supportEmail: string;
+}
+
+/** Editable marketing copy so headline text isn't hardcoded. */
+export interface ContentSettings {
+  brandName: string;
+  tagline: string;
+  announcement: string;
+  announcementHref: string;
+  footerNote: string;
+}
+
 
 export interface RemoteToken {
   id?: string;
@@ -109,10 +140,13 @@ export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
   flags: FlagSettings;
+  social: SocialSettings;
+  content: ContentSettings;
   banners: BannerSettings;
   partners: PartnerCard[];
   tokens: RemoteToken[];
 }
+
 
 export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge", "home"];
 
@@ -258,9 +292,36 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     claimThreshold: 1000,
     referralActivityPct: 20,
   },
-  flags: { showBanners: true, maintenanceNotice: "" },
+  flags: {
+    showBanners: true,
+    maintenanceNotice: "",
+    showMarkets: true,
+    showPartners: true,
+    showGames: true,
+    showAssistant: true,
+    showActivity: true,
+    swapEnabled: true,
+    bridgeEnabled: true,
+  },
+  social: {
+    x: "https://x.com/flowbridgeweb3",
+    telegram: "https://t.me/flowbridgeweb3",
+    youtube: "https://youtube.com/@flowbridgeweb3",
+    discord: "",
+    website: "https://flowbridge.space",
+    docs: "",
+    supportEmail: "",
+  },
+  content: {
+    brandName: "FlowBridge",
+    tagline: "Swap on BOT Chain, bridge USDT across chains, earn FLOW.",
+    announcement: "",
+    announcementHref: "",
+    footerNote: "ⓒ 2026 FlowBridge. Built by Kenezu",
+  },
   banners: DEFAULT_BANNERS,
   partners: DEFAULT_PARTNERS,
+
 
   tokens: [],
 
@@ -423,8 +484,32 @@ export function mergeAppConfig(partial: any): AppConfig {
     },
     flags: {
       showBanners: p.flags?.showBanners !== false,
-      maintenanceNotice: typeof p.flags?.maintenanceNotice === "string" ? p.flags.maintenanceNotice : "",
+      maintenanceNotice: str(p.flags?.maintenanceNotice),
+      showMarkets: p.flags?.showMarkets !== false,
+      showPartners: p.flags?.showPartners !== false,
+      showGames: p.flags?.showGames !== false,
+      showAssistant: p.flags?.showAssistant !== false,
+      showActivity: p.flags?.showActivity !== false,
+      swapEnabled: p.flags?.swapEnabled !== false,
+      bridgeEnabled: p.flags?.bridgeEnabled !== false,
     },
+    social: {
+      x: str(p.social?.x, d.social.x),
+      telegram: str(p.social?.telegram, d.social.telegram),
+      youtube: str(p.social?.youtube, d.social.youtube),
+      discord: str(p.social?.discord, d.social.discord),
+      website: str(p.social?.website, d.social.website),
+      docs: str(p.social?.docs, d.social.docs),
+      supportEmail: str(p.social?.supportEmail, d.social.supportEmail),
+    },
+    content: {
+      brandName: str(p.content?.brandName, d.content.brandName) || d.content.brandName,
+      tagline: str(p.content?.tagline, d.content.tagline),
+      announcement: str(p.content?.announcement),
+      announcementHref: str(p.content?.announcementHref),
+      footerNote: str(p.content?.footerNote, d.content.footerNote),
+    },
+
     banners: mergeBanners(p.banners),
     partners: mergePartners(p.partners),
 
@@ -459,6 +544,12 @@ export function getAppConfig(): AppConfig {
 
 export function setAppConfig(next: AppConfig) {
   current = next;
+  // Feed admin-published token artwork into the shared logo resolver.
+  const map: Record<string, string> = {};
+  next.tokens.forEach((t) => {
+    if (t.logoUrl) map[t.symbol.trim().toLowerCase()] = t.logoUrl;
+  });
+  setLogoOverrides(map);
   listeners.forEach((l) => l(current));
 }
 

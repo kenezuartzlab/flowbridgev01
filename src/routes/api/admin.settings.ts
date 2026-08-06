@@ -19,6 +19,31 @@ const rewardsSchema = z.object({
 const flagsSchema = z.object({
   showBanners: z.boolean(),
   maintenanceNotice: z.string().trim().max(300),
+  showMarkets: z.boolean().optional(),
+  showPartners: z.boolean().optional(),
+  showGames: z.boolean().optional(),
+  showAssistant: z.boolean().optional(),
+  showActivity: z.boolean().optional(),
+  swapEnabled: z.boolean().optional(),
+  bridgeEnabled: z.boolean().optional(),
+});
+
+const socialSchema = z.object({
+  x: z.string().trim().max(300),
+  telegram: z.string().trim().max(300),
+  youtube: z.string().trim().max(300),
+  discord: z.string().trim().max(300),
+  website: z.string().trim().max(300),
+  docs: z.string().trim().max(300),
+  supportEmail: z.string().trim().max(200),
+});
+
+const contentSchema = z.object({
+  brandName: z.string().trim().min(1).max(40),
+  tagline: z.string().trim().max(200),
+  announcement: z.string().trim().max(300),
+  announcementHref: z.string().trim().max(300),
+  footerNote: z.string().trim().max(160),
 });
 
 const scheduleSchema = z
@@ -88,6 +113,8 @@ const bodySchema = z.object({
   fees: feesSchema.optional(),
   rewards: rewardsSchema.optional(),
   flags: flagsSchema.optional(),
+  social: socialSchema.optional(),
+  content: contentSchema.optional(),
   banners: bannersSchema.optional(),
   partners: z.array(partnerSchema).max(40).optional(),
 });
@@ -119,7 +146,7 @@ export const Route = createFileRoute("/api/admin/settings")({
 
         const { writeSetting, buildPublicConfig } = await import("@/lib/appConfig.server");
         try {
-          for (const key of ["fees", "rewards", "flags", "banners", "partners"] as const) {
+          for (const key of ["fees", "rewards", "flags", "social", "content", "banners", "partners"] as const) {
             const value = parsed.data[key];
             if (value) await writeSetting(key, value, gate.admin.userId);
           }

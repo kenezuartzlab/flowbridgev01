@@ -56,16 +56,29 @@ export function normalizeSymbol(symbol: string) {
   return (symbol || "").trim().toLowerCase();
 }
 
+/**
+ * Admin-published logo URLs, keyed by lowercase symbol. Populated from the
+ * runtime app config so admins can add or replace artwork without a deploy.
+ */
+let overrides: Record<string, string> = {};
+
+export function setLogoOverrides(map: Record<string, string>) {
+  overrides = map;
+}
+
 /** Ordered list of candidate image URLs for a symbol (may be empty). */
 export function logoCandidates(symbol: string): string[] {
   const key = normalizeSymbol(symbol);
   const out: string[] = [];
+  const override = overrides[key];
+  if (override) out.push(override);
   const local = LOCAL_LOGOS[key];
   if (local) out.push(local.png, local.svg);
   const slug = REMOTE_SLUGS[key];
   if (slug) out.push(`${CDN}/${slug}.svg`);
   return out;
 }
+
 
 export function hasKnownLogo(symbol: string) {
   return logoCandidates(symbol).length > 0;
