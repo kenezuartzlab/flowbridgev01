@@ -2024,16 +2024,8 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
               </div>
             )}
 
-            {(a.iconKind === "image" || a.iconKind === "kit") && (
-              <label className="flex items-center gap-2 text-[11px] text-[#C5C1B9]">
-                <input
-                  type="checkbox"
-                  checked={a.iconFit === "cover"}
-                  onChange={(e) => patch(i, { iconFit: e.target.checked ? "cover" : "contain" })}
-                />
-                Full-bleed artwork (fills the tile icon edge-to-edge)
-              </label>
-            )}
+
+
 
             {a.iconKind === "image" && (
               <div className="space-y-1.5">
