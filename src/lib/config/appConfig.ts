@@ -489,7 +489,40 @@ export function getPartners(config: AppConfig): PartnerCard[] {
   return (config.partners ?? DEFAULT_PARTNERS).filter((p) => p.isActive !== false);
 }
 
+/** Normalizes an admin-published quick-action list (empty list = use defaults). */
+export function mergeQuickActions(raw: any): QuickAction[] {
+  if (!Array.isArray(raw)) return DEFAULT_QUICK_ACTIONS;
+  const list = raw
+    .map((a: any, i: number): QuickAction | null => {
+      if (!a || typeof a !== "object") return null;
+      const label = str(a.label).trim();
+      const to = str(a.to ?? a.href).trim();
+      if (!label || !to) return null;
+      const kind = a.iconKind === "kit" || a.iconKind === "image" ? a.iconKind : "lucide";
+      return {
+        id: str(a.id).trim() || `qa-${i}`,
+        label,
+        hint: str(a.hint).trim() || undefined,
+        to,
+        hash: str(a.hash).trim().replace(/^#/, "") || null,
+        iconKind: kind,
+        icon: str(a.icon).trim() || undefined,
+        imageUrl: str(a.imageUrl ?? a.image_url).trim() || null,
+        flag: str(a.flag).trim() || null,
+        isActive: a.isActive !== false,
+      };
+    })
+    .filter((a: QuickAction | null): a is QuickAction => !!a);
+  return list.length ? list : DEFAULT_QUICK_ACTIONS;
+}
 
+/** Quick-action tiles visible to users (active + feature flag satisfied). */
+export function getQuickActions(config: AppConfig): QuickAction[] {
+  const list = config.quickActions?.length ? config.quickActions : DEFAULT_QUICK_ACTIONS;
+  return list.filter(
+    (a) => a.isActive !== false && (!a.flag || (config.flags as any)[a.flag] !== false),
+  );
+}
 
 
 export function mergeAppConfig(partial: any): AppConfig {
