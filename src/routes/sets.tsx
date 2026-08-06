@@ -1750,3 +1750,314 @@ function PartnersPanel({ wallet }: { wallet: string }) {
     </div>
   );
 }
+
+/* ---------------------------- Quick actions ---------------------------- */
+
+const FLAG_OPTIONS: [string, string][] = [
+  ["", "Always visible"],
+  ["showMarkets", "Markets flag"],
+  ["showPartners", "Partners flag"],
+  ["showGames", "Games flag"],
+  ["showAssistant", "Assistant flag"],
+  ["showActivity", "Activity flag"],
+];
+
+function QuickActionsPanel({ wallet }: { wallet: string }) {
+  const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState<number | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetchAdminConfig(wallet)
+      .then((c) => alive && setCfg(c))
+      .catch((e) => alive && setError(e?.message ?? "Failed to load quick actions"))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [wallet]);
+
+  const actions = cfg.quickActions ?? [];
+  const patchList = (next: QuickAction[]) => setCfg({ ...cfg, quickActions: next });
+  const patch = (i: number, next: Partial<QuickAction>) =>
+    patchList(actions.map((a, idx) => (idx === i ? { ...a, ...next } : a)));
+
+  const add = () =>
+    patchList([
+      ...actions,
+      {
+        id: `qa-${Date.now()}`,
+        label: "New tile",
+        hint: "",
+        to: "/",
+        hash: null,
+        iconKind: "lucide",
+        icon: "Sparkles",
+        imageUrl: null,
+        flag: null,
+        isActive: true,
+      },
+    ]);
+
+  const remove = (i: number) => patchList(actions.filter((_, idx) => idx !== i));
+
+  const move = (i: number, dir: -1 | 1) => {
+    const next = [...actions];
+    const to = i + dir;
+    if (to < 0 || to >= next.length) return;
+    [next[i], next[to]] = [next[to], next[i]];
+    patchList(next);
+  };
+
+  const upload = async (i: number, file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    if (file.size > 2_000_000) {
+      setError("Image is larger than 2 MB — please compress it first.");
+      return;
+    }
+    setUploading(i);
+    try {
+      const { url } = await uploadBannerImage(wallet, file);
+      patch(i, { imageUrl: url, iconKind: "image" });
+    } catch (e: any) {
+      setError(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await saveAdminSettings(wallet, { quickActions: actions });
+      await loadAppConfig(true);
+      setSaved(true);
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to save quick actions");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className={cardCls}>Loading quick actions…</div>;
+
+  return (
+    <div className="space-y-4">
+      <div className={cardCls}>
+        <span className={labelCls}>Home quick actions</span>
+        <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+          Tiles render left-to-right under the Home balance card. Pick a built-in icon, a 3D kit
+          illustration, or upload your own logo. Publishing an empty list restores the defaults.
+        </div>
+        {/* Live preview of the tile grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          {actions
+            .filter((a) => a.isActive !== false)
+            .map((a) => (
+              <div
+                key={a.id}
+                className="rounded-xl border border-white/10 bg-[#010C1B] p-2.5 min-h-[70px] flex flex-col justify-between"
+              >
+                <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#32FF8B]/12 text-[#32FF8B]">
+                  <ActionIcon kind={a.iconKind} name={a.icon} imageUrl={a.imageUrl} className="h-4 w-4" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-white text-[11px] font-black uppercase tracking-widest">
+                    {a.label}
+                  </span>
+                  <span className="block truncate text-[9.5px] uppercase tracking-widest text-[#C5C1B9]">
+                    {a.hint}
+                  </span>
+                </span>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {actions.map((a, i) => (
+        <div key={a.id} className={cardCls}>
+          <div className="flex items-center justify-between">
+            <span className={labelCls}>
+              {i + 1} · {a.label || "Untitled"}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button type="button" onClick={() => move(i, -1)} className={btnGhost} aria-label="Move up">
+                ↑
+              </button>
+              <button type="button" onClick={() => move(i, 1)} className={btnGhost} aria-label="Move down">
+                ↓
+              </button>
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                className="p-2 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 cursor-pointer hover:bg-red-500/20"
+                aria-label={`Remove ${a.label}`}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <div className={labelCls}>Label</div>
+              <input value={a.label} maxLength={24} onChange={(e) => patch(i, { label: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Hint (small text)</div>
+              <input value={a.hint ?? ""} maxLength={40} onChange={(e) => patch(i, { hint: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Link (route or URL)</div>
+              <input value={a.to} placeholder="/rewards or https://…" onChange={(e) => patch(i, { to: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Hash (optional)</div>
+              <input value={a.hash ?? ""} placeholder="earn" onChange={(e) => patch(i, { hash: e.target.value })} className={inputCls} />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Visibility flag</div>
+              <select
+                value={a.flag ?? ""}
+                onChange={(e) => patch(i, { flag: e.target.value || null })}
+                className={inputCls}
+              >
+                {FLAG_OPTIONS.map(([v, label]) => (
+                  <option key={v} value={v}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Toggle
+              label={a.isActive !== false ? "Visible on Home" : "Hidden"}
+              value={a.isActive !== false}
+              onChange={(v) => patch(i, { isActive: v })}
+            />
+          </div>
+
+          {/* Icon source */}
+          <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+            <span className={labelCls}>Icon</span>
+            <div className="flex flex-wrap gap-1.5">
+              {(["lucide", "kit", "image"] as const).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => patch(i, { iconKind: k })}
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
+                    (a.iconKind ?? "lucide") === k
+                      ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                      : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                  }`}
+                >
+                  {k === "lucide" ? "Icon library" : k === "kit" ? "3D kit" : "Upload"}
+                </button>
+              ))}
+            </div>
+
+            {(a.iconKind ?? "lucide") === "lucide" && (
+              <div className="grid grid-cols-8 gap-1.5">
+                {ACTION_ICON_NAMES.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    title={name}
+                    onClick={() => patch(i, { icon: name })}
+                    className={`grid place-items-center h-9 rounded-lg cursor-pointer transition ${
+                      a.icon === name
+                        ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                        : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                    }`}
+                  >
+                    <ActionIcon kind="lucide" name={name} className="h-4 w-4" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {a.iconKind === "kit" && (
+              <div className="grid grid-cols-8 gap-1.5">
+                {KIT_ICON_NAMES.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    title={name}
+                    onClick={() => patch(i, { icon: name })}
+                    className={`grid place-items-center h-9 rounded-lg cursor-pointer transition ${
+                      a.icon === name
+                        ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40"
+                        : "bg-white/5 border border-white/10 hover:bg-white/10"
+                    }`}
+                  >
+                    <ActionIcon kind="kit" name={name} className="h-6 w-6" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {a.iconKind === "image" && (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-12 w-12 shrink-0 rounded-lg border border-white/10 bg-[#010C1B] overflow-hidden flex items-center justify-center">
+                    {a.imageUrl ? (
+                      <img src={a.imageUrl} alt={`${a.label} icon preview`} className="h-full w-full object-contain" />
+                    ) : (
+                      <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+                    )}
+                  </div>
+                  <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
+                    {uploading === i ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    {uploading === i ? "Uploading…" : "Upload icon"}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                      className="hidden"
+                      onChange={(e) => {
+                        void upload(i, e.target.files?.[0]);
+                        e.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                  {a.imageUrl && (
+                    <button type="button" onClick={() => patch(i, { imageUrl: "" })} className={btnGhost}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <input
+                  value={a.imageUrl ?? ""}
+                  placeholder="…or paste an image URL"
+                  onChange={(e) => patch(i, { imageUrl: e.target.value })}
+                  className={inputCls}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+
+      <div className={`${cardCls} flex flex-wrap items-center gap-2`}>
+        <button type="button" onClick={add} className={`${btnGhost} inline-flex items-center gap-1.5`}>
+          <Plus className="w-3.5 h-3.5" /> Add tile
+        </button>
+        {error && <span className="text-red-400 text-[11px]">{error}</span>}
+        {saved && (
+          <span className="inline-flex items-center gap-1 text-[#32FF8B] text-[11px] font-black uppercase tracking-widest">
+            <Check className="w-3.5 h-3.5" /> Published
+          </span>
+        )}
+        <button type="button" onClick={save} disabled={saving} className={btnPrimary}>
+          {saving ? "Saving…" : "Save quick actions"}
+        </button>
+      </div>
+    </div>
+  );
+}
