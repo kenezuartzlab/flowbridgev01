@@ -161,7 +161,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
 
       {!readOnly && clamped && (
         <p className="text-[11px] font-mono leading-snug text-[#FFC46B]">
-          Amount capped to your spendable balance ({maxNum.toFixed(6)} {symbol}).
+          Preview only — above your spendable balance. Max swappable is {maxNum.toFixed(6)} {symbol} (0.1% fee taken on top). Tap MAX to fill it.
         </p>
       )}
     </div>
