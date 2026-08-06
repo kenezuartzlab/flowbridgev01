@@ -2,7 +2,7 @@
 // Client-safe: reads the public /api/config endpoint and caches it in-module.
 // Defaults mirror the previous hardcoded values so behaviour never regresses
 // when the backend is unreachable.
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { setLogoOverrides } from "@/lib/tokenLogos";
 
 export interface FeeSettings {
@@ -157,6 +157,94 @@ export interface QuickAction {
   isActive?: boolean;
 }
 
+/** Pages that expose an admin-editable hero + label set. */
+export type PageKey =
+  | "home"
+  | "wallet"
+  | "rewards"
+  | "account"
+  | "markets"
+  | "partners"
+  | "activity"
+  | "swap";
+
+export const PAGE_KEYS: PageKey[] = [
+  "home",
+  "wallet",
+  "rewards",
+  "account",
+  "markets",
+  "partners",
+  "activity",
+  "swap",
+];
+
+/** Look-and-feel of a page's top hero/dashboard card. */
+export interface PageHeroSettings {
+  /** Small uppercase line above the title in the top bar / header. */
+  eyebrow?: string;
+  /** Big header title (top bar / page header). */
+  title?: string;
+  /** Optional supporting line. */
+  subtitle?: string;
+  /** Gradient override — leave blank to keep the built-in theme gradient. */
+  gradientFrom?: string | null;
+  gradientVia?: string | null;
+  gradientTo?: string | null;
+  /** Background artwork behind the whole card. */
+  backgroundImageUrl?: string | null;
+  /** 0-100 opacity of the background artwork. */
+  backgroundOpacity?: number;
+  /** Corner illustration: 3D kit asset, uploaded image, or none. */
+  artworkKind?: "kit" | "image" | "none";
+  artworkName?: string;
+  artworkUrl?: string | null;
+  /** Corner illustration size in px and 0-100 opacity. */
+  artworkSize?: number;
+  artworkOpacity?: number;
+}
+
+/** Editable hero + free-form label overrides for one page. */
+export interface PageSettings {
+  hero: PageHeroSettings;
+  /** slot key → replacement text. Unset slots keep the built-in copy. */
+  labels: Record<string, string>;
+}
+
+export type PagesSettings = Record<PageKey, PageSettings>;
+
+/** Label slots each page exposes to the control panel. */
+export const PAGE_LABEL_SLOTS: Record<PageKey, [string, string][]> = {
+  home: [
+    ["balance", "FLOW balance"],
+    ["rewardsCta", "Rewards"],
+    ["claimable", "Claimable"],
+    ["volume", "Swap volume"],
+    ["quickActions", "Quick actions"],
+    ["markets", "BOT Chain prices"],
+    ["activity", "Recent activity"],
+  ],
+  wallet: [
+    ["portfolio", "Portfolio value"],
+    ["holdings", "Holdings"],
+    ["history", "Transaction history"],
+  ],
+  rewards: [
+    ["points", "Total FLOW Points"],
+    ["available", "Available"],
+    ["pending", "Pending"],
+  ],
+  account: [
+    ["flow", "FLOW"],
+    ["play", "Play points"],
+    ["activity", "Your activity"],
+  ],
+  markets: [["heading", "Markets"]],
+  partners: [["heading", "Partners"]],
+  activity: [["heading", "Activity"]],
+  swap: [["heading", "Trade"]],
+};
+
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
@@ -166,8 +254,10 @@ export interface AppConfig {
   banners: BannerSettings;
   partners: PartnerCard[];
   quickActions: QuickAction[];
+  pages: PagesSettings;
   tokens: RemoteToken[];
 }
+
 
 
 
@@ -315,7 +405,24 @@ export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
   { id: "qa-assistant", label: "Assistant", hint: "Ask anything", to: "/assistant", iconKind: "lucide", icon: "Sparkles", flag: "showAssistant", isActive: true },
 ];
 
+function emptyPage(hero: PageHeroSettings = {}): PageSettings {
+  return { hero, labels: {} };
+}
+
+/** Seed page themes — mirror the current hardcoded hero artwork. */
+export const DEFAULT_PAGES: PagesSettings = {
+  home: emptyPage({ artworkKind: "kit", artworkName: "flowbridge", artworkSize: 132, artworkOpacity: 20 }),
+  wallet: emptyPage({ artworkKind: "kit", artworkName: "vault", artworkSize: 130, artworkOpacity: 20 }),
+  rewards: emptyPage({ artworkKind: "kit", artworkName: "trophy", artworkSize: 128, artworkOpacity: 20 }),
+  account: emptyPage({ artworkKind: "none", artworkSize: 120, artworkOpacity: 20 }),
+  markets: emptyPage(),
+  partners: emptyPage(),
+  activity: emptyPage(),
+  swap: emptyPage(),
+};
+
 export const DEFAULT_APP_CONFIG: AppConfig = {
+
 
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
   rewards: {
@@ -356,6 +463,8 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   banners: DEFAULT_BANNERS,
   partners: DEFAULT_PARTNERS,
   quickActions: DEFAULT_QUICK_ACTIONS,
+  pages: DEFAULT_PAGES,
+
 
 
 
@@ -529,6 +638,71 @@ export function getQuickActions(config: AppConfig): QuickAction[] {
   );
 }
 
+/** Normalizes admin-published per-page hero/label settings. */
+export function mergePages(raw: any): PagesSettings {
+  const out = {} as PagesSettings;
+  for (const key of PAGE_KEYS) {
+    const src = raw?.[key] ?? {};
+    const fb = DEFAULT_PAGES[key];
+    const h = src.hero ?? {};
+    const kind =
+      h.artworkKind === "image" || h.artworkKind === "none" || h.artworkKind === "kit"
+        ? h.artworkKind
+        : fb.hero.artworkKind ?? "none";
+    const labels: Record<string, string> = {};
+    if (src.labels && typeof src.labels === "object") {
+      Object.entries(src.labels).forEach(([k, v]) => {
+        const text = str(v).trim();
+        if (k && text) labels[k.slice(0, 40)] = text.slice(0, 120);
+      });
+    }
+    out[key] = {
+      hero: {
+        eyebrow: str(h.eyebrow).trim() || undefined,
+        title: str(h.title).trim() || undefined,
+        subtitle: str(h.subtitle).trim() || undefined,
+        gradientFrom: str(h.gradientFrom).trim() || null,
+        gradientVia: str(h.gradientVia).trim() || null,
+        gradientTo: str(h.gradientTo).trim() || null,
+        backgroundImageUrl: str(h.backgroundImageUrl).trim() || null,
+        backgroundOpacity: Math.min(100, Math.max(0, num(h.backgroundOpacity, 35))),
+        artworkKind: kind,
+        artworkName: str(h.artworkName).trim() || fb.hero.artworkName,
+        artworkUrl: str(h.artworkUrl).trim() || null,
+        artworkSize: Math.min(320, Math.max(40, num(h.artworkSize, fb.hero.artworkSize ?? 128))),
+        artworkOpacity: Math.min(100, Math.max(0, num(h.artworkOpacity, fb.hero.artworkOpacity ?? 20))),
+      },
+      labels,
+    };
+  }
+  return out;
+}
+
+/** Resolved page settings (never undefined). */
+export function getPage(config: AppConfig, key: PageKey): PageSettings {
+  return config.pages?.[key] ?? DEFAULT_PAGES[key];
+}
+
+/** Admin label override for a slot, falling back to the built-in copy. */
+export function pageLabel(config: AppConfig, key: PageKey, slot: string, fallback: string): string {
+  const v = getPage(config, key).labels?.[slot];
+  return v && v.trim() ? v : fallback;
+}
+
+/** Inline gradient style for a hero card when the admin overrode the colors. */
+export function heroStyle(hero: PageHeroSettings): CSSProperties | undefined {
+  const from = hero.gradientFrom;
+  const to = hero.gradientTo;
+  if (!from && !to) return undefined;
+  const a = from || to!;
+  const b = to || from!;
+  const via = hero.gradientVia || undefined;
+  const stops = via ? `${a} 0%, ${via} 55%, ${b} 100%` : `${a} 0%, ${b} 100%`;
+  return {
+    background: `radial-gradient(120% 130% at 12% 0%, rgba(255,255,255,0.22) 0%, transparent 55%), linear-gradient(135deg, ${stops})`,
+  };
+}
+
 
 export function mergeAppConfig(partial: any): AppConfig {
   const p = partial ?? {};
@@ -584,6 +758,7 @@ export function mergeAppConfig(partial: any): AppConfig {
     banners: mergeBanners(p.banners),
     partners: mergePartners(p.partners),
     quickActions: mergeQuickActions(p.quickActions),
+    pages: mergePages(p.pages),
 
 
 

@@ -15,6 +15,8 @@ import {
 import { wagmiConfig } from "@/lib/wagmi";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { AppTopBar } from "@/components/layout/AppTopBar";
+import { HeroCard } from "@/components/layout/HeroCard";
+import { getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
 import { KitIcon } from "@/components/kit/KitIcon";
@@ -193,11 +195,18 @@ function WalletPage() {
 
   const recent = useMemo(() => filtered.slice(0, 12), [filtered]);
 
+  const config = useAppConfig();
+  const page = getPage(config, "wallet");
+  const L = (slot: string, fallback: string) => pageLabel(config, "wallet", slot, fallback);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppTopBar
-        eyebrow={isConnected ? (detected ? detected.eyebrow : "Unsupported network") : "Multi-chain wallet"}
-        title="Wallet"
+        eyebrow={
+          page.hero.eyebrow ||
+          (isConnected ? (detected ? detected.eyebrow : "Unsupported network") : "Multi-chain wallet")
+        }
+        title={page.hero.title || "Wallet"}
         avatar={user?.photoURL ?? null}
         initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
         actions={
@@ -217,19 +226,10 @@ function WalletPage() {
       />
 
       <main className="mx-auto max-w-2xl space-y-4 p-3 pb-24 sm:p-4">
-        <section className="fb-hero fb-hero-wallet p-5">
-          <KitIcon
-            name="vault"
-            size={130}
-            className="pointer-events-none absolute -right-6 -top-7 opacity-20"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -bottom-16 -left-12 h-44 w-44 rounded-full bg-white/10 blur-2xl"
-          />
+        <HeroCard hero={page.hero} variant="wallet" className="p-5">
           <div className="relative flex items-center justify-between gap-2">
             <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
-              Portfolio value · {network.label}
+              {L("portfolio", "Portfolio value")} · {network.label}
             </p>
             {isConnected && portfolio && !loading && (
               <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] opacity-75">
@@ -347,11 +347,11 @@ function WalletPage() {
               automatically and shows those balances here.
             </p>
           )}
-        </section>
+        </HeroCard>
 
         <section className="fb-surface overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
-            <p className="fb-eyebrow">Holdings · {network.label}</p>
+            <p className="fb-eyebrow">{L("holdings", "Holdings")} · {network.label}</p>
             <Link
               to="/markets"
               className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary"
@@ -412,7 +412,7 @@ function WalletPage() {
 
         <section className="fb-surface overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
-            <p className="fb-eyebrow">Transaction history</p>
+            <p className="fb-eyebrow">{L("history", "Transaction history")}</p>
             <Link
               to="/activity"
               className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary"

@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { HeroCard } from "@/components/layout/HeroCard";
+import { getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
 import { KitIcon } from "@/components/kit/KitIcon";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { ProfileEditModal } from "@/components/account/ProfileEditModal";
@@ -81,6 +83,9 @@ function AccountPage() {
   const toggleTheme = () => setTheme();
 
   const flow = Number(incentives?.flowPoints ?? 0);
+  const config = useAppConfig();
+  const page = getPage(config, "account");
+  const L = (slot: string, fallback: string) => pageLabel(config, "account", slot, fallback);
   const displayName = user?.displayName || user?.name || user?.email?.split("@")[0] || "Guest";
   const initial = displayName.slice(0, 1).toUpperCase();
   const avatar = user?.photoURL || user?.avatar_url || null;
@@ -109,15 +114,11 @@ function AccountPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PageHeader title="Account" subtitle="Profile & settings" />
+      <PageHeader title={page.hero.title || "Account"} subtitle={page.hero.subtitle || "Profile & settings"} />
 
       <main className="mx-auto max-w-2xl space-y-3 p-3 sm:p-4">
         {/* Profile card */}
-        <section className="fb-hero fb-hero-account p-5">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -bottom-16 -right-10 h-44 w-44 rounded-full bg-white/10 blur-2xl"
-          />
+        <HeroCard hero={page.hero} variant="account" className="p-5">
           <div className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
             {avatar ? (
               <img
@@ -151,7 +152,7 @@ function AccountPage() {
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
               <KitIcon name="starCoin" size={28} />
               <span className="min-w-0">
-                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">FLOW</span>
+                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">{L("flow", "FLOW")}</span>
                 <span className="block font-mono text-[15px] font-black tabular-nums">
                   {flow.toLocaleString("en-US")}
                 </span>
@@ -160,7 +161,7 @@ function AccountPage() {
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
               <KitIcon name="gem" size={28} />
               <span className="min-w-0">
-                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">Play points</span>
+                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">{L("play", "Play points")}</span>
                 <span className="block font-mono text-[15px] font-black tabular-nums">
                   {play.toLocaleString("en-US")}
                 </span>
@@ -176,7 +177,7 @@ function AccountPage() {
               <SignInButton label="Sign in" returnTo="/account" />
             </div>
           )}
-        </section>
+        </HeroCard>
 
         {/* Verification / trust card — mirrors the reference A-Pass panel */}
         <section className="fb-surface relative overflow-hidden p-4">
@@ -210,7 +211,7 @@ function AccountPage() {
         </section>
 
         {/* Navigation rows */}
-        <Group title="Your activity">
+        <Group title={L("activity", "Your activity")}>
           <RowLink to="/activity" icon={<History className="h-4 w-4" />} label="Activity" />
           <RowLink to="/wallet" icon={<QrCode className="h-4 w-4" />} label="Wallet address & QR" />
           <RowLink to="/rewards" icon={<Users className="h-4 w-4" />} label="Referrals & rewards" />
