@@ -3,6 +3,7 @@
 // Defaults mirror the previous hardcoded values so behaviour never regresses
 // when the backend is unreachable.
 import { useEffect, useState } from "react";
+import { setLogoOverrides } from "@/lib/tokenLogos";
 
 export interface FeeSettings {
   defaultSlippagePct: number;
@@ -543,6 +544,12 @@ export function getAppConfig(): AppConfig {
 
 export function setAppConfig(next: AppConfig) {
   current = next;
+  // Feed admin-published token artwork into the shared logo resolver.
+  const map: Record<string, string> = {};
+  next.tokens.forEach((t) => {
+    if (t.logoUrl) map[t.symbol.trim().toLowerCase()] = t.logoUrl;
+  });
+  setLogoOverrides(map);
   listeners.forEach((l) => l(current));
 }
 
