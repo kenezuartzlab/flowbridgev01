@@ -7,7 +7,14 @@ const tokenSchema = z.object({
   symbol: z.string().trim().min(1).max(16),
   name: z.string().trim().min(1).max(64),
   decimals: z.number().int().min(0).max(36),
-  logoUrl: z.string().trim().max(500).url().optional().nullable(),
+  // Accepts absolute https URLs, app-relative paths (uploaded artwork) and data URIs.
+  logoUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => /^(https?:\/\/|\/|data:image\/)/i.test(v), "Invalid logo URL")
+    .optional()
+    .nullable(),
   routerId: z.number().int().min(0).max(1000).optional().nullable(),
   liquidityVerified: z.boolean().optional(),
   isActive: z.boolean().optional(),
