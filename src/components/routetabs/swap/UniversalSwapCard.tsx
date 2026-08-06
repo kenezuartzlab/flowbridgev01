@@ -589,22 +589,11 @@ export function UniversalSwapCard({
 
   const [clamped, setClamped] = useState(false);
 
-  // Hard-clamp typed input so a user can never submit more than their wallet
-  // can cover (swap amount + platform fee + gas reserve).
+  // Free typing: any amount is allowed so users can quote/simulate. The swap
+  // button is what blocks submission when the amount exceeds the spendable max
+  // (balance − platform fee − gas reserve).
   const onAmountInChange = (v: string) => {
     setClamped(false);
-    if (v === "" || v === ".") return setAmountIn(v);
-    let raw: bigint;
-    try {
-      raw = parseUnits(v, tokenIn.decimals);
-    } catch {
-      return setAmountIn(v);
-    }
-    if (maxSpendableRaw > 0n && raw > maxSpendableRaw) {
-      setAmountIn(maxSpendableDisplay);
-      setClamped(true);
-      return;
-    }
     setAmountIn(v);
   };
 
