@@ -2806,30 +2806,62 @@ export default function App() {
           <span className="inline-block animate-pulse">💖</span> Support FlowBridge & Request Features
         </button>
         <div className="flex items-center gap-3 mt-1">
-          <a
-            href="https://x.com/flowbridgeweb3"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="FlowBridge on X"
-            title="Follow FlowBridge on X"
-            className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
-          >
-            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">
-              <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-6.98L4.66 22H1.4l8.02-9.17L1 2h7.02l4.84 6.4L18.244 2Zm-1.2 18h1.86L7.05 4H5.09l11.954 16Z" />
-            </svg>
-          </a>
-          <a
-            href="https://youtube.com/@flowbridgeweb3"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="FlowBridge on YouTube"
-            title="FlowBridge on YouTube"
-            className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
-          >
-            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
-              <path d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.55 3.5 12 3.5 12 3.5s-7.55 0-9.4.58A3 3 0 0 0 .5 6.2C0 8.06 0 12 0 12s0 3.94.5 5.8a3 3 0 0 0 2.1 2.12C4.45 20.5 12 20.5 12 20.5s7.55 0 9.4-.58a3 3 0 0 0 2.1-2.12C24 15.94 24 12 24 12s0-3.94-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" />
-            </svg>
-          </a>
+          {appConfig.social.x && (
+            <a
+              href={appConfig.social.x}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="FlowBridge on X"
+              title="Follow FlowBridge on X"
+              className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+            >
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">
+                <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-6.98L4.66 22H1.4l8.02-9.17L1 2h7.02l4.84 6.4L18.244 2Zm-1.2 18h1.86L7.05 4H5.09l11.954 16Z" />
+              </svg>
+            </a>
+          )}
+          {appConfig.social.telegram && (
+            <a
+              href={appConfig.social.telegram}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="FlowBridge on Telegram"
+              title="FlowBridge on Telegram"
+              className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
+                <path d="M21.9 4.3 19 19.1c-.2 1-.8 1.2-1.6.8l-4.4-3.3-2.1 2c-.2.3-.5.4-.8.4l.3-4.3 8.1-7.3c.3-.3 0-.5-.5-.2L7.5 12.9 3.3 11.6c-.9-.3-.9-.9.2-1.3l17.1-6.6c.8-.3 1.5.2 1.3 1.1Z" />
+              </svg>
+            </a>
+          )}
+          {appConfig.social.youtube && (
+            <a
+              href={appConfig.social.youtube}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="FlowBridge on YouTube"
+              title="FlowBridge on YouTube"
+              className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
+                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.55 3.5 12 3.5 12 3.5s-7.55 0-9.4.58A3 3 0 0 0 .5 6.2C0 8.06 0 12 0 12s0 3.94.5 5.8a3 3 0 0 0 2.1 2.12C4.45 20.5 12 20.5 12 20.5s7.55 0 9.4-.58a3 3 0 0 0 2.1-2.12C24 15.94 24 12 24 12s0-3.94-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" />
+              </svg>
+            </a>
+          )}
+          {appConfig.social.discord && (
+            <a
+              href={appConfig.social.discord}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="FlowBridge on Discord"
+              title="FlowBridge on Discord"
+              className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
+                <path d="M20.3 4.9A16 16 0 0 0 16.4 3.7l-.3.6a12 12 0 0 1 3.4 1.6 11.5 11.5 0 0 0-8.9-1 11 11 0 0 0-2.6 1A12 12 0 0 1 11.4 4.3l-.3-.6A16 16 0 0 0 7.2 4.9 17.9 17.9 0 0 0 4 17.4a15.9 15.9 0 0 0 4.8 2.4l.6-1a12 12 0 0 1-1.7-.8l.4-.3a11.4 11.4 0 0 0 9.8 0l.4.3a12 12 0 0 1-1.7.8l.6 1a15.9 15.9 0 0 0 4.8-2.4 17.9 17.9 0 0 0-3.7-12.5ZM9.7 14.6c-.9 0-1.7-.9-1.7-2s.7-2 1.7-2 1.7.9 1.7 2-.8 2-1.7 2Zm4.6 0c-.9 0-1.7-.9-1.7-2s.7-2 1.7-2 1.7.9 1.7 2-.8 2-1.7 2Z" />
+              </svg>
+            </a>
+          )}
         </div>
         {googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com' && (
           <a
@@ -2840,7 +2872,7 @@ export default function App() {
           </a>
         )}
         <span className="text-[9px] text-[#C5C1B9]/70 tracking-[0.2em] font-medium">
-          ⓒ 2026 FlowBridge. Built by Kenezu
+          {appConfig.content.footerNote}
         </span>
 
       </footer>
