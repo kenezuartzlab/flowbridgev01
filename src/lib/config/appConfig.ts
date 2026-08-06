@@ -291,9 +291,36 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     claimThreshold: 1000,
     referralActivityPct: 20,
   },
-  flags: { showBanners: true, maintenanceNotice: "" },
+  flags: {
+    showBanners: true,
+    maintenanceNotice: "",
+    showMarkets: true,
+    showPartners: true,
+    showGames: true,
+    showAssistant: true,
+    showActivity: true,
+    swapEnabled: true,
+    bridgeEnabled: true,
+  },
+  social: {
+    x: "https://x.com/flowbridgeweb3",
+    telegram: "https://t.me/flowbridgeweb3",
+    youtube: "https://youtube.com/@flowbridgeweb3",
+    discord: "",
+    website: "https://flowbridge.space",
+    docs: "",
+    supportEmail: "",
+  },
+  content: {
+    brandName: "FlowBridge",
+    tagline: "Swap on BOT Chain, bridge USDT across chains, earn FLOW.",
+    announcement: "",
+    announcementHref: "",
+    footerNote: "ⓒ 2026 FlowBridge. Built by Kenezu",
+  },
   banners: DEFAULT_BANNERS,
   partners: DEFAULT_PARTNERS,
+
 
   tokens: [],
 
