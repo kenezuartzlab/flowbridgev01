@@ -578,6 +578,8 @@ export function mergeAppConfig(partial: any): AppConfig {
 
     banners: mergeBanners(p.banners),
     partners: mergePartners(p.partners),
+    quickActions: mergeQuickActions(p.quickActions),
+
 
 
     tokens: Array.isArray(p.tokens)
