@@ -22,7 +22,8 @@ import { KitIcon } from "@/components/kit/KitIcon";
 import { BannerRotator } from "@/components/banners/BannerRotator";
 import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
 import { trackBannerImpression } from "@/lib/banners/analytics";
-import { getBannerSurface, getQuickActions, useAppConfig } from "@/lib/config/appConfig";
+import { getBannerSurface, getPage, getQuickActions, pageLabel, useAppConfig } from "@/lib/config/appConfig";
+import { HeroCard } from "@/components/layout/HeroCard";
 import { ActionIcon } from "@/components/ActionIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
@@ -60,6 +61,8 @@ function HomePage() {
   const config = useAppConfig();
   const campaigns = useMemo(() => getBannerSurface(config, "home"), [config]);
   const quickActions = useMemo(() => getQuickActions(config), [config]);
+  const page = getPage(config, "home");
+  const L = (slot: string, fallback: string) => pageLabel(config, "home", slot, fallback);
   const campaignSlides = config.flags.showBanners ? campaigns.slides : [];
 
   const [markets, setMarkets] = useState<MarketRow[]>([]);
@@ -97,9 +100,9 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppTopBar
-        eyebrow={greeting}
+        eyebrow={page.hero.eyebrow || greeting}
         onEyebrowClick={canCycle ? nextGreeting : undefined}
-        title={user?.displayName || user?.email?.split("@")[0] || "Welcome to FlowBridge"}
+        title={page.hero.title || user?.displayName || user?.email?.split("@")[0] || "Welcome to FlowBridge"}
         avatar={user?.photoURL ?? null}
         initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
         actions={
@@ -115,25 +118,16 @@ function HomePage() {
 
       <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4">
         {/* Summary — gradient glass hero balance card */}
-        <section className="fb-hero fb-hero-home p-5">
-          <KitIcon
-            name="flowbridge"
-            size={132}
-            className="pointer-events-none absolute -right-6 -top-8 opacity-20"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-white/10 blur-2xl"
-          />
+        <HeroCard hero={page.hero} variant="home" className="p-5">
           <div className="relative flex items-start justify-between gap-3">
             <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
-              FLOW balance
+              {L("balance", "FLOW balance")}
             </p>
             <Link
               to="/rewards"
               className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-white/20 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-white/30"
             >
-              Rewards <ArrowUpRight className="h-3 w-3" />
+              {L("rewardsCta", "Rewards")} <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
 
@@ -147,7 +141,7 @@ function HomePage() {
               <KitIcon name="gift" size={26} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
-                  Claimable
+                  {L("claimable", "Claimable")}
                 </span>
                 <span className="block font-mono text-[15px] font-black tabular-nums">
                   {claimable.toLocaleString("en-US")}
@@ -158,7 +152,7 @@ function HomePage() {
               <KitIcon name="bolt" size={26} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
-                  Swap volume
+                  {L("volume", "Swap volume")}
                 </span>
                 <span className="block font-mono text-[15px] font-black tabular-nums">
                   {volumeUsd > 0 ? formatUsd(volumeUsd) : "—"}
@@ -176,12 +170,12 @@ function HomePage() {
               <SignInButton label="Sign in" returnTo="/home" />
             </div>
           )}
-        </section>
+        </HeroCard>
 
 
         {/* Quick actions */}
         <section>
-          <p className="fb-eyebrow mb-2 px-1">Quick actions</p>
+          <p className="fb-eyebrow mb-2 px-1">{L("quickActions", "Quick actions")}</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {quickActions.map((a) => {
               const external = /^https?:\/\//i.test(a.to);
@@ -245,7 +239,7 @@ function HomePage() {
         {/* Markets snapshot */}
         <section className="fb-surface overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
-            <p className="fb-eyebrow">BOT Chain prices</p>
+            <p className="fb-eyebrow">{L("markets", "BOT Chain prices")}</p>
             <Link
               to="/markets"
               className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary"
@@ -302,7 +296,7 @@ function HomePage() {
         {/* Recent activity */}
         <section className="fb-surface overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
-            <p className="fb-eyebrow">Recent activity</p>
+            <p className="fb-eyebrow">{L("activity", "Recent activity")}</p>
             <Link
               to="/activity"
               className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary"
