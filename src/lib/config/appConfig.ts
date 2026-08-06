@@ -23,7 +23,37 @@ export interface RewardSettings {
 export interface FlagSettings {
   showBanners: boolean;
   maintenanceNotice: string;
+  /** Surface toggles — hide sections app-wide without a code change. */
+  showMarkets: boolean;
+  showPartners: boolean;
+  showGames: boolean;
+  showAssistant: boolean;
+  showActivity: boolean;
+  /** Global kill switches for the trade surfaces. */
+  swapEnabled: boolean;
+  bridgeEnabled: boolean;
 }
+
+/** Public brand/social links surfaced in the footer, tasks and partner pages. */
+export interface SocialSettings {
+  x: string;
+  telegram: string;
+  youtube: string;
+  discord: string;
+  website: string;
+  docs: string;
+  supportEmail: string;
+}
+
+/** Editable marketing copy so headline text isn't hardcoded. */
+export interface ContentSettings {
+  brandName: string;
+  tagline: string;
+  announcement: string;
+  announcementHref: string;
+  footerNote: string;
+}
+
 
 export interface RemoteToken {
   id?: string;
