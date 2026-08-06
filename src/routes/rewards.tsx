@@ -67,6 +67,9 @@ function RewardsRoute() {
 function RewardsPage() {
   const { user, incentives, transactions, loading, refresh } = useAccountData();
   const [tab, setTab] = useState<Tab>("OVERVIEW");
+  const config = useAppConfig();
+  const page = getPage(config, "rewards");
+  const L = (slot: string, fallback: string) => pageLabel(config, "rewards", slot, fallback);
   const [claiming, setClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState<string | null>(null);
 

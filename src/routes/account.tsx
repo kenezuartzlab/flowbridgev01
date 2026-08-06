@@ -83,6 +83,9 @@ function AccountPage() {
   const toggleTheme = () => setTheme();
 
   const flow = Number(incentives?.flowPoints ?? 0);
+  const config = useAppConfig();
+  const page = getPage(config, "account");
+  const L = (slot: string, fallback: string) => pageLabel(config, "account", slot, fallback);
   const displayName = user?.displayName || user?.name || user?.email?.split("@")[0] || "Guest";
   const initial = displayName.slice(0, 1).toUpperCase();
   const avatar = user?.photoURL || user?.avatar_url || null;
