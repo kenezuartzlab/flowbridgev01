@@ -728,9 +728,11 @@ export function UniversalSwapCard({
               : undefined
           }
           clampedNotice={
-            clamped
-              ? `Amount capped to your spendable balance (${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol}).`
-              : undefined
+            insufficient && parsedAmount > 0n
+              ? `Preview only — above your spendable balance. Max swappable is ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} (fee${tokenIn.isNative ? " + gas" : ""} taken on top). Tap MAX to fill it.`
+              : clamped
+                ? `Amount capped to your spendable balance (${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol}).`
+                : undefined
           }
 
         />
