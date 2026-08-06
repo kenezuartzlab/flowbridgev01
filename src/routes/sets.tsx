@@ -1872,7 +1872,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
                 className="rounded-xl border border-white/10 bg-[#010C1B] p-2.5 min-h-[70px] flex flex-col justify-between"
               >
                 <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#32FF8B]/12 text-[#32FF8B]">
-                  <ActionIcon kind={a.iconKind} name={a.icon} imageUrl={a.imageUrl} className="h-4 w-4" />
+                  <ActionIcon kind={a.iconKind} name={a.icon} imageUrl={a.imageUrl} fit={a.iconFit} className={a.iconFit === "cover" ? "h-full w-full" : "h-4 w-4"} />
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate text-white text-[11px] font-black uppercase tracking-widest">
