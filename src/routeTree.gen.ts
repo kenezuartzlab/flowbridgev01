@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SetsRouteImport } from './routes/sets'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PartnersRouteImport } from './routes/partners'
@@ -22,7 +23,6 @@ import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
@@ -63,6 +63,11 @@ const WalletRoute = WalletRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetsRoute = SetsRouteImport.update({
+  id: '/sets',
+  path: '/sets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RewardsRoute = RewardsRouteImport.update({
@@ -118,11 +123,6 @@ const AssistantRoute = AssistantRouteImport.update({
 const ArcadeflixRoute = ArcadeflixRouteImport.update({
   id: '/arcadeflix',
   path: '/arcadeflix',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActivityRoute = ActivityRouteImport.update({
@@ -289,7 +289,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
-  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
@@ -301,6 +300,7 @@ export interface FileRoutesByFullPath {
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
+  '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -336,7 +336,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
-  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
@@ -348,6 +347,7 @@ export interface FileRoutesByTo {
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
+  '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -384,7 +384,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
-  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
@@ -396,6 +395,7 @@ export interface FileRoutesById {
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
+  '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -433,7 +433,6 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/activity'
-    | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
@@ -445,6 +444,7 @@ export interface FileRouteTypes {
     | '/partners'
     | '/reset-password'
     | '/rewards'
+    | '/sets'
     | '/sitemap.xml'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -480,7 +480,6 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/activity'
-    | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
@@ -492,6 +491,7 @@ export interface FileRouteTypes {
     | '/partners'
     | '/reset-password'
     | '/rewards'
+    | '/sets'
     | '/sitemap.xml'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -527,7 +527,6 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/activity'
-    | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
@@ -539,6 +538,7 @@ export interface FileRouteTypes {
     | '/partners'
     | '/reset-password'
     | '/rewards'
+    | '/sets'
     | '/sitemap.xml'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -575,7 +575,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   ActivityRoute: typeof ActivityRoute
-  AdminRoute: typeof AdminRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
   AssistantRoute: typeof AssistantRoute
   EcosurgeRoute: typeof EcosurgeRoute
@@ -587,6 +586,7 @@ export interface RootRouteChildren {
   PartnersRoute: typeof PartnersRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
+  SetsRoute: typeof SetsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WalletRoute: typeof WalletRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -632,6 +632,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sets': {
+      id: '/sets'
+      path: '/sets'
+      fullPath: '/sets'
+      preLoaderRoute: typeof SetsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rewards': {
@@ -709,13 +716,6 @@ declare module '@tanstack/react-router' {
       path: '/arcadeflix'
       fullPath: '/arcadeflix'
       preLoaderRoute: typeof ArcadeflixRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activity': {
@@ -954,7 +954,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   ActivityRoute: ActivityRoute,
-  AdminRoute: AdminRoute,
   ArcadeflixRoute: ArcadeflixRoute,
   AssistantRoute: AssistantRoute,
   EcosurgeRoute: EcosurgeRoute,
@@ -966,6 +965,7 @@ const rootRouteChildren: RootRouteChildren = {
   PartnersRoute: PartnersRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
+  SetsRoute: SetsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WalletRoute: WalletRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,

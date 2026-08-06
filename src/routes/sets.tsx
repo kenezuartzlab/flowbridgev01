@@ -43,16 +43,16 @@ import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
 import { TokenIcon } from "@/components/TokenIcon";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/sets")({
   head: () => ({
     meta: [
-      { title: "FlowBridge Admin Console" },
+      { title: "FlowBridge Control Panel — Sets" },
       {
         name: "description",
         content:
           "Private FlowBridge admin console for publishing swap tokens and tuning fee, reward and feature settings.",
       },
-      { property: "og:title", content: "FlowBridge Admin Console" },
+      { property: "og:title", content: "FlowBridge Control Panel — Sets" },
       {
         property: "og:description",
         content: "Publish swap tokens and manage FlowBridge runtime settings.",
@@ -65,7 +65,37 @@ export const Route = createFileRoute("/admin")({
   component: AdminRoute,
 });
 
-type Tab = "tokens" | "banners" | "partners" | "fees" | "rewards" | "flags";
+type Tab =
+  | "tokens"
+  | "banners"
+  | "partners"
+  | "fees"
+  | "rewards"
+  | "flags"
+  | "social"
+  | "content";
+
+/** Grouped navigation so the panel reads like a real control panel. */
+const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
+  { group: "Catalog", items: [["tokens", "Tokens & Logos"]] },
+  {
+    group: "Marketing",
+    items: [
+      ["banners", "Banners"],
+      ["partners", "Partners"],
+      ["content", "Brand & Copy"],
+      ["social", "Links & Social"],
+    ],
+  },
+  {
+    group: "Economics",
+    items: [
+      ["fees", "Fees & Slippage"],
+      ["rewards", "Rewards"],
+    ],
+  },
+  { group: "System", items: [["flags", "Feature Flags"]] },
+];
 
 const cardCls =
   "rounded-2xl border border-white/10 bg-[#0D1C2A]/70 p-4 space-y-3 font-mono text-[13px]";
@@ -159,31 +189,31 @@ function AdminPage() {
         <ShieldCheck className="w-4 h-4" /> Admin verified · {user?.email}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["tokens", "Tokens"],
-            ["banners", "Banners"],
-            ["partners", "Partners"],
-            ["fees", "Fees & Slippage"],
-            ["rewards", "Rewards"],
-            ["flags", "Feature Flags"],
-          ] as [Tab, string][]
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setTab(id)}
-            className={`px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest font-mono cursor-pointer transition ${
-              tab === id
-                ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
-            }`}
-          >
-            {label}
-          </button>
+      <nav className="space-y-2 rounded-2xl border border-white/10 bg-[#0D1C2A]/70 p-3">
+        {NAV_GROUPS.map(({ group, items }) => (
+          <div key={group} className="space-y-1.5">
+            <div className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#C5C1B9]/70 font-mono">
+              {group}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {items.map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setTab(id)}
+                  className={`px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest font-mono cursor-pointer transition ${
+                    tab === id
+                      ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                      : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
-      </div>
+      </nav>
 
       {tab === "tokens" ? (
         <TokensPanel wallet={wallet!} />
@@ -205,10 +235,10 @@ function Shell({ children }: { children: React.ReactNode }) {
       <div className="mx-auto w-full max-w-2xl space-y-4">
         <header className="space-y-1">
           <h1 className="text-white font-black tracking-widest uppercase font-mono text-lg">
-            FlowBridge Admin
+            FlowBridge Sets · Control Panel
           </h1>
           <p className="text-[#C5C1B9] text-[12px] font-mono">
-            Publish swap tokens and tune runtime settings without touching code.
+            Control panel — tokens, logos, banners, partners, copy, links, economics and feature flags. No code edits required.
           </p>
         </header>
         {children}
