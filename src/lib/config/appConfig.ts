@@ -405,7 +405,24 @@ export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
   { id: "qa-assistant", label: "Assistant", hint: "Ask anything", to: "/assistant", iconKind: "lucide", icon: "Sparkles", flag: "showAssistant", isActive: true },
 ];
 
+function emptyPage(hero: PageHeroSettings = {}): PageSettings {
+  return { hero, labels: {} };
+}
+
+/** Seed page themes — mirror the current hardcoded hero artwork. */
+export const DEFAULT_PAGES: PagesSettings = {
+  home: emptyPage({ artworkKind: "kit", artworkName: "flowbridge", artworkSize: 132, artworkOpacity: 20 }),
+  wallet: emptyPage({ artworkKind: "kit", artworkName: "vault", artworkSize: 130, artworkOpacity: 20 }),
+  rewards: emptyPage({ artworkKind: "kit", artworkName: "trophy", artworkSize: 128, artworkOpacity: 20 }),
+  account: emptyPage({ artworkKind: "none", artworkSize: 120, artworkOpacity: 20 }),
+  markets: emptyPage(),
+  partners: emptyPage(),
+  activity: emptyPage(),
+  swap: emptyPage(),
+};
+
 export const DEFAULT_APP_CONFIG: AppConfig = {
+
 
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
   rewards: {
