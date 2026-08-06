@@ -49,20 +49,13 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
     }
   };
 
-  // Hard-clamp typed input to the spendable maximum (balance minus the 0.1%
-  // platform fee the router charges on top) so a swap can never be submitted
-  // for more than the wallet can cover.
+  // Free typing: any amount is allowed so users can preview quotes. Amounts above
+  // the spendable maximum (balance minus the 0.1% platform fee taken on top) are
+  // flagged below and blocked by the action button instead of being rewritten.
   const handleInputChange = (val: string) => {
     if (!onChange) return;
-    setClamped(false);
-    if (hasMax) {
-      const n = parseFloat(val);
-      if (isFinite(n) && n > maxNum) {
-        setClamped(true);
-        onChange(maxAmount as string);
-        return;
-      }
-    }
+    const n = parseFloat(val);
+    setClamped(hasMax && isFinite(n) && n > maxNum);
     onChange(val);
   };
 
@@ -168,7 +161,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
 
       {!readOnly && clamped && (
         <p className="text-[11px] font-mono leading-snug text-[#FFC46B]">
-          Amount capped to your spendable balance ({maxNum.toFixed(6)} {symbol}).
+          Preview only — above your spendable balance. Max swappable is {maxNum.toFixed(6)} {symbol} (0.1% fee taken on top). Tap MAX to fill it.
         </p>
       )}
     </div>

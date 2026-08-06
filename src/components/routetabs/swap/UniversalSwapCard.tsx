@@ -589,22 +589,11 @@ export function UniversalSwapCard({
 
   const [clamped, setClamped] = useState(false);
 
-  // Hard-clamp typed input so a user can never submit more than their wallet
-  // can cover (swap amount + platform fee + gas reserve).
+  // Free typing: any amount is allowed so users can quote/simulate. The swap
+  // button is what blocks submission when the amount exceeds the spendable max
+  // (balance − platform fee − gas reserve).
   const onAmountInChange = (v: string) => {
     setClamped(false);
-    if (v === "" || v === ".") return setAmountIn(v);
-    let raw: bigint;
-    try {
-      raw = parseUnits(v, tokenIn.decimals);
-    } catch {
-      return setAmountIn(v);
-    }
-    if (maxSpendableRaw > 0n && raw > maxSpendableRaw) {
-      setAmountIn(maxSpendableDisplay);
-      setClamped(true);
-      return;
-    }
     setAmountIn(v);
   };
 
@@ -637,7 +626,9 @@ export function UniversalSwapCard({
   // Total debited by FlowBridgeRouter = swap amount + protocol fee (charged on top).
   const totalDebit = parsedAmount + routerFeeOnTop(parsedAmount);
   const needsApproval = !tokenIn.isNative && parsedAmount > 0n && allowanceRaw < totalDebit;
-  const insufficient = totalDebit > inBalanceRaw;
+  // Not submittable when the amount + 0.1% fee (+ native gas reserve) exceeds balance.
+  const insufficient =
+    totalDebit > inBalanceRaw || (maxSpendableRaw > 0n && parsedAmount > maxSpendableRaw);
 
   let buttonLabel = "Swap";
   let buttonDisabled = false;
@@ -737,9 +728,11 @@ export function UniversalSwapCard({
               : undefined
           }
           clampedNotice={
-            clamped
-              ? `Amount capped to your spendable balance (${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol}).`
-              : undefined
+            insufficient && parsedAmount > 0n
+              ? `Preview only — above your spendable balance. Max swappable is ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} (fee${tokenIn.isNative ? " + gas" : ""} taken on top). Tap MAX to fill it.`
+              : clamped
+                ? `Amount capped to your spendable balance (${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol}).`
+                : undefined
           }
 
         />
