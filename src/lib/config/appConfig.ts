@@ -149,6 +149,9 @@ export interface QuickAction {
   iconKind?: "lucide" | "kit" | "image";
   icon?: string;
   imageUrl?: string | null;
+  /** "cover" makes artwork full-bleed (edge-to-edge); "contain" pads it. */
+  iconFit?: "contain" | "cover";
+
   /** Optional feature-flag key that hides the tile when disabled. */
   flag?: string | null;
   isActive?: boolean;
