@@ -1829,7 +1829,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
     setUploading(i);
     try {
       const { url } = await uploadBannerImage(wallet, file);
-      patch(i, { imageUrl: url, iconKind: "image" });
+      patch(i, { imageUrl: url, iconKind: "image", iconFit: "cover" });
     } catch (e: any) {
       setError(e?.message ?? "Upload failed");
     } finally {
@@ -1969,6 +1969,21 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
               ))}
             </div>
 
+            {(a.iconKind === "image" || a.iconKind === "kit") && (
+              <div className="rounded-xl border border-[#32FF8B]/25 bg-[#32FF8B]/[0.06] p-2.5">
+                <Toggle
+                  label={
+                    a.iconFit === "cover"
+                      ? "Full-bleed artwork — fills the tile edge-to-edge"
+                      : "Padded artwork — small icon inside a background"
+                  }
+                  value={a.iconFit === "cover"}
+                  onChange={(v) => patch(i, { iconFit: v ? "cover" : "contain" })}
+                />
+              </div>
+            )}
+
+
             {(a.iconKind ?? "lucide") === "lucide" && (
               <div className="grid grid-cols-8 gap-1.5">
                 {ACTION_ICON_NAMES.map((name) => (
@@ -2009,16 +2024,8 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
               </div>
             )}
 
-            {(a.iconKind === "image" || a.iconKind === "kit") && (
-              <label className="flex items-center gap-2 text-[11px] text-[#C5C1B9]">
-                <input
-                  type="checkbox"
-                  checked={a.iconFit === "cover"}
-                  onChange={(e) => patch(i, { iconFit: e.target.checked ? "cover" : "contain" })}
-                />
-                Full-bleed artwork (fills the tile icon edge-to-edge)
-              </label>
-            )}
+
+
 
             {a.iconKind === "image" && (
               <div className="space-y-1.5">
