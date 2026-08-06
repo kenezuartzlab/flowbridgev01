@@ -2,7 +2,7 @@
 // Client-safe: reads the public /api/config endpoint and caches it in-module.
 // Defaults mirror the previous hardcoded values so behaviour never regresses
 // when the backend is unreachable.
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { setLogoOverrides } from "@/lib/tokenLogos";
 
 export interface FeeSettings {
@@ -690,7 +690,7 @@ export function pageLabel(config: AppConfig, key: PageKey, slot: string, fallbac
 }
 
 /** Inline gradient style for a hero card when the admin overrode the colors. */
-export function heroStyle(hero: PageHeroSettings): React.CSSProperties | undefined {
+export function heroStyle(hero: PageHeroSettings): CSSProperties | undefined {
   const from = hero.gradientFrom;
   const to = hero.gradientTo;
   if (!from && !to) return undefined;
@@ -758,6 +758,7 @@ export function mergeAppConfig(partial: any): AppConfig {
     banners: mergeBanners(p.banners),
     partners: mergePartners(p.partners),
     quickActions: mergeQuickActions(p.quickActions),
+    pages: mergePages(p.pages),
 
 
 
