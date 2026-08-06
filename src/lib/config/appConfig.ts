@@ -139,10 +139,13 @@ export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
   flags: FlagSettings;
+  social: SocialSettings;
+  content: ContentSettings;
   banners: BannerSettings;
   partners: PartnerCard[];
   tokens: RemoteToken[];
 }
+
 
 export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge", "home"];
 
