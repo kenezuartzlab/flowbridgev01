@@ -109,6 +109,19 @@ const partnerSchema = z.object({
     .optional(),
 });
 
+const quickActionSchema = z.object({
+  id: z.string().trim().max(64).optional(),
+  label: z.string().trim().min(1).max(24),
+  hint: z.string().trim().max(40).optional(),
+  to: z.string().trim().min(1).max(300),
+  hash: z.string().trim().max(60).nullable().optional(),
+  iconKind: z.enum(["lucide", "kit", "image"]).optional(),
+  icon: z.string().trim().max(60).optional(),
+  imageUrl: z.string().trim().max(500).nullable().optional(),
+  flag: z.string().trim().max(40).nullable().optional(),
+  isActive: z.boolean().optional(),
+});
+
 const bodySchema = z.object({
   fees: feesSchema.optional(),
   rewards: rewardsSchema.optional(),
@@ -117,7 +130,9 @@ const bodySchema = z.object({
   content: contentSchema.optional(),
   banners: bannersSchema.optional(),
   partners: z.array(partnerSchema).max(40).optional(),
+  quickActions: z.array(quickActionSchema).max(16).optional(),
 });
+
 
 
 export const Route = createFileRoute("/api/admin/settings")({
