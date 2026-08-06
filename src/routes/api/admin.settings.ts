@@ -124,7 +124,31 @@ const quickActionSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+const heroSchema = z.object({
+  eyebrow: z.string().trim().max(60).optional(),
+  title: z.string().trim().max(60).optional(),
+  subtitle: z.string().trim().max(160).optional(),
+  gradientFrom: z.string().trim().max(40).nullable().optional(),
+  gradientVia: z.string().trim().max(40).nullable().optional(),
+  gradientTo: z.string().trim().max(40).nullable().optional(),
+  backgroundImageUrl: z.string().trim().max(500).nullable().optional(),
+  backgroundOpacity: z.number().min(0).max(100).optional(),
+  artworkKind: z.enum(["kit", "image", "none"]).optional(),
+  artworkName: z.string().trim().max(60).optional(),
+  artworkUrl: z.string().trim().max(500).nullable().optional(),
+  artworkSize: z.number().min(40).max(320).optional(),
+  artworkOpacity: z.number().min(0).max(100).optional(),
+});
+
+const pageSchema = z.object({
+  hero: heroSchema.optional(),
+  labels: z.record(z.string().max(40), z.string().trim().max(120)).optional(),
+});
+
+const pagesSchema = z.record(z.string().max(40), pageSchema);
+
 const bodySchema = z.object({
+  pages: pagesSchema.optional(),
   fees: feesSchema.optional(),
   rewards: rewardsSchema.optional(),
   flags: flagsSchema.optional(),
@@ -163,7 +187,7 @@ export const Route = createFileRoute("/api/admin/settings")({
 
         const { writeSetting, buildPublicConfig } = await import("@/lib/appConfig.server");
         try {
-          for (const key of ["fees", "rewards", "flags", "social", "content", "banners", "partners", "quickActions"] as const) {
+          for (const key of ["fees", "rewards", "flags", "social", "content", "banners", "partners", "quickActions", "pages"] as const) {
             const value = parsed.data[key];
             if (value) await writeSetting(key, value, gate.admin.userId);
           }
