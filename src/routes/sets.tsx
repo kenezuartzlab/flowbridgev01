@@ -265,6 +265,20 @@ function TokensPanel({ wallet }: { wallet: string }) {
   const [checking, setChecking] = useState(false);
   const [liquidityOk, setLiquidityOk] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const uploadLogo = async (file: File, apply: (url: string) => void) => {
+    setUploading(true);
+    setError(null);
+    try {
+      const { url } = await uploadBannerImage(wallet, file);
+      apply(url);
+    } catch (e: any) {
+      setError(e?.message ?? "Logo upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -362,6 +376,44 @@ function TokensPanel({ wallet }: { wallet: string }) {
     }
   };
 
+  /** Updates only the artwork for an already-published token. */
+  const setTokenLogo = async (t: any, url: string | null) => {
+    setError(null);
+    try {
+      await saveAdminToken(wallet, {
+        chain: t.chain,
+        address: t.address,
+        symbol: t.symbol,
+        name: t.name,
+        decimals: t.decimals,
+        logoUrl: url,
+        routerId: t.router_id,
+        liquidityVerified: t.liquidity_verified,
+        isActive: t.is_active,
+        sortOrder: t.sort_order,
+      });
+      setNotice(url ? `${t.symbol} logo updated.` : `${t.symbol} logo removed.`);
+      await reload();
+      await loadAppConfig(true);
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to update logo");
+    }
+  };
+
+  /** Loads an existing token back into the publish form for editing. */
+  const editToken = (t: any) => {
+    setChain(t.chain === "testnet" ? "testnet" : "mainnet");
+    setAddr(t.address);
+    setSymbol(t.symbol);
+    setName(t.name);
+    setDecimals(String(t.decimals ?? 18));
+    setLogoUrl(t.logo_url ?? "");
+    setRouterId(t.router_id != null ? String(t.router_id) : "");
+    setLiquidityOk(t.liquidity_verified ? true : null);
+    setNotice(`Editing ${t.symbol} — publish to save changes.`);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const remove = async (id: string) => {
     try {
       await deleteAdminToken(wallet, id);
@@ -428,9 +480,43 @@ function TokensPanel({ wallet }: { wallet: string }) {
             <div className={labelCls}>Name</div>
             <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
           </div>
-          <div className="space-y-1">
-            <div className={labelCls}>Logo URL (optional)</div>
-            <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className={inputCls} />
+          <div className="space-y-1 col-span-2">
+            <div className={labelCls}>Token logo</div>
+            <div className="flex items-center gap-2">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt=""
+                  className="h-9 w-9 rounded-full border border-white/10 object-contain bg-[#010C1B]"
+                />
+              ) : (
+                <TokenIcon symbol={symbol || "?"} size={36} />
+              )}
+              <input
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                placeholder="https://… or upload"
+                className={inputCls}
+              />
+              <label className={`${btnGhost} shrink-0`}>
+                {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void uploadLogo(f, setLogoUrl);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {logoUrl && (
+                <button type="button" onClick={() => setLogoUrl("")} className={`${btnGhost} shrink-0`}>
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
           <div className="space-y-1">
             <div className={labelCls}>Preferred routerId (optional)</div>
@@ -474,7 +560,15 @@ function TokensPanel({ wallet }: { wallet: string }) {
               key={t.id}
               className="flex items-center gap-3 rounded-xl bg-[#010C1B]/60 border border-white/5 p-2.5"
             >
-              <TokenIcon symbol={t.symbol} size={28} />
+              {t.logo_url ? (
+                <img
+                  src={t.logo_url}
+                  alt=""
+                  className="h-7 w-7 shrink-0 rounded-full border border-white/10 object-contain bg-[#010C1B]"
+                />
+              ) : (
+                <TokenIcon symbol={t.symbol} size={28} />
+              )}
               <div className="flex-1 min-w-0">
                 <div className="text-white font-black tracking-wider">
                   {t.symbol}
@@ -489,6 +583,32 @@ function TokensPanel({ wallet }: { wallet: string }) {
                 </div>
                 <div className="text-[11px] text-[#C5C1B9] truncate">{t.address}</div>
               </div>
+              <label className={`${btnGhost} shrink-0`} title="Replace logo">
+                <ImageIcon className="w-3.5 h-3.5" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void uploadLogo(f, (url) => void setTokenLogo(t, url));
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {t.logo_url && (
+                <button
+                  type="button"
+                  onClick={() => void setTokenLogo(t, null)}
+                  className={btnGhost}
+                  title="Remove logo"
+                >
+                  Clear
+                </button>
+              )}
+              <button type="button" onClick={() => editToken(t)} className={btnGhost}>
+                Edit
+              </button>
               <button type="button" onClick={() => void toggleActive(t)} className={btnGhost}>
                 {t.is_active ? "Hide" : "Show"}
               </button>
