@@ -36,9 +36,11 @@ import {
   type BannerSlide,
   type BannerSurfaceKey,
   type PartnerCard,
+  type QuickAction,
 
 } from "@/lib/config/appConfig";
 import { TabBanner } from "@/components/banners/TabBanner";
+import { ActionIcon, ACTION_ICON_NAMES, KIT_ICON_NAMES } from "@/components/ActionIcon";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
 import { TokenIcon } from "@/components/TokenIcon";
@@ -69,6 +71,7 @@ type Tab =
   | "tokens"
   | "banners"
   | "partners"
+  | "quick"
   | "fees"
   | "rewards"
   | "flags"
@@ -78,6 +81,7 @@ type Tab =
 /** Grouped navigation so the panel reads like a real control panel. */
 const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
   { group: "Catalog", items: [["tokens", "Tokens & Logos"]] },
+  { group: "Layout", items: [["quick", "Home Quick Actions"]] },
   {
     group: "Marketing",
     items: [
@@ -221,6 +225,8 @@ function AdminPage() {
         <BannersPanel wallet={wallet!} />
       ) : tab === "partners" ? (
         <PartnersPanel wallet={wallet!} />
+      ) : tab === "quick" ? (
+        <QuickActionsPanel wallet={wallet!} />
       ) : (
         <SettingsPanel wallet={wallet!} tab={tab} />
       )}
@@ -630,7 +636,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
 
 /* ------------------------------ Settings ------------------------------ */
 
-function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners" | "partners"> }) {
+function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners" | "partners" | "quick"> }) {
   const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
