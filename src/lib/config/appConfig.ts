@@ -483,8 +483,32 @@ export function mergeAppConfig(partial: any): AppConfig {
     },
     flags: {
       showBanners: p.flags?.showBanners !== false,
-      maintenanceNotice: typeof p.flags?.maintenanceNotice === "string" ? p.flags.maintenanceNotice : "",
+      maintenanceNotice: str(p.flags?.maintenanceNotice),
+      showMarkets: p.flags?.showMarkets !== false,
+      showPartners: p.flags?.showPartners !== false,
+      showGames: p.flags?.showGames !== false,
+      showAssistant: p.flags?.showAssistant !== false,
+      showActivity: p.flags?.showActivity !== false,
+      swapEnabled: p.flags?.swapEnabled !== false,
+      bridgeEnabled: p.flags?.bridgeEnabled !== false,
     },
+    social: {
+      x: str(p.social?.x, d.social.x),
+      telegram: str(p.social?.telegram, d.social.telegram),
+      youtube: str(p.social?.youtube, d.social.youtube),
+      discord: str(p.social?.discord, d.social.discord),
+      website: str(p.social?.website, d.social.website),
+      docs: str(p.social?.docs, d.social.docs),
+      supportEmail: str(p.social?.supportEmail, d.social.supportEmail),
+    },
+    content: {
+      brandName: str(p.content?.brandName, d.content.brandName) || d.content.brandName,
+      tagline: str(p.content?.tagline, d.content.tagline),
+      announcement: str(p.content?.announcement),
+      announcementHref: str(p.content?.announcementHref),
+      footerNote: str(p.content?.footerNote, d.content.footerNote),
+    },
+
     banners: mergeBanners(p.banners),
     partners: mergePartners(p.partners),
 
