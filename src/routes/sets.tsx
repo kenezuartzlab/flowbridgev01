@@ -35,11 +35,15 @@ import {
   type BannerLayout,
   type BannerSlide,
   type BannerSurfaceKey,
+  PAGE_KEYS,
+  PAGE_LABEL_SLOTS,
+  type PageKey,
   type PartnerCard,
   type QuickAction,
 
 } from "@/lib/config/appConfig";
 import { TabBanner } from "@/components/banners/TabBanner";
+import { HeroCard } from "@/components/layout/HeroCard";
 import { ActionIcon, ACTION_ICON_NAMES, KIT_ICON_NAMES } from "@/components/ActionIcon";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
@@ -72,6 +76,7 @@ type Tab =
   | "banners"
   | "partners"
   | "quick"
+  | "pages"
   | "fees"
   | "rewards"
   | "flags"
@@ -81,7 +86,13 @@ type Tab =
 /** Grouped navigation so the panel reads like a real control panel. */
 const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
   { group: "Catalog", items: [["tokens", "Tokens & Logos"]] },
-  { group: "Layout", items: [["quick", "Home Quick Actions"]] },
+  {
+    group: "Layout",
+    items: [
+      ["quick", "Home Quick Actions"],
+      ["pages", "Pages & Heroes"],
+    ],
+  },
   {
     group: "Marketing",
     items: [
@@ -227,6 +238,8 @@ function AdminPage() {
         <PartnersPanel wallet={wallet!} />
       ) : tab === "quick" ? (
         <QuickActionsPanel wallet={wallet!} />
+      ) : tab === "pages" ? (
+        <PagesPanel wallet={wallet!} />
       ) : (
         <SettingsPanel wallet={wallet!} tab={tab} />
       )}
@@ -636,7 +649,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
 
 /* ------------------------------ Settings ------------------------------ */
 
-function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners" | "partners" | "quick"> }) {
+function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners" | "partners" | "quick" | "pages"> }) {
   const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -2085,6 +2098,414 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
         )}
         <button type="button" onClick={save} disabled={saving} className={btnPrimary}>
           {saving ? "Saving…" : "Save quick actions"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------ Page themes ----------------------------- */
+
+const PAGE_TITLES: Record<PageKey, string> = {
+  home: "Home dashboard",
+  wallet: "Wallet",
+  rewards: "Rewards",
+  account: "Account",
+  markets: "Markets",
+  partners: "Partners",
+  activity: "Activity",
+  swap: "Trade / Swap",
+};
+
+const GRADIENT_PRESETS: [string, string, string, string][] = [
+  ["Emerald", "#064e3b", "#0d9488", "#052e2b"],
+  ["Violet", "#312e81", "#6d28d9", "#1e1b4b"],
+  ["Sunset", "#7c2d12", "#db2777", "#4c0519"],
+  ["Ocean", "#0f172a", "#0e7490", "#082f49"],
+  ["Gold", "#78350f", "#f59e0b", "#451a03"],
+  ["Slate", "#111827", "#374151", "#0b1220"],
+];
+
+/** Per-page hero artwork, gradients, backgrounds and label overrides. */
+function PagesPanel({ wallet }: { wallet: string }) {
+  const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState<"bg" | "art" | null>(null);
+  const [pageKey, setPageKey] = useState<PageKey>("home");
+
+  useEffect(() => {
+    let alive = true;
+    fetchAdminConfig(wallet)
+      .then((c) => alive && setCfg(c))
+      .catch((e) => alive && setError(e?.message ?? "Failed to load page settings"))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [wallet]);
+
+  const pages = cfg.pages ?? DEFAULT_APP_CONFIG.pages;
+  const page = pages[pageKey];
+  const hero = page.hero;
+  const slots = PAGE_LABEL_SLOTS[pageKey];
+
+  const patchHero = (next: Partial<typeof hero>) =>
+    setCfg({ ...cfg, pages: { ...pages, [pageKey]: { ...page, hero: { ...hero, ...next } } } });
+  const patchLabel = (slot: string, value: string) =>
+    setCfg({
+      ...cfg,
+      pages: {
+        ...pages,
+        [pageKey]: { ...page, labels: { ...page.labels, [slot]: value } },
+      },
+    });
+
+  const upload = async (target: "bg" | "art", file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    if (file.size > 2_000_000) {
+      setError("Image is larger than 2 MB — please compress it first.");
+      return;
+    }
+    setUploading(target);
+    try {
+      const { url } = await uploadBannerImage(wallet, file);
+      if (target === "bg") patchHero({ backgroundImageUrl: url });
+      else patchHero({ artworkUrl: url, artworkKind: "image" });
+    } catch (e: any) {
+      setError(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await saveAdminSettings(wallet, { pages: cfg.pages });
+      await loadAppConfig(true);
+      setSaved(true);
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to save page settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className={cardCls}>Loading page settings…</div>;
+
+  const heroVariant =
+    pageKey === "wallet" || pageKey === "rewards" || pageKey === "account" ? pageKey : "home";
+
+  return (
+    <div className="space-y-4">
+      <div className={cardCls}>
+        <span className={labelCls}>Page</span>
+        <div className="flex flex-wrap gap-1.5">
+          {PAGE_KEYS.map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setPageKey(k)}
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
+                pageKey === k
+                  ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                  : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+              }`}
+            >
+              {PAGE_TITLES[k]}
+            </button>
+          ))}
+        </div>
+        <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+          Header copy, hero gradient, background artwork and section labels for{" "}
+          <span className="text-white">{PAGE_TITLES[pageKey]}</span>. Leave a field blank to keep the
+          built-in design.
+        </div>
+      </div>
+
+      {/* Live hero preview */}
+      <div className={cardCls}>
+        <span className={labelCls}>Hero preview</span>
+        <HeroCard hero={hero} variant={heroVariant as any} className="p-5">
+          <p className="relative font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
+            {hero.eyebrow || PAGE_TITLES[pageKey]}
+          </p>
+          <p className="relative mt-1 text-[30px] font-black leading-none">
+            {hero.title || PAGE_TITLES[pageKey]}
+          </p>
+          <div className="fb-hero-tile relative mt-4 p-3 font-mono text-[10.5px]">
+            {hero.subtitle || "Sample hero content"}
+          </div>
+        </HeroCard>
+      </div>
+
+      {/* Header copy */}
+      <div className={cardCls}>
+        <span className={labelCls}>Header copy</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <div className={labelCls}>Eyebrow (small line)</div>
+            <input
+              value={hero.eyebrow ?? ""}
+              maxLength={60}
+              onChange={(e) => patchHero({ eyebrow: e.target.value })}
+              className={inputCls}
+            />
+          </div>
+          <div className="space-y-1">
+            <div className={labelCls}>Title</div>
+            <input
+              value={hero.title ?? ""}
+              maxLength={60}
+              onChange={(e) => patchHero({ title: e.target.value })}
+              className={inputCls}
+            />
+          </div>
+          <div className="space-y-1 sm:col-span-2">
+            <div className={labelCls}>Subtitle / note</div>
+            <input
+              value={hero.subtitle ?? ""}
+              maxLength={160}
+              onChange={(e) => patchHero({ subtitle: e.target.value })}
+              className={inputCls}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Gradient */}
+      <div className={cardCls}>
+        <span className={labelCls}>Card gradient</span>
+        <div className="flex flex-wrap gap-1.5">
+          {GRADIENT_PRESETS.map(([name, from, via, to]) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => patchHero({ gradientFrom: from, gradientVia: via, gradientTo: to })}
+              className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer border border-white/10 text-white"
+              style={{ background: `linear-gradient(135deg, ${from}, ${via}, ${to})` }}
+            >
+              {name}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => patchHero({ gradientFrom: null, gradientVia: null, gradientTo: null })}
+            className={btnGhost}
+          >
+            Use built-in
+          </button>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {(
+            [
+              ["gradientFrom", "From"],
+              ["gradientVia", "Via"],
+              ["gradientTo", "To"],
+            ] as const
+          ).map(([field, label]) => (
+            <div key={field} className="space-y-1">
+              <div className={labelCls}>{label}</div>
+              <input
+                type="color"
+                value={(hero[field] as string) || "#0d9488"}
+                onChange={(e) => patchHero({ [field]: e.target.value } as any)}
+                className="h-9 w-full rounded-xl border border-white/15 bg-[#010C1B] cursor-pointer"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Background artwork */}
+      <div className={cardCls}>
+        <span className={labelCls}>Background image</span>
+        <div className="flex items-center gap-2.5">
+          <div className="h-12 w-20 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-[#010C1B] flex items-center justify-center">
+            {hero.backgroundImageUrl ? (
+              <img src={hero.backgroundImageUrl} alt="Background preview" className="h-full w-full object-cover" />
+            ) : (
+              <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+            )}
+          </div>
+          <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
+            {uploading === "bg" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            {uploading === "bg" ? "Uploading…" : "Upload"}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                void upload("bg", e.target.files?.[0]);
+                e.currentTarget.value = "";
+              }}
+            />
+          </label>
+          {hero.backgroundImageUrl && (
+            <button type="button" onClick={() => patchHero({ backgroundImageUrl: "" })} className={btnGhost}>
+              Remove
+            </button>
+          )}
+        </div>
+        <input
+          value={hero.backgroundImageUrl ?? ""}
+          placeholder="…or paste an image URL"
+          onChange={(e) => patchHero({ backgroundImageUrl: e.target.value })}
+          className={inputCls}
+        />
+        <div className="space-y-1">
+          <div className={labelCls}>Background opacity · {hero.backgroundOpacity ?? 35}%</div>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={hero.backgroundOpacity ?? 35}
+            onChange={(e) => patchHero({ backgroundOpacity: Number(e.target.value) })}
+            className="w-full cursor-pointer"
+          />
+        </div>
+      </div>
+
+      {/* Corner illustration */}
+      <div className={cardCls}>
+        <span className={labelCls}>Corner illustration / logo</span>
+        <div className="flex flex-wrap gap-1.5">
+          {(["kit", "image", "none"] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => patchHero({ artworkKind: k })}
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
+                (hero.artworkKind ?? "none") === k
+                  ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                  : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+              }`}
+            >
+              {k === "kit" ? "3D kit" : k === "image" ? "Upload logo" : "None"}
+            </button>
+          ))}
+        </div>
+
+        {hero.artworkKind === "kit" && (
+          <div className="grid grid-cols-8 gap-1.5">
+            {KIT_ICON_NAMES.map((name) => (
+              <button
+                key={name}
+                type="button"
+                title={name}
+                onClick={() => patchHero({ artworkName: name })}
+                className={`grid place-items-center h-9 rounded-lg cursor-pointer transition ${
+                  hero.artworkName === name
+                    ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40"
+                    : "bg-white/5 border border-white/10 hover:bg-white/10"
+                }`}
+              >
+                <ActionIcon kind="kit" name={name} className="h-6 w-6" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {hero.artworkKind === "image" && (
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2.5">
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-[#010C1B] flex items-center justify-center">
+                {hero.artworkUrl ? (
+                  <img src={hero.artworkUrl} alt="Illustration preview" className="h-full w-full object-contain" />
+                ) : (
+                  <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+                )}
+              </div>
+              <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
+                {uploading === "art" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                {uploading === "art" ? "Uploading…" : "Upload logo"}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                  className="hidden"
+                  onChange={(e) => {
+                    void upload("art", e.target.files?.[0]);
+                    e.currentTarget.value = "";
+                  }}
+                />
+              </label>
+              {hero.artworkUrl && (
+                <button type="button" onClick={() => patchHero({ artworkUrl: "" })} className={btnGhost}>
+                  Remove
+                </button>
+              )}
+            </div>
+            <input
+              value={hero.artworkUrl ?? ""}
+              placeholder="…or paste an image URL"
+              onChange={(e) => patchHero({ artworkUrl: e.target.value })}
+              className={inputCls}
+            />
+          </div>
+        )}
+
+        {hero.artworkKind !== "none" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <div className={labelCls}>Size · {hero.artworkSize ?? 128}px</div>
+              <input
+                type="range"
+                min={40}
+                max={320}
+                value={hero.artworkSize ?? 128}
+                onChange={(e) => patchHero({ artworkSize: Number(e.target.value) })}
+                className="w-full cursor-pointer"
+              />
+            </div>
+            <div className="space-y-1">
+              <div className={labelCls}>Opacity · {hero.artworkOpacity ?? 20}%</div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={hero.artworkOpacity ?? 20}
+                onChange={(e) => patchHero({ artworkOpacity: Number(e.target.value) })}
+                className="w-full cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Labels */}
+      <div className={cardCls}>
+        <span className={labelCls}>Section labels</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {slots.map(([slot, fallback]) => (
+            <div key={slot} className="space-y-1">
+              <div className={labelCls}>{fallback}</div>
+              <input
+                value={page.labels?.[slot] ?? ""}
+                placeholder={fallback}
+                maxLength={120}
+                onChange={(e) => patchLabel(slot, e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={`${cardCls} flex flex-wrap items-center gap-2`}>
+        {error && <span className="text-red-400 text-[11px]">{error}</span>}
+        {saved && (
+          <span className="inline-flex items-center gap-1 text-[#32FF8B] text-[11px] font-black uppercase tracking-widest">
+            <Check className="w-3.5 h-3.5" /> Published
+          </span>
+        )}
+        <button type="button" onClick={save} disabled={saving} className={btnPrimary}>
+          {saving ? "Saving…" : "Save page settings"}
         </button>
       </div>
     </div>
