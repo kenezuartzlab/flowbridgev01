@@ -23,6 +23,7 @@ import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
@@ -123,6 +124,11 @@ const AssistantRoute = AssistantRouteImport.update({
 const ArcadeflixRoute = ArcadeflixRouteImport.update({
   id: '/arcadeflix',
   path: '/arcadeflix',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActivityRoute = ActivityRouteImport.update({
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
+  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
@@ -336,6 +343,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
+  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
@@ -384,6 +392,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
+  '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/ecosurge': typeof EcosurgeRoute
@@ -433,6 +442,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/activity'
+    | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
@@ -480,6 +490,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/activity'
+    | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
@@ -527,6 +538,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/activity'
+    | '/admin'
     | '/arcadeflix'
     | '/assistant'
     | '/ecosurge'
@@ -575,6 +587,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   ActivityRoute: typeof ActivityRoute
+  AdminRoute: typeof AdminRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
   AssistantRoute: typeof AssistantRoute
   EcosurgeRoute: typeof EcosurgeRoute
@@ -716,6 +729,13 @@ declare module '@tanstack/react-router' {
       path: '/arcadeflix'
       fullPath: '/arcadeflix'
       preLoaderRoute: typeof ArcadeflixRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activity': {
@@ -954,6 +974,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   ActivityRoute: ActivityRoute,
+  AdminRoute: AdminRoute,
   ArcadeflixRoute: ArcadeflixRoute,
   AssistantRoute: AssistantRoute,
   EcosurgeRoute: EcosurgeRoute,

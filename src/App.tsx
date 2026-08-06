@@ -2833,7 +2833,7 @@ export default function App() {
         </div>
         {googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com' && (
           <a
-            href="/admin"
+            href="/sets"
             className="text-[9px] tracking-[0.2em] font-black text-[#32FF8B]/80 hover:text-[#32FF8B] transition-colors"
           >
             ⚙ Admin console
