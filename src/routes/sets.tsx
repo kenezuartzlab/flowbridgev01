@@ -1829,7 +1829,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
     setUploading(i);
     try {
       const { url } = await uploadBannerImage(wallet, file);
-      patch(i, { imageUrl: url, iconKind: "image" });
+      patch(i, { imageUrl: url, iconKind: "image", iconFit: "cover" });
     } catch (e: any) {
       setError(e?.message ?? "Upload failed");
     } finally {
