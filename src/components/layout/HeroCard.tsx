@@ -43,14 +43,15 @@ export function HeroCard({
       )}
 
       {kind === "kit" && hero.artworkName && (
-        <KitIcon
-          name={hero.artworkName as KitName}
-          size={size}
+        <span
+          aria-hidden
           className="pointer-events-none absolute -right-6 -top-7"
-          // opacity is admin-tunable, so it stays inline
-          {...{ style: { width: size, height: size, opacity } }}
-        />
+          style={{ opacity }}
+        >
+          <KitIcon name={hero.artworkName as KitName} size={size} />
+        </span>
       )}
+
       {kind === "image" && hero.artworkUrl && (
         <img
           src={hero.artworkUrl}
