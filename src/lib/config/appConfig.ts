@@ -136,6 +136,24 @@ export interface PartnerCard {
   campaigns?: PartnerCampaign[];
 }
 
+/** One admin-managed tile in Home → Quick actions. */
+export interface QuickAction {
+  id: string;
+  label: string;
+  hint?: string;
+  /** Internal route ("/rewards") or absolute URL. */
+  to: string;
+  /** Optional in-page hash for internal routes. */
+  hash?: string | null;
+  /** Icon source: built-in line icon, 3D asset kit, or uploaded image. */
+  iconKind?: "lucide" | "kit" | "image";
+  icon?: string;
+  imageUrl?: string | null;
+  /** Optional feature-flag key that hides the tile when disabled. */
+  flag?: string | null;
+  isActive?: boolean;
+}
+
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
@@ -144,8 +162,10 @@ export interface AppConfig {
   content: ContentSettings;
   banners: BannerSettings;
   partners: PartnerCard[];
+  quickActions: QuickAction[];
   tokens: RemoteToken[];
 }
+
 
 
 export const BANNER_SURFACES: BannerSurfaceKey[] = ["cabot", "swap", "bridge", "home"];
