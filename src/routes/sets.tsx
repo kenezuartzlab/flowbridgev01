@@ -39,6 +39,7 @@ import {
   PAGE_LABEL_SLOTS,
   PAGE_ICON_SLOTS,
   defaultPageIcon,
+  feeBpsLabel,
   type PageIconSetting,
 
   type PageKey,
