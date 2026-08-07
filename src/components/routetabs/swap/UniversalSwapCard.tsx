@@ -22,7 +22,7 @@ import {
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
 import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
 import { estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
-import { useAppConfig } from "@/lib/config/appConfig";
+import { useAppConfig, feeBpsLabel } from "@/lib/config/appConfig";
 import { formatBalance4 } from "@/lib/format";
 
 import { TokenPickerModal } from "./TokenPickerModal";
@@ -90,7 +90,12 @@ export function UniversalSwapCard({
   // Router used for the token-in ERC20 allowance check (the first step's router).
   // Recomputed after a quote arrives.
 
-  const appConfig = useAppConfig(); // admin-published tokens + default slippage
+  const appConfig = useAppConfig(); // admin-published tokens, slippage + platform fee
+  // Admin-published platform fee (bps) — mirrors FlowBridgeRouter's globalFeeBps and
+  // drives the disclosed fee plus MAX/percentage head-room. Execution still reads the
+  // exact fee from the contract before each swap.
+  const platformFeeBps = appConfig.fees.platformFeeBps;
+  const platformFeeLabel = feeBpsLabel(platformFeeBps);
   const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet, appConfig]);
   const [tokenIn, setTokenIn] = useState<Token>(curated[0]); // BOT
   const [tokenOut, setTokenOut] = useState<Token>(curated[2]); // USDT
@@ -278,7 +283,7 @@ export function UniversalSwapCard({
       if (held < totalIn) {
         const feeDisp = formatUnits(fee, step.inIsNative ? 18 : tokenIn.decimals);
         throw new Error(
-          `Not enough ${step.symbolPath[0]} to cover this swap plus the ${PLATFORM_FEE_LABEL} platform fee (${feeDisp} ${step.symbolPath[0]}). Tap MAX again or lower the amount slightly, then retry.`,
+          `Not enough ${step.symbolPath[0]} to cover this swap plus the ${platformFeeLabel} platform fee (${feeDisp} ${step.symbolPath[0]}). Tap MAX again or lower the amount slightly, then retry.`,
         );
       }
     } catch (err) {
@@ -581,9 +586,9 @@ export function UniversalSwapCard({
     if (tokenIn.isNative) {
       const buf = parseUnits("0.001", tokenIn.decimals);
       const spendable = inBalanceRaw > buf ? inBalanceRaw - buf : 0n;
-      return maxSwappableFromBalance(spendable);
+      return maxSwappableFromBalance(spendable, platformFeeBps);
     }
-    return maxSwappableFromBalance(inBalanceRaw);
+    return maxSwappableFromBalance(inBalanceRaw, platformFeeBps);
   })();
   const maxSpendableDisplay = formatUnits(maxSpendableRaw, tokenIn.decimals);
 
@@ -624,7 +629,7 @@ export function UniversalSwapCard({
     }
   })();
   // Total debited by FlowBridgeRouter = swap amount + protocol fee (charged on top).
-  const totalDebit = parsedAmount + routerFeeOnTop(parsedAmount);
+  const totalDebit = parsedAmount + routerFeeOnTop(parsedAmount, platformFeeBps);
   const needsApproval = !tokenIn.isNative && parsedAmount > 0n && allowanceRaw < totalDebit;
   // Not submittable when the amount + 0.1% fee (+ native gas reserve) exceeds balance.
   const insufficient =
@@ -804,7 +809,7 @@ export function UniversalSwapCard({
                 <Row label="Slippage" value={`${slippage}%`} />
                 <Row label="Route" value={quote.symbolPath.join(" → ")} />
                 <Row label="Trading fee" value="0.30%" />
-                <Row label="Platform fee" value={PLATFORM_FEE_LABEL} />
+                <Row label="Platform fee" value={platformFeeLabel} />
                 
                 <Row
                   label="FLOW reward status"
@@ -921,7 +926,7 @@ export function UniversalSwapCard({
         slippageTolerance={`${slippage}%`}
         minimumReceived={minReceived ? minReceived.toFixed(6) : undefined}
         tradingFee="0.30%"
-        platformFee={PLATFORM_FEE_LABEL}
+        platformFee={platformFeeLabel}
       />
     </div>
   );
