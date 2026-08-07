@@ -3,6 +3,7 @@ import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, use
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 import {
   useAppConfig,
+  feeBpsLabel,
   getBannerSurface,
   type BannerSlide,
   type BannerSurfaceKey,
@@ -452,6 +453,10 @@ export default function App() {
   });
 
   const appConfig = useAppConfig();
+  // Admin-published platform fee (bps) mirroring FlowBridgeRouter's globalFeeBps.
+  // Drives disclosure + MAX head-room; execution reads the exact fee on-chain.
+  const platformFeeBps = appConfig.fees.platformFeeBps;
+  const platformFeeLabel = feeBpsLabel(platformFeeBps);
 
   // Form states
   const [caAmount, setCaAmount] = useState('');
@@ -1291,7 +1296,7 @@ export default function App() {
   const getFixedSwapBalanceTooLowMessage = (symbol: 'CA' | 'BOT', amount: bigint, fee: bigint, balance: bigint) => {
     const total = amount + fee;
     const decimals = 18;
-    return `Not enough ${symbol} for this swap plus the 0.1% platform fee. Your balance is ${formatUnits(balance, decimals)} ${symbol}, but this swap needs ${formatUnits(total, decimals)} ${symbol}. Tap MAX again or lower the amount slightly.`;
+    return `Not enough ${symbol} for this swap plus the ${platformFeeLabel} platform fee. Your balance is ${formatUnits(balance, decimals)} ${symbol}, but this swap needs ${formatUnits(total, decimals)} ${symbol}. Tap MAX again or lower the amount slightly.`;
   };
 
   // Live and simulated swap step logic
@@ -1987,7 +1992,7 @@ export default function App() {
         : (botBalance?.value ?? 0n);
       return getFixedSwapBalanceTooLowMessage(caPaySymbol as 'CA' | 'BOT', amount, fee, held);
     } catch {
-      return `Lower the ${caPaySymbol} amount slightly to leave room for the 0.1% platform fee.`;
+      return `Lower the ${caPaySymbol} amount slightly to leave room for the ${platformFeeLabel} platform fee.`;
     }
   })() : undefined;
   let caButtonLabel = "Enter amount";
@@ -2279,9 +2284,9 @@ export default function App() {
   // FlowBridgeRouter debits `amount + platform fee`, so MAX must reserve the fee
   // or the swap reverts on-chain with SafeERC20: call failed.
   const getTokenMaxAmount = (symbol: string) => {
-    if (symbol === 'BOT') return maxSwappableDisplay(getExactBalanceAmount('BOT'), 18);
-    if (symbol === 'USDT') return maxSwappableDisplay(getExactBalanceAmount('USDT_BOT'), 6);
-    if (symbol === 'CA') return maxSwappableDisplay(getExactBalanceAmount('CA'), 18);
+    if (symbol === 'BOT') return maxSwappableDisplay(getExactBalanceAmount('BOT'), 18, platformFeeBps);
+    if (symbol === 'USDT') return maxSwappableDisplay(getExactBalanceAmount('USDT_BOT'), 6, platformFeeBps);
+    if (symbol === 'CA') return maxSwappableDisplay(getExactBalanceAmount('CA'), 18, platformFeeBps);
     return getTokenBalance(symbol).replace(/\s*FLOW$/, '');
   };
 
@@ -2624,7 +2629,7 @@ export default function App() {
               toUsdValue={getCaToBotDisplayUsd(false)}
               fromBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('CA') : getBalanceDisplay('BOT')}
               toBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('BOT') : getBalanceDisplay('CA')}
-              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? maxSwappableDisplay(getExactBalanceAmount('CA'), 18) : maxSwappableDisplay(getExactBalanceAmount('BOT'), 18)}
+              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? maxSwappableDisplay(getExactBalanceAmount('CA'), 18, platformFeeBps) : maxSwappableDisplay(getExactBalanceAmount('BOT'), 18, platformFeeBps)}
               onFromAmountChange={setCaAmount}
               onToggleDirection={handleToggleCaBot}
               buttonLabel={caButtonLabel}
@@ -2971,7 +2976,7 @@ export default function App() {
              activeConfirmModal === 'BOT/USDT' ? "0.30%" :
              (bridgeDirection === 'BOT_TO_BNB' ? "1 USDT" : "0 USDT")
           }
-          platformFee="0.1%"
+          platformFee={platformFeeLabel}
           isBridge={activeConfirmModal === 'BRIDGE'}
           fromChain={bridgeFromName}
           toChain={bridgeToName}
