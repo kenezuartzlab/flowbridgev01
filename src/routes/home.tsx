@@ -138,7 +138,7 @@ function HomePage() {
 
           <div className="relative mt-4 grid grid-cols-2 gap-2">
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <KitIcon name="gift" size={26} />
+              <PageIcon page="home" slot="claimable" size={26} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
                   {L("claimable", "Claimable")}
@@ -149,7 +149,7 @@ function HomePage() {
               </span>
             </div>
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <KitIcon name="bolt" size={26} />
+              <PageIcon page="home" slot="volume" size={26} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
                   {L("volume", "Swap volume")}
@@ -160,6 +160,7 @@ function HomePage() {
               </span>
             </div>
           </div>
+
 
           {!user && (
             <div className="fb-hero-tile relative mt-4 space-y-2.5 p-3">
