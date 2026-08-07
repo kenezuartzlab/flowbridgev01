@@ -701,7 +701,24 @@ export function mergePages(raw: any): PagesSettings {
         if (k && text) labels[k.slice(0, 40)] = text.slice(0, 120);
       });
     }
+    const icons: Record<string, PageIconSetting> = {};
+    if (src.icons && typeof src.icons === "object") {
+      Object.entries<any>(src.icons).forEach(([k, v]) => {
+        if (!k || !v || typeof v !== "object") return;
+        const ik =
+          v.kind === "kit" || v.kind === "image" || v.kind === "lucide" || v.kind === "none"
+            ? v.kind
+            : undefined;
+        if (!ik) return;
+        icons[k.slice(0, 40)] = {
+          kind: ik,
+          name: str(v.name).trim().slice(0, 60) || undefined,
+          imageUrl: str(v.imageUrl).trim().slice(0, 500) || null,
+        };
+      });
+    }
     out[key] = {
+
       hero: {
         eyebrow: str(h.eyebrow).trim() || undefined,
         title: str(h.title).trim() || undefined,
