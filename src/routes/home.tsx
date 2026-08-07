@@ -90,14 +90,14 @@ function HomePage() {
 
   const recent = useMemo(() => transactions.slice(0, 4), [transactions]);
 
-  const volumeUsd = useMemo(
-    () =>
-      transactions.reduce(
-        (sum: number, t: any) => sum + (Number(t.volume_usd ?? t.volumeUsd ?? 0) || 0),
-        0,
-      ),
-    [transactions],
+  /**
+   * Real verified swap volume, server-computed on the profile
+   * (`total_swap_volume_usd`) and returned by /api/users/incentives.
+   */
+  const volumeUsd = Number(
+    incentives?.totalSwapVolumeUsd ?? incentives?.total_swap_volume_usd ?? 0,
   );
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
