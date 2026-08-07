@@ -12,7 +12,6 @@ import {
   ERC20_ABI,
   FLOW_BRIDGE_ROUTER_V3_ABI,
   getContracts,
-  PLATFORM_FEE_LABEL,
 } from "@/lib/contracts";
 import {
   getCuratedTokens,
