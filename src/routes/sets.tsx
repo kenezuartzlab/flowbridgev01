@@ -37,6 +37,10 @@ import {
   type BannerSurfaceKey,
   PAGE_KEYS,
   PAGE_LABEL_SLOTS,
+  PAGE_ICON_SLOTS,
+  defaultPageIcon,
+  type PageIconSetting,
+
   type PageKey,
   type PartnerCard,
   type QuickAction,
