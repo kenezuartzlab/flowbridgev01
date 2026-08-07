@@ -1974,7 +1974,7 @@ export default function App() {
   const caInputExceedsSpendableBalance = (() => {
     if (isDemoMode || !caAmount) return false;
     try {
-      const required = totalRouterDebit(parseUnits(caAmount, 18));
+      const required = totalRouterDebit(parseUnits(caAmount, 18), platformFeeBps);
       const held = caToBotDirection === 'CA_TO_BOT'
         ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
         : (botBalance?.value ?? 0n);
@@ -1986,7 +1986,7 @@ export default function App() {
   const caBalanceWarning = caInputExceedsSpendableBalance ? (() => {
     try {
       const amount = parseUnits(caAmount, 18);
-      const fee = totalRouterDebit(amount) - amount;
+      const fee = totalRouterDebit(amount, platformFeeBps) - amount;
       const held = caToBotDirection === 'CA_TO_BOT'
         ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
         : (botBalance?.value ?? 0n);
@@ -2004,7 +2004,7 @@ export default function App() {
   else if (caInputExceedsSpendableBalance) caButtonLabel = `Lower ${caPaySymbol} amount`;
   else if (session.step1.status === 'done' && !caAmount) caButtonLabel = "✅ Step 1 Complete - Next →";
   else if (caAmount && !isDemoMode && caToBotDirection === 'CA_TO_BOT' && rawCaAllowance !== undefined && (() => {
-    try { return BigInt(rawCaAllowance.toString()) < totalRouterDebit(parseUnits(caAmount, 18)); }
+    try { return BigInt(rawCaAllowance.toString()) < totalRouterDebit(parseUnits(caAmount, 18), platformFeeBps); }
     catch { return BigInt(rawCaAllowance.toString()) < parseUnits(caAmount, 18); }
   })()) {
     caButtonLabel = `Approve ${caPaySymbol}`;
