@@ -204,14 +204,24 @@ export interface PageHeroSettings {
   artworkOpacity?: number;
 }
 
+/** Admin-configurable icon for a named slot inside a page. */
+export interface PageIconSetting {
+  kind?: "kit" | "image" | "lucide" | "none";
+  name?: string;
+  imageUrl?: string | null;
+}
+
 /** Editable hero + free-form label overrides for one page. */
 export interface PageSettings {
   hero: PageHeroSettings;
   /** slot key → replacement text. Unset slots keep the built-in copy. */
   labels: Record<string, string>;
+  /** slot key → icon override. Unset slots keep the built-in artwork. */
+  icons: Record<string, PageIconSetting>;
 }
 
 export type PagesSettings = Record<PageKey, PageSettings>;
+
 
 /** Label slots each page exposes to the control panel. */
 export const PAGE_LABEL_SLOTS: Record<PageKey, [string, string][]> = {
