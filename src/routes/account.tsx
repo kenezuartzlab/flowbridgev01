@@ -150,7 +150,7 @@ function AccountPage() {
 
           <div className="relative mt-4 grid grid-cols-2 gap-2">
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <KitIcon name="starCoin" size={28} />
+              <PageIcon page="account" slot="flow" size={28} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">{L("flow", "FLOW")}</span>
                 <span className="block font-mono text-[15px] font-black tabular-nums">
@@ -159,7 +159,7 @@ function AccountPage() {
               </span>
             </div>
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <KitIcon name="gem" size={28} />
+              <PageIcon page="account" slot="play" size={28} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">{L("play", "Play points")}</span>
                 <span className="block font-mono text-[15px] font-black tabular-nums">
@@ -181,13 +181,15 @@ function AccountPage() {
 
         {/* Verification / trust card — mirrors the reference A-Pass panel */}
         <section className="fb-surface relative overflow-hidden p-4">
-          <KitIcon
-            name="shieldCheck"
+          <PageIcon
+            page="account"
+            slot="passBadge"
             size={92}
             className="pointer-events-none absolute -right-3 -top-2 opacity-20"
           />
           <div className="relative flex items-start gap-3">
-            <KitIcon name="flowbridge" size={40} />
+            <PageIcon page="account" slot="pass" size={40} />
+
             <div className="min-w-0 flex-1">
               <p className="text-[15px] font-black">FlowBridge Verified Pass</p>
               <p className="mt-0.5 font-mono text-[10.5px] leading-relaxed text-muted">
