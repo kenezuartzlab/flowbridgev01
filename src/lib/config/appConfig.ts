@@ -735,6 +735,7 @@ export function mergePages(raw: any): PagesSettings {
         artworkOpacity: Math.min(100, Math.max(0, num(h.artworkOpacity, fb.hero.artworkOpacity ?? 20))),
       },
       labels,
+      icons,
     };
   }
   return out;
@@ -750,6 +751,15 @@ export function pageLabel(config: AppConfig, key: PageKey, slot: string, fallbac
   const v = getPage(config, key).labels?.[slot];
   return v && v.trim() ? v : fallback;
 }
+
+/** Admin icon override for a slot, falling back to the built-in artwork. */
+export function pageIcon(config: AppConfig, key: PageKey, slot: string): PageIconSetting {
+  const override = getPage(config, key).icons?.[slot];
+  if (!override || !override.kind) return defaultPageIcon(key, slot);
+  if (override.kind === "image" && !override.imageUrl) return defaultPageIcon(key, slot);
+  return override;
+}
+
 
 /** Inline gradient style for a hero card when the admin overrode the colors. */
 export function heroStyle(hero: PageHeroSettings): CSSProperties | undefined {
