@@ -2501,6 +2501,111 @@ function PagesPanel({ wallet }: { wallet: string }) {
         </div>
       </div>
 
+      {/* Icons */}
+      {iconSlots.length > 0 && (
+        <div className={cardCls}>
+          <span className={labelCls}>Icons & logos</span>
+          <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+            Swap the built-in artwork for a 3D kit asset, a line icon or your own upload.
+          </div>
+          <div className="space-y-3">
+            {iconSlots.map(([slot, title]) => {
+              const icon = page.icons?.[slot] ?? defaultPageIcon(pageKey, slot);
+              const kind = icon.kind ?? "kit";
+              return (
+                <div key={slot} className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-black/30">
+                      {kind !== "none" && (
+                        <ActionIcon
+                          kind={kind === "lucide" ? "lucide" : kind === "image" ? "image" : "kit"}
+                          name={icon.name}
+                          imageUrl={icon.imageUrl}
+                          className="h-8 w-8"
+                        />
+                      )}
+                    </span>
+                    <span className="text-[11px] font-black uppercase tracking-widest text-white">
+                      {title}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {(["kit", "lucide", "image", "none"] as const).map((k) => (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => patchIcon(slot, { kind: k })}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
+                          kind === k
+                            ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
+                            : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                        }`}
+                      >
+                        {k === "kit" ? "3D kit" : k === "lucide" ? "Line icon" : k === "image" ? "Upload" : "None"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {(kind === "kit" || kind === "lucide") && (
+                    <select
+                      value={icon.name ?? ""}
+                      onChange={(e) => patchIcon(slot, { name: e.target.value })}
+                      className={inputCls}
+                    >
+                      <option value="">Built-in default</option>
+                      {(kind === "kit" ? KIT_ICON_NAMES : ACTION_ICON_NAMES).map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {kind === "image" && (
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <label className={btnGhost}>
+                          {iconUploading === slot ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Upload className="w-3.5 h-3.5" />
+                          )}
+                          Upload image
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => void uploadIcon(slot, e.target.files?.[0])}
+                          />
+                        </label>
+                        {icon.imageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => patchIcon(slot, { imageUrl: "" })}
+                            className={btnGhost}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <input
+                        value={icon.imageUrl ?? ""}
+                        placeholder="…or paste an image URL"
+                        onChange={(e) => patchIcon(slot, { imageUrl: e.target.value })}
+                        className={inputCls}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+
+
       <div className={`${cardCls} flex flex-wrap items-center gap-2`}>
         {error && <span className="text-red-400 text-[11px]">{error}</span>}
         {saved && (
