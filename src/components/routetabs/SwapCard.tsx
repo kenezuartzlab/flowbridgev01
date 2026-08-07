@@ -1,5 +1,6 @@
 import { ArrowDownUp, ChevronDown, Check } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useAppConfig, feeBpsLabel } from "@/lib/config/appConfig";
 import { cn } from '../../lib/utils';
 import { WarningPanel } from './WarningPanel';
 import { FeePanel } from './FeePanel';
