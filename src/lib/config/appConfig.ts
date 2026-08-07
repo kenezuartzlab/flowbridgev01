@@ -9,7 +9,18 @@ export interface FeeSettings {
   defaultSlippagePct: number;
   maxSlippagePct: number;
   minBridgeUsd: number;
+  /**
+   * Platform fee disclosed in the UI and reserved by MAX/percentage buttons,
+   * in basis points (10 = 0.1%). Must mirror FlowBridgeRouter's globalFeeBps —
+   * update this whenever the router's fee config changes on-chain. Execution
+   * still reads the exact fee from the contract before every swap.
+   */
+  platformFeeBps: number;
 }
+
+/** "0.1%" style label for a fee expressed in basis points. */
+export const feeBpsLabel = (bps: number) =>
+  `${Number(((bps || 0) / 100).toFixed(4))}%`;
 
 export interface RewardSettings {
   minUsd: number;
@@ -469,7 +480,7 @@ export const DEFAULT_PAGES: PagesSettings = {
 export const DEFAULT_APP_CONFIG: AppConfig = {
 
 
-  fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10 },
+  fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10, platformFeeBps: 10 },
   rewards: {
     minUsd: 5,
     usdBlock: 1,
@@ -784,6 +795,10 @@ export function mergeAppConfig(partial: any): AppConfig {
       defaultSlippagePct: num(p.fees?.defaultSlippagePct, d.fees.defaultSlippagePct),
       maxSlippagePct: num(p.fees?.maxSlippagePct, d.fees.maxSlippagePct),
       minBridgeUsd: num(p.fees?.minBridgeUsd, d.fees.minBridgeUsd),
+      platformFeeBps: Math.min(
+        500,
+        Math.max(0, Math.round(num(p.fees?.platformFeeBps, d.fees.platformFeeBps))),
+      ),
     },
     rewards: {
       minUsd: num(p.rewards?.minUsd, d.rewards.minUsd),

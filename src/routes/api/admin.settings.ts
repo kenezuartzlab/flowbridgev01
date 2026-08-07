@@ -5,6 +5,7 @@ const feesSchema = z.object({
   defaultSlippagePct: z.number().min(0.01).max(50),
   maxSlippagePct: z.number().min(0.05).max(50),
   minBridgeUsd: z.number().min(0).max(100000),
+  platformFeeBps: z.number().int().min(0).max(500).optional(),
 });
 
 const rewardsSchema = z.object({

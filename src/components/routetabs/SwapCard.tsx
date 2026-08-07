@@ -1,5 +1,6 @@
 import { ArrowDownUp, ChevronDown, Check } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useAppConfig, feeBpsLabel } from "@/lib/config/appConfig";
 import { cn } from '../../lib/utils';
 import { WarningPanel } from './WarningPanel';
 import { FeePanel } from './FeePanel';
@@ -18,6 +19,8 @@ interface TokenInputProps {
 }
 
 function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onChange, readOnly }: TokenInputProps) {
+  // Admin-published platform fee (bps), mirrors FlowBridgeRouter's globalFeeBps.
+  const feeLabel = feeBpsLabel(useAppConfig().fees.platformFeeBps);
   const [clamped, setClamped] = useState(false);
   // Percentage chips reveal on focus and disappear on blur.
   const [focused, setFocused] = useState(false);
@@ -161,7 +164,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
 
       {!readOnly && clamped && (
         <p className="text-[11px] font-mono leading-snug text-[#FFC46B]">
-          Preview only — above your spendable balance. Max swappable is {maxNum.toFixed(6)} {symbol} (0.1% fee taken on top). Tap MAX to fill it.
+          Preview only — above your spendable balance. Max swappable is {maxNum.toFixed(6)} {symbol} ({feeLabel} fee taken on top). Tap MAX to fill it.
         </p>
       )}
     </div>
@@ -229,6 +232,7 @@ export function SwapCard({
   isFlowUnlocked = false,
   livePrice
 }: SwapCardProps) {
+  const platformFeeLabel = feeBpsLabel(useAppConfig().fees.platformFeeBps);
   const isBotUsdtPair = 
     (showAggregatorSelector && selectedPair === 'BOT/USDT') || 
     (!showAggregatorSelector && (
@@ -313,7 +317,7 @@ export function SwapCard({
           <FeePanel 
             rows={[
               { label: 'Dex Swap Fee', value: '0.3%' },
-              { label: 'Platform Fee', value: '0.1%' },
+              { label: 'Platform Fee', value: platformFeeLabel },
               { label: 'Slippage Tolerance', value: '0.1%' },
               { label: 'Exchange Rate', value: `1 ${fromSymbol} ≈ ${(parseFloat(toAmount) / parseFloat(fromAmount)).toFixed(8)} ${toSymbol}` }
             ]}
