@@ -10,7 +10,6 @@ import {
   Users,
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
-import { KitIcon } from "@/components/kit/KitIcon";
 import { PageIcon } from "@/components/layout/PageIcon";
 import { PartnerProfileModal } from "@/components/partners/PartnerProfileModal";
 import { getPartners, useAppConfig, type PartnerCard } from "@/lib/config/appConfig";

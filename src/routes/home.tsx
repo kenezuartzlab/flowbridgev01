@@ -18,7 +18,6 @@ import { AppTopBar } from "@/components/layout/AppTopBar";
 import { useGreeting } from "@/lib/greetings";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
-import { KitIcon } from "@/components/kit/KitIcon";
 import { PageIcon } from "@/components/layout/PageIcon";
 
 import { BannerRotator } from "@/components/banners/BannerRotator";

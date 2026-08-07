@@ -27,7 +27,6 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { HeroCard } from "@/components/layout/HeroCard";
 import { getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
-import { KitIcon } from "@/components/kit/KitIcon";
 import { PageIcon } from "@/components/layout/PageIcon";
 
 import { SignInButton } from "@/components/auth/SignInButton";
