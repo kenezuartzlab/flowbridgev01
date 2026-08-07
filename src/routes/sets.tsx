@@ -782,10 +782,17 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
             (n) => setCfg({ ...cfg, fees: { ...cfg.fees, minBridgeUsd: n } }),
             "Enforced in the UI before any wallet prompt.",
           )}
+          {numField(
+            "Platform fee (basis points)",
+            cfg.fees.platformFeeBps,
+            (n) => setCfg({ ...cfg, fees: { ...cfg.fees, platformFeeBps: Math.round(n) } }),
+            "10 bps = 0.1%. Keep this equal to FlowBridgeRouter's globalFeeBps.",
+          )}
           <div className="rounded-xl border border-white/10 bg-[#010C1B]/60 px-3 py-2 text-[11px] text-[#C5C1B9] leading-relaxed">
-            The 0.1% platform fee is enforced on-chain by FlowBridgeRouter and can only be changed
-            in the router contract — it is intentionally not editable here so UI disclosure can
-            never drift from the chain.
+            Currently disclosed as <span className="text-white">{feeBpsLabel(cfg.fees.platformFeeBps)}</span>.
+            This value drives the fee row in swap details and the MAX / 25-50-75% head-room. Swap
+            execution always reads the exact fee from FlowBridgeRouter on-chain, so update this
+            field whenever the router's fee config changes to keep the disclosure accurate.
           </div>
         </>
       );
