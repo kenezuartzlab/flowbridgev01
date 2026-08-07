@@ -140,10 +140,18 @@ const heroSchema = z.object({
   artworkOpacity: z.number().min(0).max(100).optional(),
 });
 
+const pageIconSchema = z.object({
+  kind: z.enum(["kit", "image", "lucide", "none"]),
+  name: z.string().trim().max(60).optional(),
+  imageUrl: z.string().trim().max(500).nullable().optional(),
+});
+
 const pageSchema = z.object({
   hero: heroSchema.optional(),
   labels: z.record(z.string().max(40), z.string().trim().max(120)).optional(),
+  icons: z.record(z.string().max(40), pageIconSchema).optional(),
 });
+
 
 const pagesSchema = z.record(z.string().max(40), pageSchema);
 
