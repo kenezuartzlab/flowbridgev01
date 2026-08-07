@@ -2155,6 +2155,38 @@ function PagesPanel({ wallet }: { wallet: string }) {
   const page = pages[pageKey];
   const hero = page.hero;
   const slots = PAGE_LABEL_SLOTS[pageKey];
+  const iconSlots = PAGE_ICON_SLOTS[pageKey] ?? [];
+  const [iconUploading, setIconUploading] = useState<string | null>(null);
+
+  const patchIcon = (slot: string, next: Partial<PageIconSetting>) => {
+    const current = page.icons?.[slot] ?? defaultPageIcon(pageKey, slot);
+    setCfg({
+      ...cfg,
+      pages: {
+        ...pages,
+        [pageKey]: { ...page, icons: { ...page.icons, [slot]: { ...current, ...next } } },
+      },
+    });
+  };
+
+  const uploadIcon = async (slot: string, file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    if (file.size > 2_000_000) {
+      setError("Image is larger than 2 MB — please compress it first.");
+      return;
+    }
+    setIconUploading(slot);
+    try {
+      const { url } = await uploadBannerImage(wallet, file);
+      patchIcon(slot, { kind: "image", imageUrl: url });
+    } catch (e: any) {
+      setError(e?.message ?? "Upload failed");
+    } finally {
+      setIconUploading(null);
+    }
+  };
+
 
   const patchHero = (next: Partial<typeof hero>) =>
     setCfg({ ...cfg, pages: { ...pages, [pageKey]: { ...page, hero: { ...hero, ...next } } } });
