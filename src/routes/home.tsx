@@ -18,7 +18,8 @@ import { AppTopBar } from "@/components/layout/AppTopBar";
 import { useGreeting } from "@/lib/greetings";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
-import { KitIcon } from "@/components/kit/KitIcon";
+import { PageIcon } from "@/components/layout/PageIcon";
+
 import { BannerRotator } from "@/components/banners/BannerRotator";
 import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
 import { trackBannerImpression } from "@/lib/banners/analytics";
@@ -88,14 +89,14 @@ function HomePage() {
 
   const recent = useMemo(() => transactions.slice(0, 4), [transactions]);
 
-  const volumeUsd = useMemo(
-    () =>
-      transactions.reduce(
-        (sum: number, t: any) => sum + (Number(t.volume_usd ?? t.volumeUsd ?? 0) || 0),
-        0,
-      ),
-    [transactions],
+  /**
+   * Real verified swap volume, server-computed on the profile
+   * (`total_swap_volume_usd`) and returned by /api/users/incentives.
+   */
+  const volumeUsd = Number(
+    incentives?.totalSwapVolumeUsd ?? incentives?.total_swap_volume_usd ?? 0,
   );
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -138,7 +139,7 @@ function HomePage() {
 
           <div className="relative mt-4 grid grid-cols-2 gap-2">
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <KitIcon name="gift" size={26} />
+              <PageIcon page="home" slot="claimable" size={26} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
                   {L("claimable", "Claimable")}
@@ -149,7 +150,7 @@ function HomePage() {
               </span>
             </div>
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <KitIcon name="bolt" size={26} />
+              <PageIcon page="home" slot="volume" size={26} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
                   {L("volume", "Swap volume")}
@@ -160,6 +161,7 @@ function HomePage() {
               </span>
             </div>
           </div>
+
 
           {!user && (
             <div className="fb-hero-tile relative mt-4 space-y-2.5 p-3">

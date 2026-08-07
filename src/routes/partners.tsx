@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
-import { KitIcon } from "@/components/kit/KitIcon";
+import { PageIcon } from "@/components/layout/PageIcon";
 import { PartnerProfileModal } from "@/components/partners/PartnerProfileModal";
 import { getPartners, useAppConfig, type PartnerCard } from "@/lib/config/appConfig";
 import { useAccountData } from "@/lib/app/useAccountData";
@@ -137,7 +137,7 @@ function PartnersPage() {
                   key={name}
                   className="glass-card flex flex-col items-center gap-1.5 rounded-[var(--fb-radius-md)] p-3 text-center"
                 >
-                  <KitIcon name="network" size={30} />
+                  <PageIcon page="partners" slot="category" size={30} />
                   <span className="block w-full truncate font-mono text-[10px] font-black uppercase tracking-[0.08em]">
                     {name}
                   </span>
@@ -246,7 +246,7 @@ function FeaturedPartnerCard({
           />
         ) : (
           <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-primary/12">
-            <KitIcon name="handshake" size={38} />
+            <PageIcon page="partners" slot="empty" size={38} />
           </span>
         )}
         <span className="min-w-0 flex-1">

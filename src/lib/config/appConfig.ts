@@ -204,14 +204,24 @@ export interface PageHeroSettings {
   artworkOpacity?: number;
 }
 
+/** Admin-configurable icon for a named slot inside a page. */
+export interface PageIconSetting {
+  kind?: "kit" | "image" | "lucide" | "none";
+  name?: string;
+  imageUrl?: string | null;
+}
+
 /** Editable hero + free-form label overrides for one page. */
 export interface PageSettings {
   hero: PageHeroSettings;
   /** slot key → replacement text. Unset slots keep the built-in copy. */
   labels: Record<string, string>;
+  /** slot key → icon override. Unset slots keep the built-in artwork. */
+  icons: Record<string, PageIconSetting>;
 }
 
 export type PagesSettings = Record<PageKey, PageSettings>;
+
 
 /** Label slots each page exposes to the control panel. */
 export const PAGE_LABEL_SLOTS: Record<PageKey, [string, string][]> = {
@@ -244,6 +254,40 @@ export const PAGE_LABEL_SLOTS: Record<PageKey, [string, string][]> = {
   activity: [["heading", "Activity"]],
   swap: [["heading", "Trade"]],
 };
+
+/**
+ * Icon slots each page exposes to the control panel:
+ * [slot, admin label, built-in kind, built-in name]
+ */
+export const PAGE_ICON_SLOTS: Record<PageKey, [string, string, "kit" | "lucide", string][]> = {
+  home: [
+    ["claimable", "Claimable tile icon", "kit", "gift"],
+    ["volume", "Swap volume tile icon", "kit", "bolt"],
+  ],
+  wallet: [],
+  rewards: [],
+  account: [
+    ["flow", "FLOW tile icon", "kit", "starCoin"],
+    ["play", "Play points tile icon", "kit", "gem"],
+    ["pass", "Verified pass logo", "kit", "flowbridge"],
+    ["passBadge", "Verified pass background", "kit", "shieldCheck"],
+  ],
+  markets: [],
+  partners: [
+    ["category", "Category tile icon", "kit", "network"],
+    ["empty", "Empty-state icon", "kit", "handshake"],
+  ],
+  activity: [],
+  swap: [],
+};
+
+/** Built-in icon for a slot, used when the admin has not overridden it. */
+export function defaultPageIcon(key: PageKey, slot: string): PageIconSetting {
+  const found = PAGE_ICON_SLOTS[key]?.find(([s]) => s === slot);
+  return found ? { kind: found[2], name: found[3] } : { kind: "none" };
+}
+
+
 
 export interface AppConfig {
   fees: FeeSettings;
@@ -406,8 +450,9 @@ export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
 ];
 
 function emptyPage(hero: PageHeroSettings = {}): PageSettings {
-  return { hero, labels: {} };
+  return { hero, labels: {}, icons: {} };
 }
+
 
 /** Seed page themes — mirror the current hardcoded hero artwork. */
 export const DEFAULT_PAGES: PagesSettings = {
@@ -656,7 +701,24 @@ export function mergePages(raw: any): PagesSettings {
         if (k && text) labels[k.slice(0, 40)] = text.slice(0, 120);
       });
     }
+    const icons: Record<string, PageIconSetting> = {};
+    if (src.icons && typeof src.icons === "object") {
+      Object.entries<any>(src.icons).forEach(([k, v]) => {
+        if (!k || !v || typeof v !== "object") return;
+        const ik =
+          v.kind === "kit" || v.kind === "image" || v.kind === "lucide" || v.kind === "none"
+            ? v.kind
+            : undefined;
+        if (!ik) return;
+        icons[k.slice(0, 40)] = {
+          kind: ik,
+          name: str(v.name).trim().slice(0, 60) || undefined,
+          imageUrl: str(v.imageUrl).trim().slice(0, 500) || null,
+        };
+      });
+    }
     out[key] = {
+
       hero: {
         eyebrow: str(h.eyebrow).trim() || undefined,
         title: str(h.title).trim() || undefined,
@@ -673,6 +735,7 @@ export function mergePages(raw: any): PagesSettings {
         artworkOpacity: Math.min(100, Math.max(0, num(h.artworkOpacity, fb.hero.artworkOpacity ?? 20))),
       },
       labels,
+      icons,
     };
   }
   return out;
@@ -688,6 +751,15 @@ export function pageLabel(config: AppConfig, key: PageKey, slot: string, fallbac
   const v = getPage(config, key).labels?.[slot];
   return v && v.trim() ? v : fallback;
 }
+
+/** Admin icon override for a slot, falling back to the built-in artwork. */
+export function pageIcon(config: AppConfig, key: PageKey, slot: string): PageIconSetting {
+  const override = getPage(config, key).icons?.[slot];
+  if (!override || !override.kind) return defaultPageIcon(key, slot);
+  if (override.kind === "image" && !override.imageUrl) return defaultPageIcon(key, slot);
+  return override;
+}
+
 
 /** Inline gradient style for a hero card when the admin overrode the colors. */
 export function heroStyle(hero: PageHeroSettings): CSSProperties | undefined {
