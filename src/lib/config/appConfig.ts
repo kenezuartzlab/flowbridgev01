@@ -255,6 +255,40 @@ export const PAGE_LABEL_SLOTS: Record<PageKey, [string, string][]> = {
   swap: [["heading", "Trade"]],
 };
 
+/**
+ * Icon slots each page exposes to the control panel:
+ * [slot, admin label, built-in kind, built-in name]
+ */
+export const PAGE_ICON_SLOTS: Record<PageKey, [string, string, "kit" | "lucide", string][]> = {
+  home: [
+    ["claimable", "Claimable tile icon", "kit", "gift"],
+    ["volume", "Swap volume tile icon", "kit", "bolt"],
+  ],
+  wallet: [],
+  rewards: [],
+  account: [
+    ["flow", "FLOW tile icon", "kit", "starCoin"],
+    ["play", "Play points tile icon", "kit", "gem"],
+    ["pass", "Verified pass logo", "kit", "flowbridge"],
+    ["passBadge", "Verified pass background", "kit", "shieldCheck"],
+  ],
+  markets: [],
+  partners: [
+    ["category", "Category tile icon", "kit", "network"],
+    ["empty", "Empty-state icon", "kit", "handshake"],
+  ],
+  activity: [],
+  swap: [],
+};
+
+/** Built-in icon for a slot, used when the admin has not overridden it. */
+export function defaultPageIcon(key: PageKey, slot: string): PageIconSetting {
+  const found = PAGE_ICON_SLOTS[key]?.find(([s]) => s === slot);
+  return found ? { kind: found[2], name: found[3] } : { kind: "none" };
+}
+
+
+
 export interface AppConfig {
   fees: FeeSettings;
   rewards: RewardSettings;
