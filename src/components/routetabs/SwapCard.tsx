@@ -19,6 +19,8 @@ interface TokenInputProps {
 }
 
 function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onChange, readOnly }: TokenInputProps) {
+  // Admin-published platform fee (bps), mirrors FlowBridgeRouter's globalFeeBps.
+  const feeLabel = feeBpsLabel(useAppConfig().fees.platformFeeBps);
   const [clamped, setClamped] = useState(false);
   // Percentage chips reveal on focus and disappear on blur.
   const [focused, setFocused] = useState(false);
@@ -162,7 +164,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
 
       {!readOnly && clamped && (
         <p className="text-[11px] font-mono leading-snug text-[#FFC46B]">
-          Preview only — above your spendable balance. Max swappable is {maxNum.toFixed(6)} {symbol} (0.1% fee taken on top). Tap MAX to fill it.
+          Preview only — above your spendable balance. Max swappable is {maxNum.toFixed(6)} {symbol} ({feeLabel} fee taken on top). Tap MAX to fill it.
         </p>
       )}
     </div>
