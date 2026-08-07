@@ -450,8 +450,9 @@ export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
 ];
 
 function emptyPage(hero: PageHeroSettings = {}): PageSettings {
-  return { hero, labels: {} };
+  return { hero, labels: {}, icons: {} };
 }
+
 
 /** Seed page themes — mirror the current hardcoded hero artwork. */
 export const DEFAULT_PAGES: PagesSettings = {
