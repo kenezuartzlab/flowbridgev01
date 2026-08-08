@@ -122,8 +122,52 @@ export function BindWalletCard({
         )}
       </div>
 
+      {/* Manual binding — always available, so regular desktop/mobile browsers
+          without an injected wallet can bind exactly like the FLOW portal. */}
+      {showManual ? (
+        <div className="mt-2.5 space-y-2">
+          <label className="block font-mono text-[10px] font-black uppercase tracking-[0.08em] text-muted">
+            Wallet address
+          </label>
+          <input
+            value={manual}
+            onChange={(e) => setManual(e.target.value)}
+            spellCheck={false}
+            autoComplete="off"
+            placeholder="0x…"
+            className="w-full rounded-lg border border-hairline bg-card-alt px-2.5 py-2 font-mono text-[12px] text-foreground placeholder:text-muted-soft focus:border-primary/40 focus:outline-none"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => void bind(manual)}
+              disabled={!signedIn || busy || !manual.trim()}
+              className="grid min-h-[38px] flex-1 place-items-center rounded-lg bg-primary px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary-foreground disabled:opacity-50"
+            >
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? "Rebind manually" : "Bind manually"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowManual(false); setManual(""); }}
+              className="grid min-h-[38px] shrink-0 place-items-center rounded-lg border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowManual(true)}
+          className="mt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted underline hover:text-foreground"
+        >
+          {done ? "Enter a different address manually" : "Or enter wallet address manually"}
+        </button>
+      )}
+
       {error ? <p className="mt-2 font-mono text-[10.5px] text-danger">{error}</p> : null}
       {ok ? <p className="mt-2 font-mono text-[10.5px] text-success">{ok}</p> : null}
     </section>
+
   );
 }
