@@ -444,7 +444,23 @@ function RewardsPage() {
 
             {tab === "EARN" ? (
               <>
+              <button
+                type="button"
+                onClick={() => setPortalOpen(true)}
+                className="flex min-h-[52px] w-full items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/10 px-4 text-left"
+              >
+                <span className="min-w-0">
+                  <span className="block font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary">
+                    FLOW Incentive Portal
+                  </span>
+                  <span className="block font-mono text-[10px] uppercase tracking-[0.08em] text-muted">
+                    Full tasks, binding & claim details
+                  </span>
+                </span>
+                <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+              </button>
               <BindWalletCard boundAddress={incentives?.walletAddress} onDone={refresh} signedIn={!!user} />
+
               <SocialTasksCard socials={incentives?.socials} onDone={refresh} />
               <section className="rounded-2xl border border-hairline bg-card p-4">
 
