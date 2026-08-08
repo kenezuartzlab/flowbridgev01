@@ -74,11 +74,16 @@ function RewardsPage() {
   const L = (slot: string, fallback: string) => pageLabel(config, "rewards", slot, fallback);
   const [claiming, setClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState<string | null>(null);
+  const [portalOpen, setPortalOpen] = useState(false);
 
-  /** Deep-link support: #games opens Games, #social the task portal, #bind the wallet task. */
+  /** Deep-link support: #games opens Games, #social the task portal, #bind the wallet task, #portal the FLOW Incentive Portal. */
   useEffect(() => {
     const hash = window.location.hash.replace("#", "").toUpperCase();
     if (["OVERVIEW", "EARN", "REFERRALS", "GIFTS", "GAMES"].includes(hash)) setTab(hash as Tab);
+    if (hash === "PORTAL" || hash === "FLOW-PORTAL" || hash === "INCENTIVES") {
+      setTab("EARN");
+      setPortalOpen(true);
+    }
     if (hash === "SOCIAL" || hash === "SOCIAL-TASKS") {
       setTab("EARN");
       setTimeout(() => document.getElementById("social-tasks")?.scrollIntoView({ behavior: "smooth" }), 250);
@@ -88,6 +93,7 @@ function RewardsPage() {
       setTimeout(() => document.getElementById("bind-wallet")?.scrollIntoView({ behavior: "smooth" }), 250);
     }
   }, []);
+
 
 
 
