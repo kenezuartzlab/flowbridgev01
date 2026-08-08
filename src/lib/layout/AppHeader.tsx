@@ -190,7 +190,7 @@ export function AppHeader({
       items: [
         {
           id: 'rewards',
-          label: 'Rewards',
+          label: 'FLOW Portal',
           icon: <Gift className="w-4 h-4" />,
           onClick: () => { onRewardsClick?.(); setMenuOpen(false); },
           accent: true,

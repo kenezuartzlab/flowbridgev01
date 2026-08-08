@@ -456,7 +456,7 @@ export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
   { id: "qa-markets", label: "Markets", hint: "Live prices", to: "/markets", iconKind: "lucide", icon: "LineChart", flag: "showMarkets", isActive: true },
   { id: "qa-partners", label: "Partners", hint: "Quests & apps", to: "/partners", iconKind: "lucide", icon: "Compass", flag: "showPartners", isActive: true },
   { id: "qa-rewards", label: "Rewards", hint: "FLOW points", to: "/rewards", iconKind: "lucide", icon: "Gift", isActive: true },
-  { id: "qa-portal", label: "FLOW Portal", hint: "Incentive tasks", to: "/rewards", hash: "earn", iconKind: "lucide", icon: "Heart", isActive: true },
+  { id: "qa-portal", label: "FLOW Portal", hint: "Incentive tasks", to: "/rewards", hash: "portal", iconKind: "lucide", icon: "Heart", isActive: true },
   { id: "qa-assistant", label: "Assistant", hint: "Ask anything", to: "/assistant", iconKind: "lucide", icon: "Sparkles", flag: "showAssistant", isActive: true },
 ];
 
