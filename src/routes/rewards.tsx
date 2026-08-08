@@ -581,7 +581,19 @@ function RewardsPage() {
         )}
       </main>
 
+      {portalOpen && (
+        <DonateModal
+          isOpen={portalOpen}
+          onClose={() => { setPortalOpen(false); void refresh(); }}
+          googleUser={user}
+          getEffectiveIdToken={getIdToken}
+          initialTab="incentives"
+          onGoogleSignIn={async () => { await googleSignIn(window.location.pathname + "#portal"); }}
+        />
+      )}
+
       <BottomNav />
+
     </div>
   );
 }
