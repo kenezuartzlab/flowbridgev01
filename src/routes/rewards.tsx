@@ -28,7 +28,9 @@ import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
 
 import { formatUsd } from "@/lib/format";
-import { getIdToken } from "@/lib/auth";
+import { getIdToken, googleSignIn } from "@/lib/auth";
+import { DonateModal } from "@/modals/DonateModal";
+
 
 
 export const Route = createFileRoute("/rewards")({
