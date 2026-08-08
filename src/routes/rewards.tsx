@@ -28,7 +28,9 @@ import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
 
 import { formatUsd } from "@/lib/format";
-import { getIdToken } from "@/lib/auth";
+import { getIdToken, googleSignIn } from "@/lib/auth";
+import { DonateModal } from "@/modals/DonateModal";
+
 
 
 export const Route = createFileRoute("/rewards")({
@@ -72,11 +74,16 @@ function RewardsPage() {
   const L = (slot: string, fallback: string) => pageLabel(config, "rewards", slot, fallback);
   const [claiming, setClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState<string | null>(null);
+  const [portalOpen, setPortalOpen] = useState(false);
 
-  /** Deep-link support: #games opens Games, #social the task portal, #bind the wallet task. */
+  /** Deep-link support: #games opens Games, #social the task portal, #bind the wallet task, #portal the FLOW Incentive Portal. */
   useEffect(() => {
     const hash = window.location.hash.replace("#", "").toUpperCase();
     if (["OVERVIEW", "EARN", "REFERRALS", "GIFTS", "GAMES"].includes(hash)) setTab(hash as Tab);
+    if (hash === "PORTAL" || hash === "FLOW-PORTAL" || hash === "INCENTIVES") {
+      setTab("EARN");
+      setPortalOpen(true);
+    }
     if (hash === "SOCIAL" || hash === "SOCIAL-TASKS") {
       setTab("EARN");
       setTimeout(() => document.getElementById("social-tasks")?.scrollIntoView({ behavior: "smooth" }), 250);
@@ -86,6 +93,7 @@ function RewardsPage() {
       setTimeout(() => document.getElementById("bind-wallet")?.scrollIntoView({ behavior: "smooth" }), 250);
     }
   }, []);
+
 
 
 
@@ -436,7 +444,23 @@ function RewardsPage() {
 
             {tab === "EARN" ? (
               <>
+              <button
+                type="button"
+                onClick={() => setPortalOpen(true)}
+                className="flex min-h-[52px] w-full items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/10 px-4 text-left"
+              >
+                <span className="min-w-0">
+                  <span className="block font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary">
+                    FLOW Incentive Portal
+                  </span>
+                  <span className="block font-mono text-[10px] uppercase tracking-[0.08em] text-muted">
+                    Full tasks, binding & claim details
+                  </span>
+                </span>
+                <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+              </button>
               <BindWalletCard boundAddress={incentives?.walletAddress} onDone={refresh} signedIn={!!user} />
+
               <SocialTasksCard socials={incentives?.socials} onDone={refresh} />
               <section className="rounded-2xl border border-hairline bg-card p-4">
 
@@ -557,7 +581,19 @@ function RewardsPage() {
         )}
       </main>
 
+      {portalOpen && (
+        <DonateModal
+          isOpen={portalOpen}
+          onClose={() => { setPortalOpen(false); void refresh(); }}
+          googleUser={user}
+          getEffectiveIdToken={getIdToken}
+          initialTab="incentives"
+          onGoogleSignIn={async () => { await googleSignIn(window.location.pathname + "#portal"); }}
+        />
+      )}
+
       <BottomNav />
+
     </div>
   );
 }

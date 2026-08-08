@@ -21,15 +21,22 @@ export function BindWalletCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [manual, setManual] = useState("");
+  const [showManual, setShowManual] = useState(false);
 
   const done = !!boundAddress;
   const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
-  const bind = async () => {
+  const bind = async (target?: string) => {
     setError(null);
     setOk(null);
-    if (!address) {
-      setError("Connect your wallet first, then bind it.");
+    const candidate = (target ?? address ?? "").trim();
+    if (!candidate) {
+      setError("Enter or connect a wallet address to bind.");
+      return;
+    }
+    if (!/^0x[a-fA-F0-9]{40}$/.test(candidate)) {
+      setError("That doesn't look like a valid EVM address (0x + 40 characters).");
       return;
     }
     setBusy(true);
@@ -39,11 +46,13 @@ export function BindWalletCard({
       const res = await fetch("/api/users/bind-wallet", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ walletAddress: address }),
+        body: JSON.stringify({ walletAddress: candidate }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.success) throw new Error(data?.error ?? "Could not bind wallet.");
       setOk("Wallet bound to your account.");
+      setManual("");
+      setShowManual(false);
       await onDone?.();
     } catch (e: any) {
       setError(e?.message ?? "Network error binding wallet.");
@@ -53,6 +62,7 @@ export function BindWalletCard({
   };
 
   const injected = connectors.find((c) => c.id === "injected") ?? connectors[0];
+
 
   return (
     <section id="bind-wallet" className="scroll-mt-20 rounded-2xl border border-hairline bg-card p-4">
@@ -112,8 +122,52 @@ export function BindWalletCard({
         )}
       </div>
 
+      {/* Manual binding — always available, so regular desktop/mobile browsers
+          without an injected wallet can bind exactly like the FLOW portal. */}
+      {showManual ? (
+        <div className="mt-2.5 space-y-2">
+          <label className="block font-mono text-[10px] font-black uppercase tracking-[0.08em] text-muted">
+            Wallet address
+          </label>
+          <input
+            value={manual}
+            onChange={(e) => setManual(e.target.value)}
+            spellCheck={false}
+            autoComplete="off"
+            placeholder="0x…"
+            className="w-full rounded-lg border border-hairline bg-card-alt px-2.5 py-2 font-mono text-[12px] text-foreground placeholder:text-muted-soft focus:border-primary/40 focus:outline-none"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => void bind(manual)}
+              disabled={!signedIn || busy || !manual.trim()}
+              className="grid min-h-[38px] flex-1 place-items-center rounded-lg bg-primary px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary-foreground disabled:opacity-50"
+            >
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? "Rebind manually" : "Bind manually"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowManual(false); setManual(""); }}
+              className="grid min-h-[38px] shrink-0 place-items-center rounded-lg border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowManual(true)}
+          className="mt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted underline hover:text-foreground"
+        >
+          {done ? "Enter a different address manually" : "Or enter wallet address manually"}
+        </button>
+      )}
+
       {error ? <p className="mt-2 font-mono text-[10.5px] text-danger">{error}</p> : null}
       {ok ? <p className="mt-2 font-mono text-[10.5px] text-success">{ok}</p> : null}
     </section>
+
   );
 }
