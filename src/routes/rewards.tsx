@@ -301,16 +301,16 @@ function RewardsPage() {
                         Weekly Progress
                       </h2>
                       <p className="mt-1.5 text-[13px] font-bold text-foreground">
-                        Earn {XP_PER_LEVEL.toLocaleString()} FLOW this week
+                        Earn {WEEKLY_PTS_GOAL.toLocaleString()} {PTS} this week
                       </p>
                       <p className="font-mono text-[10px] tabular-nums text-muted">
-                        {weeklyPoints.toLocaleString()} / {XP_PER_LEVEL.toLocaleString()}
+                        {formatPts(weeklyPoints)} / {WEEKLY_PTS_GOAL.toLocaleString()} {PTS}
                       </p>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-hairline">
                         <div
                           className="h-full rounded-full bg-primary transition-all duration-700"
                           style={{
-                            width: `${Math.min(100, (weeklyPoints / XP_PER_LEVEL) * 100)}%`,
+                            width: `${Math.min(100, (weeklyPoints / WEEKLY_PTS_GOAL) * 100)}%`,
                           }}
                         />
                       </div>
