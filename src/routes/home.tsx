@@ -29,6 +29,7 @@ import { ActionIcon } from "@/components/ActionIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
+import { PTS } from "@/lib/points";
 
 
 export const Route = createFileRoute("/home")({
@@ -38,12 +39,12 @@ export const Route = createFileRoute("/home")({
       {
         name: "description",
         content:
-          "Your FlowBridge home: FLOW points, recent swap and bridge activity, live BOT Chain prices and one-tap access to swap, bridge and rewards.",
+          "Your FlowBridge home: FLOW Points (PTS), recent swap and bridge activity, live BOT Chain prices and one-tap access to swap, bridge and rewards.",
       },
       { property: "og:title", content: "FlowBridge Home Dashboard" },
       {
         property: "og:description",
-        content: "FLOW points, live BOT Chain prices and recent activity in one place.",
+        content: "FLOW Points (PTS), live BOT Chain prices and recent activity in one place.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/home" },
@@ -122,7 +123,7 @@ function HomePage() {
         <HeroCard hero={page.hero} variant="home" className="p-5">
           <div className="relative flex items-start justify-between gap-3">
             <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
-              {L("balance", "FLOW balance")}
+              {L("balance", "FLOW Points")}
             </p>
             <Link
               to="/rewards"
@@ -134,7 +135,7 @@ function HomePage() {
 
           <p className="relative mt-2 font-mono text-[40px] font-black leading-none tabular-nums tracking-[-0.02em] sm:text-[46px]">
             {loading && !incentives ? "—" : flowPoints.toLocaleString("en-US")}
-            <span className="ml-2 align-baseline text-[13px] font-black opacity-80">FLOW</span>
+            <span className="ml-2 align-baseline text-[13px] font-black opacity-80">{PTS}</span>
           </p>
 
           <div className="relative mt-4 grid grid-cols-2 gap-2">
@@ -142,7 +143,7 @@ function HomePage() {
               <PageIcon page="home" slot="claimable" size={26} />
               <span className="min-w-0">
                 <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
-                  {L("claimable", "Claimable")}
+                  {L("claimable", "Claimable PTS")}
                 </span>
                 <span className="block font-mono text-[15px] font-black tabular-nums">
                   {claimable.toLocaleString("en-US")}
@@ -167,7 +168,7 @@ function HomePage() {
             <div className="fb-hero-tile relative mt-4 space-y-2.5 p-3">
               <p className="flex items-start gap-1.5 font-mono text-[10.5px] leading-relaxed">
                 <Sparkles className="mt-[1px] h-3 w-3 shrink-0" />
-                Sign in to start accruing FLOW on every swap.
+                Sign in to start accruing FLOW Points (PTS) on every swap.
               </p>
               <SignInButton label="Sign in" returnTo="/home" />
             </div>

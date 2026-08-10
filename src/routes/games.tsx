@@ -116,8 +116,8 @@ function GamesPage() {
             <span className="mr-1.5 inline-flex items-center rounded-full border border-hairline bg-card px-1.5 py-0.5 font-black uppercase tracking-[0.1em] text-foreground">
               Demo only
             </span>
-            Play Points are a local arcade score and cannot be claimed. FLOW rewards stay tied to
-            real swap and bridge volume — playing games never changes your FLOW balance.
+            Play Points are a local arcade score — they are not XP and not FLOW Points (PTS), and cannot
+            be claimed. PTS stay tied to real qualified swap volume; playing games never changes them.
           </span>
         </p>
 
@@ -161,7 +161,7 @@ function GamesPage() {
           <span className="min-w-0 flex-1">
             <span className="block text-[13px] font-black">Real rewards live in Rewards</span>
             <span className="mt-0.5 block font-mono text-[10px] leading-relaxed text-muted">
-              FLOW points, referrals and claims.
+              FLOW Points (PTS), XP levels, referrals and claims.
             </span>
           </span>
           <ChevronRight className="h-4 w-4 shrink-0 text-muted" />

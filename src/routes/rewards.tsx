@@ -30,20 +30,21 @@ import { wagmiConfig } from "@/lib/wagmi";
 import { formatUsd } from "@/lib/format";
 import { getIdToken, googleSignIn } from "@/lib/auth";
 import { DonateModal } from "@/modals/DonateModal";
+import { PTS, XP, formatPts, xpLevel } from "@/lib/points";
 
 
 
 export const Route = createFileRoute("/rewards")({
   head: () => ({
     meta: [
-      { title: "FLOW Rewards — Points & Referrals | FlowBridge" },
+      { title: "FLOW Portal — Points, XP & Referrals | FlowBridge" },
       {
         name: "description",
         content:
-          "Track your FLOW points from swaps and referrals, see claim eligibility, swap volume progress and your referral link on FlowBridge.",
+          "Track FLOW Points (PTS) from swaps and referrals, your XP level, claim eligibility, swap volume progress and referral link on FlowBridge.",
       },
-      { property: "og:title", content: "FlowBridge FLOW Rewards" },
-      { property: "og:description", content: "Swap-powered FLOW points, referral totals and claim progress." },
+      { property: "og:title", content: "FlowBridge FLOW Portal" },
+      { property: "og:description", content: "Swap-powered FLOW Points (PTS), XP levels and claim progress." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -53,8 +54,8 @@ export const Route = createFileRoute("/rewards")({
 
 type Tab = "OVERVIEW" | "EARN" | "REFERRALS" | "GIFTS" | "GAMES";
 
-const LEVEL_NAMES = ["Newcomer", "Trader", "Explorer", "Voyager", "Architect", "Legend"];
-const XP_PER_LEVEL = 1000;
+/** Presentation-only weekly PTS goal (not an economic rule). */
+const WEEKLY_PTS_GOAL = 1000;
 
 /** Wallet hooks (bind-wallet task) need a WagmiProvider in this route's tree. */
 function RewardsRoute() {
@@ -122,7 +123,7 @@ function RewardsPage() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.success) throw new Error(data?.error ?? "Claim failed.");
-      setClaimMessage(`Claimed ${claimableNow.toLocaleString()} FLOW`);
+      setClaimMessage(`Converted ${formatPts(claimableNow)} ${PTS} to claimable FLOW`);
       await refresh();
     } catch (e: any) {
       setClaimMessage(e?.message ?? "Claim failed.");
@@ -149,8 +150,8 @@ function RewardsPage() {
     }, 0);
   }, [transactions]);
 
-  const levelIndex = Math.min(LEVEL_NAMES.length - 1, Math.floor(lifetime / XP_PER_LEVEL));
-  const levelXp = lifetime % XP_PER_LEVEL;
+  /** XP mirrors lifetime engagement; it is status only and never converts to FLOW. */
+  const level = xpLevel(lifetime);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -179,8 +180,8 @@ function RewardsPage() {
           <div className="space-y-4">
             <TabBanner variant="rewards" />
             <EmptyState
-              title="Sign in to see your FLOW"
-              body="FLOW points are tied to a verified email plus the wallet bound to it. Sign in to start tracking rewards."
+              title="Sign in to see your FLOW Points"
+              body="FLOW Points (PTS) are off-chain campaign points tied to a verified email plus the wallet bound to it. They are not FLOW tokens. Sign in to start tracking."
             />
             <div className="flex justify-center">
               <SignInButton label="Sign in" returnTo="/rewards" />
@@ -191,30 +192,36 @@ function RewardsPage() {
             {/* Points hero + level progress */}
             <HeroCard hero={page.hero} variant="rewards" className="p-5">
               <p className="relative font-mono text-[10px] font-black uppercase tracking-[0.16em] opacity-80">
-                {L("points", "Total FLOW Points")}
+                {L("points", "FLOW Points")}
               </p>
               <p className="relative mt-1 text-[44px] font-black leading-none tabular-nums">
-                {lifetime.toLocaleString()}
+                {formatPts(lifetime)}
+                <span className="ml-2 align-baseline text-[14px] font-black opacity-80">{PTS}</span>
               </p>
               <p className="relative mt-1.5 font-mono text-[11px] font-black uppercase tracking-[0.1em] opacity-90">
-                +{weeklyPoints.toLocaleString()} this week
+                +{formatPts(weeklyPoints)} {PTS} this week
               </p>
 
               <div className="fb-hero-tile relative mt-4 p-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-2 font-mono text-[10px] font-black uppercase tracking-[0.1em]">
                   <span>
-                    Level {levelIndex + 1} · {LEVEL_NAMES[levelIndex]}
+                    Level {level.level} · {level.name}
                   </span>
                   <span className="tabular-nums opacity-80">
-                    {levelXp.toLocaleString()} / {XP_PER_LEVEL.toLocaleString()} XP
+                    {level.nextLevelXp
+                      ? `${level.intoLevel.toLocaleString()} / ${level.bandSize.toLocaleString()} ${XP}`
+                      : `Max level · ${lifetime.toLocaleString()} ${XP}`}
                   </span>
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/25">
                   <div
                     className="h-full rounded-full bg-white/90 transition-all duration-700"
-                    style={{ width: `${(levelXp / XP_PER_LEVEL) * 100}%` }}
+                    style={{ width: `${level.progress * 100}%` }}
                   />
                 </div>
+                <p className="mt-2 font-mono text-[9.5px] uppercase tracking-[0.08em] opacity-70">
+                  {XP} is engagement status only — it never converts to FLOW
+                </p>
               </div>
             </HeroCard>
 
@@ -222,23 +229,27 @@ function RewardsPage() {
             {/* Stat tiles */}
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <OverviewTile
-                label={L("available", "Available")}
-                value={(incentives?.claimableTotal ?? 0).toLocaleString()}
-                unit="FLOW"
+                label={L("available", "Claimable")}
+                value={formatPts(incentives?.claimableTotal ?? 0)}
+                unit={PTS}
                 accent
               />
               <OverviewTile
                 label={L("pending", "Pending")}
-                value={(incentives?.signupLocked ?? 0).toLocaleString()}
-                unit="locked"
+                value={formatPts(incentives?.signupLocked ?? 0)}
+                unit={`${PTS} locked`}
               />
-              <OverviewTile label="Lifetime" value={lifetime.toLocaleString()} unit="FLOW" />
+              <OverviewTile label="Lifetime" value={formatPts(lifetime)} unit={PTS} />
               <OverviewTile
-                label="Claimed"
+                label="Converted"
                 value={(incentives?.claimedTokens ?? 0).toLocaleString()}
                 unit="FLOW"
               />
             </section>
+            <p className="px-1 font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.08em] text-muted-soft">
+              FLOW Points ({PTS}) are off-chain campaign points — not FLOW tokens. 1 {PTS} is never
+              guaranteed to equal 1 FLOW.
+            </p>
 
             {/* Sub tabs */}
             <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
@@ -268,7 +279,7 @@ function RewardsPage() {
                     <QuickAction
                       Icon={Repeat}
                       label="Swap now"
-                      note="Earn FLOW"
+                      note="Earn PTS"
                       to="/"
                     />
                     <QuickAction
@@ -290,16 +301,16 @@ function RewardsPage() {
                         Weekly Progress
                       </h2>
                       <p className="mt-1.5 text-[13px] font-bold text-foreground">
-                        Earn {XP_PER_LEVEL.toLocaleString()} FLOW this week
+                        Earn {WEEKLY_PTS_GOAL.toLocaleString()} {PTS} this week
                       </p>
                       <p className="font-mono text-[10px] tabular-nums text-muted">
-                        {weeklyPoints.toLocaleString()} / {XP_PER_LEVEL.toLocaleString()}
+                        {formatPts(weeklyPoints)} / {WEEKLY_PTS_GOAL.toLocaleString()} {PTS}
                       </p>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-hairline">
                         <div
                           className="h-full rounded-full bg-primary transition-all duration-700"
                           style={{
-                            width: `${Math.min(100, (weeklyPoints / XP_PER_LEVEL) * 100)}%`,
+                            width: `${Math.min(100, (weeklyPoints / WEEKLY_PTS_GOAL) * 100)}%`,
                           }}
                         />
                       </div>
@@ -344,8 +355,8 @@ function RewardsPage() {
                     />
                     <CheckRow
                       done={(incentives?.claimableTotal ?? 0) >= claimThreshold}
-                      label={`${claimThreshold.toLocaleString()} claimable FLOW`}
-                      hint={`${(incentives?.claimableTotal ?? 0).toLocaleString()} available now`}
+                      label={`${claimThreshold.toLocaleString()} claimable ${PTS}`}
+                      hint={`${formatPts(incentives?.claimableTotal ?? 0)} ${PTS} available now`}
                     />
                   </ul>
 
@@ -402,13 +413,13 @@ function RewardsPage() {
                       )}
                       {claiming
                         ? "Claiming…"
-                        : `Claim available (${claimableNow.toLocaleString()} FLOW)`}
+                        : `Convert to FLOW (${formatPts(claimableNow)} ${PTS})`}
                     </button>
                     <p className="text-center font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
                       {claimMessage ??
                         (canClaim
                           ? "All requirements met — claim now"
-                          : `Complete the checklist and reach ${claimThreshold.toLocaleString()} claimable FLOW`)}
+                          : `Complete the checklist and reach ${claimThreshold.toLocaleString()} claimable ${PTS}`)}
                     </p>
                   </div>
                 </section>
@@ -471,9 +482,9 @@ function RewardsPage() {
                 <ul className="mt-3 space-y-2.5">
                   <TaskRow
                     label="Complete a swap"
-                    hint="Swaps accrue FLOW · bridges never do"
+                    hint="Swaps accrue PTS · bridges never do"
                     progress={(incentives?.pointsSelf ?? 0) > 0 ? 1 : 0}
-                    detail={`${(incentives?.pointsSelf ?? 0).toLocaleString()} FLOW from swaps`}
+                    detail={`${formatPts(incentives?.pointsSelf ?? 0)} ${PTS} from swaps`}
                     cta="Swap now"
                   />
                   <TaskRow
@@ -562,7 +573,7 @@ function RewardsPage() {
               <ComingSoon
                 Icon={Gift}
                 title="Gifts & Vouchers"
-                body="Sending FLOW gift vouchers and soulbound collectibles is on the roadmap. Points keep accruing from swaps in the meantime."
+                body="Sending FLOW-token gift vouchers and soulbound collectibles is on the roadmap. Points keep accruing from swaps in the meantime."
               />
             ) : null}
 
@@ -575,7 +586,7 @@ function RewardsPage() {
             ) : null}
 
             <p className="pb-2 text-center font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
-              Rewards are swap-only · claims require a verified email + bound wallet
+              Swap-only · FLOW Points (PTS) are off-chain · claims require a verified email + bound wallet
             </p>
           </div>
         )}
