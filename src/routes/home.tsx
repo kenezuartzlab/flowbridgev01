@@ -29,6 +29,7 @@ import { ActionIcon } from "@/components/ActionIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
+import { PTS } from "@/lib/points";
 
 
 export const Route = createFileRoute("/home")({
