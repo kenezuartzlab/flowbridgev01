@@ -30,6 +30,7 @@ import { wagmiConfig } from "@/lib/wagmi";
 import { formatUsd } from "@/lib/format";
 import { getIdToken, googleSignIn } from "@/lib/auth";
 import { DonateModal } from "@/modals/DonateModal";
+import { PTS, XP, formatPts, xpLevel } from "@/lib/points";
 
 
 
@@ -53,8 +54,8 @@ export const Route = createFileRoute("/rewards")({
 
 type Tab = "OVERVIEW" | "EARN" | "REFERRALS" | "GIFTS" | "GAMES";
 
-const LEVEL_NAMES = ["Newcomer", "Trader", "Explorer", "Voyager", "Architect", "Legend"];
-const XP_PER_LEVEL = 1000;
+/** Presentation-only weekly PTS goal (not an economic rule). */
+const WEEKLY_PTS_GOAL = 1000;
 
 /** Wallet hooks (bind-wallet task) need a WagmiProvider in this route's tree. */
 function RewardsRoute() {
@@ -122,7 +123,7 @@ function RewardsPage() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.success) throw new Error(data?.error ?? "Claim failed.");
-      setClaimMessage(`Claimed ${claimableNow.toLocaleString()} FLOW`);
+      setClaimMessage(`Converted ${formatPts(claimableNow)} ${PTS} to claimable FLOW`);
       await refresh();
     } catch (e: any) {
       setClaimMessage(e?.message ?? "Claim failed.");
@@ -149,8 +150,8 @@ function RewardsPage() {
     }, 0);
   }, [transactions]);
 
-  const levelIndex = Math.min(LEVEL_NAMES.length - 1, Math.floor(lifetime / XP_PER_LEVEL));
-  const levelXp = lifetime % XP_PER_LEVEL;
+  /** XP mirrors lifetime engagement; it is status only and never converts to FLOW. */
+  const level = xpLevel(lifetime);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -179,8 +180,8 @@ function RewardsPage() {
           <div className="space-y-4">
             <TabBanner variant="rewards" />
             <EmptyState
-              title="Sign in to see your FLOW"
-              body="FLOW points are tied to a verified email plus the wallet bound to it. Sign in to start tracking rewards."
+              title="Sign in to see your FLOW Points"
+              body="FLOW Points (PTS) are off-chain campaign points tied to a verified email plus the wallet bound to it. They are not FLOW tokens. Sign in to start tracking."
             />
             <div className="flex justify-center">
               <SignInButton label="Sign in" returnTo="/rewards" />
@@ -191,30 +192,36 @@ function RewardsPage() {
             {/* Points hero + level progress */}
             <HeroCard hero={page.hero} variant="rewards" className="p-5">
               <p className="relative font-mono text-[10px] font-black uppercase tracking-[0.16em] opacity-80">
-                {L("points", "Total FLOW Points")}
+                {L("points", "FLOW Points")}
               </p>
               <p className="relative mt-1 text-[44px] font-black leading-none tabular-nums">
-                {lifetime.toLocaleString()}
+                {formatPts(lifetime)}
+                <span className="ml-2 align-baseline text-[14px] font-black opacity-80">{PTS}</span>
               </p>
               <p className="relative mt-1.5 font-mono text-[11px] font-black uppercase tracking-[0.1em] opacity-90">
-                +{weeklyPoints.toLocaleString()} this week
+                +{formatPts(weeklyPoints)} {PTS} this week
               </p>
 
               <div className="fb-hero-tile relative mt-4 p-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-2 font-mono text-[10px] font-black uppercase tracking-[0.1em]">
                   <span>
-                    Level {levelIndex + 1} · {LEVEL_NAMES[levelIndex]}
+                    Level {level.level} · {level.name}
                   </span>
                   <span className="tabular-nums opacity-80">
-                    {levelXp.toLocaleString()} / {XP_PER_LEVEL.toLocaleString()} XP
+                    {level.nextLevelXp
+                      ? `${level.intoLevel.toLocaleString()} / ${level.bandSize.toLocaleString()} ${XP}`
+                      : `Max level · ${lifetime.toLocaleString()} ${XP}`}
                   </span>
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/25">
                   <div
                     className="h-full rounded-full bg-white/90 transition-all duration-700"
-                    style={{ width: `${(levelXp / XP_PER_LEVEL) * 100}%` }}
+                    style={{ width: `${level.progress * 100}%` }}
                   />
                 </div>
+                <p className="mt-2 font-mono text-[9.5px] uppercase tracking-[0.08em] opacity-70">
+                  {XP} is engagement status only — it never converts to FLOW
+                </p>
               </div>
             </HeroCard>
 
@@ -222,23 +229,27 @@ function RewardsPage() {
             {/* Stat tiles */}
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <OverviewTile
-                label={L("available", "Available")}
-                value={(incentives?.claimableTotal ?? 0).toLocaleString()}
-                unit="FLOW"
+                label={L("available", "Claimable")}
+                value={formatPts(incentives?.claimableTotal ?? 0)}
+                unit={PTS}
                 accent
               />
               <OverviewTile
                 label={L("pending", "Pending")}
-                value={(incentives?.signupLocked ?? 0).toLocaleString()}
-                unit="locked"
+                value={formatPts(incentives?.signupLocked ?? 0)}
+                unit={`${PTS} locked`}
               />
-              <OverviewTile label="Lifetime" value={lifetime.toLocaleString()} unit="FLOW" />
+              <OverviewTile label="Lifetime" value={formatPts(lifetime)} unit={PTS} />
               <OverviewTile
-                label="Claimed"
+                label="Converted"
                 value={(incentives?.claimedTokens ?? 0).toLocaleString()}
                 unit="FLOW"
               />
             </section>
+            <p className="px-1 font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.08em] text-muted-soft">
+              FLOW Points ({PTS}) are off-chain campaign points — not FLOW tokens. 1 {PTS} is never
+              guaranteed to equal 1 FLOW.
+            </p>
 
             {/* Sub tabs */}
             <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
