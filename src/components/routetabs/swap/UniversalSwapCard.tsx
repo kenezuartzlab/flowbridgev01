@@ -811,23 +811,23 @@ export function UniversalSwapCard({
                 <Row label="Platform fee" value={platformFeeLabel} />
                 
                 <Row
-                  label="FLOW reward status"
+                  label="FLOW Points estimate"
                   value={
                     !rewardsActive
                       ? "Link email + wallet"
                       : swapUsd == null
                         ? "Price loading"
                         : rewardEligible
-                          ? `+${estimatedFlowPoints.toLocaleString()} FLOW`
-                          : `0 FLOW · min ${formatUsd(rewardRules.minUsd)}`
+                          ? `+${estimatedFlowPoints.toLocaleString()} PTS (provisional)`
+                          : `0 PTS · min ${formatUsd(rewardRules.minUsd)}`
                   }
                 />
                 <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">
                   {rewardsActive
                     ? rewardEligible
-                      ? `${formatUsd(swapUsd)} verified swap value qualifies for FLOW rewards after the transaction confirms.`
-                      : `FLOW rewards start at ${formatUsd(rewardRules.minUsd)} verified swap value. Smaller swaps can complete, but earn 0 FLOW.`
-                    : "FLOW rewards require a verified email and the connected wallet bound to that account."}
+                      ? `${formatUsd(swapUsd)} verified swap value qualifies for FLOW Points after the transaction confirms. PTS are off-chain and finalised daily.`
+                      : `FLOW Points start at ${formatUsd(rewardRules.minUsd)} verified swap value. Smaller swaps can complete, but earn 0 PTS.`
+                    : "FLOW Points require a verified email and the connected wallet bound to that account."}
                 </p>
               </div>
             </div>

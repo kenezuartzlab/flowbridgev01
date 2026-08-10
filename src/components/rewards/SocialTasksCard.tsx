@@ -76,7 +76,7 @@ export function SocialTasksCard({
         <span className="font-mono text-[10px] font-black tabular-nums text-muted">{doneCount} / 3 done</span>
       </div>
       <p className="mt-2 text-[12px] leading-relaxed text-muted">
-        Follow all three official channels and confirm your handle — required before you can claim FLOW.
+        Follow all three official channels and confirm your handle — required before you can claim rewards.
       </p>
 
       <ul className="mt-3 space-y-2">

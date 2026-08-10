@@ -80,7 +80,7 @@ export function BindWalletCard({
         </span>
       </div>
       <p className="mt-2 text-[12px] leading-relaxed text-muted">
-        Link the wallet you swap with to your account — required before you can claim FLOW.
+        Link the wallet you swap with to your account — required before you can claim rewards.
       </p>
 
       <div
