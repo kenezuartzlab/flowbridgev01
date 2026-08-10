@@ -45,7 +45,7 @@ export const Route = createFileRoute("/account")({
       {
         name: "description",
         content:
-          "Manage your FlowBridge profile: FLOW balance, appearance, notifications, display currency, language, data export and sign-out — all in one place.",
+          "Manage your FlowBridge profile: FLOW Points (PTS), appearance, notifications, display currency, language, data export and sign-out — all in one place.",
       },
       { property: "og:title", content: "FlowBridge Account" },
       {
@@ -153,7 +153,7 @@ function AccountPage() {
             <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
               <PageIcon page="account" slot="flow" size={28} />
               <span className="min-w-0">
-                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">{L("flow", "FLOW")}</span>
+                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">{L("flow", "FLOW Points")}</span>
                 <span className="block font-mono text-[15px] font-black tabular-nums">
                   {flow.toLocaleString("en-US")}
                 </span>
@@ -173,7 +173,7 @@ function AccountPage() {
           {authReady && !user && (
             <div className="fb-hero-tile relative mt-3 space-y-2 p-3">
               <p className="font-mono text-[10.5px] leading-relaxed">
-                Sign in to sync your FLOW balance, referrals and transaction history.
+                Sign in to sync your FLOW Points (PTS), referrals and transaction history.
               </p>
               <SignInButton label="Sign in" returnTo="/account" />
             </div>
@@ -222,7 +222,7 @@ function AccountPage() {
             to="/rewards"
             hash="social"
             icon={<Heart className="h-4 w-4" />}
-            label="Social tasks & FLOW incentives"
+            label="Social tasks & FLOW Point incentives"
           />
 
           <RowLink to="/games" icon={<ShieldCheck className="h-4 w-4" />} label="Games & challenges" />

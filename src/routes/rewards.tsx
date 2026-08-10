@@ -37,14 +37,14 @@ import { PTS, XP, formatPts, xpLevel } from "@/lib/points";
 export const Route = createFileRoute("/rewards")({
   head: () => ({
     meta: [
-      { title: "FLOW Rewards — Points & Referrals | FlowBridge" },
+      { title: "FLOW Portal — Points, XP & Referrals | FlowBridge" },
       {
         name: "description",
         content:
-          "Track your FLOW points from swaps and referrals, see claim eligibility, swap volume progress and your referral link on FlowBridge.",
+          "Track FLOW Points (PTS) from swaps and referrals, your XP level, claim eligibility, swap volume progress and referral link on FlowBridge.",
       },
-      { property: "og:title", content: "FlowBridge FLOW Rewards" },
-      { property: "og:description", content: "Swap-powered FLOW points, referral totals and claim progress." },
+      { property: "og:title", content: "FlowBridge FLOW Portal" },
+      { property: "og:description", content: "Swap-powered FLOW Points (PTS), XP levels and claim progress." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -279,7 +279,7 @@ function RewardsPage() {
                     <QuickAction
                       Icon={Repeat}
                       label="Swap now"
-                      note="Earn FLOW"
+                      note="Earn PTS"
                       to="/"
                     />
                     <QuickAction
@@ -355,8 +355,8 @@ function RewardsPage() {
                     />
                     <CheckRow
                       done={(incentives?.claimableTotal ?? 0) >= claimThreshold}
-                      label={`${claimThreshold.toLocaleString()} claimable FLOW`}
-                      hint={`${(incentives?.claimableTotal ?? 0).toLocaleString()} available now`}
+                      label={`${claimThreshold.toLocaleString()} claimable ${PTS}`}
+                      hint={`${formatPts(incentives?.claimableTotal ?? 0)} ${PTS} available now`}
                     />
                   </ul>
 
@@ -413,13 +413,13 @@ function RewardsPage() {
                       )}
                       {claiming
                         ? "Claiming…"
-                        : `Claim available (${claimableNow.toLocaleString()} FLOW)`}
+                        : `Convert to FLOW (${formatPts(claimableNow)} ${PTS})`}
                     </button>
                     <p className="text-center font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
                       {claimMessage ??
                         (canClaim
                           ? "All requirements met — claim now"
-                          : `Complete the checklist and reach ${claimThreshold.toLocaleString()} claimable FLOW`)}
+                          : `Complete the checklist and reach ${claimThreshold.toLocaleString()} claimable ${PTS}`)}
                     </p>
                   </div>
                 </section>
@@ -482,9 +482,9 @@ function RewardsPage() {
                 <ul className="mt-3 space-y-2.5">
                   <TaskRow
                     label="Complete a swap"
-                    hint="Swaps accrue FLOW · bridges never do"
+                    hint="Swaps accrue PTS · bridges never do"
                     progress={(incentives?.pointsSelf ?? 0) > 0 ? 1 : 0}
-                    detail={`${(incentives?.pointsSelf ?? 0).toLocaleString()} FLOW from swaps`}
+                    detail={`${formatPts(incentives?.pointsSelf ?? 0)} ${PTS} from swaps`}
                     cta="Swap now"
                   />
                   <TaskRow
@@ -573,7 +573,7 @@ function RewardsPage() {
               <ComingSoon
                 Icon={Gift}
                 title="Gifts & Vouchers"
-                body="Sending FLOW gift vouchers and soulbound collectibles is on the roadmap. Points keep accruing from swaps in the meantime."
+                body="Sending FLOW-token gift vouchers and soulbound collectibles is on the roadmap. Points keep accruing from swaps in the meantime."
               />
             ) : null}
 
@@ -586,7 +586,7 @@ function RewardsPage() {
             ) : null}
 
             <p className="pb-2 text-center font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
-              Rewards are swap-only · claims require a verified email + bound wallet
+              Swap-only · FLOW Points (PTS) are off-chain · claims require a verified email + bound wallet
             </p>
           </div>
         )}
