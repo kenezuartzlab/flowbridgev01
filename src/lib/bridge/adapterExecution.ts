@@ -8,13 +8,14 @@
  * Supported: BNB Testnet (97) <-> BOT Testnet (968) active adapter routes only.
  * Not supported: mainnet, Sepolia (beta/inactive), BOT-gas top-ups.
  */
-import { isAddress, maxUint256 } from 'viem';
+import { decodeEventLog, isAddress, maxUint256 } from 'viem';
 import {
   BRIDGE_ADAPTER_ROUTES,
   isBridgeAdapterTestnetEnabled,
   type BridgeAdapterRoute,
   type Hex,
 } from './adapterConfig';
+import { BRIDGE_ADAPTER_ABI } from './adapterAbi';
 import { mapAdapterPreview, type AdapterPreview, type PreviewSourceTuple } from './adapterPreview';
 
 /** Deadline horizon: 20 minutes past the source chain's latest block timestamp. */
@@ -257,4 +258,30 @@ export async function executeAdapterBridge(
     sourceConfirmed: true,
     destinationConfirmed: false,
   };
+}
+
+/**
+ * Default BridgeRequested decoder. The gatewayNonce emitted by the MINED
+ * adapter transaction is authoritative — never predicted from a pre-read of
+ * the shared global gateway counter.
+ */
+export function parseBridgeRequestedNonce(logs: readonly unknown[]): bigint | null {
+  for (const log of logs) {
+    try {
+      const decoded = decodeEventLog({
+        abi: BRIDGE_ADAPTER_ABI,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        topics: (log as any).topics,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data: (log as any).data,
+      });
+      if (decoded.eventName === 'BridgeRequested') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (decoded.args as any).gatewayNonce as bigint;
+      }
+    } catch {
+      // not an adapter log — ignore
+    }
+  }
+  return null;
 }
