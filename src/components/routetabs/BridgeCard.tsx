@@ -41,7 +41,20 @@ interface BridgeCardProps {
   tronAddress?: string;
   tronConnecting?: boolean;
   onConnectTron?: () => void;
+  /**
+   * Phase 3 read-only BridgeAdapter preview (testnet BNB↔BOT, feature-flagged).
+   * When present it overrides the fee/limit DISPLAY only — execution is unchanged.
+   */
+  adapterPreview?: {
+    officialFeeFormatted: string;
+    refundableFormatted: string;
+    feeRatePercent: string;
+    minAmountUsdFormatted: string;
+    maxAmountUsdFormatted: string;
+    routeUnavailable: boolean;
+  } | null;
 }
+
 
 export function BridgeCard({
   amount,
