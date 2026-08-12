@@ -13,7 +13,7 @@
  */
 import { formatUnits, parseUnits } from 'viem';
 import {
-  findBridgeAdapterRoute,
+  BRIDGE_ADAPTER_ROUTES,
   isBridgeAdapterTestnetEnabled,
   ADAPTER_CHAIN_IDS,
   type BridgeAdapterRoute,
@@ -89,8 +89,12 @@ export function resolveAdapterPreviewRequest(args: {
   const destination =
     args.bridgeDirection === 'BNB_TO_BOT' ? ADAPTER_CHAIN_IDS.botTestnet : ADAPTER_CHAIN_IDS.bnbTestnet;
 
-  const route = findBridgeAdapterRoute(source, destination);
-  if (!route || !route.active) return null;
+  // Flag was already checked above, so look the route up directly (the
+  // flag-gated helper would double-gate and hide the route in tests).
+  const route = BRIDGE_ADAPTER_ROUTES.find(
+    (r) => r.active && r.sourceChainId === source && r.destinationChainId === destination,
+  );
+  if (!route) return null;
 
   let amountWei: bigint;
   try {
