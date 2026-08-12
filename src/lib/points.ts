@@ -14,7 +14,7 @@ export const FLOW_TOKEN = "FLOW";
 
 /** True once a real FLOW token address is configured for this environment. */
 export const FLOW_TOKEN_ADDRESS: string | null =
-  (import.meta as any)?.env?.VITE_FLOW_TOKEN_ADDRESS || null;
+  import.meta.env.VITE_FLOW_TOKEN_ADDRESS || null;
 
 export const FLOW_TOKEN_LIVE = !!FLOW_TOKEN_ADDRESS;
 

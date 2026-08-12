@@ -39,6 +39,7 @@ import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
+import { useAdapterPreview } from './lib/bridge/useAdapterPreview';
 import { BridgeStatusPanel } from './components/routetabs/BridgeStatusPanel';
 import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
@@ -2206,6 +2207,15 @@ export default function App() {
     return finalVal.toFixed(8).toString();
   };
 
+  // Phase 3: read-only BridgeAdapter preview. No RPC happens unless the
+  // VITE_ENABLE_BRIDGE_ADAPTER_TESTNET flag is on AND we're on testnet BNB↔BOT
+  // with a valid positive amount. Display only — execution paths untouched.
+  const { preview: adapterPreview } = useAdapterPreview({
+    isMainnet,
+    bridgeDirection,
+    amount: usdtAmount,
+  });
+
   const calculateBridgeReceive = (amountStr: string) => {
     if (!amountStr || isNaN(parseFloat(amountStr))) return "";
     const amt = parseFloat(amountStr);
@@ -2731,7 +2741,8 @@ export default function App() {
                   : bridgePeer === 'ETH' ? getExactBalanceAmount('USDT_ETH')
                   : getExactBalanceAmount('USDT_TRX')
               }
-              estimatedReceive={calculateBridgeReceive(usdtAmount)}
+              estimatedReceive={adapterPreview ? adapterPreview.refundableFormatted : calculateBridgeReceive(usdtAmount)}
+              adapterPreview={adapterPreview}
               receiveAddress={
                 bridgeDirection === 'BOT_TO_TRX'
                   ? (tronAddress || 'Connect TronLink to see address...')
