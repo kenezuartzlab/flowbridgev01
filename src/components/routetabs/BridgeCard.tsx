@@ -85,6 +85,7 @@ export function BridgeCard({
   tronAddress,
   tronConnecting = false,
   onConnectTron,
+  adapterPreview = null,
 }: BridgeCardProps) {
   const activePeer: BridgePeer = peer
     ?? (bridgeDirection.includes('ETH') ? 'ETH'
@@ -329,15 +330,33 @@ export function BridgeCard({
       </div>
 
       {/* 3. DETAILS & FEEDBACKS (Rendered below the action button) */}
+      {/* Adapter preview (read-only) supplies live fee/limit rows when the
+          Phase 2 feature flag is on; otherwise the original static rows show. */}
       <FeePanel 
         receiveAddress={receiveAddress}
-        rows={[
+        rows={adapterPreview ? [
+          { label: 'Bridge Fee', value: `${parseFloat(adapterPreview.officialFeeFormatted).toFixed(6)} USDT` },
+          { label: 'Fee Rate', value: adapterPreview.feeRatePercent },
+          { label: 'Gas fee', value: gasFeeLabel },
+          { label: 'Minimum amount', value: `$${adapterPreview.minAmountUsdFormatted}` },
+          { label: 'Maximum amount', value: `$${adapterPreview.maxAmountUsdFormatted}` },
+          { label: 'Estimated completion time', value: '≈ 7 min' },
+          { label: 'Receive (estimated)', value: `${parseFloat(adapterPreview.refundableFormatted).toFixed(6)} USDT`, isImportant: true },
+        ] : [
           { label: 'Bridge Fee', value: bridgeDirection === 'BOT_TO_BNB' ? '1 USDT' : '0 USDT (No Fee)' },
           { label: 'Gas fee', value: gasFeeLabel },
           { label: 'Estimated completion time', value: '≈ 7 min' },
           { label: 'Receive (estimated)', value: estimatedReceive ? `${parseFloat(estimatedReceive).toFixed(8)} USDT` : '0.00000000 USDT', isImportant: true }
         ]} 
       />
+
+      {adapterPreview?.routeUnavailable && (
+        <WarningPanel
+          type="warning"
+          title="Testnet route unavailable"
+          message="This testnet bridge route is currently paused on-chain (bridge or token paused). Please try again later."
+        />
+      )}
 
       {showReceiveBotGasOption && (
         <label className="bg-[#0D1C2A]/70 border border-white/15 rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-[#32FF8B]/30 transition-colors font-sans">
