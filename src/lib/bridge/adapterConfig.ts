@@ -31,6 +31,10 @@ export interface BridgeAdapterRoute {
   destinationChainId: number;
   sourceToken: Hex;
   destinationToken: Hex;
+  /** ERC-20 decimals of the SOURCE token — used to encode previewSource(amount). */
+  sourceDecimals: number;
+  /** ERC-20 decimals of the DESTINATION token. */
+  destinationDecimals: number;
   /** false = present for reference/beta, must not be offered or executed. */
   active: boolean;
   beta?: boolean;
@@ -45,6 +49,8 @@ export const BRIDGE_ADAPTER_ROUTES: readonly BridgeAdapterRoute[] = [
     destinationChainId: ADAPTER_CHAIN_IDS.botTestnet,
     sourceToken: ADAPTER_TOKENS.usdtBnbTestnet,
     destinationToken: ADAPTER_TOKENS.usdtBotTestnet,
+    sourceDecimals: 18,
+    destinationDecimals: 6,
     active: true,
   },
   {
@@ -55,6 +61,8 @@ export const BRIDGE_ADAPTER_ROUTES: readonly BridgeAdapterRoute[] = [
     destinationChainId: ADAPTER_CHAIN_IDS.bnbTestnet,
     sourceToken: ADAPTER_TOKENS.usdtBotTestnet,
     destinationToken: ADAPTER_TOKENS.usdtBnbTestnet,
+    sourceDecimals: 6,
+    destinationDecimals: 18,
     active: true,
   },
   {
@@ -65,6 +73,8 @@ export const BRIDGE_ADAPTER_ROUTES: readonly BridgeAdapterRoute[] = [
     destinationChainId: ADAPTER_CHAIN_IDS.botTestnet,
     sourceToken: ADAPTER_TOKENS.usdtSepolia,
     destinationToken: ADAPTER_TOKENS.usdtBotTestnet,
+    sourceDecimals: 6,
+    destinationDecimals: 6,
     active: false,
     beta: true,
   },
@@ -75,7 +85,7 @@ export const BRIDGE_ADAPTER_ROUTES: readonly BridgeAdapterRoute[] = [
  * Defaults to false when unset or set to anything other than "true"/"1".
  */
 export function isBridgeAdapterTestnetEnabled(): boolean {
-  const raw = (import.meta as any)?.env?.VITE_ENABLE_BRIDGE_ADAPTER_TESTNET;
+  const raw = import.meta.env.VITE_ENABLE_BRIDGE_ADAPTER_TESTNET;
   if (typeof raw !== 'string') return false;
   const v = raw.trim().toLowerCase();
   return v === 'true' || v === '1';
