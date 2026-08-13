@@ -141,7 +141,7 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   // BridgeRouter on BOT Chain — single router services all outbound destinations.
   botBridgeProxy: "0xef8dc669eca13e612b67ff09478352e85bd6cc53",
   // External-chain BridgeGateway addresses (inbound to BOT Chain).
-  bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
+  bnbBridgeProxy: "0xbCAA929FdB16f5a7185C96A4Ed0CC4F25ab86E40", // BNB testnet official Gateway (verified Phase A1)
   ethBridgeProxy: "0x2945d3aF6f012e49f7421252b5fB57D1bb7E6Edd",
   tronBridgeProxy: "TGhXbQpjBgC6bDp5jAexzeQPHEXXsx5f35", // base58, requires TronLink
   flowBridgeRouter: "0x19784e19546307af427902a75771434df831d882",
@@ -163,11 +163,11 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   wbot: "0xd5452816194a3784dba983426cce7c122f4abd30",
   caWbot: "0xf704ad4be6d75c62550571f3ead025efe7ca30d1",
   usdtBot: "0x75edc9335175fc0552d51d48439f229c10420fe3", // Tether USD on BOT testnet
-  usdtBnb: "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd",  // USDT BSC testnet
+  usdtBnb: "0x5d012516D129Ab3aE7673FE32E5ABFCD9be4d086",  // USDT BSC testnet (official bridge route token, 18dp)
   usdtEth: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDT Sepolia (placeholder — verify before enabling ETH testnet bridge)
   usdtTron: "TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs",         // USDT Shasta (TRC-20)
   botBridgeProxy: "0x6239404Aa276ba68486E2Fa40E90CDd36ff8ec3A", // BOT testnet BridgeRouter (from docs)
-  bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
+  bnbBridgeProxy: "0xbCAA929FdB16f5a7185C96A4Ed0CC4F25ab86E40", // BNB testnet official Gateway (verified Phase A1)
   ethBridgeProxy: "0x0000000000000000000000000000000000000000", // not published for testnet — disable ETH bridge on testnet
   tronBridgeProxy: "",                                          // not published for testnet — disable TRX bridge on testnet
   flowBridgeRouter: "0x72c7d69f44cf0ce056b1c39032c41ee97e09bc8e",
