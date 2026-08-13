@@ -40,6 +40,7 @@ import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { useAdapterPreview } from './lib/bridge/useAdapterPreview';
+import { resolveAdapterDispatch } from './lib/bridge/adapterDispatch';
 import { BridgeStatusPanel } from './components/routetabs/BridgeStatusPanel';
 import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
