@@ -238,6 +238,14 @@ export function BridgeStatusPanel({
     return () => clearInterval(id);
   }, [phase, relayCountdown]);
 
+  // Adapter session → Adapter-specific branch. Direct-gateway sessions below
+  // keep their existing behavior byte-for-byte.
+  if (adapterSession) {
+    return (
+      <AdapterStatusBranch session={adapterSession} sourceExplorerPrefix={sourceExplorerPrefix} />
+    );
+  }
+
   if (!txHash) return null;
 
   const pct = Math.min(100, Math.round((confirmations / required) * 100));
