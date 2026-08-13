@@ -11,6 +11,7 @@
 import { decodeEventLog, isAddress, maxUint256 } from 'viem';
 import {
   BRIDGE_ADAPTER_ROUTES,
+  isBridgeAdapterExecutionTestnetEnabled,
   isBridgeAdapterTestnetEnabled,
   type BridgeAdapterRoute,
   type Hex,
@@ -59,8 +60,10 @@ export interface AdapterExecutionInput {
   amountWei: bigint;
   destinationRecipient: string;
   refundRecipient: string;
-  /** override only for tests; defaults to the env feature flag */
+  /** preview flag override; defaults to VITE_ENABLE_BRIDGE_ADAPTER_TESTNET */
   flagEnabled?: boolean;
+  /** execution flag override; defaults to VITE_ENABLE_BRIDGE_ADAPTER_EXECUTION_TESTNET */
+  executionFlagEnabled?: boolean;
 }
 
 export interface AdapterExecutionResult {
@@ -87,6 +90,7 @@ export class AdapterExecutionError extends Error {
   constructor(
     public code:
       | 'FLAG_DISABLED'
+      | 'EXECUTION_FLAG_DISABLED'
       | 'ROUTE_UNSUPPORTED'
       | 'WRONG_SOURCE_CHAIN'
       | 'INVALID_AMOUNT'
@@ -111,6 +115,15 @@ const isNonZeroAddress = (value: string): boolean =>
 export function resolveAdapterExecutionRoute(input: AdapterExecutionInput): BridgeAdapterRoute {
   const flagEnabled = input.flagEnabled ?? isBridgeAdapterTestnetEnabled();
   if (!flagEnabled) throw new AdapterExecutionError('FLAG_DISABLED', 'BridgeAdapter testnet flag is disabled.');
+
+  // Defense in depth: the read-only preview flag alone must never authorize a write.
+  const executionFlagEnabled = input.executionFlagEnabled ?? isBridgeAdapterExecutionTestnetEnabled();
+  if (!executionFlagEnabled) {
+    throw new AdapterExecutionError(
+      'EXECUTION_FLAG_DISABLED',
+      'BridgeAdapter execution flag is disabled.',
+    );
+  }
 
   const route = BRIDGE_ADAPTER_ROUTES.find(
     (r) =>

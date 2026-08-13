@@ -67,6 +67,7 @@ const bnbToBot = {
   refundRecipient: USER,
   owner: USER,
   flagEnabled: true,
+  executionFlagEnabled: true,
 };
 
 const botToBnb = {

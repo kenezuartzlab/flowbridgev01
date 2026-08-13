@@ -14,10 +14,31 @@ export interface StepState {
   error_message?: string;
 }
 
+/**
+ * Phase 4B additive metadata: a mined Adapter SOURCE transaction is recorded
+ * here as PENDING only. It never means the cross-chain transfer settled.
+ */
+export interface PendingAdapterBridge {
+  tx_hash: string;
+  gateway_nonce?: string;
+  source_chain_id: number;
+  destination_chain_id: number;
+  adapter_address: string;
+  amount: string;
+  destination_recipient: string;
+  refund_recipient: string;
+  deadline?: string;
+  timestamp: number;
+  /** Always 'pending' in this phase — destination settlement is Phase 5. */
+  status: 'pending';
+}
+
 export interface RouteSession {
   step1: StepState;
   step2: StepState;
   step3: StepState;
+  /** optional; old persisted sessions without this field remain valid */
+  pendingAdapterBridge?: PendingAdapterBridge;
 }
 
 const DEFAULT_SESSION: RouteSession = {
