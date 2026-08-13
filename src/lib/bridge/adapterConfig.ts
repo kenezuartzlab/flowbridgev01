@@ -103,6 +103,28 @@ export function isBridgeAdapterExecutionTestnetEnabled(): boolean {
   return v === 'true' || v === '1';
 }
 
+/**
+ * Third, INDEPENDENT feature flag: VITE_ENABLE_BRIDGE_ADAPTER_REFUND_CLAIM_TESTNET.
+ * Enables the explicit user-initiated refund claim only. Defaults to false when
+ * unset. Deliberately does NOT depend on the execution flag: new bridge
+ * submissions can be disabled while refunds stay recoverable.
+ */
+export function isBridgeAdapterRefundClaimTestnetEnabled(): boolean {
+  const raw = import.meta.env.VITE_ENABLE_BRIDGE_ADAPTER_REFUND_CLAIM_TESTNET;
+  if (typeof raw !== 'string') return false;
+  const v = raw.trim().toLowerCase();
+  return v === 'true' || v === '1';
+}
+
+/** Active testnet route lookup that ignores feature flags (claim scope check). */
+export function findActiveAdapterRouteUnflagged(
+  sourceChainId: number,
+  destinationChainId: number,
+): BridgeAdapterRoute | undefined {
+  return BRIDGE_ADAPTER_ROUTES.find(
+    (r) => r.active && r.sourceChainId === sourceChainId && r.destinationChainId === destinationChainId,
+  );
+}
 
 /** Lookup helper for future phases. Returns undefined when the flag is off. */
 export function findBridgeAdapterRoute(
