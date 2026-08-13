@@ -75,12 +75,85 @@ function sourceChainName(dir: BridgeDirection) {
   return dir.startsWith('BOT_TO_') ? CHAIN_NAME.BOT : CHAIN_NAME[peerFor(dir)];
 }
 
+/**
+ * Phase 5A: Adapter session status. Finality comes ONLY from the on-chain
+ * requestState() read — source confirmations can never show success here.
+ */
+function AdapterStatusBranch({
+  session,
+  sourceExplorerPrefix,
+}: {
+  session: PendingAdapterBridge;
+  sourceExplorerPrefix: string;
+}) {
+  const { status, rpcError } = useAdapterStatus(session);
+  const severity = status?.severity ?? 'info';
+  const tone =
+    severity === 'success'
+      ? 'text-[#32FF8B]'
+      : severity === 'critical'
+        ? 'text-red-400'
+        : severity === 'warning'
+          ? 'text-amber-300'
+          : 'text-[#32FF8B]';
+
+  return (
+    <div className="bg-[#0D1C2A]/80 border border-white/20 rounded-2xl p-4 space-y-3 font-mono shadow-inner">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 min-w-0">
+          {severity === 'success' ? (
+            <CheckCircle2 className={`w-4 h-4 shrink-0 ${tone}`} />
+          ) : severity === 'critical' ? (
+            <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+          ) : severity === 'warning' ? (
+            <AlertTriangle className="w-4 h-4 text-amber-300 shrink-0" />
+          ) : (
+            <Loader2 className={`w-4 h-4 animate-spin shrink-0 ${tone}`} />
+          )}
+          <span className="text-[12px] font-black uppercase tracking-widest text-white truncate">
+            {status ? status.title : 'Checking bridge request…'}
+          </span>
+        </div>
+        <a
+          href={`${sourceExplorerPrefix}${session.tx_hash}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-[11px] text-[#32FF8B] hover:underline flex items-center gap-1 shrink-0"
+        >
+          View <ExternalLink className="w-3 h-3" />
+        </a>
+      </div>
+
+      <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+        {status
+          ? status.description
+          : 'Reading the bridge request state on-chain. The source transaction alone does not confirm delivery.'}
+      </div>
+
+      {rpcError && (
+        <div className="text-[11px] text-amber-300">
+          Network read failed — retrying. Status is unchanged until the chain answers.
+        </div>
+      )}
+
+      <div className="text-[10px] text-[#C5C1B9]/70 space-y-0.5 pt-1 border-t border-white/5">
+        <div>Request #{session.gateway_nonce ?? '—'}</div>
+        <div className="truncate">Adapter {session.adapter_address}</div>
+        <div>
+          Chain {session.source_chain_id} → {session.destination_chain_id}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function BridgeStatusPanel({
   txHash,
   bridgeDirection,
   isMainnet,
   sourceExplorerPrefix,
   destExplorerPrefix,
+  adapterSession,
 }: BridgeStatusPanelProps) {
   const [phase, setPhase] = useState<Phase>('pending');
   const [confirmations, setConfirmations] = useState(0);
