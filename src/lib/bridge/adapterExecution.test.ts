@@ -146,13 +146,21 @@ describe('gates', () => {
     expect(deps.writeBridge).not.toHaveBeenCalled();
   });
 
-  it('below live minimum / above live maximum → rejected', async () => {
+  it('below live minimum / above live maximum → rejected (USD bounds vs token units)', async () => {
+    const oneToken = 10n ** 18n;
+    // min = 500 USD, sending 100 USDT
     const low = makeDeps({}, tuple(97n, { min: 500n }));
-    await expect(executeAdapterBridge(low, { ...bnbToBot, amountWei: 100n })).rejects.toThrow(/below the live minimum/);
+    await expect(executeAdapterBridge(low, { ...bnbToBot, amountWei: 100n * oneToken })).rejects.toThrow(
+      /below the live minimum/,
+    );
+    // max = 50 USD, sending 100 USDT
     const high = makeDeps({}, tuple(97n, { max: 50n }));
-    await expect(executeAdapterBridge(high, { ...bnbToBot, amountWei: 100n })).rejects.toThrow(
+    await expect(executeAdapterBridge(high, { ...bnbToBot, amountWei: 100n * oneToken })).rejects.toThrow(
       /above the live maximum/,
     );
+    // within bounds → allowed
+    const ok = makeDeps({}, tuple(97n, { min: 10n, max: 50_000n }));
+    await expect(executeAdapterBridge(ok, { ...bnbToBot, amountWei: 20n * oneToken })).resolves.toBeTruthy();
   });
 });
 
