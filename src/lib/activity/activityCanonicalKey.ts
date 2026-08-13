@@ -31,5 +31,5 @@ export function activityIntentHash(intent: ActivityIntent): Hex {
     types: payload.types,
     primaryType: payload.primaryType,
     message: payload.message,
-  } as Parameters<typeof hashTypedData>[0]);
+  } as unknown as Parameters<typeof hashTypedData>[0]);
 }
