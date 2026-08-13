@@ -87,7 +87,16 @@ function AdapterStatusBranch({
   sourceExplorerPrefix: string;
 }) {
   const { status, rpcError } = useAdapterStatus(session);
-  const severity = status?.severity ?? 'info';
+  const {
+    flagEnabled: refundFlagOn,
+    claiming,
+    claimError,
+    claimResult,
+    claim,
+  } = useAdapterRefundClaim(session);
+
+  const claimCompleted = claimResult?.refundCompleted === true;
+  const severity = claimCompleted ? 'info' : (status?.severity ?? 'info');
   const tone =
     severity === 'success'
       ? 'text-[#32FF8B]'
@@ -96,6 +105,7 @@ function AdapterStatusBranch({
         : severity === 'warning'
           ? 'text-amber-300'
           : 'text-[#32FF8B]';
+  const showRefundArea = status?.refundClaimable === true || claimCompleted;
 
   return (
     <div className="bg-[#0D1C2A]/80 border border-white/20 rounded-2xl p-4 space-y-3 font-mono shadow-inner">
@@ -111,7 +121,7 @@ function AdapterStatusBranch({
             <Loader2 className={`w-4 h-4 animate-spin shrink-0 ${tone}`} />
           )}
           <span className="text-[12px] font-black uppercase tracking-widest text-white truncate">
-            {status ? status.title : 'Checking bridge request…'}
+            {claimCompleted ? 'Refund completed' : status ? status.title : 'Checking bridge request…'}
           </span>
         </div>
         <a
@@ -125,14 +135,56 @@ function AdapterStatusBranch({
       </div>
 
       <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
-        {status
-          ? status.description
-          : 'Reading the bridge request state on-chain. The source transaction alone does not confirm delivery.'}
+        {claimCompleted
+          ? 'The Adapter paid the recorded refund recipient. Verified on-chain.'
+          : status
+            ? status.description
+            : 'Reading the bridge request state on-chain. The source transaction alone does not confirm delivery.'}
       </div>
 
       {rpcError && (
         <div className="text-[11px] text-amber-300">
           Network read failed — retrying. Status is unchanged until the chain answers.
+        </div>
+      )}
+
+      {showRefundArea && (
+        <div className="space-y-2 pt-2 border-t border-white/10">
+          <div className="text-[10px] text-[#C5C1B9]/80 break-all">
+            Refund recipient (fixed by the Adapter): {session.refund_recipient}
+          </div>
+          {!refundFlagOn ? (
+            <div className="text-[11px] text-amber-300">
+              Refund claiming is not enabled in this build.
+            </div>
+          ) : claimCompleted ? (
+            <button
+              type="button"
+              disabled
+              className="w-full rounded-xl bg-white/10 text-[#C5C1B9] text-[12px] font-black uppercase tracking-widest py-2.5 cursor-not-allowed"
+            >
+              Refund completed
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={claim}
+                disabled={claiming}
+                className="w-full rounded-xl bg-[#32FF8B] text-[#07131E] text-[12px] font-black uppercase tracking-widest py-2.5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {claiming && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {claiming ? 'Claiming…' : 'Claim refund'}
+              </button>
+              {claimResult && !claimResult.refundCompleted && (
+                <div className="text-[11px] text-amber-300">
+                  Verification pending — the Adapter has not reported the refund as claimed yet.
+                  Status is being refreshed.
+                </div>
+              )}
+              {claimError && <div className="text-[11px] text-red-400">{claimError}</div>}
+            </>
+          )}
         </div>
       )}
 
@@ -146,6 +198,7 @@ function AdapterStatusBranch({
     </div>
   );
 }
+
 
 export function BridgeStatusPanel({
   txHash,
