@@ -1700,17 +1700,20 @@ export default function App() {
         }
 
         // ============================================================
-        // Phase 4B (DORMANT): testnet BNB↔BOT BridgeAdapter execution.
-        // Returns null unless BOTH adapter flags are ON, mode is testnet and
-        // an active route matches the connected chain — otherwise the existing
-        // official-gateway code below runs completely unchanged.
+        // Phase A1: explicit dispatch policy. The DEFAULT strategy is the
+        // direct official gateway call from the user's wallet. The dormant
+        // Phase 4B BridgeAdapter branch is only reachable when BOTH adapter
+        // flags are ON in testnet mode for an active route — with the flags
+        // unset the official-gateway code below runs completely unchanged and
+        // the Adapter is never used as a post-signature fallback.
         // ============================================================
-        const adapterRoute = resolveAdapterDispatch({
+        const dispatchDecision = resolveBridgeDispatch({
           isMainnet,
           isDemoMode,
           bridgeDirection,
           walletChainId: currentChainId,
         });
+        const adapterRoute = dispatchDecision.adapterRoute;
         if (adapterRoute) {
           setActionStep('bridging_usdt');
           const { executeAdapterBridge } = await import('./lib/bridge/adapterExecution');
