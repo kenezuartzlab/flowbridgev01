@@ -2853,7 +2853,21 @@ export default function App() {
           )}
 
 
-          {activeTab === 'BRIDGE' && session.step3.status === 'submitted' && session.step3.tx_hash && (
+          {/* Phase 5A: Adapter session status (finality from requestState only). */}
+          {activeTab === 'BRIDGE' && session.pendingAdapterBridge && (
+            <div className="mt-4">
+              <BridgeStatusPanel
+                txHash={session.pendingAdapterBridge.tx_hash}
+                bridgeDirection={bridgeDirection}
+                isMainnet={isMainnet}
+                sourceExplorerPrefix={bridgeSrcExplorerPrefix}
+                destExplorerPrefix={bridgeDestExplorerBase}
+                adapterSession={session.pendingAdapterBridge}
+              />
+            </div>
+          )}
+
+          {activeTab === 'BRIDGE' && !session.pendingAdapterBridge && session.step3.status === 'submitted' && session.step3.tx_hash && (
             <div className="mt-4">
               <BridgeStatusPanel
                 txHash={session.step3.tx_hash}
