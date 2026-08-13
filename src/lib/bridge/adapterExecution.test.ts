@@ -36,11 +36,11 @@ const bridgeRequestedLog = (nonce: bigint) => {
   const topics = encodeEventTopics({
     abi: BRIDGE_ADAPTER_ABI,
     eventName: 'BridgeRequested',
-    args: { gatewayNonce: nonce, sender: USER },
+    args: { gatewayNonce: nonce, sender: USER, destinationRecipient: RECIPIENT },
   });
   const data = encodeAbiParameters(
-    [{ type: 'address' }, { type: 'uint256' }, { type: 'uint256' }],
-    [RECIPIENT, 5n, 999n],
+    [{ type: 'address' }, { type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }, { type: 'bool' }],
+    [USER, 100n, 97n, 3n, false],
   );
   return { topics, data };
 };
