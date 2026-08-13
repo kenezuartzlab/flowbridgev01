@@ -29,8 +29,11 @@ export interface PendingAdapterBridge {
   refund_recipient: string;
   deadline?: string;
   timestamp: number;
-  /** Always 'pending' in this phase — destination settlement is Phase 5. */
-  status: 'pending';
+  /**
+   * Lifecycle status. 'pending' until the Adapter's on-chain requestState()
+   * says otherwise (Phase 5A). Older persisted sessions only ever had 'pending'.
+   */
+  status: 'pending' | 'executed' | 'refund_available' | 'refund_claimed' | 'inconsistent';
 }
 
 export interface RouteSession {
