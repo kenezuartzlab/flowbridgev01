@@ -6,6 +6,8 @@ import { CheckCircle2, Loader2, XCircle, ExternalLink, Clock, AlertTriangle } fr
 import { toFriendlyError } from '../../lib/friendlyError';
 import type { PendingAdapterBridge } from '../../store/routeSession';
 import { useAdapterStatus } from '../../lib/bridge/useAdapterStatus';
+import { useAdapterRefundClaim } from '../../lib/bridge/useAdapterRefundClaim';
+
 
 type Phase = 'pending' | 'mining' | 'confirming' | 'success' | 'failed';
 
