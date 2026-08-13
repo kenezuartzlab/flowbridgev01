@@ -40,7 +40,8 @@ import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { useAdapterPreview } from './lib/bridge/useAdapterPreview';
-import { resolveAdapterDispatch } from './lib/bridge/adapterDispatch';
+import { resolveBridgeDispatch } from './lib/bridge/directDispatch';
+import { captureActivityIntent, isActivityIntentEnabled } from './lib/activity/activityIntent';
 import { BridgeStatusPanel } from './components/routetabs/BridgeStatusPanel';
 import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
@@ -1699,17 +1700,20 @@ export default function App() {
         }
 
         // ============================================================
-        // Phase 4B (DORMANT): testnet BNB↔BOT BridgeAdapter execution.
-        // Returns null unless BOTH adapter flags are ON, mode is testnet and
-        // an active route matches the connected chain — otherwise the existing
-        // official-gateway code below runs completely unchanged.
+        // Phase A1: explicit dispatch policy. The DEFAULT strategy is the
+        // direct official gateway call from the user's wallet. The dormant
+        // Phase 4B BridgeAdapter branch is only reachable when BOTH adapter
+        // flags are ON in testnet mode for an active route — with the flags
+        // unset the official-gateway code below runs completely unchanged and
+        // the Adapter is never used as a post-signature fallback.
         // ============================================================
-        const adapterRoute = resolveAdapterDispatch({
+        const dispatchDecision = resolveBridgeDispatch({
           isMainnet,
           isDemoMode,
           bridgeDirection,
           walletChainId: currentChainId,
         });
+        const adapterRoute = dispatchDecision.adapterRoute;
         if (adapterRoute) {
           setActionStep('bridging_usdt');
           const { executeAdapterBridge } = await import('./lib/bridge/adapterExecution');
@@ -1751,9 +1755,63 @@ export default function App() {
           return;
         }
 
-
-
-
+        // ============================================================
+        // Phase A1 (attribution scaffold, OFF by default): sign + store an
+        // EIP-712 FlowBridgeActivityIntent BEFORE the direct bridge write.
+        // Attribution evidence only: it authorizes no calldata, moves no funds
+        // and grants zero XP/PTS/FLOW. If unavailable, the safe direct bridge
+        // flow continues unchanged.
+        // ============================================================
+        if (isActivityIntentEnabled() && (bridgeDirection === 'BNB_TO_BOT' || bridgeDirection === 'BOT_TO_BNB')) {
+          const { findOfficialTestnetRoute } = await import('./lib/bridge/officialBridgeConfig');
+          const intentRoute = findOfficialTestnetRoute(bridgeDirection);
+          if (intentRoute) {
+            const attribution = await captureActivityIntent(
+              {
+                attributionEnabled: true,
+                signTypedData: async (payload) => {
+                  const eth = (window as any).ethereum;
+                  if (!eth?.request) throw new Error('No typed-data signer available');
+                  const json = JSON.stringify(
+                    {
+                      domain: payload.domain,
+                      types: {
+                        EIP712Domain: [
+                          { name: 'name', type: 'string' },
+                          { name: 'version', type: 'string' },
+                          { name: 'chainId', type: 'uint256' },
+                        ],
+                        ...payload.types,
+                      },
+                      primaryType: payload.primaryType,
+                      message: payload.message,
+                    },
+                    (_k, v) => (typeof v === 'bigint' ? v.toString() : v),
+                  );
+                  return await eth.request({
+                    method: 'eth_signTypedData_v4',
+                    params: [address, json],
+                  });
+                },
+              },
+              {
+                intentId: `0x${crypto.randomUUID().replace(/-/g, '').padEnd(64, '0')}` as `0x${string}`,
+                user: address as string,
+                actionType: `0x${'00'.repeat(32)}` as `0x${string}`,
+                sourceChainId: intentRoute.sourceChainId,
+                destinationChainId: intentRoute.destinationChainId,
+                token: intentRoute.sourceToken,
+                amount: parseUnits(usdtAmount, intentRoute.sourceDecimals),
+                recipient: recipientAddr,
+                nonce: BigInt(Date.now()),
+                nowSeconds: Math.floor(Date.now() / 1000),
+              },
+            );
+            if (attribution.status === 'unavailable') {
+              console.info('[FlowBridge] activity attribution unavailable:', attribution.reason);
+            }
+          }
+        }
 
 
         // ============================================================
