@@ -148,14 +148,38 @@ export function resolveAdapterExecutionRoute(input: AdapterExecutionInput): Brid
   return route;
 }
 
-/** Checks live pause flags and USD-agnostic min/max bounds against the amount. */
-export function assertPreviewAllowsExecution(preview: AdapterPreview, amountWei: bigint): void {
+/**
+ * The USD bounds returned by previewSource are USD figures, not token units,
+ * and different deployments scale them by 1, 1e6 or 1e18. Convert a bound into
+ * SOURCE-token units (USDT is treated as 1:1 with USD) so it can be compared
+ * against the encoded amount.
+ */
+export function usdBoundToTokenUnits(raw: bigint, sourceDecimals: number): bigint {
+  if (raw <= 0n) return 0n;
+  const scale = 10n ** BigInt(sourceDecimals);
+  const MAX_PLAUSIBLE_USD = 1_000_000n;
+  for (const dp of [0n, 6n, 18n]) {
+    const divisor = 10n ** dp;
+    const usd = raw / divisor;
+    if (usd > 0n && usd <= MAX_PLAUSIBLE_USD) return (raw * scale) / divisor;
+  }
+  return (raw * scale) / 10n ** 18n;
+}
+
+/** Checks live pause flags and USD min/max bounds against the amount. */
+export function assertPreviewAllowsExecution(
+  preview: AdapterPreview,
+  amountWei: bigint,
+  sourceDecimals = 18,
+): void {
   if (preview.bridgePaused) throw new AdapterExecutionError('BRIDGE_PAUSED', 'Bridge is paused on-chain.');
   if (preview.tokenPaused) throw new AdapterExecutionError('TOKEN_PAUSED', 'Token is paused on-chain.');
-  if (preview.minAmountUsd > 0n && amountWei < preview.minAmountUsd) {
+  const minUnits = usdBoundToTokenUnits(preview.minAmountUsd, sourceDecimals);
+  const maxUnits = usdBoundToTokenUnits(preview.maxAmountUsd, sourceDecimals);
+  if (minUnits > 0n && amountWei < minUnits) {
     throw new AdapterExecutionError('BELOW_MINIMUM', 'Amount is below the live minimum.');
   }
-  if (preview.maxAmountUsd > 0n && amountWei > preview.maxAmountUsd) {
+  if (maxUnits > 0n && amountWei > maxUnits) {
     throw new AdapterExecutionError('ABOVE_MAXIMUM', 'Amount is above the live maximum.');
   }
 }
