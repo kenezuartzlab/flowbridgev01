@@ -78,10 +78,13 @@ describe('refund claim gating', () => {
   });
 
   it('wrong source chain for the stored adapter rejected', () => {
-    expect(refundClaimGate({ ...session, source_chain_id: 968 }, true).reason).toBe(
-      'ADAPTER_MISMATCH',
-    );
+    // 968 -> 968 is not a configured route, and the stored BNB adapter cannot match it.
+    expect(refundClaimGate({ ...session, source_chain_id: 968 }, true).claimable).toBe(false);
+    expect(
+      refundClaimGate({ ...session, source_chain_id: 968, destination_chain_id: 97 }, true).reason,
+    ).toBe('ADAPTER_MISMATCH');
   });
+
 
   it('missing/predicted nonce rejected', () => {
     expect(refundClaimGate({ ...session, gateway_nonce: undefined }, true).reason).toBe(
