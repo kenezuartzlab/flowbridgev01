@@ -141,7 +141,7 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   // BridgeRouter on BOT Chain — single router services all outbound destinations.
   botBridgeProxy: "0xef8dc669eca13e612b67ff09478352e85bd6cc53",
   // External-chain BridgeGateway addresses (inbound to BOT Chain).
-  bnbBridgeProxy: "0xbCAA929FdB16f5a7185C96A4Ed0CC4F25ab86E40", // BNB testnet official Gateway (verified Phase A1)
+  bnbBridgeProxy: "0x3cd6fb6b0cddd3610f0f4769aa7bb686cd4a4b55",
   ethBridgeProxy: "0x2945d3aF6f012e49f7421252b5fB57D1bb7E6Edd",
   tronBridgeProxy: "TGhXbQpjBgC6bDp5jAexzeQPHEXXsx5f35", // base58, requires TronLink
   flowBridgeRouter: "0x19784e19546307af427902a75771434df831d882",
