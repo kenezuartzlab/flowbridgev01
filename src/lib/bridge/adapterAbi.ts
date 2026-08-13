@@ -12,5 +12,5 @@ export const BRIDGE_ADAPTER_ABI = parseAbi([
   'function requestState(uint256 gatewayNonce) view returns (uint8 state)',
   'function canClaimRefund(uint256 gatewayNonce) view returns (bool)',
   'function claimRefund(uint256 gatewayNonce)',
-  'event BridgeRequested(uint256 indexed gatewayNonce, address indexed sender, address destinationRecipient, uint256 amount, uint256 deadline)',
+  'event BridgeRequested(uint256 indexed gatewayNonce, address indexed sender, address indexed destinationRecipient, address refundRecipient, uint256 amount, uint256 refundableAmount, uint256 fee, bool gasTopUp)',
 ]);
