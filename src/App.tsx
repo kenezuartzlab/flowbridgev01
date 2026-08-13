@@ -1697,6 +1697,61 @@ export default function App() {
           await ensureSourceChainCore(makeBridgeDeps(targetChainIdForTab()), targetChainIdForTab());
         }
 
+        // ============================================================
+        // Phase 4B (DORMANT): testnet BNB↔BOT BridgeAdapter execution.
+        // Returns null unless BOTH adapter flags are ON, mode is testnet and
+        // an active route matches the connected chain — otherwise the existing
+        // official-gateway code below runs completely unchanged.
+        // ============================================================
+        const adapterRoute = resolveAdapterDispatch({
+          isMainnet,
+          isDemoMode,
+          bridgeDirection,
+          walletChainId: currentChainId,
+        });
+        if (adapterRoute) {
+          setActionStep('bridging_usdt');
+          const { executeAdapterBridge } = await import('./lib/bridge/adapterExecution');
+          const { createAdapterExecutionDeps } = await import('./lib/bridge/adapterExecutionDeps');
+          const result = await executeAdapterBridge(
+            createAdapterExecutionDeps({
+              account: address as `0x${string}`,
+              writeContractAsync: (config: any) => writeContractAsync(config as any),
+            }),
+            {
+              sourceChainId: adapterRoute.sourceChainId,
+              destinationChainId: adapterRoute.destinationChainId,
+              amountWei: parseUnits(usdtAmount, adapterRoute.sourceDecimals),
+              destinationRecipient: recipientAddr,
+              refundRecipient: address as string,
+              owner: address as string,
+            },
+          );
+
+          // Source mined only. NOT final success: no DB "SUCCESS" log, no
+          // receipt modal, no completion claim. Phase 5 adds status tracking.
+          await updateSession({
+            pendingAdapterBridge: {
+              tx_hash: result.txHash,
+              gateway_nonce: result.gatewayNonce != null ? result.gatewayNonce.toString() : undefined,
+              source_chain_id: result.sourceChainId,
+              destination_chain_id: result.destinationChainId,
+              adapter_address: result.adapterAddress,
+              amount: result.amount.toString(),
+              destination_recipient: result.destinationRecipient,
+              refund_recipient: result.refundRecipient,
+              deadline: result.deadline.toString(),
+              timestamp: Date.now(),
+              status: 'pending',
+            },
+          });
+          setUsdtAmount('');
+          setIsWaitingModalOpen(false);
+          return;
+        }
+
+
+
 
 
 
