@@ -91,6 +91,19 @@ export function isBridgeAdapterTestnetEnabled(): boolean {
   return v === 'true' || v === '1';
 }
 
+/**
+ * Second, INDEPENDENT feature flag: VITE_ENABLE_BRIDGE_ADAPTER_EXECUTION_TESTNET.
+ * Enables Adapter WRITES only. Defaults to false when unset.
+ * The preview flag alone never authorizes a transaction.
+ */
+export function isBridgeAdapterExecutionTestnetEnabled(): boolean {
+  const raw = import.meta.env.VITE_ENABLE_BRIDGE_ADAPTER_EXECUTION_TESTNET;
+  if (typeof raw !== 'string') return false;
+  const v = raw.trim().toLowerCase();
+  return v === 'true' || v === '1';
+}
+
+
 /** Lookup helper for future phases. Returns undefined when the flag is off. */
 export function findBridgeAdapterRoute(
   sourceChainId: number,
