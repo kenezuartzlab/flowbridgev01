@@ -234,7 +234,7 @@ export async function executeAdapterBridge(
     amountWei: amount,
   });
   const preview = mapAdapterPreview(tuple, route.sourceDecimals);
-  assertPreviewAllowsExecution(preview, amount);
+  assertPreviewAllowsExecution(preview, amount, route.sourceDecimals);
 
   // 4. Execution bound comes from the fresh preview.
   const minRefundableAmount = preview.refundableAmount;
