@@ -28,8 +28,8 @@ export function activityIntentHash(intent: ActivityIntent): Hex {
   const payload = activityIntentTypedData(intent);
   return hashTypedData({
     domain: payload.domain,
-    types: payload.types as never,
+    types: payload.types,
     primaryType: payload.primaryType,
-    message: payload.message as never,
-  });
+    message: payload.message,
+  } as Parameters<typeof hashTypedData>[0]);
 }
