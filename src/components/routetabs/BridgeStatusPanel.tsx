@@ -18,6 +18,8 @@ interface BridgeStatusPanelProps {
   isMainnet: boolean;
   sourceExplorerPrefix: string;
   destExplorerPrefix: string;
+  /** Phase 5A: when set, the Adapter status branch renders instead. */
+  adapterSession?: PendingAdapterBridge | null;
 }
 
 const REQUIRED_CONFIRMATIONS: Record<number, number> = {
