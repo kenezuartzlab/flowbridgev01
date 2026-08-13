@@ -175,7 +175,7 @@ export async function verifyBridgeActivity(
   }
 
   const activity: VerifiedActivity = {
-    activityId: canonicalActivityId(key),
+    activityId: canonicalActivityId(key, intent.actionType),
     user: intent.user.toLowerCase() as Hex,
     kind: 'BRIDGE_SUBMITTED',
     sourceChainId: key.chainId,
