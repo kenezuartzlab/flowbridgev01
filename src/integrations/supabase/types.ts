@@ -634,6 +634,66 @@ export type Database = {
           },
         ]
       }
+      verified_activities: {
+        Row: {
+          action_type: string
+          activity_id: string
+          amount_raw: string
+          campaign_id: string
+          created_at: string
+          destination_chain_id: number
+          intent_hash: string
+          intent_nonce: string
+          kind: string
+          observed_at: string
+          occurred_at: string
+          source_chain_id: number
+          source_log_index: number
+          source_tx_hash: string
+          status: string
+          token: string
+          user_wallet: string
+        }
+        Insert: {
+          action_type: string
+          activity_id: string
+          amount_raw: string
+          campaign_id: string
+          created_at?: string
+          destination_chain_id: number
+          intent_hash: string
+          intent_nonce: string
+          kind: string
+          observed_at: string
+          occurred_at: string
+          source_chain_id: number
+          source_log_index: number
+          source_tx_hash: string
+          status?: string
+          token: string
+          user_wallet: string
+        }
+        Update: {
+          action_type?: string
+          activity_id?: string
+          amount_raw?: string
+          campaign_id?: string
+          created_at?: string
+          destination_chain_id?: number
+          intent_hash?: string
+          intent_nonce?: string
+          kind?: string
+          observed_at?: string
+          occurred_at?: string
+          source_chain_id?: number
+          source_log_index?: number
+          source_tx_hash?: string
+          status?: string
+          token?: string
+          user_wallet?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -663,6 +723,29 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_record_verified_activity: {
+        Args: {
+          p_action_type: string
+          p_activity_id: string
+          p_amount_raw: string
+          p_campaign_id: string
+          p_destination_chain_id: number
+          p_intent_hash: string
+          p_intent_nonce: string
+          p_kind: string
+          p_observed_at: string
+          p_occurred_at: string
+          p_source_chain_id: number
+          p_source_log_index: number
+          p_source_tx_hash: string
+          p_token: string
+          p_user_wallet: string
+        }
+        Returns: {
+          activity_id: string
+          inserted: boolean
+        }[]
       }
       admin_settle_campaign_completion: {
         Args: {
