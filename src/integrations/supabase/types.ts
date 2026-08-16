@@ -74,6 +74,219 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_completion_activities: {
+        Row: {
+          activity_id: string
+          campaign_id: string
+          completion_id: string
+          created_at: string
+          task_id: string
+          user_wallet: string
+        }
+        Insert: {
+          activity_id: string
+          campaign_id: string
+          completion_id: string
+          created_at?: string
+          task_id: string
+          user_wallet: string
+        }
+        Update: {
+          activity_id?: string
+          campaign_id?: string
+          completion_id?: string
+          created_at?: string
+          task_id?: string
+          user_wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_completion_activitie_completion_id_campaign_id_ta_fkey"
+            columns: ["completion_id", "campaign_id", "task_id", "user_wallet"]
+            isOneToOne: false
+            referencedRelation: "campaign_completions"
+            referencedColumns: [
+              "completion_id",
+              "campaign_id",
+              "task_id",
+              "user_wallet",
+            ]
+          },
+        ]
+      }
+      campaign_completions: {
+        Row: {
+          campaign_id: string
+          completed_at: string
+          completion_id: string
+          created_at: string
+          points: number
+          task_id: string
+          user_wallet: string
+        }
+        Insert: {
+          campaign_id: string
+          completed_at?: string
+          completion_id: string
+          created_at?: string
+          points: number
+          task_id: string
+          user_wallet: string
+        }
+        Update: {
+          campaign_id?: string
+          completed_at?: string
+          completion_id?: string
+          created_at?: string
+          points?: number
+          task_id?: string
+          user_wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_completions_campaign_id_task_id_fkey"
+            columns: ["campaign_id", "task_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_tasks"
+            referencedColumns: ["campaign_id", "task_id"]
+          },
+        ]
+      }
+      campaign_points_ledger: {
+        Row: {
+          campaign_id: string
+          completion_id: string
+          created_at: string
+          ledger_id: string
+          points_delta: number
+          reason: string
+          task_id: string
+          user_wallet: string
+        }
+        Insert: {
+          campaign_id: string
+          completion_id: string
+          created_at?: string
+          ledger_id?: string
+          points_delta: number
+          reason?: string
+          task_id: string
+          user_wallet: string
+        }
+        Update: {
+          campaign_id?: string
+          completion_id?: string
+          created_at?: string
+          ledger_id?: string
+          points_delta?: number
+          reason?: string
+          task_id?: string
+          user_wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_points_ledger_completion_id_campaign_id_task_id_u_fkey"
+            columns: ["completion_id", "campaign_id", "task_id", "user_wallet"]
+            isOneToOne: false
+            referencedRelation: "campaign_completions"
+            referencedColumns: [
+              "completion_id",
+              "campaign_id",
+              "task_id",
+              "user_wallet",
+            ]
+          },
+        ]
+      }
+      campaign_tasks: {
+        Row: {
+          campaign_id: string
+          completion_limit_per_wallet: number
+          created_at: string
+          description: string | null
+          points: number
+          required_count: number
+          rules: Json
+          sort_order: number
+          task_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          completion_limit_per_wallet?: number
+          created_at?: string
+          description?: string | null
+          points: number
+          required_count: number
+          rules?: Json
+          sort_order?: number
+          task_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          completion_limit_per_wallet?: number
+          created_at?: string
+          description?: string | null
+          points?: number
+          required_count?: number
+          rules?: Json
+          sort_order?: number
+          task_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_tasks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["campaign_id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          description: string | null
+          ends_at: string
+          metadata: Json
+          name: string
+          slug: string
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          description?: string | null
+          ends_at: string
+          metadata?: Json
+          name: string
+          slug: string
+          starts_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          metadata?: Json
+          name?: string
+          slug?: string
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -450,6 +663,21 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_settle_campaign_completion: {
+        Args: {
+          p_activity_ids: string[]
+          p_campaign_id: string
+          p_completed_at?: string
+          p_completion_id: string
+          p_task_id: string
+          p_user_wallet: string
+        }
+        Returns: {
+          completion_id: string
+          inserted: boolean
+          points_awarded: number
+        }[]
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
