@@ -51,6 +51,8 @@ export interface TrustedVerificationDeps {
   /** Repository bound to the server-reconstructed facts. */
   createRepository: (facts: TrustedActivityFacts) => ActivityRepository;
   recoverTypedDataSigner?: (args: { payload: any; signature: Hex }) => Promise<string>;
+  /** Test-only decoder override; production uses the official viem decoder. */
+  decodeLog?: import('./officialBridgeEvent').DepositLogDecoder;
 
   now?: () => number;
 }
@@ -116,6 +118,7 @@ export async function verifyAndPersistBridgeActivity(
       getSourceReceipt: async () => receipt,
       isFinalized: async () => finalized,
       repository: deps.createRepository(facts),
+      ...(deps.decodeLog ? { decodeLog: deps.decodeLog } : {}),
       now: deps.now,
     },
     handoff,
