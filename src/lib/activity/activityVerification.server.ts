@@ -14,6 +14,8 @@
  */
 import { createPublicClient, http, recoverTypedDataAddress } from 'viem';
 import type { Hex } from './activityIntent';
+import { activityIntentHash } from './activityCanonicalKey';
+
 import { verifyBridgeActivity, type ActivityIntentHandoff, type VerificationOutcome } from './activityVerifier';
 import type { RawLog, SourceReceipt } from './officialBridgeEvent';
 import type { ActivityRepository, VerifiedActivity } from './activityRepository';
@@ -78,6 +80,15 @@ export async function verifyAndPersistBridgeActivity(
 ): Promise<VerificationOutcome> {
   const required = BigInt(assertRequiredConfirmations(options.requiredConfirmations));
   const sourceChainId = Number(handoff.intent.sourceChainId);
+
+  // Cheap canonical intentHash check BEFORE any source-chain RPC, persistence
+  // or settlement work. Same REJECTED semantics as verifyBridgeActivity, which
+  // keeps its own check as defense-in-depth.
+  const computedIntentHash = activityIntentHash(handoff.intent);
+  if (computedIntentHash.toLowerCase() !== handoff.intentHash?.toLowerCase()) {
+    return { status: 'REJECTED', reason: 'intent hash does not match the signed intent' };
+  }
+
 
   let raw: TrustedSourceReceipt | null;
   try {

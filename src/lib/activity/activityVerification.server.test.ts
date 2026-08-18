@@ -124,7 +124,57 @@ describe('required confirmations', () => {
   });
 });
 
+describe('early intentHash rejection', () => {
+  it('rejects a wrong intentHash before any source-chain RPC or persistence', async () => {
+    const intent = makeIntent();
+    const signature = (await account.signTypedData(
+      activityIntentTypedData(intent) as any,
+    )) as Hex;
+
+    let receiptCalls = 0;
+    let headCalls = 0;
+    let repoCalls = 0;
+
+    const spyReader: TrustedChainReader = {
+      async getSourceReceipt() {
+        receiptCalls += 1;
+        return { status: 'success', blockNumber: 100n, blockTimestamp: 1_700_000_100, logs: [RAW_LOG] };
+      },
+      async getLatestBlockNumber() {
+        headCalls += 1;
+        return 200n;
+      },
+    };
+
+    const outcome = await verifyAndPersistBridgeActivity(
+      {
+        reader: spyReader,
+        createRepository: () => {
+          repoCalls += 1;
+          return createInMemoryActivityRepository();
+        },
+        decodeLog: decodeLog(intent) as never,
+        now: () => 1_700_000_200_000,
+      },
+      {
+        intent,
+        signature,
+        intentHash: `0x${'99'.repeat(32)}` as Hex,
+        sourceTxHash: TX,
+      },
+      { requiredConfirmations: 5 },
+    );
+
+    expect(outcome.status).toBe('REJECTED');
+    expect((outcome as any).reason).toBe('intent hash does not match the signed intent');
+    expect(receiptCalls).toBe(0);
+    expect(headCalls).toBe(0);
+    expect(repoCalls).toBe(0);
+  });
+});
+
 describe('trusted verification adapter', () => {
+
   it('confirms and persists once with sufficient confirmations', async () => {
     const { outcome, repo } = await run(105n, 5); // 6 confirmations
     expect(outcome.status).toBe('CONFIRMED');
