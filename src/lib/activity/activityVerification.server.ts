@@ -14,6 +14,8 @@
  */
 import { createPublicClient, http, recoverTypedDataAddress } from 'viem';
 import type { Hex } from './activityIntent';
+import { activityIntentHash } from './activityCanonicalKey';
+
 import { verifyBridgeActivity, type ActivityIntentHandoff, type VerificationOutcome } from './activityVerifier';
 import type { RawLog, SourceReceipt } from './officialBridgeEvent';
 import type { ActivityRepository, VerifiedActivity } from './activityRepository';
