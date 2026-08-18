@@ -61,7 +61,9 @@ export async function fetchBotChainSpotPrices(isMainnet: boolean): Promise<BotCh
   const c = getContracts(isMainnet);
   const pub = client(isMainnet);
   const pool = c.usdtBotPoolV3.toLowerCase() as Address;
-  const pair = c.caWbot.toLowerCase() as Address;
+  const factory = c.caSwapFactory.toLowerCase() as Address;
+  const caWnative = c.caWbot.toLowerCase() as Address;
+
   const wbot = c.wbot.toLowerCase();
   const usdt = c.usdtBot.toLowerCase();
   const caToken = c.caToken.toLowerCase();
