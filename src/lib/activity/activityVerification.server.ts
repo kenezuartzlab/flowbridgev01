@@ -50,10 +50,8 @@ export interface TrustedVerificationDeps {
   reader: TrustedChainReader;
   /** Repository bound to the server-reconstructed facts. */
   createRepository: (facts: TrustedActivityFacts) => ActivityRepository;
-  recoverTypedDataSigner?: (args: {
-    payload: Parameters<typeof recoverTypedDataAddress>[0] extends never ? never : any;
-    signature: Hex;
-  }) => Promise<string>;
+  recoverTypedDataSigner?: (args: { payload: any; signature: Hex }) => Promise<string>;
+
   now?: () => number;
 }
 
