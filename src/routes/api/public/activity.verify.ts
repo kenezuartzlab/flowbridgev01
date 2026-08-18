@@ -35,15 +35,32 @@ export const Route = createFileRoute('/api/public/activity/verify')({
           );
           try {
             const outcome = await handleActivityVerification(handoff);
-            return Response.json(
-              outcome.status === 'CONFIRMED'
-                ? {
-                    status: 'CONFIRMED',
-                    activityId: outcome.activity.activityId,
-                    created: outcome.created,
-                  }
-                : { status: outcome.status, reason: outcome.reason },
+            if (outcome.status !== 'CONFIRMED') {
+              return Response.json({ status: outcome.status, reason: outcome.reason });
+            }
+
+            // CONFIRMED: delegate durable campaign settlement to the trusted
+            // server helper. A settlement throw becomes a 500 (retryable);
+            // the durable verified activity is never downgraded.
+            const { settleCampaignsForVerificationOutcome } = await import(
+              '@/lib/campaign/activityCampaignSettlement.server'
             );
+            const settlement = await settleCampaignsForVerificationOutcome(outcome);
+
+            return Response.json({
+              status: 'CONFIRMED',
+              activityId: outcome.activity.activityId,
+              created: outcome.created,
+              ...(settlement
+                ? {
+                    campaignSettlement: {
+                      pointsAwarded: settlement.pointsAwarded,
+                      completions: settlement.completions.length,
+                      replayed: settlement.replayed,
+                    },
+                  }
+                : {}),
+            });
           } catch (e: any) {
             if (e instanceof FinalityConfigError) {
               return Response.json(
