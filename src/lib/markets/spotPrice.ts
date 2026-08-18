@@ -97,12 +97,20 @@ export async function fetchBotChainSpotPrices(isMainnet: boolean): Promise<BotCh
   const ca = await (async () => {
     if (bot <= 0) return 0;
     try {
+      const pair = (await pub.readContract({
+        address: factory,
+        abi: FACTORY_ABI,
+        functionName: "getPair",
+        args: [c.caToken.toLowerCase() as Address, caWnative],
+      })) as Address;
+      if (!pair || /^0x0+$/.test(pair)) return 0;
       const [reserves, token0] = await Promise.all([
         pub.readContract({ address: pair, abi: PAIR_ABI, functionName: "getReserves" }),
         pub.readContract({ address: pair, abi: PAIR_ABI, functionName: "token0" }),
       ]);
       const [r0, r1] = reserves as readonly [bigint, bigint, number];
       if (r0 <= 0n || r1 <= 0n) return 0;
+
       const t0 = String(token0).toLowerCase();
       // CA and WBOT are both 18 decimals → plain reserve ratio
       const botPerCa =
