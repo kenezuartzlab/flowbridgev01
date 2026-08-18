@@ -114,7 +114,7 @@ export async function fetchBotChainSpotPrices(isMainnet: boolean): Promise<BotCh
       const t0 = String(token0).toLowerCase();
       // CA and WBOT are both 18 decimals → plain reserve ratio
       const botPerCa =
-        t0 === caToken ? Number(r1) / Number(r0) : t0 === wbot ? Number(r0) / Number(r1) : 0;
+        t0 === caToken ? Number(r1) / Number(r0) : t0 === caWnative ? Number(r0) / Number(r1) : 0;
       if (!Number.isFinite(botPerCa) || botPerCa <= 0) return 0;
       return botPerCa * bot;
     } catch {
