@@ -31,6 +31,7 @@ import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
+import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
 import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
 import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -165,6 +166,11 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
 const ApiConfigRoute = ApiConfigRouteImport.update({
   id: '/api/config',
   path: '/api/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCampaignsRoute = ApiCampaignsRouteImport.update({
+  id: '/api/campaigns',
+  path: '/api/campaigns',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBannerEventsRoute = ApiBannerEventsRouteImport.update({
@@ -320,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/banner-events': typeof ApiBannerEventsRoute
+  '/api/campaigns': typeof ApiCampaignsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
@@ -369,6 +376,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/banner-events': typeof ApiBannerEventsRoute
+  '/api/campaigns': typeof ApiCampaignsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
@@ -419,6 +427,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/banner-events': typeof ApiBannerEventsRoute
+  '/api/campaigns': typeof ApiCampaignsRoute
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
@@ -470,6 +479,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/assistant'
     | '/api/banner-events'
+    | '/api/campaigns'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
@@ -519,6 +529,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/assistant'
     | '/api/banner-events'
+    | '/api/campaigns'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
@@ -568,6 +579,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/assistant'
     | '/api/banner-events'
+    | '/api/campaigns'
     | '/api/config'
     | '/api/health'
     | '/api/proposals'
@@ -618,6 +630,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiAssistantRoute: typeof ApiAssistantRoute
   ApiBannerEventsRoute: typeof ApiBannerEventsRoute
+  ApiCampaignsRoute: typeof ApiCampaignsRoute
   ApiConfigRoute: typeof ApiConfigRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
@@ -798,6 +811,13 @@ declare module '@tanstack/react-router' {
       path: '/api/config'
       fullPath: '/api/config'
       preLoaderRoute: typeof ApiConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/campaigns': {
+      id: '/api/campaigns'
+      path: '/api/campaigns'
+      fullPath: '/api/campaigns'
+      preLoaderRoute: typeof ApiCampaignsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/banner-events': {
@@ -1014,6 +1034,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiAssistantRoute: ApiAssistantRoute,
   ApiBannerEventsRoute: ApiBannerEventsRoute,
+  ApiCampaignsRoute: ApiCampaignsRoute,
   ApiConfigRoute: ApiConfigRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
