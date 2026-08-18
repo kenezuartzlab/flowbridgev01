@@ -1756,63 +1756,108 @@ export default function App() {
         }
 
         // ============================================================
-        // Phase A1 (attribution scaffold, OFF by default): sign + store an
-        // EIP-712 FlowBridgeActivityIntent BEFORE the direct bridge write.
-        // Attribution evidence only: it authorizes no calldata, moves no funds
-        // and grants zero XP/PTS/FLOW. If unavailable, the safe direct bridge
-        // flow continues unchanged.
+        // Phase A3B (attribution, OFF by default): sign + persist a FRESH
+        // EIP-712 FlowBridgeActivityIntent for the official BOT<->BNB direct
+        // routes only — after allowance/preflight/gas estimation and
+        // immediately before the official bridge write. Attribution evidence
+        // only: authorizes no calldata, moves no funds, grants zero XP/PTS/FLOW
+        // and never writes the Activity Registry.
         // ============================================================
-        if (isActivityIntentEnabled() && (bridgeDirection === 'BNB_TO_BOT' || bridgeDirection === 'BOT_TO_BNB')) {
+        let directAttribution:
+          | { intent: any; signature: `0x${string}`; intentHash: `0x${string}` }
+          | null = null;
+
+        const captureDirectAttribution = async () => {
+          if (!isActivityIntentEnabled()) return;
+          if (bridgeDirection !== 'BNB_TO_BOT' && bridgeDirection !== 'BOT_TO_BNB') return;
           const { findOfficialTestnetRoute } = await import('./lib/bridge/officialBridgeConfig');
           const intentRoute = findOfficialTestnetRoute(bridgeDirection);
-          if (intentRoute) {
-            const attribution = await captureActivityIntent(
-              {
-                attributionEnabled: true,
-                signTypedData: async (payload) => {
-                  const eth = (window as any).ethereum;
-                  if (!eth?.request) throw new Error('No typed-data signer available');
-                  const json = JSON.stringify(
-                    {
-                      domain: payload.domain,
-                      types: {
-                        EIP712Domain: [
-                          { name: 'name', type: 'string' },
-                          { name: 'version', type: 'string' },
-                          { name: 'chainId', type: 'uint256' },
-                        ],
-                        ...payload.types,
-                      },
-                      primaryType: payload.primaryType,
-                      message: payload.message,
-                    },
-                    (_k, v) => (typeof v === 'bigint' ? v.toString() : v),
-                  );
-                  return await eth.request({
-                    method: 'eth_signTypedData_v4',
-                    params: [address, json],
-                  });
-                },
-              },
-              {
-                intentId: `0x${crypto.randomUUID().replace(/-/g, '').padEnd(64, '0')}` as `0x${string}`,
-                user: address as string,
-                actionType: `0x${'00'.repeat(32)}` as `0x${string}`,
-                sourceChainId: intentRoute.sourceChainId,
-                destinationChainId: intentRoute.destinationChainId,
-                token: intentRoute.sourceToken,
-                amount: parseUnits(usdtAmount, intentRoute.sourceDecimals),
-                recipient: recipientAddr,
-                nonce: BigInt(Date.now()),
-                nowSeconds: Math.floor(Date.now() / 1000),
-              },
-            );
-            if (attribution.status === 'unavailable') {
-              console.info('[FlowBridge] activity attribution unavailable:', attribution.reason);
-            }
-          }
-        }
+          if (!intentRoute) return;
+          const { DIRECT_BRIDGE_ACTION_TYPE } = await import('./lib/activity/activityVerifier');
+          const { activityIntentHash } = await import('./lib/activity/activityCanonicalKey');
+          const { persistSignedAttribution, isAttributionRequired } = await import(
+            './lib/activity/activityHandoff'
+          );
 
+          const attribution = await captureActivityIntent(
+            {
+              attributionEnabled: true,
+              signTypedData: async (payload) => {
+                const eth = (window as any).ethereum;
+                if (!eth?.request) throw new Error('No typed-data signer available');
+                const json = JSON.stringify(
+                  {
+                    domain: payload.domain,
+                    types: {
+                      EIP712Domain: [
+                        { name: 'name', type: 'string' },
+                        { name: 'version', type: 'string' },
+                        { name: 'chainId', type: 'uint256' },
+                      ],
+                      ...payload.types,
+                    },
+                    primaryType: payload.primaryType,
+                    message: payload.message,
+                  },
+                  (_k, v) => (typeof v === 'bigint' ? v.toString() : v),
+                );
+                return await eth.request({
+                  method: 'eth_signTypedData_v4',
+                  params: [address, json],
+                });
+              },
+            },
+            {
+              intentId: `0x${crypto.randomUUID().replace(/-/g, '').padEnd(64, '0')}` as `0x${string}`,
+              user: address as string,
+              actionType: DIRECT_BRIDGE_ACTION_TYPE,
+              sourceChainId: intentRoute.sourceChainId,
+              destinationChainId: intentRoute.destinationChainId,
+              token: intentRoute.sourceToken,
+              amount: parseUnits(usdtAmount, intentRoute.sourceDecimals),
+              recipient: recipientAddr,
+              nonce: BigInt(Date.now()),
+              nowSeconds: Math.floor(Date.now() / 1000),
+            },
+          );
+
+          if (attribution.status !== 'signed') {
+            if (isAttributionRequired()) {
+              throw new Error('Attribution is required but could not be captured. Bridge not sent.');
+            }
+            console.info('[FlowBridge] activity attribution unavailable:', attribution.reason);
+            return;
+          }
+
+          const intentHash = activityIntentHash(attribution.intent);
+          const evidence = {
+            intent: attribution.intent,
+            signature: attribution.signature,
+            intentHash,
+          };
+          // Persist BEFORE the bridge write, with a read-after-write check.
+          if (!persistSignedAttribution(evidence)) {
+            if (isAttributionRequired()) {
+              throw new Error('Attribution evidence could not be stored. Bridge not sent.');
+            }
+            console.info('[FlowBridge] activity attribution not persisted; continuing bridge');
+            return;
+          }
+          directAttribution = evidence;
+        };
+
+        // Post-confirmation, fire-and-forget handoff of signed evidence ONLY.
+        // A failed handoff never resends or reverses the bridge transaction.
+        const handoffDirectAttribution = (sourceTxHash: `0x${string}`) => {
+          const evidence = directAttribution;
+          if (!evidence) return;
+          directAttribution = null;
+          void import('./lib/activity/activityHandoff')
+            .then(({ submitActivityVerification }) =>
+              submitActivityVerification(evidence, sourceTxHash),
+            )
+            .catch(() => {});
+        };
 
         // ============================================================
         // BOT → {BNB, ETH} : source = BOT Chain, use botBridgeProxy
@@ -1867,6 +1912,8 @@ export default function App() {
             fallback: 1000000n,
           });
 
+          await captureDirectAttribution();
+
           const txBridge = await writeContractAsync({
             address: contracts.botBridgeProxy as `0x${string}`,
             abi: depositAbi,
@@ -1886,6 +1933,7 @@ export default function App() {
           // Clear the input after a submitted bridge so the same amount can't be
           // accidentally re-sent by tapping the button again.
           setUsdtAmount('');
+          handoffDirectAttribution(txBridge);
 
         } else if (bridgePeer === 'BNB') {
           // ================= BNB → BOT (existing path) =================
@@ -1938,6 +1986,8 @@ export default function App() {
             fallback: useBotGas ? 1100000n : 1000000n,
           });
 
+          await captureDirectAttribution();
+
           const txBridge = await writeContractAsync({
             address: contracts.bnbBridgeProxy as `0x${string}`,
             abi: bnbAbi,
@@ -1957,6 +2007,7 @@ export default function App() {
           // Clear the input after a submitted bridge so the same amount can't be
           // accidentally re-sent by tapping the button again.
           setUsdtAmount('');
+          handoffDirectAttribution(txBridge);
 
         } else if (bridgePeer === 'ETH') {
           // ================= ETH → BOT (new) =================
