@@ -56,40 +56,6 @@ function PartnersPage() {
     return [...map.entries()];
   }, [partners]);
 
-  const socials = (["youtube", "x", "telegram"] as const).filter(
-    (k) => incentives?.socials?.[k],
-  ).length;
-  const volume = Number(incentives?.totalSwapVolumeUsd ?? 0);
-  const invites = Number(incentives?.inviteCount ?? 0);
-  const selfPoints = Number(incentives?.pointsSelf ?? 0);
-
-  const QUESTS = [
-    {
-      label: "Complete your first swap",
-      detail: `${selfPoints.toLocaleString("en-US")} FLOW from swaps`,
-      progress: selfPoints > 0 ? 1 : 0,
-      Icon: Sparkles,
-    },
-    {
-      label: "Reach $100 swap volume",
-      detail: `${formatUsd(volume)} / ${formatUsd(100)}`,
-      progress: volume / 100,
-      Icon: Target,
-    },
-    {
-      label: "Invite 3 traders",
-      detail: `${invites} invited`,
-      progress: invites / 3,
-      Icon: Users,
-    },
-    {
-      label: "Link all social accounts",
-      detail: `${socials} / 3 linked`,
-      progress: socials / 3,
-      Icon: Compass,
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 border-b border-hairline bg-card-alt px-4 py-3 backdrop-blur-xl">
