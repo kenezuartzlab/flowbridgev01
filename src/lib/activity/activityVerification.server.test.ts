@@ -42,31 +42,27 @@ function makeIntent(): ActivityIntent {
   });
 }
 
-function depositLog(intent: ActivityIntent) {
-  return {
-    address: route.gateway,
-    topics: [
-      keccak256(
-        new TextEncoder().encode(
-          'Deposit(uint256,bytes32,address,address,uint256,address)',
-        ) as unknown as Hex extends never ? never : any,
-      ),
-      pad(account.address as Hex, { size: 32 }),
-    ] as readonly Hex[],
-    data: '0x' as Hex,
-    logIndex: 3,
-  };
-}
+const RAW_LOG = {
+  address: route.gateway,
+  topics: [`0x${'cd'.repeat(32)}`] as readonly Hex[],
+  data: '0x' as Hex,
+  logIndex: 3,
+};
 
-/** Deterministic decoder stub — decoding itself is covered by A2 tests. */
+/** Deterministic decoder stub — real decoding is covered by the A2 tests. */
+const decodeLog = (intent: ActivityIntent) => () => ({
+  logIndex: 3,
+  emitter: route.gateway.toLowerCase() as Hex,
+  depositor: intent.user.toLowerCase() as Hex,
+  recipient: intent.recipient.toLowerCase() as Hex,
+  destinationChainId: intent.destinationChainId,
+  amount: intent.amount,
+  token: route.sourceToken.toLowerCase() as Hex,
+});
+
 const reader = (blockNumber: bigint, latest: bigint, timestamp = 1_700_000_100): TrustedChainReader => ({
   async getSourceReceipt() {
-    return {
-      status: 'success',
-      blockNumber,
-      blockTimestamp: timestamp,
-      logs: [depositLog(makeIntent())],
-    };
+    return { status: 'success', blockNumber, blockTimestamp: timestamp, logs: [RAW_LOG] };
   },
   async getLatestBlockNumber() {
     return latest;
@@ -82,6 +78,7 @@ async function run(latest: bigint, requiredConfirmations: number, repo = createI
     {
       reader: reader(100n, latest),
       createRepository: () => repo,
+      decodeLog: decodeLog(intent) as never,
       now: () => 1_700_000_200_000,
     },
     { intent, signature, intentHash: activityIntentHash(intent), sourceTxHash: TX },
@@ -128,6 +125,22 @@ describe('required confirmations', () => {
 });
 
 describe('trusted verification adapter', () => {
+  it('confirms and persists once with sufficient confirmations', async () => {
+    const { outcome, repo } = await run(105n, 5); // 6 confirmations
+    expect(outcome.status).toBe('CONFIRMED');
+    expect(repo.all()).toHaveLength(1);
+    if (outcome.status === 'CONFIRMED') {
+      expect(outcome.created).toBe(true);
+      expect(outcome.activity.amountRaw).toBe(1_000_000_000_000_000_000n);
+    }
+
+    // Idempotent retry: same evidence, same repository -> no duplicate row.
+    const again = await run(105n, 5, repo);
+    expect(again.outcome.status).toBe('CONFIRMED');
+    if (again.outcome.status === 'CONFIRMED') expect(again.outcome.created).toBe(false);
+    expect(repo.all()).toHaveLength(1);
+  });
+
   it('stays PENDING with one confirmation less than required', async () => {
     const { outcome } = await run(103n, 5); // 4 confirmations
     expect(outcome.status).toBe('PENDING');
