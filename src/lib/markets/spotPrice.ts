@@ -11,16 +11,7 @@
 import { createPublicClient, http, parseAbi, type Address } from "viem";
 import { botMainnet, botTestnet } from "@/lib/wagmi";
 import { getContracts, UNISWAP_V3_POOL_ABI } from "@/lib/contracts";
-
-const PAIR_ABI = parseAbi([
-  "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
-  "function token0() view returns (address)",
-  "function token1() view returns (address)",
-]);
-
-const FACTORY_ABI = parseAbi([
-  "function getPair(address tokenA, address tokenB) view returns (address pair)",
-]);
+import { NATIVE_TOKEN_ADDRESS } from "@/lib/swap/tokenRegistry";
 
 
 const V3_TOKENS_ABI = parseAbi([
@@ -61,12 +52,9 @@ export async function fetchBotChainSpotPrices(isMainnet: boolean): Promise<BotCh
   const c = getContracts(isMainnet);
   const pub = client(isMainnet);
   const pool = c.usdtBotPoolV3.toLowerCase() as Address;
-  const factory = c.caSwapFactory.toLowerCase() as Address;
-  const caWnative = c.caWbot.toLowerCase() as Address;
 
   const wbot = c.wbot.toLowerCase();
   const usdt = c.usdtBot.toLowerCase();
-  const caToken = c.caToken.toLowerCase();
 
   const bot = await (async () => {
     try {
@@ -100,7 +88,7 @@ export async function fetchBotChainSpotPrices(isMainnet: boolean): Promise<BotCh
       const { getBestRoute } = await import("@/lib/swap/quoter");
       const one = 10n ** 18n;
       const r = await getBestRoute(
-        { address: "native", symbol: "BOT", name: "BOT", decimals: 18, isNative: true } as any,
+        { address: NATIVE_TOKEN_ADDRESS, symbol: "BOT", name: "BOT", decimals: 18, isNative: true } as any,
         { address: c.caToken.toLowerCase(), symbol: "CA", name: "CaryPact", decimals: 18 } as any,
         one,
         isMainnet,
