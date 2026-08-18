@@ -79,6 +79,15 @@ export async function verifyAndPersistBridgeActivity(
   const required = BigInt(assertRequiredConfirmations(options.requiredConfirmations));
   const sourceChainId = Number(handoff.intent.sourceChainId);
 
+  // Cheap canonical intentHash check BEFORE any source-chain RPC, persistence
+  // or settlement work. Same REJECTED semantics as verifyBridgeActivity, which
+  // keeps its own check as defense-in-depth.
+  const computedIntentHash = activityIntentHash(handoff.intent);
+  if (computedIntentHash.toLowerCase() !== handoff.intentHash?.toLowerCase()) {
+    return { status: 'REJECTED', reason: 'intent hash does not match the signed intent' };
+  }
+
+
   let raw: TrustedSourceReceipt | null;
   try {
     raw = await deps.reader.getSourceReceipt({ chainId: sourceChainId, txHash: handoff.sourceTxHash });
