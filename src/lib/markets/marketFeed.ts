@@ -2,9 +2,8 @@
 // BOT chain tokens: derived from on-chain quoter (getBestRoute → USDT).
 // Cross-chain (ETH/BSC/TRON): CoinGecko free public API with in-memory cache.
 
-import { getBestRoute } from "@/lib/swap/quoter";
 import { getContracts } from "@/lib/contracts";
-import { NATIVE_TOKEN_ADDRESS, type Token } from "@/lib/swap/tokenRegistry";
+import { fetchBotChainSpotPrices } from "@/lib/markets/spotPrice";
 
 export type Chain = "BOT" | "MAJOR" | "ETH" | "BSC" | "TRON";
 
@@ -23,62 +22,47 @@ export interface MarketRow {
 
 // ── BOT Chain ─────────────────────────────────────────────────────────────
 export async function fetchBotChainMarkets(isMainnet: boolean): Promise<MarketRow[]> {
-  const rows: MarketRow[] = [];
-  const c = getContracts(isMainnet);
+  // Market prices (mid / buy-side reference), NOT the executable sell quote.
+  const { bot: botPrice, ca: caPrice } = await fetchBotChainSpotPrices(isMainnet);
 
-  const usdt: Token = { address: c.usdtBot.toLowerCase(), symbol: "USDT", name: "Tether USD", decimals: 6 };
-  const bot: Token = { address: NATIVE_TOKEN_ADDRESS, symbol: "BOT", name: "BOT", decimals: 18, isNative: true };
-  const ca: Token = { address: c.caToken.toLowerCase(), symbol: "CA", name: "CaryPact", decimals: 18 };
-
-  const priceOf = async (tok: Token): Promise<number> => {
-    try {
-      const r = await getBestRoute(tok, usdt, 10n ** BigInt(tok.decimals), isMainnet);
-      if (!r || r.amountOut <= 0n) return 0;
-      return Number(r.amountOut) / 1e6;
-    } catch {
-      return 0;
-    }
-  };
-  const [botPrice, caPrice] = await Promise.all([priceOf(bot), priceOf(ca)]);
-
-
-  rows.push({
-    id: "bot",
-    symbol: "BOT",
-    name: "BOT Chain (native)",
-    chain: "BOT",
-    priceUsd: botPrice,
-    change24h: null,
-    marketCap: null,
-  });
-  rows.push({
-    id: "wbot",
-    symbol: "WBOT",
-    name: "Wrapped BOT",
-    chain: "BOT",
-    priceUsd: botPrice,
-    change24h: null,
-    marketCap: null,
-  });
-  rows.push({
-    id: "usdt-bot",
-    symbol: "USDT",
-    name: "Tether USD (BOT Chain)",
-    chain: "BOT",
-    priceUsd: 1,
-    change24h: 0,
-    marketCap: null,
-  });
-  rows.push({
-    id: "ca",
-    symbol: "CA",
-    name: "CaryPact",
-    chain: "BOT",
-    priceUsd: caPrice,
-    change24h: null,
-    marketCap: null,
-  });
-  return rows;
+  return [
+    {
+      id: "bot",
+      symbol: "BOT",
+      name: "BOT Chain (native)",
+      chain: "BOT",
+      priceUsd: botPrice,
+      change24h: null,
+      marketCap: null,
+    },
+    {
+      id: "wbot",
+      symbol: "WBOT",
+      name: "Wrapped BOT",
+      chain: "BOT",
+      priceUsd: botPrice,
+      change24h: null,
+      marketCap: null,
+    },
+    {
+      id: "usdt-bot",
+      symbol: "USDT",
+      name: "Tether USD (BOT Chain)",
+      chain: "BOT",
+      priceUsd: 1,
+      change24h: 0,
+      marketCap: null,
+    },
+    {
+      id: "ca",
+      symbol: "CA",
+      name: "CaryPact",
+      chain: "BOT",
+      priceUsd: caPrice,
+      change24h: null,
+      marketCap: null,
+    },
+  ];
 }
 
 async function safeCall<T>(fn: () => Promise<T> | T): Promise<T | null> {
