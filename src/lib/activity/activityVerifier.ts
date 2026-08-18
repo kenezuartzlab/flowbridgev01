@@ -29,8 +29,13 @@ import {
 } from '../bridge/officialBridgeConfig';
 import { ZERO_BYTES32 } from './activityIntent';
 
-/** The only bridge action tag A2 accepts (matches the app's direct-bridge tag). */
-export const DIRECT_BRIDGE_ACTION_TYPE: Hex = ZERO_BYTES32;
+/**
+ * Frozen direct-bridge action tag. NEVER zero bytes32.
+ * keccak256 tag agreed for the official BOT<->BNB direct bridge.
+ */
+export const DIRECT_BRIDGE_ACTION_TYPE: Hex =
+  '0xa391054066f75f7c43647fb06ebe9f75413bc8d943fe571990a3e644f576b309';
+
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
