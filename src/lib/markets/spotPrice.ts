@@ -1,12 +1,12 @@
-// Market (spot) prices for BOT Chain tokens.
+// Market (reference) prices for BOT Chain tokens.
 //
-// These are *mid/spot* prices read straight from pool state — the same basis
-// used by charting/market sites (Ave.ai, BDEX, CaryPact "real-time price").
-// They deliberately EXCLUDE swap fees, price impact and token transfer taxes,
-// so they can differ from the executable quote shown on the swap cards.
+// This is the *market* basis used by charting sites (Ave.ai, BDEX) and the
+// CaryPact "real-time price" card — NOT the executable sell quote shown on the
+// swap cards, which additionally pays CA's temporary sell tax.
 //
-//   BOT/USDT  →  BDex V3 pool slot0() sqrtPriceX96
-//   CA/BOT    →  CaSwap V2 pair getReserves()
+//   BOT/USDT  ->  BDex V3 pool slot0() sqrtPriceX96 (mid price)
+//   CA        ->  buy-side reference: how much CA 1 BOT buys on CaSwap
+//                 (excludes the CA sell tax, matching Ave.ai / CaryPact)
 
 import { createPublicClient, http, parseAbi, type Address } from "viem";
 import { botMainnet, botTestnet } from "@/lib/wagmi";
@@ -97,26 +97,17 @@ export async function fetchBotChainSpotPrices(isMainnet: boolean): Promise<BotCh
   const ca = await (async () => {
     if (bot <= 0) return 0;
     try {
-      const pair = (await pub.readContract({
-        address: factory,
-        abi: FACTORY_ABI,
-        functionName: "getPair",
-        args: [c.caToken.toLowerCase() as Address, caWnative],
-      })) as Address;
-      if (!pair || /^0x0+$/.test(pair)) return 0;
-      const [reserves, token0] = await Promise.all([
-        pub.readContract({ address: pair, abi: PAIR_ABI, functionName: "getReserves" }),
-        pub.readContract({ address: pair, abi: PAIR_ABI, functionName: "token0" }),
-      ]);
-      const [r0, r1] = reserves as readonly [bigint, bigint, number];
-      if (r0 <= 0n || r1 <= 0n) return 0;
-
-      const t0 = String(token0).toLowerCase();
-      // CA and WBOT are both 18 decimals → plain reserve ratio
-      const botPerCa =
-        t0 === caToken ? Number(r1) / Number(r0) : t0 === caWnative ? Number(r0) / Number(r1) : 0;
-      if (!Number.isFinite(botPerCa) || botPerCa <= 0) return 0;
-      return botPerCa * bot;
+      const { getBestRoute } = await import("@/lib/swap/quoter");
+      const one = 10n ** 18n;
+      const r = await getBestRoute(
+        { address: "native", symbol: "BOT", name: "BOT", decimals: 18, isNative: true } as any,
+        { address: c.caToken.toLowerCase(), symbol: "CA", name: "CaryPact", decimals: 18 } as any,
+        one,
+        isMainnet,
+      );
+      const caPerBot = Number(r?.amountOut ?? 0n) / 1e18;
+      if (!Number.isFinite(caPerBot) || caPerBot <= 0) return 0;
+      return bot / caPerBot;
     } catch {
       return 0;
     }
