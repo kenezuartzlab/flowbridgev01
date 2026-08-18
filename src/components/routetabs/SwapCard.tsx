@@ -322,6 +322,11 @@ export function SwapCard({
               { label: 'Exchange Rate', value: `1 ${fromSymbol} ≈ ${(parseFloat(toAmount) / parseFloat(fromAmount)).toFixed(8)} ${toSymbol}` }
             ]}
           />
+          <p className="px-1 font-mono text-[10px] leading-relaxed text-[#C5C1B9]/60">
+            Quotes are live executable amounts from the on-chain routers, including CA's
+            temporary sell tax. Market/chart prices (Ave.ai, CaryPact) exclude that tax, so
+            they read higher than what a sell actually returns.
+          </p>
           {onShowRoute && (
             <div className="flex justify-between items-center bg-[#32FF8B]/5 border border-[#32FF8B]/15 rounded-xl px-3 py-2 text-[12px] font-bold text-[#F0F7F3] shadow-sm font-mono">
               <span className="text-[#C5C1B9] flex items-center gap-1 uppercase tracking-wider">
