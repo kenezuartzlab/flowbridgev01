@@ -18,6 +18,11 @@ const PAIR_ABI = parseAbi([
   "function token1() view returns (address)",
 ]);
 
+const FACTORY_ABI = parseAbi([
+  "function getPair(address tokenA, address tokenB) view returns (address pair)",
+]);
+
+
 const V3_TOKENS_ABI = parseAbi([
   "function token0() view returns (address)",
   "function token1() view returns (address)",
