@@ -808,6 +808,7 @@ export function UniversalSwapCard({
                 <Row label="Slippage" value={`${slippage}%`} />
                 <Row label="Route" value={quote.symbolPath.join(" → ")} />
                 <Row label="Trading fee" value="0.30%" />
+                <Row label="Quote basis" value="Executable (on-chain)" />
                 <Row label="Platform fee" value={platformFeeLabel} />
                 
                 <Row
@@ -822,6 +823,11 @@ export function UniversalSwapCard({
                           : `0 PTS · min ${formatUsd(rewardRules.minUsd)}`
                   }
                 />
+                <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">
+                  Amounts come straight from the routers you'll trade against, including any
+                  token transfer tax (e.g. CA's temporary sell tax). Market/chart prices exclude
+                  those taxes, so a chart price can look higher than your actual output.
+                </p>
                 <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">
                   {rewardsActive
                     ? rewardEligible

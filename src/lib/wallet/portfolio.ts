@@ -155,10 +155,25 @@ export async function fetchPortfolio(
       name: "Tether USD",
       decimals: 6,
     };
+    // BOT / WBOT / CA use the same MARKET price shown on /markets so the
+    // portfolio never disagrees with the markets page. Anything else falls
+    // back to an executable quote against USDT.
+    const spot = await withTimeout(
+      import("@/lib/markets/spotPrice").then((m) => m.fetchBotChainSpotPrices(true)),
+    ).catch(() => null);
+    const marketPrice = (symbol: string): number | null => {
+      const s = symbol.toUpperCase();
+      if (!spot) return null;
+      if (s === "BOT" || s === "WBOT") return spot.bot > 0 ? spot.bot : null;
+      if (s === "CA") return spot.ca > 0 ? spot.ca : null;
+      return null;
+    };
     prices = await Promise.all(
       tokens.map(async (t, i): Promise<number | null> => {
         if (amounts[i] <= 0) return 0;
         if (t.address === usdt.address) return 1;
+        const mkt = marketPrice(t.symbol);
+        if (mkt != null) return mkt;
         try {
           const r = await withTimeout(
             getBestRoute(t, usdt, 10n ** BigInt(t.decimals), true),
