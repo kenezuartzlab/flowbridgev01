@@ -164,52 +164,8 @@ function PartnersPage() {
           </section>
         )}
 
-        {/* Quest center */}
-        <section className="fb-surface overflow-hidden">
-          <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
-            <p className="fb-eyebrow">Quest center</p>
-            <Link
-              to="/rewards"
-              className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary"
-            >
-              All rewards
-            </Link>
-          </div>
-          <ul className="divide-y divide-hairline">
-            {QUESTS.map(({ label, detail, progress, Icon }) => {
-              const pct = Math.max(0, Math.min(1, progress));
-              const done = pct >= 1;
-              return (
-                <li key={label} className="flex items-center gap-3 px-4 py-3">
-                  <span
-                    className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${
-                      done ? "bg-success/15 text-success" : "bg-primary/12 text-primary"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-mono text-[11.5px] font-black uppercase tracking-[0.06em]">
-                      {label}
-                    </p>
-                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10">
-                      <div
-                        className={`h-full rounded-full ${done ? "bg-success" : "bg-primary"}`}
-                        style={{ width: `${pct * 100}%` }}
-                      />
-                    </div>
-                    <p className="mt-1 truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-                      {detail}
-                    </p>
-                  </div>
-                  <span className="shrink-0 font-mono text-[10px] font-black tabular-nums text-muted">
-                    {Math.round(pct * 100)}%
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+        {/* Campaign Center (B1 read-through) */}
+        <CampaignCenter />
       </main>
 
       {active && <PartnerProfileModal partner={active} onClose={() => setActive(null)} />}
