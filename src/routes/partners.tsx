@@ -2,19 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   ArrowUpRight,
+  CheckCircle2,
   Compass,
   Gamepad2,
-  Sparkles,
+  Gift,
   Target,
   TrendingUp,
-  Users,
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { PageIcon } from "@/components/layout/PageIcon";
 import { PartnerProfileModal } from "@/components/partners/PartnerProfileModal";
 import { getPartners, useAppConfig, type PartnerCard } from "@/lib/config/appConfig";
-import { useAccountData } from "@/lib/app/useAccountData";
-import { formatUsd } from "@/lib/format";
+import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 
 export const Route = createFileRoute("/partners")({
   head: () => ({
