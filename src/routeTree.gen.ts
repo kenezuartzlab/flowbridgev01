@@ -54,6 +54,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
+import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public/activity.verify'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 
 const WalletRoute = WalletRouteImport.update({
@@ -285,6 +286,11 @@ const ApiPublicSiweNonceRoute = ApiPublicSiweNonceRouteImport.update({
   path: '/api/public/siwe/nonce',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicActivityVerifyRoute = ApiPublicActivityVerifyRouteImport.update({
+  id: '/api/public/activity/verify',
+  path: '/api/public/activity/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
   id: '/$id/vote',
   path: '/$id/vote',
@@ -333,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -381,6 +388,7 @@ export interface FileRoutesByTo {
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -430,6 +438,7 @@ export interface FileRoutesById {
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
+  '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -480,6 +489,7 @@ export interface FileRouteTypes {
     | '/api/users/socials'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/activity/verify'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -528,6 +538,7 @@ export interface FileRouteTypes {
     | '/api/users/socials'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/activity/verify'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -576,6 +587,7 @@ export interface FileRouteTypes {
     | '/api/users/socials'
     | '/api/users/sync'
     | '/api/proposals/$id/vote'
+    | '/api/public/activity/verify'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -624,6 +636,7 @@ export interface RootRouteChildren {
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
   ApiUsersSocialsRoute: typeof ApiUsersSocialsRoute
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
+  ApiPublicActivityVerifyRoute: typeof ApiPublicActivityVerifyRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
   ApiPublicSiweVerifyRoute: typeof ApiPublicSiweVerifyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -948,6 +961,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSiweNonceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/activity/verify': {
+      id: '/api/public/activity/verify'
+      path: '/api/public/activity/verify'
+      fullPath: '/api/public/activity/verify'
+      preLoaderRoute: typeof ApiPublicActivityVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/proposals/$id/vote': {
       id: '/api/proposals/$id/vote'
       path: '/$id/vote'
@@ -1012,6 +1032,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
   ApiUsersSocialsRoute: ApiUsersSocialsRoute,
   ApiUsersSyncRoute: ApiUsersSyncRoute,
+  ApiPublicActivityVerifyRoute: ApiPublicActivityVerifyRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,
   ApiPublicSiweVerifyRoute: ApiPublicSiweVerifyRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
