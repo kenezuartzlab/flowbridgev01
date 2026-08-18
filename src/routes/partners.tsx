@@ -40,7 +40,6 @@ export const Route = createFileRoute("/partners")({
 });
 
 function PartnersPage() {
-  const { incentives } = useAccountData();
   const config = useAppConfig();
   const [active, setActive] = useState<PartnerCard | null>(null);
 
