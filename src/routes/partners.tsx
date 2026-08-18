@@ -241,3 +241,139 @@ function PartnerListCard({ partner, onOpen }: { partner: PartnerCard; onOpen: ()
     </button>
   );
 }
+
+/**
+ * B1 Campaign Center — reads the durable /api/campaigns definitions + progress.
+ * Campaign PTS is deliberately labelled separately from FLOW rewards.
+ */
+function CampaignCenter() {
+  const {
+    loading,
+    error,
+    campaigns,
+    authenticated,
+    wallet,
+    campaignPointsTotal,
+    progressFor,
+  } = useCampaignProgress();
+
+  return (
+    <section className="fb-surface overflow-hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
+        <div className="min-w-0">
+          <p className="fb-eyebrow">Campaign center</p>
+          <p className="mt-0.5 truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+            Campaign PTS — separate from FLOW rewards
+          </p>
+        </div>
+        <span className="shrink-0 rounded-xl bg-primary/12 px-2.5 py-1 font-mono text-[10px] font-black tabular-nums text-primary">
+          {campaignPointsTotal.toLocaleString("en-US")} PTS
+        </span>
+      </div>
+
+      {loading ? (
+        <p className="px-4 py-4 font-mono text-[10.5px] text-muted">Loading campaigns…</p>
+      ) : error ? (
+        <p className="px-4 py-4 font-mono text-[10.5px] text-danger">{error}</p>
+      ) : campaigns.length === 0 ? (
+        <p className="px-4 py-4 font-mono text-[10.5px] text-muted">
+          No published campaigns right now.
+        </p>
+      ) : (
+        <ul className="divide-y divide-hairline">
+          {campaigns.map((c) => {
+            const progress = progressFor(c.campaignId);
+            return (
+              <li key={c.campaignId} className="px-4 py-3">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary">
+                    <Gift className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-mono text-[11.5px] font-black uppercase tracking-[0.06em]">
+                      {c.name}
+                    </p>
+                    {c.description && (
+                      <p className="mt-1 font-mono text-[10px] leading-relaxed text-muted">
+                        {c.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <ul className="mt-2.5 space-y-2">
+                  {c.tasks.map((t) => {
+                    const tp = progress?.tasks.find((x) => x.taskId === t.taskId);
+                    const done = !!tp?.completed;
+                    const pct = tp
+                      ? Math.min(1, tp.completions / Math.max(1, tp.completionLimitPerWallet))
+                      : 0;
+                    return (
+                      <li key={t.taskId} className="fb-inset p-2.5">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg ${
+                              done ? "bg-success/15 text-success" : "bg-primary/12 text-primary"
+                            }`}
+                          >
+                            {done ? (
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                            ) : (
+                              <Target className="h-3.5 w-3.5" />
+                            )}
+                          </span>
+                          <p className="min-w-0 flex-1 truncate font-mono text-[10.5px] font-black uppercase tracking-[0.06em]">
+                            {t.title}
+                          </p>
+                          <span className="shrink-0 font-mono text-[9.5px] font-black tabular-nums text-primary">
+                            {t.points} PTS
+                          </span>
+                        </div>
+                        {t.description && (
+                          <p className="mt-1.5 font-mono text-[9.5px] leading-relaxed text-muted">
+                            {t.description}
+                          </p>
+                        )}
+                        {authenticated && (
+                          <>
+                            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10">
+                              <div
+                                className={`h-full rounded-full ${done ? "bg-success" : "bg-primary"}`}
+                                style={{ width: `${pct * 100}%` }}
+                              />
+                            </div>
+                            <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.06em] text-muted">
+                              {(tp?.completions ?? 0)} / {t.completionLimitPerWallet} completed
+                              {" · "}
+                              {(tp?.campaignPoints ?? 0).toLocaleString("en-US")} PTS earned
+                            </p>
+                          </>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <div className="border-t border-hairline px-4 py-3">
+        {!authenticated ? (
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+            Sign in to track your campaign progress.
+          </p>
+        ) : !wallet ? (
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+            Bind a wallet in Rewards to start earning Campaign PTS.
+          </p>
+        ) : (
+          <p className="truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+            Tracking wallet {wallet.slice(0, 6)}…{wallet.slice(-4)}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
