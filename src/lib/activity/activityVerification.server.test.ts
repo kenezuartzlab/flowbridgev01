@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { privateKeyToAccount } from 'viem/accounts';
-import { encodeAbiParameters, keccak256, pad } from 'viem';
+import { encodeAbiParameters, keccak256, pad, toHex } from 'viem';
 import {
   buildActivityIntent,
   activityIntentTypedData,
@@ -296,5 +296,89 @@ describe('handoff idempotency', () => {
     const existing = await repo.findByCanonicalKey(key);
     expect(existing?.activityId).toBe(activityId);
     expect(repo.all()).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Production decoder binding: no deps.decodeLog override — the server module
+// must bind decodeOfficialDepositLog itself.
+// ---------------------------------------------------------------------------
+describe('production server decoder binding', () => {
+  const LIVE_GATEWAY = '0xbCAA929FdB16f5a7185C96A4Ed0CC4F25ab86E40';
+  const LIVE_AMOUNT = 10110000000000000000n;
+  const DEPOSIT_EVENT_TOPIC = keccak256(
+    toHex('DepositEvent(address,address,uint256,uint256,address,uint256,uint256)'),
+  );
+
+  const liveRawLog = (topic0: Hex) => ({
+    address: route.gateway,
+    logIndex: 3,
+    topics: [
+      topic0,
+      encodeAbiParameters([{ type: 'address' }], [account.address]) as Hex,
+      encodeAbiParameters([{ type: 'address' }], [account.address]) as Hex,
+      encodeAbiParameters([{ type: 'uint256' }], [LIVE_AMOUNT]) as Hex,
+    ] as readonly Hex[],
+    data: encodeAbiParameters(
+      [{ type: 'uint256' }, { type: 'address' }, { type: 'uint256' }, { type: 'uint256' }],
+      [LIVE_AMOUNT - 10_000_000_000_000_000n, route.sourceToken as Hex, 42n, BigInt(route.destinationChainId)],
+    ) as Hex,
+  });
+
+  const liveIntent = () =>
+    buildActivityIntent({
+      intentId: `0x${'22'.repeat(32)}` as Hex,
+      user: account.address,
+      actionType: DIRECT_BRIDGE_ACTION_TYPE,
+      sourceChainId: route.sourceChainId,
+      destinationChainId: route.destinationChainId,
+      token: route.sourceToken,
+      amount: LIVE_AMOUNT,
+      recipient: account.address,
+      nonce: 91n,
+      nowSeconds: 1_700_000_000,
+    });
+
+  async function runLive(topic0: Hex) {
+    const intent = liveIntent();
+    const signature = (await account.signTypedData(activityIntentTypedData(intent) as any)) as Hex;
+    const repo = createInMemoryActivityRepository();
+    const log = liveRawLog(topic0);
+    const outcome = await verifyAndPersistBridgeActivity(
+      {
+        reader: {
+          async getSourceReceipt() {
+            return { status: 'success', blockNumber: 100n, blockTimestamp: 1_700_000_100, logs: [log] };
+          },
+          async getLatestBlockNumber() {
+            return 110n;
+          },
+        },
+        createRepository: () => repo,
+        now: () => 1_700_000_200_000,
+      },
+      { intent, signature, intentHash: activityIntentHash(intent), sourceTxHash: TX },
+      { requiredConfirmations: 5 },
+    );
+    return { outcome, repo };
+  }
+
+  it('confirms the real DepositEvent layout without any decoder override', async () => {
+    const { outcome, repo } = await runLive(DEPOSIT_EVENT_TOPIC);
+    expect(outcome.status).toBe('CONFIRMED');
+    if (outcome.status === 'CONFIRMED') {
+      expect(outcome.activity.kind).toBe('BRIDGE_SUBMITTED');
+      expect(outcome.activity.sourceLogIndex).toBe(3);
+      expect(outcome.activity.amountRaw).toBe(LIVE_AMOUNT);
+    }
+    expect(repo.all()).toHaveLength(1);
+    expect(LIVE_GATEWAY.toLowerCase()).toBe(route.gateway.toLowerCase());
+  });
+
+  it('does not confirm the obsolete Deposit signature layout', async () => {
+    const obsolete = keccak256(toHex('Deposit(uint256,bytes32,address,address,uint256,address)'));
+    const { outcome, repo } = await runLive(obsolete);
+    expect(outcome.status).not.toBe('CONFIRMED');
+    expect(repo.all()).toHaveLength(0);
   });
 });
