@@ -177,11 +177,44 @@ function CampaignsPage() {
           </dl>
         </section>
 
+        {/* Search + chain filter */}
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Search campaigns</span>
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search campaigns"
+              className="min-h-[38px] w-full rounded-xl border border-hairline bg-card-alt pl-9 pr-3 font-mono text-[11px] outline-none transition focus:border-primary/60"
+            />
+          </label>
+          <label className="shrink-0">
+            <span className="sr-only">Filter by chain</span>
+            <select
+              value={chain}
+              onChange={(e) => setChain(e.target.value)}
+              className="min-h-[38px] w-full rounded-xl border border-hairline bg-card-alt px-3 font-mono text-[10px] font-black uppercase tracking-[0.08em] outline-none transition focus:border-primary/60 sm:w-auto"
+            >
+              <option value="all">All chains</option>
+              {chainOptions.map((id) => (
+                <option key={id} value={String(id)}>
+                  {chainName(id)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
         {/* Filters */}
         <div
           role="tablist"
           aria-label="Campaign filters"
-          className="flex flex-wrap gap-1.5 overflow-x-auto"
+          className="flex flex-wrap gap-1.5"
         >
           {tabs.map((t) => (
             <button
@@ -201,6 +234,25 @@ function CampaignsPage() {
             </button>
           ))}
         </div>
+
+        {/* Spotlight — deterministic: soonest-ending live campaigns */}
+        {!loading && !error && spotlight.length > 0 && (
+          <section>
+            <p className="fb-eyebrow mb-2 px-1">Spotlight · ending soonest</p>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {spotlight.map(({ campaign, progress }) => (
+                <li key={`spot-${campaign.campaignId}`}>
+                  <CampaignCard
+                    campaign={campaign}
+                    progress={progress}
+                    authenticated={authenticated}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
 
         {/* Grid */}
         {loading ? (
