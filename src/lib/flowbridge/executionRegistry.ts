@@ -188,8 +188,8 @@ export function isFlowBridgeV4Target(
 /** V4-only resolution. Legacy/unknown chains resolve as unconfigured. */
 export function resolveFlowBridgeV4Execution(chainId: number): FlowBridgeExecutionResolution {
   const entry = resolveFlowBridgeExecution(chainId);
-  if (isFlowBridgeV4Target(entry)) return entry;
   if (entry.configured) {
+    if (isFlowBridgeV4Target(entry)) return entry;
     return {
       configured: false,
       chainId: entry.chainId,
