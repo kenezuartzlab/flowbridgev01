@@ -10,7 +10,7 @@ import type { Hex } from './activityIntent';
 
 /** Smallest read-only event ABI needed to verify an official source deposit. */
 export const OFFICIAL_BRIDGE_EVENT_ABI = parseAbi([
-  'event Deposit(uint256 destinationChainId, bytes32 resourceId, address indexed depositor, address recipient, uint256 amount, address token)',
+  'event DepositEvent(address indexed depositer, address indexed recipient, uint256 indexed amount, uint256 receiveAmount, address tokenAddress, uint256 depositNonce, uint256 destinationChainId)',
 ]);
 
 export interface RawLog {
