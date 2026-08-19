@@ -2924,6 +2924,18 @@ export default function App() {
             />
           )}
 
+          {/* V7: campaign task context (presentation only, never authoritative). */}
+          {activeTab === 'BRIDGE' && campaignActionCtx && (
+            <CampaignTaskContextBanner
+              ctx={campaignActionCtx}
+              currentDirection={bridgeDirection}
+              txHash={
+                session.pendingAdapterBridge?.tx_hash ??
+                (session.step3.status === 'submitted' ? session.step3.tx_hash : undefined)
+              }
+            />
+          )}
+
           {activeTab === 'BRIDGE' && (
             <BridgeCard
               amount={usdtAmount}
@@ -3000,18 +3012,6 @@ export default function App() {
             />
           )}
 
-
-          {/* V7: campaign task context (presentation only, never authoritative). */}
-          {activeTab === 'BRIDGE' && campaignActionCtx && (
-            <CampaignTaskContextBanner
-              ctx={campaignActionCtx}
-              currentDirection={bridgeDirection}
-              txHash={
-                session.pendingAdapterBridge?.tx_hash ??
-                (session.step3.status === 'submitted' ? session.step3.tx_hash : undefined)
-              }
-            />
-          )}
 
           {/* V6: non-authoritative campaign route hint (presentation only). */}
           {activeTab === 'BRIDGE' && !campaignActionCtx && (
