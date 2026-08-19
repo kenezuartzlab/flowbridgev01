@@ -360,13 +360,17 @@ async function botUsdtStep(
   const q = await quoteV3BotUsdt(client, poolV3, detect.isBotIn, amountIn);
   if (!q || q.amountOut <= 0n) return null;
 
+  const routerId = await bdexV3RouterId(isMainnet);
+  if (routerId === null) return null;
+
   const inAddr = detect.isBotIn ? wbot : usdt;
   const outAddr = detect.isBotIn ? usdt : wbot;
 
   return {
     dex: "bdex-v3",
-    routerId: await bdexV3RouterId(isMainnet),
+    routerId,
     router: bdexRouter,
+
     path: [inAddr, outAddr],
     symbolPath: [
       detect.isBotIn ? "BOT" : "USDT",
