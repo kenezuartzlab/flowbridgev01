@@ -8,22 +8,31 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Info } from "lucide-react";
 import { campaignChains } from "@/components/campaigns/campaignPresentation";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
+import { OFFICIAL_CHAIN_IDS } from "@/lib/bridge/officialBridgeConfig";
+
+/** Route chain ids derived from existing bridge configuration only. */
+function routeChains(direction: string, isMainnet: boolean) {
+  const bot = isMainnet ? OFFICIAL_CHAIN_IDS.botMainnet : OFFICIAL_CHAIN_IDS.botTestnet;
+  const bnb = isMainnet ? OFFICIAL_CHAIN_IDS.bnbMainnet : OFFICIAL_CHAIN_IDS.bnbTestnet;
+  if (direction === "BNB_TO_BOT") return { source: bnb, destination: bot };
+  if (direction === "BOT_TO_BNB") return { source: bot, destination: bnb };
+  return null;
+}
 
 export function BridgeCampaignHint({
-  sourceChainId,
-  destinationChainId,
+  direction,
+  isMainnet,
 }: {
-  sourceChainId?: number | null;
-  destinationChainId?: number | null;
+  direction: string;
+  isMainnet: boolean;
 }) {
   const { campaigns } = useCampaignProgress();
-  if (!sourceChainId || !destinationChainId) return null;
+  const route = routeChains(direction, isMainnet);
+  if (!route) return null;
 
   const match = campaigns.find((c) => {
     const chains = campaignChains(c);
-    return (
-      chains.sources.includes(sourceChainId) && chains.destinations.includes(destinationChainId)
-    );
+    return chains.source === route.source && chains.destination === route.destination;
   });
   if (!match) return null;
 
