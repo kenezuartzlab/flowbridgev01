@@ -28,6 +28,7 @@ import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CampaignsIndexRouteImport } from './routes/campaigns/index'
+import { Route as CampaignsStudioRouteImport } from './routes/campaigns/studio'
 import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
 import { Route as CampaignsSlugRouteImport } from './routes/campaigns/$slug'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
@@ -48,6 +49,7 @@ import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/w
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
 import { Route as ApiCampaignsMeRouteImport } from './routes/api/campaigns.me'
 import { Route as ApiCampaignsLeaderboardRouteImport } from './routes/api/campaigns.leaderboard'
+import { Route as ApiCampaignsAdminRouteImport } from './routes/api/campaigns.admin'
 import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-image.$'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
@@ -62,6 +64,7 @@ import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siw
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
 import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public/activity.verify'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
+import { Route as ApiCampaignsAdminIdRouteImport } from './routes/api/campaigns.admin.$id'
 
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
@@ -156,6 +159,11 @@ const IndexRoute = IndexRouteImport.update({
 const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
   id: '/campaigns/',
   path: '/campaigns/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsStudioRoute = CampaignsStudioRouteImport.update({
+  id: '/campaigns/studio',
+  path: '/campaigns/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampaignsMeRoute = CampaignsMeRouteImport.update({
@@ -260,6 +268,11 @@ const ApiCampaignsLeaderboardRoute = ApiCampaignsLeaderboardRouteImport.update({
   path: '/leaderboard',
   getParentRoute: () => ApiCampaignsRoute,
 } as any)
+const ApiCampaignsAdminRoute = ApiCampaignsAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => ApiCampaignsRoute,
+} as any)
 const ApiBannerImageSplatRoute = ApiBannerImageSplatRouteImport.update({
   id: '/api/banner-image/$',
   path: '/api/banner-image/$',
@@ -332,6 +345,11 @@ const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
   path: '/$id/vote',
   getParentRoute: () => ApiProposalsRoute,
 } as any)
+const ApiCampaignsAdminIdRoute = ApiCampaignsAdminIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiCampaignsAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -363,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
+  '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -371,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
+  '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
@@ -380,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
+  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -418,6 +439,7 @@ export interface FileRoutesByTo {
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
+  '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -426,6 +448,7 @@ export interface FileRoutesByTo {
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
+  '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
@@ -435,6 +458,7 @@ export interface FileRoutesByTo {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
+  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -474,6 +498,7 @@ export interface FileRoutesById {
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
+  '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -482,6 +507,7 @@ export interface FileRoutesById {
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
+  '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
@@ -491,6 +517,7 @@ export interface FileRoutesById {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
+  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRoute
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -531,6 +558,7 @@ export interface FileRouteTypes {
     | '/api/transactions'
     | '/campaigns/$slug'
     | '/campaigns/me'
+    | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
@@ -539,6 +567,7 @@ export interface FileRouteTypes {
     | '/api/admin/tokens'
     | '/api/admin/whoami'
     | '/api/banner-image/$'
+    | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
@@ -548,6 +577,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
+    | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/siwe/nonce'
@@ -586,6 +616,7 @@ export interface FileRouteTypes {
     | '/api/transactions'
     | '/campaigns/$slug'
     | '/campaigns/me'
+    | '/campaigns/studio'
     | '/campaigns'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
@@ -594,6 +625,7 @@ export interface FileRouteTypes {
     | '/api/admin/tokens'
     | '/api/admin/whoami'
     | '/api/banner-image/$'
+    | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
@@ -603,6 +635,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
+    | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/siwe/nonce'
@@ -641,6 +674,7 @@ export interface FileRouteTypes {
     | '/api/transactions'
     | '/campaigns/$slug'
     | '/campaigns/me'
+    | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
@@ -649,6 +683,7 @@ export interface FileRouteTypes {
     | '/api/admin/tokens'
     | '/api/admin/whoami'
     | '/api/banner-image/$'
+    | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
@@ -658,6 +693,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
+    | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/siwe/nonce'
@@ -697,6 +733,7 @@ export interface RootRouteChildren {
   ApiTransactionsRoute: typeof ApiTransactionsRoute
   CampaignsSlugRoute: typeof CampaignsSlugRoute
   CampaignsMeRoute: typeof CampaignsMeRoute
+  CampaignsStudioRoute: typeof CampaignsStudioRoute
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
@@ -855,6 +892,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CampaignsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campaigns/studio': {
+      id: '/campaigns/studio'
+      path: '/campaigns/studio'
+      fullPath: '/campaigns/studio'
+      preLoaderRoute: typeof CampaignsStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/campaigns/me': {
       id: '/campaigns/me'
       path: '/campaigns/me'
@@ -995,6 +1039,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCampaignsLeaderboardRouteImport
       parentRoute: typeof ApiCampaignsRoute
     }
+    '/api/campaigns/admin': {
+      id: '/api/campaigns/admin'
+      path: '/admin'
+      fullPath: '/api/campaigns/admin'
+      preLoaderRoute: typeof ApiCampaignsAdminRouteImport
+      parentRoute: typeof ApiCampaignsRoute
+    }
     '/api/banner-image/$': {
       id: '/api/banner-image/$'
       path: '/api/banner-image/$'
@@ -1093,15 +1144,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProposalsIdVoteRouteImport
       parentRoute: typeof ApiProposalsRoute
     }
+    '/api/campaigns/admin/$id': {
+      id: '/api/campaigns/admin/$id'
+      path: '/$id'
+      fullPath: '/api/campaigns/admin/$id'
+      preLoaderRoute: typeof ApiCampaignsAdminIdRouteImport
+      parentRoute: typeof ApiCampaignsAdminRoute
+    }
   }
 }
 
+interface ApiCampaignsAdminRouteChildren {
+  ApiCampaignsAdminIdRoute: typeof ApiCampaignsAdminIdRoute
+}
+
+const ApiCampaignsAdminRouteChildren: ApiCampaignsAdminRouteChildren = {
+  ApiCampaignsAdminIdRoute: ApiCampaignsAdminIdRoute,
+}
+
+const ApiCampaignsAdminRouteWithChildren =
+  ApiCampaignsAdminRoute._addFileChildren(ApiCampaignsAdminRouteChildren)
+
 interface ApiCampaignsRouteChildren {
+  ApiCampaignsAdminRoute: typeof ApiCampaignsAdminRouteWithChildren
   ApiCampaignsLeaderboardRoute: typeof ApiCampaignsLeaderboardRoute
   ApiCampaignsMeRoute: typeof ApiCampaignsMeRoute
 }
 
 const ApiCampaignsRouteChildren: ApiCampaignsRouteChildren = {
+  ApiCampaignsAdminRoute: ApiCampaignsAdminRouteWithChildren,
   ApiCampaignsLeaderboardRoute: ApiCampaignsLeaderboardRoute,
   ApiCampaignsMeRoute: ApiCampaignsMeRoute,
 }
@@ -1153,6 +1224,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTransactionsRoute: ApiTransactionsRoute,
   CampaignsSlugRoute: CampaignsSlugRoute,
   CampaignsMeRoute: CampaignsMeRoute,
+  CampaignsStudioRoute: CampaignsStudioRoute,
   CampaignsIndexRoute: CampaignsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
