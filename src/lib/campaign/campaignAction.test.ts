@@ -1,13 +1,13 @@
 import { VERIFIED_SWAP_PATHS, VERIFIED_SWAP_V1_ACTION_TYPE } from '../swap/verifiedSwapConfig';
-import {
-  campaignSwapActionLink,
-  parseCampaignSwapActionSearchString,
-  resolveCampaignTaskSwapAction, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   campaignActionLink,
+  campaignSwapActionLink,
   parseCampaignActionSearch,
   parseCampaignActionSearchString,
+  parseCampaignSwapActionSearchString,
   resolveCampaignTaskAction,
+  resolveCampaignTaskSwapAction,
 } from './campaignAction';
 import type { CampaignApiTask } from './campaignApi';
 
