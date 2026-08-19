@@ -14,11 +14,15 @@ import { activityIntentTypedData, ZERO_BYTES32, type Hex } from './activityInten
 import { activityIntentHash, canonicalActivityId, type CanonicalEventKey } from './activityCanonicalKey';
 import type { SourceReceipt } from './officialBridgeEvent';
 import {
-  decodeErc20TransferLog,
-  decodeTransferEvents,
-  selectCanonicalSwapTransferLog,
-  type TransferLogDecoder,
-} from './swapTransferEvent';
+  decodeSwapActivityEvents,
+  decodeSwapActivityLog,
+  selectCanonicalSwapActivityLog,
+  type SwapActivityLogDecoder,
+} from './swapActivityEvent';
+import {
+  decodeApprovedSafeSwapCalldata,
+  validateApprovedSafeSwapCalldata,
+} from './verifiedSwapCalldata';
 import type { ActivityRepository, VerifiedActivity } from './activityRepository';
 import type { ActivityIntentHandoff, VerificationOutcome } from './activityVerifier';
 import { ZERO_ADDRESS } from './activityVerifier';
@@ -34,12 +38,23 @@ export interface SwapVerifierDeps {
     signature: Hex;
   }) => Promise<string>;
   getSourceReceipt: (args: { chainId: number; txHash: Hex }) => Promise<SourceReceipt | null>;
+  /** Trusted source transaction (to / from / calldata). */
+  getSourceTransaction: (args: {
+    chainId: number;
+    txHash: Hex;
+  }) => Promise<SourceTransaction | null>;
   isFinalized: (args: { chainId: number; receipt: SourceReceipt }) => Promise<boolean>;
   repository: ActivityRepository;
   /** Approved swap paths. Defaults to the frozen server config. */
   paths?: readonly VerifiedSwapPath[];
-  decodeLog?: TransferLogDecoder;
+  decodeLog?: SwapActivityLogDecoder;
   now?: () => number;
+}
+
+export interface SourceTransaction {
+  from: Hex;
+  to: Hex | null;
+  input: Hex;
 }
 
 const eq = (a?: string, b?: string) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
@@ -120,20 +135,72 @@ export async function verifySwapActivity(
   const finalized = await deps.isFinalized({ chainId: path.chainId, receipt });
   if (!finalized) return { status: 'PENDING', reason: 'source transaction not finalized yet' };
 
-  // ---- Canonical token-in transfer --------------------------------------
-  const selection = selectCanonicalSwapTransferLog(
-    decodeTransferEvents(receipt, deps.decodeLog ?? decodeErc20TransferLog),
+  // ---- Trusted source transaction: exact router + exact safe entrypoint ----
+  let tx: SourceTransaction | null;
+  try {
+    tx = await deps.getSourceTransaction({
+      chainId: path.chainId,
+      txHash: handoff.sourceTxHash,
+    });
+  } catch (err) {
+    return {
+      status: 'PENDING',
+      reason: err instanceof Error ? err.message : 'source transaction unavailable',
+    };
+  }
+  if (!tx) return { status: 'PENDING', reason: 'no source transaction yet' };
+  if (!eq(tx.from, intent.user)) {
+    return { status: 'REJECTED', reason: 'source transaction sender is not the intent user' };
+  }
+  if (!tx.to || !eq(tx.to, path.router)) {
+    return {
+      status: 'REJECTED',
+      reason: 'source transaction target is not the approved FlowBridgeRouter V4',
+    };
+  }
+
+  const decodedCalldata = decodeApprovedSafeSwapCalldata(tx.input, path);
+  if (!decodedCalldata.ok) {
+    return { status: 'REJECTED', reason: decodedCalldata.reason };
+  }
+  const calldata = decodedCalldata.calldata;
+  const calldataCheck = validateApprovedSafeSwapCalldata(calldata, {
+    path,
+    amount: intent.amount,
+    recipient: intent.recipient.toLowerCase() as Hex,
+    deadline: intent.deadline,
+  });
+  if (!calldataCheck.ok) {
+    return { status: 'REJECTED', reason: calldataCheck.reason };
+  }
+
+  // ---- Canonical native Router V4 SwapActivity evidence -------------------
+  const selection = selectCanonicalSwapActivityLog(
+    decodeSwapActivityEvents(receipt, deps.decodeLog ?? decodeSwapActivityLog),
     {
-      token: path.tokenIn,
-      from: intent.user.toLowerCase() as Hex,
-      to: path.router,
-      value: intent.amount,
+      router: path.router,
+      sender: intent.user.toLowerCase() as Hex,
+      recipient: intent.recipient.toLowerCase() as Hex,
+      routerId: path.routerId,
+      tokenIn: path.tokenIn,
+      tokenOut: path.tokenOut,
+      amountIn: calldata.swapAmount,
     },
   );
   if (!selection.ok) {
     return selection.kind === 'ambiguous'
       ? { status: 'REVIEW', reason: selection.reason }
       : { status: 'REJECTED', reason: selection.reason };
+  }
+  // Semantic swap input only — protocolFee is never added to amountRaw.
+  if (selection.event.amountIn !== intent.amount) {
+    return { status: 'REJECTED', reason: 'SwapActivity amountIn does not equal the signed amount' };
+  }
+  if (selection.event.protocolFee > calldata.maxProtocolFee) {
+    return {
+      status: 'REJECTED',
+      reason: 'SwapActivity protocolFee exceeds the user-bound maxProtocolFee',
+    };
   }
 
   const key: CanonicalEventKey = {
@@ -157,8 +224,8 @@ export async function verifySwapActivity(
     sourceChainId: key.chainId,
     sourceTxHash: key.txHash,
     sourceLogIndex: key.logIndex,
-    // Canonical amount comes from the decoded Transfer log, never the client.
-    amountRaw: selection.event.value,
+    // Canonical amount = SwapActivity.amountIn (semantic swap input, fee excluded).
+    amountRaw: selection.event.amountIn,
     campaignId: intent.campaignId,
     intentHash: computedHash,
     status: 'CONFIRMED',
