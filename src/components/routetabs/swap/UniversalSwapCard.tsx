@@ -13,6 +13,9 @@ import {
   FLOW_BRIDGE_ROUTER_V3_ABI,
   getContracts,
 } from "@/lib/contracts";
+import { FLOW_BRIDGE_ROUTER_V4_ABI } from "@/lib/flowbridge/routerV4Abi";
+import { resolveFlowBridgeExecutionForNetwork } from "@/lib/flowbridge/executionRegistry";
+
 import {
   getCuratedTokens,
   NATIVE_TOKEN_ADDRESS,
@@ -167,9 +170,15 @@ export function UniversalSwapCard({
   const inBalanceDisplay = formatUnits(inBalanceRaw, tokenIn.decimals);
   const outBalanceDisplay = formatUnits(outBalanceRaw, tokenOut.decimals);
 
-  // All swaps route through FlowBridgeRouter v3, so ERC20 approvals target it.
-  const flowRouter: Address = contracts.flowBridgeRouterV3.toLowerCase() as Address;
+  // Swap execution target + approval spender come from the canonical FlowBridge
+  // execution registry (V4 on BOT Testnet, v3 on BOT Mainnet until V4 ships).
+  const flowTarget = useMemo(() => resolveFlowBridgeExecutionForNetwork(isMainnet), [isMainnet]);
+  const flowAbi = flowTarget.routerVersion === "v4"
+    ? FLOW_BRIDGE_ROUTER_V4_ABI
+    : FLOW_BRIDGE_ROUTER_V3_ABI;
+  const flowRouter: Address = flowTarget.router;
   const firstStepRouter: Address = flowRouter;
+
 
   // Always-on native BOT balance for the low-gas warning banner (independent
   // of whichever token the user is spending).
@@ -252,20 +261,26 @@ export function UniversalSwapCard({
 
     // Read the on-chain protocol fee for this swap so we approve/send the exact amount.
     let fee = 0n;
+    let feeKnown = false;
     try {
       const res = (await publicClient!.readContract({
         address: flowRouter,
-        abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+        abi: flowAbi,
         functionName: "computeRouterFee",
         args: [BigInt(step.routerId), amountInRaw, address as `0x${string}`],
       })) as readonly [bigint, bigint];
       fee = res[0] ?? 0n;
+      feeKnown = true;
     } catch {
       // If the fee view reverts for any reason, fall back to 0 — the router will
       // still enforce fee logic on-chain and revert if the caller under-pays.
       fee = 0n;
     }
     const totalIn = amountInRaw + fee;
+    // V4 hardened entry points bound the fee the router may charge. Only used
+    // when the exact fee is known; otherwise fall back to the compatible calls.
+    const useSafe = flowTarget.supportsSafeSwaps && feeKnown;
+
 
     // ── Balance guard: the router debits `amount + fee`, so swapping an exact
     // full balance fails on-chain with a cryptic SafeERC20 error. Catch it here
@@ -375,52 +390,88 @@ export function UniversalSwapCard({
     };
 
     // ── Dispatch to the correct FlowBridgeRouter entry point ──────────────
+    // V4 (`*Safe`) adds an explicit maxProtocolFee bound; the legacy calls stay
+    // for v3 chains and for the case where the fee view is unavailable.
     if (step.inIsNative) {
-      const base = {
-        address: flowRouter,
-        abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-        functionName: "swapNativeToToken" as const,
-        args: [routerIdBig, step.path[step.path.length - 1], feePool, minOut, step.path, to, deadline] as const,
-        value: totalIn,
-        account: address,
-      };
+      const base = (useSafe
+        ? {
+            address: flowRouter,
+            abi: flowAbi,
+            functionName: "swapNativeToTokenSafe",
+            args: [routerIdBig, amountInRaw, step.path[step.path.length - 1], feePool, minOut, step.path, to, deadline, fee],
+            value: totalIn,
+            account: address,
+          }
+        : {
+            address: flowRouter,
+            abi: flowAbi,
+            functionName: "swapNativeToToken",
+            args: [routerIdBig, step.path[step.path.length - 1], feePool, minOut, step.path, to, deadline],
+            value: totalIn,
+            account: address,
+          }) as any;
       const gas = await estimateOr(base);
       return await writeContractAsync({ ...base, gas });
     }
 
     if (step.outIsNative) {
-      const base = {
-        address: flowRouter,
-        abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-        functionName: "swapTokenToNative" as const,
-        args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline] as const,
-        account: address,
-      };
+      const base = (useSafe
+        ? {
+            address: flowRouter,
+            abi: flowAbi,
+            functionName: "swapTokenToNativeSafe",
+            args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline, fee],
+            account: address,
+          }
+        : {
+            address: flowRouter,
+            abi: flowAbi,
+            functionName: "swapTokenToNative",
+            args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline],
+            account: address,
+          }) as any;
       const gas = await estimateOr(base);
       return await writeContractAsync({ ...base, gas });
     }
 
     // ERC20 → ERC20
     if (isV3) {
-      const base = {
-        address: flowRouter,
-        abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-        functionName: "swapV3Single" as const,
-        args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline] as const,
-        account: address,
-      };
+      const base = (useSafe
+        ? {
+            address: flowRouter,
+            abi: flowAbi,
+            functionName: "swapV3SingleSafe",
+            args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline, fee],
+            account: address,
+          }
+        : {
+            address: flowRouter,
+            abi: flowAbi,
+            functionName: "swapV3Single",
+            args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline],
+            account: address,
+          }) as any;
       const gas = await estimateOr(base);
       return await writeContractAsync({ ...base, gas });
     }
-    const base = {
-      address: flowRouter,
-      abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-      functionName: "swapV2" as const,
-      args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline] as const,
-      account: address,
-    };
+    const base = (useSafe
+      ? {
+          address: flowRouter,
+          abi: flowAbi,
+          functionName: "swapV2Safe",
+          args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline, fee],
+          account: address,
+        }
+      : {
+          address: flowRouter,
+          abi: flowAbi,
+          functionName: "swapV2",
+          args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline],
+          account: address,
+        }) as any;
     const gas = await estimateOr(base);
     return await writeContractAsync({ ...base, gas });
+
 
   };
 
@@ -496,7 +547,7 @@ export function UniversalSwapCard({
         try {
           const res = (await publicClient.readContract({
             address: flowRouter,
-            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+            abi: flowAbi,
             functionName: "computeRouterFee",
             args: [BigInt(firstStep.routerId), initialAmount, address as `0x${string}`],
           })) as readonly [bigint, bigint];

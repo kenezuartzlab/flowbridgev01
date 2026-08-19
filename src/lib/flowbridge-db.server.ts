@@ -2,6 +2,10 @@
 // queries against Lovable Cloud (Supabase) using the service-role client.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { MAINNET_CONTRACTS } from "@/lib/contracts";
+import {
+  BOT_MAINNET_CHAIN_ID,
+  requireFlowBridgeExecution,
+} from "@/lib/flowbridge/executionRegistry";
 import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd } from "@/lib/rewards";
 import { getRewardSettings } from "@/lib/appConfig.server";
 
@@ -45,7 +49,11 @@ async function verifySwapReceipt(txHash: string | null, walletAddress: string) {
   // Mainnet only: testnet activity is intentionally never recorded or rewarded,
   // so testnet swaps can never credit FLOW points.
   const candidates = [
-    { rpcUrl: BOT_MAINNET_RPC, router: MAINNET_CONTRACTS.flowBridgeRouterV3.toLowerCase() },
+    {
+      rpcUrl: BOT_MAINNET_RPC,
+      // Canonical execution target for BOT Mainnet (registry-resolved).
+      router: requireFlowBridgeExecution(BOT_MAINNET_CHAIN_ID).router,
+    },
   ];
 
   for (const candidate of candidates) {
