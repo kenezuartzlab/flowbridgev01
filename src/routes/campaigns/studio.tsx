@@ -694,6 +694,13 @@ function TaskEditor({
 
   return (
     <div className="fb-inset space-y-3 p-3">
+      <datalist id="fb-studio-tokens">
+        {STUDIO_TOKEN_OPTIONS.map((t) => (
+          <option key={t.address} value={t.address}>
+            {t.label}
+          </option>
+        ))}
+      </datalist>
       <div className="flex items-center justify-between gap-2">
         <p className="font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary">
           Task {index + 1}
