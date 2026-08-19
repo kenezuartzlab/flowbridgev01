@@ -10,7 +10,7 @@ import type { Hex } from './activityIntent';
 
 /** Smallest read-only event ABI needed to verify an official source deposit. */
 export const OFFICIAL_BRIDGE_EVENT_ABI = parseAbi([
-  'event Deposit(uint256 destinationChainId, bytes32 resourceId, address indexed depositor, address recipient, uint256 amount, address token)',
+  'event DepositEvent(address indexed depositer, address indexed recipient, uint256 indexed amount, uint256 receiveAmount, address tokenAddress, uint256 depositNonce, uint256 destinationChainId)',
 ]);
 
 export interface RawLog {
@@ -49,16 +49,17 @@ export const decodeOfficialDepositLog: DepositLogDecoder = (log) => {
       topics: log.topics as [Hex, ...Hex[]],
       data: log.data,
     }) as { eventName: string; args: Record<string, unknown> };
-    if (decoded.eventName !== 'Deposit') return null;
+    if (decoded.eventName !== 'DepositEvent') return null;
     const a = decoded.args;
     return {
       logIndex: log.logIndex,
       emitter: log.address.toLowerCase() as Hex,
-      depositor: String(a['depositor']).toLowerCase() as Hex,
+      depositor: String(a['depositer']).toLowerCase() as Hex,
       recipient: String(a['recipient']).toLowerCase() as Hex,
       destinationChainId: BigInt(a['destinationChainId'] as bigint),
+      // canonical source amount is the indexed gross `amount`, never receiveAmount
       amount: BigInt(a['amount'] as bigint),
-      token: a['token'] ? (String(a['token']).toLowerCase() as Hex) : undefined,
+      token: a['tokenAddress'] ? (String(a['tokenAddress']).toLowerCase() as Hex) : undefined,
     };
   } catch {
     return null;
