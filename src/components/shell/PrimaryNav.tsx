@@ -1,20 +1,23 @@
 /**
- * FlowBridge V9 — desktop primary navigation. Icons always carry text labels,
- * active state is expressed with fill + weight (never colour alone), and focus
- * rings are preserved. Presentation only.
+ * FlowBridge V9.1 — desktop/tablet primary navigation (>= 768px).
+ *
+ * Four consumer destinations in a fixed reading order (Home, Trade, Explore,
+ * Activity); Profile lives with the wallet/avatar cluster on the right of the
+ * shell header. Operator surfaces (Studio / My progress) are NOT equal-weight
+ * consumer tabs — they live in the Explore/Profile context instead.
  */
 import { Link, useRouterState } from "@tanstack/react-router";
-import { OPERATOR_NAV, PRIMARY_NAV, isNavActive } from "./navModel";
+import { PRIMARY_NAV, isNavActive } from "./navModel";
+
+const DESKTOP_ORDER = ["home", "trade", "explore", "activity"];
 
 export function PrimaryNav({ className = "" }: { className?: string }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const items = DESKTOP_ORDER.map((id) => PRIMARY_NAV.find((d) => d.id === id)!).filter(Boolean);
 
   return (
-    <nav
-      aria-label="Primary"
-      className={`hidden md:flex md:items-center md:gap-1 ${className}`}
-    >
-      {PRIMARY_NAV.map((dest) => {
+    <nav aria-label="Primary" className={`hidden md:flex md:items-center md:gap-1 ${className}`}>
+      {items.map((dest) => {
         const active = isNavActive(dest, pathname);
         const { Icon } = dest;
         return (
@@ -22,7 +25,9 @@ export function PrimaryNav({ className = "" }: { className?: string }) {
             key={dest.id}
             to={dest.to}
             aria-current={active ? "page" : undefined}
-            className={`inline-flex min-h-[40px] items-center gap-2 rounded-[var(--fb-radius-md)] border px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.1em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+            data-nav-id={dest.id}
+            data-nav-active={active ? "true" : "false"}
+            className={`inline-flex min-h-[40px] items-center gap-2 rounded-[var(--fb-radius-md)] border px-3 text-[12.5px] font-bold tracking-[-0.01em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
               active
                 ? "border-primary/45 bg-primary/12 text-primary"
                 : "border-transparent text-muted hover:border-hairline hover:text-foreground"
@@ -33,18 +38,6 @@ export function PrimaryNav({ className = "" }: { className?: string }) {
           </Link>
         );
       })}
-
-      <span aria-hidden className="mx-1 h-5 w-px bg-hairline" />
-
-      {OPERATOR_NAV.map((item) => (
-        <Link
-          key={item.id}
-          to={item.to}
-          className="inline-flex min-h-[40px] items-center rounded-[var(--fb-radius-md)] px-2.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted-soft transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-        >
-          {item.label}
-        </Link>
-      ))}
     </nav>
   );
 }

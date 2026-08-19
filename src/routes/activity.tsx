@@ -89,7 +89,7 @@ function ActivityPage() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-4 pb-24 sm:py-5">
+      <main className="mx-auto max-w-lg px-4 py-4 pb-24 sm:py-5 md:max-w-3xl lg:max-w-5xl">
         {!user ? (
           <div className="space-y-4">
             <TabBanner variant="activity" />

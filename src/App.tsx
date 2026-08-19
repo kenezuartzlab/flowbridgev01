@@ -2671,7 +2671,7 @@ export default function App() {
           onTabChange={setActiveTab}
         />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-background flex flex-col items-stretch px-3.5 pb-4 pt-1.5 sm:px-5 sm:pb-5 sm:pt-2 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-background flex flex-col items-stretch px-3.5 pb-4 pt-1.5 sm:px-5 sm:pb-5 sm:pt-2 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl md:[&>*]:max-w-2xl lg:[&>*]:max-w-3xl">
 
           {/* Tab hero banners (admin-managed) + status bar, swipeable */}
           {(() => {

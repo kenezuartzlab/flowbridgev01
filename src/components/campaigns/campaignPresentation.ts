@@ -151,3 +151,78 @@ export function formatDate(ts: number): string {
 }
 
 export const shortWallet = (w: string) => `${w.slice(0, 6)}…${w.slice(-4)}`;
+
+/* ------------------------------------------------------------------ *
+ * V9.1 — deterministic decorative cover art.
+ * Derived only from known campaign metadata (slug + chains + task rules).
+ * Purely decorative: it never implies rewards, partners or social proof.
+ * ------------------------------------------------------------------ */
+
+export interface CampaignCover {
+  /** CSS gradient for the cover surface. */
+  gradient: string;
+  /** Accent colour used for arcs / rings / route lines. */
+  accent: string;
+  /** Deterministic category label from authoritative rules. */
+  category: string;
+  /** 0..1 seeds so the generated art differs per campaign but is stable. */
+  seed: number;
+}
+
+const COVER_PALETTES: { from: string; to: string; accent: string }[] = [
+  { from: "#043b32", to: "#0a5f4a", accent: "#34d399" },
+  { from: "#12224d", to: "#1d3f8f", accent: "#60a5fa" },
+  { from: "#2b1147", to: "#4c1d95", accent: "#c084fc" },
+  { from: "#062b3d", to: "#0e5566", accent: "#22d3ee" },
+  { from: "#3b1a05", to: "#7c3a08", accent: "#fb923c" },
+];
+
+function hashString(value: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    h ^= value.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
+/** Deterministic category from the campaign's own rules — never invented. */
+export function campaignCategory(campaign: CampaignApiCampaign): string {
+  const { source, destination } = campaignChains(campaign);
+  if (source !== undefined && destination !== undefined && source !== destination) {
+    return "Bridge route";
+  }
+  const kinds = new Set<string>();
+  for (const task of campaign.tasks) {
+    for (const rule of rulesOf(task)) {
+      if (rule.type === "ACTIVITY_KIND" && typeof rule.kind === "string") kinds.add(rule.kind);
+    }
+  }
+  if (kinds.has("SWAP_EXECUTED")) return "Swap quest";
+  if (kinds.size > 0) return "Bridge quest";
+  return "Campaign";
+}
+
+export function campaignCover(campaign: CampaignApiCampaign): CampaignCover {
+  const hash = hashString(`${campaign.slug}:${campaign.campaignId}`);
+  const palette = COVER_PALETTES[hash % COVER_PALETTES.length]!;
+  return {
+    gradient: `linear-gradient(135deg, ${palette.from} 0%, ${palette.to} 100%)`,
+    accent: palette.accent,
+    category: campaignCategory(campaign),
+    seed: (hash % 1000) / 1000,
+  };
+}
+
+/** Stable de-duplication by campaign identity (id first, slug fallback). */
+export function dedupeCampaigns(list: CampaignApiCampaign[]): CampaignApiCampaign[] {
+  const seen = new Set<string>();
+  const out: CampaignApiCampaign[] = [];
+  for (const c of list) {
+    const key = (c.campaignId || c.slug || "").toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(c);
+  }
+  return out;
+}
