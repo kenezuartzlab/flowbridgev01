@@ -468,6 +468,7 @@ export function UniversalSwapCard({
       let nextAmount = initialAmount;
       let activeQuote = latestQuote;
       let finalExpectedOut = latestQuote.amountOut;
+      let finalToAmountDisplay = formatUnits(finalExpectedOut, tokenOut.decimals);
 
       // ============================================================
       // V8 (attribution, OFF by default): sign + persist a FRESH EIP-712
@@ -647,6 +648,7 @@ export function UniversalSwapCard({
           });
           return;
         }
+        handoffSwapAttribution(tx);
       }
 
       if (lastTx) {
