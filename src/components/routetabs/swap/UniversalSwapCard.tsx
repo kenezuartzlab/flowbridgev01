@@ -23,6 +23,12 @@ import {
   type Token,
 } from "@/lib/swap/tokenRegistry";
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
+import {
+  captureVerifiedSwapAttribution,
+  scheduleVerifiedSwapHandoff,
+} from "@/lib/swap/verifiedSwapAttribution";
+import type { SignedAttribution } from "@/lib/activity/activityHandoff";
+
 import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
 import { estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
 import { useAppConfig, feeBpsLabel } from "@/lib/config/appConfig";
@@ -526,48 +532,19 @@ export function UniversalSwapCard({
       let finalToAmountDisplay = formatUnits(finalExpectedOut, tokenOut.decimals);
 
       // ============================================================
-      // V8 (attribution, OFF by default): sign + persist a FRESH EIP-712
+      // V8.2 (attribution): sign + persist a FRESH EIP-712
       // FlowBridgeActivityIntent for the ONE approved verified-swap path
       // (single-step, ERC-20 token-in), immediately before the swap write.
+      // The implementation lives in a STATICALLY imported module so the
+      // production client always retains the capture + verify-swap handoff.
       // Attribution evidence only: authorizes no calldata, moves no funds,
       // grants zero XP/PTS/FLOW and never writes the Activity Registry.
       // ============================================================
-      let swapAttribution:
-        | { intent: any; signature: `0x${string}`; intentHash: `0x${string}` }
-        | null = null;
+      let swapAttribution: SignedAttribution | null = null;
 
       const captureSwapAttribution = async () => {
-        const { isVerifiedSwapActivityEnabled, findVerifiedSwapPath, VERIFIED_SWAP_V1_ACTION_TYPE } =
-          await import("@/lib/swap/verifiedSwapConfig");
-        if (!isVerifiedSwapActivityEnabled()) return;
-        const chainId = publicClient.chain?.id;
-        const firstStep = latestQuote.steps[0];
-        if (!chainId || latestQuote.steps.length !== 1 || !firstStep || firstStep.inIsNative) return;
-        if (firstStep.outIsNative) return;
-        const path = findVerifiedSwapPath(chainId, firstStep.path[0]);
-        if (!path) return;
-        // V8.1 — attribute ONLY the single proven Router V4 path:
-        // swapV2Safe, approved routerId, approved token-in → token-out endpoints.
-        const stepOut = firstStep.path[firstStep.path.length - 1];
-        if (
-          BigInt(firstStep.routerId) !== path.routerId ||
-          !stepOut ||
-          stepOut.toLowerCase() !== path.tokenOut.toLowerCase()
-        ) {
-          return;
-        }
-
-        // V8.1 — the signed amount is the SEMANTIC swap input (calldata
-        // swapAmount == SwapActivity.amountIn). Protocol fee is never added.
-        const { captureActivityIntent } = await import("@/lib/activity/activityIntent");
-        const { activityIntentHash } = await import("@/lib/activity/activityCanonicalKey");
-        const { persistSignedAttribution, isAttributionRequired } = await import(
-          "@/lib/activity/activityHandoff"
-        );
-
-        const attribution = await captureActivityIntent(
+        swapAttribution = await captureVerifiedSwapAttribution(
           {
-            attributionEnabled: true,
             signTypedData: async (payload) => {
               const eth = (window as any).ethereum;
               if (!eth?.request) throw new Error("No typed-data signer available");
@@ -594,37 +571,12 @@ export function UniversalSwapCard({
             },
           },
           {
-            intentId: `0x${crypto.randomUUID().replace(/-/g, "").padEnd(64, "0")}` as `0x${string}`,
+            chainId: publicClient.chain?.id,
+            steps: latestQuote.steps,
+            amountIn: initialAmount,
             user: address as string,
-            actionType: VERIFIED_SWAP_V1_ACTION_TYPE,
-            sourceChainId: path.chainId,
-            destinationChainId: path.chainId,
-            token: path.tokenIn,
-            amount: initialAmount,
-            recipient: address as string,
-            nonce: BigInt(Date.now()),
-            nowSeconds: Math.floor(Date.now() / 1000),
           },
         );
-
-        if (attribution.status !== "signed") {
-          if (isAttributionRequired()) {
-            throw new Error("Attribution is required but could not be captured. Swap not sent.");
-          }
-          return;
-        }
-        const evidence = {
-          intent: attribution.intent,
-          signature: attribution.signature,
-          intentHash: activityIntentHash(attribution.intent),
-        };
-        if (!persistSignedAttribution(evidence)) {
-          if (isAttributionRequired()) {
-            throw new Error("Attribution evidence could not be stored. Swap not sent.");
-          }
-          return;
-        }
-        swapAttribution = evidence;
       };
 
       // Fire-and-forget handoff of signed evidence only. A failed handoff never
@@ -633,11 +585,8 @@ export function UniversalSwapCard({
         const evidence = swapAttribution;
         if (!evidence) return;
         swapAttribution = null;
-        void import("@/lib/activity/activityHandoff")
-          .then(({ submitSwapActivityVerification }) =>
-            submitSwapActivityVerification(evidence, sourceTxHash),
-          )
-          .catch(() => {});
+        scheduleVerifiedSwapHandoff(evidence, sourceTxHash);
+
       };
 
       await captureSwapAttribution();
