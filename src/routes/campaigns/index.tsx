@@ -1,11 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Compass, Trophy, User2, Wallet2 } from "lucide-react";
+import { Compass, Search, Trophy, User2, Wallet2 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 import { CampaignCard } from "@/components/campaigns/CampaignCard";
 import { SkeletonCard } from "@/components/campaigns/CampaignBits";
-import { campaignMetrics, shortWallet } from "@/components/campaigns/campaignPresentation";
+import {
+  campaignChains,
+  campaignMetrics,
+  chainName,
+  shortWallet,
+} from "@/components/campaigns/campaignPresentation";
 
 export const Route = createFileRoute("/campaigns/")({
   head: () => ({
@@ -29,7 +34,9 @@ export const Route = createFileRoute("/campaigns/")({
   component: CampaignsPage,
 });
 
-type Filter = "all" | "live" | "completed";
+type Filter = "all" | "live" | "ending" | "completed";
+
+const ENDING_SOON_MS = 7 * 86_400_000;
 
 function CampaignsPage() {
   const {
@@ -42,28 +49,74 @@ function CampaignsPage() {
     progressFor,
   } = useCampaignProgress();
   const [filter, setFilter] = useState<Filter>("all");
+  const [query, setQuery] = useState("");
+  const [chain, setChain] = useState("all");
 
   const rows = useMemo(
     () =>
       campaigns.map((c) => {
         const progress = progressFor(c.campaignId);
-        return { campaign: c, progress, metrics: campaignMetrics(c, progress) };
+        return {
+          campaign: c,
+          progress,
+          metrics: campaignMetrics(c, progress),
+          chains: campaignChains(c),
+        };
       }),
     [campaigns, progressFor],
   );
 
+  const chainOptions = useMemo(() => {
+    const ids = new Set<number>();
+    rows.forEach((r) => {
+      if (r.chains.source !== undefined) ids.add(r.chains.source);
+      if (r.chains.destination !== undefined) ids.add(r.chains.destination);
+    });
+    return [...ids].sort((a, b) => a - b);
+  }, [rows]);
+
   const completedCount = rows.filter((r) => authenticated && r.metrics.isComplete).length;
-  const filtered = rows.filter((r) => {
+  const isEndingSoon = (r: (typeof rows)[number]) =>
+    r.metrics.isLive && r.metrics.endsAt - Date.now() <= ENDING_SOON_MS;
+
+  const q = query.trim().toLowerCase();
+  const searched = rows.filter((r) => {
+    const matchesQuery =
+      !q ||
+      [r.campaign.name, r.campaign.slug, r.campaign.description ?? ""]
+        .join(" ")
+        .toLowerCase()
+        .includes(q);
+    const matchesChain =
+      chain === "all" ||
+      String(r.chains.source) === chain ||
+      String(r.chains.destination) === chain;
+    return matchesQuery && matchesChain;
+  });
+
+  const filtered = searched.filter((r) => {
     if (filter === "live") return r.metrics.isLive;
+    if (filter === "ending") return isEndingSoon(r);
     if (filter === "completed") return authenticated && r.metrics.isComplete;
     return true;
   });
 
+  /** Spotlight is a deterministic presentation rule: soonest-ending live campaigns. */
+  const spotlight =
+    filter === "all" && !q && chain === "all"
+      ? [...rows]
+          .filter((r) => r.metrics.isLive)
+          .sort((a, b) => a.metrics.endsAt - b.metrics.endsAt)
+          .slice(0, 2)
+      : [];
+
   const tabs: { id: Filter; label: string; count: number }[] = [
-    { id: "all", label: "All", count: rows.length },
-    { id: "live", label: "Live", count: rows.filter((r) => r.metrics.isLive).length },
+    { id: "all", label: "All", count: searched.length },
+    { id: "live", label: "Live", count: searched.filter((r) => r.metrics.isLive).length },
+    { id: "ending", label: "Ending soon", count: searched.filter(isEndingSoon).length },
     { id: "completed", label: "Completed", count: completedCount },
   ];
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -129,11 +182,44 @@ function CampaignsPage() {
           </dl>
         </section>
 
+        {/* Search + chain filter */}
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Search campaigns</span>
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search campaigns"
+              className="min-h-[38px] w-full rounded-xl border border-hairline bg-card-alt pl-9 pr-3 font-mono text-[11px] outline-none transition focus:border-primary/60"
+            />
+          </label>
+          <label className="shrink-0">
+            <span className="sr-only">Filter by chain</span>
+            <select
+              value={chain}
+              onChange={(e) => setChain(e.target.value)}
+              className="min-h-[38px] w-full rounded-xl border border-hairline bg-card-alt px-3 font-mono text-[10px] font-black uppercase tracking-[0.08em] outline-none transition focus:border-primary/60 sm:w-auto"
+            >
+              <option value="all">All chains</option>
+              {chainOptions.map((id) => (
+                <option key={id} value={String(id)}>
+                  {chainName(id)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
         {/* Filters */}
         <div
           role="tablist"
           aria-label="Campaign filters"
-          className="flex flex-wrap gap-1.5 overflow-x-auto"
+          className="flex flex-wrap gap-1.5"
         >
           {tabs.map((t) => (
             <button
@@ -154,7 +240,26 @@ function CampaignsPage() {
           ))}
         </div>
 
-        {/* Grid */}
+        {/* Spotlight — deterministic: soonest-ending live campaigns */}
+        {!loading && !error && spotlight.length > 0 && (
+          <section>
+            <p className="fb-eyebrow mb-2 px-1">Spotlight · ending soonest</p>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {spotlight.map(({ campaign, progress }) => (
+                <li key={`spot-${campaign.campaignId}`}>
+                  <CampaignCard
+                    campaign={campaign}
+                    progress={progress}
+                    authenticated={authenticated}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+
+        {/* All results */}
         {loading ? (
           <div className="grid gap-3 sm:grid-cols-2">
             <SkeletonCard />

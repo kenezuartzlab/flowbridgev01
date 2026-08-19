@@ -99,3 +99,98 @@ export function DeadlineNote({ children }: { children: React.ReactNode }) {
     </span>
   );
 }
+
+/* --------------------------- V5 shared primitives -------------------------- */
+
+/** Compact labelled metric tile used by explorer, detail and analytics. */
+export function MetricStat({
+  label,
+  value,
+  hint,
+  icon,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className="fb-inset min-w-0 p-2.5">
+      <p className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted">
+        {icon && <span className="text-primary">{icon}</span>}
+        <span className="truncate">{label}</span>
+      </p>
+      <p className="mt-1 truncate font-mono text-[13px] font-black tabular-nums">{value}</p>
+      {hint && (
+        <p className="mt-0.5 truncate font-mono text-[8.5px] uppercase tracking-[0.08em] text-muted">
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Display-only achievement chip. Never creates reward state. */
+export function AchievementChip({
+  label,
+  icon,
+  tone = "primary",
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  tone?: "primary" | "success";
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.1em] ${
+        tone === "success"
+          ? "border-success/35 bg-success/12 text-success"
+          : "border-primary/35 bg-primary/12 text-primary"
+      }`}
+    >
+      {icon}
+      {label}
+    </span>
+  );
+}
+
+/** Lightweight SVG-free bar chart for real timestamped series only. */
+export function MiniBarChart({
+  data,
+  label,
+  tone = "primary",
+}: {
+  data: { date: string; value: number }[];
+  label: string;
+  tone?: "primary" | "success";
+}) {
+  const max = Math.max(1, ...data.map((d) => d.value));
+  if (data.length === 0) {
+    return (
+      <p className="font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+        No {label.toLowerCase()} recorded yet
+      </p>
+    );
+  }
+  return (
+    <figure className="min-w-0">
+      <figcaption className="mb-2 font-mono text-[9px] uppercase tracking-[0.1em] text-muted">
+        {label}
+      </figcaption>
+      <div className="flex h-24 items-end gap-1 overflow-x-auto">
+        {data.map((d) => (
+          <div key={d.date} className="flex min-w-[10px] flex-1 flex-col items-center gap-1">
+            <div
+              title={`${d.date}: ${d.value.toLocaleString("en-US")}`}
+              style={{ height: `${Math.max(3, (d.value / max) * 100)}%` }}
+              className={`w-full rounded-t ${tone === "success" ? "bg-success/70" : "bg-primary/70"}`}
+            />
+            <span className="font-mono text-[7.5px] tabular-nums text-muted">
+              {d.date.slice(5)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </figure>
+  );
+}

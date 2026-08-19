@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
   Compass,
   Route as RouteIcon,
+  Share2,
   ShieldCheck,
   Trophy,
+  Users,
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
@@ -20,7 +22,12 @@ import {
   taskState,
 } from "@/components/campaigns/campaignPresentation";
 import {
+  fetchCampaignMetrics,
+  type PublicCampaignMetrics,
+} from "@/lib/campaign/campaignMetricsApi";
+import {
   ChainChip,
+  MetricStat,
   DeadlineNote,
   PointsChip,
   ProgressBar,
@@ -63,6 +70,31 @@ function CampaignDetailPage() {
   const metrics = campaign ? campaignMetrics(campaign, progress) : null;
   const chains = campaign ? campaignChains(campaign) : {};
   const complete = authenticated && !!metrics?.isComplete;
+  const [publicMetrics, setPublicMetrics] = useState<PublicCampaignMetrics | null>(null);
+  const [shared, setShared] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetchCampaignMetrics(slug)
+      .then((m) => alive && setPublicMetrics(m))
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [slug]);
+
+  const share = async () => {
+    const url = typeof window === "undefined" ? "" : window.location.href;
+    const title = campaign?.name ?? "FlowBridge campaign";
+    try {
+      if (navigator.share) await navigator.share({ title, url });
+      else await navigator.clipboard.writeText(url);
+      setShared(true);
+      setTimeout(() => setShared(false), 2000);
+    } catch {
+      /* user dismissed share sheet */
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -141,7 +173,20 @@ function CampaignDetailPage() {
                       ? `Ended ${formatDate(metrics.endsAt)}`
                       : `${metrics.timeRemaining} · ends ${formatDate(metrics.endsAt)}`}
                   </DeadlineNote>
+                  <button
+                    type="button"
+                    onClick={share}
+                    className="inline-flex min-h-[32px] items-center gap-1.5 rounded-xl border border-hairline px-3 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+                  >
+                    <Share2 className="h-3 w-3" aria-hidden />
+                    {shared ? "Link copied" : "Share"}
+                  </button>
                 </div>
+                {complete && (
+                  <p className="fb-fade-in relative mt-3 rounded-xl border border-success/35 bg-success/10 px-3 py-2 font-mono text-[9.5px] font-black uppercase tracking-[0.08em] text-success">
+                    Campaign complete — every task verified on the source chain.
+                  </p>
+                )}
                 <div className="relative mt-3">
                   <div className="mb-1 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.08em] text-muted">
                     <span>Overall progress</span>
@@ -243,6 +288,57 @@ function CampaignDetailPage() {
                       </li>
                     );
                   })}
+                </ul>
+              </section>
+
+              {/* Community metrics + recent verified completions */}
+              <section className="fb-surface overflow-hidden">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-4 py-2.5">
+                  <p className="fb-eyebrow">Community activity</p>
+                  <span className="inline-flex items-center gap-1.5 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-success">
+                    <ShieldCheck className="h-3 w-3" aria-hidden /> Verified on-chain data
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-3">
+                  <MetricStat
+                    label="Participants"
+                    value={(publicMetrics?.participants ?? 0).toLocaleString("en-US")}
+                    icon={<Users className="h-3.5 w-3.5" aria-hidden />}
+                  />
+                  <MetricStat
+                    label="Completions"
+                    value={(publicMetrics?.completions ?? 0).toLocaleString("en-US")}
+                  />
+                  <MetricStat
+                    label="PTS awarded"
+                    value={(publicMetrics?.pointsAwarded ?? 0).toLocaleString("en-US")}
+                    icon={<Trophy className="h-3.5 w-3.5" aria-hidden />}
+                  />
+                </div>
+                <ul className="divide-y divide-hairline border-t border-hairline">
+                  {(publicMetrics?.recentCompletions ?? []).slice(0, 6).map((r, i) => (
+                    <li
+                      key={`${r.completedAt}-${r.taskId}-${i}`}
+                      className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5"
+                    >
+                      <span className="min-w-0 font-mono text-[10px] font-black uppercase tracking-[0.06em]">
+                        {r.wallet}
+                        <span className="ml-2 truncate font-normal normal-case tracking-normal text-muted">
+                          {r.taskTitle}
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-2 font-mono text-[9.5px] tabular-nums text-muted">
+                        {r.verified && <ShieldCheck className="h-3 w-3 text-success" aria-hidden />}
+                        {r.points.toLocaleString("en-US")} PTS ·{" "}
+                        {formatDate(new Date(r.completedAt).getTime())}
+                      </span>
+                    </li>
+                  ))}
+                  {(publicMetrics?.recentCompletions ?? []).length === 0 && (
+                    <li className="px-4 py-3 font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+                      No verified completions recorded yet.
+                    </li>
+                  )}
                 </ul>
               </section>
             </div>

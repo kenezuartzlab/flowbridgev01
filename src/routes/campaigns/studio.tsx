@@ -4,6 +4,7 @@ import { useAccount, WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
 import {
   ArrowLeft,
+  BarChart3,
   Copy,
   Eye,
   Loader2,
@@ -401,6 +402,13 @@ function StudioPage() {
                       >
                         {c.status === "published" ? "Unpublish" : "Publish"}
                       </button>
+                      <Link
+                        to="/campaigns/analytics/$id"
+                        params={{ id: c.campaignId }}
+                        className={btnGhost}
+                      >
+                        <BarChart3 className="h-3 w-3" aria-hidden /> Analytics
+                      </Link>
                       <button
                         type="button"
                         disabled={busy}
@@ -409,6 +417,7 @@ function StudioPage() {
                       >
                         <Copy className="h-3 w-3" aria-hidden /> Duplicate
                       </button>
+
                       {c.status !== "archived" && c.completionCount > 0 && (
                         <button
                           type="button"

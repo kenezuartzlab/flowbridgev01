@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Activity, Compass, Trophy, User2, Wallet2 } from "lucide-react";
+import { Activity, Award, Compass, Medal, ShieldCheck, Trophy, User2, Wallet2 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
@@ -8,7 +8,11 @@ import { useParticipantData } from "@/lib/campaign/useParticipantData";
 import { CampaignCard } from "@/components/campaigns/CampaignCard";
 import { ActivityTimeline } from "@/components/campaigns/ActivityTimeline";
 import { LeaderboardTable } from "@/components/campaigns/LeaderboardTable";
-import { ProgressBar, SkeletonCard } from "@/components/campaigns/CampaignBits";
+import {
+  AchievementChip,
+  ProgressBar,
+  SkeletonCard,
+} from "@/components/campaigns/CampaignBits";
 import { campaignMetrics, shortWallet } from "@/components/campaigns/campaignPresentation";
 import { formatDateTime } from "@/components/campaigns/activityPresentation";
 
@@ -63,6 +67,31 @@ function ParticipantCenterPage() {
   const totalTasks = rows.reduce((sum, r) => sum + r.metrics.taskCount, 0);
   const completionRate = totalTasks ? completedTasks / totalTasks : 0;
   const recent = me?.completions[0] ?? null;
+
+  /** Display-only badges. Each is derived strictly from real state. */
+  const achievements = [
+    completedCampaigns.length > 0 && {
+      label: "First campaign completed",
+      icon: <Award className="h-3 w-3" aria-hidden />,
+      tone: "success" as const,
+    },
+    completedTasks > 0 && {
+      label: `${completedTasks} verified task${completedTasks > 1 ? "s" : ""}`,
+      icon: <ShieldCheck className="h-3 w-3" aria-hidden />,
+      tone: "primary" as const,
+    },
+    !!me?.rank &&
+      me.rank <= 10 && {
+        label: `Top 10 · rank #${me.rank}`,
+        icon: <Medal className="h-3 w-3" aria-hidden />,
+        tone: "primary" as const,
+      },
+    (me?.campaignPointsTotal ?? 0) >= 250 && {
+      label: "250+ Campaign PTS",
+      icon: <Trophy className="h-3 w-3" aria-hidden />,
+      tone: "primary" as const,
+    },
+  ].filter(Boolean) as { label: string; icon: React.ReactNode; tone: "primary" | "success" }[];
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
@@ -137,6 +166,18 @@ function ParticipantCenterPage() {
             </p>
           </div>
         </section>
+
+        {/* Achievement shelf — display only, no reward state */}
+        {!needsSignIn && achievements.length > 0 && (
+          <section className="fb-surface p-3.5">
+            <p className="fb-eyebrow">Achievements</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {achievements.map((a) => (
+                <AchievementChip key={a.label} label={a.label} icon={a.icon} tone={a.tone} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Tabs */}
         <div role="tablist" aria-label="Participant sections" className="flex flex-wrap gap-1.5">
