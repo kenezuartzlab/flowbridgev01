@@ -29,7 +29,9 @@ export const Route = createFileRoute("/campaigns/")({
   component: CampaignsPage,
 });
 
-type Filter = "all" | "live" | "completed";
+type Filter = "all" | "live" | "ending" | "completed";
+
+const ENDING_SOON_MS = 7 * 86_400_000;
 
 function CampaignsPage() {
   const {
@@ -42,28 +44,74 @@ function CampaignsPage() {
     progressFor,
   } = useCampaignProgress();
   const [filter, setFilter] = useState<Filter>("all");
+  const [query, setQuery] = useState("");
+  const [chain, setChain] = useState("all");
 
   const rows = useMemo(
     () =>
       campaigns.map((c) => {
         const progress = progressFor(c.campaignId);
-        return { campaign: c, progress, metrics: campaignMetrics(c, progress) };
+        return {
+          campaign: c,
+          progress,
+          metrics: campaignMetrics(c, progress),
+          chains: campaignChains(c),
+        };
       }),
     [campaigns, progressFor],
   );
 
+  const chainOptions = useMemo(() => {
+    const ids = new Set<number>();
+    rows.forEach((r) => {
+      if (r.chains.source !== undefined) ids.add(r.chains.source);
+      if (r.chains.destination !== undefined) ids.add(r.chains.destination);
+    });
+    return [...ids].sort((a, b) => a - b);
+  }, [rows]);
+
   const completedCount = rows.filter((r) => authenticated && r.metrics.isComplete).length;
-  const filtered = rows.filter((r) => {
+  const isEndingSoon = (r: (typeof rows)[number]) =>
+    r.metrics.isLive && r.metrics.endsAt - Date.now() <= ENDING_SOON_MS;
+
+  const q = query.trim().toLowerCase();
+  const searched = rows.filter((r) => {
+    const matchesQuery =
+      !q ||
+      [r.campaign.name, r.campaign.slug, r.campaign.description ?? ""]
+        .join(" ")
+        .toLowerCase()
+        .includes(q);
+    const matchesChain =
+      chain === "all" ||
+      String(r.chains.source) === chain ||
+      String(r.chains.destination) === chain;
+    return matchesQuery && matchesChain;
+  });
+
+  const filtered = searched.filter((r) => {
     if (filter === "live") return r.metrics.isLive;
+    if (filter === "ending") return isEndingSoon(r);
     if (filter === "completed") return authenticated && r.metrics.isComplete;
     return true;
   });
 
+  /** Spotlight is a deterministic presentation rule: soonest-ending live campaigns. */
+  const spotlight =
+    filter === "all" && !q && chain === "all"
+      ? [...rows]
+          .filter((r) => r.metrics.isLive)
+          .sort((a, b) => a.metrics.endsAt - b.metrics.endsAt)
+          .slice(0, 2)
+      : [];
+
   const tabs: { id: Filter; label: string; count: number }[] = [
-    { id: "all", label: "All", count: rows.length },
-    { id: "live", label: "Live", count: rows.filter((r) => r.metrics.isLive).length },
+    { id: "all", label: "All", count: searched.length },
+    { id: "live", label: "Live", count: searched.filter((r) => r.metrics.isLive).length },
+    { id: "ending", label: "Ending soon", count: searched.filter(isEndingSoon).length },
     { id: "completed", label: "Completed", count: completedCount },
   ];
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
