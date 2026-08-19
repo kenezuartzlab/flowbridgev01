@@ -543,23 +543,22 @@ export function UniversalSwapCard({
         const chainId = publicClient.chain?.id;
         const firstStep = latestQuote.steps[0];
         if (!chainId || latestQuote.steps.length !== 1 || !firstStep || firstStep.inIsNative) return;
+        if (firstStep.outIsNative) return;
         const path = findVerifiedSwapPath(chainId, firstStep.path[0]);
         if (!path) return;
-
-        // Canonical Transfer value is swap amount + on-chain protocol fee.
-        let fee = 0n;
-        try {
-          const res = (await publicClient.readContract({
-            address: flowRouter,
-            abi: flowAbi,
-            functionName: "computeRouterFee",
-            args: [BigInt(firstStep.routerId), initialAmount, address as `0x${string}`],
-          })) as readonly [bigint, bigint];
-          fee = res[0] ?? 0n;
-        } catch {
-          fee = 0n;
+        // V8.1 — attribute ONLY the single proven Router V4 path:
+        // swapV2Safe, approved routerId, approved token-in → token-out endpoints.
+        const stepOut = firstStep.path[firstStep.path.length - 1];
+        if (
+          BigInt(firstStep.routerId) !== path.routerId ||
+          !stepOut ||
+          stepOut.toLowerCase() !== path.tokenOut.toLowerCase()
+        ) {
+          return;
         }
 
+        // V8.1 — the signed amount is the SEMANTIC swap input (calldata
+        // swapAmount == SwapActivity.amountIn). Protocol fee is never added.
         const { captureActivityIntent } = await import("@/lib/activity/activityIntent");
         const { activityIntentHash } = await import("@/lib/activity/activityCanonicalKey");
         const { persistSignedAttribution, isAttributionRequired } = await import(
@@ -601,7 +600,7 @@ export function UniversalSwapCard({
             sourceChainId: path.chainId,
             destinationChainId: path.chainId,
             token: path.tokenIn,
-            amount: initialAmount + fee,
+            amount: initialAmount,
             recipient: address as string,
             nonce: BigInt(Date.now()),
             nowSeconds: Math.floor(Date.now() / 1000),
