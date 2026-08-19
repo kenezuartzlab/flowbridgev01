@@ -25,7 +25,12 @@ export const BOT_MAINNET_CHAIN_ID = 677;
 
 export type Hex = `0x${string}`;
 
-export type FlowBridgeRouterVersion = 'v3' | 'v4';
+/**
+ * `v4` = canonical Router V4 architecture target.
+ * `v3-legacy` = pre-V4 deployment kept for backward compatibility ONLY. It is
+ * never a V4 target and can never satisfy a V4 resolver check.
+ */
+export type FlowBridgeRouterVersion = 'v3-legacy' | 'v4';
 
 export interface FlowBridgeExecutionTarget {
   configured: true;
@@ -34,14 +39,23 @@ export interface FlowBridgeExecutionTarget {
   routerVersion: FlowBridgeRouterVersion;
   /** Swap execution target AND ERC-20 approval spender. */
   router: Hex;
-  /** Discovery/quote reader. V4 chains use the Lens; v3 chains use the router. */
+  /** Discovery/quote reader. V4 chains use the Lens; legacy chains the router. */
   discovery: Hex;
   discoveryKind: 'lens' | 'router';
   /** V4 hardened `*Safe` entry points with an explicit maxProtocolFee bound. */
   supportsSafeSwaps: boolean;
+  /** True only when an audited Router V4 address is deployed for this chain. */
+  v4Configured: boolean;
+  /** True only when V4 execution is allowed on this chain today. */
+  v4Enabled: boolean;
+  /** True while this chain still awaits its future V4 deployment gate. */
+  promotionPending: boolean;
+  /** Legacy-only target: intentionally supported, but outside V4 readiness. */
+  legacy: boolean;
   /** V4 bridge proxy execution — false everywhere in V8-R (bridge stays direct). */
   bridgeProxyEnabled: boolean;
 }
+
 
 export interface FlowBridgeExecutionUnconfigured {
   configured: false;
