@@ -23,6 +23,12 @@ import {
   type Token,
 } from "@/lib/swap/tokenRegistry";
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
+import {
+  captureVerifiedSwapAttribution,
+  scheduleVerifiedSwapHandoff,
+} from "@/lib/swap/verifiedSwapAttribution";
+import type { SignedAttribution } from "@/lib/activity/activityHandoff";
+
 import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
 import { estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
 import { useAppConfig, feeBpsLabel } from "@/lib/config/appConfig";
