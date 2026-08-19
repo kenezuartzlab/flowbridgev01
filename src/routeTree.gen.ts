@@ -28,6 +28,7 @@ import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CampaignsIndexRouteImport } from './routes/campaigns/index'
+import { Route as CampaignsSlugRouteImport } from './routes/campaigns/$slug'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
@@ -152,6 +153,11 @@ const IndexRoute = IndexRouteImport.update({
 const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
   id: '/campaigns/',
   path: '/campaigns/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsSlugRoute = CampaignsSlugRouteImport.update({
+  id: '/campaigns/$slug',
+  path: '/campaigns/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTransactionsRoute = ApiTransactionsRouteImport.update({
@@ -337,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
+  '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -388,6 +395,7 @@ export interface FileRoutesByTo {
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
+  '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -440,6 +448,7 @@ export interface FileRoutesById {
   '/api/health': typeof ApiHealthRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
+  '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -493,6 +502,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
+    | '/campaigns/$slug'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
@@ -544,6 +554,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
+    | '/campaigns/$slug'
     | '/campaigns'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
@@ -595,6 +606,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/proposals'
     | '/api/transactions'
+    | '/campaigns/$slug'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
@@ -647,6 +659,7 @@ export interface RootRouteChildren {
   ApiHealthRoute: typeof ApiHealthRoute
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
   ApiTransactionsRoute: typeof ApiTransactionsRoute
+  CampaignsSlugRoute: typeof CampaignsSlugRoute
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
@@ -803,6 +816,13 @@ declare module '@tanstack/react-router' {
       path: '/campaigns'
       fullPath: '/campaigns/'
       preLoaderRoute: typeof CampaignsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/$slug': {
+      id: '/campaigns/$slug'
+      path: '/campaigns/$slug'
+      fullPath: '/campaigns/$slug'
+      preLoaderRoute: typeof CampaignsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/transactions': {
@@ -1059,6 +1079,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHealthRoute: ApiHealthRoute,
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
   ApiTransactionsRoute: ApiTransactionsRoute,
+  CampaignsSlugRoute: CampaignsSlugRoute,
   CampaignsIndexRoute: CampaignsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
