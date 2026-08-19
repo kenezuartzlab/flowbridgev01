@@ -126,11 +126,18 @@ export function validateApprovedSafeSwapCalldata(
   if (calldata.routerId !== path.routerId) {
     return { ok: false, reason: 'calldata routerId is not the approved verified-swap routerId' };
   }
+  if (!eq(calldata.tokenIn, path.tokenIn)) {
+    return { ok: false, reason: 'calldata tokenIn is not the approved token-in' };
+  }
   if (!eq(calldata.path[0]!, path.tokenIn)) {
     return { ok: false, reason: 'calldata path start is not the approved token-in' };
   }
+  // Execution proof: the V2 path must terminate at the trusted wrapped native.
   if (!eq(calldata.path[calldata.path.length - 1]!, path.tokenOut)) {
-    return { ok: false, reason: 'calldata path end is not the approved token-out' };
+    return { ok: false, reason: 'calldata path end is not the trusted wrapped-native endpoint' };
+  }
+  if (calldata.amountOutMin <= 0n) {
+    return { ok: false, reason: 'calldata amountOutMin must be present and positive' };
   }
   if (calldata.swapAmount !== expected.amount) {
     return { ok: false, reason: 'calldata swapAmount does not equal the signed intent amount' };
