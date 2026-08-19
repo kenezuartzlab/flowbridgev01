@@ -9,6 +9,7 @@
 import type { ActivityIntent, Hex } from './activityIntent';
 
 export const ACTIVITY_VERIFY_ENDPOINT = '/api/public/activity/verify';
+export const SWAP_ACTIVITY_VERIFY_ENDPOINT = '/api/public/activity/verify-swap';
 export const HANDOFF_MAX_ATTEMPTS = 12;
 export const HANDOFF_RETRY_DELAY_MS = 10_000;
 
@@ -48,6 +49,8 @@ export type HandoffResult =
   | { outcome: 'UNCONFIGURED' | 'FAILED'; attempts: number };
 
 export interface HandoffDeps {
+  /** Trusted verification endpoint. Defaults to the bridge verifier. */
+  endpoint?: string;
   fetchImpl?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
   maxAttempts?: number;
@@ -76,7 +79,7 @@ export async function submitActivityVerification(
   while (attempts < maxAttempts) {
     attempts += 1;
     try {
-      const res = await doFetch(ACTIVITY_VERIFY_ENDPOINT, {
+      const res = await doFetch(deps.endpoint ?? ACTIVITY_VERIFY_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body,
@@ -139,4 +142,19 @@ export function isAttributionRequired(): boolean {
   if (typeof raw !== 'string') return false;
   const v = raw.trim().toLowerCase();
   return v === 'true' || v === '1';
+}
+
+/**
+ * V8 — same bounded handoff, aimed at the verified swap endpoint. The payload is
+ * identical signed attribution evidence: router, token and chain stay server-owned.
+ */
+export async function submitSwapActivityVerification(
+  attribution: SignedAttribution,
+  sourceTxHash: Hex,
+  deps: HandoffDeps = {},
+): Promise<HandoffResult> {
+  return await submitActivityVerification(attribution, sourceTxHash, {
+    ...deps,
+    endpoint: deps.endpoint ?? SWAP_ACTIVITY_VERIFY_ENDPOINT,
+  });
 }
