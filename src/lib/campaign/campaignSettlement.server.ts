@@ -42,11 +42,17 @@ function parseChainId(raw: unknown, field: string): number {
   return n;
 }
 
+const DURABLE_ACTIVITY_KINDS: readonly VerifiedActivityKind[] = [
+  'BRIDGE_SUBMITTED',
+  'BRIDGE_COMPLETED',
+  'SWAP_EXECUTED',
+];
+
 function parseKind(raw: unknown): VerifiedActivityKind {
-  if (raw !== 'BRIDGE_SUBMITTED' && raw !== 'BRIDGE_COMPLETED') {
+  if (!DURABLE_ACTIVITY_KINDS.includes(raw as VerifiedActivityKind)) {
     throw new DurableEvidenceError('kind is invalid');
   }
-  return raw;
+  return raw as VerifiedActivityKind;
 }
 
 function parseStatus(raw: unknown): VerifiedActivityStatus {

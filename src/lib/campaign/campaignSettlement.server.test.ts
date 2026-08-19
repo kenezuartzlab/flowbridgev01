@@ -95,6 +95,15 @@ describe('durable evidence reconstruction', () => {
     }
   });
 
+  it('accepts exactly the three durable activity kinds (V8.4)', () => {
+    for (const kind of ['BRIDGE_SUBMITTED', 'BRIDGE_COMPLETED', 'SWAP_EXECUTED']) {
+      expect(factsFromDurableRow(durableRow({ kind })).kind).toBe(kind);
+    }
+    for (const bad of ['SWAP', 'swap_executed', 'BRIDGE_MAYBE', '', null, 1]) {
+      expect(() => factsFromDurableRow(durableRow({ kind: bad }))).toThrow(DurableEvidenceError);
+    }
+  });
+
   it('fails closed on malformed durable rows', () => {
     for (const over of [
       { activity_id: '0xdead' },
