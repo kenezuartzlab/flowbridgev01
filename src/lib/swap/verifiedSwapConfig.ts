@@ -11,7 +11,7 @@
  * Native token-in is intentionally unsupported: it produces no ERC-20 Transfer
  * log, so the token-in amount could not be proven deterministically.
  */
-import { keccak256, toBytes } from 'viem';
+import { keccak256, toBytes, toFunctionSelector } from 'viem';
 import { TESTNET_CONTRACTS } from '../contracts';
 import { OFFICIAL_CHAIN_IDS } from '../bridge/officialBridgeConfig';
 import { requireFlowBridgeV4Execution } from '../flowbridge/executionRegistry';
@@ -39,18 +39,41 @@ export interface VerifiedSwapPath {
   tokenIn: Hex;
   tokenInDecimals: number;
   tokenInSymbol: string;
+  /** Frozen token-out endpoint of the single approved route. */
+  tokenOut: Hex;
+  tokenOutSymbol: string;
+  /** Live Lens-derived BDEX V2 routerId for the approved route. */
+  routerId: bigint;
+  /** Exact approved Router V4 hardened entrypoint. */
+  safeFunctionName: 'swapV2Safe';
+  safeFunctionSignature: string;
+  /** 4-byte selector of `safeFunctionSignature`. */
+  safeSelector: Hex;
 }
+
+/** Frozen approved Router V4 safe entrypoint for the single V8.1 swap path. */
+export const VERIFIED_SWAP_SAFE_SIGNATURE =
+  'swapV2Safe(uint256,uint256,uint256,address[],address,uint256,uint256)' as const;
+export const VERIFIED_SWAP_SAFE_SELECTOR: Hex = toFunctionSelector(
+  `function ${VERIFIED_SWAP_SAFE_SIGNATURE}`,
+);
 
 export const VERIFIED_SWAP_PATHS: readonly VerifiedSwapPath[] = [
   {
     id: 'bot-testnet-usdt',
-    label: 'BOT Testnet · USDT swap via FlowBridgeRouter V4',
+    label: 'BOT Testnet · USDT → WBOT swap via FlowBridgeRouter V4 (BDEX V2, routerId 0)',
     chainId: OFFICIAL_CHAIN_IDS.botTestnet,
     // Canonical Router V4 execution target (V4 resolver — legacy targets rejected).
     router: requireFlowBridgeV4Execution(OFFICIAL_CHAIN_IDS.botTestnet).router,
     tokenIn: TESTNET_CONTRACTS.usdtBot.toLowerCase() as Hex,
     tokenInDecimals: 6,
     tokenInSymbol: 'USDT',
+    tokenOut: TESTNET_CONTRACTS.wbot.toLowerCase() as Hex,
+    tokenOutSymbol: 'WBOT',
+    routerId: 0n,
+    safeFunctionName: 'swapV2Safe',
+    safeFunctionSignature: VERIFIED_SWAP_SAFE_SIGNATURE,
+    safeSelector: VERIFIED_SWAP_SAFE_SELECTOR,
   },
 ] as const;
 

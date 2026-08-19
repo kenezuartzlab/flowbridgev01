@@ -297,5 +297,5 @@ export const STUDIO_TOKEN_OPTIONS = [
 
 export const STUDIO_ACTION_TYPES = [
   { value: DIRECT_BRIDGE_ACTION_TYPE, label: 'Direct official bridge' },
-  { value: VERIFIED_SWAP_V1_ACTION_TYPE, label: 'Verified swap (FlowBridgeRouter v3)' },
+  { value: VERIFIED_SWAP_V1_ACTION_TYPE, label: 'Verified swap (FlowBridgeRouter V4)' },
 ];
