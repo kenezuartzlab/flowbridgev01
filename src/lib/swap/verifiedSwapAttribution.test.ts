@@ -11,7 +11,11 @@ import {
   scheduleVerifiedSwapHandoff,
   VerifiedSwapAttributionError,
 } from './verifiedSwapAttribution';
-import { readPublicBuildFlag } from '../config/publicBuildFlags';
+import {
+  DEFAULT_OFF_ONLY_FLAGS,
+  PUBLIC_BUILD_FLAG_DEFAULTS,
+  readPublicBuildFlag,
+} from '../config/publicBuildFlags';
 
 const PATH = VERIFIED_SWAP_PATHS[0]!;
 const USER = '0x1111111111111111111111111111111111111111';
