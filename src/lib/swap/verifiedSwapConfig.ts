@@ -91,12 +91,12 @@ export function findVerifiedSwapPath(
 }
 
 /**
- * Attribution flag: VITE_ENABLE_VERIFIED_SWAP_ACTIVITY ("true"/"1").
- * Off by default; when off the swap flow is byte-for-byte the current flow.
+ * Attribution flag (V8.2): resolved through the public build flag source so a
+ * production build cannot silently lose it. Explicit
+ * VITE_ENABLE_VERIFIED_SWAP_ACTIVITY always wins; otherwise the committed
+ * public default applies; otherwise OFF.
  */
 export function isVerifiedSwapActivityEnabled(): boolean {
-  const raw = import.meta.env.VITE_ENABLE_VERIFIED_SWAP_ACTIVITY;
-  if (typeof raw !== 'string') return false;
-  const v = raw.trim().toLowerCase();
-  return v === 'true' || v === '1';
+  return readPublicBuildFlag('ENABLE_VERIFIED_SWAP_ACTIVITY');
 }
+
