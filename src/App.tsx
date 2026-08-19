@@ -2883,7 +2883,7 @@ export default function App() {
           )}
 
           {activeTab === 'BOT/USDT' && campaignSwapCtx && (
-            <SwapCampaignTaskBanner ctx={campaignSwapCtx} currentChainId={walletChainId ?? null} />
+            <SwapCampaignTaskBanner ctx={campaignSwapCtx} currentChainId={currentChainId ?? null} />
           )}
 
           {activeTab === 'BOT/USDT' && (
