@@ -40,6 +40,7 @@ import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
 import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as CampaignsAnalyticsIdRouteImport } from './routes/campaigns/analytics.$id'
 import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
 import { Route as ApiUsersSocialsRouteImport } from './routes/api/users.socials'
 import { Route as ApiUsersIncentivesRouteImport } from './routes/api/users.incentives'
@@ -225,6 +226,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const CampaignsAnalyticsIdRoute = CampaignsAnalyticsIdRouteImport.update({
+  id: '/campaigns/analytics/$id',
+  path: '/campaigns/analytics/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiUsersSyncRoute = ApiUsersSyncRouteImport.update({
   id: '/api/users/sync',
   path: '/api/users/sync',
@@ -413,6 +419,7 @@ export interface FileRoutesByFullPath {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
+  '/campaigns/analytics/$id': typeof CampaignsAnalyticsIdRoute
   '/api/campaigns/$slug/metrics': typeof ApiCampaignsSlugMetricsRoute
   '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
@@ -473,6 +480,7 @@ export interface FileRoutesByTo {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
+  '/campaigns/analytics/$id': typeof CampaignsAnalyticsIdRoute
   '/api/campaigns/$slug/metrics': typeof ApiCampaignsSlugMetricsRoute
   '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
@@ -534,6 +542,7 @@ export interface FileRoutesById {
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
+  '/campaigns/analytics/$id': typeof CampaignsAnalyticsIdRoute
   '/api/campaigns/$slug/metrics': typeof ApiCampaignsSlugMetricsRoute
   '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
@@ -596,6 +605,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
+    | '/campaigns/analytics/$id'
     | '/api/campaigns/$slug/metrics'
     | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
@@ -656,6 +666,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
+    | '/campaigns/analytics/$id'
     | '/api/campaigns/$slug/metrics'
     | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
@@ -716,6 +727,7 @@ export interface FileRouteTypes {
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
+    | '/campaigns/analytics/$id'
     | '/api/campaigns/$slug/metrics'
     | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
@@ -774,6 +786,7 @@ export interface RootRouteChildren {
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
   ApiUsersSocialsRoute: typeof ApiUsersSocialsRoute
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
+  CampaignsAnalyticsIdRoute: typeof CampaignsAnalyticsIdRoute
   ApiPublicActivityVerifyRoute: typeof ApiPublicActivityVerifyRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
   ApiPublicSiweVerifyRoute: typeof ApiPublicSiweVerifyRoute
@@ -999,6 +1012,13 @@ declare module '@tanstack/react-router' {
       path: '/.mcp/list-tools'
       fullPath: '/.mcp/list-tools'
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/analytics/$id': {
+      id: '/campaigns/analytics/$id'
+      path: '/campaigns/analytics/$id'
+      fullPath: '/campaigns/analytics/$id'
+      preLoaderRoute: typeof CampaignsAnalyticsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/users/sync': {
@@ -1292,6 +1312,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
   ApiUsersSocialsRoute: ApiUsersSocialsRoute,
   ApiUsersSyncRoute: ApiUsersSyncRoute,
+  CampaignsAnalyticsIdRoute: CampaignsAnalyticsIdRoute,
   ApiPublicActivityVerifyRoute: ApiPublicActivityVerifyRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,
   ApiPublicSiweVerifyRoute: ApiPublicSiweVerifyRoute,
