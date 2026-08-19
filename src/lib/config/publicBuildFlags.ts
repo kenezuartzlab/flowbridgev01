@@ -50,7 +50,7 @@ export function readPublicBuildFlag(
   name: PublicBuildFlagName,
   overrides?: { env?: Partial<Record<PublicBuildFlagName, unknown>>; defaults?: Partial<Record<PublicBuildFlagName, boolean>> },
 ): boolean {
-  const env = overrides?.env ?? ENV_VALUES;
+  const env = overrides?.env ?? envValues();
   const fromEnv = parsePublicBuildFlag(env[name]);
   if (fromEnv !== undefined) return fromEnv;
   const defaults = overrides?.defaults ?? PUBLIC_BUILD_FLAG_DEFAULTS;
