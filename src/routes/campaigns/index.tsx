@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Compass, Trophy, Wallet2 } from "lucide-react";
+import { Compass, Trophy, User2, Wallet2 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 import { CampaignCard } from "@/components/campaigns/CampaignCard";
@@ -77,12 +77,21 @@ function CampaignsPage() {
               Growth hub<span className="text-primary">.</span>
             </h1>
           </div>
-          <Link
-            to="/partners"
-            className="inline-flex min-h-[36px] items-center rounded-xl border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
-          >
-            Partners
-          </Link>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Link
+              to="/campaigns/me"
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary transition-colors hover:bg-primary/16"
+            >
+              <User2 className="h-3.5 w-3.5" aria-hidden />
+              My progress
+            </Link>
+            <Link
+              to="/partners"
+              className="inline-flex min-h-[36px] items-center rounded-xl border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+            >
+              Partners
+            </Link>
+          </div>
         </div>
       </header>
 
