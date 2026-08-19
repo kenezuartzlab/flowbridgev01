@@ -129,7 +129,8 @@ export async function verifyAndPersistBridgeActivity(
       getSourceReceipt: async () => receipt,
       isFinalized: async () => finalized,
       repository: deps.createRepository(facts),
-      ...(deps.decodeLog ? { decodeLog: deps.decodeLog } : {}),
+      // Production MUST bind the corrected official decoder explicitly.
+      decodeLog: deps.decodeLog ?? decodeOfficialDepositLog,
       now: deps.now,
     },
     handoff,
