@@ -5,7 +5,6 @@ import { SignInButton } from "@/components/auth/SignInButton";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { TabBanner } from "@/components/banners/TabBanner";
-import { AppQuickNav } from "@/components/app/AppQuickNav";
 import { VerifiedActivityPanel } from "@/components/app/VerifiedActivityPanel";
 
 export const Route = createFileRoute("/activity")({
@@ -107,10 +106,6 @@ function ActivityPage() {
         ) : (
           <>
             <EarningsSummary transactions={transactions} />
-
-            <div className="mb-4">
-              <AppQuickNav />
-            </div>
 
             <div className="mb-4">
               <VerifiedActivityPanel />

@@ -30,7 +30,6 @@ import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
 import { PTS } from "@/lib/points";
-import { AppQuickNav } from "@/components/app/AppQuickNav";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
 
@@ -181,9 +180,6 @@ function HomePage() {
           )}
         </HeroCard>
 
-
-        {/* V6 first-class destinations */}
-        <AppQuickNav />
 
         {/* Quick actions */}
         <section>
