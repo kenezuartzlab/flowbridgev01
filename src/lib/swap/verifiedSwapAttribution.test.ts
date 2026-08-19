@@ -198,26 +198,39 @@ describe('V8.2 verified swap attribution gate', () => {
   });
 });
 
-describe('V8.2 public build flag resolution', () => {
+describe('V8.2A verified-swap flag is default OFF', () => {
   const flag = 'ENABLE_VERIFIED_SWAP_ACTIVITY' as const;
 
-  it('is off when neither env nor committed default declares it', () => {
-    expect(readPublicBuildFlag(flag, { env: {}, defaults: {} })).toBe(false);
-    expect(readPublicBuildFlag(flag, { env: { [flag]: undefined }, defaults: {} })).toBe(false);
-  });
-
-  it('honours an explicit env value over the committed default', () => {
-    expect(readPublicBuildFlag(flag, { env: { [flag]: 'false' }, defaults: { [flag]: true } })).toBe(
-      false,
-    );
+  it('true only for explicit true/1', () => {
     expect(readPublicBuildFlag(flag, { env: { [flag]: 'true' }, defaults: {} })).toBe(true);
     expect(readPublicBuildFlag(flag, { env: { [flag]: '1' }, defaults: {} })).toBe(true);
-    expect(readPublicBuildFlag(flag, { env: { [flag]: 'yes' }, defaults: { [flag]: true } })).toBe(
-      false,
-    );
   });
 
-  it('falls back to the committed public default when env is absent', () => {
-    expect(readPublicBuildFlag(flag, { env: {}, defaults: { [flag]: true } })).toBe(true);
+  it('false for explicit false/0/any non-true value', () => {
+    for (const v of ['false', '0', 'yes', 'off', '']) {
+      expect(readPublicBuildFlag(flag, { env: { [flag]: v }, defaults: { [flag]: true } })).toBe(
+        false,
+      );
+    }
+  });
+
+  it('false when absent/undefined, even with a committed true default', () => {
+    expect(readPublicBuildFlag(flag, { env: {}, defaults: {} })).toBe(false);
+    expect(readPublicBuildFlag(flag, { env: { [flag]: undefined }, defaults: {} })).toBe(false);
+    expect(readPublicBuildFlag(flag, { env: {}, defaults: { [flag]: true } })).toBe(false);
+  });
+
+  it('carries no committed default for the verified-swap flag', () => {
+    expect(PUBLIC_BUILD_FLAG_DEFAULTS.ENABLE_VERIFIED_SWAP_ACTIVITY).toBeUndefined();
+    expect(DEFAULT_OFF_ONLY_FLAGS).toContain(flag);
+  });
+
+  it('other non-sensitive flags may still use committed defaults', () => {
+    expect(
+      readPublicBuildFlag('REQUIRE_ACTIVITY_ATTRIBUTION', {
+        env: {},
+        defaults: { REQUIRE_ACTIVITY_ATTRIBUTION: true },
+      }),
+    ).toBe(true);
   });
 });
