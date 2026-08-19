@@ -4,6 +4,7 @@ import { useAccount, WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
 import {
   ArrowLeft,
+  BarChart3,
   Copy,
   Eye,
   Loader2,
