@@ -31,7 +31,7 @@ export const Route = createFileRoute("/campaigns/me")({
     ],
     links: [{ rel: "canonical", href: "https://flowbridge.space/campaigns/me" }],
   }),
-  component: ParticipantCenterPage;
+  component: ParticipantCenterPage,
 });
 
 type Tab = "overview" | "campaigns" | "activity" | "leaderboard";
