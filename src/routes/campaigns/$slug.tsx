@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   Compass,
-  Route as RouteIcon,
   RefreshCw,
   Share2,
   ShieldCheck,
