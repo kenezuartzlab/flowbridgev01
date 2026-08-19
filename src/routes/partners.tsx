@@ -67,12 +67,21 @@ function PartnersPage() {
               Partners<span className="text-primary">.</span>
             </h1>
           </div>
-          <Link
-            to="/rewards"
-            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
-          >
-            Rewards <ArrowUpRight className="h-3 w-3" />
-          </Link>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Link
+              to="/campaigns"
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/12 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary transition-colors hover:bg-primary/20"
+            >
+              Growth hub <ArrowUpRight className="h-3 w-3" />
+            </Link>
+            <Link
+              to="/rewards"
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-hairline px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+            >
+              Rewards
+            </Link>
+          </div>
+
         </div>
       </header>
 
