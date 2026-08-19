@@ -179,9 +179,7 @@ export function flowBridgeExecutionRegistry(): readonly FlowBridgeExecutionResol
 // target can never satisfy a V4 check, and no testnet address may ever resolve
 // on a mainnet chain.
 
-export function isFlowBridgeV4Target(
-  entry: FlowBridgeExecutionResolution,
-): entry is FlowBridgeExecutionTarget {
+export function isFlowBridgeV4Target(entry: FlowBridgeExecutionResolution): boolean {
   return entry.configured && entry.routerVersion === 'v4' && entry.v4Configured && entry.v4Enabled;
 }
 
