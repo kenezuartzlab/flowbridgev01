@@ -96,17 +96,28 @@ const REGISTRY: readonly FlowBridgeExecutionResolution[] = [
     discovery: FLOW_BRIDGE_ROUTER_LENS_BOT_TESTNET,
     discoveryKind: 'lens',
     supportsSafeSwaps: true,
+    v4Configured: true,
+    v4Enabled: true,
+    promotionPending: false,
+    legacy: false,
     bridgeProxyEnabled: false,
   },
   {
+    // TESTNET FIRST, MAINNET LATER: this is the pre-V4 production deployment,
+    // retained for backward compatibility only. It is NOT a Router V4 target
+    // and awaits a future audited V4 mainnet deployment gate.
     configured: true,
     chainId: BOT_MAINNET_CHAIN_ID,
     chainName: 'BOT Mainnet',
-    routerVersion: 'v3',
+    routerVersion: 'v3-legacy',
     router: lower(MAINNET_CONTRACTS.flowBridgeRouterV3),
     discovery: lower(MAINNET_CONTRACTS.flowBridgeRouterV3),
     discoveryKind: 'router',
     supportsSafeSwaps: false,
+    v4Configured: false,
+    v4Enabled: false,
+    promotionPending: true,
+    legacy: true,
     bridgeProxyEnabled: false,
   },
   {
@@ -122,6 +133,7 @@ const REGISTRY: readonly FlowBridgeExecutionResolution[] = [
     reason: 'no FlowBridge execution contract is deployed on this chain',
   },
 ] as const;
+
 
 /** Legacy v3 testnet router kept for audit/reference only — never for execution. */
 export const LEGACY_FLOW_BRIDGE_ROUTER_V3_BOT_TESTNET: Hex = lower(
