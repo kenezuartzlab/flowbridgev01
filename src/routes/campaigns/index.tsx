@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Compass, Trophy, Wallet2 } from "lucide-react";
+import { Compass, Trophy, User2, Wallet2 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 import { CampaignCard } from "@/components/campaigns/CampaignCard";
