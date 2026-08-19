@@ -8,7 +8,7 @@
 import type { Hex } from './activityIntent';
 import { canonicalEventKeyString, type CanonicalEventKey } from './activityCanonicalKey';
 
-export type VerifiedActivityKind = 'BRIDGE_SUBMITTED' | 'BRIDGE_COMPLETED';
+export type VerifiedActivityKind = 'BRIDGE_SUBMITTED' | 'BRIDGE_COMPLETED' | 'SWAP_EXECUTED';
 export type VerifiedActivityStatus = 'PENDING' | 'CONFIRMED' | 'REVIEW' | 'REVERSED';
 
 export interface VerifiedActivity {

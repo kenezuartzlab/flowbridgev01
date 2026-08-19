@@ -1,0 +1,75 @@
+/**
+ * V8 — Verified Swap Adapter configuration (server-owned truth).
+ *
+ * This module is the ONLY place that may name a swap execution target for
+ * verified activity. Router / token / chain are never accepted from the
+ * browser, from query parameters or from a request body.
+ *
+ * Supported V8 path (deliberately ONE path, ERC-20 token-in only):
+ *   BOT Testnet (968) · FlowBridgeRouter v3 · USDT token-in
+ *
+ * Native token-in is intentionally unsupported: it produces no ERC-20 Transfer
+ * log, so the token-in amount could not be proven deterministically.
+ */
+import { keccak256, toBytes } from 'viem';
+import { TESTNET_CONTRACTS } from '../contracts';
+import { OFFICIAL_CHAIN_IDS } from '../bridge/officialBridgeConfig';
+
+export type Hex = `0x${string}`;
+
+/**
+ * Frozen FlowBridge verified swap V1 action type.
+ * keccak256("FLOWBRIDGE_VERIFIED_SWAP_V1"). Never equal to
+ * DIRECT_BRIDGE_ACTION_TYPE, which stays untouched.
+ */
+export const VERIFIED_SWAP_V1_ACTION_TYPE: Hex = keccak256(
+  toBytes('FLOWBRIDGE_VERIFIED_SWAP_V1'),
+);
+
+export interface VerifiedSwapPath {
+  id: string;
+  label: string;
+  /** Execution chain. Same-chain action: source === destination. */
+  chainId: number;
+  /** Configured swap execution target (FlowBridgeRouter v3). */
+  router: Hex;
+  /** Configured ERC-20 token-in. */
+  tokenIn: Hex;
+  tokenInDecimals: number;
+  tokenInSymbol: string;
+}
+
+export const VERIFIED_SWAP_PATHS: readonly VerifiedSwapPath[] = [
+  {
+    id: 'bot-testnet-usdt',
+    label: 'BOT Testnet · USDT swap via FlowBridgeRouter v3',
+    chainId: OFFICIAL_CHAIN_IDS.botTestnet,
+    router: TESTNET_CONTRACTS.flowBridgeRouterV3.toLowerCase() as Hex,
+    tokenIn: TESTNET_CONTRACTS.usdtBot.toLowerCase() as Hex,
+    tokenInDecimals: 6,
+    tokenInSymbol: 'USDT',
+  },
+] as const;
+
+const eq = (a?: string, b?: string) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
+
+/** Supported path lookup. Token-in is optional; when given it must match. */
+export function findVerifiedSwapPath(
+  chainId: number,
+  tokenIn?: string,
+): VerifiedSwapPath | undefined {
+  return VERIFIED_SWAP_PATHS.find(
+    (p) => p.chainId === chainId && (tokenIn === undefined || eq(p.tokenIn, tokenIn)),
+  );
+}
+
+/**
+ * Attribution flag: VITE_ENABLE_VERIFIED_SWAP_ACTIVITY ("true"/"1").
+ * Off by default; when off the swap flow is byte-for-byte the current flow.
+ */
+export function isVerifiedSwapActivityEnabled(): boolean {
+  const raw = import.meta.env.VITE_ENABLE_VERIFIED_SWAP_ACTIVITY;
+  if (typeof raw !== 'string') return false;
+  const v = raw.trim().toLowerCase();
+  return v === 'true' || v === '1';
+}
