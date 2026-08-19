@@ -123,7 +123,7 @@ async function fetchActiveRouters(isMainnet: boolean): Promise<ActiveRouter[]> {
     // Fallback is only valid for the v3 mainnet registry, whose IDs were
     // verified against getActiveRouters(). On V4 chains the registry IDs are
     // owned by the Lens, so we fail closed instead of inventing IDs.
-    if (target.routerVersion !== "v3") {
+    if (target.routerVersion !== "v3-legacy") {
       ROUTER_CACHE.set(key, { at: Date.now(), routers: [] });
       return [];
     }

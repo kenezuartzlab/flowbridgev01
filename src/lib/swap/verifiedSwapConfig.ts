@@ -14,7 +14,7 @@
 import { keccak256, toBytes } from 'viem';
 import { TESTNET_CONTRACTS } from '../contracts';
 import { OFFICIAL_CHAIN_IDS } from '../bridge/officialBridgeConfig';
-import { requireFlowBridgeExecution } from '../flowbridge/executionRegistry';
+import { requireFlowBridgeV4Execution } from '../flowbridge/executionRegistry';
 
 
 export type Hex = `0x${string}`;
@@ -46,8 +46,8 @@ export const VERIFIED_SWAP_PATHS: readonly VerifiedSwapPath[] = [
     id: 'bot-testnet-usdt',
     label: 'BOT Testnet · USDT swap via FlowBridgeRouter V4',
     chainId: OFFICIAL_CHAIN_IDS.botTestnet,
-    // Canonical execution target from the FlowBridge execution registry.
-    router: requireFlowBridgeExecution(OFFICIAL_CHAIN_IDS.botTestnet).router,
+    // Canonical Router V4 execution target (V4 resolver — legacy targets rejected).
+    router: requireFlowBridgeV4Execution(OFFICIAL_CHAIN_IDS.botTestnet).router,
     tokenIn: TESTNET_CONTRACTS.usdtBot.toLowerCase() as Hex,
     tokenInDecimals: 6,
     tokenInSymbol: 'USDT',

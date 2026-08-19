@@ -25,7 +25,12 @@ export const BOT_MAINNET_CHAIN_ID = 677;
 
 export type Hex = `0x${string}`;
 
-export type FlowBridgeRouterVersion = 'v3' | 'v4';
+/**
+ * `v4` = canonical Router V4 architecture target.
+ * `v3-legacy` = pre-V4 deployment kept for backward compatibility ONLY. It is
+ * never a V4 target and can never satisfy a V4 resolver check.
+ */
+export type FlowBridgeRouterVersion = 'v3-legacy' | 'v4';
 
 export interface FlowBridgeExecutionTarget {
   configured: true;
@@ -34,14 +39,23 @@ export interface FlowBridgeExecutionTarget {
   routerVersion: FlowBridgeRouterVersion;
   /** Swap execution target AND ERC-20 approval spender. */
   router: Hex;
-  /** Discovery/quote reader. V4 chains use the Lens; v3 chains use the router. */
+  /** Discovery/quote reader. V4 chains use the Lens; legacy chains the router. */
   discovery: Hex;
   discoveryKind: 'lens' | 'router';
   /** V4 hardened `*Safe` entry points with an explicit maxProtocolFee bound. */
   supportsSafeSwaps: boolean;
+  /** True only when an audited Router V4 address is deployed for this chain. */
+  v4Configured: boolean;
+  /** True only when V4 execution is allowed on this chain today. */
+  v4Enabled: boolean;
+  /** True while this chain still awaits its future V4 deployment gate. */
+  promotionPending: boolean;
+  /** Legacy-only target: intentionally supported, but outside V4 readiness. */
+  legacy: boolean;
   /** V4 bridge proxy execution — false everywhere in V8-R (bridge stays direct). */
   bridgeProxyEnabled: boolean;
 }
+
 
 export interface FlowBridgeExecutionUnconfigured {
   configured: false;
@@ -82,17 +96,28 @@ const REGISTRY: readonly FlowBridgeExecutionResolution[] = [
     discovery: FLOW_BRIDGE_ROUTER_LENS_BOT_TESTNET,
     discoveryKind: 'lens',
     supportsSafeSwaps: true,
+    v4Configured: true,
+    v4Enabled: true,
+    promotionPending: false,
+    legacy: false,
     bridgeProxyEnabled: false,
   },
   {
+    // TESTNET FIRST, MAINNET LATER: this is the pre-V4 production deployment,
+    // retained for backward compatibility only. It is NOT a Router V4 target
+    // and awaits a future audited V4 mainnet deployment gate.
     configured: true,
     chainId: BOT_MAINNET_CHAIN_ID,
     chainName: 'BOT Mainnet',
-    routerVersion: 'v3',
+    routerVersion: 'v3-legacy',
     router: lower(MAINNET_CONTRACTS.flowBridgeRouterV3),
     discovery: lower(MAINNET_CONTRACTS.flowBridgeRouterV3),
     discoveryKind: 'router',
     supportsSafeSwaps: false,
+    v4Configured: false,
+    v4Enabled: false,
+    promotionPending: true,
+    legacy: true,
     bridgeProxyEnabled: false,
   },
   {
@@ -108,6 +133,7 @@ const REGISTRY: readonly FlowBridgeExecutionResolution[] = [
     reason: 'no FlowBridge execution contract is deployed on this chain',
   },
 ] as const;
+
 
 /** Legacy v3 testnet router kept for audit/reference only — never for execution. */
 export const LEGACY_FLOW_BRIDGE_ROUTER_V3_BOT_TESTNET: Hex = lower(
@@ -145,4 +171,42 @@ export function resolveFlowBridgeExecutionForNetwork(
 
 export function flowBridgeExecutionRegistry(): readonly FlowBridgeExecutionResolution[] {
   return REGISTRY;
+}
+
+// ── Router V4 readiness boundary ────────────────────────────────────────────
+// V4 consumers (Campaign Studio, Verified Swap, Action Runner and any new
+// execution work) MUST resolve through these helpers. A legacy `v3-legacy`
+// target can never satisfy a V4 check, and no testnet address may ever resolve
+// on a mainnet chain.
+
+export function isFlowBridgeV4Target(entry: FlowBridgeExecutionResolution): boolean {
+  return entry.configured && entry.routerVersion === 'v4' && entry.v4Configured && entry.v4Enabled;
+}
+
+/** V4-only resolution. Legacy/unknown chains resolve as unconfigured. */
+export function resolveFlowBridgeV4Execution(chainId: number): FlowBridgeExecutionResolution {
+  const entry = resolveFlowBridgeExecution(chainId);
+  if (entry.configured) {
+    if (isFlowBridgeV4Target(entry)) return entry;
+    return {
+      configured: false,
+      chainId: entry.chainId,
+      chainName: entry.chainName,
+      reason: entry.promotionPending
+        ? `FlowBridgeRouter V4 is not deployed on ${entry.chainName} yet (legacy ${entry.routerVersion} target, promotion pending)`
+        : `${entry.chainName} is not a FlowBridgeRouter V4 target`,
+    };
+  }
+  return entry;
+}
+
+/** Fail-closed V4 resolution for write paths and V4 API checks. */
+export function requireFlowBridgeV4Execution(chainId: number): FlowBridgeExecutionTarget {
+  const entry = resolveFlowBridgeV4Execution(chainId);
+  if (!entry.configured) throw new FlowBridgeExecutionUnconfiguredError(chainId, entry.reason);
+  return entry;
+}
+
+export function isFlowBridgeV4Configured(chainId: number): boolean {
+  return resolveFlowBridgeV4Execution(chainId).configured;
 }

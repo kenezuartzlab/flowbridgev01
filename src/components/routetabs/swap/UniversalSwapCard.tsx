@@ -15,6 +15,7 @@ import {
 } from "@/lib/contracts";
 import { FLOW_BRIDGE_ROUTER_V4_ABI } from "@/lib/flowbridge/routerV4Abi";
 import { resolveFlowBridgeExecutionForNetwork } from "@/lib/flowbridge/executionRegistry";
+import { requireSafeSwapDecision } from "@/lib/flowbridge/swapMethodPolicy";
 
 import {
   getCuratedTokens,
@@ -272,14 +273,16 @@ export function UniversalSwapCard({
       fee = res[0] ?? 0n;
       feeKnown = true;
     } catch {
-      // If the fee view reverts for any reason, fall back to 0 — the router will
-      // still enforce fee logic on-chain and revert if the caller under-pays.
+      // Fee read failed. On the canonical V4 path this is fatal (see below):
+      // we never downgrade to a legacy call, because that drops the fee bound.
       fee = 0n;
     }
     const totalIn = amountInRaw + fee;
-    // V4 hardened entry points bound the fee the router may charge. Only used
-    // when the exact fee is known; otherwise fall back to the compatible calls.
-    const useSafe = flowTarget.supportsSafeSwaps && feeKnown;
+    // V4 hardened entry points bound the fee the router may charge. If the fee
+    // view is unavailable on a V4 target we fail closed here — BEFORE any
+    // approval or swap write — instead of falling back to a legacy call.
+    const useSafe = requireSafeSwapDecision({ target: flowTarget, feeKnown });
+
 
 
     // ── Balance guard: the router debits `amount + fee`, so swapping an exact
@@ -390,8 +393,9 @@ export function UniversalSwapCard({
     };
 
     // ── Dispatch to the correct FlowBridgeRouter entry point ──────────────
-    // V4 (`*Safe`) adds an explicit maxProtocolFee bound; the legacy calls stay
-    // for v3 chains and for the case where the fee view is unavailable.
+    // V4 (`*Safe`) adds an explicit maxProtocolFee bound. The legacy calls are
+    // reachable ONLY on an explicitly legacy (v3-legacy) execution target — never
+    // as a runtime fallback for a resolved V4 route.
     if (step.inIsNative) {
       const base = (useSafe
         ? {
