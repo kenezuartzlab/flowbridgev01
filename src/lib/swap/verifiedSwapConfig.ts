@@ -15,6 +15,8 @@ import { keccak256, toBytes, toFunctionSelector } from 'viem';
 import { TESTNET_CONTRACTS } from '../contracts';
 import { OFFICIAL_CHAIN_IDS } from '../bridge/officialBridgeConfig';
 import { requireFlowBridgeV4Execution } from '../flowbridge/executionRegistry';
+import { readPublicBuildFlag } from '../config/publicBuildFlags';
+
 
 
 export type Hex = `0x${string}`;
