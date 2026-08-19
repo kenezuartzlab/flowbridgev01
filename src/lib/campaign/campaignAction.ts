@@ -234,6 +234,10 @@ export interface CampaignSwapAction {
   /** Configured token-in of the approved swap path (display + prefill only). */
   tokenIn: string;
   tokenLabel: string;
+  /** Display-only user-facing output asset label (native BOT on the V8.3 path). */
+  outputLabel: string;
+  /** True when the supported user-facing output is the native coin. */
+  outputIsNative: boolean;
   minAmountRaw?: string;
   minAmountLabel?: string;
 }
@@ -313,6 +317,8 @@ export function resolveCampaignTaskSwapAction(task: CampaignApiTask): CampaignSw
     chainId: path.chainId,
     tokenIn: path.tokenIn,
     tokenLabel: path.tokenInSymbol,
+    outputLabel: path.tokenOutSymbol,
+    outputIsNative: path.outputIsNative,
     ...(minAmountRaw
       ? {
           minAmountRaw,

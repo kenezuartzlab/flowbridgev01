@@ -49,7 +49,9 @@ export function SwapCampaignTaskBanner({
       <p className="font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.06em] text-muted">
         {matching ? (
           <>
-            Verified swap task on {chainName(action.chainId)} · {action.tokenLabel} in
+            Verified swap task on {chainName(action.chainId)} · {action.tokenLabel} →{" "}
+            {action.outputLabel}
+            {action.outputIsNative ? " (native)" : ""}
             {action.minAmountLabel ? ` · minimum ${action.minAmountLabel}` : ""}. Campaign PTS are
             credited only after the trusted verifier confirms your swap on-chain.
           </>
