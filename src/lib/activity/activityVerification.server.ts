@@ -17,7 +17,7 @@ import type { Hex } from './activityIntent';
 import { activityIntentHash } from './activityCanonicalKey';
 
 import { verifyBridgeActivity, type ActivityIntentHandoff, type VerificationOutcome } from './activityVerifier';
-import type { RawLog, SourceReceipt } from './officialBridgeEvent';
+import { decodeOfficialDepositLog, type RawLog, type SourceReceipt } from './officialBridgeEvent';
 import type { ActivityRepository, VerifiedActivity } from './activityRepository';
 import { botTestnet, bscTestnet } from '../wagmi';
 import { OFFICIAL_CHAIN_IDS } from '../bridge/officialBridgeConfig';
