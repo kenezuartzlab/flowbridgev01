@@ -471,6 +471,23 @@ export default function App() {
   const [caToBotDirection, setCaToBotDirection] = useState<'CA_TO_BOT' | 'BOT_TO_CA'>('CA_TO_BOT');
   const [botToUsdtDirection, setBotToUsdtDirection] = useState<'BOT_TO_USDT' | 'USDT_TO_BOT'>('BOT_TO_USDT');
   const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT' | 'BOT_TO_ETH' | 'ETH_TO_BOT' | 'BOT_TO_TRX' | 'TRX_TO_BOT'>('BOT_TO_BNB');
+
+  /**
+   * V7 Campaign Action Runner — presentation-only prefill.
+   * A validated campaign deep link may preselect bridge mode + route context.
+   * It NEVER changes gateway/router addresses, amounts, signing, write ordering,
+   * verification or settlement, and it never auto-submits a transaction.
+   */
+  const [campaignActionCtx, setCampaignActionCtx] = useState<CampaignActionSearch | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const ctx = parseCampaignActionSearchString(window.location.search);
+    if (!ctx) return;
+    setCampaignActionCtx(ctx);
+    setActiveTab('BRIDGE');
+    setBridgeDirection(ctx.direction);
+    setIsMainnet(isMainnetActionSearch(ctx));
+  }, []);
   const [tronAddress, setTronAddress] = useState<string | null>(null);
   const [tronUsdtBalance, setTronUsdtBalance] = useState<string>('0');
   const [tronStatus, setTronStatus] = useState<TronStatus>('unavailable');
