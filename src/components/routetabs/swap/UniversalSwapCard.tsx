@@ -272,14 +272,16 @@ export function UniversalSwapCard({
       fee = res[0] ?? 0n;
       feeKnown = true;
     } catch {
-      // If the fee view reverts for any reason, fall back to 0 — the router will
-      // still enforce fee logic on-chain and revert if the caller under-pays.
+      // Fee read failed. On the canonical V4 path this is fatal (see below):
+      // we never downgrade to a legacy call, because that drops the fee bound.
       fee = 0n;
     }
     const totalIn = amountInRaw + fee;
-    // V4 hardened entry points bound the fee the router may charge. Only used
-    // when the exact fee is known; otherwise fall back to the compatible calls.
-    const useSafe = flowTarget.supportsSafeSwaps && feeKnown;
+    // V4 hardened entry points bound the fee the router may charge. If the fee
+    // view is unavailable on a V4 target we fail closed here — BEFORE any
+    // approval or swap write — instead of falling back to a legacy call.
+    const useSafe = requireSafeSwapDecision({ target: flowTarget, feeKnown });
+
 
 
     // ── Balance guard: the router debits `amount + fee`, so swapping an exact
