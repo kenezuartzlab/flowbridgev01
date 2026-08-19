@@ -18,7 +18,7 @@ const BOT = OFFICIAL_TESTNET_ROUTES[1]!; // 968 -> 97, 6dp
 const USER = '0x1111111111111111111111111111111111111111' as Hex;
 const OTHER = '0x2222222222222222222222222222222222222222' as Hex;
 const TX = ('0x' + 'ee'.repeat(32)) as Hex;
-const RESOURCE = ('0x' + 'ac'.repeat(32)) as Hex;
+
 
 const DEPOSIT_TOPIC = keccak256(
   toHex('DepositEvent(address,address,uint256,uint256,address,uint256,uint256)'),
