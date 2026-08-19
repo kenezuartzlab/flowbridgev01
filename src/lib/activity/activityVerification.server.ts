@@ -34,9 +34,20 @@ export interface TrustedSourceReceipt {
   logs: readonly RawLog[];
 }
 
+export interface TrustedSourceTransaction {
+  from: Hex;
+  to: Hex | null;
+  input: Hex;
+}
+
 export interface TrustedChainReader {
   getSourceReceipt(args: { chainId: number; txHash: Hex }): Promise<TrustedSourceReceipt | null>;
   getLatestBlockNumber(args: { chainId: number }): Promise<bigint>;
+  /** V8.1 — trusted source transaction for exact calldata/selector proof. */
+  getSourceTransaction?(args: {
+    chainId: number;
+    txHash: Hex;
+  }): Promise<TrustedSourceTransaction | null>;
 }
 
 /** Facts reconstructed server-side; the browser never supplies them. */
@@ -164,6 +175,17 @@ export function createViemChainReader(): TrustedChainReader {
           data: l.data as Hex,
           logIndex: Number(l.logIndex),
         })),
+      };
+    },
+    async getSourceTransaction({ chainId, txHash }) {
+      const tx = await client(chainId)
+        .getTransaction({ hash: txHash })
+        .catch(() => null);
+      if (!tx) return null;
+      return {
+        from: tx.from.toLowerCase() as Hex,
+        to: (tx.to ? (tx.to.toLowerCase() as Hex) : null),
+        input: tx.input as Hex,
       };
     },
     async getLatestBlockNumber({ chainId }) {

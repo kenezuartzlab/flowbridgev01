@@ -11,7 +11,7 @@ import type { Hex } from './activityIntent';
 import { activityIntentHash } from './activityCanonicalKey';
 import type { ActivityIntentHandoff, VerificationOutcome } from './activityVerifier';
 import type { SourceReceipt } from './officialBridgeEvent';
-import { decodeErc20TransferLog, type TransferLogDecoder } from './swapTransferEvent';
+import { decodeSwapActivityLog, type SwapActivityLogDecoder } from './swapActivityEvent';
 import { verifySwapActivity } from './swapActivityVerifier';
 import {
   FinalityConfigError,
@@ -31,7 +31,7 @@ export interface TrustedSwapVerificationDeps {
   reader: TrustedChainReader;
   createRepository: (facts: TrustedActivityFacts) => ActivityRepository;
   recoverTypedDataSigner?: (args: { payload: any; signature: Hex }) => Promise<string>;
-  decodeLog?: TransferLogDecoder;
+  decodeLog?: SwapActivityLogDecoder;
   now?: () => number;
 }
 
@@ -100,9 +100,18 @@ export async function verifyAndPersistSwapActivity(
         (async ({ payload, signature }) =>
           await recoverTypedDataAddress({ ...(payload as any), signature } as any)),
       getSourceReceipt: async () => receipt,
+      getSourceTransaction: async () => {
+        if (!deps.reader.getSourceTransaction) {
+          throw new Error('trusted chain reader cannot read the source transaction');
+        }
+        return await deps.reader.getSourceTransaction({
+          chainId,
+          txHash: handoff.sourceTxHash,
+        });
+      },
       isFinalized: async () => finalized,
       repository: deps.createRepository(facts),
-      decodeLog: deps.decodeLog ?? decodeErc20TransferLog,
+      decodeLog: deps.decodeLog ?? decodeSwapActivityLog,
       ...(deps.now ? { now: deps.now } : {}),
     },
     handoff,
