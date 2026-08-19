@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { encodeAbiParameters, encodeEventTopics, encodeFunctionData } from 'viem';
+import {
+  encodeAbiParameters,
+  encodeEventTopics,
+  encodeFunctionData,
+  toFunctionSelector,
+} from 'viem';
 import { buildActivityIntent, type Hex } from './activityIntent';
 import { activityIntentHash } from './activityCanonicalKey';
 import { createInMemoryActivityRepository } from './activityRepository';
@@ -59,7 +64,7 @@ function activityLog(
       ],
       [
         over.tokenIn ?? PATH.tokenIn,
-        over.tokenOut ?? PATH.tokenOut,
+        over.tokenOut ?? PATH.eventTokenOut,
         over.amountIn ?? AMOUNT,
         over.amountOut ?? 5_000_000_000_000_000_000n,
         over.protocolFee ?? 0n,
@@ -71,6 +76,7 @@ function activityLog(
 function safeCalldata(
   over: Partial<{
     routerId: bigint;
+    tokenIn: Hex;
     swapAmount: bigint;
     path: readonly Hex[];
     to: Hex;
@@ -78,14 +84,17 @@ function safeCalldata(
     maxProtocolFee: bigint;
   }> = {},
 ): Hex {
+  const path = (over.path ?? [PATH.tokenIn, PATH.tokenOut]) as readonly Hex[];
   return encodeFunctionData({
     abi: FLOW_BRIDGE_ROUTER_V4_ABI,
-    functionName: 'swapV2Safe',
+    functionName: 'swapTokenToNativeSafe',
     args: [
       over.routerId ?? PATH.routerId,
+      over.tokenIn ?? path[0]!,
+      0,
       over.swapAmount ?? AMOUNT,
       1n,
-      (over.path ?? [PATH.tokenIn, PATH.tokenOut]) as readonly Hex[],
+      path,
       over.to ?? USER,
       over.deadline ?? DEADLINE,
       over.maxProtocolFee ?? MAX_FEE,
@@ -100,11 +109,26 @@ const legacyCalldata = (): Hex =>
     args: [PATH.routerId, AMOUNT, 1n, [PATH.tokenIn, PATH.tokenOut], USER, DEADLINE],
   }) as Hex;
 
+/** swapV2Safe (0xaa8244eb) — token-to-token; rejected for Verified Swap V1. */
 const wrongSafeCalldata = (): Hex =>
+  encodeFunctionData({
+    abi: FLOW_BRIDGE_ROUTER_V4_ABI,
+    functionName: 'swapV2Safe',
+    args: [PATH.routerId, AMOUNT, 1n, [PATH.tokenIn, PATH.tokenOut], USER, DEADLINE, MAX_FEE],
+  }) as Hex;
+
+const v3SingleSafeCalldata = (): Hex =>
   encodeFunctionData({
     abi: FLOW_BRIDGE_ROUTER_V4_ABI,
     functionName: 'swapV3SingleSafe',
     args: [PATH.routerId, PATH.tokenIn, PATH.tokenOut, 3000, AMOUNT, 1n, USER, DEADLINE, MAX_FEE],
+  }) as Hex;
+
+const legacyTokenToNativeCalldata = (): Hex =>
+  encodeFunctionData({
+    abi: FLOW_BRIDGE_ROUTER_V4_ABI,
+    functionName: 'swapTokenToNative',
+    args: [PATH.routerId, PATH.tokenIn, 0, AMOUNT, 1n, [PATH.tokenIn, PATH.tokenOut], USER, DEADLINE],
   }) as Hex;
 
 function intentFor(over: Partial<Parameters<typeof buildActivityIntent>[0]> = {}) {
@@ -397,6 +421,66 @@ describe('V8.1 verified swap soundness (Router V4 SwapActivity evidence)', () =>
   it('rejects a signature recovered to another address', async () => {
     const out = await verifySwapActivity(
       deps(ok(), { recoverTypedDataSigner: async () => OTHER }),
+      handoff(),
+    );
+    expect(out.status).toBe('REJECTED');
+  });
+});
+
+describe('V8.3 native-BOT route alignment', () => {
+  it('freezes the approved safe entrypoint selector to 0x2411755e', () => {
+    expect(PATH.safeFunctionName).toBe('swapTokenToNativeSafe');
+    expect(PATH.safeSelector).toBe('0x2411755e');
+    expect(
+      toFunctionSelector(
+        'function swapTokenToNativeSafe(uint256,address,uint24,uint256,uint256,address[],address,uint256,uint256)',
+      ),
+    ).toBe('0x2411755e');
+    expect(PATH.eventTokenOut).toBe('0x0000000000000000000000000000000000000000');
+    expect(PATH.outputIsNative).toBe(true);
+  });
+
+  it('confirms swapTokenToNativeSafe + SwapActivity(tokenOut = address(0))', async () => {
+    const out = await verifySwapActivity(deps(ok()), handoff());
+    expect(out.status).toBe('CONFIRMED');
+  });
+
+  it('rejects swapV2Safe (0xaa8244eb) for this path', async () => {
+    expect(
+      toFunctionSelector(
+        'function swapV2Safe(uint256,uint256,uint256,address[],address,uint256,uint256)',
+      ),
+    ).toBe('0xaa8244eb');
+    const out = await verifySwapActivity(
+      deps(ok(), { getSourceTransaction: async () => tx({ input: wrongSafeCalldata() }) }),
+      handoff(),
+    );
+    expect(out.status).toBe('REJECTED');
+  });
+
+  it('rejects V3-single-safe and legacy swapTokenToNative', async () => {
+    for (const input of [v3SingleSafeCalldata(), legacyTokenToNativeCalldata()]) {
+      const out = await verifySwapActivity(
+        deps(ok(), { getSourceTransaction: async () => tx({ input }) }),
+        handoff(),
+      );
+      expect(out.status).toBe('REJECTED');
+    }
+  });
+
+  it('rejects a wrapped-native event tokenOut (WBOT) instead of address(0)', async () => {
+    const out = await verifySwapActivity(
+      deps(receipt([activityLog({ tokenOut: PATH.tokenOut })])),
+      handoff(),
+    );
+    expect(out.status).toBe('REJECTED');
+  });
+
+  it('rejects a calldata tokenIn that is not the approved token-in', async () => {
+    const out = await verifySwapActivity(
+      deps(ok(), {
+        getSourceTransaction: async () => tx({ input: safeCalldata({ tokenIn: OTHER }) }),
+      }),
       handoff(),
     );
     expect(out.status).toBe('REJECTED');

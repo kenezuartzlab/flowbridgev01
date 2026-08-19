@@ -27,7 +27,8 @@ const qualifyingInput = () => ({
       routerId: Number(PATH.routerId),
       path: [PATH.tokenIn, PATH.tokenOut],
       inIsNative: false,
-      outIsNative: false,
+      // V8.3: user-facing output is NATIVE BOT (swapTokenToNativeSafe).
+      outIsNative: true,
     },
   ],
   amountIn: 1_000_000n,
@@ -165,10 +166,17 @@ describe('V8.2 verified swap attribution gate', () => {
         steps: [{ ...base.steps[0]!, path: [PATH.tokenIn, USER] }],
       }),
     ).toBeNull();
+    // A token-to-token USDT -> WBOT route must not masquerade as this path.
     expect(
       resolveQualifyingVerifiedSwap({
         ...base,
-        steps: [{ ...base.steps[0]!, outIsNative: true }],
+        steps: [{ ...base.steps[0]!, outIsNative: false }],
+      }),
+    ).toBeNull();
+    expect(
+      resolveQualifyingVerifiedSwap({
+        ...base,
+        steps: [{ ...base.steps[0]!, inIsNative: true }],
       }),
     ).toBeNull();
     expect(
