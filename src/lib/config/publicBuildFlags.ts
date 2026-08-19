@@ -20,13 +20,21 @@ export type PublicBuildFlagName =
   | 'REQUIRE_ACTIVITY_ATTRIBUTION';
 
 /**
- * Committed public build flags. Verified-swap attribution is intended to be ON
- * for production builds; it stays runtime-constrained to the single canonical
- * BOT Testnet (968) Router V4 / BDEX V2 USDT -> WBOT path in
- * `verifiedSwapConfig.ts`. It is NOT "attribution on for every network".
+ * V8.2A — flags that are security-sensitive (transaction attribution) and MUST
+ * fail closed: a committed default can never turn them on. Only an explicit
+ * `true`/`1` value from the build environment enables them; missing/undefined
+ * resolves to `false`.
+ */
+export const DEFAULT_OFF_ONLY_FLAGS: readonly PublicBuildFlagName[] = [
+  'ENABLE_VERIFIED_SWAP_ACTIVITY',
+];
+
+/**
+ * Committed public build flags. Verified-swap attribution is deliberately NOT
+ * listed here: it stays default OFF unless the build environment sets
+ * `VITE_ENABLE_VERIFIED_SWAP_ACTIVITY=true`.
  */
 export const PUBLIC_BUILD_FLAG_DEFAULTS: Partial<Record<PublicBuildFlagName, boolean>> = {
-  ENABLE_VERIFIED_SWAP_ACTIVITY: true,
   REQUIRE_ACTIVITY_ATTRIBUTION: true,
 };
 
