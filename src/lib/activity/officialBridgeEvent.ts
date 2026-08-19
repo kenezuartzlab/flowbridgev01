@@ -49,16 +49,17 @@ export const decodeOfficialDepositLog: DepositLogDecoder = (log) => {
       topics: log.topics as [Hex, ...Hex[]],
       data: log.data,
     }) as { eventName: string; args: Record<string, unknown> };
-    if (decoded.eventName !== 'Deposit') return null;
+    if (decoded.eventName !== 'DepositEvent') return null;
     const a = decoded.args;
     return {
       logIndex: log.logIndex,
       emitter: log.address.toLowerCase() as Hex,
-      depositor: String(a['depositor']).toLowerCase() as Hex,
+      depositor: String(a['depositer']).toLowerCase() as Hex,
       recipient: String(a['recipient']).toLowerCase() as Hex,
       destinationChainId: BigInt(a['destinationChainId'] as bigint),
+      // canonical source amount is the indexed gross `amount`, never receiveAmount
       amount: BigInt(a['amount'] as bigint),
-      token: a['token'] ? (String(a['token']).toLowerCase() as Hex) : undefined,
+      token: a['tokenAddress'] ? (String(a['tokenAddress']).toLowerCase() as Hex) : undefined,
     };
   } catch {
     return null;
