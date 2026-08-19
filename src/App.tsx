@@ -39,6 +39,7 @@ import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
+import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
 import { useAdapterPreview } from './lib/bridge/useAdapterPreview';
 import { resolveBridgeDispatch } from './lib/bridge/directDispatch';
 import { captureActivityIntent, isActivityIntentEnabled } from './lib/activity/activityIntent';
@@ -2961,6 +2962,11 @@ export default function App() {
             />
           )}
 
+
+          {/* V6: non-authoritative campaign route hint (presentation only). */}
+          {activeTab === 'BRIDGE' && (
+            <BridgeCampaignHint direction={bridgeDirection} isMainnet={isMainnet} />
+          )}
 
           {/* Phase 5A: Adapter session status (finality from requestState only). */}
           {activeTab === 'BRIDGE' && session.pendingAdapterBridge && (

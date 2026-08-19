@@ -30,6 +30,9 @@ import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
 import { PTS } from "@/lib/points";
+import { AppQuickNav } from "@/components/app/AppQuickNav";
+import { GrowthHubModule } from "@/components/app/GrowthHubModule";
+import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
 
 
 export const Route = createFileRoute("/home")({
@@ -108,6 +111,8 @@ function HomePage() {
         avatar={user?.photoURL ?? null}
         initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
         actions={
+          <>
+          <CampaignPtsPill />
           <Link
             to="/"
             aria-label="Trade"
@@ -115,6 +120,7 @@ function HomePage() {
           >
             <ArrowLeftRight className="h-4 w-4" />
           </Link>
+          </>
         }
       />
 
@@ -175,6 +181,9 @@ function HomePage() {
           )}
         </HeroCard>
 
+
+        {/* V6 first-class destinations */}
+        <AppQuickNav />
 
         {/* Quick actions */}
         <section>
@@ -238,6 +247,9 @@ function HomePage() {
           />
         )}
 
+
+        {/* Growth Hub module — existing /api/campaigns data only */}
+        <GrowthHubModule />
 
         {/* Markets snapshot */}
         <section className="fb-surface overflow-hidden">
