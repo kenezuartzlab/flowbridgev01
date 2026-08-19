@@ -495,6 +495,20 @@ export default function App() {
     setBridgeDirection(ctx.direction);
     setIsMainnet(isMainnetActionSearch(ctx));
   }, []);
+
+  // Safe return breadcrumbs only (slug/task/known source tx hash). Never used
+  // for verification, completion or PTS — those stay server-authoritative.
+  useEffect(() => {
+    if (!campaignActionCtx) return;
+    const txHash =
+      session.pendingAdapterBridge?.tx_hash ??
+      (session.step3.status === 'submitted' ? session.step3.tx_hash : undefined);
+    saveCampaignActionReturn({
+      campaignSlug: campaignActionCtx.campaign,
+      taskId: campaignActionCtx.task,
+      ...(txHash ? { txHash } : {}),
+    });
+  }, [campaignActionCtx, session.pendingAdapterBridge?.tx_hash, session.step3.status, session.step3.tx_hash]);
   const [tronAddress, setTronAddress] = useState<string | null>(null);
   const [tronUsdtBalance, setTronUsdtBalance] = useState<string>('0');
   const [tronStatus, setTronStatus] = useState<TronStatus>('unavailable');
