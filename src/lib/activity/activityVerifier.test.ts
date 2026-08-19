@@ -21,7 +21,7 @@ const TX = ('0x' + 'ee'.repeat(32)) as Hex;
 const RESOURCE = ('0x' + 'ac'.repeat(32)) as Hex;
 
 const DEPOSIT_TOPIC = keccak256(
-  toHex('Deposit(uint256,bytes32,address,address,uint256,address)'),
+  toHex('DepositEvent(address,address,uint256,uint256,address,uint256,uint256)'),
 );
 
 function depositLog(args: {
@@ -39,21 +39,21 @@ function depositLog(args: {
     topics: [
       DEPOSIT_TOPIC,
       encodeAbiParameters([{ type: 'address' }], [args.depositor ?? USER]) as Hex,
+      encodeAbiParameters([{ type: 'address' }], [(args.recipient ?? USER) as Hex]) as Hex,
+      encodeAbiParameters([{ type: 'uint256' }], [args.amount]) as Hex,
     ],
     data: encodeAbiParameters(
       [
         { type: 'uint256' },
-        { type: 'bytes32' },
         { type: 'address' },
         { type: 'uint256' },
-        { type: 'address' },
+        { type: 'uint256' },
       ],
       [
-        args.destinationChainId ?? BigInt(BNB.destinationChainId),
-        RESOURCE,
-        (args.recipient ?? USER) as Hex,
         args.amount,
         (args.token ?? BNB.sourceToken) as Hex,
+        1n,
+        args.destinationChainId ?? BigInt(BNB.destinationChainId),
       ],
     ) as Hex,
   };
