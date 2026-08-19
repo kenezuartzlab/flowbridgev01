@@ -53,7 +53,7 @@ const okCapture = (async (_deps: any, args: any) => ({
 
 describe('V8.2 verified swap attribution gate', () => {
   it('captures nothing when the flag is off', async () => {
-    const capture = vi.fn(okCapture);
+    const capture = vi.fn(okCapture) as any;
     const out = await captureVerifiedSwapAttribution(
       { signTypedData: signer, enabled: () => false, capture, persist: () => true },
       qualifyingInput(),
@@ -63,7 +63,7 @@ describe('V8.2 verified swap attribution gate', () => {
   });
 
   it('captures on the exact supported route when the flag is true', async () => {
-    const capture = vi.fn(okCapture);
+    const capture = vi.fn(okCapture) as any;
     const persisted: any[] = [];
     const out = await captureVerifiedSwapAttribution(
       {
@@ -80,7 +80,7 @@ describe('V8.2 verified swap attribution gate', () => {
     );
     expect(out).not.toBeNull();
     expect(persisted).toHaveLength(1);
-    const args = capture.mock.calls[0]![1] as any;
+    const args = (capture.mock.calls[0] as any[])[1] as any;
     expect(args.actionType).toBe(VERIFIED_SWAP_V1_ACTION_TYPE);
     expect(args.sourceChainId).toBe(OFFICIAL_CHAIN_IDS.botTestnet);
     expect(args.destinationChainId).toBe(OFFICIAL_CHAIN_IDS.botTestnet);
@@ -177,7 +177,7 @@ describe('V8.2 verified swap attribution gate', () => {
   });
 
   it('schedules the verify-swap handoff with the persisted evidence and tx hash', async () => {
-    const submit = vi.fn(async () => ({ outcome: 'CONFIRMED' as const, attempts: 1 }));
+    const submit = vi.fn(async (_e: any, _t: any) => ({ outcome: 'CONFIRMED' as const, attempts: 1 }));
     const evidence = await captureVerifiedSwapAttribution(
       { signTypedData: signer, enabled: () => true, capture: okCapture, persist: () => true },
       qualifyingInput(),
@@ -187,8 +187,8 @@ describe('V8.2 verified swap attribution gate', () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(submit).toHaveBeenCalledTimes(1);
-    expect(submit.mock.calls[0]![0]).toBe(evidence as any);
-    expect(submit.mock.calls[0]![1]).toBe(txHash as any);
+    expect((submit.mock.calls[0] as any[])[0]).toBe(evidence as any);
+    expect((submit.mock.calls[0] as any[])[1]).toBe(txHash as any);
   });
 
   it('never hands off when nothing was captured', () => {
