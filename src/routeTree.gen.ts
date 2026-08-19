@@ -48,6 +48,7 @@ import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/w
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
 import { Route as ApiCampaignsMeRouteImport } from './routes/api/campaigns.me'
 import { Route as ApiCampaignsLeaderboardRouteImport } from './routes/api/campaigns.leaderboard'
+import { Route as ApiCampaignsAdminRouteImport } from './routes/api/campaigns.admin'
 import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-image.$'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
@@ -260,6 +261,11 @@ const ApiCampaignsLeaderboardRoute = ApiCampaignsLeaderboardRouteImport.update({
   path: '/leaderboard',
   getParentRoute: () => ApiCampaignsRoute,
 } as any)
+const ApiCampaignsAdminRoute = ApiCampaignsAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => ApiCampaignsRoute,
+} as any)
 const ApiBannerImageSplatRoute = ApiBannerImageSplatRouteImport.update({
   id: '/api/banner-image/$',
   path: '/api/banner-image/$',
@@ -371,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
+  '/api/campaigns/admin': typeof ApiCampaignsAdminRoute
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
@@ -426,6 +433,7 @@ export interface FileRoutesByTo {
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
+  '/api/campaigns/admin': typeof ApiCampaignsAdminRoute
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
+  '/api/campaigns/admin': typeof ApiCampaignsAdminRoute
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
@@ -539,6 +548,7 @@ export interface FileRouteTypes {
     | '/api/admin/tokens'
     | '/api/admin/whoami'
     | '/api/banner-image/$'
+    | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
@@ -594,6 +604,7 @@ export interface FileRouteTypes {
     | '/api/admin/tokens'
     | '/api/admin/whoami'
     | '/api/banner-image/$'
+    | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
@@ -649,6 +660,7 @@ export interface FileRouteTypes {
     | '/api/admin/tokens'
     | '/api/admin/whoami'
     | '/api/banner-image/$'
+    | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
@@ -995,6 +1007,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCampaignsLeaderboardRouteImport
       parentRoute: typeof ApiCampaignsRoute
     }
+    '/api/campaigns/admin': {
+      id: '/api/campaigns/admin'
+      path: '/admin'
+      fullPath: '/api/campaigns/admin'
+      preLoaderRoute: typeof ApiCampaignsAdminRouteImport
+      parentRoute: typeof ApiCampaignsRoute
+    }
     '/api/banner-image/$': {
       id: '/api/banner-image/$'
       path: '/api/banner-image/$'
@@ -1097,11 +1116,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface ApiCampaignsRouteChildren {
+  ApiCampaignsAdminRoute: typeof ApiCampaignsAdminRoute
   ApiCampaignsLeaderboardRoute: typeof ApiCampaignsLeaderboardRoute
   ApiCampaignsMeRoute: typeof ApiCampaignsMeRoute
 }
 
 const ApiCampaignsRouteChildren: ApiCampaignsRouteChildren = {
+  ApiCampaignsAdminRoute: ApiCampaignsAdminRoute,
   ApiCampaignsLeaderboardRoute: ApiCampaignsLeaderboardRoute,
   ApiCampaignsMeRoute: ApiCampaignsMeRoute,
 }
