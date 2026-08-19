@@ -30,9 +30,9 @@ import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
 import { PTS } from "@/lib/points";
-import { AppQuickNav } from "@/components/app/AppQuickNav";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
+import { PRIMARY_NAV } from "@/components/shell/navModel";
 
 
 export const Route = createFileRoute("/home")({
@@ -65,7 +65,16 @@ function HomePage() {
   const { greeting, next: nextGreeting, canCycle } = useGreeting();
   const config = useAppConfig();
   const campaigns = useMemo(() => getBannerSurface(config, "home"), [config]);
-  const quickActions = useMemo(() => getQuickActions(config), [config]);
+  /**
+   * V9 — one concept, one home: drop quick actions that only re-link to a
+   * destination already present in the global navigation (Trade, Explore,
+   * Activity, Profile). Everything else (Markets, Partners, Assistant, …)
+   * stays because global nav has no entry for it.
+   */
+  const quickActions = useMemo(() => {
+    const navTargets = new Set(PRIMARY_NAV.flatMap((d) => [d.to, ...(d.aliases ?? [])]));
+    return getQuickActions(config).filter((a) => !navTargets.has(a.to));
+  }, [config]);
   const page = getPage(config, "home");
   const L = (slot: string, fallback: string) => pageLabel(config, "home", slot, fallback);
   const campaignSlides = config.flags.showBanners ? campaigns.slides : [];
@@ -124,7 +133,7 @@ function HomePage() {
         }
       />
 
-      <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4">
+      <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4 md:max-w-4xl md:py-6">
         {/* Summary — gradient glass hero balance card */}
         <HeroCard hero={page.hero} variant="home" className="p-5">
           <div className="relative flex items-start justify-between gap-3">
@@ -181,9 +190,6 @@ function HomePage() {
           )}
         </HeroCard>
 
-
-        {/* V6 first-class destinations */}
-        <AppQuickNav />
 
         {/* Quick actions */}
         <section>

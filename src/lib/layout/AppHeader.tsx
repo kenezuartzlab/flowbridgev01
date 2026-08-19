@@ -11,6 +11,7 @@ import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 import logoUrl from '@/assets/flowbridge-logo.png';
 import { FlowPointsPill } from '@/components/rewards/FlowPointsPill';
+import { PrimaryNav } from '@/components/shell/PrimaryNav';
 
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -289,6 +290,9 @@ export function AppHeader({
             <FlowPointsPill googleUser={googleUser} incentives={incentives} loading={incentivesLoading} />
           </div>
         </div>
+
+        {/* V9 — one authoritative desktop navigation, shared with every other route */}
+        <PrimaryNav className="shrink-0" />
 
         {/* Actions: wallet + one menu button */}
         <div className="flex items-center gap-1.5 shrink-0">
