@@ -131,9 +131,28 @@ const post = async () => {
   const request = new Request('http://localhost/api/public/activity/verify-swap', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    // Body content is irrelevant: the verifier is stubbed at the trusted
-    // boundary and the preserved signed evidence is never reconstructed here.
-    body: JSON.stringify({ preserved: true }),
+    // Shape-valid signed handoff (the trusted verifier itself is stubbed at its
+    // server boundary; no real signature or on-chain evidence is reconstructed).
+    body: JSON.stringify({
+      intent: {
+        intentId: '0x' + '11'.repeat(32),
+        user: WALLET,
+        actionType: ACTION_TYPE,
+        sourceChainId: '968',
+        destinationChainId: '968',
+        token: TOKEN,
+        amount: '1000000000000000000',
+        recipient: WALLET,
+        // The preserved live intent carries a zero campaignId; settlement
+        // matches published campaigns from trusted rules, not from this field.
+        campaignId: '0x' + '00'.repeat(32),
+        nonce: '1',
+        deadline: '9999999999',
+      },
+      signature: '0x' + '22'.repeat(65),
+      intentHash: '0x' + '33'.repeat(32),
+      sourceTxHash: '0x' + '44'.repeat(32),
+    }),
   });
   const response = await handler({ request });
   return { response, body: await response.json() };
