@@ -5,6 +5,8 @@ import { SignInButton } from "@/components/auth/SignInButton";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { TabBanner } from "@/components/banners/TabBanner";
+import { AppQuickNav } from "@/components/app/AppQuickNav";
+import { VerifiedActivityPanel } from "@/components/app/VerifiedActivityPanel";
 
 export const Route = createFileRoute("/activity")({
   head: () => ({
@@ -105,6 +107,18 @@ function ActivityPage() {
         ) : (
           <>
             <EarningsSummary transactions={transactions} />
+
+            <div className="mb-4">
+              <AppQuickNav />
+            </div>
+
+            <div className="mb-4">
+              <VerifiedActivityPanel />
+            </div>
+
+            <p className="mb-2 font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted-soft">
+              Below: local swap / bridge submission history (separate source)
+            </p>
 
             <nav className="-mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1">
               {(["ALL", "EARNINGS", "SWAPS", "BRIDGES"] as Filter[]).map((f) => (
