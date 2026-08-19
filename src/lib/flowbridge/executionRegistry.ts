@@ -172,3 +172,43 @@ export function resolveFlowBridgeExecutionForNetwork(
 export function flowBridgeExecutionRegistry(): readonly FlowBridgeExecutionResolution[] {
   return REGISTRY;
 }
+
+// ── Router V4 readiness boundary ────────────────────────────────────────────
+// V4 consumers (Campaign Studio, Verified Swap, Action Runner and any new
+// execution work) MUST resolve through these helpers. A legacy `v3-legacy`
+// target can never satisfy a V4 check, and no testnet address may ever resolve
+// on a mainnet chain.
+
+export function isFlowBridgeV4Target(
+  entry: FlowBridgeExecutionResolution,
+): entry is FlowBridgeExecutionTarget {
+  return entry.configured && entry.routerVersion === 'v4' && entry.v4Configured && entry.v4Enabled;
+}
+
+/** V4-only resolution. Legacy/unknown chains resolve as unconfigured. */
+export function resolveFlowBridgeV4Execution(chainId: number): FlowBridgeExecutionResolution {
+  const entry = resolveFlowBridgeExecution(chainId);
+  if (isFlowBridgeV4Target(entry)) return entry;
+  if (entry.configured) {
+    return {
+      configured: false,
+      chainId: entry.chainId,
+      chainName: entry.chainName,
+      reason: entry.promotionPending
+        ? `FlowBridgeRouter V4 is not deployed on ${entry.chainName} yet (legacy ${entry.routerVersion} target, promotion pending)`
+        : `${entry.chainName} is not a FlowBridgeRouter V4 target`,
+    };
+  }
+  return entry;
+}
+
+/** Fail-closed V4 resolution for write paths and V4 API checks. */
+export function requireFlowBridgeV4Execution(chainId: number): FlowBridgeExecutionTarget {
+  const entry = resolveFlowBridgeV4Execution(chainId);
+  if (!entry.configured) throw new FlowBridgeExecutionUnconfiguredError(chainId, entry.reason);
+  return entry;
+}
+
+export function isFlowBridgeV4Configured(chainId: number): boolean {
+  return resolveFlowBridgeV4Execution(chainId).configured;
+}
