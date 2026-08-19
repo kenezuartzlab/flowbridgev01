@@ -183,7 +183,8 @@ export async function verifySwapActivity(
       recipient: intent.recipient.toLowerCase() as Hex,
       routerId: path.routerId,
       tokenIn: path.tokenIn,
-      tokenOut: path.tokenOut,
+      // Semantic native-output proof: Router V4 emits tokenOut = address(0).
+      tokenOut: path.eventTokenOut,
       amountIn: calldata.swapAmount,
     },
   );
