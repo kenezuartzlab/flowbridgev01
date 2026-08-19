@@ -14,11 +14,13 @@ import {
   fetchParticipantMe,
   type ParticipantMeResponse,
 } from "@/lib/campaign/participantApi";
+import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 
 export function VerifiedActivityPanel() {
   const [me, setMe] = useState<ParticipantMeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { campaigns } = useCampaignProgress();
 
   useEffect(() => {
     let cancelled = false;
@@ -84,7 +86,35 @@ export function VerifiedActivityPanel() {
               verifier confirms it on the source chain.
             </p>
           ) : (
-            <ActivityTimeline items={me.activity.slice(0, 6)} />
+            <>
+              <ActivityTimeline items={me.activity.slice(0, 6)} />
+              {(() => {
+                // V7: only link when a published campaign definition matches.
+                const linked = campaigns.filter((c) =>
+                  me.activity.some(
+                    (a) =>
+                      typeof a.campaignId === "string" &&
+                      a.campaignId.toLowerCase() === c.campaignId.toLowerCase(),
+                  ),
+                );
+                if (linked.length === 0) return null;
+                return (
+                  <ul className="flex flex-wrap gap-1.5">
+                    {linked.map((c) => (
+                      <li key={c.campaignId}>
+                        <Link
+                          to="/campaigns/$slug"
+                          params={{ slug: c.slug }}
+                          className="inline-flex min-h-[30px] items-center gap-1 rounded-xl border border-hairline px-2.5 font-mono text-[9.5px] font-black uppercase tracking-[0.08em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+                        >
+                          View campaign · {c.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
+            </>
           )}
         </div>
       )}

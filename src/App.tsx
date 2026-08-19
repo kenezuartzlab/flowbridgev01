@@ -40,6 +40,13 @@ import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
+import { CampaignTaskContextBanner } from './components/app/CampaignTaskContextBanner';
+import {
+  isMainnetActionSearch,
+  parseCampaignActionSearchString,
+  type CampaignActionSearch,
+} from './lib/campaign/campaignAction';
+import { saveCampaignActionReturn } from './lib/campaign/campaignReturn';
 import { useAdapterPreview } from './lib/bridge/useAdapterPreview';
 import { resolveBridgeDispatch } from './lib/bridge/directDispatch';
 import { captureActivityIntent, isActivityIntentEnabled } from './lib/activity/activityIntent';
@@ -471,6 +478,37 @@ export default function App() {
   const [caToBotDirection, setCaToBotDirection] = useState<'CA_TO_BOT' | 'BOT_TO_CA'>('CA_TO_BOT');
   const [botToUsdtDirection, setBotToUsdtDirection] = useState<'BOT_TO_USDT' | 'USDT_TO_BOT'>('BOT_TO_USDT');
   const [bridgeDirection, setBridgeDirection] = useState<'BOT_TO_BNB' | 'BNB_TO_BOT' | 'BOT_TO_ETH' | 'ETH_TO_BOT' | 'BOT_TO_TRX' | 'TRX_TO_BOT'>('BOT_TO_BNB');
+
+  /**
+   * V7 Campaign Action Runner — presentation-only prefill.
+   * A validated campaign deep link may preselect bridge mode + route context.
+   * It NEVER changes gateway/router addresses, amounts, signing, write ordering,
+   * verification or settlement, and it never auto-submits a transaction.
+   */
+  const [campaignActionCtx, setCampaignActionCtx] = useState<CampaignActionSearch | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const ctx = parseCampaignActionSearchString(window.location.search);
+    if (!ctx) return;
+    setCampaignActionCtx(ctx);
+    setActiveTab('BRIDGE');
+    setBridgeDirection(ctx.direction);
+    setIsMainnet(isMainnetActionSearch(ctx));
+  }, []);
+
+  // Safe return breadcrumbs only (slug/task/known source tx hash). Never used
+  // for verification, completion or PTS — those stay server-authoritative.
+  useEffect(() => {
+    if (!campaignActionCtx) return;
+    const txHash =
+      session.pendingAdapterBridge?.tx_hash ??
+      (session.step3.status === 'submitted' ? session.step3.tx_hash : undefined);
+    saveCampaignActionReturn({
+      campaignSlug: campaignActionCtx.campaign,
+      taskId: campaignActionCtx.task,
+      ...(txHash ? { txHash } : {}),
+    });
+  }, [campaignActionCtx, session.pendingAdapterBridge?.tx_hash, session.step3.status, session.step3.tx_hash]);
   const [tronAddress, setTronAddress] = useState<string | null>(null);
   const [tronUsdtBalance, setTronUsdtBalance] = useState<string>('0');
   const [tronStatus, setTronStatus] = useState<TronStatus>('unavailable');
@@ -2886,6 +2924,18 @@ export default function App() {
             />
           )}
 
+          {/* V7: campaign task context (presentation only, never authoritative). */}
+          {activeTab === 'BRIDGE' && campaignActionCtx && (
+            <CampaignTaskContextBanner
+              ctx={campaignActionCtx}
+              currentDirection={bridgeDirection}
+              txHash={
+                session.pendingAdapterBridge?.tx_hash ??
+                (session.step3.status === 'submitted' ? session.step3.tx_hash : undefined)
+              }
+            />
+          )}
+
           {activeTab === 'BRIDGE' && (
             <BridgeCard
               amount={usdtAmount}
@@ -2964,7 +3014,7 @@ export default function App() {
 
 
           {/* V6: non-authoritative campaign route hint (presentation only). */}
-          {activeTab === 'BRIDGE' && (
+          {activeTab === 'BRIDGE' && !campaignActionCtx && (
             <BridgeCampaignHint direction={bridgeDirection} isMainnet={isMainnet} />
           )}
 
