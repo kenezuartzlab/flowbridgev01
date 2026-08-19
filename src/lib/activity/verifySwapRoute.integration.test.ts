@@ -126,7 +126,7 @@ vi.mock('@/lib/activity/swapVerification.server', () => ({
 }));
 
 const post = async () => {
-  const { Route } = await import('./activity.verify-swap');
+  const { Route } = await import("@/routes/api/public/activity.verify-swap");
   const handler = (Route as any).options.server.handlers.POST;
   const request = new Request('http://localhost/api/public/activity/verify-swap', {
     method: 'POST',
