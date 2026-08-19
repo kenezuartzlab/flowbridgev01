@@ -41,39 +41,56 @@ export interface VerifiedSwapPath {
   tokenIn: Hex;
   tokenInDecimals: number;
   tokenInSymbol: string;
-  /** Frozen token-out endpoint of the single approved route. */
+  /**
+   * V8.3 — trusted wrapped-native endpoint the underlying BDEX V2 path must
+   * terminate at (execution proof). This is NOT the user-facing output asset.
+   */
   tokenOut: Hex;
+  /** User-facing output symbol (native BOT for the approved V8.3 path). */
   tokenOutSymbol: string;
+  /** True when the user-facing output asset is the chain's native coin. */
+  outputIsNative: boolean;
+  /**
+   * Semantic Router V4 `SwapActivity.tokenOut` value for this path.
+   * address(0) for token-to-native execution (semantic native-output proof).
+   */
+  eventTokenOut: Hex;
   /** Live Lens-derived BDEX V2 routerId for the approved route. */
   routerId: bigint;
   /** Exact approved Router V4 hardened entrypoint. */
-  safeFunctionName: 'swapV2Safe';
+  safeFunctionName: 'swapTokenToNativeSafe';
   safeFunctionSignature: string;
   /** 4-byte selector of `safeFunctionSignature`. */
   safeSelector: Hex;
 }
 
-/** Frozen approved Router V4 safe entrypoint for the single V8.1 swap path. */
+/** Frozen approved Router V4 safe entrypoint for the single V8.3 swap path. */
 export const VERIFIED_SWAP_SAFE_SIGNATURE =
-  'swapV2Safe(uint256,uint256,uint256,address[],address,uint256,uint256)' as const;
+  'swapTokenToNativeSafe(uint256,address,uint24,uint256,uint256,address[],address,uint256,uint256)' as const;
 export const VERIFIED_SWAP_SAFE_SELECTOR: Hex = toFunctionSelector(
   `function ${VERIFIED_SWAP_SAFE_SIGNATURE}`,
 );
 
+/** Native-output semantic tokenOut emitted by Router V4 SwapActivity. */
+export const NATIVE_OUTPUT_EVENT_TOKEN: Hex = '0x0000000000000000000000000000000000000000';
+
 export const VERIFIED_SWAP_PATHS: readonly VerifiedSwapPath[] = [
   {
     id: 'bot-testnet-usdt',
-    label: 'BOT Testnet · USDT → WBOT swap via FlowBridgeRouter V4 (BDEX V2, routerId 0)',
+    label: 'BOT Testnet · USDT → BOT (native) swap via FlowBridgeRouter V4 (BDEX V2, routerId 0)',
     chainId: OFFICIAL_CHAIN_IDS.botTestnet,
     // Canonical Router V4 execution target (V4 resolver — legacy targets rejected).
     router: requireFlowBridgeV4Execution(OFFICIAL_CHAIN_IDS.botTestnet).router,
     tokenIn: TESTNET_CONTRACTS.usdtBot.toLowerCase() as Hex,
     tokenInDecimals: 6,
     tokenInSymbol: 'USDT',
+    // Execution proof only: the V2 path must end at wrapped native (WBOT).
     tokenOut: TESTNET_CONTRACTS.wbot.toLowerCase() as Hex,
-    tokenOutSymbol: 'WBOT',
+    tokenOutSymbol: 'BOT',
+    outputIsNative: true,
+    eventTokenOut: NATIVE_OUTPUT_EVENT_TOKEN,
     routerId: 0n,
-    safeFunctionName: 'swapV2Safe',
+    safeFunctionName: 'swapTokenToNativeSafe',
     safeFunctionSignature: VERIFIED_SWAP_SAFE_SIGNATURE,
     safeSelector: VERIFIED_SWAP_SAFE_SELECTOR,
   },
