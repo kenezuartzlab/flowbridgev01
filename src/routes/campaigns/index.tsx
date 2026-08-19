@@ -1,11 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Compass, Trophy, User2, Wallet2 } from "lucide-react";
+import { Compass, Search, Trophy, User2, Wallet2 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 import { CampaignCard } from "@/components/campaigns/CampaignCard";
 import { SkeletonCard } from "@/components/campaigns/CampaignBits";
-import { campaignMetrics, shortWallet } from "@/components/campaigns/campaignPresentation";
+import {
+  campaignChains,
+  campaignMetrics,
+  chainName,
+  shortWallet,
+} from "@/components/campaigns/campaignPresentation";
 
 export const Route = createFileRoute("/campaigns/")({
   head: () => ({
@@ -254,7 +259,7 @@ function CampaignsPage() {
         )}
 
 
-        {/* Grid */}
+        {/* All results */}
         {loading ? (
           <div className="grid gap-3 sm:grid-cols-2">
             <SkeletonCard />
