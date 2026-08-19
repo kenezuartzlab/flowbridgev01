@@ -286,7 +286,7 @@ function CampaignDetailPage() {
                     const reqs = taskRequirements(task);
                     const action = resolveCampaignTaskAction(task);
                     return (
-                      <li key={task.taskId}>
+                      <li key={task.taskId} id={`task-${task.taskId}`}>
                         <article
                           className={`fb-surface fb-fade-in p-3.5 ${
                             state === "completed" ? "ring-1 ring-success/35" : ""

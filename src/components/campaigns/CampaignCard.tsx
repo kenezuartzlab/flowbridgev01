@@ -7,6 +7,7 @@ import {
   chainName,
   formatDate,
 } from "./campaignPresentation";
+import { resolveCampaignTaskAction } from "@/lib/campaign/campaignAction";
 import { ChainChip, DeadlineNote, PointsChip, ProgressBar, StatusPill } from "./CampaignBits";
 
 export function CampaignCard({
@@ -21,6 +22,14 @@ export function CampaignCard({
   const m = campaignMetrics(campaign, progress);
   const { source, destination } = campaignChains(campaign);
   const complete = authenticated && m.isComplete;
+  /** V7: continuity — jump to the first actionable, incomplete task. */
+  const actionableTask = complete
+    ? undefined
+    : campaign.tasks.find(
+        (t) =>
+          !!resolveCampaignTaskAction(t) &&
+          !progress?.tasks.find((x) => x.taskId === t.taskId)?.completed,
+      );
 
   return (
     <article
@@ -91,6 +100,7 @@ export function CampaignCard({
       <Link
         to="/campaigns/$slug"
         params={{ slug: campaign.slug }}
+        hash={actionableTask ? `task-${actionableTask.taskId}` : undefined}
         className="relative mt-3.5 inline-flex min-h-[38px] w-fit items-center gap-1.5 rounded-full bg-primary px-4 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.99]"
       >
         {complete ? "View details" : authenticated && m.completedTasks > 0 ? "Continue" : "View campaign"}
