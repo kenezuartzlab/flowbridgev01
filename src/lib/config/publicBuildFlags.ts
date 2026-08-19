@@ -37,11 +37,14 @@ export function parsePublicBuildFlag(raw: unknown): boolean | undefined {
   return v === 'true' || v === '1';
 }
 
-const ENV_VALUES: Partial<Record<PublicBuildFlagName, unknown>> = {
-  // Referenced statically so Vite can inline the values at build time.
-  ENABLE_VERIFIED_SWAP_ACTIVITY: import.meta.env.VITE_ENABLE_VERIFIED_SWAP_ACTIVITY,
-  REQUIRE_ACTIVITY_ATTRIBUTION: import.meta.env.VITE_REQUIRE_ACTIVITY_ATTRIBUTION,
-};
+/** Static `import.meta.env` references so Vite inlines the values at build time. */
+function envValues(): Partial<Record<PublicBuildFlagName, unknown>> {
+  return {
+    ENABLE_VERIFIED_SWAP_ACTIVITY: import.meta.env.VITE_ENABLE_VERIFIED_SWAP_ACTIVITY,
+    REQUIRE_ACTIVITY_ATTRIBUTION: import.meta.env.VITE_REQUIRE_ACTIVITY_ATTRIBUTION,
+  };
+}
+
 
 export function readPublicBuildFlag(
   name: PublicBuildFlagName,
