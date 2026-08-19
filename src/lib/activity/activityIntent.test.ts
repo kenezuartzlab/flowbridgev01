@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ACTIVITY_INTENT_TYPES,
   activityIntentDomain,
@@ -27,7 +27,21 @@ const args = {
 };
 
 describe('Phase A1 Activity Intent scaffold', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('is disabled by default', () => {
+    // Isolate the deployment flag: default/off behavior must hold regardless
+    // of the workspace .env value. Restored by unstubAllEnvs above.
+    vi.stubEnv('VITE_ENABLE_ACTIVITY_INTENT', undefined as unknown as string);
+    expect(isActivityIntentEnabled()).toBe(false);
+  });
+
+  it('opts in only when the flag is explicitly enabled', () => {
+    vi.stubEnv('VITE_ENABLE_ACTIVITY_INTENT', 'true');
+    expect(isActivityIntentEnabled()).toBe(true);
+    vi.stubEnv('VITE_ENABLE_ACTIVITY_INTENT', 'false');
     expect(isActivityIntentEnabled()).toBe(false);
   });
 
