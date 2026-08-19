@@ -15,6 +15,10 @@ import {
   findOfficialTestnetRoute,
   officialSourceDecimals,
 } from '../bridge/officialBridgeConfig';
+import {
+  VERIFIED_SWAP_V1_ACTION_TYPE,
+  findVerifiedSwapPath,
+} from '../swap/verifiedSwapConfig';
 import type { CampaignApiCampaign, CampaignApiTask } from './campaignApi';
 import { CAMPAIGN_RULE_TYPES } from './campaignTypes';
 
@@ -220,4 +224,151 @@ export function parseCampaignActionSearchString(search: string): CampaignActionS
 
 export function isMainnetActionSearch(search: CampaignActionSearch): boolean {
   return findPair(search.source, search.destination)?.isMainnet ?? false;
+}
+
+/* ------------------------------ V8 verified swap ----------------------------- */
+
+export interface CampaignSwapAction {
+  kind: 'VERIFIED_SWAP';
+  chainId: number;
+  /** Configured token-in of the approved swap path (display + prefill only). */
+  tokenIn: string;
+  tokenLabel: string;
+  minAmountRaw?: string;
+  minAmountLabel?: string;
+}
+
+export interface CampaignSwapActionSearch {
+  mode: 'swap';
+  chain: number;
+  token: string;
+  campaign: string;
+  task: string;
+}
+
+export type CampaignTaskAnyAction = CampaignBridgeAction | CampaignSwapAction;
+
+/**
+ * Supported V8 swap pattern (all rules must be known types):
+ *   ACTIVITY_KIND(SWAP_EXECUTED)
+ * + SOURCE_CHAIN === DESTINATION_CHAIN matching an approved swap path
+ * + optional ACTION_TYPE (must be the verified swap action type)
+ * + optional TOKEN (must be the configured token-in) / MIN_AMOUNT / CAMPAIGN_ID
+ */
+export function resolveCampaignTaskSwapAction(task: CampaignApiTask): CampaignSwapAction | null {
+  const rules = Array.isArray(task.rules) ? (task.rules as Record<string, unknown>[]) : [];
+  if (rules.length === 0) return null;
+
+  let kindOk = false;
+  let source: number | undefined;
+  let destination: number | undefined;
+  let token: string | undefined;
+  let actionType: string | undefined;
+  let minAmountRaw: string | undefined;
+
+  for (const rule of rules) {
+    const type = typeof rule?.type === 'string' ? rule.type : '';
+    if (!(CAMPAIGN_RULE_TYPES as readonly string[]).includes(type)) return null;
+    switch (type) {
+      case 'ACTIVITY_KIND':
+        if (rule.kind !== 'SWAP_EXECUTED') return null;
+        kindOk = true;
+        break;
+      case 'SOURCE_CHAIN':
+        if (typeof rule.chainId !== 'number') return null;
+        source = rule.chainId;
+        break;
+      case 'DESTINATION_CHAIN':
+        if (typeof rule.chainId !== 'number') return null;
+        destination = rule.chainId;
+        break;
+      case 'ACTION_TYPE':
+        if (typeof rule.actionType !== 'string') return null;
+        actionType = rule.actionType;
+        break;
+      case 'TOKEN':
+        if (typeof rule.token !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(rule.token)) return null;
+        token = rule.token;
+        break;
+      case 'MIN_AMOUNT':
+        if (typeof rule.minAmountRaw !== 'string' || !/^\d+$/.test(rule.minAmountRaw)) return null;
+        minAmountRaw = rule.minAmountRaw;
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (!kindOk || source === undefined) return null;
+  if (destination !== undefined && destination !== source) return null;
+  if (actionType && actionType.toLowerCase() !== VERIFIED_SWAP_V1_ACTION_TYPE.toLowerCase()) {
+    return null;
+  }
+
+  const path = findVerifiedSwapPath(source, token);
+  if (!path) return null;
+
+  return {
+    kind: 'VERIFIED_SWAP',
+    chainId: path.chainId,
+    tokenIn: path.tokenIn,
+    tokenLabel: path.tokenInSymbol,
+    ...(minAmountRaw
+      ? {
+          minAmountRaw,
+          minAmountLabel: formatMinAmount(minAmountRaw, path.tokenInDecimals),
+        }
+      : {}),
+  };
+}
+
+/** Bridge first (unchanged), then the V8 verified swap path. */
+export function resolveCampaignTaskAnyAction(task: CampaignApiTask): CampaignTaskAnyAction | null {
+  return resolveCampaignTaskAction(task) ?? resolveCampaignTaskSwapAction(task);
+}
+
+export function campaignSwapActionLink(
+  campaign: Pick<CampaignApiCampaign, 'slug'>,
+  task: Pick<CampaignApiTask, 'taskId'>,
+  action: CampaignSwapAction,
+): CampaignSwapActionSearch {
+  return {
+    mode: 'swap',
+    chain: action.chainId,
+    token: action.tokenIn,
+    campaign: campaign.slug,
+    task: task.taskId,
+  };
+}
+
+/** Validate untrusted swap query state. Anything unexpected fails closed. */
+export function parseCampaignSwapActionSearch(raw: unknown): CampaignSwapActionSearch | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const q = raw as Record<string, unknown>;
+  if (q.mode !== 'swap') return null;
+  const chain = Number(q.chain);
+  if (!Number.isInteger(chain)) return null;
+  const token = typeof q.token === 'string' ? q.token : undefined;
+  const path = findVerifiedSwapPath(chain, token);
+  if (!path) return null;
+  if (!isSafeId(q.campaign) || !isSafeId(q.task)) return null;
+  return {
+    mode: 'swap',
+    chain: path.chainId,
+    token: path.tokenIn,
+    campaign: q.campaign,
+    task: q.task,
+  };
+}
+
+export function parseCampaignSwapActionSearchString(
+  search: string,
+): CampaignSwapActionSearch | null {
+  try {
+    const params = new URLSearchParams(search);
+    if (params.get('mode') !== 'swap') return null;
+    return parseCampaignSwapActionSearch(Object.fromEntries(params.entries()));
+  } catch {
+    return null;
+  }
 }

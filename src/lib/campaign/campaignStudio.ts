@@ -13,6 +13,7 @@ import {
   OFFICIAL_TESTNET_ROUTES,
 } from '../bridge/officialBridgeConfig';
 import { DIRECT_BRIDGE_ACTION_TYPE } from '../activity/activityVerifier';
+import { VERIFIED_SWAP_PATHS, VERIFIED_SWAP_V1_ACTION_TYPE } from '../swap/verifiedSwapConfig';
 
 export { CAMPAIGN_RULE_TYPES };
 
@@ -194,6 +195,38 @@ function bridgeTemplate(routeId: 'BNB_TO_BOT' | 'BOT_TO_BNB'): StudioCampaignInp
   };
 }
 
+function verifiedSwapTemplate(): StudioCampaignInput {
+  const path = VERIFIED_SWAP_PATHS[0]!;
+  const now = Date.now();
+  return {
+    slug: normalizeSlug(`verified-swap-${path.id}`),
+    name: 'Verified Swap — FlowBridgeRouter v3',
+    description:
+      'Swap USDT through FlowBridgeRouter v3. Progress is awarded only from server-verified on-chain swap activity.',
+    status: 'draft',
+    startsAt: now,
+    endsAt: now + 30 * DAY,
+    tasks: [
+      {
+        taskId: 'verified-swap',
+        title: `Swap ${path.tokenInSymbol} on ${path.label}`,
+        description: 'Complete one verified swap through the approved router path.',
+        points: 100,
+        requiredCount: 1,
+        completionLimitPerWallet: 1,
+        sortOrder: 0,
+        rules: [
+          { type: 'ACTIVITY_KIND', kind: 'SWAP_EXECUTED' },
+          { type: 'SOURCE_CHAIN', chainId: path.chainId },
+          { type: 'DESTINATION_CHAIN', chainId: path.chainId },
+          { type: 'ACTION_TYPE', actionType: VERIFIED_SWAP_V1_ACTION_TYPE },
+          { type: 'TOKEN', token: path.tokenIn },
+        ],
+      },
+    ],
+  };
+}
+
 export const STUDIO_TEMPLATES: StudioTemplate[] = [
   {
     id: 'bridge-bnb-bot',
@@ -206,6 +239,12 @@ export const STUDIO_TEMPLATES: StudioTemplate[] = [
     label: 'Verified Bridge — BOT Testnet → BNB Testnet',
     hint: 'Preselects BRIDGE_SUBMITTED, official route chains, action type and source token.',
     build: () => bridgeTemplate('BOT_TO_BNB'),
+  },
+  {
+    id: 'verified-swap',
+    label: 'Verified Swap — FlowBridgeRouter v3 (BOT Testnet)',
+    hint: 'Preselects SWAP_EXECUTED, the approved swap chain, action type and token-in.',
+    build: verifiedSwapTemplate,
   },
   {
     id: 'generic-activity',
@@ -245,11 +284,18 @@ export const STUDIO_CHAIN_OPTIONS = [
   { id: OFFICIAL_CHAIN_IDS.botMainnet, label: 'BOT Chain (1024)' },
 ];
 
-export const STUDIO_TOKEN_OPTIONS = OFFICIAL_TESTNET_ROUTES.map((r) => ({
-  address: r.sourceToken,
-  label: `USDT · ${r.id === 'BNB_TO_BOT' ? 'BNB Testnet' : 'BOT Testnet'}`,
-}));
+export const STUDIO_TOKEN_OPTIONS = [
+  ...OFFICIAL_TESTNET_ROUTES.map((r) => ({
+    address: r.sourceToken,
+    label: `USDT · ${r.id === 'BNB_TO_BOT' ? 'BNB Testnet' : 'BOT Testnet'}`,
+  })),
+  ...VERIFIED_SWAP_PATHS.map((p) => ({
+    address: p.tokenIn,
+    label: `${p.tokenInSymbol} swap token-in · ${p.label}`,
+  })),
+];
 
 export const STUDIO_ACTION_TYPES = [
   { value: DIRECT_BRIDGE_ACTION_TYPE, label: 'Direct official bridge' },
+  { value: VERIFIED_SWAP_V1_ACTION_TYPE, label: 'Verified swap (FlowBridgeRouter v3)' },
 ];

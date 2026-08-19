@@ -7,7 +7,7 @@ import {
   chainName,
   formatDate,
 } from "./campaignPresentation";
-import { resolveCampaignTaskAction } from "@/lib/campaign/campaignAction";
+import { resolveCampaignTaskAnyAction } from "@/lib/campaign/campaignAction";
 import { ChainChip, DeadlineNote, PointsChip, ProgressBar, StatusPill } from "./CampaignBits";
 
 export function CampaignCard({
@@ -27,7 +27,7 @@ export function CampaignCard({
     ? undefined
     : campaign.tasks.find(
         (t) =>
-          !!resolveCampaignTaskAction(t) &&
+          !!resolveCampaignTaskAnyAction(t) &&
           !progress?.tasks.find((x) => x.taskId === t.taskId)?.completed,
       );
 

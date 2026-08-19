@@ -857,6 +857,7 @@ function RuleValue({
       >
         <option value="BRIDGE_SUBMITTED">BRIDGE_SUBMITTED</option>
         <option value="BRIDGE_COMPLETED">BRIDGE_COMPLETED</option>
+        <option value="SWAP_EXECUTED">SWAP_EXECUTED</option>
       </select>
     );
   }

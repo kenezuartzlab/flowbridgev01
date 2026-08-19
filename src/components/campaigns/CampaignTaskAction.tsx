@@ -8,7 +8,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Route as RouteIcon, ShieldCheck } from "lucide-react";
 import {
   campaignActionLink,
-  type CampaignBridgeAction,
+  campaignSwapActionLink,
+  type CampaignTaskAnyAction,
 } from "@/lib/campaign/campaignAction";
 import type { CampaignApiCampaign, CampaignApiTask } from "@/lib/campaign/campaignApi";
 
@@ -22,7 +23,7 @@ export function CampaignTaskAction({
 }: {
   campaign: CampaignApiCampaign;
   task: CampaignApiTask;
-  action: CampaignBridgeAction | null;
+  action: CampaignTaskAnyAction | null;
   completed: boolean;
   started: boolean;
   verifying?: boolean;
@@ -61,11 +62,21 @@ export function CampaignTaskAction({
       )}
       <Link
         to="/"
-        search={campaignActionLink(campaign, task, action)}
+        search={
+          action.kind === "VERIFIED_SWAP"
+            ? campaignSwapActionLink(campaign, task, action)
+            : campaignActionLink(campaign, task, action)
+        }
         className="inline-flex min-h-[34px] items-center gap-1.5 rounded-full bg-primary px-3.5 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-primary-foreground transition-transform motion-safe:hover:scale-[1.02]"
       >
         <RouteIcon className="h-3 w-3" aria-hidden />
-        {started ? "Continue bridge" : "Start bridge"}
+        {action.kind === "VERIFIED_SWAP"
+          ? started
+            ? "Continue swap"
+            : "Start swap"
+          : started
+            ? "Continue bridge"
+            : "Start bridge"}
       </Link>
     </div>
   );
@@ -78,14 +89,20 @@ export function CampaignTaskActionSummary({
   completions,
   limit,
 }: {
-  action: CampaignBridgeAction | null;
+  action: CampaignTaskAnyAction | null;
   task: CampaignApiTask;
   completions: number;
   limit: number;
 }) {
   const bits: string[] = [];
   if (action) {
-    bits.push(action.direction === "BNB_TO_BOT" ? "BNB → BOT" : "BOT → BNB");
+    bits.push(
+      action.kind === "VERIFIED_SWAP"
+        ? "Verified swap"
+        : action.direction === "BNB_TO_BOT"
+          ? "BNB → BOT"
+          : "BOT → BNB",
+    );
     if (action.tokenLabel) bits.push(action.tokenLabel);
     if (action.minAmountLabel) bits.push(`min ${action.minAmountLabel}`);
   }

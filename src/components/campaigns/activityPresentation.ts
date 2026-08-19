@@ -27,6 +27,8 @@ export function activityKindLabel(kind: string): string {
       return "Bridge submitted";
     case "BRIDGE_COMPLETED":
       return "Bridge completed";
+    case "SWAP_EXECUTED":
+      return "Swap executed";
     default:
       return kind.replace(/_/g, " ").toLowerCase();
   }

@@ -41,10 +41,13 @@ import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
 import { CampaignTaskContextBanner } from './components/app/CampaignTaskContextBanner';
+import { SwapCampaignTaskBanner } from './components/app/SwapCampaignTaskBanner';
 import {
   isMainnetActionSearch,
   parseCampaignActionSearchString,
+  parseCampaignSwapActionSearchString,
   type CampaignActionSearch,
+  type CampaignSwapActionSearch,
 } from './lib/campaign/campaignAction';
 import { saveCampaignActionReturn } from './lib/campaign/campaignReturn';
 import { useAdapterPreview } from './lib/bridge/useAdapterPreview';
@@ -494,6 +497,21 @@ export default function App() {
     setActiveTab('BRIDGE');
     setBridgeDirection(ctx.direction);
     setIsMainnet(isMainnetActionSearch(ctx));
+  }, []);
+
+  /**
+   * V8: a validated verified-swap deep link may preselect the swap workspace.
+   * Presentation only — it never changes router addresses, amounts, signing,
+   * write ordering, verification or settlement, and never auto-submits.
+   */
+  const [campaignSwapCtx, setCampaignSwapCtx] = useState<CampaignSwapActionSearch | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const ctx = parseCampaignSwapActionSearchString(window.location.search);
+    if (!ctx) return;
+    setCampaignSwapCtx(ctx);
+    setActiveTab('BOT/USDT');
+    saveCampaignActionReturn({ campaignSlug: ctx.campaign, taskId: ctx.task });
   }, []);
 
   // Safe return breadcrumbs only (slug/task/known source tx hash). Never used
@@ -2862,6 +2880,10 @@ export default function App() {
               onReset={resetStep1}
               livePrice={getLiveBotPrice()}
             />
+          )}
+
+          {activeTab === 'BOT/USDT' && campaignSwapCtx && (
+            <SwapCampaignTaskBanner ctx={campaignSwapCtx} currentChainId={currentChainId ?? null} />
           )}
 
           {activeTab === 'BOT/USDT' && (

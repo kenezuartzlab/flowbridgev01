@@ -63,6 +63,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
+import { Route as ApiPublicActivityVerifySwapRouteImport } from './routes/api/public/activity.verify-swap'
 import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public/activity.verify'
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 import { Route as ApiCampaignsAdminIdRouteImport } from './routes/api/campaigns.admin.$id'
@@ -343,6 +344,12 @@ const ApiPublicSiweNonceRoute = ApiPublicSiweNonceRouteImport.update({
   path: '/api/public/siwe/nonce',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicActivityVerifySwapRoute =
+  ApiPublicActivityVerifySwapRouteImport.update({
+    id: '/api/public/activity/verify-swap',
+    path: '/api/public/activity/verify-swap',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicActivityVerifyRoute = ApiPublicActivityVerifyRouteImport.update({
   id: '/api/public/activity/verify',
   path: '/api/public/activity/verify',
@@ -424,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
+  '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -485,6 +493,7 @@ export interface FileRoutesByTo {
   '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
+  '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -547,6 +556,7 @@ export interface FileRoutesById {
   '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
+  '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -610,6 +620,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
+    | '/api/public/activity/verify-swap'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -671,6 +682,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
+    | '/api/public/activity/verify-swap'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -732,6 +744,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/admin/$id'
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
+    | '/api/public/activity/verify-swap'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/lovable/email/auth/preview'
@@ -788,6 +801,7 @@ export interface RootRouteChildren {
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
   CampaignsAnalyticsIdRoute: typeof CampaignsAnalyticsIdRoute
   ApiPublicActivityVerifyRoute: typeof ApiPublicActivityVerifyRoute
+  ApiPublicActivityVerifySwapRoute: typeof ApiPublicActivityVerifySwapRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
   ApiPublicSiweVerifyRoute: typeof ApiPublicSiweVerifyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -1175,6 +1189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSiweNonceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/activity/verify-swap': {
+      id: '/api/public/activity/verify-swap'
+      path: '/api/public/activity/verify-swap'
+      fullPath: '/api/public/activity/verify-swap'
+      preLoaderRoute: typeof ApiPublicActivityVerifySwapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/activity/verify': {
       id: '/api/public/activity/verify'
       path: '/api/public/activity/verify'
@@ -1314,6 +1335,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersSyncRoute: ApiUsersSyncRoute,
   CampaignsAnalyticsIdRoute: CampaignsAnalyticsIdRoute,
   ApiPublicActivityVerifyRoute: ApiPublicActivityVerifyRoute,
+  ApiPublicActivityVerifySwapRoute: ApiPublicActivityVerifySwapRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,
   ApiPublicSiweVerifyRoute: ApiPublicSiweVerifyRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

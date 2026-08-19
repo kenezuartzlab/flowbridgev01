@@ -29,7 +29,7 @@ import {
   CampaignTaskAction,
   CampaignTaskActionSummary,
 } from "@/components/campaigns/CampaignTaskAction";
-import { resolveCampaignTaskAction } from "@/lib/campaign/campaignAction";
+import { resolveCampaignTaskAnyAction } from "@/lib/campaign/campaignAction";
 import {
   clearCampaignActionReturn,
   readCampaignActionReturn,
@@ -284,7 +284,7 @@ function CampaignDetailPage() {
                     const limit = Math.max(1, task.completionLimitPerWallet);
                     const pct = Math.min(1, (tp?.completions ?? 0) / limit);
                     const reqs = taskRequirements(task);
-                    const action = resolveCampaignTaskAction(task);
+                    const action = resolveCampaignTaskAnyAction(task);
                     return (
                       <li key={task.taskId} id={`task-${task.taskId}`}>
                         <article

@@ -25,7 +25,11 @@ export function parseCampaignRule(raw: unknown): CampaignRule {
   const r = raw as Record<string, unknown>;
   switch (r.type) {
     case 'ACTIVITY_KIND':
-      if (r.kind !== 'BRIDGE_SUBMITTED' && r.kind !== 'BRIDGE_COMPLETED') {
+      if (
+        r.kind !== 'BRIDGE_SUBMITTED' &&
+        r.kind !== 'BRIDGE_COMPLETED' &&
+        r.kind !== 'SWAP_EXECUTED'
+      ) {
         throw new CampaignRuleError('ACTIVITY_KIND.kind is invalid');
       }
       return { type: 'ACTIVITY_KIND', kind: r.kind };
