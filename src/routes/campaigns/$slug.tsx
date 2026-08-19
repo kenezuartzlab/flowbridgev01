@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Compass,
   Route as RouteIcon,
+  RefreshCw,
   Share2,
   ShieldCheck,
   Trophy,
@@ -25,6 +26,16 @@ import {
   fetchCampaignMetrics,
   type PublicCampaignMetrics,
 } from "@/lib/campaign/campaignMetricsApi";
+import {
+  CampaignTaskAction,
+  CampaignTaskActionSummary,
+} from "@/components/campaigns/CampaignTaskAction";
+import { resolveCampaignTaskAction } from "@/lib/campaign/campaignAction";
+import {
+  clearCampaignActionReturn,
+  readCampaignActionReturn,
+  type CampaignActionReturn,
+} from "@/lib/campaign/campaignReturn";
 import {
   ChainChip,
   MetricStat,
@@ -59,7 +70,7 @@ export const Route = createFileRoute("/campaigns/$slug")({
 
 function CampaignDetailPage() {
   const { slug } = Route.useParams();
-  const { loading, error, campaigns, authenticated, wallet, progressFor } =
+  const { loading, error, campaigns, authenticated, wallet, progressFor, refresh } =
     useCampaignProgress();
 
   const campaign = useMemo(
@@ -72,6 +83,46 @@ function CampaignDetailPage() {
   const complete = authenticated && !!metrics?.isComplete;
   const [publicMetrics, setPublicMetrics] = useState<PublicCampaignMetrics | null>(null);
   const [shared, setShared] = useState(false);
+
+  /**
+   * V7 — transient, local "verifying" affordance for a task that was just
+   * executed from this campaign. It is read-only: bounded refetching of the
+   * existing campaign progress API. Nothing here writes, settles or awards.
+   */
+  const [pending, setPending] = useState<CampaignActionReturn | null>(null);
+  const [pollsLeft, setPollsLeft] = useState(0);
+  const [timedOut, setTimedOut] = useState(false);
+
+  useEffect(() => {
+    const entry = readCampaignActionReturn();
+    if (entry && entry.campaignSlug === slug && entry.txHash) {
+      setPending(entry);
+      setPollsLeft(5);
+    }
+  }, [slug]);
+
+  const pendingTaskComplete = !!(
+    pending && progress?.tasks.find((t) => t.taskId === pending.taskId)?.completed
+  );
+
+  useEffect(() => {
+    if (!pending || pollsLeft <= 0 || error) return;
+    if (pendingTaskComplete) {
+      setPollsLeft(0);
+      clearCampaignActionReturn();
+      setPending(null);
+      return;
+    }
+    const id = setTimeout(() => {
+      setPollsLeft((n) => {
+        const next = n - 1;
+        if (next <= 0) setTimedOut(true);
+        return next;
+      });
+      void refresh();
+    }, 6000);
+    return () => clearTimeout(id);
+  }, [pending, pollsLeft, error, pendingTaskComplete, refresh]);
 
   useEffect(() => {
     let alive = true;
@@ -204,7 +255,28 @@ function CampaignDetailPage() {
 
               {/* Tasks */}
               <section className="space-y-2.5">
-                <p className="fb-eyebrow px-1">Tasks</p>
+                <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                  <p className="fb-eyebrow">Tasks</p>
+                  {authenticated && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTimedOut(false);
+                        void refresh();
+                      }}
+                      className="inline-flex min-h-[30px] items-center gap-1.5 rounded-xl border border-hairline px-2.5 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+                    >
+                      <RefreshCw className="h-3 w-3" aria-hidden /> Refresh status
+                    </button>
+                  )}
+                </div>
+                {pending && !pendingTaskComplete && (
+                  <p className="fb-inset px-3 py-2 font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.06em] text-muted">
+                    {timedOut
+                      ? "Still verifying — refresh later. Final Campaign PTS depend on server verification."
+                      : "Verifying your recent bridge — final Campaign PTS depend on server verification."}
+                  </p>
+                )}
                 <ul className="space-y-2.5">
                   {campaign.tasks.map((task) => {
                     const state = taskState(task, progress, authenticated);
@@ -213,6 +285,7 @@ function CampaignDetailPage() {
                     const limit = Math.max(1, task.completionLimitPerWallet);
                     const pct = Math.min(1, (tp?.completions ?? 0) / limit);
                     const reqs = taskRequirements(task);
+                    const action = resolveCampaignTaskAction(task);
                     return (
                       <li key={task.taskId}>
                         <article
@@ -262,26 +335,36 @@ function CampaignDetailPage() {
                               label={`${task.title} progress`}
                             />
                             <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
-                              <p className="font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
-                                {authenticated
-                                  ? `${tp?.completions ?? 0} / ${limit} completed · ${(
-                                      tp?.campaignPoints ?? 0
-                                    ).toLocaleString("en-US")} PTS earned`
-                                  : "Sign in to track this task"}
-                              </p>
-                              {state === "completed" ? (
-                                <span className="inline-flex items-center gap-1.5 font-mono text-[9.5px] font-black uppercase tracking-[0.08em] text-success">
-                                  <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-                                  Verified on source chain
-                                </span>
+                              {authenticated ? (
+                                <div className="min-w-0 space-y-1">
+                                  <CampaignTaskActionSummary
+                                    action={action}
+                                    task={task}
+                                    completions={tp?.completions ?? 0}
+                                    limit={limit}
+                                  />
+                                  <p className="font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+                                    {(tp?.campaignPoints ?? 0).toLocaleString("en-US")} PTS earned
+                                  </p>
+                                </div>
                               ) : (
-                                <Link
-                                  to="/"
-                                  className="inline-flex min-h-[34px] items-center gap-1.5 rounded-full bg-primary px-3.5 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-primary-foreground transition-transform hover:scale-[1.02]"
-                                >
-                                  <RouteIcon className="h-3 w-3" aria-hidden /> Start bridging
-                                </Link>
+                                <p className="font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
+                                  Sign in to track this task
+                                </p>
                               )}
+                              <CampaignTaskAction
+                                campaign={campaign}
+                                task={task}
+                                action={action}
+                                completed={state === "completed"}
+                                started={(tp?.completions ?? 0) > 0}
+                                verifying={
+                                  !!pending &&
+                                  pending.taskId === task.taskId &&
+                                  state !== "completed" &&
+                                  pollsLeft > 0
+                                }
+                              />
                             </div>
                           </div>
                         </article>
