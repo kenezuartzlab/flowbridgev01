@@ -40,6 +40,13 @@ import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
+import { CampaignTaskContextBanner } from './components/app/CampaignTaskContextBanner';
+import {
+  isMainnetActionSearch,
+  parseCampaignActionSearchString,
+  type CampaignActionSearch,
+} from './lib/campaign/campaignAction';
+import { saveCampaignActionReturn } from './lib/campaign/campaignReturn';
 import { useAdapterPreview } from './lib/bridge/useAdapterPreview';
 import { resolveBridgeDispatch } from './lib/bridge/directDispatch';
 import { captureActivityIntent, isActivityIntentEnabled } from './lib/activity/activityIntent';
@@ -2980,8 +2987,20 @@ export default function App() {
           )}
 
 
+          {/* V7: campaign task context (presentation only, never authoritative). */}
+          {activeTab === 'BRIDGE' && campaignActionCtx && (
+            <CampaignTaskContextBanner
+              ctx={campaignActionCtx}
+              currentDirection={bridgeDirection}
+              txHash={
+                session.pendingAdapterBridge?.tx_hash ??
+                (session.step3.status === 'submitted' ? session.step3.tx_hash : undefined)
+              }
+            />
+          )}
+
           {/* V6: non-authoritative campaign route hint (presentation only). */}
-          {activeTab === 'BRIDGE' && (
+          {activeTab === 'BRIDGE' && !campaignActionCtx && (
             <BridgeCampaignHint direction={bridgeDirection} isMainnet={isMainnet} />
           )}
 
