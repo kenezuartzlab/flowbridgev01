@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { VERIFIED_SWAP_PATHS, VERIFIED_SWAP_V1_ACTION_TYPE } from '../swap/verifiedSwapConfig';
+import {
+  campaignSwapActionLink,
+  parseCampaignSwapActionSearchString,
+  resolveCampaignTaskSwapAction, describe, expect, it } from 'vitest';
 import {
   campaignActionLink,
   parseCampaignActionSearch,
@@ -172,5 +176,57 @@ describe('campaign action deep links', () => {
 
   it('returns null for a non-campaign search string', () => {
     expect(parseCampaignActionSearchString('?foo=bar')).toBeNull();
+  });
+});
+
+describe('V8 verified swap deep link', () => {
+  const path = VERIFIED_SWAP_PATHS[0]!;
+  const swapTask = {
+    taskId: 'verified-swap',
+    title: 'Swap',
+    points: 100,
+    requiredCount: 1,
+    completionLimitPerWallet: 1,
+    rules: [
+      { type: 'ACTIVITY_KIND', kind: 'SWAP_EXECUTED' },
+      { type: 'SOURCE_CHAIN', chainId: path.chainId },
+      { type: 'DESTINATION_CHAIN', chainId: path.chainId },
+      { type: 'ACTION_TYPE', actionType: VERIFIED_SWAP_V1_ACTION_TYPE },
+      { type: 'TOKEN', token: path.tokenIn },
+    ],
+  } as any;
+
+  it('resolves a supported swap task', () => {
+    const action = resolveCampaignTaskSwapAction(swapTask);
+    expect(action?.kind).toBe('VERIFIED_SWAP');
+    expect(action?.chainId).toBe(path.chainId);
+  });
+
+  it('fails closed on an unapproved chain', () => {
+    const action = resolveCampaignTaskSwapAction({
+      ...swapTask,
+      rules: [
+        { type: 'ACTIVITY_KIND', kind: 'SWAP_EXECUTED' },
+        { type: 'SOURCE_CHAIN', chainId: 12345 },
+      ],
+    });
+    expect(action).toBeNull();
+  });
+
+  it('round-trips a validated swap link', () => {
+    const action = resolveCampaignTaskSwapAction(swapTask)!;
+    const link = campaignSwapActionLink({ slug: 'demo' } as any, swapTask, action);
+    const params = new URLSearchParams(
+      Object.entries(link).map(([k, v]) => [k, String(v)]),
+    ).toString();
+    expect(parseCampaignSwapActionSearchString(`?${params}`)).toEqual(link);
+  });
+
+  it('rejects an unknown swap token', () => {
+    expect(
+      parseCampaignSwapActionSearchString(
+        `?mode=swap&chain=${path.chainId}&token=0x2222222222222222222222222222222222222222&campaign=demo&task=t`,
+      ),
+    ).toBeNull();
   });
 });
