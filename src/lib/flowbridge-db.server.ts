@@ -51,7 +51,8 @@ async function verifySwapReceipt(txHash: string | null, walletAddress: string) {
   const candidates = [
     {
       rpcUrl: BOT_MAINNET_RPC,
-      // Canonical execution target for BOT Mainnet (registry-resolved).
+      // LEGACY v3 mainnet read only. This is explicitly NOT Router V4 evidence
+      // and is never reinterpreted as V4 verified-swap data.
       router: requireFlowBridgeExecution(BOT_MAINNET_CHAIN_ID).router,
     },
   ];
