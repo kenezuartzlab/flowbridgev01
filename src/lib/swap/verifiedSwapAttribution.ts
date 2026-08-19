@@ -75,21 +75,26 @@ function randomIntentId(): Hex {
 }
 
 /**
- * True only for the single approved verified-swap route: correct chain, single
- * ERC-20 step, approved routerId and approved token-in -> token-out endpoints.
+ * V8.3 — true only for the single approved verified-swap route: correct chain,
+ * one single-step ERC-20 token-in leg with NATIVE user-facing output (which
+ * resolves to Router V4 `swapTokenToNativeSafe`), the approved routerId, the
+ * approved token-in and a V2 path terminating at the trusted wrapped native.
+ * A token-to-token USDT -> WBOT route never qualifies here.
  */
 export function resolveQualifyingVerifiedSwap(input: VerifiedSwapAttributionInput) {
   const chainId = input.chainId;
   const step = input.steps[0];
   if (!chainId || input.steps.length !== 1 || !step) return null;
-  if (step.inIsNative || step.outIsNative) return null;
+  if (step.inIsNative) return null;
   const tokenIn = step.path[0];
-  const tokenOut = step.path[step.path.length - 1];
-  if (!tokenIn || !tokenOut) return null;
+  const pathEnd = step.path[step.path.length - 1];
+  if (!tokenIn || !pathEnd) return null;
   const path = findVerifiedSwapPath(chainId, tokenIn);
   if (!path) return null;
+  // Native user-facing output is mandatory for the approved V8.3 path.
+  if (path.outputIsNative !== step.outIsNative) return null;
   if (BigInt(step.routerId) !== path.routerId) return null;
-  if (tokenOut.toLowerCase() !== path.tokenOut.toLowerCase()) return null;
+  if (pathEnd.toLowerCase() !== path.tokenOut.toLowerCase()) return null;
   return path;
 }
 
