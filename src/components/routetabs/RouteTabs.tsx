@@ -41,6 +41,11 @@ export function RouteTabs({ activeTab, onTabChange }: RouteTabsProps) {
           );
         })}
       </nav>
+      <p className="mt-2 px-1 text-center font-mono text-[9px] uppercase tracking-[0.1em] text-muted">
+        {activeTab === 'BRIDGE'
+          ? 'Bridge mode · direct official route'
+          : 'Swap mode · on-chain routing'}
+      </p>
     </div>
   );
 }
