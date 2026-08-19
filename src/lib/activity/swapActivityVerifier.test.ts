@@ -21,7 +21,7 @@ const OTHER = '0x2222222222222222222222222222222222222222' as Hex;
 const TX = ('0x' + 'cd'.repeat(32)) as Hex;
 const AMOUNT = 12_500000n;
 const MAX_FEE = 12_500n;
-const DEADLINE = 1_700_000_000n + 1200n;
+const DEADLINE = 1_700_000_000n + 300n;
 
 function activityLog(
   over: Partial<{
