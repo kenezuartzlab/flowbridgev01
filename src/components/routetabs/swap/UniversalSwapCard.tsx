@@ -468,7 +468,125 @@ export function UniversalSwapCard({
       let nextAmount = initialAmount;
       let activeQuote = latestQuote;
       let finalExpectedOut = latestQuote.amountOut;
-      let finalToAmountDisplay = formatUnits(finalExpectedOut, tokenOut.decimals);
+
+      // ============================================================
+      // V8 (attribution, OFF by default): sign + persist a FRESH EIP-712
+      // FlowBridgeActivityIntent for the ONE approved verified-swap path
+      // (single-step, ERC-20 token-in), immediately before the swap write.
+      // Attribution evidence only: authorizes no calldata, moves no funds,
+      // grants zero XP/PTS/FLOW and never writes the Activity Registry.
+      // ============================================================
+      let swapAttribution:
+        | { intent: any; signature: `0x${string}`; intentHash: `0x${string}` }
+        | null = null;
+
+      const captureSwapAttribution = async () => {
+        const { isVerifiedSwapActivityEnabled, findVerifiedSwapPath, VERIFIED_SWAP_V1_ACTION_TYPE } =
+          await import("@/lib/swap/verifiedSwapConfig");
+        if (!isVerifiedSwapActivityEnabled()) return;
+        const chainId = publicClient.chain?.id;
+        const firstStep = latestQuote.steps[0];
+        if (!chainId || latestQuote.steps.length !== 1 || !firstStep || firstStep.inIsNative) return;
+        const path = findVerifiedSwapPath(chainId, firstStep.path[0]);
+        if (!path) return;
+
+        // Canonical Transfer value is swap amount + on-chain protocol fee.
+        let fee = 0n;
+        try {
+          const res = (await publicClient.readContract({
+            address: flowRouter,
+            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+            functionName: "computeRouterFee",
+            args: [BigInt(firstStep.routerId), initialAmount, address as `0x${string}`],
+          })) as readonly [bigint, bigint];
+          fee = res[0] ?? 0n;
+        } catch {
+          fee = 0n;
+        }
+
+        const { captureActivityIntent } = await import("@/lib/activity/activityIntent");
+        const { activityIntentHash } = await import("@/lib/activity/activityCanonicalKey");
+        const { persistSignedAttribution, isAttributionRequired } = await import(
+          "@/lib/activity/activityHandoff"
+        );
+
+        const attribution = await captureActivityIntent(
+          {
+            attributionEnabled: true,
+            signTypedData: async (payload) => {
+              const eth = (window as any).ethereum;
+              if (!eth?.request) throw new Error("No typed-data signer available");
+              const json = JSON.stringify(
+                {
+                  domain: payload.domain,
+                  types: {
+                    EIP712Domain: [
+                      { name: "name", type: "string" },
+                      { name: "version", type: "string" },
+                      { name: "chainId", type: "uint256" },
+                    ],
+                    ...payload.types,
+                  },
+                  primaryType: payload.primaryType,
+                  message: payload.message,
+                },
+                (_k, v) => (typeof v === "bigint" ? v.toString() : v),
+              );
+              return await eth.request({
+                method: "eth_signTypedData_v4",
+                params: [address, json],
+              });
+            },
+          },
+          {
+            intentId: `0x${crypto.randomUUID().replace(/-/g, "").padEnd(64, "0")}` as `0x${string}`,
+            user: address as string,
+            actionType: VERIFIED_SWAP_V1_ACTION_TYPE,
+            sourceChainId: path.chainId,
+            destinationChainId: path.chainId,
+            token: path.tokenIn,
+            amount: initialAmount + fee,
+            recipient: address as string,
+            nonce: BigInt(Date.now()),
+            nowSeconds: Math.floor(Date.now() / 1000),
+          },
+        );
+
+        if (attribution.status !== "signed") {
+          if (isAttributionRequired()) {
+            throw new Error("Attribution is required but could not be captured. Swap not sent.");
+          }
+          return;
+        }
+        const evidence = {
+          intent: attribution.intent,
+          signature: attribution.signature,
+          intentHash: activityIntentHash(attribution.intent),
+        };
+        if (!persistSignedAttribution(evidence)) {
+          if (isAttributionRequired()) {
+            throw new Error("Attribution evidence could not be stored. Swap not sent.");
+          }
+          return;
+        }
+        swapAttribution = evidence;
+      };
+
+      // Fire-and-forget handoff of signed evidence only. A failed handoff never
+      // resends or reverses the swap transaction.
+      const handoffSwapAttribution = (sourceTxHash: `0x${string}`) => {
+        const evidence = swapAttribution;
+        if (!evidence) return;
+        swapAttribution = null;
+        void import("@/lib/activity/activityHandoff")
+          .then(({ submitSwapActivityVerification }) =>
+            submitSwapActivityVerification(evidence, sourceTxHash),
+          )
+          .catch(() => {});
+      };
+
+      await captureSwapAttribution();
+
 
       for (let i = 0; i < activeQuote.steps.length; i++) {
         let step = activeQuote.steps[i];
