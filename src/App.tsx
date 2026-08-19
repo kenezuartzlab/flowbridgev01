@@ -19,6 +19,8 @@ import {
   TRON_EXPLORER_TX_PREFIX, getTronStatus, subscribeTronLink, waitForTronWeb,
   type TronStatus,
 } from './lib/tronBridge';
+import { FLOW_BRIDGE_ROUTER_V4_ABI } from './lib/flowbridge/routerV4Abi';
+import { resolveFlowBridgeExecutionForNetwork } from './lib/flowbridge/executionRegistry';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
 import { maxSwappableDisplay, totalRouterDebit } from './lib/swap/platformFee';
 import type { BridgeDeps } from './lib/bridge/evmBridge';
@@ -629,6 +631,11 @@ export default function App() {
 
   // Load contract registry
   const contracts = getContracts(isMainnet);
+  // Canonical FlowBridge swap execution target for the active BOT chain.
+  const flowExecution = resolveFlowBridgeExecutionForNetwork(isMainnet);
+  const flowExecutionAbi = flowExecution.routerVersion === 'v4'
+    ? FLOW_BRIDGE_ROUTER_V4_ABI
+    : FLOW_BRIDGE_ROUTER_V3_ABI;
 
   // Standard Wagmi Write Hooks
   const { writeContractAsync } = useWriteContract();
@@ -721,7 +728,7 @@ export default function App() {
     address: contracts.caToken as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'allowance',
-    args: address ? [address as `0x${string}`, contracts.flowBridgeRouterV3 as `0x${string}`] : undefined,
+    args: address ? [address as `0x${string}`, flowExecution.router] : undefined,
     chainId: currentBotChainId,
     query: { enabled: !!address && !isDemoMode }
   });
@@ -748,7 +755,7 @@ export default function App() {
     address: contracts.usdtBot as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'allowance',
-    args: address ? [address as `0x${string}`, contracts.flowBridgeRouterV3 as `0x${string}`] : undefined,
+    args: address ? [address as `0x${string}`, flowExecution.router] : undefined,
     chainId: currentBotChainId,
     query: { enabled: !!address && !isDemoMode }
   });
@@ -1394,7 +1401,7 @@ export default function App() {
       try {
         setIsActionLoading(true);
         const parsedAmount = parseUnits(caAmount, 18);
-        const flowRouter = contracts.flowBridgeRouterV3 as `0x${string}`;
+        const flowRouter = flowExecution.router;
         const caWbot = contracts.caWbot as `0x${string}`;
         const caToken = contracts.caToken as `0x${string}`;
         const routerId = 3n; // CaSwap V2 registry ID
@@ -1403,18 +1410,22 @@ export default function App() {
 
         // Read on-chain protocol fee so we approve / send the exact totalIn.
         let fee = 0n;
+        let feeKnown = false;
         try {
           if (botPublicClient) {
             const res = (await botPublicClient.readContract({
               address: flowRouter,
-              abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+              abi: flowExecutionAbi,
               functionName: 'computeRouterFee',
               args: [routerId, parsedAmount, to],
             })) as readonly [bigint, bigint];
             fee = res[0] ?? 0n;
+            feeKnown = true;
           }
         } catch { fee = 0n; }
         const totalIn = parsedAmount + fee;
+        // V4 hardened calls bound the protocol fee; only usable with an exact fee.
+        const useSafeSwap = flowExecution.supportsSafeSwaps && feeKnown;
 
         let heldBalance = caToBotDirection === 'CA_TO_BOT'
           ? (rawCaBalance ? BigInt(rawCaBalance.toString()) : 0n)
@@ -1460,13 +1471,15 @@ export default function App() {
             refetchCaAllowance();
           }
 
-          // 2. Swap CA → native BOT via FlowBridgeRouter v3.
+          // 2. Swap CA → native BOT via the canonical FlowBridge router.
           setActionStep('swapping_ca');
           const txSwap = await writeContractAsync({
             address: flowRouter,
-            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-            functionName: 'swapTokenToNative',
-            args: [routerId, caToken, 0, parsedAmount, 0n, [caToken, caWbot], to, deadline],
+            abi: flowExecutionAbi,
+            functionName: useSafeSwap ? 'swapTokenToNativeSafe' : 'swapTokenToNative',
+            args: useSafeSwap
+              ? [routerId, caToken, 0, parsedAmount, 0n, [caToken, caWbot], to, deadline, fee]
+              : [routerId, caToken, 0, parsedAmount, 0n, [caToken, caWbot], to, deadline],
             chainId: targetChainIdForTab(),
             gas: 350000n,
           } as any);
@@ -1479,13 +1492,15 @@ export default function App() {
           });
           logTransactionToDb('SWAP', caToBotDirection, caAmount, botAmount || '0', txSwap, 'SUCCESS');
         } else {
-          // Swap native BOT → CA via FlowBridgeRouter v3. value = amountIn + fee.
+          // Swap native BOT → CA via the canonical FlowBridge router. value = amountIn + fee.
           setActionStep('swapping_ca');
           const txSwap = await writeContractAsync({
             address: flowRouter,
-            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
-            functionName: 'swapNativeToToken',
-            args: [routerId, caToken, 0, 0n, [caWbot, caToken], to, deadline],
+            abi: flowExecutionAbi,
+            functionName: useSafeSwap ? 'swapNativeToTokenSafe' : 'swapNativeToToken',
+            args: useSafeSwap
+              ? [routerId, parsedAmount, caToken, 0, 0n, [caWbot, caToken], to, deadline, fee]
+              : [routerId, caToken, 0, 0n, [caWbot, caToken], to, deadline],
             value: totalIn,
             chainId: targetChainIdForTab(),
             gas: 350000n,

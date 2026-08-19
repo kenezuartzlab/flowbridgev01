@@ -1,0 +1,148 @@
+/**
+ * V8-R — Canonical FlowBridge execution registry (single source of truth).
+ *
+ * Every consumer that needs to know "which FlowBridge contract executes a swap
+ * on this chain, and which contract answers discovery/quote reads" MUST resolve
+ * it here. No consumer may hardcode a router address again.
+ *
+ * Deployment truth (user-provided manifest, validated on-chain):
+ *   BOT Testnet (968)  FlowBridgeRouterV4 0xEcd8041a0aD94992a735a5d8AEB40D3e8B4d089A
+ *                      FlowBridgeRouterLens 0x1F32C2d73Ed7D2878252De3Bb4c40bD07f36db2E
+ *   BOT Mainnet (677)  FlowBridgeRouter v3 (existing production deployment) —
+ *                      V4 mainnet deployment DEFERRED, so v3 stays authoritative.
+ *   BNB chains (97/56) No FlowBridge execution contract — explicitly unconfigured.
+ *
+ * The official bridge stays DIRECT: V4 bridge-proxy execution is disabled
+ * on-chain (`bridgeProxyExecutionEnabled(id) == false`), reflected below as
+ * `bridgeProxyEnabled: false`.
+ */
+import { MAINNET_CONTRACTS, TESTNET_CONTRACTS } from '../contracts';
+import { OFFICIAL_CHAIN_IDS } from '../bridge/officialBridgeConfig';
+
+/** BOT chain IDs as used by the wallet/RPC layer (see src/lib/wagmi.ts). */
+export const BOT_TESTNET_CHAIN_ID = OFFICIAL_CHAIN_IDS.botTestnet;
+export const BOT_MAINNET_CHAIN_ID = 677;
+
+export type Hex = `0x${string}`;
+
+export type FlowBridgeRouterVersion = 'v3' | 'v4';
+
+export interface FlowBridgeExecutionTarget {
+  configured: true;
+  chainId: number;
+  chainName: string;
+  routerVersion: FlowBridgeRouterVersion;
+  /** Swap execution target AND ERC-20 approval spender. */
+  router: Hex;
+  /** Discovery/quote reader. V4 chains use the Lens; v3 chains use the router. */
+  discovery: Hex;
+  discoveryKind: 'lens' | 'router';
+  /** V4 hardened `*Safe` entry points with an explicit maxProtocolFee bound. */
+  supportsSafeSwaps: boolean;
+  /** V4 bridge proxy execution — false everywhere in V8-R (bridge stays direct). */
+  bridgeProxyEnabled: boolean;
+}
+
+export interface FlowBridgeExecutionUnconfigured {
+  configured: false;
+  chainId: number;
+  chainName: string;
+  reason: string;
+}
+
+export type FlowBridgeExecutionResolution =
+  | FlowBridgeExecutionTarget
+  | FlowBridgeExecutionUnconfigured;
+
+export class FlowBridgeExecutionUnconfiguredError extends Error {
+  readonly chainId: number;
+  constructor(chainId: number, reason: string) {
+    super(`FlowBridge execution is not configured for chain ${chainId}: ${reason}`);
+    this.name = 'FlowBridgeExecutionUnconfiguredError';
+    this.chainId = chainId;
+  }
+}
+
+/** BOT Testnet FlowBridgeRouterV4 (deployment truth — never guessed). */
+export const FLOW_BRIDGE_ROUTER_V4_BOT_TESTNET: Hex =
+  '0xecd8041a0ad94992a735a5d8aeb40d3e8b4d089a';
+/** BOT Testnet FlowBridgeRouterLens paired with the V4 router above. */
+export const FLOW_BRIDGE_ROUTER_LENS_BOT_TESTNET: Hex =
+  '0x1f32c2d73ed7d2878252de3bb4c40bd07f36db2e';
+
+const lower = (v: string) => v.toLowerCase() as Hex;
+
+const REGISTRY: readonly FlowBridgeExecutionResolution[] = [
+  {
+    configured: true,
+    chainId: BOT_TESTNET_CHAIN_ID,
+    chainName: 'BOT Testnet',
+    routerVersion: 'v4',
+    router: FLOW_BRIDGE_ROUTER_V4_BOT_TESTNET,
+    discovery: FLOW_BRIDGE_ROUTER_LENS_BOT_TESTNET,
+    discoveryKind: 'lens',
+    supportsSafeSwaps: true,
+    bridgeProxyEnabled: false,
+  },
+  {
+    configured: true,
+    chainId: BOT_MAINNET_CHAIN_ID,
+    chainName: 'BOT Mainnet',
+    routerVersion: 'v3',
+    router: lower(MAINNET_CONTRACTS.flowBridgeRouterV3),
+    discovery: lower(MAINNET_CONTRACTS.flowBridgeRouterV3),
+    discoveryKind: 'router',
+    supportsSafeSwaps: false,
+    bridgeProxyEnabled: false,
+  },
+  {
+    configured: false,
+    chainId: OFFICIAL_CHAIN_IDS.bnbTestnet,
+    chainName: 'BNB Testnet',
+    reason: 'no FlowBridge execution contract is deployed on this chain',
+  },
+  {
+    configured: false,
+    chainId: OFFICIAL_CHAIN_IDS.bnbMainnet,
+    chainName: 'BNB Mainnet',
+    reason: 'no FlowBridge execution contract is deployed on this chain',
+  },
+] as const;
+
+/** Legacy v3 testnet router kept for audit/reference only — never for execution. */
+export const LEGACY_FLOW_BRIDGE_ROUTER_V3_BOT_TESTNET: Hex = lower(
+  TESTNET_CONTRACTS.flowBridgeRouterV3,
+);
+
+export function resolveFlowBridgeExecution(chainId: number): FlowBridgeExecutionResolution {
+  return (
+    REGISTRY.find((e) => e.chainId === chainId) ?? {
+      configured: false,
+      chainId,
+      chainName: `chain ${chainId}`,
+      reason: 'chain is not part of the FlowBridge execution registry',
+    }
+  );
+}
+
+/** Fail-closed resolution for write paths. */
+export function requireFlowBridgeExecution(chainId: number): FlowBridgeExecutionTarget {
+  const entry = resolveFlowBridgeExecution(chainId);
+  if (!entry.configured) throw new FlowBridgeExecutionUnconfiguredError(chainId, entry.reason);
+  return entry;
+}
+
+/** Convenience for UI code that only knows the mainnet/testnet toggle. */
+export function flowBridgeChainId(isMainnet: boolean): number {
+  return isMainnet ? BOT_MAINNET_CHAIN_ID : BOT_TESTNET_CHAIN_ID;
+}
+
+export function resolveFlowBridgeExecutionForNetwork(
+  isMainnet: boolean,
+): FlowBridgeExecutionTarget {
+  return requireFlowBridgeExecution(flowBridgeChainId(isMainnet));
+}
+
+export function flowBridgeExecutionRegistry(): readonly FlowBridgeExecutionResolution[] {
+  return REGISTRY;
+}

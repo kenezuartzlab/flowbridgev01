@@ -19,7 +19,10 @@ import {
   UNISWAP_V3_POOL_ABI,
   FLOW_BRIDGE_ROUTER_V3_ABI,
 } from "@/lib/contracts";
+import { FLOW_BRIDGE_ROUTER_LENS_ABI } from "@/lib/flowbridge/routerV4Abi";
+import { resolveFlowBridgeExecutionForNetwork } from "@/lib/flowbridge/executionRegistry";
 import { NATIVE_TOKEN_ADDRESS, type Token } from "./tokenRegistry";
+
 
 const FACTORY_ABI = parseAbi([
   "function getPair(address tokenA, address tokenB) view returns (address pair)",
@@ -98,10 +101,13 @@ async function fetchActiveRouters(isMainnet: boolean): Promise<ActiveRouter[]> {
 
   const c = getContracts(isMainnet);
   const client = publicClient(isMainnet);
+  // Discovery target comes from the canonical FlowBridge execution registry:
+  // V4 chains answer getActiveRouters() on the Lens, v3 chains on the router.
+  const target = resolveFlowBridgeExecutionForNetwork(isMainnet);
   try {
     const [ids, names, versions, types, addrs] = (await client.readContract({
-      address: c.flowBridgeRouterV3.toLowerCase() as Address,
-      abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+      address: target.discovery,
+      abi: target.discoveryKind === "lens" ? FLOW_BRIDGE_ROUTER_LENS_ABI : FLOW_BRIDGE_ROUTER_V3_ABI,
       functionName: "getActiveRouters",
     })) as readonly [readonly bigint[], readonly string[], readonly string[], readonly number[], readonly Address[]];
     const routers: ActiveRouter[] = ids.map((id, i) => ({
@@ -114,8 +120,13 @@ async function fetchActiveRouters(isMainnet: boolean): Promise<ActiveRouter[]> {
     ROUTER_CACHE.set(key, { at: Date.now(), routers });
     return routers;
   } catch {
-    // Fallback: use the addresses baked into contracts.ts. Router IDs match
-    // the current on-chain registry (verified via getActiveRouters read).
+    // Fallback is only valid for the v3 mainnet registry, whose IDs were
+    // verified against getActiveRouters(). On V4 chains the registry IDs are
+    // owned by the Lens, so we fail closed instead of inventing IDs.
+    if (target.routerVersion !== "v3") {
+      ROUTER_CACHE.set(key, { at: Date.now(), routers: [] });
+      return [];
+    }
     const fallback: ActiveRouter[] = [
       { id: 1, name: "BDex V2 (legacy)", version: "2.0", type: 0, addr: c.bdexRouter.toLowerCase() as Address },
       { id: 2, name: "BDex V3", version: "3.0", type: 1, addr: c.bdexRouter.toLowerCase() as Address },
@@ -125,6 +136,7 @@ async function fetchActiveRouters(isMainnet: boolean): Promise<ActiveRouter[]> {
     ROUTER_CACHE.set(key, { at: Date.now(), routers: fallback });
     return fallback;
   }
+
 }
 
 /** Expose active routers for UI / diagnostics. */
@@ -202,13 +214,15 @@ async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
   return cfgs;
 }
 
-// Router ID for BDex V3 on-chain. Read from the active registry so it is
-// never stale — falls back to 2 (the current mainnet id) if unavailable.
-async function bdexV3RouterId(isMainnet: boolean): Promise<number> {
+// Router ID for the V3-style (type 1) pool router, read from the live registry.
+// Fails closed with null when the registry has no type-1 router, so we never
+// send a swap with an invented router ID.
+async function bdexV3RouterId(isMainnet: boolean): Promise<number | null> {
   const routers = await fetchActiveRouters(isMainnet);
   const v3 = routers.find((r) => r.type === 1);
-  return v3 ? v3.id : 2;
+  return v3 ? v3.id : null;
 }
+
 
 
 // Pair existence never flips back to "missing", and new pairs are rare, so we
