@@ -66,6 +66,7 @@ import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 import { Route as ApiCampaignsAdminIdRouteImport } from './routes/api/campaigns.admin.$id'
 import { Route as ApiCampaignsSlugMetricsRouteImport } from './routes/api/campaigns.$slug.metrics'
+import { Route as ApiCampaignsAdminIdAnalyticsRouteImport } from './routes/api/campaigns.admin.$id.analytics'
 
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
@@ -356,6 +357,12 @@ const ApiCampaignsSlugMetricsRoute = ApiCampaignsSlugMetricsRouteImport.update({
   path: '/$slug/metrics',
   getParentRoute: () => ApiCampaignsRoute,
 } as any)
+const ApiCampaignsAdminIdAnalyticsRoute =
+  ApiCampaignsAdminIdAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => ApiCampaignsAdminIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -407,7 +414,7 @@ export interface FileRoutesByFullPath {
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/campaigns/$slug/metrics': typeof ApiCampaignsSlugMetricsRoute
-  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRoute
+  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -415,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/api/campaigns/admin/$id/analytics': typeof ApiCampaignsAdminIdAnalyticsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -466,7 +474,7 @@ export interface FileRoutesByTo {
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/campaigns/$slug/metrics': typeof ApiCampaignsSlugMetricsRoute
-  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRoute
+  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -474,6 +482,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/api/campaigns/admin/$id/analytics': typeof ApiCampaignsAdminIdAnalyticsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -526,7 +535,7 @@ export interface FileRoutesById {
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
   '/api/campaigns/$slug/metrics': typeof ApiCampaignsSlugMetricsRoute
-  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRoute
+  '/api/campaigns/admin/$id': typeof ApiCampaignsAdminIdRouteWithChildren
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -534,6 +543,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/api/campaigns/admin/$id/analytics': typeof ApiCampaignsAdminIdAnalyticsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -595,6 +605,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/api/campaigns/admin/$id/analytics'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -654,6 +665,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/api/campaigns/admin/$id/analytics'
   id:
     | '__root__'
     | '/'
@@ -713,6 +725,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/api/campaigns/admin/$id/analytics'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1170,15 +1183,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCampaignsSlugMetricsRouteImport
       parentRoute: typeof ApiCampaignsRoute
     }
+    '/api/campaigns/admin/$id/analytics': {
+      id: '/api/campaigns/admin/$id/analytics'
+      path: '/analytics'
+      fullPath: '/api/campaigns/admin/$id/analytics'
+      preLoaderRoute: typeof ApiCampaignsAdminIdAnalyticsRouteImport
+      parentRoute: typeof ApiCampaignsAdminIdRoute
+    }
   }
 }
 
+interface ApiCampaignsAdminIdRouteChildren {
+  ApiCampaignsAdminIdAnalyticsRoute: typeof ApiCampaignsAdminIdAnalyticsRoute
+}
+
+const ApiCampaignsAdminIdRouteChildren: ApiCampaignsAdminIdRouteChildren = {
+  ApiCampaignsAdminIdAnalyticsRoute: ApiCampaignsAdminIdAnalyticsRoute,
+}
+
+const ApiCampaignsAdminIdRouteWithChildren =
+  ApiCampaignsAdminIdRoute._addFileChildren(ApiCampaignsAdminIdRouteChildren)
+
 interface ApiCampaignsAdminRouteChildren {
-  ApiCampaignsAdminIdRoute: typeof ApiCampaignsAdminIdRoute
+  ApiCampaignsAdminIdRoute: typeof ApiCampaignsAdminIdRouteWithChildren
 }
 
 const ApiCampaignsAdminRouteChildren: ApiCampaignsAdminRouteChildren = {
-  ApiCampaignsAdminIdRoute: ApiCampaignsAdminIdRoute,
+  ApiCampaignsAdminIdRoute: ApiCampaignsAdminIdRouteWithChildren,
 }
 
 const ApiCampaignsAdminRouteWithChildren =
