@@ -15,6 +15,7 @@ import {
 } from "@/lib/contracts";
 import { FLOW_BRIDGE_ROUTER_V4_ABI } from "@/lib/flowbridge/routerV4Abi";
 import { resolveFlowBridgeExecutionForNetwork } from "@/lib/flowbridge/executionRegistry";
+import { requireSafeSwapDecision } from "@/lib/flowbridge/swapMethodPolicy";
 
 import {
   getCuratedTokens,
@@ -392,8 +393,9 @@ export function UniversalSwapCard({
     };
 
     // ── Dispatch to the correct FlowBridgeRouter entry point ──────────────
-    // V4 (`*Safe`) adds an explicit maxProtocolFee bound; the legacy calls stay
-    // for v3 chains and for the case where the fee view is unavailable.
+    // V4 (`*Safe`) adds an explicit maxProtocolFee bound. The legacy calls are
+    // reachable ONLY on an explicitly legacy (v3-legacy) execution target — never
+    // as a runtime fallback for a resolved V4 route.
     if (step.inIsNative) {
       const base = (useSafe
         ? {
