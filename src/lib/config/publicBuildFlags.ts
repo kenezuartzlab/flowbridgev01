@@ -61,6 +61,8 @@ export function readPublicBuildFlag(
   const env = overrides?.env ?? envValues();
   const fromEnv = parsePublicBuildFlag(env[name]);
   if (fromEnv !== undefined) return fromEnv;
+  // V8.2A: security-sensitive flags ignore committed defaults and fail closed.
+  if (DEFAULT_OFF_ONLY_FLAGS.includes(name)) return false;
   const defaults = overrides?.defaults ?? PUBLIC_BUILD_FLAG_DEFAULTS;
   return defaults[name] === true;
 }
