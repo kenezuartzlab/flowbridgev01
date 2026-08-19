@@ -1,11 +1,12 @@
 /**
- * V8.1 — server-side decoding of the ONE approved FlowBridgeRouterV4 safe
- * entrypoint calldata for verified swap attribution.
+ * V8.3 — server-side decoding of the ONE approved FlowBridgeRouterV4 safe
+ * entrypoint calldata for verified swap attribution:
+ *   swapTokenToNativeSafe(uint256,address,uint24,uint256,uint256,address[],address,uint256,uint256)
+ *   selector 0x2411755e
  *
- * Only the exact approved selector is accepted. Legacy V3-compatible
- * entrypoints (`swapV2`, `swapV3Single`, …) are rejected for verified-swap
- * rewards even though they can execute on chain, because they carry no
- * user-bound `maxProtocolFee`.
+ * Only the exact approved selector is accepted. `swapV2Safe`, `swapV2`,
+ * `swapTokenToNative` (legacy), V3-single and native-to-token entrypoints are
+ * rejected for this Verified Swap V1 path.
  */
 import { decodeFunctionData } from 'viem';
 import type { Hex } from './activityIntent';
@@ -16,6 +17,10 @@ export interface DecodedSafeSwapCalldata {
   selector: Hex;
   functionName: string;
   routerId: bigint;
+  /** Explicit token-in argument of the native-output entrypoint. */
+  tokenIn: Hex;
+  /** V3 pool fee tier — ignored by the BDEX V2 branch (0 on this path). */
+  feePool: number;
   swapAmount: bigint;
   amountOutMin: bigint;
   path: readonly Hex[];
@@ -31,7 +36,7 @@ export type SafeSwapCalldataDecode =
 const selectorOf = (input: string): Hex => input.slice(0, 10).toLowerCase() as Hex;
 
 /**
- * Decode the approved `swapV2Safe` calldata for the given frozen path.
+ * Decode the approved `swapTokenToNativeSafe` calldata for the frozen path.
  * Deterministic: a non-matching selector or a non-decodable body fails closed.
  */
 export function decodeApprovedSafeSwapCalldata(
@@ -62,19 +67,22 @@ export function decodeApprovedSafeSwapCalldata(
     return { ok: false, reason: 'decoded function is not the approved verified-swap entrypoint' };
   }
   const args = decoded.args ?? [];
-  if (args.length !== 7) {
+  if (args.length !== 9) {
     return { ok: false, reason: 'approved safe swap calldata has an unexpected argument count' };
   }
 
-  const [routerId, swapAmount, amountOutMin, rawPath, to, deadline, maxProtocolFee] = args as [
-    bigint,
-    bigint,
-    bigint,
-    readonly string[],
-    string,
-    bigint,
-    bigint,
-  ];
+  const [routerId, tokenIn, feePool, swapAmount, amountOutMin, rawPath, to, deadline, maxProtocolFee] =
+    args as [
+      bigint,
+      string,
+      number,
+      bigint,
+      bigint,
+      readonly string[],
+      string,
+      bigint,
+      bigint,
+    ];
   if (!Array.isArray(rawPath) || rawPath.length < 2) {
     return { ok: false, reason: 'approved safe swap calldata path is too short' };
   }
@@ -85,6 +93,8 @@ export function decodeApprovedSafeSwapCalldata(
       selector,
       functionName: decoded.functionName,
       routerId,
+      tokenIn: tokenIn.toLowerCase() as Hex,
+      feePool: Number(feePool),
       swapAmount,
       amountOutMin,
       path: rawPath.map((a) => a.toLowerCase() as Hex),
@@ -116,11 +126,18 @@ export function validateApprovedSafeSwapCalldata(
   if (calldata.routerId !== path.routerId) {
     return { ok: false, reason: 'calldata routerId is not the approved verified-swap routerId' };
   }
+  if (!eq(calldata.tokenIn, path.tokenIn)) {
+    return { ok: false, reason: 'calldata tokenIn is not the approved token-in' };
+  }
   if (!eq(calldata.path[0]!, path.tokenIn)) {
     return { ok: false, reason: 'calldata path start is not the approved token-in' };
   }
+  // Execution proof: the V2 path must terminate at the trusted wrapped native.
   if (!eq(calldata.path[calldata.path.length - 1]!, path.tokenOut)) {
-    return { ok: false, reason: 'calldata path end is not the approved token-out' };
+    return { ok: false, reason: 'calldata path end is not the trusted wrapped-native endpoint' };
+  }
+  if (calldata.amountOutMin <= 0n) {
+    return { ok: false, reason: 'calldata amountOutMin must be present and positive' };
   }
   if (calldata.swapAmount !== expected.amount) {
     return { ok: false, reason: 'calldata swapAmount does not equal the signed intent amount' };

@@ -200,17 +200,18 @@ function verifiedSwapTemplate(): StudioCampaignInput {
   const now = Date.now();
   return {
     slug: normalizeSlug(`verified-swap-${path.id}`),
-    name: 'Verified Swap — FlowBridgeRouter v3',
+    name: 'Verified Swap — FlowBridgeRouter V4 (USDT → BOT)',
     description:
-      'Swap USDT through FlowBridgeRouter v3. Progress is awarded only from server-verified on-chain swap activity.',
+      'Swap USDT to native BOT through FlowBridgeRouter V4. Progress is awarded only from server-verified on-chain swap activity.',
     status: 'draft',
     startsAt: now,
     endsAt: now + 30 * DAY,
     tasks: [
       {
         taskId: 'verified-swap',
-        title: `Swap ${path.tokenInSymbol} on ${path.label}`,
-        description: 'Complete one verified swap through the approved router path.',
+        title: `Swap ${path.tokenInSymbol} → ${path.tokenOutSymbol}${path.outputIsNative ? ' (native)' : ''} on ${path.label}`,
+        description:
+          'Complete one verified USDT → BOT (native) swap through the approved FlowBridgeRouter V4 path.',
         points: 100,
         requiredCount: 1,
         completionLimitPerWallet: 1,
