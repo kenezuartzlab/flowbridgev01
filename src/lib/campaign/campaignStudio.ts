@@ -13,6 +13,7 @@ import {
   OFFICIAL_TESTNET_ROUTES,
 } from '../bridge/officialBridgeConfig';
 import { DIRECT_BRIDGE_ACTION_TYPE } from '../activity/activityVerifier';
+import { VERIFIED_SWAP_PATHS, VERIFIED_SWAP_V1_ACTION_TYPE } from '../swap/verifiedSwapConfig';
 
 export { CAMPAIGN_RULE_TYPES };
 
