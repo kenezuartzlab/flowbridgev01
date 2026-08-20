@@ -372,9 +372,12 @@ function EarnPage() {
                 })}
               </ul>
               <p className="border-t border-hairline p-4 text-[11px] leading-relaxed text-muted-soft">
-                FLOW Points (PTS) are an off-chain balance. Converting PTS to on-chain FLOW becomes
-                possible only after the token distributor is deployed and a rewards conversion policy
-                is approved. No FLOW token amount is promised here.
+                FLOW Points (PTS) are an off-chain balance. On BOT Testnet the distributor is
+                deployed and funded with 10,000,000 FLOW from the approved treasury, and the
+                approved testnet policy converts 1 PTS to 1 FLOW cumulatively — Campaign PTS are
+                always excluded. Claim authorizations are server-signed and short-lived; the first
+                on-chain payout is not triggered automatically. BOT Mainnet remains pending
+                promotion.
               </p>
             </Surface>
           </>
