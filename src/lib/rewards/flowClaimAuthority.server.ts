@@ -68,8 +68,9 @@ export type FlowClaimAuthorization =
       distributor: Hex;
       account: Hex;
       cumulativeEntitlement: string;
-      alreadyClaimed: string | null;
-      claimableDelta: string | null;
+      alreadyClaimed: string;
+      claimableDelta: string;
+      distributorBalance: string;
       deadline: number;
       signature: Hex;
       display: FlowClaimDisplay;
