@@ -249,9 +249,16 @@ export default function App() {
     // server rejects activity logging for them.
     if (!emailVerified || !normalizedWallet) return;
 
-    // Testnet is fully isolated from mainnet: testnet activity is never
-    // recorded in history and never credits FLOW points.
-    if (!isMainnet) return;
+    // Testnet stays isolated from mainnet, with ONE owner-approved exception:
+    // the verified-swap path (BOT Testnet 968 · Router V4), which is where the
+    // funded FLOW distributor and FLOW Points V2 accrual actually live. Only
+    // SWAP rows pass, and the server independently re-verifies the receipt
+    // against that exact router before anything accrues.
+    const approvedTestnetSwap =
+      String(txType).toUpperCase() === 'SWAP' &&
+      !!findVerifiedSwapPath(BOT_TESTNET_CHAIN_ID);
+    if (!isMainnet && !approvedTestnetSwap) return;
+
 
     // NOTE: bridges are recorded for history/attribution only — the server
     // always stores 0 points for them. Rewards remain swap-only.
