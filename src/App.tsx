@@ -2596,7 +2596,7 @@ export default function App() {
   const activeTxPrefix = bridgeSrcExplorerPrefix;
 
   return (
-    <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-center font-sans overflow-y-auto relative py-0 sm:py-8 gap-0 sm:gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
+    <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-start font-sans overflow-y-auto relative py-0 md:py-6 gap-0 md:gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
       <SiteLoader />
       
       {/* Background grid + ambient glow of Ecosurge specification */}
@@ -2604,8 +2604,14 @@ export default function App() {
       <div className="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#32FF8B]/5 blur-[120px] pointer-events-none" />
       <div className="fixed bottom-[-20%] right-[-10%] w-[65%] h-[65%] rounded-full bg-[#00D7B2]/5 blur-[120px] pointer-events-none" />
 
-      {/* Styled Phone/DApp Frame container matching Ecosurge Tech-Forward theme */}
-      <div className="w-full sm:w-[410px] h-[100dvh] sm:h-[780px] bg-[#010C1B] sm:rounded-[36px] sm:border-[8px] border-[#0D1C2A] shadow-[0_0_60px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col relative z-10">
+      {/* V9.4 — real page shell. No phone frame, no fixed device width: the
+          Trade workspace widens with the viewport so the global header measures
+          the site shell (and can reach full desktop navigation). */}
+      <div
+        data-trade-shell="true"
+        className="w-full min-h-[100dvh] md:min-h-0 md:w-full md:max-w-[900px] xl:max-w-[1180px] bg-[#010C1B] overflow-hidden flex flex-col relative z-10 md:rounded-3xl md:border md:border-hairline md:shadow-[0_24px_70px_-30px_rgba(0,0,0,0.85)]"
+      >
+
         {(() => {
           const isBridgeTab = activeTab === 'BRIDGE';
           const isTronSource = isBridgeTab && bridgeDirection === 'TRX_TO_BOT';
@@ -2671,7 +2677,7 @@ export default function App() {
           onTabChange={setActiveTab}
         />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto w-full bg-background flex flex-col items-stretch px-3.5 pb-4 pt-1.5 sm:px-5 sm:pb-5 sm:pt-2 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl md:[&>*]:max-w-2xl lg:[&>*]:max-w-3xl">
+        <main className="flex-1 overflow-x-hidden md:overflow-y-visible overflow-y-auto w-full bg-background flex flex-col items-stretch px-3.5 pb-4 pt-1.5 sm:px-5 sm:pb-5 sm:pt-2 md:px-8 md:pb-8 space-y-3.5 sm:space-y-4 font-sans [&>*]:w-full [&>*]:mx-auto [&>*]:max-w-xl md:[&>*]:max-w-2xl xl:[&>*]:max-w-[880px]">
 
           {/* Tab hero banners (admin-managed) + status bar, swipeable */}
           {(() => {
