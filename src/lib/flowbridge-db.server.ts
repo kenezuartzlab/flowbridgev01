@@ -6,8 +6,13 @@ import {
   BOT_MAINNET_CHAIN_ID,
   requireFlowBridgeExecution,
 } from "@/lib/flowbridge/executionRegistry";
-import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd, referralActivityShare } from "@/lib/rewards";
+import { FLOW_REWARD_MIN_USD } from "@/lib/rewards";
 import { getRewardSettings } from "@/lib/appConfig.server";
+import {
+  accrueCoreSwapPoints,
+  grantReferralMilestones,
+  isFlowPointsV2Live,
+} from "@/lib/rewards/flowPointsV2Ledger.server";
 
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -156,7 +161,10 @@ export async function ensureProfile(userId: string, email: string, referredByCod
     .select()
     .single();
 
-  if (finalReferredBy) {
+  // V12.4A — FLOW Points V2 disables the legacy +50 signup credit for NEW
+  // accruals. The relationship is still bound; referral value now comes from
+  // idempotent milestones once the referred user actually swaps.
+  if (finalReferredBy && !(await isFlowPointsV2Live())) {
     const { data: ref } = await supabaseAdmin
       .from("profiles")
       .select("id, flow_points, points_referral_signup")
@@ -197,13 +205,16 @@ export async function linkReferralIfMissing(userId: string, referredByCode?: str
     .from("profiles")
     .update({ referred_by: referredByCode })
     .eq("id", userId);
-  await supabaseAdmin
-    .from("profiles")
-    .update({
-      flow_points: (ref.flow_points ?? 0) + 50,
-      points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
-    })
-    .eq("id", ref.id);
+  // V2: binding a relationship is not an economic milestone.
+  if (!(await isFlowPointsV2Live())) {
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        flow_points: (ref.flow_points ?? 0) + 50,
+        points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
+      })
+      .eq("id", ref.id);
+  }
 }
 
 
