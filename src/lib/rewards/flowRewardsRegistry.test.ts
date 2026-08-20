@@ -14,10 +14,8 @@ describe("flow rewards registry", () => {
     expect(resolveFlowClaimReadiness(97, true)).toMatchObject({ ready: false, reason: "unsupportedChain" });
   });
 
-  it("keeps every chain undeployed and claims disabled in the V12 gate", () => {
+  it("keeps claims disabled on every chain in the V12.2B gate", () => {
     for (const c of FLOW_REWARDS_CHAINS) {
-      expect(c.token).toBeNull();
-      expect(c.distributor).toBeNull();
       expect(c.claimsEnabled).toBe(false);
     }
   });
@@ -34,10 +32,10 @@ describe("flow rewards registry", () => {
     });
   });
 
-  it("reports testnet as pending deployment", () => {
+  it("keeps deployed testnet claims disabled until funding + enablement", () => {
     expect(resolveFlowClaimReadiness(BOT_TESTNET_CHAIN_ID, true)).toMatchObject({
       ready: false,
-      reason: "distributorNotDeployed",
+      reason: "claimsDisabled",
     });
   });
 

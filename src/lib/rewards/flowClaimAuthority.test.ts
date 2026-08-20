@@ -50,7 +50,7 @@ describe("authorizeFlowTokenClaim", () => {
     expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
-  it("blocks testnet while the distributor is undeployed, but still returns display data", async () => {
+  it("blocks testnet while claims are disabled, but still returns display data", async () => {
     const d = deps({ conversionPolicyApproved: true });
     const res = await authorizeFlowTokenClaim({
       userId: "u1",
@@ -58,7 +58,7 @@ describe("authorizeFlowTokenClaim", () => {
       chainId: BOT_TESTNET_CHAIN_ID,
       deps: d,
     });
-    expect(res).toMatchObject({ authorized: false, reason: "distributorNotDeployed" });
+    expect(res).toMatchObject({ authorized: false, reason: "claimsDisabled" });
     if (!res.authorized) {
       expect(res.display.flowPoints).toBe(1200);
       expect(res.display.walletAddress).toBe(incentives.walletAddress);

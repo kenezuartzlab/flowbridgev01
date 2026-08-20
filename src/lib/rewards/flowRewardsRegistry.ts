@@ -36,8 +36,10 @@ export const FLOW_REWARDS_CHAINS: readonly FlowRewardsChainConfig[] = [
     label: "BOT Testnet",
     isMainnet: false,
     v12Built: true,
-    token: null,
-    distributor: null,
+    // V12.2B verified live deployment (contracts/deployments/bot-testnet.json).
+    token: "0xCE14Ca1CF2012F1996D5FBc7d369FA051aa641Ac",
+    distributor: "0x559605fa3120cd472b86966FE4b5dC7e9e0b2b34",
+    // Distributor is UNFUNDED; claims stay disabled until treasury funding lands.
     claimsEnabled: false,
   },
   {
