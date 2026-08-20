@@ -482,13 +482,26 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
 
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10, platformFeeBps: 10 },
   rewards: {
+    // Legacy V1 fields — retained read-only for historical audit. They no longer
+    // decide new accruals (FLOW Points V2 is the live policy).
     minUsd: 5,
     usdBlock: 1,
     pointsPerBlock: 1,
     referralClaimMinSwapUsd: 100,
     claimThreshold: 1000,
-    referralActivityPct: 20,
+    referralActivityPct: 0,
+    // FLOW Points V2 (owner-approved, V12.4A).
+    policyVersion: "FLOW_POINTS_V2",
+    v2EffectiveAt: "2026-08-20T15:00:00.000Z",
+    minSwapUsd: 5,
+    dailyCoreSwapCap: 1000,
+    referralMilestoneFirstSwap: 15,
+    referralMilestoneVolume: 35,
+    referralMilestoneActiveDaysPoints: 50,
+    referralMaxPerReferredUser: 100,
+    referralMonthlyCap: 10,
   },
+
   flags: {
     showBanners: true,
     maintenanceNotice: "",
