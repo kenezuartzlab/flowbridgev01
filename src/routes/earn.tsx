@@ -327,8 +327,47 @@ function EarnPage() {
                 </p>
               </div>
             </Surface>
+
+            {/* V12 — on-chain FLOW token distribution status. Read-only and
+                fail-closed: it states the truth about the claim contract and
+                never implies a token claim is available. */}
+            <Surface id="flow-token">
+              <SectionHeader
+                title="On-chain FLOW token claims"
+                hint="Status of the FLOW token distributor. PTS stay off-chain until this is live."
+              />
+              <ul className="divide-y divide-hairline border-t border-hairline">
+                {FLOW_REWARDS_CHAINS.map((c) => {
+                  const readiness = resolveFlowClaimReadiness(c.chainId, FLOW_POLICY_APPROVED);
+                  return (
+                    <li key={c.chainId}>
+                      <ListRow
+                        icon={<Coins className="h-4 w-4" aria-hidden />}
+                        label={c.label}
+                        description={
+                          readiness.ready
+                            ? "Claim contract live."
+                            : FLOW_CLAIM_BLOCKED_COPY[readiness.reason]
+                        }
+                        trailing={
+                          <StatusPill tone={readiness.ready ? "ok" : "pending"}>
+                            {readiness.ready ? "Live" : "Pending"}
+                          </StatusPill>
+                        }
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="border-t border-hairline p-4 text-[11px] leading-relaxed text-muted-soft">
+                FLOW Points (PTS) are an off-chain balance. Converting PTS to on-chain FLOW becomes
+                possible only after the token distributor is deployed and a rewards conversion policy
+                is approved. No FLOW token amount is promised here.
+              </p>
+            </Surface>
           </>
         )}
+
 
         {/* How earning works — sourced from the shared points rules, not copy. */}
         <Surface id="how">
