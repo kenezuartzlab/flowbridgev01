@@ -30,6 +30,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CampaignsIndexRouteImport } from './routes/campaigns/index'
 import { Route as CampaignsStudioRouteImport } from './routes/campaigns/studio'
+import { Route as CampaignsPartnersRouteImport } from './routes/campaigns/partners'
 import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
 import { Route as CampaignsSlugRouteImport } from './routes/campaigns/$slug'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
@@ -174,6 +175,11 @@ const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
 const CampaignsStudioRoute = CampaignsStudioRouteImport.update({
   id: '/campaigns/studio',
   path: '/campaigns/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsPartnersRoute = CampaignsPartnersRouteImport.update({
+  id: '/campaigns/partners',
+  path: '/campaigns/partners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampaignsMeRoute = CampaignsMeRouteImport.update({
@@ -414,6 +420,7 @@ export interface FileRoutesByFullPath {
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
+  '/campaigns/partners': typeof CampaignsPartnersRoute
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -477,6 +484,7 @@ export interface FileRoutesByTo {
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
+  '/campaigns/partners': typeof CampaignsPartnersRoute
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -541,6 +549,7 @@ export interface FileRoutesById {
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
+  '/campaigns/partners': typeof CampaignsPartnersRoute
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -606,6 +615,7 @@ export interface FileRouteTypes {
     | '/api/transactions'
     | '/campaigns/$slug'
     | '/campaigns/me'
+    | '/campaigns/partners'
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
@@ -669,6 +679,7 @@ export interface FileRouteTypes {
     | '/api/transactions'
     | '/campaigns/$slug'
     | '/campaigns/me'
+    | '/campaigns/partners'
     | '/campaigns/studio'
     | '/campaigns'
     | '/.mcp/invoke-tool/$tool'
@@ -732,6 +743,7 @@ export interface FileRouteTypes {
     | '/api/transactions'
     | '/campaigns/$slug'
     | '/campaigns/me'
+    | '/campaigns/partners'
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
@@ -796,6 +808,7 @@ export interface RootRouteChildren {
   ApiTransactionsRoute: typeof ApiTransactionsRoute
   CampaignsSlugRoute: typeof CampaignsSlugRoute
   CampaignsMeRoute: typeof CampaignsMeRoute
+  CampaignsPartnersRoute: typeof CampaignsPartnersRoute
   CampaignsStudioRoute: typeof CampaignsStudioRoute
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -969,6 +982,13 @@ declare module '@tanstack/react-router' {
       path: '/campaigns/studio'
       fullPath: '/campaigns/studio'
       preLoaderRoute: typeof CampaignsStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/partners': {
+      id: '/campaigns/partners'
+      path: '/campaigns/partners'
+      fullPath: '/campaigns/partners'
+      preLoaderRoute: typeof CampaignsPartnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/campaigns/me': {
@@ -1338,6 +1358,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTransactionsRoute: ApiTransactionsRoute,
   CampaignsSlugRoute: CampaignsSlugRoute,
   CampaignsMeRoute: CampaignsMeRoute,
+  CampaignsPartnersRoute: CampaignsPartnersRoute,
   CampaignsStudioRoute: CampaignsStudioRoute,
   CampaignsIndexRoute: CampaignsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
