@@ -1,6 +1,6 @@
 # FlowBridge V12.4B — FLOW Points V2 Live Swap Accrual Canary
 
-Status: **BLOCKED — awaiting the owner's one fresh qualifying BOT Testnet swap.**
+Status: **VERIFIED — live accrual proven on BOT Testnet 968 (see §4).**
 
 ## 1. Before-state (recorded 2026-08-20T15:52Z)
 
@@ -54,3 +54,29 @@ Then supply the tx hash so the after-state (points delta, claimable delta,
 campaign PTS unchanged, single ledger row, idempotency proof) can be verified.
 
 FLOW POINTS V12.4B LIVE ACCRUAL CANARY BLOCKED
+
+## 4. After-state — VERIFIED (2026-08-20T16:11Z)
+
+Canary swap: `0xfaca742f459984f4418b0a515028da8ef9d22983bed3c2ac282dc69094b2a13a`
+(BOT Testnet 968 · Router V4 · USDT → BOT native, logIndex 8, amount_raw 11000000).
+
+| Item | Before | After |
+| --- | --- | --- |
+| `verified_activities` row | — | CONFIRMED, chain 968, logIndex 8 |
+| Verified USD (server-derived) | — | $11.00 |
+| `flow_points_ledger` CORE_SWAP rows for this activity | 0 | 1 (`968:0xfaca…a13a:8`) |
+| Points awarded (1 pt / whole $1, min $5) | 0 | 11 |
+| `profiles.flow_points` (canary) | 0 | 11 |
+| `profiles.points_self` (canary) | 0 | 11 |
+| `claimed_tokens` (lifetime converted) | 1017 | 1017 (unchanged) |
+| Available to claim | 0 FLOW | 11 FLOW (1 PTS = 1 FLOW) |
+| Campaign PTS (separate ledger) | 350 | 350 (unchanged) |
+| Daily cap headroom (1,000/UTC day) | 1000 | 989 |
+| Referral milestone (referrer) | 0 | REFERRAL_MILESTONE_FIRST_SWAP, 15 pts, one row |
+| BOT Mainnet 677 | disabled | disabled |
+
+Idempotency: exactly one ledger row exists for the canonical activity key
+`<chainId>:<txHash>:<logIndex>`; a replay of the same receipt inserts nothing
+(unique index on `activity_key`) and pays 0.
+
+FLOW POINTS V12.4B LIVE ACCRUAL CANARY VERIFIED
