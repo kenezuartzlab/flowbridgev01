@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   Check,
   Circle,
+  Coins,
   Gift,
   History,
   Link2,
@@ -13,6 +14,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SignInButton } from "@/components/auth/SignInButton";
@@ -40,6 +42,16 @@ import {
   formatXp,
   xpLevel,
 } from "@/lib/points";
+import {
+  FLOW_CLAIM_BLOCKED_COPY,
+  FLOW_REWARDS_CHAINS,
+  resolveFlowClaimReadiness,
+} from "@/lib/rewards/flowRewardsRegistry";
+import { isFlowConversionPolicyApproved } from "@/lib/rewards/flowConversionPolicy";
+
+/** Client-safe: the policy holder is a plain constant, no secrets involved. */
+const FLOW_POLICY_APPROVED = isFlowConversionPolicyApproved();
+
 
 /**
  * FlowBridge V11 — the canonical Earn destination.
@@ -327,8 +339,47 @@ function EarnPage() {
                 </p>
               </div>
             </Surface>
+
+            {/* V12 — on-chain FLOW token distribution status. Read-only and
+                fail-closed: it states the truth about the claim contract and
+                never implies a token claim is available. */}
+            <Surface id="flow-token">
+              <SectionHeader
+                title="On-chain FLOW token claims"
+                hint="Status of the FLOW token distributor. PTS stay off-chain until this is live."
+              />
+              <ul className="divide-y divide-hairline border-t border-hairline">
+                {FLOW_REWARDS_CHAINS.map((c) => {
+                  const readiness = resolveFlowClaimReadiness(c.chainId, FLOW_POLICY_APPROVED);
+                  return (
+                    <li key={c.chainId}>
+                      <ListRow
+                        icon={<Coins className="h-4 w-4" aria-hidden />}
+                        label={c.label}
+                        description={
+                          readiness.ready
+                            ? "Claim contract live."
+                            : FLOW_CLAIM_BLOCKED_COPY[readiness.reason]
+                        }
+                        trailing={
+                          <StatusPill tone={readiness.ready ? "ok" : "pending"}>
+                            {readiness.ready ? "Live" : "Pending"}
+                          </StatusPill>
+                        }
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="border-t border-hairline p-4 text-[11px] leading-relaxed text-muted-soft">
+                FLOW Points (PTS) are an off-chain balance. Converting PTS to on-chain FLOW becomes
+                possible only after the token distributor is deployed and a rewards conversion policy
+                is approved. No FLOW token amount is promised here.
+              </p>
+            </Surface>
           </>
         )}
+
 
         {/* How earning works — sourced from the shared points rules, not copy. */}
         <Surface id="how">

@@ -1,0 +1,25 @@
+{
+  "$comment": "FlowBridge V12 — BOT Mainnet 677 config placeholder. NOT deployable in this gate. Requires a separate, reviewed approval of treasury, owner, reward signer, supply/allocation and distributor funding. Never copy testnet addresses here.",
+  "chainId": 677,
+  "network": "bot-mainnet",
+  "rpcUrlEnv": "BOT_MAINNET_RPC_URL",
+  "deployerKeyEnv": "MAINNET_DEPLOYER_PRIVATE_KEY",
+  "token": {
+    "name": null,
+    "symbol": null,
+    "decimals": 18,
+    "totalSupply": null,
+    "treasury": null
+  },
+  "distributor": {
+    "owner": null,
+    "rewardSigner": null,
+    "initialFundingAmount": null
+  },
+  "compiler": {
+    "version": "0.8.24",
+    "optimizer": { "enabled": true, "runs": 200 },
+    "evmVersion": "paris"
+  },
+  "status": "PROMOTION_PENDING"
+}
