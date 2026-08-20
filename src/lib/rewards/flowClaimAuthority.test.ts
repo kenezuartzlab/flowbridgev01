@@ -50,7 +50,7 @@ describe("authorizeFlowTokenClaim", () => {
     expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
-  it("blocks testnet while the distributor is undeployed, but still returns display data", async () => {
+  it("blocks testnet while claims are disabled, but still returns display data", async () => {
     const d = deps({ conversionPolicyApproved: true });
     const res = await authorizeFlowTokenClaim({
       userId: "u1",
