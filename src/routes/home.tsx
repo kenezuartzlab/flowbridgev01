@@ -127,9 +127,12 @@ function HomePage() {
         }
       />
 
-      <main className="mx-auto max-w-2xl space-y-4 p-3 sm:p-4 md:max-w-4xl md:py-6">
-        {/* Summary — gradient glass hero balance card */}
-        <HeroCard hero={page.hero} variant="home" className="p-5">
+      <main
+        className="mx-auto w-full max-w-2xl space-y-4 px-3 pt-3 sm:px-4 sm:pt-4 md:max-w-4xl md:pt-6"
+        style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}
+      >
+        {/* Summary — compact on mobile so the fold shows real content. */}
+        <HeroCard hero={page.hero} variant="home" className="p-3.5 sm:p-5">
           <div className="relative flex items-start justify-between gap-3">
             <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
               {L("balance", "FLOW Points")}
@@ -142,35 +145,36 @@ function HomePage() {
             </Link>
           </div>
 
-          <p className="relative mt-2 font-mono text-[40px] font-black leading-none tabular-nums tracking-[-0.02em] sm:text-[46px]">
+          <p className="relative mt-1.5 font-mono text-[30px] font-black leading-none tabular-nums tracking-[-0.02em] sm:mt-2 sm:text-[42px]">
             {loading && !incentives ? "—" : flowPoints.toLocaleString("en-US")}
             <span className="ml-2 align-baseline text-[13px] font-black opacity-80">{PTS}</span>
           </p>
 
-          <div className="relative mt-4 grid grid-cols-2 gap-2">
-            <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <PageIcon page="home" slot="claimable" size={26} />
+          <div className="relative mt-3 grid grid-cols-2 gap-2 sm:mt-4">
+            <div className="fb-hero-tile flex items-center gap-2 px-2.5 py-2 sm:px-3 sm:py-2.5">
+              <PageIcon page="home" slot="claimable" size={24} />
               <span className="min-w-0">
-                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
+                <span className="block truncate font-mono text-[9px] font-black uppercase tracking-[0.12em] opacity-80">
                   {L("claimable", "Claimable PTS")}
                 </span>
-                <span className="block font-mono text-[15px] font-black tabular-nums">
+                <span className="block font-mono text-[14px] font-black tabular-nums sm:text-[15px]">
                   {claimable.toLocaleString("en-US")}
                 </span>
               </span>
             </div>
-            <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <PageIcon page="home" slot="volume" size={26} />
+            <div className="fb-hero-tile flex items-center gap-2 px-2.5 py-2 sm:px-3 sm:py-2.5">
+              <PageIcon page="home" slot="volume" size={24} />
               <span className="min-w-0">
-                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">
+                <span className="block truncate font-mono text-[9px] font-black uppercase tracking-[0.12em] opacity-80">
                   {L("volume", "Swap volume")}
                 </span>
-                <span className="block font-mono text-[15px] font-black tabular-nums">
+                <span className="block font-mono text-[14px] font-black tabular-nums sm:text-[15px]">
                   {volumeUsd > 0 ? formatUsd(volumeUsd) : "—"}
                 </span>
               </span>
             </div>
           </div>
+
 
 
           {!user && (
