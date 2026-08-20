@@ -39,7 +39,7 @@ async function ethCall(chainId: number, to: Hex, data: string): Promise<bigint> 
 const pad = (addr: string) => addr.toLowerCase().replace(/^0x/, "").padStart(64, "0");
 
 /** keccak256("claimed(address)") selector. */
-const CLAIMED_SELECTOR = "0xd6c0b2c4";
+const CLAIMED_SELECTOR = "0xc884ef83";
 /** keccak256("balanceOf(address)") selector. */
 const BALANCE_OF_SELECTOR = "0x70a08231";
 
