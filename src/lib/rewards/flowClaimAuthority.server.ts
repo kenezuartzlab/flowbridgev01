@@ -171,6 +171,55 @@ export async function authorizeFlowTokenClaim(args: AuthorizeArgs): Promise<Flow
     );
   }
 
+  // Reconcile against chain truth BEFORE signing anything (V12.3):
+  // delta must be strictly positive and the distributor must already hold it.
+  const account = wallet.toLowerCase() as Hex;
+  const readChainState =
+    args.deps?.readChainState ??
+    (async (a: any) => {
+      const { readFlowClaimChainState } = await import("./flowClaimOnChain.server");
+      return readFlowClaimChainState(a);
+    });
+
+  let chainState: { alreadyClaimed: bigint; distributorBalance: bigint };
+  try {
+    chainState = await readChainState({
+      chainId: readiness.config.chainId,
+      token: readiness.config.token,
+      distributor: readiness.config.distributor,
+      account,
+    });
+  } catch {
+    return blocked(
+      "chainStateUnavailable",
+      "Could not read the distributor state right now. Try again shortly.",
+      readiness.config.chainId,
+      display,
+      { cumulativeEntitlement: entitlement },
+    );
+  }
+
+  const claimableDelta =
+    entitlement > chainState.alreadyClaimed ? entitlement - chainState.alreadyClaimed : 0n;
+  if (claimableDelta === 0n) {
+    return blocked(
+      "nothingToClaim",
+      "No new FLOW to claim — your on-chain claimed total already matches your entitlement.",
+      readiness.config.chainId,
+      display,
+      { cumulativeEntitlement: entitlement, alreadyClaimed: chainState.alreadyClaimed, claimableDelta },
+    );
+  }
+  if (chainState.distributorBalance < claimableDelta) {
+    return blocked(
+      "distributorUnderfunded",
+      "The distributor does not currently hold enough FLOW for this claim.",
+      readiness.config.chainId,
+      display,
+      { cumulativeEntitlement: entitlement, alreadyClaimed: chainState.alreadyClaimed, claimableDelta },
+    );
+  }
+
   const now = Math.floor((args.deps?.now?.() ?? Date.now()) / 1000);
   const deadline = now + FLOW_CLAIM_DEADLINE_SECONDS;
   const typedData = buildFlowClaimTypedData({
