@@ -138,7 +138,7 @@ function HomePage() {
               {L("balance", "FLOW Points")}
             </p>
             <Link
-              to="/rewards"
+              to="/earn"
               className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-white/20 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-white/30"
             >
               {L("rewardsCta", "Rewards")} <ArrowUpRight className="h-3 w-3" />

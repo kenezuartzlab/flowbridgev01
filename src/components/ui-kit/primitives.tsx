@@ -47,13 +47,16 @@ export function Surface({
   children,
   className = "",
   padded = false,
+  id,
 }: {
   children: ReactNode;
   className?: string;
   padded?: boolean;
+  /** Anchor id so pages can deep-link to a section. */
+  id?: string;
 }) {
   return (
-    <section className={`fb-surface overflow-hidden ${padded ? "p-4" : ""} ${className}`}>
+    <section id={id} className={`fb-surface overflow-hidden ${padded ? "p-4" : ""} ${className}`}>
       {children}
     </section>
   );

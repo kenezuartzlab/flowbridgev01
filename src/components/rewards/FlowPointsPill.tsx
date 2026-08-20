@@ -70,7 +70,7 @@ export function FlowPointsPill(props: FlowPointsPillProps) {
   const state = resolveState(props);
   return (
     <Link
-      to="/rewards"
+      to="/earn"
       title={state.title}
       aria-label={state.title}
       className={`flex shrink-0 items-center gap-1 rounded-lg px-1 py-0.5 font-mono text-[10px] font-black uppercase leading-none tracking-[0.08em] transition-all active:scale-95 ${TONES[state.tone]}`}
