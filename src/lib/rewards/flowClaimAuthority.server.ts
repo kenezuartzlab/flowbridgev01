@@ -88,6 +88,12 @@ export interface AuthorizeArgs {
     signTypedData?: (typedData: any) => Promise<Hex>;
     now?: () => number;
     conversionPolicyApproved?: boolean;
+    readChainState?: (args: {
+      chainId: number;
+      token: Hex;
+      distributor: Hex;
+      account: Hex;
+    }) => Promise<{ alreadyClaimed: bigint; distributorBalance: bigint }>;
   };
 }
 
@@ -96,8 +102,20 @@ function blocked(
   message: string,
   chainId: number | null,
   display: FlowClaimDisplay,
+  extra?: { cumulativeEntitlement?: bigint; alreadyClaimed?: bigint; claimableDelta?: bigint },
 ): FlowClaimAuthorization {
-  return { authorized: false, reason, message, chainId, display };
+  return {
+    authorized: false,
+    reason,
+    message,
+    chainId,
+    display,
+    ...(extra?.cumulativeEntitlement != null
+      ? { cumulativeEntitlement: extra.cumulativeEntitlement.toString() }
+      : {}),
+    ...(extra?.alreadyClaimed != null ? { alreadyClaimed: extra.alreadyClaimed.toString() } : {}),
+    ...(extra?.claimableDelta != null ? { claimableDelta: extra.claimableDelta.toString() } : {}),
+  };
 }
 
 const EMPTY_DISPLAY: FlowClaimDisplay = {
