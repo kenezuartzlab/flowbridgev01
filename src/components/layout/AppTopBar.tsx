@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Moon, Sun } from "lucide-react";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { useTheme } from "@/lib/theme";
 import { PrimaryNav } from "@/components/shell/PrimaryNav";
+import { ShellNavMenu } from "@/components/shell/ShellNavMenu";
+import { useShellMode } from "@/components/shell/useShellMode";
 import logoUrl from "@/assets/flowbridge-logo.png";
 
 /**
@@ -26,10 +28,16 @@ export function AppTopBar({
   onEyebrowClick?: () => void;
 }) {
   const [theme, setTheme] = useTheme();
+  // V9.3 — measure the actual shell row, not the browser width.
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const shellMode = useShellMode(rowRef);
 
   return (
     <header className="bg-background px-3 pb-2.5 pt-4 sm:px-4">
-      <div className="mx-auto flex max-w-2xl items-center gap-2.5 md:max-w-6xl">
+      <div
+        ref={rowRef}
+        className="mx-auto flex max-w-2xl flex-nowrap items-center gap-2.5 md:max-w-6xl"
+      >
         <img
           src={logoUrl}
           alt=""
@@ -57,10 +65,11 @@ export function AppTopBar({
           </p>
         </div>
 
-        <PrimaryNav className="shrink-0" />
+        {shellMode === "desktop" && <PrimaryNav className="shrink-0" />}
 
         <div className="flex shrink-0 items-center gap-1.5">
           {actions}
+          {shellMode === "compact" && <ShellNavMenu />}
           <button
             type="button"
             onClick={() => setTheme()}
