@@ -70,11 +70,10 @@ const SECTIONS = [
 ] as const;
 
 export const Route = createFileRoute("/sets")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    section: SECTIONS.includes(search.section as (typeof SECTIONS)[number])
-      ? (search.section as (typeof SECTIONS)[number])
-      : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { section?: (typeof SECTIONS)[number] } =>
+    SECTIONS.includes(search.section as (typeof SECTIONS)[number])
+      ? { section: search.section as (typeof SECTIONS)[number] }
+      : {},
   head: () => ({
     meta: [
       { title: "FlowBridge Control Panel — Sets" },
