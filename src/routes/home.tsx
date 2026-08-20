@@ -191,53 +191,12 @@ function HomePage() {
         </HeroCard>
 
 
-        {/* Quick actions */}
-        <section>
-          <p className="fb-eyebrow mb-2 px-1">{L("quickActions", "Quick actions")}</p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {quickActions.map((a) => {
-              const external = /^https?:\/\//i.test(a.to);
-              const bleed = a.iconFit === "cover" && (a.iconKind === "image" || a.iconKind === "kit");
-              const inner = (
-                <>
-                  <span
-                    className={`grid h-7 w-7 place-items-center overflow-hidden rounded-lg ${
-                      bleed ? "" : "bg-primary/12 p-0 text-primary"
-                    }`}
-                  >
-                    <ActionIcon
-                      kind={a.iconKind}
-                      name={a.icon}
-                      imageUrl={a.imageUrl}
-                      fit={a.iconFit}
-                      className={bleed ? "h-7 w-7" : "h-4 w-4"}
-                    />
-                  </span>
+        {/*
+         * V10 — the Quick actions grid is gone: it was a dashboard-of-links that
+         * duplicated global navigation. Everything it linked to has a real owner
+         * (Trade, Explore, Activity, Profile, Markets).
+         */}
 
-                  <span className="min-w-0">
-                    <span className="block truncate font-mono text-[11px] font-black uppercase tracking-[0.08em]">
-                      {a.label}
-                    </span>
-                    <span className="block truncate font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
-                      {a.hint}
-                    </span>
-                  </span>
-                </>
-              );
-              const cls =
-                "glass-card flex min-h-[76px] flex-col justify-between rounded-[var(--fb-radius-md)] p-3";
-              return external ? (
-                <a key={a.id} href={a.to} target="_blank" rel="noreferrer" className={cls}>
-                  {inner}
-                </a>
-              ) : (
-                <Link key={a.id} to={a.to} hash={a.hash ?? undefined} className={cls}>
-                  {inner}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
 
         {/* Featured campaign — admin-managed, 4s cross-fade */}
         {campaignSlides.length > 0 && (
