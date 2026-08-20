@@ -395,21 +395,37 @@ function EarnPage() {
         <Surface id="how">
           <SectionHeader
             title="How you earn"
-            hint={`Qualified swaps from $${SWAP_MIN_QUALIFYING_USD} count toward a daily maximum of ${SWAP_MAX_DAILY_PTS} ${PTS}.`}
+            hint={`Verified swaps from $${SWAP_MIN_QUALIFYING_USD} grow your FLOW Points. Amounts are decided server-side from on-chain evidence.`}
           />
-          <ul className="divide-y divide-hairline border-t border-hairline">
+          <div className="divide-y divide-hairline border-t border-hairline">
+            <ListRow
+              icon={<Sparkles className="h-4 w-4" aria-hidden />}
+              label="Verified swaps"
+              description={`Qualifying swap activity grows your FLOW Points once per verified transaction. Swaps below $${SWAP_MIN_QUALIFYING_USD} still complete but earn no ${PTS}.`}
+              to="/trade"
+            />
+          </div>
+          <div className="px-4 pb-3 pt-2">
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Reference tiers below are the documented target policy for daily volume (up to{" "}
+              {SWAP_MAX_DAILY_PTS} {PTS}/day) and are pending owner approval — they are not the
+              currently active accrual rule.
+            </p>
+          </div>
+          <ul className="divide-y divide-hairline border-t border-hairline opacity-60">
             {SWAP_DAILY_TIERS.map((t) => (
               <li
                 key={t.minUsd}
                 className="flex items-center justify-between gap-3 px-4 py-2.5 text-[12.5px]"
               >
                 <span className="font-bold">{formatUsd(t.minUsd)}+ daily swap volume</span>
-                <span className="font-mono text-[12px] font-black tabular-nums text-primary">
+                <span className="font-mono text-[12px] font-black tabular-nums text-muted-foreground">
                   {t.pts} {PTS}
                 </span>
               </li>
             ))}
           </ul>
+
           <div className="divide-y divide-hairline border-t border-hairline">
             <ListRow
               icon={<Trophy className="h-4 w-4" aria-hidden />}

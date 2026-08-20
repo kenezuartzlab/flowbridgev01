@@ -6,7 +6,7 @@ import {
   BOT_MAINNET_CHAIN_ID,
   requireFlowBridgeExecution,
 } from "@/lib/flowbridge/executionRegistry";
-import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd } from "@/lib/rewards";
+import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd, referralActivityShare } from "@/lib/rewards";
 import { getRewardSettings } from "@/lib/appConfig.server";
 
 
@@ -310,7 +310,7 @@ export async function createTransactionHistory(
     // points their referee just earned from verified swap volume.
     if (pointsToEarn > 0 && user.referred_by) {
       const rules = await getRewardSettings();
-      const share = Math.floor((pointsToEarn * (rules.referralActivityPct ?? 0)) / 100);
+      const share = referralActivityShare(pointsToEarn, rules.referralActivityPct);
       if (share > 0) {
         const { data: referrer } = await supabaseAdmin
           .from("profiles")
