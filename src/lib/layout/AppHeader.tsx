@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
@@ -13,6 +13,8 @@ import logoUrl from '@/assets/flowbridge-logo.png';
 import { checkAdmin } from '@/lib/admin/adminApi';
 import { FlowPointsPill } from '@/components/rewards/FlowPointsPill';
 import { PrimaryNav } from '@/components/shell/PrimaryNav';
+import { useShellMode } from '@/components/shell/useShellMode';
+import { PRIMARY_NAV, isNavActive } from '@/components/shell/navModel';
 
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -93,6 +95,11 @@ export function AppHeader({
   const [canOpenSets, setCanOpenSets] = useState(false);
   const [roadmapOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  // V9.3 — the header measures ITSELF; the inline desktop nav is only rendered
+  // when the shell genuinely has room for a single no-wrap row.
+  const headerRef = useRef<HTMLElement | null>(null);
+  const shellMode = useShellMode(headerRef);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigate = useNavigate();
 
@@ -201,7 +208,32 @@ export function AppHeader({
 
   const go = (to: string) => () => { navigate({ to }); setMenuOpen(false); };
 
+  // V9.3 — at mobile/compact widths the drawer is the ONLY top navigation
+  // surface, so the canonical destinations live at the top of the menu.
+  const navigateSection: MenuSection[] =
+    shellMode === 'desktop'
+      ? []
+      : [
+          {
+            id: 'navigate',
+            title: 'Navigate',
+            items: PRIMARY_NAV.map((dest) => {
+              const active = isNavActive(dest, pathname);
+              const Icon = dest.Icon;
+              return {
+                id: `nav-${dest.id}`,
+                label: dest.label,
+                icon: <Icon className="w-4 h-4" strokeWidth={active ? 2.6 : 2} />,
+                onClick: go(dest.to),
+                accent: active,
+                show: true,
+              } as MenuItem;
+            }),
+          },
+        ];
+
   const sections: MenuSection[] = [
+    ...navigateSection,
     {
       id: 'explore',
       title: 'Trade',
@@ -297,7 +329,7 @@ export function AppHeader({
 
 
   return (
-    <header className="presentation-exempt flex flex-col border-b border-hairline bg-background relative z-20 w-full font-mono">
+    <header ref={headerRef} className="presentation-exempt flex flex-col border-b border-hairline bg-background relative z-20 w-full font-mono">
       <div className="flex items-center justify-between gap-2 p-3 sm:p-4 min-w-0">
         {/* Brand */}
         <div className="flex flex-col min-w-0 flex-1">
@@ -321,8 +353,8 @@ export function AppHeader({
           </div>
         </div>
 
-        {/* V9 — one authoritative desktop navigation, shared with every other route */}
-        <PrimaryNav className="shrink-0" />
+        {/* V9.3 — inline navigation only in genuine full-desktop shells */}
+        {shellMode === 'desktop' && <PrimaryNav className="shrink-0" />}
 
         {/* Actions: wallet + one menu button */}
         <div className="flex items-center gap-1.5 shrink-0">
