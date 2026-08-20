@@ -156,7 +156,7 @@ function CampaignsPage() {
       <main className="mx-auto max-w-2xl space-y-5 p-3 sm:p-4 md:max-w-4xl lg:max-w-[1240px] lg:py-6">
         <ExploreTabs className="px-1" />
         {/* Hero */}
-        <section className="fb-surface relative overflow-hidden p-4 sm:p-5 lg:p-6">
+        <section className="fb-surface relative overflow-hidden p-3.5 sm:p-5 lg:p-6">
           <span
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl"
@@ -164,14 +164,15 @@ function CampaignsPage() {
           <div className="relative lg:flex lg:items-end lg:justify-between lg:gap-8">
             <div className="min-w-0">
               <p className="fb-eyebrow">Explore campaigns</p>
-              <h1 className="mt-1.5 text-[21px] font-black leading-tight tracking-[-0.02em] sm:text-[26px] lg:text-[30px]">
+              <h1 className="mt-1 text-[18px] font-black leading-tight tracking-[-0.02em] sm:text-[26px] lg:text-[30px]">
                 Complete verified on-chain quests. Earn Campaign PTS.
               </h1>
-              <p className="mt-2 max-w-xl text-[12.5px] leading-relaxed text-muted">
-                Every campaign task settles from verified source-chain activity. Campaign PTS is
-                tracked separately from FLOW rewards.
+              <p className="mt-1.5 max-w-xl text-[12px] leading-relaxed text-muted sm:text-[12.5px]">
+                Every task settles from verified source-chain activity. Campaign PTS is tracked
+                separately from FLOW rewards.
               </p>
             </div>
+
             <dl className="mt-4 grid grid-cols-2 gap-2 lg:mt-0 lg:w-[420px] lg:shrink-0 lg:grid-cols-3">
               <Stat
                 icon={<Trophy className="h-3.5 w-3.5" aria-hidden />}

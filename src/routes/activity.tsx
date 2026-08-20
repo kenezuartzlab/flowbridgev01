@@ -1,11 +1,33 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+/**
+ * FlowBridge V10.1 — Activity on the shared consumer shell.
+ *
+ * The old dark/terminal treatment (sticky mono header, nested bordered cards,
+ * monospace everywhere) is gone: this route now renders through the same
+ * primitives as Home and Explore — `AppTopBar`, `SafeAreaPage`, `Surface`,
+ * `MetricStrip`, `TimelineRow`, `StatusPill` — so all four surfaces read as one
+ * product in both themes.
+ *
+ * Data semantics are untouched: verified server evidence and local submissions
+ * stay two separately labelled sources and are never merged.
+ */
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, RefreshCw, ArrowUpRight, Repeat, Waypoints, Users } from "lucide-react";
+import { ArrowUpRight, RefreshCw, Repeat, Users, Waypoints } from "lucide-react";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { BottomNav } from "@/components/nav/BottomNav";
+import { AppTopBar } from "@/components/layout/AppTopBar";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { TabBanner } from "@/components/banners/TabBanner";
 import { VerifiedActivityPanel } from "@/components/app/VerifiedActivityPanel";
+import {
+  MetricStrip,
+  SafeAreaPage,
+  SectionHeader,
+  StatusPill,
+  Surface,
+  TimelineRow,
+  toneForStatus,
+} from "@/components/ui-kit/primitives";
 
 export const Route = createFileRoute("/activity")({
   head: () => ({
@@ -69,223 +91,169 @@ function ActivityPage() {
     return out;
   }, [transactions, filter]);
 
+  const totals = useMemo(
+    () =>
+      transactions.reduce(
+        (acc: { swaps: number; bridges: number; points: number }, t: any) => {
+          if (isBridgeTx(t)) acc.bridges += 1;
+          else acc.swaps += 1;
+          acc.points += pointsOf(t);
+          return acc;
+        },
+        { swaps: 0, bridges: 0, points: 0 },
+      ),
+    [transactions],
+  );
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-hairline bg-card-alt px-4 py-3 backdrop-blur-xl">
-        <Link
-          to="/"
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-hairline text-muted hover:text-foreground"
-          aria-label="Back to swap"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-        <h1 className="font-mono text-[13px] font-black uppercase tracking-[0.12em]">Activity</h1>
-        <button
-          onClick={() => void refresh()}
-          className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg border border-hairline text-muted hover:text-foreground"
-          aria-label="Refresh activity"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-        </button>
-      </header>
+      <AppTopBar
+        eyebrow="Activity"
+        title="Your evidence timeline"
+        avatar={user?.photoURL ?? null}
+        initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
+        actions={
+          <button
+            type="button"
+            onClick={() => void refresh()}
+            aria-label="Refresh activity"
+            className="grid h-9 w-9 place-items-center rounded-2xl border border-hairline bg-card text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden />
+          </button>
+        }
+      />
 
-      <main className="mx-auto max-w-lg px-4 py-4 pb-24 sm:py-5 md:max-w-3xl lg:max-w-5xl">
+      <SafeAreaPage width="wide">
         {!user ? (
-          <div className="space-y-4">
+          <>
             <TabBanner variant="activity" />
-            <div className="rounded-2xl border border-hairline bg-card p-6 text-center">
-              <h2 className="text-base font-black text-foreground">Sign in to see your history</h2>
-              <p className="mt-2 text-[12px] leading-relaxed text-muted">
+            <Surface padded className="text-center">
+              <h2 className="text-[15px] font-black">Sign in to see your history</h2>
+              <p className="mx-auto mt-1.5 max-w-sm text-[12px] leading-relaxed text-muted">
                 Activity is recorded only for a verified email and the wallet bound to it.
               </p>
-              <div className="mt-4">
+              <div className="mt-4 flex justify-center">
                 <SignInButton label="Sign in" returnTo="/activity" />
               </div>
-            </div>
-          </div>
+            </Surface>
+          </>
         ) : (
           <>
-            <EarningsSummary transactions={transactions} />
+            <MetricStrip
+              items={[
+                { label: "FLOW earned", value: totals.points.toLocaleString("en-US") },
+                { label: "Swaps", value: String(totals.swaps) },
+                { label: "Bridges", value: String(totals.bridges) },
+              ]}
+            />
 
-            {/* V10 — one timeline, two clearly labelled sources. */}
-            <section className="mb-4">
-              <h2 className="mb-2 px-1 text-[13px] font-black">
-                Verified on-chain
-                <span className="ml-2 rounded-full border border-success/30 bg-success/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-success">
-                  Server verified
-                </span>
-              </h2>
-              <VerifiedActivityPanel />
-            </section>
+            {/* Source 1 — server-verified evidence. */}
+            <VerifiedActivityPanel />
 
-            <h2 className="mb-2 px-1 text-[13px] font-black">
-              Submissions
-              <span className="ml-2 rounded-full border border-hairline px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-muted">
-                This device
-              </span>
-            </h2>
+            {/* Source 2 — local submissions from this device. */}
+            <Surface>
+              <SectionHeader
+                title="Submissions"
+                hint="Recorded by this device — not server-verified evidence."
+                badge={<StatusPill tone="neutral">This device</StatusPill>}
+              />
 
-            <nav
-              aria-label="Filter submissions"
-              className="-mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1"
-            >
-              {(
-                [
-                  ["ALL", "All"],
-                  ["SWAPS", "Swaps"],
-                  ["BRIDGES", "Bridges"],
-                  ["EARNINGS", "Earning"],
-                ] as [Filter, string][]
-              ).map(([f, label]) => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  aria-pressed={filter === f}
-                  className={`shrink-0 rounded-full border px-3.5 py-1.5 text-[12px] font-bold transition-colors ${
-                    filter === f
-                      ? "border-primary/40 bg-primary/15 text-primary"
-                      : "border-hairline bg-card text-muted hover:text-foreground"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </nav>
+              <div className="border-t border-hairline px-4 py-2.5">
+                <nav aria-label="Filter submissions" className="-mx-1 flex gap-1.5 overflow-x-auto px-1">
+                  {(
+                    [
+                      ["ALL", "All"],
+                      ["SWAPS", "Swaps"],
+                      ["BRIDGES", "Bridges"],
+                      ["EARNINGS", "Earning"],
+                    ] as [Filter, string][]
+                  ).map(([f, label]) => (
+                    <button
+                      key={f}
+                      onClick={() => setFilter(f)}
+                      aria-pressed={filter === f}
+                      className={`shrink-0 rounded-full border px-3.5 py-1.5 text-[12px] font-bold transition-colors ${
+                        filter === f
+                          ? "border-primary/40 bg-primary/15 text-primary"
+                          : "border-hairline bg-transparent text-muted hover:text-foreground"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
 
-
-            {groups.length === 0 ? (
-              <p className="rounded-2xl border border-hairline bg-card p-6 text-center font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
-                {loading ? "Loading activity…" : "No recorded activity yet"}
-              </p>
-            ) : (
-              <div className="space-y-5">
-                {groups.map((g) => (
-                  <section key={g.label}>
-                    <h2 className="mb-2 font-mono text-[10px] font-black uppercase tracking-[0.14em] text-muted-soft">
+              {groups.length === 0 ? (
+                <p className="border-t border-hairline px-4 py-6 text-center text-[12px] text-muted">
+                  {loading ? "Loading activity…" : "No recorded activity yet."}
+                </p>
+              ) : (
+                groups.map((g) => (
+                  <div key={g.label} className="border-t border-hairline">
+                    <p className="px-4 pt-3 text-[10.5px] font-bold uppercase tracking-[0.12em] text-muted-soft">
                       {g.label}
-                    </h2>
-                    <ul className="divide-y divide-hairline overflow-hidden rounded-2xl border border-hairline bg-card">
+                    </p>
+                    <ul>
                       {g.items.map((t: any, i: number) => (
-                        <ActivityRow key={t.id ?? t.tx_hash ?? `${g.label}-${i}`} tx={t} />
+                        <SubmissionRow key={t.id ?? t.tx_hash ?? `${g.label}-${i}`} tx={t} />
                       ))}
                     </ul>
-                  </section>
-                ))}
-              </div>
-            )}
+                  </div>
+                ))
+              )}
+            </Surface>
 
-            <p className="mt-4 pb-2 text-center font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
+            <p className="pb-1 text-center text-[11px] text-muted-soft">
               Bridges are recorded for history only · points come from swaps
             </p>
           </>
         )}
-      </main>
+      </SafeAreaPage>
 
       <BottomNav />
     </div>
   );
 }
 
-function EarningsSummary({ transactions }: { transactions: any[] }) {
-  const totals = transactions.reduce(
-    (acc, t: any) => {
-      if (isBridgeTx(t)) acc.bridges += 1;
-      else acc.swaps += 1;
-      acc.points += pointsOf(t);
-      return acc;
-    },
-    { swaps: 0, bridges: 0, points: 0 },
-  );
-
-  return (
-    <section className="relative mb-4 overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/20 via-primary/10 to-accent/15 p-4">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary/20 blur-3xl"
-      />
-      <h2 className="relative font-mono text-[11px] font-black uppercase tracking-[0.12em] text-muted">
-        Earnings Activity
-      </h2>
-      <div className="relative mt-3 grid grid-cols-3 gap-2 text-center">
-        <div>
-          <p className="text-2xl font-black tabular-nums text-primary">{totals.points.toLocaleString()}</p>
-          <p className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted-soft">
-            FLOW earned
-          </p>
-        </div>
-        <div>
-          <p className="text-2xl font-black tabular-nums text-foreground">{totals.swaps}</p>
-          <p className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted-soft">Swaps</p>
-        </div>
-        <div>
-          <p className="text-2xl font-black tabular-nums text-foreground">{totals.bridges}</p>
-          <p className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted-soft">Bridges</p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ActivityRow({ tx }: { tx: any }) {
+function SubmissionRow({ tx }: { tx: any }) {
   const type = String(tx.tx_type ?? tx.txType ?? "TX").toUpperCase();
   const bridge = isBridgeTx(tx);
-  const status = String(tx.status ?? "").toUpperCase();
+  const status = String(tx.status ?? "").toUpperCase() || "PENDING";
   const points = pointsOf(tx);
   const hash = tx.tx_hash ?? tx.txHash ?? "";
   const created = tx.created_at ?? tx.createdAt;
   const Icon = bridge ? Waypoints : type.includes("REFERRAL") ? Users : Repeat;
 
   return (
-    <li className="flex items-start gap-3 p-3.5">
-      <span
-        className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
-          bridge ? "border-accent/30 bg-accent/10 text-accent" : "border-primary/30 bg-primary/10 text-primary"
-        }`}
-      >
-        <Icon className="h-4 w-4" />
-      </span>
-
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-bold text-foreground">
-          {bridge ? "Bridge Transaction" : "Swap Reward"}
-        </p>
-        <p className="mt-0.5 truncate font-mono text-[10.5px] text-muted">
-          {tx.direction ?? type} · {tx.from_amount ?? tx.fromAmount ?? "—"} →{" "}
-          {tx.to_amount ?? tx.toAmount ?? "—"}
-        </p>
-        {hash ? (
+    <TimelineRow
+      icon={<Icon className="h-4 w-4" aria-hidden />}
+      title={bridge ? "Bridge transaction" : "Swap reward"}
+      status={status}
+      statusTone={toneForStatus(status)}
+      meta={`${tx.direction ?? type} · ${tx.from_amount ?? tx.fromAmount ?? "—"} → ${
+        tx.to_amount ?? tx.toAmount ?? "—"
+      }`}
+      timestamp={
+        created
+          ? new Date(created).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+          : undefined
+      }
+      points={points > 0 ? `+${points.toLocaleString("en-US")} FLOW` : undefined}
+      action={
+        hash ? (
           <a
             href={`https://scan.botchain.ai/tx/${hash}`}
             target="_blank"
             rel="noreferrer"
-            className="mt-1 inline-flex items-center gap-1 font-mono text-[10px] text-muted-soft hover:text-primary"
+            className="inline-flex items-center gap-1 font-mono text-[10px] text-muted-soft hover:text-primary"
           >
             {String(hash).slice(0, 10)}…{String(hash).slice(-6)}
-            <ArrowUpRight className="h-3 w-3" />
+            <ArrowUpRight className="h-3 w-3" aria-hidden />
           </a>
-        ) : null}
-      </div>
-
-      <div className="shrink-0 text-right">
-        <p
-          className={`font-mono text-[12px] font-black tabular-nums ${
-            points > 0 ? "text-primary" : "text-muted-soft"
-          }`}
-        >
-          {points > 0 ? `+${points.toLocaleString()} FLOW` : "—"}
-        </p>
-        <p className="font-mono text-[10px] text-muted">
-          {created ? new Date(created).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : ""}
-        </p>
-        <p
-          className={`font-mono text-[9px] font-black uppercase tracking-[0.08em] ${
-            status === "SUCCESS" || status === "COMPLETED" ? "text-success" : "text-warning"
-          }`}
-        >
-          {status || "PENDING"}
-        </p>
-      </div>
-    </li>
+        ) : undefined
+      }
+    />
   );
 }
-

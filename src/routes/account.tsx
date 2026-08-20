@@ -2,8 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
-  LineChart,
-  Sparkles,
   ChevronRight,
   Coins,
   Download,
@@ -17,13 +15,11 @@ import {
   ShieldCheck,
   Sun,
   Users,
-  Heart,
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { HeroCard } from "@/components/layout/HeroCard";
+import { AppTopBar } from "@/components/layout/AppTopBar";
+import { MetricStrip, StatusPill } from "@/components/ui-kit/primitives";
 import { getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
-import { PageIcon } from "@/components/layout/PageIcon";
 
 import { SignInButton } from "@/components/auth/SignInButton";
 import { ProfileEditModal } from "@/components/account/ProfileEditModal";
@@ -33,6 +29,7 @@ import { logout } from "@/lib/auth";
 import { readPlayState } from "@/lib/games/playState";
 import { usePrefs } from "@/lib/prefs";
 import { GREETING_STYLES, greetingVariants, type GreetingStyleId } from "@/lib/greetings";
+
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -86,6 +83,8 @@ function AccountPage() {
   const displayName = user?.displayName || user?.name || user?.email?.split("@")[0] || "Guest";
   const initial = displayName.slice(0, 1).toUpperCase();
   const avatar = user?.photoURL || user?.avatar_url || null;
+  const verified = Boolean(user && (user.emailVerified || user.email_verified));
+
 
   const exportData = useMemo(
     () => ({
@@ -111,123 +110,106 @@ function AccountPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PageHeader title={page.hero.title || "Account"} subtitle={page.hero.subtitle || "Profile & settings"} />
+      <AppTopBar
+        eyebrow="Profile"
+        title={page.hero.title || displayName}
+        avatar={avatar}
+        initial={initial}
+      />
 
-      <main className="mx-auto max-w-2xl space-y-3 p-3 sm:p-4">
-        {/* Profile card */}
-        <HeroCard hero={page.hero} variant="account" className="p-5">
-          <div className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+      <main
+        className="mx-auto w-full max-w-2xl space-y-4 px-3 pt-3 sm:px-4 sm:pt-4 md:max-w-3xl md:pt-6"
+        style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}
+      >
+        {/*
+         * V10.1 — identity is FlowBridge-native: the shared surface tokens plus
+         * the primary accent, instead of the isolated purple gradient card that
+         * belonged to no other screen.
+         */}
+        <section className="fb-surface relative overflow-hidden p-4">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-14 -top-16 h-44 w-44 rounded-full bg-primary/15 blur-3xl"
+          />
+          <div className="relative flex items-center gap-3">
             {avatar ? (
               <img
                 src={avatar}
                 alt=""
-                className="h-14 w-14 shrink-0 rounded-full border border-white/40 object-cover"
+                className="h-14 w-14 shrink-0 rounded-full border border-primary/30 object-cover"
               />
             ) : (
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-white/40 bg-white/15 text-xl font-black">
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-primary/30 bg-primary/12 text-xl font-black text-primary">
                 {initial}
               </span>
             )}
-            <div className="min-w-0">
-              <p className="truncate text-[19px] font-black leading-tight">{displayName}</p>
-              <p className="truncate font-mono text-[10.5px] opacity-80">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[18px] font-black leading-tight tracking-[-0.01em]">
+                {displayName}
+              </p>
+              <p className="truncate font-mono text-[10.5px] text-muted">
                 {user?.email ?? "Not signed in"}
               </p>
-              {user && (
-                <button
-                  type="button"
-                  onClick={() => setEditOpen(true)}
-                  className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/15 px-2.5 py-1 font-mono text-[9.5px] font-black uppercase tracking-[0.12em]"
-                >
-                  <Pencil className="h-3 w-3" /> Edit profile
-                </button>
-              )}
             </div>
+            {user && (
+              <button
+                type="button"
+                onClick={() => setEditOpen(true)}
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-hairline bg-card px-2.5 py-1.5 text-[11px] font-bold text-muted transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                <Pencil className="h-3 w-3" aria-hidden /> Edit
+              </button>
+            )}
           </div>
 
-          <div className="relative mt-4 grid grid-cols-2 gap-2">
-            <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <PageIcon page="account" slot="flow" size={28} />
-              <span className="min-w-0">
-                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">{L("flow", "FLOW Points")}</span>
-                <span className="block font-mono text-[15px] font-black tabular-nums">
-                  {flow.toLocaleString("en-US")}
-                </span>
-              </span>
-            </div>
-            <div className="fb-hero-tile flex items-center gap-2 px-3 py-2.5">
-              <PageIcon page="account" slot="play" size={28} />
-              <span className="min-w-0">
-                <span className="block font-mono text-[9.5px] font-black uppercase tracking-[0.14em] opacity-80">{L("play", "Play points")}</span>
-                <span className="block font-mono text-[15px] font-black tabular-nums">
-                  {play.toLocaleString("en-US")}
-                </span>
-              </span>
-            </div>
+          <div className="relative mt-3 flex flex-wrap items-center gap-2">
+            <StatusPill tone={verified ? "ok" : "pending"}>
+              <ShieldCheck className="h-3 w-3" aria-hidden />
+              {verified ? "Verified pass" : "Verification pending"}
+            </StatusPill>
+            <span className="text-[11.5px] text-muted">
+              {verified
+                ? "Wallet binding and referral rewards unlocked."
+                : user
+                  ? "Verify your email from the header banner to unlock referral rewards."
+                  : "Sign in and verify your email to unlock referral rewards."}
+            </span>
           </div>
 
           {authReady && !user && (
-            <div className="fb-hero-tile relative mt-3 space-y-2 p-3">
-              <p className="font-mono text-[10.5px] leading-relaxed">
-                Sign in to sync your FLOW Points (PTS), referrals and transaction history.
-              </p>
+            <div className="relative mt-3">
               <SignInButton label="Sign in" returnTo="/account" />
             </div>
           )}
-        </HeroCard>
-
-        {/* Verification / trust card — mirrors the reference A-Pass panel */}
-        <section className="fb-surface relative overflow-hidden p-4">
-          <PageIcon
-            page="account"
-            slot="passBadge"
-            size={92}
-            className="pointer-events-none absolute -right-3 -top-2 opacity-20"
-          />
-          <div className="relative flex items-start gap-3">
-            <PageIcon page="account" slot="pass" size={40} />
-
-            <div className="min-w-0 flex-1">
-              <p className="text-[15px] font-black">FlowBridge Verified Pass</p>
-              <p className="mt-0.5 font-mono text-[10.5px] leading-relaxed text-muted">
-                {user
-                  ? user.emailVerified || user.email_verified
-                    ? "Email verified — wallet binding and referral rewards unlocked."
-                    : "Verify your email from the header banner to unlock referral rewards."
-                  : "Sign in and verify your email to unlock referral rewards."}
-              </p>
-            </div>
-            <span
-              className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.1em] ${
-                user && (user.emailVerified || user.email_verified)
-                  ? "border-success/30 bg-success/10 text-success"
-                  : "border-warning/30 bg-warning/10 text-warning"
-              }`}
-            >
-              {user && (user.emailVerified || user.email_verified) ? "Verified" : "Pending"}
-            </span>
-          </div>
         </section>
 
+        {/* Progression — PTS (campaign/off-chain) stays distinct from FLOW. */}
+        <MetricStrip
+          items={[
+            { label: L("flow", "FLOW Points"), value: flow.toLocaleString("en-US") },
+            { label: L("play", "Play points"), value: play.toLocaleString("en-US") },
+          ]}
+        />
+
         {/*
-         * V10 — Profile is identity and progression, not a second navigation
-         * menu. Rows that only duplicate a global destination (Activity,
-         * Partners, Explore roadmap teasers) were removed; what remains is
-         * account-owned or has no other home.
+         * V10.1 — Profile is identity, progression and account-owned utilities.
+         * Rows that duplicate global navigation (Activity, Markets, Explore) or
+         * inactive surfaces (Social tasks, Games, AI assistant) were removed.
          */}
-        <Group title={L("activity", "Your account")}>
+        <Group title="Wallet & security">
           <RowLink to="/wallet" icon={<QrCode className="h-4 w-4" />} label="Wallet address & QR" />
-          <RowLink to="/rewards" icon={<Users className="h-4 w-4" />} label="Referrals & rewards" />
-          <RowLink
-            to="/rewards"
-            hash="social"
-            icon={<Heart className="h-4 w-4" />}
-            label="Social tasks & FLOW Point incentives"
+          <RowButton
+            icon={<Download className="h-4 w-4" />}
+            label="Export data"
+            value="JSON"
+            onClick={download}
           />
-          <RowLink to="/games" icon={<ShieldCheck className="h-4 w-4" />} label="Games & challenges" />
-          <RowLink to="/markets" icon={<LineChart className="h-4 w-4" />} label="Markets" />
-          <RowLink to="/assistant" icon={<Sparkles className="h-4 w-4" />} label="AI assistant" />
         </Group>
+
+        <Group title="Referrals">
+          <RowLink to="/rewards" icon={<Users className="h-4 w-4" />} label="Referrals & rewards" />
+        </Group>
+
 
 
         <Group title="Preferences">
@@ -329,14 +311,9 @@ function AccountPage() {
           )}
         </Group>
 
-        <Group title="Data & security">
-          <RowButton
-            icon={<Download className="h-4 w-4" />}
-            label="Export data"
-            value="JSON"
-            onClick={download}
-          />
+        <Group title="Support">
           <RowLink to="/campaigns/partners" icon={<Info className="h-4 w-4" />} label="About FlowBridge" />
+
           {user && (
             <button
               type="button"
