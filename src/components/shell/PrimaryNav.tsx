@@ -16,7 +16,11 @@ export function PrimaryNav({ className = "" }: { className?: string }) {
   const items = DESKTOP_ORDER.map((id) => PRIMARY_NAV.find((d) => d.id === id)!).filter(Boolean);
 
   return (
-    <nav aria-label="Primary" className={`hidden md:flex md:items-center md:gap-1 ${className}`}>
+    <nav
+      aria-label="Primary"
+      data-shell-nav="desktop"
+      className={`flex flex-nowrap items-center gap-1 font-sans ${className}`}
+    >
       {items.map((dest) => {
         const active = isNavActive(dest, pathname);
         const { Icon } = dest;

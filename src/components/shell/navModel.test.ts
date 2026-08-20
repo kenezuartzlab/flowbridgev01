@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { OPERATOR_NAV, PRIMARY_NAV, activeNavId, isNavActive } from './navModel';
+import { computeShellMode } from './useShellMode';
 
 const trade = PRIMARY_NAV.find((d) => d.id === 'trade')!;
 
@@ -52,5 +53,27 @@ describe('V9.1 navigation model', () => {
   it('keeps operator surfaces out of the primary set', () => {
     const primary = new Set(PRIMARY_NAV.map((d) => d.to));
     for (const item of OPERATOR_NAV) expect(primary.has(item.to)).toBe(false);
+  });
+});
+
+describe('V9.3 adaptive shell mode', () => {
+  it('uses the mobile shell below 768px', () => {
+    expect(computeShellMode(390, 390)).toBe('mobile');
+    expect(computeShellMode(767, 767)).toBe('mobile');
+  });
+
+  it('uses the compact shell for tablet and narrow desktop widths', () => {
+    for (const w of [768, 900, 1024, 1100, 1199]) {
+      expect(computeShellMode(w, w)).toBe('compact');
+    }
+  });
+
+  it('uses the full desktop shell only when viewport AND shell width allow a no-wrap row', () => {
+    for (const w of [1200, 1280, 1440]) {
+      expect(computeShellMode(w, w - 64)).toBe('desktop');
+    }
+    // Wide browser window but a narrow measured shell (iframe / split view / sidebar)
+    expect(computeShellMode(1440, 900)).toBe('compact');
+    expect(computeShellMode(1280, 1079)).toBe('compact');
   });
 });
