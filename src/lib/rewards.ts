@@ -29,3 +29,16 @@ export function estimateFlowPointsForUsd(
   const block = rules.usdBlock > 0 ? rules.usdBlock : FLOW_REWARD_USD_BLOCK;
   return Math.floor(Number(value) / block) * rules.pointsPerBlock;
 }
+
+/**
+ * V12.4 — the executed referrer share of a referee's verified swap points.
+ * Extracted verbatim from createTransactionHistory(); economics unchanged.
+ */
+export function referralActivityShare(
+  refereePoints: number,
+  referralActivityPct: number | null | undefined,
+): number {
+  const pts = Math.max(0, Math.floor(Number(refereePoints) || 0));
+  const pct = Math.max(0, Number(referralActivityPct) || 0);
+  return Math.floor((pts * pct) / 100);
+}
