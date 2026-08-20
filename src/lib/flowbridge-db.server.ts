@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { MAINNET_CONTRACTS } from "@/lib/contracts";
 import {
   BOT_MAINNET_CHAIN_ID,
+  BOT_TESTNET_CHAIN_ID,
   requireFlowBridgeExecution,
 } from "@/lib/flowbridge/executionRegistry";
 import { FLOW_REWARD_MIN_USD } from "@/lib/rewards";
