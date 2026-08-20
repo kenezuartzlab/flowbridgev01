@@ -312,14 +312,9 @@ function AccountPage() {
           )}
         </Group>
 
-        <Group title="Data & security">
-          <RowButton
-            icon={<Download className="h-4 w-4" />}
-            label="Export data"
-            value="JSON"
-            onClick={download}
-          />
+        <Group title="Support">
           <RowLink to="/campaigns/partners" icon={<Info className="h-4 w-4" />} label="About FlowBridge" />
+
           {user && (
             <button
               type="button"
