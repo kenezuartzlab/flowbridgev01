@@ -12,6 +12,10 @@ const incentives = {
 
 const deps = (over: Partial<any> = {}) => ({
   readIncentives: vi.fn(async () => incentives),
+  readChainState: vi.fn(async () => ({
+    alreadyClaimed: 0n,
+    distributorBalance: 10_000_000n * 10n ** 18n,
+  })),
   signTypedData: vi.fn(async () => "0xdead" as `0x${string}`),
   now: () => 1_700_000_000_000,
   ...over,
@@ -64,8 +68,60 @@ describe("authorizeFlowTokenClaim", () => {
       expect(res.cumulativeEntitlement).toBe((4000n * 10n ** 18n).toString());
       expect(res.account).toBe(incentives.walletAddress);
       expect(res.display.flowPoints).toBe(1200);
+      expect(res.alreadyClaimed).toBe("0");
+      expect(res.claimableDelta).toBe((4000n * 10n ** 18n).toString());
     }
     expect(d.signTypedData).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses a second positive authorization once the delta is settled on-chain (V12.3)", async () => {
+    const d = deps({
+      conversionPolicyApproved: true,
+      readChainState: vi.fn(async () => ({
+        alreadyClaimed: 4000n * 10n ** 18n,
+        distributorBalance: 10_000_000n * 10n ** 18n,
+      })),
+    });
+    const res = await authorizeFlowTokenClaim({
+      userId: "u1",
+      emailVerified: true,
+      chainId: BOT_TESTNET_CHAIN_ID,
+      deps: d,
+    });
+    expect(res).toMatchObject({ authorized: false, reason: "nothingToClaim", claimableDelta: "0" });
+    expect(d.signTypedData).not.toHaveBeenCalled();
+  });
+
+  it("never signs when the distributor cannot cover the delta", async () => {
+    const d = deps({
+      conversionPolicyApproved: true,
+      readChainState: vi.fn(async () => ({ alreadyClaimed: 0n, distributorBalance: 1n })),
+    });
+    const res = await authorizeFlowTokenClaim({
+      userId: "u1",
+      emailVerified: true,
+      chainId: BOT_TESTNET_CHAIN_ID,
+      deps: d,
+    });
+    expect(res).toMatchObject({ authorized: false, reason: "distributorUnderfunded" });
+    expect(d.signTypedData).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when chain state cannot be read", async () => {
+    const d = deps({
+      conversionPolicyApproved: true,
+      readChainState: vi.fn(async () => {
+        throw new Error("rpc down");
+      }),
+    });
+    const res = await authorizeFlowTokenClaim({
+      userId: "u1",
+      emailVerified: true,
+      chainId: BOT_TESTNET_CHAIN_ID,
+      deps: d,
+    });
+    expect(res).toMatchObject({ authorized: false, reason: "chainStateUnavailable" });
+    expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
   it("blocks testnet when the conversion policy is unapproved, but still returns display data", async () => {
