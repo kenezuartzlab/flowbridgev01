@@ -822,29 +822,81 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
     if (tab === "rewards") {
       return (
         <>
-          {numField("Minimum swap value to earn (USD)", cfg.rewards.minUsd, (n) =>
-            setCfg({ ...cfg, rewards: { ...cfg.rewards, minUsd: n } }),
-          )}
-          {numField("USD per FLOW block", cfg.rewards.usdBlock, (n) =>
-            setCfg({ ...cfg, rewards: { ...cfg.rewards, usdBlock: n } }),
-          )}
-          {numField("FLOW points per block", cfg.rewards.pointsPerBlock, (n) =>
-            setCfg({ ...cfg, rewards: { ...cfg.rewards, pointsPerBlock: n } }),
+          <div className="rounded-xl border border-white/10 bg-[#010C1B]/60 px-3 py-2 text-[11px] leading-relaxed text-[#C5C1B9]">
+            Active policy <span className="text-white">{cfg.rewards.policyVersion}</span> · effective{" "}
+            <span className="text-white">{cfg.rewards.v2EffectiveAt}</span>. The server is
+            authoritative: FLOW Points accrue as 1 point per whole $1 of verified swap value, above
+            the minimum, bounded by the daily cap. Legacy per-block and referral percentage-share
+            controls are retired and kept read-only for historical audit.
+          </div>
+          {numField(
+            "Minimum verified swap value (USD)",
+            cfg.rewards.minSwapUsd,
+            (n) => setCfg({ ...cfg, rewards: { ...cfg.rewards, minSwapUsd: n } }),
+            "Swaps below this earn 0 FLOW Points.",
           )}
           {numField(
-            "Referral-signup unlock per swap volume (USD)",
+            "Daily core swap cap (FLOW Points per wallet per UTC day)",
+            cfg.rewards.dailyCoreSwapCap,
+            (n) => setCfg({ ...cfg, rewards: { ...cfg.rewards, dailyCoreSwapCap: Math.round(n) } }),
+          )}
+          {numField(
+            "Referral milestone 1 — first qualifying swap",
+            cfg.rewards.referralMilestoneFirstSwap,
+            (n) =>
+              setCfg({
+                ...cfg,
+                rewards: { ...cfg.rewards, referralMilestoneFirstSwap: Math.round(n) },
+              }),
+          )}
+          {numField(
+            "Referral milestone 2 — cumulative referred volume",
+            cfg.rewards.referralMilestoneVolume,
+            (n) =>
+              setCfg({
+                ...cfg,
+                rewards: { ...cfg.rewards, referralMilestoneVolume: Math.round(n) },
+              }),
+            "Awarded once the referred user passes the qualified volume threshold below.",
+          )}
+          {numField(
+            "Qualified referred volume threshold (USD)",
             cfg.rewards.referralClaimMinSwapUsd,
             (n) => setCfg({ ...cfg, rewards: { ...cfg.rewards, referralClaimMinSwapUsd: n } }),
           )}
-          {numField("Claim threshold (FLOW)", cfg.rewards.claimThreshold, (n) =>
-            setCfg({ ...cfg, rewards: { ...cfg.rewards, claimThreshold: n } }),
+          {numField(
+            "Referral milestone 3 — 3 distinct active days",
+            cfg.rewards.referralMilestoneActiveDaysPoints,
+            (n) =>
+              setCfg({
+                ...cfg,
+                rewards: { ...cfg.rewards, referralMilestoneActiveDaysPoints: Math.round(n) },
+              }),
           )}
-          {numField("Referral activity share (% of referee swap points)", cfg.rewards.referralActivityPct, (n) =>
-            setCfg({ ...cfg, rewards: { ...cfg.rewards, referralActivityPct: n } }),
+          {numField(
+            "Maximum FLOW Points per referred user",
+            cfg.rewards.referralMaxPerReferredUser,
+            (n) =>
+              setCfg({
+                ...cfg,
+                rewards: { ...cfg.rewards, referralMaxPerReferredUser: Math.round(n) },
+              }),
+          )}
+          {numField(
+            "Rewarded referrals per referrer per month",
+            cfg.rewards.referralMonthlyCap,
+            (n) =>
+              setCfg({ ...cfg, rewards: { ...cfg.rewards, referralMonthlyCap: Math.round(n) } }),
+          )}
+          {numField(
+            "Conversion threshold (FLOW Points needed to convert)",
+            cfg.rewards.claimThreshold,
+            (n) => setCfg({ ...cfg, rewards: { ...cfg.rewards, claimThreshold: n } }),
           )}
         </>
       );
     }
+
     const flag = (k: keyof AppConfig["flags"], label: string, hint?: string) => (
       <Toggle
         label={label}
