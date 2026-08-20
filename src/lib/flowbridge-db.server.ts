@@ -47,20 +47,40 @@ async function rpc<T>(url: string, method: string, params: unknown[]): Promise<T
   }
 }
 
-async function verifySwapReceipt(txHash: string | null, walletAddress: string) {
+/**
+ * V12.4B — canonical swap-receipt verification.
+ *
+ * Returns the chain the swap was proven on, or null when nothing verifies.
+ * Two disjoint candidates, each pinned to its own router:
+ *   - BOT Mainnet 677 · legacy v3 router (historic reads only)
+ *   - BOT Testnet 968 · Router V4 (the approved verified-swap execution path)
+ * Neither candidate's evidence is ever reinterpreted as the other's.
+ */
+async function verifySwapReceipt(
+  txHash: string | null,
+  walletAddress: string,
+): Promise<number | null> {
   const hash = txHash?.trim();
-  if (!hash || !/^0x[a-fA-F0-9]{64}$/.test(hash)) return false;
+  if (!hash || !/^0x[a-fA-F0-9]{64}$/.test(hash)) return null;
   const wallet = walletAddress.toLowerCase();
-  // Mainnet only: testnet activity is intentionally never recorded or rewarded,
-  // so testnet swaps can never credit FLOW points.
-  const candidates = [
+  const { requireFlowBridgeV4Execution } = await import("@/lib/flowbridge/executionRegistry");
+  const testnetRpc = process.env["BOT_TESTNET_RPC_URL"] ?? "";
+
+  const candidates: Array<{ chainId: number; rpcUrl: string; router: string }> = [
     {
+      chainId: BOT_MAINNET_CHAIN_ID,
       rpcUrl: BOT_MAINNET_RPC,
-      // LEGACY v3 mainnet read only. This is explicitly NOT Router V4 evidence
-      // and is never reinterpreted as V4 verified-swap data.
+      // LEGACY v3 mainnet read only. This is explicitly NOT Router V4 evidence.
       router: requireFlowBridgeExecution(BOT_MAINNET_CHAIN_ID).router,
     },
   ];
+  if (testnetRpc) {
+    candidates.push({
+      chainId: BOT_TESTNET_CHAIN_ID,
+      rpcUrl: testnetRpc,
+      router: requireFlowBridgeV4Execution(BOT_TESTNET_CHAIN_ID).router,
+    });
+  }
 
   for (const candidate of candidates) {
     const [receipt, tx] = await Promise.all([
@@ -70,11 +90,53 @@ async function verifySwapReceipt(txHash: string | null, walletAddress: string) {
     if (!receipt || !tx) continue;
     const statusOk = String(receipt.status).toLowerCase() === "0x1";
     const fromOk = String(tx.from ?? receipt.from ?? "").toLowerCase() === wallet;
-    const toOk = String(tx.to ?? receipt.to ?? "").toLowerCase() === candidate.router;
-    if (statusOk && fromOk && toOk) return true;
+    const toOk =
+      String(tx.to ?? receipt.to ?? "").toLowerCase() === candidate.router.toLowerCase();
+    if (statusOk && fromOk && toOk) return candidate.chainId;
   }
-  return false;
+  return null;
 }
+
+/**
+ * V12.4B — canonical verified-activity evidence for a swap, when the indexer has
+ * already recorded it. Token, amount and log index come from this row, never
+ * from the browser payload.
+ */
+async function canonicalSwapEvidence(txHash: string, walletAddress: string) {
+  const { data } = await supabaseAdmin
+    .from("verified_activities")
+    .select("source_chain_id, source_log_index, amount_raw, token, kind, status")
+    .eq("source_tx_hash", txHash.toLowerCase())
+    .eq("user_wallet", walletAddress.toLowerCase())
+    .eq("kind", "SWAP_EXECUTED")
+    .order("source_log_index", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (!data) return null;
+  return {
+    chainId: Number(data.source_chain_id),
+    logIndex: Number(data.source_log_index),
+    amountRaw: String(data.amount_raw),
+    token: String(data.token).toLowerCase(),
+  };
+}
+
+/** USD value derived purely from canonical evidence (amount_raw + token). */
+async function canonicalEvidenceUsd(evidence: {
+  chainId: number;
+  amountRaw: string;
+  token: string;
+}): Promise<number> {
+  const { findVerifiedSwapPath } = await import("@/lib/swap/verifiedSwapConfig");
+  const path = findVerifiedSwapPath(evidence.chainId, evidence.token);
+  if (!path) return 0;
+  const raw = Number(evidence.amountRaw);
+  if (!Number.isFinite(raw) || raw <= 0) return 0;
+  const amount = raw / 10 ** path.tokenInDecimals;
+  const price = await fetchTokenUsdPrice(path.tokenInSymbol);
+  return amount * price;
+}
+
 
 /** Resolve the on-chain address for a swap symbol (built-ins + admin-published tokens). */
 async function resolveTokenAddress(symbol: string): Promise<string | null> {
