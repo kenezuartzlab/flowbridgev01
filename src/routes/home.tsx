@@ -23,16 +23,14 @@ import { PageIcon } from "@/components/layout/PageIcon";
 import { BannerRotator } from "@/components/banners/BannerRotator";
 import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
 import { trackBannerImpression } from "@/lib/banners/analytics";
-import { getBannerSurface, getPage, getQuickActions, pageLabel, useAppConfig } from "@/lib/config/appConfig";
+import { getBannerSurface, getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
 import { HeroCard } from "@/components/layout/HeroCard";
-import { ActionIcon } from "@/components/ActionIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
 import { PTS } from "@/lib/points";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
-import { PRIMARY_NAV } from "@/components/shell/navModel";
 
 
 export const Route = createFileRoute("/home")({
