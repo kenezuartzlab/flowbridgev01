@@ -38,11 +38,12 @@ export const PRIMARY_NAV: NavDestination[] = [
   { id: "profile", label: "Profile", to: "/account", Icon: CircleUser },
 ];
 
-/** Operator surfaces are secondary navigation, never equal-weight consumer tabs. */
-export const OPERATOR_NAV = [
-  { id: "studio", label: "Studio", to: "/campaigns/studio" },
-  { id: "participant", label: "My progress", to: "/campaigns/me" },
-];
+/**
+ * V9.2 — operator tooling is NOT consumer navigation. Campaign Studio now lives
+ * inside the secure Sets console and is never linked from public surfaces; only
+ * "My progress" remains as in-context secondary navigation under Explore.
+ */
+export const OPERATOR_NAV = [{ id: "participant", label: "My progress", to: "/campaigns/me" }];
 
 export function isNavActive(dest: NavDestination, pathname: string): boolean {
   const paths = [dest.to, ...(dest.aliases ?? [])];
