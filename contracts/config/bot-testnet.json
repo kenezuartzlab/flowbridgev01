@@ -1,0 +1,25 @@
+{
+  "$comment": "FlowBridge V12 deployment config — BOT Testnet 968. Values set to null REQUIRE owner approval before deployment. Do NOT guess.",
+  "chainId": 968,
+  "network": "bot-testnet",
+  "rpcUrlEnv": "BOT_TESTNET_RPC_URL",
+  "deployerKeyEnv": "DEPLOYER_PRIVATE_KEY",
+  "token": {
+    "name": null,
+    "symbol": null,
+    "decimals": 18,
+    "totalSupply": null,
+    "treasury": null
+  },
+  "distributor": {
+    "owner": null,
+    "rewardSigner": null,
+    "initialFundingAmount": null
+  },
+  "compiler": {
+    "version": "0.8.24",
+    "optimizer": { "enabled": true, "runs": 200 },
+    "evmVersion": "paris"
+  },
+  "status": "BLOCKED_PENDING_APPROVED_TOKENOMICS"
+}
