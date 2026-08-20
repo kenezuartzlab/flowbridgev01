@@ -30,7 +30,7 @@ import { wagmiConfig } from "@/lib/wagmi";
 import { formatUsd } from "@/lib/format";
 import { getIdToken, googleSignIn } from "@/lib/auth";
 import { DonateModal } from "@/modals/DonateModal";
-import { PTS, XP, formatPts, xpLevel } from "@/lib/points";
+import { FLOW_TOKEN, PTS, XP, formatPts, xpLevel } from "@/lib/points";
 
 
 
