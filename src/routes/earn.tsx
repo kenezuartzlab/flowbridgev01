@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   Check,
   Circle,
+  Coins,
   Gift,
   History,
   Link2,
@@ -13,6 +14,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SignInButton } from "@/components/auth/SignInButton";
