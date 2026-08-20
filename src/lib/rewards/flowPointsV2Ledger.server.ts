@@ -15,6 +15,7 @@ import {
   type LedgerReason,
   type ReferralMilestoneId,
   coreSwapAward,
+  isFlowPointsV2Active,
   referralMilestonesDue,
   referralMonthlyCapReached,
   referralRelationshipEligible,
@@ -224,4 +225,10 @@ export async function grantReferralMilestones(input: {
   }
 
   return { granted: points, milestones: awarded };
+}
+
+/** True when new accruals are governed by V2 (i.e. now >= effectiveAt). */
+export async function isFlowPointsV2Live(at: Date = new Date()): Promise<boolean> {
+  const policy = await resolveFlowPointsV2Policy();
+  return isFlowPointsV2Active(at, policy);
 }
