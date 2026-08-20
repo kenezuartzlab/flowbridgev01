@@ -40,13 +40,26 @@ export interface FlowClaimDisplay {
   walletAddress: string | null;
 }
 
+export type FlowClaimBlockedExtra =
+  | "notAuthenticated"
+  | "emailNotVerified"
+  | "walletNotBound"
+  | "signerNotConfigured"
+  | "chainStateUnavailable"
+  | "nothingToClaim"
+  | "distributorUnderfunded";
+
 export type FlowClaimAuthorization =
   | {
       authorized: false;
-      reason: FlowClaimBlockedReason | "notAuthenticated" | "emailNotVerified" | "walletNotBound" | "signerNotConfigured";
+      reason: FlowClaimBlockedReason | FlowClaimBlockedExtra;
       message: string;
       chainId: number | null;
       display: FlowClaimDisplay;
+      /** Public reconciliation values when they could be read. */
+      cumulativeEntitlement?: string;
+      alreadyClaimed?: string;
+      claimableDelta?: string;
     }
   | {
       authorized: true;
@@ -55,8 +68,9 @@ export type FlowClaimAuthorization =
       distributor: Hex;
       account: Hex;
       cumulativeEntitlement: string;
-      alreadyClaimed: string | null;
-      claimableDelta: string | null;
+      alreadyClaimed: string;
+      claimableDelta: string;
+      distributorBalance: string;
       deadline: number;
       signature: Hex;
       display: FlowClaimDisplay;
@@ -74,6 +88,12 @@ export interface AuthorizeArgs {
     signTypedData?: (typedData: any) => Promise<Hex>;
     now?: () => number;
     conversionPolicyApproved?: boolean;
+    readChainState?: (args: {
+      chainId: number;
+      token: Hex;
+      distributor: Hex;
+      account: Hex;
+    }) => Promise<{ alreadyClaimed: bigint; distributorBalance: bigint }>;
   };
 }
 
@@ -82,8 +102,20 @@ function blocked(
   message: string,
   chainId: number | null,
   display: FlowClaimDisplay,
+  extra?: { cumulativeEntitlement?: bigint; alreadyClaimed?: bigint; claimableDelta?: bigint },
 ): FlowClaimAuthorization {
-  return { authorized: false, reason, message, chainId, display };
+  return {
+    authorized: false,
+    reason,
+    message,
+    chainId,
+    display,
+    ...(extra?.cumulativeEntitlement != null
+      ? { cumulativeEntitlement: extra.cumulativeEntitlement.toString() }
+      : {}),
+    ...(extra?.alreadyClaimed != null ? { alreadyClaimed: extra.alreadyClaimed.toString() } : {}),
+    ...(extra?.claimableDelta != null ? { claimableDelta: extra.claimableDelta.toString() } : {}),
+  };
 }
 
 const EMPTY_DISPLAY: FlowClaimDisplay = {
@@ -139,6 +171,55 @@ export async function authorizeFlowTokenClaim(args: AuthorizeArgs): Promise<Flow
     );
   }
 
+  // Reconcile against chain truth BEFORE signing anything (V12.3):
+  // delta must be strictly positive and the distributor must already hold it.
+  const account = wallet.toLowerCase() as Hex;
+  const readChainState =
+    args.deps?.readChainState ??
+    (async (a: any) => {
+      const { readFlowClaimChainState } = await import("./flowClaimOnChain.server");
+      return readFlowClaimChainState(a);
+    });
+
+  let chainState: { alreadyClaimed: bigint; distributorBalance: bigint };
+  try {
+    chainState = await readChainState({
+      chainId: readiness.config.chainId,
+      token: readiness.config.token,
+      distributor: readiness.config.distributor,
+      account,
+    });
+  } catch {
+    return blocked(
+      "chainStateUnavailable",
+      "Could not read the distributor state right now. Try again shortly.",
+      readiness.config.chainId,
+      display,
+      { cumulativeEntitlement: entitlement },
+    );
+  }
+
+  const claimableDelta =
+    entitlement > chainState.alreadyClaimed ? entitlement - chainState.alreadyClaimed : 0n;
+  if (claimableDelta === 0n) {
+    return blocked(
+      "nothingToClaim",
+      "No new FLOW to claim — your on-chain claimed total already matches your entitlement.",
+      readiness.config.chainId,
+      display,
+      { cumulativeEntitlement: entitlement, alreadyClaimed: chainState.alreadyClaimed, claimableDelta },
+    );
+  }
+  if (chainState.distributorBalance < claimableDelta) {
+    return blocked(
+      "distributorUnderfunded",
+      "The distributor does not currently hold enough FLOW for this claim.",
+      readiness.config.chainId,
+      display,
+      { cumulativeEntitlement: entitlement, alreadyClaimed: chainState.alreadyClaimed, claimableDelta },
+    );
+  }
+
   const now = Math.floor((args.deps?.now?.() ?? Date.now()) / 1000);
   const deadline = now + FLOW_CLAIM_DEADLINE_SECONDS;
   const typedData = buildFlowClaimTypedData({
@@ -167,10 +248,11 @@ export async function authorizeFlowTokenClaim(args: AuthorizeArgs): Promise<Flow
     chainId: readiness.config.chainId,
     token: readiness.config.token,
     distributor: readiness.config.distributor,
-    account: wallet.toLowerCase() as Hex,
+    account,
     cumulativeEntitlement: entitlement.toString(),
-    alreadyClaimed: null,
-    claimableDelta: null,
+    alreadyClaimed: chainState.alreadyClaimed.toString(),
+    claimableDelta: claimableDelta.toString(),
+    distributorBalance: chainState.distributorBalance.toString(),
     deadline,
     signature,
     display,
