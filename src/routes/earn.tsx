@@ -42,6 +42,16 @@ import {
   formatXp,
   xpLevel,
 } from "@/lib/points";
+import {
+  FLOW_CLAIM_BLOCKED_COPY,
+  FLOW_REWARDS_CHAINS,
+  resolveFlowClaimReadiness,
+} from "@/lib/rewards/flowRewardsRegistry";
+import { isFlowConversionPolicyApproved } from "@/lib/rewards/flowConversionPolicy";
+
+/** Client-safe: the policy holder is a plain constant, no secrets involved. */
+const FLOW_POLICY_APPROVED = isFlowConversionPolicyApproved();
+
 
 /**
  * FlowBridge V11 — the canonical Earn destination.
