@@ -2,8 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
-  LineChart,
-  Sparkles,
   ChevronRight,
   Coins,
   Download,
@@ -17,13 +15,11 @@ import {
   ShieldCheck,
   Sun,
   Users,
-  Heart,
 } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { HeroCard } from "@/components/layout/HeroCard";
+import { AppTopBar } from "@/components/layout/AppTopBar";
+import { MetricStrip, StatusPill } from "@/components/ui-kit/primitives";
 import { getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
-import { PageIcon } from "@/components/layout/PageIcon";
 
 import { SignInButton } from "@/components/auth/SignInButton";
 import { ProfileEditModal } from "@/components/account/ProfileEditModal";
@@ -33,6 +29,7 @@ import { logout } from "@/lib/auth";
 import { readPlayState } from "@/lib/games/playState";
 import { usePrefs } from "@/lib/prefs";
 import { GREETING_STYLES, greetingVariants, type GreetingStyleId } from "@/lib/greetings";
+
 
 export const Route = createFileRoute("/account")({
   head: () => ({
