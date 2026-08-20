@@ -41,7 +41,10 @@
   },
   "claim": {
     "authorizationLifetimeSeconds": 900,
-    "conversionPolicyRef": "contracts/OWNER_APPROVAL_SHEET.md#v122-bot-testnet-conversion-policy (1 FLOW Point = 1 FLOW, cumulative, Campaign PTS excluded, testnet validation only)"
+    "conversionPolicyRef": "contracts/OWNER_APPROVAL_SHEET.md#v122-bot-testnet-conversion-policy (1 FLOW Point = 1 FLOW, cumulative, Campaign PTS excluded, testnet validation only)",
+    "readiness": "READY",
+    "readinessGate": "V12.2C",
+    "firstUserClaimGate": "V12.3 — no claim() executed in V12.2C"
   },
   "deployedAt": "2026-08-20T09:58:45.388Z"
 }
