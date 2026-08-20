@@ -125,8 +125,22 @@ vi.mock('@/lib/activity/swapVerification.server', () => ({
   }),
 }));
 
+/**
+ * V9.4A — every module the route handler pulls in lazily is resolved here at
+ * COLLECTION time (statically, after the hoisted vi.mock factories), so no test
+ * body ever pays for a Vite transform of the route / parser / settlement chain.
+ * That transform cost was the entire source of the intermittent 5s timeout.
+ */
+const routeModulePromise = import('@/routes/api/public/activity.verify-swap');
+const warmup = Promise.all([
+  routeModulePromise,
+  import('@/lib/activity/activityVerifyRequest'),
+  import('@/lib/activity/swapVerification.server'),
+  import('@/lib/campaign/activityCampaignSettlement.server'),
+]);
+
 const post = async () => {
-  const { Route } = await import("@/routes/api/public/activity.verify-swap");
+  const { Route } = await routeModulePromise;
   const handler = (Route as any).options.server.handlers.POST;
   const request = new Request('http://localhost/api/public/activity/verify-swap', {
     method: 'POST',
@@ -159,10 +173,25 @@ const post = async () => {
 };
 
 describe('POST /api/public/activity/verify-swap — deployed settlement chain', () => {
+  // Module resolution is awaited in a hook (60s collect / 10s hook budget),
+  // never inside a 5s test body.
+  beforeAll(async () => {
+    await warmup;
+  });
+
   beforeEach(() => {
     settled.length = 0;
     currentKind = 'SWAP_EXECUTED';
   });
+
+  afterEach(() => {
+    // No timers, env stubs or spies are created here; still reset every piece of
+    // shared mutable state so ordering between tests can never matter.
+    settled.length = 0;
+    currentKind = 'SWAP_EXECUTED';
+    vi.clearAllMocks();
+  });
+
 
   it('does not 500 for a durable SWAP_EXECUTED activity and settles once', async () => {
     const first = await post();
