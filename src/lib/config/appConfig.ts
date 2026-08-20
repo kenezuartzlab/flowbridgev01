@@ -813,7 +813,41 @@ export function mergeAppConfig(partial: any): AppConfig {
         100,
         Math.max(0, num(p.rewards?.referralActivityPct, d.rewards.referralActivityPct)),
       ),
+      // V12.4A — FLOW Points V2 (the live policy for new accruals).
+      policyVersion: str(p.rewards?.policyVersion) || d.rewards.policyVersion,
+      v2EffectiveAt: str(p.rewards?.v2EffectiveAt) || d.rewards.v2EffectiveAt,
+      minSwapUsd: Math.max(0, num(p.rewards?.minSwapUsd, d.rewards.minSwapUsd)),
+      dailyCoreSwapCap: Math.max(
+        0,
+        Math.round(num(p.rewards?.dailyCoreSwapCap, d.rewards.dailyCoreSwapCap)),
+      ),
+      referralMilestoneFirstSwap: Math.max(
+        0,
+        Math.round(num(p.rewards?.referralMilestoneFirstSwap, d.rewards.referralMilestoneFirstSwap)),
+      ),
+      referralMilestoneVolume: Math.max(
+        0,
+        Math.round(num(p.rewards?.referralMilestoneVolume, d.rewards.referralMilestoneVolume)),
+      ),
+      referralMilestoneActiveDaysPoints: Math.max(
+        0,
+        Math.round(
+          num(
+            p.rewards?.referralMilestoneActiveDaysPoints,
+            d.rewards.referralMilestoneActiveDaysPoints,
+          ),
+        ),
+      ),
+      referralMaxPerReferredUser: Math.max(
+        0,
+        Math.round(num(p.rewards?.referralMaxPerReferredUser, d.rewards.referralMaxPerReferredUser)),
+      ),
+      referralMonthlyCap: Math.max(
+        0,
+        Math.round(num(p.rewards?.referralMonthlyCap, d.rewards.referralMonthlyCap)),
+      ),
     },
+
     flags: {
       showBanners: p.flags?.showBanners !== false,
       maintenanceNotice: str(p.flags?.maintenanceNotice),
