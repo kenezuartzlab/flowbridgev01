@@ -1,0 +1,27 @@
+{
+  "$comment": "Copy to contracts/deployments/<network>.json AFTER a real deployment. Every field must be filled from the broadcast receipts, never by hand-waving.",
+  "network": null,
+  "chainId": null,
+  "flowToken": {
+    "address": null,
+    "name": null,
+    "symbol": null,
+    "decimals": 18,
+    "totalSupply": null,
+    "treasury": null,
+    "deployTxHash": null
+  },
+  "flowRewardsDistributor": {
+    "address": null,
+    "token": null,
+    "owner": null,
+    "rewardSignerAddress": null,
+    "paused": null,
+    "fundedAmount": null,
+    "deployTxHash": null
+  },
+  "deployer": null,
+  "compiler": { "version": "0.8.24", "optimizer": { "enabled": true, "runs": 200 } },
+  "sourceCommit": null,
+  "verifiedAt": null
+}
