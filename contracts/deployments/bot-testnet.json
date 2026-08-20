@@ -44,7 +44,17 @@
     "conversionPolicyRef": "contracts/OWNER_APPROVAL_SHEET.md#v122-bot-testnet-conversion-policy (1 FLOW Point = 1 FLOW, cumulative, Campaign PTS excluded, testnet validation only)",
     "readiness": "READY",
     "readinessGate": "V12.2C",
-    "firstUserClaimGate": "V12.3 — no claim() executed in V12.2C"
+    "firstUserClaimGate": "V12.3 \u2014 VERIFIED",
+    "firstUserClaim": {
+      "txHash": "0x74b0d5b710ae7cffdac214dea20bab59afb58a27d9238d5a7d6a19a167df51b4",
+      "account": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+      "blockNumber": 20530265,
+      "status": "success",
+      "amount": "1017000000000000000000",
+      "cumulativeClaimed": "1017000000000000000000",
+      "postClaimDistributorBalance": "9998983000000000000000000",
+      "verifiedAt": "2026-08-20T13:39:00.000Z"
+    }
   },
   "deployedAt": "2026-08-20T09:58:45.388Z"
 }
