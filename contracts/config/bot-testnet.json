@@ -1,5 +1,5 @@
 {
-  "$comment": "FlowBridge V12 deployment config — BOT Testnet 968. Values set to null REQUIRE owner approval before deployment. Do NOT guess.",
+  "$comment": "FlowBridge V12.1 deployment config — BOT Testnet 968. This file is the SINGLE source of truth for owner-approved economic/deployment parameters on this chain. Values set to null are BLOCKED and REQUIRE explicit owner approval. Do NOT guess, and do NOT copy values from chat, UI copy or tests.",
   "chainId": 968,
   "network": "bot-testnet",
   "rpcUrlEnv": "BOT_TESTNET_RPC_URL",
@@ -15,6 +15,10 @@
     "owner": null,
     "rewardSigner": null,
     "initialFundingAmount": null
+  },
+  "claim": {
+    "authorizationLifetimeSeconds": null,
+    "conversionPolicyRef": null
   },
   "compiler": {
     "version": "0.8.24",
