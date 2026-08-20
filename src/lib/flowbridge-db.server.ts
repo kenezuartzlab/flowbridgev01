@@ -331,22 +331,30 @@ export async function createTransactionHistory(
   let pointsToEarn = 0;
   const v2Live = await isFlowPointsV2Live();
   if (!isBridge && isSuccessfulSwap && submittedWallet && normalizedTxHash) {
-    const receiptOk = await verifySwapReceipt(normalizedTxHash, submittedWallet);
-    if (receiptOk) {
-      // Server-derived USD only: the browser payload never decides the award.
-      verifiedSwapUsd = await estimateSwapUsd(payload.direction, payload.fromAmount);
+    const verifiedChainId = await verifySwapReceipt(normalizedTxHash, submittedWallet);
+    if (verifiedChainId != null) {
+      // V12.4B — token/amount authority is canonical on-chain evidence when the
+      // verified-activity indexer has it; the browser payload is only a legacy
+      // fallback for the historic mainnet v3 path.
+      const evidence = await canonicalSwapEvidence(normalizedTxHash, submittedWallet);
+      verifiedSwapUsd = evidence
+        ? await canonicalEvidenceUsd(evidence)
+        : await estimateSwapUsd(payload.direction, payload.fromAmount);
       if (v2Live) {
         // V12.4A FLOW Points V2: floor(verifiedUsd) from $minSwapUsd, bounded by
-        // the per-wallet daily cap, recorded once per canonical activity.
+        // the per-wallet daily cap, recorded once per canonical activity
+        // (chainId + txHash + sourceLogIndex).
         const accrual = await accrueCoreSwapPoints({
           userId,
           walletAddress: submittedWallet,
           verifiedUsd: verifiedSwapUsd,
-          chainId: BOT_MAINNET_CHAIN_ID,
+          chainId: evidence?.chainId ?? verifiedChainId,
           txHash: normalizedTxHash,
+          sourceLogIndex: evidence?.logIndex ?? null,
         });
         pointsToEarn = accrual.award;
         if (!accrual.recorded) verifiedSwapUsd = 0;
+
       } else {
         const rules = await getRewardSettings();
         const { estimateFlowPointsForUsd } = await import("@/lib/rewards");
