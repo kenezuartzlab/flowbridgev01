@@ -1,29 +1,29 @@
 {
-  "$comment": "FlowBridge V12.1 deployment config — BOT Testnet 968. This file is the SINGLE source of truth for owner-approved economic/deployment parameters on this chain. Values set to null are BLOCKED and REQUIRE explicit owner approval. Do NOT guess, and do NOT copy values from chat, UI copy or tests.",
+  "$comment": "FlowBridge V12.2 deployment config — BOT Testnet 968. SINGLE source of truth for owner-approved economic/deployment parameters on this chain. Values were approved by the owner in the V12.2 gate document and apply to BOT Testnet ONLY. Never copy them into bot-mainnet.json.",
   "chainId": 968,
   "network": "bot-testnet",
   "rpcUrlEnv": "BOT_TESTNET_RPC_URL",
   "deployerKeyEnv": "DEPLOYER_PRIVATE_KEY",
   "token": {
-    "name": null,
-    "symbol": null,
+    "name": "FlowBridge Token",
+    "symbol": "FLOW",
     "decimals": 18,
-    "totalSupply": null,
-    "treasury": null
+    "totalSupply": "1000000000000000000000000000",
+    "treasury": "0xFA3DE5CFa1DE8EcC36197dCC0FC34fef5c1C7e47"
   },
   "distributor": {
-    "owner": null,
-    "rewardSigner": null,
-    "initialFundingAmount": null
+    "owner": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+    "rewardSigner": "0xA7d016C50e2B54B0942e8bEF0b4E5a82362330a2",
+    "initialFundingAmount": "10000000000000000000000000"
   },
   "claim": {
-    "authorizationLifetimeSeconds": null,
-    "conversionPolicyRef": null
+    "authorizationLifetimeSeconds": 900,
+    "conversionPolicyRef": "contracts/OWNER_APPROVAL_SHEET.md#v122-bot-testnet-conversion-policy (1 FLOW Point = 1 FLOW, cumulative, Campaign PTS excluded, testnet validation only)"
   },
   "compiler": {
     "version": "0.8.24",
     "optimizer": { "enabled": true, "runs": 200 },
     "evmVersion": "paris"
   },
-  "status": "BLOCKED_PENDING_APPROVED_TOKENOMICS"
+  "status": "APPROVED_BOT_TESTNET_ONLY"
 }

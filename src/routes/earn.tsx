@@ -47,10 +47,7 @@ import {
   FLOW_REWARDS_CHAINS,
   resolveFlowClaimReadiness,
 } from "@/lib/rewards/flowRewardsRegistry";
-import { isFlowConversionPolicyApproved } from "@/lib/rewards/flowConversionPolicy";
-
-/** Client-safe: the policy holder is a plain constant, no secrets involved. */
-const FLOW_POLICY_APPROVED = isFlowConversionPolicyApproved();
+import { isFlowConversionPolicyApprovedForChain } from "@/lib/rewards/flowConversionPolicy";
 
 
 /**
@@ -350,7 +347,10 @@ function EarnPage() {
               />
               <ul className="divide-y divide-hairline border-t border-hairline">
                 {FLOW_REWARDS_CHAINS.map((c) => {
-                  const readiness = resolveFlowClaimReadiness(c.chainId, FLOW_POLICY_APPROVED);
+                  const readiness = resolveFlowClaimReadiness(
+                    c.chainId,
+                    isFlowConversionPolicyApprovedForChain(c.chainId),
+                  );
                   return (
                     <li key={c.chainId}>
                       <ListRow
