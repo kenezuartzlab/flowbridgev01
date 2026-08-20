@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAccount, WagmiProvider } from "wagmi";
-import { wagmiConfig } from "@/lib/wagmi";
+import { useAccount } from "wagmi";
 import {
   ArrowLeft,
   BarChart3,
