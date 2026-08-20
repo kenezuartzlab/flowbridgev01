@@ -16,11 +16,19 @@ import {
   type FlowClaimBlockedReason,
   type Hex,
 } from "./flowRewardsRegistry";
-import { cumulativeFlowEntitlement, isFlowConversionPolicyApproved } from "./flowConversionPolicy";
+import {
+  cumulativeFlowEntitlement,
+  getFlowConversionPolicy,
+  isFlowConversionPolicyApproved,
+} from "./flowConversionPolicy";
+import { APPROVED_BOT_TESTNET } from "./flowApprovedTestnetPolicy";
 import { buildFlowClaimTypedData } from "./flowClaimTypedData";
 
-/** Signature validity window. Short by design. */
-export const FLOW_CLAIM_DEADLINE_SECONDS = 15 * 60;
+/**
+ * Signature validity window — owner-approved at 900 seconds for BOT Testnet
+ * (V12.2 gate). Short by design; no indefinite authorizations exist.
+ */
+export const FLOW_CLAIM_DEADLINE_SECONDS = APPROVED_BOT_TESTNET.claim.authorizationLifetimeSeconds;
 
 export interface FlowClaimDisplay {
   /** Off-chain FLOW Points balance (loyalty ledger, not tokens). */
@@ -103,7 +111,8 @@ export async function authorizeFlowTokenClaim(args: AuthorizeArgs): Promise<Flow
       }
     : EMPTY_DISPLAY;
 
-  const policyApproved = args.deps?.conversionPolicyApproved ?? isFlowConversionPolicyApproved();
+  const chainPolicy = getFlowConversionPolicy(args.chainId);
+  const policyApproved = args.deps?.conversionPolicyApproved ?? isFlowConversionPolicyApproved(chainPolicy);
   const readiness = resolveFlowClaimReadiness(args.chainId, policyApproved);
   if (!readiness.ready) {
     return blocked(readiness.reason, FLOW_CLAIM_BLOCKED_COPY[readiness.reason], args.chainId ?? null, display);
@@ -118,7 +127,9 @@ export async function authorizeFlowTokenClaim(args: AuthorizeArgs): Promise<Flow
     return blocked("walletNotBound", "Bind your wallet before claiming FLOW.", readiness.config.chainId, display);
   }
 
-  const entitlement = cumulativeFlowEntitlement(display.lifetimeClaimedPoints);
+  // Campaign PTS are never part of this total — only the off-chain FLOW Points
+  // ledger's lifetime claimed amount converts, cumulatively.
+  const entitlement = cumulativeFlowEntitlement(display.lifetimeClaimedPoints, chainPolicy);
   if (entitlement == null) {
     return blocked(
       "conversionPolicyNotApproved",
@@ -166,10 +177,19 @@ export async function authorizeFlowTokenClaim(args: AuthorizeArgs): Promise<Flow
   };
 }
 
+/**
+ * Signs with the server-only reward signer key, but ONLY when that key derives
+ * to the owner-approved public reward-signer address. A different key is a
+ * configuration error (SIGNER_SECRET_CONFIGURATION_REQUIRED), never a fallback.
+ * The key itself is never logged, returned or persisted.
+ */
 async function defaultSignTypedData(typedData: any): Promise<Hex> {
   const key = process.env["FLOW_REWARD_SIGNER_PRIVATE_KEY"];
-  if (!key) throw new Error("FLOW_REWARD_SIGNER_PRIVATE_KEY not configured");
+  if (!key) throw new Error("SIGNER_SECRET_CONFIGURATION_REQUIRED");
   const { privateKeyToAccount } = await import("viem/accounts");
   const account = privateKeyToAccount(key as Hex);
+  if (account.address.toLowerCase() !== APPROVED_BOT_TESTNET.distributor.rewardSigner.toLowerCase()) {
+    throw new Error("SIGNER_SECRET_CONFIGURATION_REQUIRED");
+  }
   return (await account.signTypedData(typedData)) as Hex;
 }
