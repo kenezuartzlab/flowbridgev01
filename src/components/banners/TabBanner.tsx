@@ -16,7 +16,7 @@ const COPY: Record<
     title: "Swap & Earn FLOW Points",
     body: "Earn points on every qualified swap.",
     art: giftAsset.url,
-    href: "/rewards",
+    href: "/earn",
   },
   bridge: {
     title: "Cross-Chain Bridge",

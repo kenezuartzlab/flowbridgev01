@@ -452,7 +452,7 @@ function CampaignDetailPage() {
                 </dl>
                 {!wallet && (
                   <Link
-                    to="/rewards"
+                    to="/earn"
                     className="mt-3 inline-flex min-h-[36px] w-full items-center justify-center rounded-xl border border-hairline font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:border-primary/40 hover:text-foreground"
                   >
                     {authenticated ? "Bind wallet" : "Sign in"}

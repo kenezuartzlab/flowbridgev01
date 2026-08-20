@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Coins,
   Download,
+  Gift,
   Globe,
   Info,
   LogOut,
@@ -206,8 +207,9 @@ function AccountPage() {
           />
         </Group>
 
-        <Group title="Referrals">
-          <RowLink to="/rewards" icon={<Users className="h-4 w-4" />} label="Referrals & rewards" />
+        <Group title="Earn">
+          <RowLink to="/earn" icon={<Gift className="h-4 w-4" />} label="Earn & FLOW Points" />
+          <RowLink to="/rewards" icon={<Users className="h-4 w-4" />} label="Referrals & tasks" />
         </Group>
 
 
