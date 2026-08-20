@@ -6,7 +6,6 @@ import {
   simulateClaim,
   simulateDeployment,
   simulatedManifest,
-  type Hex as _Hex,
 } from "./flowDeploymentSimulation";
 import { buildFlowClaimTypedData, type Hex } from "./flowClaimTypedData";
 
