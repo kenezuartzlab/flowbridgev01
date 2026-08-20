@@ -73,3 +73,11 @@ on the exact commit; a successful BOT Testnet deployment verified by
 + higher-cumulative top-up observed; signer rotation rehearsal; pause rehearsal;
 and an approved, committed conversion policy. Mainnet requires its own reviewed
 config (`config/bot-mainnet.json`) — testnet addresses must never appear there.
+
+## V12.1 parameter lock (no broadcast)
+
+- `OWNER_APPROVAL_SHEET.md` — canonical APPROVED/BLOCKED table per parameter.
+- `OPERATIONS.md` — pause, signer rotation, ownership transfer and top-up runbook.
+- `scripts/dryrun.bot-testnet.ts` — offline parameter-lock report + in-memory
+  deployment/claim/replay simulation. Exits non-zero while any field is BLOCKED.
+- Approved values may live ONLY in `config/bot-testnet.json` (BOT Testnet 968).
