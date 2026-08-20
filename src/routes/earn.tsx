@@ -34,8 +34,6 @@ import { getIdToken } from "@/lib/auth";
 import { formatUsd } from "@/lib/format";
 import {
   PTS,
-  SWAP_DAILY_TIERS,
-  SWAP_MAX_DAILY_PTS,
   SWAP_MIN_QUALIFYING_USD,
   XP,
   formatPts,
@@ -243,9 +241,11 @@ function EarnPage() {
                   hint: PTS,
                 },
                 {
-                  label: "Claimable",
+                  // V12.4A §6 — this is the remaining TOKEN payout delta, in FLOW,
+                  // not a second points balance.
+                  label: "Available to claim",
                   value: loading && !incentives ? "—" : formatPts(claimable),
-                  hint: `of ${formatPts(claimThreshold)} needed`,
+                  hint: `${FLOW_TOKEN} · ${formatPts(claimedTokens)} claimed`,
                 },
                 {
                   label: "Campaign PTS",
@@ -395,36 +395,30 @@ function EarnPage() {
         <Surface id="how">
           <SectionHeader
             title="How you earn"
-            hint={`Verified swaps from $${SWAP_MIN_QUALIFYING_USD} grow your FLOW Points. Amounts are decided server-side from on-chain evidence.`}
+            hint={`FLOW Points V2: verified swaps from $${SWAP_MIN_QUALIFYING_USD} grow your ${PTS}. Amounts are decided server-side from canonical on-chain evidence.`}
           />
           <div className="divide-y divide-hairline border-t border-hairline">
             <ListRow
               icon={<Sparkles className="h-4 w-4" aria-hidden />}
               label="Verified swaps"
-              description={`Qualifying swap activity grows your FLOW Points once per verified transaction. Swaps below $${SWAP_MIN_QUALIFYING_USD} still complete but earn no ${PTS}.`}
+              description={`1 ${PTS} per whole $1 of verified swap value, counted once per canonical on-chain activity. Swaps below $${SWAP_MIN_QUALIFYING_USD} still complete but earn no ${PTS}.`}
               to="/trade"
             />
           </div>
-          <div className="px-4 pb-3 pt-2">
-            <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Reference tiers below are the documented target policy for daily volume (up to{" "}
-              {SWAP_MAX_DAILY_PTS} {PTS}/day) and are pending owner approval — they are not the
-              currently active accrual rule.
-            </p>
+          <div className="divide-y divide-hairline border-t border-hairline">
+            <ListRow
+              icon={<Coins className="h-4 w-4" aria-hidden />}
+              label="Daily cap"
+              description={`Core swap accrual is capped at ${formatPts(FLOW_POINTS_V2_DAILY_CAP)} ${PTS} per bound wallet each UTC day. Swaps past the cap still complete and stay verified.`}
+            />
+            <ListRow
+              icon={<Users className="h-4 w-4" aria-hidden />}
+              label="Referral milestones"
+              description="Referred users earn you +15 on their first qualifying swap, +35 at $100 qualified volume and +50 at 3 active days — up to 100 PTS per referred user. Signing up alone earns nothing."
+              to="/rewards"
+              hash="referrals"
+            />
           </div>
-          <ul className="divide-y divide-hairline border-t border-hairline opacity-60">
-            {SWAP_DAILY_TIERS.map((t) => (
-              <li
-                key={t.minUsd}
-                className="flex items-center justify-between gap-3 px-4 py-2.5 text-[12.5px]"
-              >
-                <span className="font-bold">{formatUsd(t.minUsd)}+ daily swap volume</span>
-                <span className="font-mono text-[12px] font-black tabular-nums text-muted-foreground">
-                  {t.pts} {PTS}
-                </span>
-              </li>
-            ))}
-          </ul>
 
           <div className="divide-y divide-hairline border-t border-hairline">
             <ListRow
