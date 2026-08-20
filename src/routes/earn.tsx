@@ -48,6 +48,7 @@ import {
   resolveFlowClaimReadiness,
 } from "@/lib/rewards/flowRewardsRegistry";
 import { isFlowConversionPolicyApprovedForChain } from "@/lib/rewards/flowConversionPolicy";
+import { FlowTokenClaimCard } from "@/components/rewards/FlowTokenClaimCard";
 
 
 /**
