@@ -9,13 +9,25 @@ const feesSchema = z.object({
 });
 
 const rewardsSchema = z.object({
+  // Legacy V1 fields kept for read-only history; not the active V2 authority.
   minUsd: z.number().min(0).max(100000),
   usdBlock: z.number().min(0.01).max(100000),
   pointsPerBlock: z.number().int().min(0).max(100000),
   referralClaimMinSwapUsd: z.number().min(0).max(1000000),
   claimThreshold: z.number().int().min(1).max(10000000),
   referralActivityPct: z.number().min(0).max(100).optional(),
+  // FLOW Points V2 (V12.4A) — the live accrual controls.
+  policyVersion: z.string().trim().max(40).optional(),
+  v2EffectiveAt: z.string().trim().max(40).optional(),
+  minSwapUsd: z.number().min(0).max(100000).optional(),
+  dailyCoreSwapCap: z.number().int().min(0).max(10000000).optional(),
+  referralMilestoneFirstSwap: z.number().int().min(0).max(100000).optional(),
+  referralMilestoneVolume: z.number().int().min(0).max(100000).optional(),
+  referralMilestoneActiveDaysPoints: z.number().int().min(0).max(100000).optional(),
+  referralMaxPerReferredUser: z.number().int().min(0).max(1000000).optional(),
+  referralMonthlyCap: z.number().int().min(0).max(10000).optional(),
 });
+
 
 const flagsSchema = z.object({
   showBanners: z.boolean(),
