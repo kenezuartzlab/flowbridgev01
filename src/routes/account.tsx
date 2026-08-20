@@ -83,6 +83,8 @@ function AccountPage() {
   const displayName = user?.displayName || user?.name || user?.email?.split("@")[0] || "Guest";
   const initial = displayName.slice(0, 1).toUpperCase();
   const avatar = user?.photoURL || user?.avatar_url || null;
+  const verified = Boolean(user && (user.emailVerified || user.email_verified));
+
 
   const exportData = useMemo(
     () => ({
