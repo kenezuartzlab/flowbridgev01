@@ -66,15 +66,11 @@ function HomePage() {
   const config = useAppConfig();
   const campaigns = useMemo(() => getBannerSurface(config, "home"), [config]);
   /**
-   * V9 — one concept, one home: drop quick actions that only re-link to a
-   * destination already present in the global navigation (Trade, Explore,
-   * Activity, Profile). Everything else (Markets, Partners, Assistant, …)
-   * stays because global nav has no entry for it.
+   * V10 — Home is a personal summary surface, not a link dashboard, so the
+   * quick-action grid was removed entirely. Every destination it re-linked is
+   * owned by the global navigation or by Explore.
    */
-  const quickActions = useMemo(() => {
-    const navTargets = new Set(PRIMARY_NAV.flatMap((d) => [d.to, ...(d.aliases ?? [])]));
-    return getQuickActions(config).filter((a) => !navTargets.has(a.to));
-  }, [config]);
+
   const page = getPage(config, "home");
   const L = (slot: string, fallback: string) => pageLabel(config, "home", slot, fallback);
   const campaignSlides = config.flags.showBanners ? campaigns.slides : [];
