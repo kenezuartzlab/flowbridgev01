@@ -1,3 +1,4 @@
+import { ExploreTabs } from "@/components/campaigns/ExploreTabs";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Activity, Award, Compass, Medal, ShieldCheck, Trophy, User2, Wallet2 } from "lucide-react";
@@ -126,6 +127,7 @@ function ParticipantCenterPage() {
       </header>
 
       <main className="fb-fade-in mx-auto max-w-3xl space-y-4 p-3 sm:p-4">
+        <ExploreTabs className="px-1" />
         {/* Summary hero */}
         <section className="fb-surface relative overflow-hidden p-4 sm:p-5">
           <span

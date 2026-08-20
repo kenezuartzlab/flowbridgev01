@@ -23,16 +23,14 @@ import { PageIcon } from "@/components/layout/PageIcon";
 import { BannerRotator } from "@/components/banners/BannerRotator";
 import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
 import { trackBannerImpression } from "@/lib/banners/analytics";
-import { getBannerSurface, getPage, getQuickActions, pageLabel, useAppConfig } from "@/lib/config/appConfig";
+import { getBannerSurface, getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
 import { HeroCard } from "@/components/layout/HeroCard";
-import { ActionIcon } from "@/components/ActionIcon";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
 import { PTS } from "@/lib/points";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
-import { PRIMARY_NAV } from "@/components/shell/navModel";
 
 
 export const Route = createFileRoute("/home")({
@@ -66,15 +64,11 @@ function HomePage() {
   const config = useAppConfig();
   const campaigns = useMemo(() => getBannerSurface(config, "home"), [config]);
   /**
-   * V9 — one concept, one home: drop quick actions that only re-link to a
-   * destination already present in the global navigation (Trade, Explore,
-   * Activity, Profile). Everything else (Markets, Partners, Assistant, …)
-   * stays because global nav has no entry for it.
+   * V10 — Home is a personal summary surface, not a link dashboard, so the
+   * quick-action grid was removed entirely. Every destination it re-linked is
+   * owned by the global navigation or by Explore.
    */
-  const quickActions = useMemo(() => {
-    const navTargets = new Set(PRIMARY_NAV.flatMap((d) => [d.to, ...(d.aliases ?? [])]));
-    return getQuickActions(config).filter((a) => !navTargets.has(a.to));
-  }, [config]);
+
   const page = getPage(config, "home");
   const L = (slot: string, fallback: string) => pageLabel(config, "home", slot, fallback);
   const campaignSlides = config.flags.showBanners ? campaigns.slides : [];
@@ -191,53 +185,12 @@ function HomePage() {
         </HeroCard>
 
 
-        {/* Quick actions */}
-        <section>
-          <p className="fb-eyebrow mb-2 px-1">{L("quickActions", "Quick actions")}</p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {quickActions.map((a) => {
-              const external = /^https?:\/\//i.test(a.to);
-              const bleed = a.iconFit === "cover" && (a.iconKind === "image" || a.iconKind === "kit");
-              const inner = (
-                <>
-                  <span
-                    className={`grid h-7 w-7 place-items-center overflow-hidden rounded-lg ${
-                      bleed ? "" : "bg-primary/12 p-0 text-primary"
-                    }`}
-                  >
-                    <ActionIcon
-                      kind={a.iconKind}
-                      name={a.icon}
-                      imageUrl={a.imageUrl}
-                      fit={a.iconFit}
-                      className={bleed ? "h-7 w-7" : "h-4 w-4"}
-                    />
-                  </span>
+        {/*
+         * V10 — the Quick actions grid is gone: it was a dashboard-of-links that
+         * duplicated global navigation. Everything it linked to has a real owner
+         * (Trade, Explore, Activity, Profile, Markets).
+         */}
 
-                  <span className="min-w-0">
-                    <span className="block truncate font-mono text-[11px] font-black uppercase tracking-[0.08em]">
-                      {a.label}
-                    </span>
-                    <span className="block truncate font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
-                      {a.hint}
-                    </span>
-                  </span>
-                </>
-              );
-              const cls =
-                "glass-card flex min-h-[76px] flex-col justify-between rounded-[var(--fb-radius-md)] p-3";
-              return external ? (
-                <a key={a.id} href={a.to} target="_blank" rel="noreferrer" className={cls}>
-                  {inner}
-                </a>
-              ) : (
-                <Link key={a.id} to={a.to} hash={a.hash ?? undefined} className={cls}>
-                  {inner}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
 
         {/* Featured campaign — admin-managed, 4s cross-fade */}
         {campaignSlides.length > 0 && (

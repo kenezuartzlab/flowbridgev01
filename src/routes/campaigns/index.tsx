@@ -1,3 +1,4 @@
+import { ExploreTabs } from "@/components/campaigns/ExploreTabs";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Compass, RefreshCw, Search, Sparkles, Trophy, Wallet2 } from "lucide-react";
@@ -153,6 +154,7 @@ function CampaignsPage() {
       <AppTopBar eyebrow="Explore" title="Campaign Growth Hub" />
 
       <main className="mx-auto max-w-2xl space-y-5 p-3 sm:p-4 md:max-w-4xl lg:max-w-[1240px] lg:py-6">
+        <ExploreTabs className="px-1" />
         {/* Hero */}
         <section className="fb-surface relative overflow-hidden p-4 sm:p-5 lg:p-6">
           <span

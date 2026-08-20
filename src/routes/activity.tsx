@@ -107,29 +107,51 @@ function ActivityPage() {
           <>
             <EarningsSummary transactions={transactions} />
 
-            <div className="mb-4">
+            {/* V10 — one timeline, two clearly labelled sources. */}
+            <section className="mb-4">
+              <h2 className="mb-2 px-1 text-[13px] font-black">
+                Verified on-chain
+                <span className="ml-2 rounded-full border border-success/30 bg-success/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-success">
+                  Server verified
+                </span>
+              </h2>
               <VerifiedActivityPanel />
-            </div>
+            </section>
 
-            <p className="mb-2 font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted-soft">
-              Below: local swap / bridge submission history (separate source)
-            </p>
+            <h2 className="mb-2 px-1 text-[13px] font-black">
+              Submissions
+              <span className="ml-2 rounded-full border border-hairline px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-muted">
+                This device
+              </span>
+            </h2>
 
-            <nav className="-mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1">
-              {(["ALL", "EARNINGS", "SWAPS", "BRIDGES"] as Filter[]).map((f) => (
+            <nav
+              aria-label="Filter submissions"
+              className="-mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1"
+            >
+              {(
+                [
+                  ["ALL", "All"],
+                  ["SWAPS", "Swaps"],
+                  ["BRIDGES", "Bridges"],
+                  ["EARNINGS", "Earning"],
+                ] as [Filter, string][]
+              ).map(([f, label]) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`shrink-0 rounded-full border px-3.5 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors ${
+                  aria-pressed={filter === f}
+                  className={`shrink-0 rounded-full border px-3.5 py-1.5 text-[12px] font-bold transition-colors ${
                     filter === f
                       ? "border-primary/40 bg-primary/15 text-primary"
-                      : "border-hairline bg-card text-muted"
+                      : "border-hairline bg-card text-muted hover:text-foreground"
                   }`}
                 >
-                  {f}
+                  {label}
                 </button>
               ))}
             </nav>
+
 
             {groups.length === 0 ? (
               <p className="rounded-2xl border border-hairline bg-card p-6 text-center font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
