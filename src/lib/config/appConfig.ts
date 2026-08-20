@@ -23,14 +23,33 @@ export const feeBpsLabel = (bps: number) =>
   `${Number(((bps || 0) / 100).toFixed(4))}%`;
 
 export interface RewardSettings {
+  /** @deprecated legacy V1 field, read-only history (superseded by minSwapUsd). */
   minUsd: number;
+  /** @deprecated legacy V1 field, read-only history. */
   usdBlock: number;
+  /** @deprecated legacy V1 field, read-only history. */
   pointsPerBlock: number;
   referralClaimMinSwapUsd: number;
   claimThreshold: number;
-  /** % of a referee's earned swap points credited to their referrer. */
+  /** @deprecated disabled under FLOW Points V2 — no new percentage-share accruals. */
   referralActivityPct: number;
+
+  /** Active policy version for NEW accruals ("FLOW_POINTS_V2"). */
+  policyVersion: string;
+  /** UTC instant from which FLOW Points V2 governs new accruals. */
+  v2EffectiveAt: string;
+  /** V2: minimum verified swap USD before points accrue. */
+  minSwapUsd: number;
+  /** V2: core swap points cap per bound wallet per UTC day. */
+  dailyCoreSwapCap: number;
+  /** V2 referral milestones. */
+  referralMilestoneFirstSwap: number;
+  referralMilestoneVolume: number;
+  referralMilestoneActiveDaysPoints: number;
+  referralMaxPerReferredUser: number;
+  referralMonthlyCap: number;
 }
+
 
 export interface FlagSettings {
   showBanners: boolean;
