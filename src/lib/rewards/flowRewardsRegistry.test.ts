@@ -32,10 +32,10 @@ describe("flow rewards registry", () => {
     });
   });
 
-  it("reports testnet as pending deployment", () => {
+  it("keeps deployed testnet claims disabled until funding + enablement", () => {
     expect(resolveFlowClaimReadiness(BOT_TESTNET_CHAIN_ID, true)).toMatchObject({
       ready: false,
-      reason: "distributorNotDeployed",
+      reason: "claimsDisabled",
     });
   });
 
