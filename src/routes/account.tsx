@@ -2,16 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
-  Compass,
-  Gamepad2,
   LineChart,
-  Rocket,
   Sparkles,
   ChevronRight,
   Coins,
   Download,
   Globe,
-  History,
   Info,
   LogOut,
   MessageSquare,
@@ -340,7 +336,7 @@ function AccountPage() {
             value="JSON"
             onClick={download}
           />
-          <RowLink to="/partners" icon={<Info className="h-4 w-4" />} label="About FlowBridge" />
+          <RowLink to="/campaigns/partners" icon={<Info className="h-4 w-4" />} label="About FlowBridge" />
           {user && (
             <button
               type="button"
