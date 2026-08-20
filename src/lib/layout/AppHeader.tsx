@@ -3,13 +3,14 @@ import { useNavigate } from '@tanstack/react-router';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
-  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut,
+  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut, SlidersHorizontal,
   ChevronDown, LogIn, CircleUser,
 } from 'lucide-react';
 
 import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 import logoUrl from '@/assets/flowbridge-logo.png';
+import { checkAdmin } from '@/lib/admin/adminApi';
 import { FlowPointsPill } from '@/components/rewards/FlowPointsPill';
 import { PrimaryNav } from '@/components/shell/PrimaryNav';
 
@@ -86,6 +87,10 @@ export function AppHeader({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [cooldownSec, setCooldownSec] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  // V9.2 — the Sets console link is only ever revealed after the SERVER confirms
+  // this signed-in wallet is an operator. Visibility is cosmetic; /sets and every
+  // admin API re-verify authorization on each request.
+  const [canOpenSets, setCanOpenSets] = useState(false);
   const [roadmapOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -113,6 +118,18 @@ export function AppHeader({
     }, 1000);
     return () => { if (tickRef.current) clearInterval(tickRef.current); };
   }, [cooldownSec]);
+
+  useEffect(() => {
+    let alive = true;
+    if (!walletAddress || !isUserLoggedIn) {
+      setCanOpenSets(false);
+      return;
+    }
+    checkAdmin(walletAddress)
+      .then((r) => { if (alive) setCanOpenSets(!!r.isAdmin); })
+      .catch(() => { if (alive) setCanOpenSets(false); });
+    return () => { alive = false; };
+  }, [walletAddress, isUserLoggedIn]);
 
   // Close submenu on outside click / Escape
   useEffect(() => {
@@ -221,6 +238,19 @@ export function AppHeader({
       ],
     },
 
+    {
+      id: 'operator',
+      title: 'Operator',
+      items: [
+        {
+          id: 'sets',
+          label: 'Control panel',
+          icon: <SlidersHorizontal className="w-4 h-4" />,
+          onClick: go('/sets'),
+          show: canOpenSets,
+        },
+      ],
+    },
     {
       id: 'preferences',
       title: 'Preferences',
