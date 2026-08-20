@@ -39,7 +39,7 @@ const short = (a?: string | null) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : 
 
 /** claim(address,uint256,uint256,bytes) calldata, built from the server authorization only. */
 function encodeClaim(auth: Authorization): string {
-  const selector = "0x9d3b7d1a";
+  const selector = "0x2ada8a32";
   const word = (v: bigint) => v.toString(16).padStart(64, "0");
   const addr = auth.account.toLowerCase().replace(/^0x/, "").padStart(64, "0");
   const sig = auth.signature.replace(/^0x/, "");
