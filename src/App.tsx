@@ -20,7 +20,8 @@ import {
   type TronStatus,
 } from './lib/tronBridge';
 import { FLOW_BRIDGE_ROUTER_V4_ABI } from './lib/flowbridge/routerV4Abi';
-import { resolveFlowBridgeExecutionForNetwork } from './lib/flowbridge/executionRegistry';
+import { BOT_TESTNET_CHAIN_ID, resolveFlowBridgeExecutionForNetwork } from './lib/flowbridge/executionRegistry';
+import { findVerifiedSwapPath } from './lib/swap/verifiedSwapConfig';
 import { requireSafeSwapDecision } from './lib/flowbridge/swapMethodPolicy';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
 import { maxSwappableDisplay, totalRouterDebit } from './lib/swap/platformFee';
@@ -249,9 +250,16 @@ export default function App() {
     // server rejects activity logging for them.
     if (!emailVerified || !normalizedWallet) return;
 
-    // Testnet is fully isolated from mainnet: testnet activity is never
-    // recorded in history and never credits FLOW points.
-    if (!isMainnet) return;
+    // Testnet stays isolated from mainnet, with ONE owner-approved exception:
+    // the verified-swap path (BOT Testnet 968 · Router V4), which is where the
+    // funded FLOW distributor and FLOW Points V2 accrual actually live. Only
+    // SWAP rows pass, and the server independently re-verifies the receipt
+    // against that exact router before anything accrues.
+    const approvedTestnetSwap =
+      String(txType).toUpperCase() === 'SWAP' &&
+      !!findVerifiedSwapPath(BOT_TESTNET_CHAIN_ID);
+    if (!isMainnet && !approvedTestnetSwap) return;
+
 
     // NOTE: bridges are recorded for history/attribution only — the server
     // always stores 0 points for them. Rewards remain swap-only.
