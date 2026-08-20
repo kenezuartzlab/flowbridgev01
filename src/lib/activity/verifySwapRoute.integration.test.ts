@@ -9,7 +9,7 @@
  * This is the chain that failed live with HTTP 500 "kind is invalid" while the
  * isolated V8.4 parser test passed.
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const WALLET = '0x1111111111111111111111111111111111111111';
 const CAMPAIGN_ID = '0x' + '3a'.repeat(32);
