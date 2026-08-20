@@ -58,7 +58,7 @@ describe("authorizeFlowTokenClaim", () => {
       chainId: BOT_TESTNET_CHAIN_ID,
       deps: d,
     });
-    expect(res).toMatchObject({ authorized: false, reason: "distributorNotDeployed" });
+    expect(res).toMatchObject({ authorized: false, reason: "claimsDisabled" });
     if (!res.authorized) {
       expect(res.display.flowPoints).toBe(1200);
       expect(res.display.walletAddress).toBe(incentives.walletAddress);
