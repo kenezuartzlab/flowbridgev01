@@ -210,7 +210,7 @@ export function CampaignVisual({
           style={{ objectPosition: visual.focalPosition }}
         />
       ) : (
-        <PresetArt preset={visual.artPreset} accent={visual.accent} seed={visual.seed} id={id} />
+        <PresetArt preset={visual.artPreset} accent={visual.accentColor} seed={visual.seed} id={id} />
       )}
 
       <span

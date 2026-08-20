@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 import { CampaignCard } from "@/components/campaigns/CampaignCard";
-import { CampaignArt } from "@/components/campaigns/CampaignArt";
+import { CampaignVisual } from "@/components/campaigns/CampaignVisual";
 import { SkeletonCard } from "@/components/campaigns/CampaignBits";
 import {
   campaignChains,
@@ -346,7 +346,7 @@ function FeaturedCampaign({
 
   return (
     <section className="overflow-hidden rounded-[var(--fb-radius-lg,20px)] border border-hairline bg-card lg:grid lg:grid-cols-12">
-      <CampaignArt campaign={campaign} className="h-40 lg:col-span-5 lg:h-full" />
+      <CampaignVisual campaign={campaign} variant="spotlight" className="lg:col-span-5" />
       <div className="p-4 sm:p-5 lg:col-span-7 lg:p-6">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-bold text-primary">
