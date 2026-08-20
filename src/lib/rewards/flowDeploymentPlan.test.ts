@@ -8,6 +8,16 @@ import {
   simulatedManifest,
 } from "./flowDeploymentSimulation";
 import { buildFlowClaimTypedData, type Hex } from "./flowClaimTypedData";
+import {
+  APPROVED_BOT_TESTNET,
+  diffAgainstApprovedTestnet,
+  mainnetStillBlocked,
+} from "./flowApprovedTestnetPolicy";
+import {
+  cumulativeFlowEntitlement,
+  getFlowConversionPolicy,
+  isFlowConversionPolicyApprovedForChain,
+} from "./flowConversionPolicy";
 
 const TESTNET_CONFIG_PATH = "contracts/config/bot-testnet.json";
 const MAINNET_CONFIG_PATH = "contracts/config/bot-mainnet.json";
@@ -16,27 +26,45 @@ function readConfig(path: string) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
-describe("V12.1 owner parameter lock — committed configs", () => {
-  it("marks every owner-controlled BOT Testnet parameter BLOCKED (no silent defaults)", () => {
-    const plan = buildFlowDeploymentPlan(readConfig(TESTNET_CONFIG_PATH), TESTNET_CONFIG_PATH);
+describe("V12.2 owner parameter lock — committed configs", () => {
+  it("has every BOT Testnet parameter APPROVED and equal to the owner-approved V12.2 values", () => {
+    const config = readConfig(TESTNET_CONFIG_PATH);
+    const plan = buildFlowDeploymentPlan(config, TESTNET_CONFIG_PATH);
     expect(plan.chainId).toBe(968);
-    expect(plan.ready).toBe(false);
-    expect(plan.steps).toBeNull();
-    expect(plan.blocked).toEqual([
-      "token.name",
-      "token.symbol",
-      "token.totalSupply",
-      "token.treasury",
-      "distributor.initialFundingAmount",
-      "distributor.owner",
-      "distributor.rewardSigner",
-      "claim.authorizationLifetimeSeconds",
-      "claim.conversionPolicy",
+    expect(plan.blocked).toEqual([]);
+    expect(plan.ready).toBe(true);
+    expect(plan.steps).toHaveLength(2);
+    expect(diffAgainstApprovedTestnet(config)).toEqual([]);
+    expect(plan.steps![0].constructorArgs).toEqual([
+      "FlowBridge Token",
+      "FLOW",
+      "0xFA3DE5CFa1DE8EcC36197dCC0FC34fef5c1C7e47",
+      "1000000000000000000000000000",
     ]);
-    // decimals is the only APPROVED field, and only from canonical source.
     const decimals = plan.verdicts.find((v) => v.parameter === "token.decimals")!;
     expect(decimals.status).toBe("APPROVED");
     expect(decimals.source).toContain("contracts/FlowToken.sol");
+  });
+
+  it("keeps BOT Mainnet 677 fully unapproved", () => {
+    expect(mainnetStillBlocked(readConfig(MAINNET_CONFIG_PATH))).toBe(true);
+  });
+
+  it("rejects a config that drifts from the approved values", () => {
+    const config = readConfig(TESTNET_CONFIG_PATH);
+    config.token.symbol = "FLOWX";
+    config.distributor.owner = `0x${"9".repeat(40)}`;
+    const diffs = diffAgainstApprovedTestnet(config);
+    expect(diffs).toContain("token.symbol mismatch");
+    expect(diffs).toContain("distributor.owner mismatch");
+  });
+
+  it("applies the approved testnet-only conversion policy and excludes other chains", () => {
+    expect(isFlowConversionPolicyApprovedForChain(968)).toBe(true);
+    expect(isFlowConversionPolicyApprovedForChain(677)).toBe(false);
+    expect(cumulativeFlowEntitlement(5, getFlowConversionPolicy(968))).toBe(5n * 10n ** 18n);
+    expect(cumulativeFlowEntitlement(5, getFlowConversionPolicy(677))).toBeNull();
+    expect(APPROVED_BOT_TESTNET.claim.authorizationLifetimeSeconds).toBe(900);
   });
 
   it("keeps BOT Mainnet 677 unconfigured and not deployable", () => {
