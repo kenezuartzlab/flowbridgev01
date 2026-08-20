@@ -213,9 +213,13 @@ function AccountPage() {
           </div>
         </section>
 
-        {/* Navigation rows */}
-        <Group title={L("activity", "Your activity")}>
-          <RowLink to="/activity" icon={<History className="h-4 w-4" />} label="Activity" />
+        {/*
+         * V10 — Profile is identity and progression, not a second navigation
+         * menu. Rows that only duplicate a global destination (Activity,
+         * Partners, Explore roadmap teasers) were removed; what remains is
+         * account-owned or has no other home.
+         */}
+        <Group title={L("activity", "Your account")}>
           <RowLink to="/wallet" icon={<QrCode className="h-4 w-4" />} label="Wallet address & QR" />
           <RowLink to="/rewards" icon={<Users className="h-4 w-4" />} label="Referrals & rewards" />
           <RowLink
@@ -224,21 +228,11 @@ function AccountPage() {
             icon={<Heart className="h-4 w-4" />}
             label="Social tasks & FLOW Point incentives"
           />
-
           <RowLink to="/games" icon={<ShieldCheck className="h-4 w-4" />} label="Games & challenges" />
-        </Group>
-
-        <Group title="Explore FlowBridge">
           <RowLink to="/markets" icon={<LineChart className="h-4 w-4" />} label="Markets" />
-          <RowLink to="/partners" icon={<Compass className="h-4 w-4" />} label="Partners & quests" />
           <RowLink to="/assistant" icon={<Sparkles className="h-4 w-4" />} label="AI assistant" />
         </Group>
 
-        <Group title="Roadmap">
-          <RowLink to="/ecosurge" icon={<Rocket className="h-4 w-4" />} label="Ecosurge Growth Hub" />
-          <RowLink to="/arcadeflix" icon={<Gamepad2 className="h-4 w-4" />} label="ArcadeFlix" />
-          <RowLink to="/fortune" icon={<Coins className="h-4 w-4" />} label="Fortune Wheel" />
-        </Group>
 
         <Group title="Preferences">
           <RowButton
