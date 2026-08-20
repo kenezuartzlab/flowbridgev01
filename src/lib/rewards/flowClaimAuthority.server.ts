@@ -40,13 +40,26 @@ export interface FlowClaimDisplay {
   walletAddress: string | null;
 }
 
+export type FlowClaimBlockedExtra =
+  | "notAuthenticated"
+  | "emailNotVerified"
+  | "walletNotBound"
+  | "signerNotConfigured"
+  | "chainStateUnavailable"
+  | "nothingToClaim"
+  | "distributorUnderfunded";
+
 export type FlowClaimAuthorization =
   | {
       authorized: false;
-      reason: FlowClaimBlockedReason | "notAuthenticated" | "emailNotVerified" | "walletNotBound" | "signerNotConfigured";
+      reason: FlowClaimBlockedReason | FlowClaimBlockedExtra;
       message: string;
       chainId: number | null;
       display: FlowClaimDisplay;
+      /** Public reconciliation values when they could be read. */
+      cumulativeEntitlement?: string;
+      alreadyClaimed?: string;
+      claimableDelta?: string;
     }
   | {
       authorized: true;
