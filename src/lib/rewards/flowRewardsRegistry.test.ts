@@ -14,10 +14,11 @@ describe("flow rewards registry", () => {
     expect(resolveFlowClaimReadiness(97, true)).toMatchObject({ ready: false, reason: "unsupportedChain" });
   });
 
-  it("keeps claims disabled on every chain in the V12.2B gate", () => {
-    for (const c of FLOW_REWARDS_CHAINS) {
-      expect(c.claimsEnabled).toBe(false);
-    }
+  it("keeps mainnet claims disabled in the V12.2C gate", () => {
+    expect(getFlowRewardsChainConfig(BOT_MAINNET_CHAIN_ID)!.claimsEnabled).toBe(false);
+    expect(FLOW_REWARDS_CHAINS.filter((c) => c.claimsEnabled).map((c) => c.chainId)).toEqual([
+      BOT_TESTNET_CHAIN_ID,
+    ]);
   });
 
   it("never lets mainnet inherit testnet addresses", () => {
@@ -32,17 +33,14 @@ describe("flow rewards registry", () => {
     });
   });
 
-  it("keeps deployed testnet claims disabled until funding + enablement", () => {
-    expect(resolveFlowClaimReadiness(BOT_TESTNET_CHAIN_ID, true)).toMatchObject({
-      ready: false,
-      reason: "claimsDisabled",
-    });
+  it("marks funded + enabled testnet claims ready (V12.2C)", () => {
+    expect(resolveFlowClaimReadiness(BOT_TESTNET_CHAIN_ID, true)).toMatchObject({ ready: true });
   });
 
   it("still fails closed when addresses exist but policy is unapproved", () => {
-    // simulate a post-deployment config
-    const cfg = { ...getFlowRewardsChainConfig(BOT_TESTNET_CHAIN_ID)! };
-    expect(cfg.claimsEnabled).toBe(false);
-    expect(resolveFlowClaimReadiness(BOT_TESTNET_CHAIN_ID, false)).toMatchObject({ ready: false });
+    expect(resolveFlowClaimReadiness(BOT_TESTNET_CHAIN_ID, false)).toMatchObject({
+      ready: false,
+      reason: "conversionPolicyNotApproved",
+    });
   });
 });

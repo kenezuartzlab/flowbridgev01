@@ -50,7 +50,7 @@ describe("authorizeFlowTokenClaim", () => {
     expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
-  it("blocks testnet while claims are disabled, but still returns display data", async () => {
+  it("authorizes funded testnet claims with a cumulative entitlement (V12.2C)", async () => {
     const d = deps({ conversionPolicyApproved: true });
     const res = await authorizeFlowTokenClaim({
       userId: "u1",
@@ -58,7 +58,25 @@ describe("authorizeFlowTokenClaim", () => {
       chainId: BOT_TESTNET_CHAIN_ID,
       deps: d,
     });
-    expect(res).toMatchObject({ authorized: false, reason: "claimsDisabled" });
+    expect(res).toMatchObject({ authorized: true, chainId: BOT_TESTNET_CHAIN_ID });
+    if (res.authorized) {
+      // 4000 lifetime claimed points → 4000 FLOW, cumulative. Campaign PTS excluded.
+      expect(res.cumulativeEntitlement).toBe((4000n * 10n ** 18n).toString());
+      expect(res.account).toBe(incentives.walletAddress);
+      expect(res.display.flowPoints).toBe(1200);
+    }
+    expect(d.signTypedData).toHaveBeenCalledTimes(1);
+  });
+
+  it("blocks testnet when the conversion policy is unapproved, but still returns display data", async () => {
+    const d = deps({ conversionPolicyApproved: false });
+    const res = await authorizeFlowTokenClaim({
+      userId: "u1",
+      emailVerified: true,
+      chainId: BOT_TESTNET_CHAIN_ID,
+      deps: d,
+    });
+    expect(res).toMatchObject({ authorized: false, reason: "conversionPolicyNotApproved" });
     if (!res.authorized) {
       expect(res.display.flowPoints).toBe(1200);
       expect(res.display.walletAddress).toBe(incentives.walletAddress);
