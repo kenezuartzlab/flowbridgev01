@@ -33,6 +33,7 @@ import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 import { getIdToken } from "@/lib/auth";
 import { formatUsd } from "@/lib/format";
 import {
+  FLOW_TOKEN,
   PTS,
   SWAP_MIN_QUALIFYING_USD,
   XP,
@@ -40,6 +41,10 @@ import {
   formatXp,
   xpLevel,
 } from "@/lib/points";
+import { DEFAULT_FLOW_POINTS_V2_POLICY } from "@/lib/rewards/flowPointsV2";
+
+const FLOW_POINTS_V2_DAILY_CAP = DEFAULT_FLOW_POINTS_V2_POLICY.dailyCoreSwapCap;
+
 import {
   FLOW_CLAIM_BLOCKED_COPY,
   FLOW_REWARDS_CHAINS,
