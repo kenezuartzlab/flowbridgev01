@@ -160,7 +160,7 @@ function AdminRoute() {
 }
 
 function AdminPage() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const wallet = address?.toLowerCase();
 
   const [user, setUser] = useState<any>(null);
