@@ -53,8 +53,27 @@ import { ActionIcon, ACTION_ICON_NAMES, KIT_ICON_NAMES } from "@/components/Acti
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
 import { TokenIcon } from "@/components/TokenIcon";
+import { CampaignStudioWorkspace } from "@/components/campaigns/CampaignStudioWorkspace";
+
+const SECTIONS = [
+  "tokens",
+  "banners",
+  "partners",
+  "quick",
+  "pages",
+  "fees",
+  "rewards",
+  "flags",
+  "social",
+  "content",
+  "campaigns",
+] as const;
 
 export const Route = createFileRoute("/sets")({
+  validateSearch: (search: Record<string, unknown>): { section?: (typeof SECTIONS)[number] } =>
+    SECTIONS.includes(search.section as (typeof SECTIONS)[number])
+      ? { section: search.section as (typeof SECTIONS)[number] }
+      : {},
   head: () => ({
     meta: [
       { title: "FlowBridge Control Panel — Sets" },
@@ -86,7 +105,8 @@ type Tab =
   | "rewards"
   | "flags"
   | "social"
-  | "content";
+  | "content"
+  | "campaigns";
 
 /** Grouped navigation so the panel reads like a real control panel. */
 const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
@@ -114,6 +134,7 @@ const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
       ["rewards", "Rewards"],
     ],
   },
+  { group: "Growth", items: [["campaigns", "Campaigns & Visuals"]] },
   { group: "System", items: [["flags", "Feature Flags"]] },
 ];
 
@@ -138,13 +159,17 @@ function AdminRoute() {
 }
 
 function AdminPage() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const wallet = address?.toLowerCase();
 
   const [user, setUser] = useState<any>(null);
   const [authReady, setAuthReady] = useState(false);
   const [gate, setGate] = useState<{ isAdmin: boolean; reason?: string } | null>(null);
-  const [tab, setTab] = useState<Tab>("tokens");
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const tab = (search.section ?? "tokens") as Tab;
+  const setTab = (next: Tab) =>
+    void navigate({ search: { section: next }, replace: true });
 
   useEffect(() => {
     const un = initAuth(
@@ -183,23 +208,17 @@ function AdminPage() {
     );
   }
 
+  // V9.2 — the route name is not a security boundary. Unauthorized callers get a
+  // plain not-found surface: no admin branding, no privileged shell, no data.
   if (!gate.isAdmin) {
     return (
-      <Shell>
-        <div className={cardCls}>
-          <div className="flex items-center gap-2 text-amber-400 font-black uppercase tracking-widest text-[12px]">
-            <AlertTriangle className="w-4 h-4" /> Admin access required
-          </div>
-          <p className="text-[#C5C1B9] leading-relaxed">
-            {gate.reason ?? "This console is restricted."} Access needs the verified admin email
-            signed in <span className="text-white">and</span> its bound wallet connected
-            {isConnected && wallet ? ` (connected: ${wallet.slice(0, 6)}…${wallet.slice(-4)})` : ""}.
-          </p>
-          <Link to="/" className={btnGhost}>
-            Back to app
-          </Link>
-        </div>
-      </Shell>
+      <div className="min-h-screen bg-[#010C1B] px-4 py-24 text-center font-mono text-[#C5C1B9]">
+        <p className="text-white text-lg font-black uppercase tracking-widest">404</p>
+        <p className="mt-2 text-[12px]">This page could not be found.</p>
+        <Link to="/" className="mt-5 inline-block underline">
+          Back to FlowBridge
+        </Link>
+      </div>
     );
   }
 
@@ -245,6 +264,8 @@ function AdminPage() {
         <QuickActionsPanel wallet={wallet!} />
       ) : tab === "pages" ? (
         <PagesPanel wallet={wallet!} />
+      ) : tab === "campaigns" ? (
+        <CampaignStudioWorkspace embedded />
       ) : (
         <SettingsPanel wallet={wallet!} tab={tab} />
       )}
@@ -256,7 +277,7 @@ function AdminPage() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#010C1B] px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-2xl space-y-4">
+      <div className="mx-auto w-full max-w-2xl space-y-4 lg:max-w-5xl">
         <header className="space-y-1">
           <h1 className="text-white font-black tracking-widest uppercase font-mono text-lg">
             FlowBridge Sets · Control Panel

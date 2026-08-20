@@ -9,6 +9,7 @@ import {
 } from "./campaignPresentation";
 import { resolveCampaignTaskAnyAction } from "@/lib/campaign/campaignAction";
 import { ChainChip, DeadlineNote, PointsChip, ProgressBar, StatusPill } from "./CampaignBits";
+import { CampaignVisual } from "./CampaignVisual";
 
 export function CampaignCard({
   campaign,
@@ -33,17 +34,14 @@ export function CampaignCard({
 
   return (
     <article
-      className={`fb-surface fb-fade-in relative flex h-full flex-col overflow-hidden p-4 transition-shadow hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.75)] ${
+      className={`fb-surface fb-fade-in relative flex h-full flex-col overflow-hidden transition-shadow hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.75)] ${
         complete ? "ring-1 ring-success/35" : ""
       }`}
     >
-      <span
-        aria-hidden
-        className={`pointer-events-none absolute -right-12 -top-14 h-40 w-40 rounded-full blur-3xl ${
-          complete ? "bg-success/20" : "bg-primary/20"
-        }`}
-      />
+      {/* V9.2 — shared campaign visual (decorative only) */}
+      <CampaignVisual campaign={campaign} variant="card" />
 
+      <div className="flex flex-1 flex-col p-4">
       <div className="relative flex flex-wrap items-center gap-1.5">
         {complete ? (
           <StatusPill tone="done">
@@ -106,6 +104,7 @@ export function CampaignCard({
         {complete ? "View details" : authenticated && m.completedTasks > 0 ? "Continue" : "View campaign"}
         <ArrowUpRight className="h-3 w-3" aria-hidden />
       </Link>
+      </div>
     </article>
   );
 }

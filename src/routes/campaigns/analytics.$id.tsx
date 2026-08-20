@@ -137,7 +137,8 @@ function AnalyticsPage() {
       <header className="sticky top-0 z-30 border-b border-hairline bg-card-alt px-4 py-3 backdrop-blur-xl">
         <div className="mx-auto flex max-w-4xl items-center gap-2">
           <Link
-            to="/campaigns/studio"
+            to="/sets"
+            search={{ section: "campaigns" as const }}
             aria-label="Back to Campaign Studio"
             className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-hairline text-muted transition-colors hover:border-primary/40 hover:text-foreground"
           >

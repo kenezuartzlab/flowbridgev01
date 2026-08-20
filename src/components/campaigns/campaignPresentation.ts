@@ -214,6 +214,107 @@ export function campaignCover(campaign: CampaignApiCampaign): CampaignCover {
   };
 }
 
+/* ------------------------------------------------------------------ *
+ * V9.2 — one campaign presentation definition, shared by every surface.
+ * These fields are PRESENTATION ONLY. Campaign rule matching, PTS,
+ * verification and settlement ignore them completely.
+ * ------------------------------------------------------------------ */
+
+export const CAMPAIGN_ART_PRESETS = [
+  "portal",
+  "arcs",
+  "orbs",
+  "route",
+  "grid",
+  "chain",
+] as const;
+export type CampaignArtPreset = (typeof CAMPAIGN_ART_PRESETS)[number];
+
+export const CAMPAIGN_ACCENTS = ["emerald", "teal", "cyan", "blue", "violet", "amber"] as const;
+export type CampaignAccent = (typeof CAMPAIGN_ACCENTS)[number];
+
+const ACCENT_FAMILIES: Record<CampaignAccent, { from: string; to: string; accent: string }> = {
+  emerald: { from: "#043b32", to: "#0a5f4a", accent: "#34d399" },
+  teal: { from: "#04302f", to: "#0b5b58", accent: "#2dd4bf" },
+  cyan: { from: "#062b3d", to: "#0e5566", accent: "#22d3ee" },
+  blue: { from: "#12224d", to: "#1d3f8f", accent: "#60a5fa" },
+  violet: { from: "#2b1147", to: "#4c1d95", accent: "#c084fc" },
+  amber: { from: "#3b1a05", to: "#7c3a08", accent: "#fb923c" },
+};
+
+export interface CampaignVisualConfig {
+  artMode: "preset" | "image";
+  artPreset: CampaignArtPreset;
+  accent: CampaignAccent;
+  imageUrl?: string | null;
+  /** CSS object-position for responsive crops. */
+  focalPosition: string;
+  /** Bounded readability overlay strength (0–0.75). */
+  overlay: number;
+  gradient: string;
+  /** Resolved accent colour for decorative geometry. */
+  accentColor: string;
+  category: string;
+  seed: number;
+}
+
+/** Only HTTPS references are ever accepted as campaign artwork. */
+export function isAllowedCampaignImage(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    return new URL(url).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function clampOverlay(value: number | undefined, fallback = 0.5): number {
+  if (typeof value !== "number" || Number.isNaN(value)) return fallback;
+  return Math.min(0.75, Math.max(0, value));
+}
+
+/**
+ * Resolves the presentation definition for one campaign.
+ *
+ * Preference order: validated admin presentation config (when the campaign
+ * payload carries one) → deterministic preset derived from campaign identity.
+ * The deterministic path guarantees a stable, never-broken visual.
+ */
+export function campaignVisual(campaign: CampaignApiCampaign): CampaignVisualConfig {
+  const hash = hashString(`${campaign.slug}:${campaign.campaignId}`);
+  const seed = (hash % 1000) / 1000;
+
+  const admin = (campaign as unknown as { presentation?: Partial<CampaignVisualConfig> })
+    .presentation;
+
+  const accent: CampaignAccent =
+    admin?.accent && CAMPAIGN_ACCENTS.includes(admin.accent)
+      ? admin.accent
+      : CAMPAIGN_ACCENTS[hash % CAMPAIGN_ACCENTS.length]!;
+
+  const artPreset: CampaignArtPreset =
+    admin?.artPreset && CAMPAIGN_ART_PRESETS.includes(admin.artPreset)
+      ? admin.artPreset
+      : CAMPAIGN_ART_PRESETS[(hash >> 3) % CAMPAIGN_ART_PRESETS.length]!;
+
+  const imageOk = isAllowedCampaignImage(admin?.imageUrl);
+  const family = ACCENT_FAMILIES[accent];
+
+  return {
+    artMode: admin?.artMode === "image" && imageOk ? "image" : "preset",
+    artPreset,
+    accent,
+    imageUrl: imageOk ? admin?.imageUrl : null,
+    focalPosition: typeof admin?.focalPosition === "string" ? admin.focalPosition : "50% 50%",
+    overlay: clampOverlay(admin?.overlay),
+    gradient: `linear-gradient(135deg, ${family.from} 0%, ${family.to} 100%)`,
+    accentColor: family.accent,
+    category: campaignCategory(campaign),
+    seed,
+  };
+}
+
+
 /** Stable de-duplication by campaign identity (id first, slug fallback). */
 export function dedupeCampaigns(list: CampaignApiCampaign[]): CampaignApiCampaign[] {
   const seen = new Set<string>();

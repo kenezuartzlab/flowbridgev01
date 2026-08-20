@@ -45,6 +45,7 @@ import {
   StatusPill,
   TASK_STATE_META,
 } from "@/components/campaigns/CampaignBits";
+import { CampaignVisual } from "@/components/campaigns/CampaignVisual";
 
 export const Route = createFileRoute("/campaigns/$slug")({
   head: () => ({
@@ -185,10 +186,8 @@ function CampaignDetailPage() {
             <div className="min-w-0 space-y-4">
               {/* Top */}
               <section className="fb-surface relative overflow-hidden p-4 sm:p-5">
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl"
-                />
+                {/* V9.2 — same campaign presentation definition as card/spotlight */}
+                <CampaignVisual campaign={campaign} variant="hero" className="opacity-70" />
                 <div className="relative flex flex-wrap items-center gap-1.5">
                   {complete ? (
                     <StatusPill tone="done">
