@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Gift, Loader2, LogIn, MailWarning, Wallet, Sparkles } from "lucide-react";
-import { PTS, formatPts } from "@/lib/points";
+import { FLOW_TOKEN, PTS, formatPts } from "@/lib/points";
 
 /**
  * P2 — compact FLOW Points (PTS) pill in the header. Purely presentational: it
@@ -46,8 +46,8 @@ function resolveState({ googleUser, incentives, loading }: FlowPointsPillProps):
   if (claimable > 0) {
     return {
       icon: <Sparkles className="w-3 h-3" />,
-      label: `${formatPts(claimable)} ${PTS}`,
-      title: `${formatPts(claimable)} ${PTS} ready to claim`,
+      label: `${formatPts(claimable)} ${FLOW_TOKEN}`,
+      title: `${formatPts(claimable)} ${FLOW_TOKEN} available to claim`,
       tone: "hot",
     };
   }

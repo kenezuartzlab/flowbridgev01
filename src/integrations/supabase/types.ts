@@ -374,6 +374,60 @@ export type Database = {
         }
         Relationships: []
       }
+      flow_points_ledger: {
+        Row: {
+          activity_key: string | null
+          base_points: number
+          chain_id: number | null
+          created_at: string
+          day_key: string | null
+          id: string
+          metadata: Json | null
+          points: number
+          policy_version: string
+          reason: string
+          source_log_index: number | null
+          tx_hash: string | null
+          user_id: string
+          verified_usd: number | null
+          wallet_address: string | null
+        }
+        Insert: {
+          activity_key?: string | null
+          base_points?: number
+          chain_id?: number | null
+          created_at?: string
+          day_key?: string | null
+          id?: string
+          metadata?: Json | null
+          points?: number
+          policy_version?: string
+          reason: string
+          source_log_index?: number | null
+          tx_hash?: string | null
+          user_id: string
+          verified_usd?: number | null
+          wallet_address?: string | null
+        }
+        Update: {
+          activity_key?: string | null
+          base_points?: number
+          chain_id?: number | null
+          created_at?: string
+          day_key?: string | null
+          id?: string
+          metadata?: Json | null
+          points?: number
+          policy_version?: string
+          reason?: string
+          source_log_index?: number | null
+          tx_hash?: string | null
+          user_id?: string
+          verified_usd?: number | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           binding_changes_count: number
@@ -449,6 +503,39 @@ export type Database = {
           id?: string
           text?: string
           votes?: number
+        }
+        Relationships: []
+      }
+      referral_milestone_awards: {
+        Row: {
+          created_at: string
+          id: string
+          milestone: string
+          month_key: string
+          points: number
+          policy_version: string
+          referee_id: string
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          milestone: string
+          month_key: string
+          points?: number
+          policy_version?: string
+          referee_id: string
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          milestone?: string
+          month_key?: string
+          points?: number
+          policy_version?: string
+          referee_id?: string
+          referrer_id?: string
         }
         Relationships: []
       }

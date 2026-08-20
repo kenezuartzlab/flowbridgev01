@@ -30,7 +30,7 @@ import { wagmiConfig } from "@/lib/wagmi";
 import { formatUsd } from "@/lib/format";
 import { getIdToken, googleSignIn } from "@/lib/auth";
 import { DonateModal } from "@/modals/DonateModal";
-import { PTS, XP, formatPts, xpLevel } from "@/lib/points";
+import { FLOW_TOKEN, PTS, XP, formatPts, xpLevel } from "@/lib/points";
 
 
 
@@ -228,10 +228,11 @@ function RewardsPage() {
 
             {/* Stat tiles */}
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {/* V12.4A §6 — the remaining token payout delta, denominated in FLOW. */}
               <OverviewTile
-                label={L("available", "Claimable")}
+                label={L("available", "Available to claim")}
                 value={formatPts(incentives?.claimableTotal ?? 0)}
-                unit={PTS}
+                unit={FLOW_TOKEN}
                 accent
               />
               <OverviewTile
@@ -355,8 +356,8 @@ function RewardsPage() {
                     />
                     <CheckRow
                       done={(incentives?.claimableTotal ?? 0) >= claimThreshold}
-                      label={`${claimThreshold.toLocaleString()} claimable ${PTS}`}
-                      hint={`${formatPts(incentives?.claimableTotal ?? 0)} ${PTS} available now`}
+                      label={`${claimThreshold.toLocaleString()} ${PTS} eligible to convert`}
+                      hint={`${formatPts(incentives?.claimableTotal ?? 0)} ${FLOW_TOKEN} available to claim now`}
                     />
                   </ul>
 

@@ -23,14 +23,33 @@ export const feeBpsLabel = (bps: number) =>
   `${Number(((bps || 0) / 100).toFixed(4))}%`;
 
 export interface RewardSettings {
+  /** @deprecated legacy V1 field, read-only history (superseded by minSwapUsd). */
   minUsd: number;
+  /** @deprecated legacy V1 field, read-only history. */
   usdBlock: number;
+  /** @deprecated legacy V1 field, read-only history. */
   pointsPerBlock: number;
   referralClaimMinSwapUsd: number;
   claimThreshold: number;
-  /** % of a referee's earned swap points credited to their referrer. */
+  /** @deprecated disabled under FLOW Points V2 — no new percentage-share accruals. */
   referralActivityPct: number;
+
+  /** Active policy version for NEW accruals ("FLOW_POINTS_V2"). */
+  policyVersion: string;
+  /** UTC instant from which FLOW Points V2 governs new accruals. */
+  v2EffectiveAt: string;
+  /** V2: minimum verified swap USD before points accrue. */
+  minSwapUsd: number;
+  /** V2: core swap points cap per bound wallet per UTC day. */
+  dailyCoreSwapCap: number;
+  /** V2 referral milestones. */
+  referralMilestoneFirstSwap: number;
+  referralMilestoneVolume: number;
+  referralMilestoneActiveDaysPoints: number;
+  referralMaxPerReferredUser: number;
+  referralMonthlyCap: number;
 }
+
 
 export interface FlagSettings {
   showBanners: boolean;
@@ -482,13 +501,26 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
 
   fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10, platformFeeBps: 10 },
   rewards: {
+    // Legacy V1 fields — retained read-only for historical audit. They no longer
+    // decide new accruals (FLOW Points V2 is the live policy).
     minUsd: 5,
     usdBlock: 1,
     pointsPerBlock: 1,
     referralClaimMinSwapUsd: 100,
     claimThreshold: 1000,
-    referralActivityPct: 20,
+    referralActivityPct: 0,
+    // FLOW Points V2 (owner-approved, V12.4A).
+    policyVersion: "FLOW_POINTS_V2",
+    v2EffectiveAt: "2026-08-20T15:00:00.000Z",
+    minSwapUsd: 5,
+    dailyCoreSwapCap: 1000,
+    referralMilestoneFirstSwap: 15,
+    referralMilestoneVolume: 35,
+    referralMilestoneActiveDaysPoints: 50,
+    referralMaxPerReferredUser: 100,
+    referralMonthlyCap: 10,
   },
+
   flags: {
     showBanners: true,
     maintenanceNotice: "",
@@ -813,7 +845,41 @@ export function mergeAppConfig(partial: any): AppConfig {
         100,
         Math.max(0, num(p.rewards?.referralActivityPct, d.rewards.referralActivityPct)),
       ),
+      // V12.4A — FLOW Points V2 (the live policy for new accruals).
+      policyVersion: str(p.rewards?.policyVersion) || d.rewards.policyVersion,
+      v2EffectiveAt: str(p.rewards?.v2EffectiveAt) || d.rewards.v2EffectiveAt,
+      minSwapUsd: Math.max(0, num(p.rewards?.minSwapUsd, d.rewards.minSwapUsd)),
+      dailyCoreSwapCap: Math.max(
+        0,
+        Math.round(num(p.rewards?.dailyCoreSwapCap, d.rewards.dailyCoreSwapCap)),
+      ),
+      referralMilestoneFirstSwap: Math.max(
+        0,
+        Math.round(num(p.rewards?.referralMilestoneFirstSwap, d.rewards.referralMilestoneFirstSwap)),
+      ),
+      referralMilestoneVolume: Math.max(
+        0,
+        Math.round(num(p.rewards?.referralMilestoneVolume, d.rewards.referralMilestoneVolume)),
+      ),
+      referralMilestoneActiveDaysPoints: Math.max(
+        0,
+        Math.round(
+          num(
+            p.rewards?.referralMilestoneActiveDaysPoints,
+            d.rewards.referralMilestoneActiveDaysPoints,
+          ),
+        ),
+      ),
+      referralMaxPerReferredUser: Math.max(
+        0,
+        Math.round(num(p.rewards?.referralMaxPerReferredUser, d.rewards.referralMaxPerReferredUser)),
+      ),
+      referralMonthlyCap: Math.max(
+        0,
+        Math.round(num(p.rewards?.referralMonthlyCap, d.rewards.referralMonthlyCap)),
+      ),
     },
+
     flags: {
       showBanners: p.flags?.showBanners !== false,
       maintenanceNotice: str(p.flags?.maintenanceNotice),

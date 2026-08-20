@@ -6,8 +6,13 @@ import {
   BOT_MAINNET_CHAIN_ID,
   requireFlowBridgeExecution,
 } from "@/lib/flowbridge/executionRegistry";
-import { FLOW_REWARD_MIN_USD, estimateFlowPointsForUsd, referralActivityShare } from "@/lib/rewards";
+import { FLOW_REWARD_MIN_USD } from "@/lib/rewards";
 import { getRewardSettings } from "@/lib/appConfig.server";
+import {
+  accrueCoreSwapPoints,
+  grantReferralMilestones,
+  isFlowPointsV2Live,
+} from "@/lib/rewards/flowPointsV2Ledger.server";
 
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -156,7 +161,10 @@ export async function ensureProfile(userId: string, email: string, referredByCod
     .select()
     .single();
 
-  if (finalReferredBy) {
+  // V12.4A — FLOW Points V2 disables the legacy +50 signup credit for NEW
+  // accruals. The relationship is still bound; referral value now comes from
+  // idempotent milestones once the referred user actually swaps.
+  if (finalReferredBy && !(await isFlowPointsV2Live())) {
     const { data: ref } = await supabaseAdmin
       .from("profiles")
       .select("id, flow_points, points_referral_signup")
@@ -197,13 +205,16 @@ export async function linkReferralIfMissing(userId: string, referredByCode?: str
     .from("profiles")
     .update({ referred_by: referredByCode })
     .eq("id", userId);
-  await supabaseAdmin
-    .from("profiles")
-    .update({
-      flow_points: (ref.flow_points ?? 0) + 50,
-      points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
-    })
-    .eq("id", ref.id);
+  // V2: binding a relationship is not an economic milestone.
+  if (!(await isFlowPointsV2Live())) {
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        flow_points: (ref.flow_points ?? 0) + 50,
+        points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
+      })
+      .eq("id", ref.id);
+  }
 }
 
 
@@ -255,12 +266,29 @@ export async function createTransactionHistory(
 
   let verifiedSwapUsd = 0;
   let pointsToEarn = 0;
-  if (!isBridge && isSuccessfulSwap && submittedWallet) {
+  const v2Live = await isFlowPointsV2Live();
+  if (!isBridge && isSuccessfulSwap && submittedWallet && normalizedTxHash) {
     const receiptOk = await verifySwapReceipt(normalizedTxHash, submittedWallet);
     if (receiptOk) {
-      const rules = await getRewardSettings();
+      // Server-derived USD only: the browser payload never decides the award.
       verifiedSwapUsd = await estimateSwapUsd(payload.direction, payload.fromAmount);
-      pointsToEarn = estimateFlowPointsForUsd(verifiedSwapUsd, rules);
+      if (v2Live) {
+        // V12.4A FLOW Points V2: floor(verifiedUsd) from $minSwapUsd, bounded by
+        // the per-wallet daily cap, recorded once per canonical activity.
+        const accrual = await accrueCoreSwapPoints({
+          userId,
+          walletAddress: submittedWallet,
+          verifiedUsd: verifiedSwapUsd,
+          chainId: BOT_MAINNET_CHAIN_ID,
+          txHash: normalizedTxHash,
+        });
+        pointsToEarn = accrual.award;
+        if (!accrual.recorded) verifiedSwapUsd = 0;
+      } else {
+        const rules = await getRewardSettings();
+        const { estimateFlowPointsForUsd } = await import("@/lib/rewards");
+        pointsToEarn = estimateFlowPointsForUsd(verifiedSwapUsd, rules);
+      }
     }
   }
 
@@ -306,25 +334,35 @@ export async function createTransactionHistory(
       })
       .eq("id", userId);
 
-    // Referral activity share: the referrer earns a configurable % of the
-    // points their referee just earned from verified swap volume.
+    // Referral rewards. Under FLOW Points V2 the indefinite percentage share is
+    // disabled and replaced by idempotent milestones (+15 / +35 / +50, max 100
+    // per referred user, monthly cap per referrer).
     if (pointsToEarn > 0 && user.referred_by) {
-      const rules = await getRewardSettings();
-      const share = referralActivityShare(pointsToEarn, rules.referralActivityPct);
-      if (share > 0) {
-        const { data: referrer } = await supabaseAdmin
-          .from("profiles")
-          .select("id, flow_points, points_referral_activity")
-          .eq("referral_code", user.referred_by)
-          .maybeSingle();
-        if (referrer && referrer.id !== userId) {
-          await supabaseAdmin
-            .from("profiles")
-            .update({
-              points_referral_activity: Number(referrer.points_referral_activity ?? 0) + share,
-              flow_points: Number(referrer.flow_points ?? 0) + share,
-            })
-            .eq("id", referrer.id);
+      const { data: referrer } = await supabaseAdmin
+        .from("profiles")
+        .select("id, flow_points, points_referral_activity")
+        .eq("referral_code", user.referred_by)
+        .maybeSingle();
+      if (referrer && referrer.id !== userId) {
+        if (v2Live) {
+          await grantReferralMilestones({
+            refereeId: userId,
+            referrerId: referrer.id,
+            refereeWalletBound: !!boundWallet,
+          });
+        } else {
+          const rules = await getRewardSettings();
+          const { referralActivityShare } = await import("@/lib/rewards");
+          const share = referralActivityShare(pointsToEarn, rules.referralActivityPct);
+          if (share > 0) {
+            await supabaseAdmin
+              .from("profiles")
+              .update({
+                points_referral_activity: Number(referrer.points_referral_activity ?? 0) + share,
+                flow_points: Number(referrer.flow_points ?? 0) + share,
+              })
+              .eq("id", referrer.id);
+          }
         }
       }
     }
