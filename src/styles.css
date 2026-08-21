@@ -506,3 +506,31 @@ html.light {
   border: 1px solid rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(8px);
 }
+
+/* V12.4C — restrained rewards feedback: one pulse on accrual, a soft glow
+   when FLOW is actually claimable. Both disabled under reduced motion. */
+@keyframes fb-pulse-once {
+  0% { opacity: 0.55; }
+  50% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+@utility fb-pulse-once {
+  animation: fb-pulse-once 900ms ease-out 1;
+}
+
+@keyframes fb-ready-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.18); }
+  50% { box-shadow: 0 0 16px 1px rgba(255, 255, 255, 0.34); }
+}
+
+@utility fb-ready-glow {
+  animation: fb-ready-glow 2600ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fb-pulse-once,
+  .fb-ready-glow {
+    animation: none;
+  }
+}
