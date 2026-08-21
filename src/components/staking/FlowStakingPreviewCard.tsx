@@ -232,6 +232,70 @@ export function FlowStakingPreviewCard({
     [readState],
   );
 
+  const connectWallet = useCallback(async () => {
+    const eth = (window as any).ethereum;
+    if (!eth) {
+      setError("No wallet detected in this browser.");
+      return;
+    }
+    setError(null);
+    try {
+      await eth.request({ method: "eth_requestAccounts" });
+      await readState();
+    } catch (e: any) {
+      setError(e?.message ? String(e.message) : "Wallet connection was rejected.");
+    }
+  }, [readState]);
+
+  const switchNetwork = useCallback(async () => {
+    const eth = (window as any).ethereum;
+    if (!eth) return;
+    setError(null);
+    try {
+      await eth.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BOT_TESTNET_CHAIN_HEX }],
+      });
+    } catch (e: any) {
+      if (e?.code === 4902 || /unrecognized|not added|add.*chain/i.test(String(e?.message ?? ""))) {
+        try {
+          await eth.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: BOT_TESTNET_CHAIN_HEX,
+                chainName: "BOT Chain Testnet",
+                nativeCurrency: { name: "tBOT", symbol: "tBOT", decimals: 18 },
+                rpcUrls: [BOT_TESTNET_RPC_URL],
+                blockExplorerUrls: ["https://scan.bohr.life"],
+              },
+            ],
+          });
+        } catch (addErr: any) {
+          setError(addErr?.message ? String(addErr.message) : "Could not add BOT Testnet 968.");
+          return;
+        }
+      } else {
+        setError(e?.message ? String(e.message) : "Could not switch network.");
+        return;
+      }
+    }
+    await readState();
+  }, [readState]);
+
+  // Keep account/chain state in sync with wallet-side changes.
+  useEffect(() => {
+    const eth = (window as any).ethereum;
+    if (!eth?.on) return;
+    const refresh = () => void readState();
+    eth.on("accountsChanged", refresh);
+    eth.on("chainChanged", refresh);
+    return () => {
+      eth.removeListener?.("accountsChanged", refresh);
+      eth.removeListener?.("chainChanged", refresh);
+    };
+  }, [readState]);
+
   const disabledBase = !account || !onRightChain || pending != null || !chain.vault || !chain.token;
 
   return (
