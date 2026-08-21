@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as TradeRouteImport } from './routes/trade'
+import { Route as StakeRouteImport } from './routes/stake'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetsRouteImport } from './routes/sets'
 import { Route as RewardsRouteImport } from './routes/rewards'
@@ -82,6 +83,11 @@ const WalletRoute = WalletRouteImport.update({
 const TradeRoute = TradeRouteImport.update({
   id: '/trade',
   path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StakeRoute = StakeRouteImport.update({
+  id: '/stake',
+  path: '/stake',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -421,6 +427,7 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stake': typeof StakeRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -487,6 +494,7 @@ export interface FileRoutesByTo {
   '/rewards': typeof RewardsRoute
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stake': typeof StakeRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -554,6 +562,7 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stake': typeof StakeRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -622,6 +631,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sets'
     | '/sitemap.xml'
+    | '/stake'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -688,6 +698,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sets'
     | '/sitemap.xml'
+    | '/stake'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -754,6 +765,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sets'
     | '/sitemap.xml'
+    | '/stake'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -821,6 +833,7 @@ export interface RootRouteChildren {
   RewardsRoute: typeof RewardsRoute
   SetsRoute: typeof SetsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StakeRoute: typeof StakeRoute
   TradeRoute: typeof TradeRoute
   WalletRoute: typeof WalletRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -876,6 +889,13 @@ declare module '@tanstack/react-router' {
       path: '/trade'
       fullPath: '/trade'
       preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stake': {
+      id: '/stake'
+      path: '/stake'
+      fullPath: '/stake'
+      preLoaderRoute: typeof StakeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1386,6 +1406,7 @@ const rootRouteChildren: RootRouteChildren = {
   RewardsRoute: RewardsRoute,
   SetsRoute: SetsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StakeRoute: StakeRoute,
   TradeRoute: TradeRoute,
   WalletRoute: WalletRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
