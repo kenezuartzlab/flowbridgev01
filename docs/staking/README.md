@@ -49,3 +49,18 @@ principal, never convertible into principal, and never a staking multiplier.
    (`0xCE14Ca1CF2012F1996D5FBc7d369FA051aa641Ac`, BOT Testnet 968).
 3. Treasury funds reward inventory; verify on-chain with the verification script.
 4. Fill the vault address in the registry and flip `stakingEnabled` for testnet only.
+
+## V13.1 — Owner parameter lock
+
+`docs/staking/OWNER_APPROVAL_SHEET.md` is the owner-approval table.
+`contracts/config/staking-bot-testnet.json` is the single canonical BOT Testnet
+config. `bun contracts/scripts/paramlock.staking.bot-testnet.ts` prints every
+verdict, hashes and the funding-solvency calculation; it refuses to simulate a
+production-shaped deployment while any mandatory decision is missing, and runs
+the full funded local dry-run (fund → activate → two stakers → accrual → claim →
+partial/full unstake → schedule end → replay) once all are approved.
+`src/lib/staking/flowStakingVaultSim.ts` is the integer-faithful reference
+simulator used by that dry-run and by the tests.
+
+Current verdict: **FLOW STAKING V13.1 PARAMETER LOCK BLOCKED** (no owner-approved
+economics; nothing deployed or broadcast).
