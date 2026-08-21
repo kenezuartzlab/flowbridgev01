@@ -32,7 +32,7 @@ const SELECTORS = {
   owner: "0x8da5cb5b",
   paused: "0x5c975abb",
   totalStaked: "0x817b1cd2",
-  rewardInventory: "0x1e6b1c60",
+  rewardInventory: "0x7e7ae4aa",
   rewardRate: "0x7b0a47ee",
   periodFinish: "0xebe2b12b",
 } as const;

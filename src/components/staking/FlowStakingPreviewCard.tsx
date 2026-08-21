@@ -1,25 +1,34 @@
 import { useCallback, useEffect, useState } from "react";
-import { Info, Loader2, Lock, RefreshCw, Wallet } from "lucide-react";
+import { Info, Loader2, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
 
 import { SectionHeader, StatusPill, Surface } from "@/components/ui-kit/primitives";
 import {
   BOT_TESTNET_CHAIN_ID,
   FLOW_STAKING_BLOCKED_COPY,
+  describeRewardSchedule,
   getFlowStakingChainConfig,
   resolveFlowStakingReadiness,
 } from "@/lib/staking/flowStakingRegistry";
 
 /**
- * FlowBridge V13 — FLOW staking TESTNET PREVIEW panel.
+ * FlowBridge V13.2 — FLOW staking BOT Testnet panel.
  *
- * Presentation only, and deliberately fail-closed: no vault is deployed, so
- * this panel can never show staking as live and never renders an APR/APY. The
- * only live number it reads is the user's real FLOW balance from the canonical
- * token contract. It cannot stake, sign or submit anything.
+ * Read-only by construction: it reads the user's FLOW balance, their vault
+ * position and the live on-chain schedule state. It never renders an APR/APY,
+ * and it never signs, approves or submits a stake — user staking opens in a
+ * later gate.
  */
 
 const FLOW_DECIMALS = 18n;
-const BALANCE_OF = "0x70a08231";
+const SELECTORS = {
+  balanceOf: "0x70a08231",
+  totalStaked: "0x817b1cd2",
+  rewardRate: "0x7b0a47ee",
+  periodFinish: "0xebe2b12b",
+  minStake: "0x375b3c0a",
+  rewardInventory: "0x7e7ae4aa",
+  earned: "0x008cc262",
+} as const;
 
 function formatFlow(raw: bigint | null, maxFrac = 4): string {
   if (raw == null) return "—";
@@ -35,6 +44,11 @@ function formatFlow(raw: bigint | null, maxFrac = 4): string {
   return `${whole.toLocaleString("en-US")}${fracStr ? `.${fracStr}` : ""}`;
 }
 
+function formatDays(seconds: bigint): string {
+  const days = Number(seconds) / 86400;
+  return days >= 1 ? `${days.toFixed(1)}d left` : `${Math.max(0, Math.round(Number(seconds) / 3600))}h left`;
+}
+
 export function FlowStakingPreviewCard({
   flowPoints,
   campaignPts,
@@ -43,62 +57,116 @@ export function FlowStakingPreviewCard({
   campaignPts?: number | null;
 }) {
   const chain = getFlowStakingChainConfig(BOT_TESTNET_CHAIN_ID)!;
-  const readiness = resolveFlowStakingReadiness(BOT_TESTNET_CHAIN_ID, false);
-  const blockedCopy = readiness.ready ? null : FLOW_STAKING_BLOCKED_COPY[readiness.reason];
 
   const [account, setAccount] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
+  const [staked, setStaked] = useState<bigint | null>(null);
+  const [earned, setEarned] = useState<bigint | null>(null);
+  const [minStake, setMinStake] = useState<bigint | null>(null);
+  const [inventory, setInventory] = useState<bigint | null>(null);
+  const [rewardRate, setRewardRate] = useState<bigint | null>(null);
+  const [periodFinish, setPeriodFinish] = useState<bigint | null>(null);
+  const [totalStaked, setTotalStaked] = useState<bigint | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const readBalance = useCallback(async () => {
+  const scheduleFunded = (inventory ?? 0n) > 0n && (rewardRate ?? 0n) > 0n;
+  const readiness = resolveFlowStakingReadiness(BOT_TESTNET_CHAIN_ID, scheduleFunded);
+  const blockedCopy = readiness.ready ? null : FLOW_STAKING_BLOCKED_COPY[readiness.reason];
+  const scheduleState = describeRewardSchedule({
+    rewardRatePerSecond: rewardRate,
+    periodFinish,
+    totalStaked,
+    nowSeconds: BigInt(Math.floor(Date.now() / 1000)),
+  });
+
+  const readState = useCallback(async () => {
     const eth = (window as any).ethereum;
     if (!eth || !chain.token) return;
     setLoading(true);
     setError(null);
+    const call = async (to: string, data: string) => {
+      const result: string = await eth.request({
+        method: "eth_call",
+        params: [{ to, data }, "latest"],
+      });
+      return BigInt(result && result !== "0x" ? result : "0x0");
+    };
     try {
       const accounts: string[] = await eth.request({ method: "eth_accounts" });
       const addr = accounts?.[0] ?? null;
       setAccount(addr);
+
+      if (chain.vault) {
+        const [ms, inv, rate, finish, total] = await Promise.all([
+          call(chain.vault, SELECTORS.minStake),
+          call(chain.vault, SELECTORS.rewardInventory),
+          call(chain.vault, SELECTORS.rewardRate),
+          call(chain.vault, SELECTORS.periodFinish),
+          call(chain.vault, SELECTORS.totalStaked),
+        ]);
+        setMinStake(ms);
+        setInventory(inv);
+        setRewardRate(rate);
+        setPeriodFinish(finish);
+        setTotalStaked(total);
+      }
+
       if (!addr) {
         setBalance(null);
+        setStaked(null);
+        setEarned(null);
         return;
       }
-      const data = `${BALANCE_OF}${addr.toLowerCase().replace(/^0x/, "").padStart(64, "0")}`;
-      const result: string = await eth.request({
-        method: "eth_call",
-        params: [{ to: chain.token, data }, "latest"],
-      });
-      setBalance(BigInt(result && result !== "0x" ? result : "0x0"));
+      const arg = addr.toLowerCase().replace(/^0x/, "").padStart(64, "0");
+      setBalance(await call(chain.token, `${SELECTORS.balanceOf}${arg}`));
+      if (chain.vault) {
+        setStaked(await call(chain.vault, `${SELECTORS.balanceOf}${arg}`));
+        setEarned(await call(chain.vault, `${SELECTORS.earned}${arg}`));
+      }
     } catch {
-      setError("Could not read your FLOW balance. Switch to BOT Testnet and retry.");
-      setBalance(null);
+      setError("Could not read on-chain staking state. Switch to BOT Testnet and retry.");
     } finally {
       setLoading(false);
     }
-  }, [chain.token]);
+  }, [chain.token, chain.vault]);
 
   useEffect(() => {
-    void readBalance();
-  }, [readBalance]);
+    void readState();
+  }, [readState]);
 
   return (
     <Surface>
       <SectionHeader
         title="FLOW staking"
-        hint="BOT Testnet 968 — build preview"
+        hint="BOT Testnet 968 — vault live"
         badge={
-          <StatusPill tone="warn">
-            <Lock className="h-3 w-3" /> Testnet preview · not active
+          <StatusPill tone={readiness.ready ? "ok" : "warn"}>
+            <ShieldCheck className="h-3 w-3" />
+            {readiness.ready ? "Funded schedule active" : "Schedule pending"}
           </StatusPill>
         }
       />
 
       <div className="grid grid-cols-2 gap-px border-t border-hairline bg-hairline">
         <Stat label="Your FLOW balance" value={formatFlow(balance)} />
-        <Stat label="Staked" value={readiness.ready ? formatFlow(null) : "—"} />
-        <Stat label="Earned rewards" value="—" />
-        <Stat label="Reward schedule" value="No funded schedule" />
+        <Stat label="Your staked FLOW" value={formatFlow(staked)} />
+        <Stat label="Your earned rewards" value={formatFlow(earned)} />
+        <Stat
+          label="Reward schedule"
+          value={
+            scheduleState?.active
+              ? `${formatFlow(scheduleState.ratePerDay, 2)} FLOW/day`
+              : "No funded schedule"
+          }
+        />
+        <Stat label="Reward inventory" value={formatFlow(inventory)} />
+        <Stat
+          label="Schedule window"
+          value={scheduleState?.active ? formatDays(scheduleState.remainingSeconds) : "—"}
+        />
+        <Stat label="Total staked (vault)" value={formatFlow(totalStaked)} />
+        <Stat label="Minimum stake" value={`${formatFlow(minStake)} FLOW`} />
       </div>
 
       <div className="space-y-3 border-t border-hairline p-4">
@@ -109,7 +177,7 @@ export function FlowStakingPreviewCard({
           </span>
           <button
             type="button"
-            onClick={() => void readBalance()}
+            onClick={() => void readState()}
             className="inline-flex items-center gap-1.5 rounded-lg border border-hairline px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.1em]"
           >
             {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
@@ -124,10 +192,12 @@ export function FlowStakingPreviewCard({
             <Info className="h-3.5 w-3.5" /> Status
           </span>
           <p className="mt-1.5">
-            {blockedCopy} Staking will use the existing fixed-supply FLOW token as principal and pay
-            rewards only from a separately pre-funded reward inventory — it never mints FLOW.
-            Minimum stake, reward budget, epoch duration and start time all remain owner-gated, so
-            no rate is shown. There is no lock-up and no early-withdraw penalty.
+            {blockedCopy ??
+              "The BOT Testnet vault is deployed, verified and funded with a 100,000 FLOW reward inventory over a 30-day schedule."}{" "}
+            Staking uses the existing fixed-supply FLOW token as principal and pays rewards only from
+            that separately pre-funded inventory — it never mints FLOW. Your reward share depends on
+            the live on-chain reward rate and total staked, so no APR/APY is quoted. There is no
+            lock-up, cooldown or early-withdraw penalty: principal stays withdrawable at any time.
           </p>
           <p className="mt-2">
             FLOW Points ({(flowPoints ?? 0).toLocaleString("en-US")} PTS) and Campaign PTS (
@@ -141,7 +211,7 @@ export function FlowStakingPreviewCard({
           disabled
           className="w-full cursor-not-allowed rounded-xl border border-hairline py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.12em] opacity-50"
         >
-          Stake FLOW — pending vault deployment
+          Stake FLOW — user staking opens in the next gate
         </button>
       </div>
     </Surface>
