@@ -92,5 +92,37 @@ Operations: `pause()`/`unpause()` block new stakes and reward claims only —
 treasury `approve` + `fundRewards`; a new schedule may only be activated after the
 current period finishes.
 
-No user stake, approval, withdrawal or reward claim was performed. V13.3 owns the
-first user canary.
+## V13.3 — first real staking lifecycle canary (PASS)
+
+Canary wallet `0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164`, BOT Testnet 968, all four
+steps signed by the user from `/stake`. Every receipt is `status=success`.
+
+| Step | Tx | On-chain effect |
+| --- | --- | --- |
+| Approve exact 10 FLOW | (allowance set prior to stake) | ERC-20 `Approval` to vault |
+| Stake 10 FLOW | `0x336a9cab91c28beb7d6d55760b6f37f00154de8be34eb2bd6606e1c8e82c67b2` | `Transfer` 10 FLOW wallet→vault + `Staked(10 FLOW)`, block 20639616 |
+| Claim reward | `0x13942dc852258f68cd5347cf1a01caf5ebf71390ea4ee33d1848de8a7791262b` | `RewardPaid` 9.529320987654320760 FLOW vault→wallet, block 20639946 |
+| Withdraw principal | `0x339c61d538389b5137a69f47c969c8600df957eed84dae2be7a23dd31b15deda` | `Transfer` exactly 10 FLOW vault→wallet + `Withdrawn(10 FLOW)`, block 20639969 |
+
+Invariants verified after the lifecycle:
+
+- Accrual is contract-computed: sole staker for 247s × 38580246913580246 wei/s =
+  9.52932098765432076 FLOW, matching the `RewardPaid` amount to the wei.
+- Principal returned exactly: 10 FLOW in, 10 FLOW out, no fee, no penalty, no lock.
+- `totalStaked = 0`, `balanceOf(canary) = 0` — no residual staked position.
+- Solvency holds: `rewardInventory = 99,990.470679012345679240` FLOW equals the
+  vault's live FLOW balance; only accrued rewards left inventory.
+- Reward schedule untouched: `rewardRate` unchanged, `periodFinish = 1789888882`,
+  `scheduleActive = true`, vault not paused, no second schedule.
+- FLOW total supply unchanged — rewards were paid from pre-funded inventory, never
+  minted.
+- Off-chain metrics unaffected: staking accrues no FLOW Points and no Campaign PTS,
+  and neither is used as staking principal or a multiplier.
+
+Residual detail: `earned(canary)` shows 0.694444444444444420 FLOW accrued in the 18s
+between claim and withdraw. It is frozen (stake is zero), fully covered by inventory,
+and claimable by the canary at any time.
+
+Verdict: **FLOW STAKING V13.3 FIRST LIFECYCLE CANARY PASS**. BOT Mainnet 677 staking
+remains `vault=null / stakingEnabled=false / promotion pending`.
+
