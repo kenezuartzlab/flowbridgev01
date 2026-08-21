@@ -122,21 +122,33 @@ export function FlowStakingPreviewCard({
   const needsApproval = amount != null && (allowance ?? 0n) < amount;
 
   const readState = useCallback(async () => {
+    if (!chain.token || !chain.vault) return;
     const eth = (window as any).ethereum;
-    if (!eth || !chain.token || !chain.vault) return;
     setLoading(true);
     setError(null);
+    // Always read through the BOT Testnet RPC so on-chain state renders even
+    // while the wallet is pointed at another network.
     const call = async (to: string, data: string) => {
-      const result: string = await eth.request({
-        method: "eth_call",
-        params: [{ to, data }, "latest"],
+      const res = await fetch(BOT_TESTNET_RPC_URL, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "eth_call",
+          params: [{ to, data }, "latest"],
+        }),
       });
+      const json = await res.json();
+      const result: string | undefined = json?.result;
       return BigInt(result && result !== "0x" ? result : "0x0");
     };
     try {
-      const rawChain: string = await eth.request({ method: "eth_chainId" });
-      setChainId(Number(BigInt(rawChain)));
-      const accounts: string[] = await eth.request({ method: "eth_accounts" });
+      if (eth) {
+        const rawChain: string = await eth.request({ method: "eth_chainId" });
+        setChainId(Number(BigInt(rawChain)));
+      }
+      const accounts: string[] = eth ? await eth.request({ method: "eth_accounts" }) : [];
       const addr = accounts?.[0] ?? null;
       setAccount(addr);
 
