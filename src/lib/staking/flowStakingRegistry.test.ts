@@ -9,11 +9,13 @@ import {
 } from "./flowStakingRegistry";
 import { FLOW_TOKEN_BOT_TESTNET } from "./flowStakingPolicy";
 
-describe("FLOW staking registry (V13 fail-closed)", () => {
-  it("never resolves staking as live in the build gate", () => {
-    const r = resolveFlowStakingReadiness(BOT_TESTNET_CHAIN_ID, true);
-    expect(r.ready).toBe(false);
-    if (!r.ready) expect(r.reason).toBe("vaultNotDeployed");
+describe("FLOW staking registry (V13.2 testnet live, mainnet fail-closed)", () => {
+  it("resolves BOT Testnet as live only with a funded schedule", () => {
+    const funded = resolveFlowStakingReadiness(BOT_TESTNET_CHAIN_ID, true);
+    expect(funded.ready).toBe(true);
+    const unfunded = resolveFlowStakingReadiness(BOT_TESTNET_CHAIN_ID, false);
+    expect(unfunded.ready).toBe(false);
+    if (!unfunded.ready) expect(unfunded.reason).toBe("scheduleNotFunded");
   });
 
   it("keeps mainnet unpromoted", () => {

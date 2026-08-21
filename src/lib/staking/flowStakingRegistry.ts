@@ -1,9 +1,9 @@
 /**
- * FlowBridge V13 — FLOW staking execution registry.
+ * FlowBridge V13.2 — FLOW staking execution registry.
  *
- * Fail-closed: no vault is deployed in V13, so staking can never resolve as
- * live. Mainnet stays unconfigured. Addresses are only filled by a future
- * deployment gate from a source-controlled manifest.
+ * BOT Testnet 968 vault is deployed, verified and funded with a 100,000 FLOW /
+ * 30-day schedule (see contracts/deployments/staking-bot-testnet.json).
+ * Mainnet stays unconfigured and fail-closed.
  */
 import {
   FLOW_TOKEN_BOT_TESTNET,
@@ -33,9 +33,9 @@ export const FLOW_STAKING_CHAINS: readonly FlowStakingChainConfig[] = [
     label: "BOT Testnet",
     isMainnet: false,
     token: FLOW_TOKEN_BOT_TESTNET,
-    // V13 is a BUILD gate: nothing was deployed or broadcast.
-    vault: null,
-    stakingEnabled: false,
+    // V13.2 verified deployment — funded 100,000 FLOW / 2,592,000s schedule.
+    vault: "0x36f2318027edf79D083Aac98D66C9a1b3e2AAdD1",
+    stakingEnabled: true,
     policyVersion: STAKING_POLICY_VERSION,
   },
   {

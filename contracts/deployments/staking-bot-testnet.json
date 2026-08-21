@@ -1,0 +1,53 @@
+{
+  "network": "bot-testnet",
+  "chainId": 968,
+  "stakingPolicyVersion": "v13-testnet-build-gate",
+  "stakingLockVersion": "v13.1-parameter-lock",
+  "gate": "V13.2",
+  "flowStakingVault": {
+    "address": "0x36f2318027edf79D083Aac98D66C9a1b3e2AAdD1",
+    "token": "0xCE14Ca1CF2012F1996D5FBc7d369FA051aa641Ac",
+    "owner": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+    "rewardTreasury": "0xFA3DE5CFa1DE8EcC36197dCC0FC34fef5c1C7e47",
+    "deployTxHash": "0xba172346893957b6f4551a87c0f88f330a5c4f0500f0bd4f6b35f72e52b0883e",
+    "minStakeTxHash": "0xd593779d978fc96750b96fe884f9aec580f1d4b9be2ffa771582daa6dca90f6d",
+    "treasuryApproveTxHash": "0x3f27714085083e2c917e9ccf0cca26a7f5dca443fa291b9fc56e40550f48d39d",
+    "fundingTxHash": "0x9a4b9de9d482e6e901871be2fd2800694da5653af0fc676145421e2ffd7a52f1",
+    "unfundedReason": null,
+    "activationTxHash": "0x0fec620a91e575dddca6b0969549aff221a3a531dd10b073d5136baeeb36fb28",
+    "notActivatedReason": null,
+    "sourceSha256": "242d0ea4c834a4baf5792737a2714e8851671155be9d286c62fd01f089760a78",
+    "artifactSha256": "43842626b9bec3b7febfb8c598f695a168d9a5ac2c4140d3cfce999e3971b896",
+    "compiler": {
+      "version": "0.8.24",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "evmVersion": "paris"
+    },
+    "live": {
+      "token": "0xCE14Ca1CF2012F1996D5FBc7d369FA051aa641Ac",
+      "owner": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+      "paused": false,
+      "minStake": "10000000000000000000",
+      "maxStakePerWallet": "0",
+      "totalStaked": "0",
+      "rewardInventory": "100000000000000000000000",
+      "rewardCommitted": "100000000000000000000000",
+      "uncommittedRewards": "0",
+      "rewardRate": "38580246913580246",
+      "periodFinish": "1789888882",
+      "lastUpdateTime": "1787296882",
+      "scheduleActive": true,
+      "runtimeCodeBytes": 5101
+    }
+  },
+  "deployer": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+  "operations": {
+    "pause": "owner pause()/unpause() — blocks new stakes and reward claims only; withdraw() stays open",
+    "emergencyWithdraw": "ALWAYS_WITHDRAWABLE_PRINCIPAL — withdraw()/exit() available even while paused",
+    "rewardTopUp": "treasury approve + fundRewards(amount); activateSchedule only after the current period finishes"
+  },
+  "deployedAt": "2026-08-21T07:21:26.497Z"
+}
