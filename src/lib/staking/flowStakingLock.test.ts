@@ -10,8 +10,8 @@ import { FLOW_TOKEN_BOT_TESTNET } from "./flowStakingPolicy";
 import { FlowStakingVaultSim } from "./flowStakingVaultSim";
 import config from "../../../contracts/config/staking-bot-testnet.json";
 
-const OWNER = "0x00000000000000000000000000000000000000o1".replace("o", "0");
-const TREASURY = "0x0000000000000000000000000000000000000t22".replace("t", "0");
+const OWNER = "0x0000000000000000000000000000000000000011";
+const TREASURY = "0x0000000000000000000000000000000000000022";
 
 const approved: FlowStakingLockConfig = {
   chainId: 968,
@@ -90,7 +90,7 @@ describe("FlowStakingVault reference simulator", () => {
     const sim = fresh();
     sim.stake(A, 100n * 10n ** 18n);
     expect(sim.rewardInventory).toBe(budget);
-    expect(sim.totalStaked).toBe(100n * 10n ** 18m0n === undefined ? 0n : 100n * 10n ** 18n);
+    expect(sim.totalStaked).toBe(100n * 10n ** 18n);
     expect(sim.checkInvariants()).toEqual([]);
   });
 
