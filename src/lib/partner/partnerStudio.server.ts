@@ -370,7 +370,7 @@ export async function partnerTransition(
 
   const { error: updateError } = await supabase
     .from('campaigns')
-    .update(patch)
+    .update(patch as never)
     .eq('campaign_id', row.campaign_id)
     .eq('organization_id', partner.orgId);
   if (updateError) throw new PartnerError(updateError.message, 500);

@@ -207,7 +207,7 @@ export async function governanceCampaignAction(
 
   const { error: updateError } = await supabase
     .from('campaigns')
-    .update(patch)
+    .update(patch as never)
     .eq('campaign_id', row.campaign_id);
   if (updateError) throw new PartnerError(updateError.message, 500);
 
