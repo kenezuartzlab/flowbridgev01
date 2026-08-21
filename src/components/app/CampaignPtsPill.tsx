@@ -14,12 +14,15 @@ export function CampaignPtsPill() {
   return (
     <Link
       to="/campaigns/me"
-      aria-label="Campaign PTS"
-      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-2xl border border-primary/35 bg-primary/10 px-2.5 font-mono text-[10px] font-black tabular-nums text-primary transition-colors hover:bg-primary/18"
+      aria-label={`${campaignPointsTotal.toLocaleString("en-US")} Campaign PTS`}
+      title="Campaign PTS — verified campaign score, not FLOW"
+      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-2xl border border-accent/35 bg-accent/10 px-2.5 font-mono text-[10px] font-black tabular-nums text-accent transition-colors hover:bg-accent/20"
     >
       <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden />
       {loading ? "—" : campaignPointsTotal.toLocaleString("en-US")}
-      <span className="hidden sm:inline">PTS</span>
+      {/* Never a bare trophy number: the unit is always visible. */}
+      <span className="hidden sm:inline">Campaign PTS</span>
+      <span className="sm:hidden">C-PTS</span>
     </Link>
   );
 }

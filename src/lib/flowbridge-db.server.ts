@@ -638,6 +638,30 @@ export async function getUserPointsAndReferrals(userId: string) {
   const totals = await globalTotals();
   const socials = await getSocialFollows(userId);
   const breakdown = computeClaimable(user as any, await getRewardSettings());
+
+  /**
+   * V12.4C — authoritative "today" momentum, read from the V2 ledger only.
+   * Presentation-only addition: no accrual, cap or policy behaviour changes.
+   */
+  const { utcDayKey, DEFAULT_FLOW_POINTS_V2_POLICY } = await import(
+    "@/lib/rewards/flowPointsV2"
+  );
+  const dayKey = utcDayKey();
+  const { data: todayRows } = await supabaseAdmin
+    .from("flow_points_ledger")
+    .select("points,reason")
+    .eq("user_id", userId)
+    .eq("day_key", dayKey);
+  const rows = todayRows ?? [];
+  const flowPointsToday = rows.reduce((s: number, r: any) => s + Number(r.points ?? 0), 0);
+  const coreSwapPointsToday = rows
+    .filter((r: any) => r.reason === "CORE_SWAP")
+    .reduce((s: number, r: any) => s + Number(r.points ?? 0), 0);
+  const settings = await getRewardSettings();
+  const dailyCoreSwapCap = Number(
+    (settings as any)?.dailyCoreSwapCap ?? DEFAULT_FLOW_POINTS_V2_POLICY.dailyCoreSwapCap,
+  );
+
   return {
     flowPoints: user.flow_points,
     claimedTokens: user.claimed_tokens,
@@ -655,6 +679,9 @@ export async function getUserPointsAndReferrals(userId: string) {
     totalSwapVolumeUsd: breakdown.volume,
     nextUnlockUsd: breakdown.nextUnlockUsd,
     claimableTotal: breakdown.claimable,
+    flowPointsToday,
+    coreSwapPointsToday,
+    dailyCoreSwapCap,
     socials,
     ...totals,
     milestoneReached: totals.globalTotalClaimed >= 1_000_000,

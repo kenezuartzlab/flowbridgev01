@@ -18,7 +18,6 @@ import { AppTopBar } from "@/components/layout/AppTopBar";
 import { useGreeting } from "@/lib/greetings";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
-import { PageIcon } from "@/components/layout/PageIcon";
 
 import { BannerRotator } from "@/components/banners/BannerRotator";
 import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
@@ -28,9 +27,9 @@ import { HeroCard } from "@/components/layout/HeroCard";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
-import { PTS } from "@/lib/points";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
+import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
 
 
 export const Route = createFileRoute("/home")({
@@ -92,7 +91,16 @@ function HomePage() {
   }, []);
 
   const flowPoints = Number(incentives?.flowPoints ?? 0);
-  const claimable = Number(incentives?.claimablePoints ?? incentives?.claimable ?? 0);
+  /**
+   * V12.4C — the claim unit is FLOW (the token), never PTS. `claimableTotal` is
+   * the server-computed FLOW payout delta and `claimedTokens` the lifetime paid
+   * amount; both come straight from /api/users/incentives.
+   */
+  const claimableFlow = Number(incentives?.claimableTotal ?? 0);
+  const claimedFlow = Number(incentives?.claimedTokens ?? 0);
+  const pointsToday = Number(incentives?.flowPointsToday ?? 0);
+  const corePointsToday = Number(incentives?.coreSwapPointsToday ?? 0);
+  const dailyCap = Number(incentives?.dailyCoreSwapCap ?? 1000);
 
   const recent = useMemo(() => transactions.slice(0, 4), [transactions]);
 
@@ -133,47 +141,19 @@ function HomePage() {
       >
         {/* Summary — compact on mobile so the fold shows real content. */}
         <HeroCard hero={page.hero} variant="home" className="p-3.5 sm:p-5">
-          <div className="relative flex items-start justify-between gap-3">
-            <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
-              {L("balance", "FLOW Points")}
-            </p>
-            <Link
-              to="/earn"
-              className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-white/20 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-white/30"
-            >
-              {L("rewardsCta", "Rewards")} <ArrowUpRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          <p className="relative mt-1.5 font-mono text-[30px] font-black leading-none tabular-nums tracking-[-0.02em] sm:mt-2 sm:text-[42px]">
-            {loading && !incentives ? "—" : flowPoints.toLocaleString("en-US")}
-            <span className="ml-2 align-baseline text-[13px] font-black opacity-80">{PTS}</span>
-          </p>
-
-          <div className="relative mt-3 grid grid-cols-2 gap-2 sm:mt-4">
-            <div className="fb-hero-tile flex items-center gap-2 px-2.5 py-2 sm:px-3 sm:py-2.5">
-              <PageIcon page="home" slot="claimable" size={24} />
-              <span className="min-w-0">
-                <span className="block truncate font-mono text-[9px] font-black uppercase tracking-[0.12em] opacity-80">
-                  {L("claimable", "Claimable PTS")}
-                </span>
-                <span className="block font-mono text-[14px] font-black tabular-nums sm:text-[15px]">
-                  {claimable.toLocaleString("en-US")}
-                </span>
-              </span>
-            </div>
-            <div className="fb-hero-tile flex items-center gap-2 px-2.5 py-2 sm:px-3 sm:py-2.5">
-              <PageIcon page="home" slot="volume" size={24} />
-              <span className="min-w-0">
-                <span className="block truncate font-mono text-[9px] font-black uppercase tracking-[0.12em] opacity-80">
-                  {L("volume", "Swap volume")}
-                </span>
-                <span className="block font-mono text-[14px] font-black tabular-nums sm:text-[15px]">
-                  {volumeUsd > 0 ? formatUsd(volumeUsd) : "—"}
-                </span>
-              </span>
-            </div>
-          </div>
+          <RewardsHeroContent
+            label={L("balance", "FLOW Points")}
+            ctaLabel={L("rewardsCta", "Earn & Claim")}
+            loading={loading}
+            hasData={!!incentives}
+            flowPoints={flowPoints}
+            pointsToday={pointsToday}
+            corePointsToday={corePointsToday}
+            dailyCap={dailyCap}
+            claimableFlow={claimableFlow}
+            claimedFlow={claimedFlow}
+            volumeUsd={volumeUsd}
+          />
 
 
 
