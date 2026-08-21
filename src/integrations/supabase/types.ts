@@ -14,18 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_events: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_role: string
+          actor_user_id: string | null
+          created_at: string
+          event_id: string
+          new_value: Json | null
+          object_id: string
+          object_type: string
+          old_value: Json | null
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_role: string
+          actor_user_id?: string | null
+          created_at?: string
+          event_id?: string
+          new_value?: Json | null
+          object_id: string
+          object_type: string
+          old_value?: Json | null
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_role?: string
+          actor_user_id?: string | null
+          created_at?: string
+          event_id?: string
+          new_value?: Json | null
+          object_id?: string
+          object_type?: string
+          old_value?: Json | null
+          reason?: string | null
+        }
+        Relationships: []
+      }
       app_admins: {
         Row: {
           created_at: string
           email: string
+          role: string
         }
         Insert: {
           created_at?: string
           email: string
+          role?: string
         }
         Update: {
           created_at?: string
           email?: string
+          role?: string
         }
         Relationships: []
       }
@@ -198,6 +243,69 @@ export type Database = {
           },
         ]
       }
+      campaign_review_events: {
+        Row: {
+          action: string
+          actor_role: string
+          actor_user_id: string | null
+          campaign_id: string
+          created_at: string
+          event_id: string
+          from_state:
+            | Database["public"]["Enums"]["campaign_review_state"]
+            | null
+          note: string | null
+          organization_id: string
+          revision: number
+          to_state: Database["public"]["Enums"]["campaign_review_state"] | null
+        }
+        Insert: {
+          action: string
+          actor_role: string
+          actor_user_id?: string | null
+          campaign_id: string
+          created_at?: string
+          event_id?: string
+          from_state?:
+            | Database["public"]["Enums"]["campaign_review_state"]
+            | null
+          note?: string | null
+          organization_id: string
+          revision?: number
+          to_state?: Database["public"]["Enums"]["campaign_review_state"] | null
+        }
+        Update: {
+          action?: string
+          actor_role?: string
+          actor_user_id?: string | null
+          campaign_id?: string
+          created_at?: string
+          event_id?: string
+          from_state?:
+            | Database["public"]["Enums"]["campaign_review_state"]
+            | null
+          note?: string | null
+          organization_id?: string
+          revision?: number
+          to_state?: Database["public"]["Enums"]["campaign_review_state"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_review_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "campaign_review_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "partner_organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       campaign_tasks: {
         Row: {
           campaign_id: string
@@ -252,40 +360,75 @@ export type Database = {
         Row: {
           campaign_id: string
           created_at: string
+          created_by: string | null
           description: string | null
           ends_at: string
           metadata: Json
           name: string
+          organization_id: string
+          review_note: string | null
+          review_state: Database["public"]["Enums"]["campaign_review_state"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          revision: number
+          reward_type: Database["public"]["Enums"]["campaign_reward_type"]
           slug: string
           starts_at: string
           status: string
+          submitted_at: string | null
           updated_at: string
         }
         Insert: {
           campaign_id: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           ends_at: string
           metadata?: Json
           name: string
+          organization_id?: string
+          review_note?: string | null
+          review_state?: Database["public"]["Enums"]["campaign_review_state"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          revision?: number
+          reward_type?: Database["public"]["Enums"]["campaign_reward_type"]
           slug: string
           starts_at: string
           status?: string
+          submitted_at?: string | null
           updated_at?: string
         }
         Update: {
           campaign_id?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           ends_at?: string
           metadata?: Json
           name?: string
+          organization_id?: string
+          review_note?: string | null
+          review_state?: Database["public"]["Enums"]["campaign_review_state"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          revision?: number
+          reward_type?: Database["public"]["Enums"]["campaign_reward_type"]
           slug?: string
           starts_at?: string
           status?: string
+          submitted_at?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "partner_organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
       }
       email_send_log: {
         Row: {
@@ -425,6 +568,77 @@ export type Database = {
           user_id?: string
           verified_usd?: number | null
           wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      partner_org_members: {
+        Row: {
+          created_at: string
+          org_id: string
+          role: Database["public"]["Enums"]["partner_member_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          org_id: string
+          role?: Database["public"]["Enums"]["partner_member_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          org_id?: string
+          role?: Database["public"]["Enums"]["partner_member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "partner_organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      partner_organizations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          is_system: boolean
+          name: string
+          org_id: string
+          risk_notes: string | null
+          slug: string
+          status: Database["public"]["Enums"]["partner_org_status"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          is_system?: boolean
+          name: string
+          org_id?: string
+          risk_notes?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["partner_org_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          is_system?: boolean
+          name?: string
+          org_id?: string
+          risk_notes?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["partner_org_status"]
+          updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -858,6 +1072,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      is_org_member: { Args: { _org: string; _user: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -878,7 +1093,17 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      campaign_review_state:
+        | "draft"
+        | "submitted"
+        | "changes_requested"
+        | "approved"
+        | "published"
+        | "paused"
+        | "ended"
+      campaign_reward_type: "campaign_pts" | "flow_points_bonus" | "flow_token"
+      partner_member_role: "partner_admin" | "partner_editor"
+      partner_org_status: "pending" | "verified" | "rejected" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1005,6 +1230,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      campaign_review_state: [
+        "draft",
+        "submitted",
+        "changes_requested",
+        "approved",
+        "published",
+        "paused",
+        "ended",
+      ],
+      campaign_reward_type: ["campaign_pts", "flow_points_bonus", "flow_token"],
+      partner_member_role: ["partner_admin", "partner_editor"],
+      partner_org_status: ["pending", "verified", "rejected", "suspended"],
+    },
   },
 } as const

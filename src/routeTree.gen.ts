@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as TradeRouteImport } from './routes/trade'
+import { Route as StudioRouteImport } from './routes/studio'
 import { Route as StakeRouteImport } from './routes/stake'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetsRouteImport } from './routes/sets'
@@ -50,6 +51,8 @@ import { Route as ApiUsersSocialsRouteImport } from './routes/api/users.socials'
 import { Route as ApiUsersIncentivesRouteImport } from './routes/api/users.incentives'
 import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
+import { Route as ApiStudioSessionRouteImport } from './routes/api/studio.session'
+import { Route as ApiStudioCampaignsRouteImport } from './routes/api/studio.campaigns'
 import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
@@ -60,12 +63,14 @@ import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-ima
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
+import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiStudioCampaignsIdRouteImport } from './routes/api/studio.campaigns.$id'
 import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
 import { Route as ApiPublicActivityVerifySwapRouteImport } from './routes/api/public/activity.verify-swap'
@@ -83,6 +88,11 @@ const WalletRoute = WalletRouteImport.update({
 const TradeRoute = TradeRouteImport.update({
   id: '/trade',
   path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StakeRoute = StakeRouteImport.update({
@@ -282,6 +292,16 @@ const ApiUsersBindWalletRoute = ApiUsersBindWalletRouteImport.update({
   path: '/api/users/bind-wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStudioSessionRoute = ApiStudioSessionRouteImport.update({
+  id: '/api/studio/session',
+  path: '/api/studio/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioCampaignsRoute = ApiStudioCampaignsRouteImport.update({
+  id: '/api/studio/campaigns',
+  path: '/api/studio/campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRewardsClaimAuthorizationRoute =
   ApiRewardsClaimAuthorizationRouteImport.update({
     id: '/api/rewards/claim-authorization',
@@ -333,6 +353,12 @@ const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
   path: '/api/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminPartnerGovernanceRoute =
+  ApiAdminPartnerGovernanceRouteImport.update({
+    id: '/api/admin/partner-governance',
+    path: '/api/admin/partner-governance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
   id: '/api/admin/banner-upload',
   path: '/api/admin/banner-upload',
@@ -364,6 +390,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioCampaignsIdRoute = ApiStudioCampaignsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiStudioCampaignsRoute,
 } as any)
 const ApiPublicSiweVerifyRoute = ApiPublicSiweVerifyRouteImport.update({
   id: '/api/public/siwe/verify',
@@ -428,6 +459,7 @@ export interface FileRoutesByFullPath {
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -447,6 +479,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
@@ -457,6 +490,8 @@ export interface FileRoutesByFullPath {
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
+  '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
+  '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
@@ -470,6 +505,7 @@ export interface FileRoutesByFullPath {
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
+  '/api/studio/campaigns/$id': typeof ApiStudioCampaignsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -495,6 +531,7 @@ export interface FileRoutesByTo {
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -514,6 +551,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
@@ -524,6 +562,8 @@ export interface FileRoutesByTo {
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
+  '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
+  '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
@@ -537,6 +577,7 @@ export interface FileRoutesByTo {
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
+  '/api/studio/campaigns/$id': typeof ApiStudioCampaignsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -563,6 +604,7 @@ export interface FileRoutesById {
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -582,6 +624,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
@@ -592,6 +635,8 @@ export interface FileRoutesById {
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
+  '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
+  '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
@@ -605,6 +650,7 @@ export interface FileRoutesById {
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
+  '/api/studio/campaigns/$id': typeof ApiStudioCampaignsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -632,6 +678,7 @@ export interface FileRouteTypes {
     | '/sets'
     | '/sitemap.xml'
     | '/stake'
+    | '/studio'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -651,6 +698,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
@@ -661,6 +709,8 @@ export interface FileRouteTypes {
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
+    | '/api/studio/campaigns'
+    | '/api/studio/session'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
@@ -674,6 +724,7 @@ export interface FileRouteTypes {
     | '/api/public/activity/verify-swap'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
+    | '/api/studio/campaigns/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -699,6 +750,7 @@ export interface FileRouteTypes {
     | '/sets'
     | '/sitemap.xml'
     | '/stake'
+    | '/studio'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -718,6 +770,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
@@ -728,6 +781,8 @@ export interface FileRouteTypes {
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
+    | '/api/studio/campaigns'
+    | '/api/studio/session'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
@@ -741,6 +796,7 @@ export interface FileRouteTypes {
     | '/api/public/activity/verify-swap'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
+    | '/api/studio/campaigns/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -766,6 +822,7 @@ export interface FileRouteTypes {
     | '/sets'
     | '/sitemap.xml'
     | '/stake'
+    | '/studio'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -785,6 +842,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
@@ -795,6 +853,8 @@ export interface FileRouteTypes {
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
+    | '/api/studio/campaigns'
+    | '/api/studio/session'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
     | '/api/users/incentives'
@@ -808,6 +868,7 @@ export interface FileRouteTypes {
     | '/api/public/activity/verify-swap'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
+    | '/api/studio/campaigns/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -834,6 +895,7 @@ export interface RootRouteChildren {
   SetsRoute: typeof SetsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StakeRoute: typeof StakeRoute
+  StudioRoute: typeof StudioRoute
   TradeRoute: typeof TradeRoute
   WalletRoute: typeof WalletRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -853,6 +915,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
+  ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
   ApiAdminWhoamiRoute: typeof ApiAdminWhoamiRoute
@@ -860,6 +923,8 @@ export interface RootRouteChildren {
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiRewardsClaimAuthorizationRoute: typeof ApiRewardsClaimAuthorizationRoute
+  ApiStudioCampaignsRoute: typeof ApiStudioCampaignsRouteWithChildren
+  ApiStudioSessionRoute: typeof ApiStudioSessionRoute
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
   ApiUsersClaimRoute: typeof ApiUsersClaimRoute
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
@@ -889,6 +954,13 @@ declare module '@tanstack/react-router' {
       path: '/trade'
       fullPath: '/trade'
       preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stake': {
@@ -1164,6 +1236,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUsersBindWalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/studio/session': {
+      id: '/api/studio/session'
+      path: '/api/studio/session'
+      fullPath: '/api/studio/session'
+      preLoaderRoute: typeof ApiStudioSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/campaigns': {
+      id: '/api/studio/campaigns'
+      path: '/api/studio/campaigns'
+      fullPath: '/api/studio/campaigns'
+      preLoaderRoute: typeof ApiStudioCampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rewards/claim-authorization': {
       id: '/api/rewards/claim-authorization'
       path: '/api/rewards/claim-authorization'
@@ -1234,6 +1320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/partner-governance': {
+      id: '/api/admin/partner-governance'
+      path: '/api/admin/partner-governance'
+      fullPath: '/api/admin/partner-governance'
+      preLoaderRoute: typeof ApiAdminPartnerGovernanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/banner-upload': {
       id: '/api/admin/banner-upload'
       path: '/api/admin/banner-upload'
@@ -1275,6 +1368,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/campaigns/$id': {
+      id: '/api/studio/campaigns/$id'
+      path: '/$id'
+      fullPath: '/api/studio/campaigns/$id'
+      preLoaderRoute: typeof ApiStudioCampaignsIdRouteImport
+      parentRoute: typeof ApiStudioCampaignsRoute
     }
     '/api/public/siwe/verify': {
       id: '/api/public/siwe/verify'
@@ -1387,6 +1487,17 @@ const ApiProposalsRouteWithChildren = ApiProposalsRoute._addFileChildren(
   ApiProposalsRouteChildren,
 )
 
+interface ApiStudioCampaignsRouteChildren {
+  ApiStudioCampaignsIdRoute: typeof ApiStudioCampaignsIdRoute
+}
+
+const ApiStudioCampaignsRouteChildren: ApiStudioCampaignsRouteChildren = {
+  ApiStudioCampaignsIdRoute: ApiStudioCampaignsIdRoute,
+}
+
+const ApiStudioCampaignsRouteWithChildren =
+  ApiStudioCampaignsRoute._addFileChildren(ApiStudioCampaignsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -1407,6 +1518,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetsRoute: SetsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StakeRoute: StakeRoute,
+  StudioRoute: StudioRoute,
   TradeRoute: TradeRoute,
   WalletRoute: WalletRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
@@ -1427,6 +1539,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
+  ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
   ApiAdminWhoamiRoute: ApiAdminWhoamiRoute,
@@ -1434,6 +1547,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiRewardsClaimAuthorizationRoute: ApiRewardsClaimAuthorizationRoute,
+  ApiStudioCampaignsRoute: ApiStudioCampaignsRouteWithChildren,
+  ApiStudioSessionRoute: ApiStudioSessionRoute,
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,
   ApiUsersClaimRoute: ApiUsersClaimRoute,
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,

@@ -6,10 +6,14 @@
 //      bound to that profile.
 import { getAuthUser, jsonResponse } from "@/lib/api-auth.server";
 
+export type InternalRole = "super_admin" | "internal_operator";
+
 export interface AdminContext {
   userId: string;
   email: string;
   wallet: string;
+  /** V14: scoped internal role. Operators get review powers, not policy. */
+  role: InternalRole;
 }
 
 export type AdminGateResult = { ok: true; admin: AdminContext } | { ok: false; response: Response };
@@ -26,7 +30,7 @@ export async function requireAdmin(request: Request): Promise<AdminGateResult> {
   const email = user.email.toLowerCase();
   const { data: adminRow } = await supabaseAdmin
     .from("app_admins")
-    .select("email")
+    .select("email,role")
     .eq("email", email)
     .maybeSingle();
   if (!adminRow) return { ok: false, response: jsonResponse({ error: "Forbidden" }, 403) };
@@ -55,5 +59,8 @@ export async function requireAdmin(request: Request): Promise<AdminGateResult> {
     };
   }
 
-  return { ok: true, admin: { userId: user.id, email, wallet: bound } };
+  const role: InternalRole =
+    (adminRow as any)?.role === "internal_operator" ? "internal_operator" : "super_admin";
+
+  return { ok: true, admin: { userId: user.id, email, wallet: bound, role } };
 }
