@@ -91,10 +91,11 @@ function StakePage() {
         </Surface>
 
         <p className="px-1 text-[11px] leading-relaxed text-muted-soft">
-          BOT Testnet validation vault — deployed, verified and funded. FLOW Points and Campaign PTS are separate off-chain
-          metrics and are never staking principal or a staking multiplier. BOT Mainnet staking
-          remains pending promotion.
+          BOT Testnet validation vault — deployed, funded and lifecycle-verified end to end (stake,
+          claim, withdraw). FLOW Points and Campaign PTS are separate off-chain metrics and are never
+          staking principal or a staking multiplier. BOT Mainnet staking remains pending promotion.
         </p>
+
       </SafeAreaPage>
       <BottomNav />
     </>
