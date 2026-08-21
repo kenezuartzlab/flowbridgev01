@@ -43,6 +43,17 @@ export interface GovernanceCampaign {
   completionCount: number;
   rewardBlockReason: string | null;
   ruleSummary: string[];
+  ptsBudget: number;
+  maxPtsPerWallet: number;
+  publishedRevision?: number | null;
+  pendingRevision?: {
+    revisionId: string;
+    revision: number;
+    status: string;
+    fingerprint: string;
+    submittedAt: number;
+    changes: string[];
+  } | null;
 }
 
 export interface GovernanceAuditEvent {
