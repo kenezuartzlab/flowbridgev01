@@ -338,14 +338,34 @@ export function FlowStakingPreviewCard({
             <Wallet className="h-3.5 w-3.5" />
             {account ? `${account.slice(0, 6)}…${account.slice(-4)}` : "Wallet not connected"}
           </span>
-          <button
-            type="button"
-            onClick={() => void readState()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-hairline px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.1em]"
-          >
-            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-            Refresh
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {!account && (
+              <button
+                type="button"
+                onClick={() => void connectWallet()}
+                className="rounded-lg border border-hairline px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-foreground"
+              >
+                Connect wallet
+              </button>
+            )}
+            {account && !onRightChain && (
+              <button
+                type="button"
+                onClick={() => void switchNetwork()}
+                className="rounded-lg border border-hairline px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-foreground"
+              >
+                Switch to BOT Testnet
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => void readState()}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-hairline px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.1em]"
+            >
+              {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              Refresh
+            </button>
+          </div>
         </div>
 
         {/* Amount + lifecycle actions — each button is one explicit wallet signature. */}
