@@ -92,7 +92,16 @@ function HomePage() {
   }, []);
 
   const flowPoints = Number(incentives?.flowPoints ?? 0);
-  const claimable = Number(incentives?.claimablePoints ?? incentives?.claimable ?? 0);
+  /**
+   * V12.4C — the claim unit is FLOW (the token), never PTS. `claimableTotal` is
+   * the server-computed FLOW payout delta and `claimedTokens` the lifetime paid
+   * amount; both come straight from /api/users/incentives.
+   */
+  const claimableFlow = Number(incentives?.claimableTotal ?? 0);
+  const claimedFlow = Number(incentives?.claimedTokens ?? 0);
+  const pointsToday = Number(incentives?.flowPointsToday ?? 0);
+  const corePointsToday = Number(incentives?.coreSwapPointsToday ?? 0);
+  const dailyCap = Number(incentives?.dailyCoreSwapCap ?? 1000);
 
   const recent = useMemo(() => transactions.slice(0, 4), [transactions]);
 
