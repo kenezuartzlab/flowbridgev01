@@ -85,10 +85,13 @@ export function FlowStakingPreviewCard({
   return (
     <Surface>
       <SectionHeader
-        icon={Lock}
         title="FLOW staking"
-        subtitle="BOT Testnet 968 — build preview"
-        right={<StatusPill tone="warn" label="Testnet preview · not active" />}
+        hint="BOT Testnet 968 — build preview"
+        badge={
+          <StatusPill tone="warn">
+            <Lock className="h-3 w-3" /> Testnet preview · not active
+          </StatusPill>
+        }
       />
 
       <div className="grid grid-cols-2 gap-px border-t border-hairline bg-hairline">
