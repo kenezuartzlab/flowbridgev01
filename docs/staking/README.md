@@ -64,3 +64,33 @@ simulator used by that dry-run and by the tests.
 
 Current verdict: **FLOW STAKING V13.1 PARAMETER LOCK BLOCKED** (no owner-approved
 economics; nothing deployed or broadcast).
+
+## V13.2 — BOT Testnet deployment + funding (LIVE)
+
+`bun contracts/scripts/deploy.staking.bot-testnet.ts --broadcast` executed the only
+authorized sequence: deploy vault → `setMinStake(10 FLOW)` → treasury `approve` +
+`fundRewards(100,000 FLOW)` → owner `activateSchedule(100,000 FLOW, 2,592,000s)`.
+
+| Item | Value |
+| --- | --- |
+| FlowStakingVault | `0x36f2318027edf79D083Aac98D66C9a1b3e2AAdD1` |
+| Staking/reward token | `0xCE14Ca1CF2012F1996D5FBc7d369FA051aa641Ac` (FLOW) |
+| Owner | `0x628e237b73C5a37EF3968527563FA1a26b32BB97` |
+| Reward treasury | `0xFA3DE5CFa1DE8EcC36197dCC0FC34fef5c1C7e47` |
+| Reward inventory | 100,000 FLOW (fully committed to schedule 1) |
+| Reward rate | 38580246913580246 wei/s |
+| Minimum stake | 10 FLOW |
+| Max stake / lock / cooldown / penalty / slashing | NONE |
+| totalStaked before canary | 0 |
+
+Manifest: `contracts/deployments/staking-bot-testnet.json`.
+Registry now lists the testnet vault with `stakingEnabled: true`; BOT Mainnet 677
+remains `vault=null / stakingEnabled=false / promotion pending`.
+
+Operations: `pause()`/`unpause()` block new stakes and reward claims only —
+`withdraw()`/`exit()` stay open (ALWAYS_WITHDRAWABLE_PRINCIPAL). Reward top-up is
+treasury `approve` + `fundRewards`; a new schedule may only be activated after the
+current period finishes.
+
+No user stake, approval, withdrawal or reward claim was performed. V13.3 owns the
+first user canary.
