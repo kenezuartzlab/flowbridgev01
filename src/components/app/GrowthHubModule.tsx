@@ -32,12 +32,16 @@ export function GrowthHubModule() {
           <div className="min-w-0">
             <p className="fb-eyebrow">Growth hub</p>
             <p className="truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-              Campaign PTS — separate from FLOW
+              Campaign PTS — verified campaign score, never FLOW
             </p>
           </div>
         </div>
-        <span className="shrink-0 rounded-xl bg-primary/12 px-2.5 py-1 font-mono text-[10px] font-black tabular-nums text-primary">
-          {authenticated ? campaignPointsTotal.toLocaleString("en-US") : "—"} PTS
+        {/* V12.4C — the unit is spelled out so it can't read as FLOW Points. */}
+        <span
+          title="Campaign PTS — verified campaign score, not FLOW"
+          className="shrink-0 rounded-xl bg-accent/12 px-2.5 py-1 font-mono text-[10px] font-black tabular-nums text-accent"
+        >
+          {authenticated ? campaignPointsTotal.toLocaleString("en-US") : "—"} Campaign PTS
         </span>
       </div>
 
