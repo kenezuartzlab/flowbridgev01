@@ -84,7 +84,10 @@ describe('V14.1 submission policy bounds', () => {
   });
 
   it('requires a bounded, positive Campaign PTS budget', () => {
-    expect(validatePtsBudget({ rewardType: 'campaign_pts', ptsBudget: 0, tasks: [task()] })).toHaveLength(1);
+    // Zero budget is rejected outright, and also cannot cover a single wallet.
+    expect(
+      validatePtsBudget({ rewardType: 'campaign_pts', ptsBudget: 0, tasks: [task()] }).join(' '),
+    ).toMatch(/budget of 1 or more/i);
     expect(
       validatePtsBudget({
         rewardType: 'campaign_pts',
