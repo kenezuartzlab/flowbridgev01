@@ -1,0 +1,35 @@
+{
+  "$comment": "FlowBridge V13 — FlowStakingVault deployment manifest TEMPLATE. Copy to contracts/deployments/staking-bot-testnet.json only when a real deployment is executed under an owner-approved gate. All null fields must be filled from verified on-chain state.",
+  "network": "bot-testnet",
+  "chainId": 968,
+  "flowStakingVault": {
+    "address": null,
+    "token": "0xCE14Ca1CF2012F1996D5FBc7d369FA051aa641Ac",
+    "owner": null,
+    "deployTxHash": null,
+    "paused": null,
+    "sourceSha256": null,
+    "artifactSha256": null
+  },
+  "rewardFunding": {
+    "fundedAmount": "0",
+    "fundingTxHash": null,
+    "fundingFrom": null,
+    "rewardInventory": "0"
+  },
+  "schedule": {
+    "budget": null,
+    "durationSeconds": null,
+    "rewardRatePerSecond": null,
+    "periodFinish": null,
+    "activationTxHash": null
+  },
+  "deployer": null,
+  "compiler": {
+    "version": "0.8.24",
+    "optimizer": { "enabled": true, "runs": 200 },
+    "evmVersion": "paris"
+  },
+  "stakingPolicyVersion": "v13-testnet-build-gate",
+  "deployedAt": null
+}

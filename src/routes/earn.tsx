@@ -392,6 +392,22 @@ function EarnPage() {
               campaignPts={campaignAuthed ? campaignPointsTotal : null}
               onClaimed={refresh}
             />
+
+            {/* V13 — staking build gate: preview surface only, never a live rate. */}
+            <Link
+              to="/stake"
+              className="flex items-center justify-between gap-3 rounded-2xl border border-hairline bg-card px-4 py-3"
+            >
+              <span className="min-w-0">
+                <span className="block text-[13px] font-black">FLOW staking</span>
+                <span className="block text-[11px] text-muted-soft">
+                  Testnet preview — pre-funded rewards, no minting, parameters owner-gated.
+                </span>
+              </span>
+              <span className="shrink-0 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted">
+                Preview
+              </span>
+            </Link>
           </>
         )}
 

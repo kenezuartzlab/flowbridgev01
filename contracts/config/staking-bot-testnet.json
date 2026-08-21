@@ -1,0 +1,25 @@
+{
+  "$comment": "FlowBridge V13 — FlowStakingVault deployment config, BOT Testnet 968. Build gate only: NOTHING is deployed or broadcast from this file yet. `token` is fixed to the existing V12.2 FLOW token. Every economic parameter stays null until the owner explicitly approves it. Never copy these into a mainnet config.",
+  "chainId": 968,
+  "network": "bot-testnet",
+  "rpcUrlEnv": "BOT_TESTNET_RPC_URL",
+  "deployerKeyEnv": "DEPLOYER_PRIVATE_KEY",
+  "token": "0xCE14Ca1CF2012F1996D5FBc7d369FA051aa641Ac",
+  "vaultOwner": null,
+  "economics": {
+    "minStake": null,
+    "rewardBudgetPerEpoch": null,
+    "epochDurationSeconds": null,
+    "startTime": null,
+    "lockSeconds": null,
+    "earlyWithdrawPenaltyBps": null,
+    "maxStakePerWallet": null
+  },
+  "compiler": {
+    "version": "0.8.24",
+    "optimizer": { "enabled": true, "runs": 200 },
+    "evmVersion": "paris"
+  },
+  "stakingPolicyVersion": "v13-testnet-build-gate",
+  "status": "OWNER_APPROVAL_REQUIRED_NOT_DEPLOYABLE"
+}
