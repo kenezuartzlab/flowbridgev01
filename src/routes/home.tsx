@@ -133,47 +133,19 @@ function HomePage() {
       >
         {/* Summary — compact on mobile so the fold shows real content. */}
         <HeroCard hero={page.hero} variant="home" className="p-3.5 sm:p-5">
-          <div className="relative flex items-start justify-between gap-3">
-            <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
-              {L("balance", "FLOW Points")}
-            </p>
-            <Link
-              to="/earn"
-              className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-white/20 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-white/30"
-            >
-              {L("rewardsCta", "Rewards")} <ArrowUpRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          <p className="relative mt-1.5 font-mono text-[30px] font-black leading-none tabular-nums tracking-[-0.02em] sm:mt-2 sm:text-[42px]">
-            {loading && !incentives ? "—" : flowPoints.toLocaleString("en-US")}
-            <span className="ml-2 align-baseline text-[13px] font-black opacity-80">{PTS}</span>
-          </p>
-
-          <div className="relative mt-3 grid grid-cols-2 gap-2 sm:mt-4">
-            <div className="fb-hero-tile flex items-center gap-2 px-2.5 py-2 sm:px-3 sm:py-2.5">
-              <PageIcon page="home" slot="claimable" size={24} />
-              <span className="min-w-0">
-                <span className="block truncate font-mono text-[9px] font-black uppercase tracking-[0.12em] opacity-80">
-                  {L("claimable", "Claimable PTS")}
-                </span>
-                <span className="block font-mono text-[14px] font-black tabular-nums sm:text-[15px]">
-                  {claimable.toLocaleString("en-US")}
-                </span>
-              </span>
-            </div>
-            <div className="fb-hero-tile flex items-center gap-2 px-2.5 py-2 sm:px-3 sm:py-2.5">
-              <PageIcon page="home" slot="volume" size={24} />
-              <span className="min-w-0">
-                <span className="block truncate font-mono text-[9px] font-black uppercase tracking-[0.12em] opacity-80">
-                  {L("volume", "Swap volume")}
-                </span>
-                <span className="block font-mono text-[14px] font-black tabular-nums sm:text-[15px]">
-                  {volumeUsd > 0 ? formatUsd(volumeUsd) : "—"}
-                </span>
-              </span>
-            </div>
-          </div>
+          <RewardsHeroContent
+            label={L("balance", "FLOW Points")}
+            ctaLabel={L("rewardsCta", "Earn & Claim")}
+            loading={loading}
+            hasData={!!incentives}
+            flowPoints={flowPoints}
+            pointsToday={pointsToday}
+            corePointsToday={corePointsToday}
+            dailyCap={dailyCap}
+            claimableFlow={claimableFlow}
+            claimedFlow={claimedFlow}
+            volumeUsd={volumeUsd}
+          />
 
 
 
