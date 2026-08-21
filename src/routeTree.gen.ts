@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as TradeRouteImport } from './routes/trade'
+import { Route as StudioRouteImport } from './routes/studio'
 import { Route as StakeRouteImport } from './routes/stake'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetsRouteImport } from './routes/sets'
@@ -87,6 +88,11 @@ const WalletRoute = WalletRouteImport.update({
 const TradeRoute = TradeRouteImport.update({
   id: '/trade',
   path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StakeRoute = StakeRouteImport.update({
@@ -453,6 +459,7 @@ export interface FileRoutesByFullPath {
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -524,6 +531,7 @@ export interface FileRoutesByTo {
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -596,6 +604,7 @@ export interface FileRoutesById {
   '/sets': typeof SetsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -669,6 +678,7 @@ export interface FileRouteTypes {
     | '/sets'
     | '/sitemap.xml'
     | '/stake'
+    | '/studio'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -740,6 +750,7 @@ export interface FileRouteTypes {
     | '/sets'
     | '/sitemap.xml'
     | '/stake'
+    | '/studio'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -811,6 +822,7 @@ export interface FileRouteTypes {
     | '/sets'
     | '/sitemap.xml'
     | '/stake'
+    | '/studio'
     | '/trade'
     | '/wallet'
     | '/.mcp/list-tools'
@@ -883,6 +895,7 @@ export interface RootRouteChildren {
   SetsRoute: typeof SetsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StakeRoute: typeof StakeRoute
+  StudioRoute: typeof StudioRoute
   TradeRoute: typeof TradeRoute
   WalletRoute: typeof WalletRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -941,6 +954,13 @@ declare module '@tanstack/react-router' {
       path: '/trade'
       fullPath: '/trade'
       preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stake': {
@@ -1498,6 +1518,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetsRoute: SetsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StakeRoute: StakeRoute,
+  StudioRoute: StudioRoute,
   TradeRoute: TradeRoute,
   WalletRoute: WalletRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
