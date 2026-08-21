@@ -7,7 +7,7 @@
  * browser.
  */
 
-export type PartnerMemberRole = 'partner_admin' | 'partner_editor';
+export type PartnerMemberRole = 'partner_admin' | 'partner_editor' | 'partner_viewer';
 export type PartnerOrgStatus = 'pending' | 'verified' | 'rejected' | 'suspended';
 
 export type CampaignReviewState =
@@ -22,7 +22,18 @@ export type CampaignReviewState =
 export type CampaignRewardType = 'campaign_pts' | 'flow_points_bonus' | 'flow_token';
 
 /** Actor classes recognised by the lifecycle machine. */
-export type LifecycleActor = 'partner_admin' | 'partner_editor' | 'internal' | 'super_admin';
+export type LifecycleActor =
+  | 'partner_admin'
+  | 'partner_editor'
+  | 'partner_viewer'
+  | 'internal'
+  | 'super_admin';
+
+export const PARTNER_MEMBER_ROLE_LABEL: Record<PartnerMemberRole, string> = {
+  partner_admin: 'Org owner',
+  partner_editor: 'Editor',
+  partner_viewer: 'Viewer',
+};
 
 export interface PartnerOrg {
   orgId: string;
@@ -57,6 +68,10 @@ export interface PartnerCampaignSummary {
   completionCount: number;
   taskCount: number;
   totalPoints: number;
+  /** Declared Campaign PTS issuance bound for this campaign. */
+  ptsBudget: number;
+  /** Revision currently materialized into the canonical live campaign. */
+  publishedRevision?: number | null;
 }
 
 export interface CampaignReviewEvent {
@@ -166,6 +181,11 @@ export function canSubmit(role: PartnerMemberRole): boolean {
 
 export function canEditDrafts(role: PartnerMemberRole): boolean {
   return role === 'partner_admin' || role === 'partner_editor';
+}
+
+/** Viewers are read-only: dashboards and review history, never a write. */
+export function isReadOnlyRole(role: PartnerMemberRole): boolean {
+  return role === 'partner_viewer';
 }
 
 export function canManageMembers(role: PartnerMemberRole): boolean {

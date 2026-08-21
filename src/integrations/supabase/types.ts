@@ -306,6 +306,69 @@ export type Database = {
           },
         ]
       }
+      campaign_submission_revisions: {
+        Row: {
+          campaign_id: string
+          fingerprint: string
+          organization_id: string
+          published_at: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          revision: number
+          revision_id: string
+          snapshot: Json
+          status: string
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          campaign_id: string
+          fingerprint: string
+          organization_id: string
+          published_at?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          revision: number
+          revision_id?: string
+          snapshot: Json
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          fingerprint?: string
+          organization_id?: string
+          published_at?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          revision?: number
+          revision_id?: string
+          snapshot?: Json
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_submission_revisions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "campaign_submission_revisions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "partner_organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       campaign_tasks: {
         Row: {
           campaign_id: string
@@ -366,6 +429,9 @@ export type Database = {
           metadata: Json
           name: string
           organization_id: string
+          pts_budget: number
+          published_revision: number | null
+          published_revision_id: string | null
           review_note: string | null
           review_state: Database["public"]["Enums"]["campaign_review_state"]
           reviewed_at: string | null
@@ -387,6 +453,9 @@ export type Database = {
           metadata?: Json
           name: string
           organization_id?: string
+          pts_budget?: number
+          published_revision?: number | null
+          published_revision_id?: string | null
           review_note?: string | null
           review_state?: Database["public"]["Enums"]["campaign_review_state"]
           reviewed_at?: string | null
@@ -408,6 +477,9 @@ export type Database = {
           metadata?: Json
           name?: string
           organization_id?: string
+          pts_budget?: number
+          published_revision?: number | null
+          published_revision_id?: string | null
           review_note?: string | null
           review_state?: Database["public"]["Enums"]["campaign_review_state"]
           reviewed_at?: string | null
@@ -1102,7 +1174,7 @@ export type Database = {
         | "paused"
         | "ended"
       campaign_reward_type: "campaign_pts" | "flow_points_bonus" | "flow_token"
-      partner_member_role: "partner_admin" | "partner_editor"
+      partner_member_role: "partner_admin" | "partner_editor" | "partner_viewer"
       partner_org_status: "pending" | "verified" | "rejected" | "suspended"
     }
     CompositeTypes: {
@@ -1241,7 +1313,11 @@ export const Constants = {
         "ended",
       ],
       campaign_reward_type: ["campaign_pts", "flow_points_bonus", "flow_token"],
-      partner_member_role: ["partner_admin", "partner_editor"],
+      partner_member_role: [
+        "partner_admin",
+        "partner_editor",
+        "partner_viewer",
+      ],
       partner_org_status: ["pending", "verified", "rejected", "suspended"],
     },
   },

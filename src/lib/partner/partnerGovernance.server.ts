@@ -8,6 +8,8 @@
 import type { AdminContext } from '@/lib/admin/adminGate.server';
 import { PartnerError } from './partnerGate.server';
 import { recordReviewEvent } from './partnerStudio.server';
+import { diffSnapshots, maxPtsPerWallet, validateSubmission } from './partnerRevision';
+import { activeRevision, markRevision, materializeRevision } from './partnerRevisions.server';
 import {
   canTransition,
   findTransition,
@@ -115,6 +117,20 @@ export interface GovernanceCampaignRow {
   completionCount: number;
   rewardBlockReason: string | null;
   ruleSummary: string[];
+  /** Declared Campaign PTS issuance bound. */
+  ptsBudget: number;
+  /** Worst-case PTS a single wallet could earn under the pending snapshot. */
+  maxPtsPerWallet: number;
+  publishedRevision?: number | null;
+  /** The frozen submission a reviewer is acting on, if any. */
+  pendingRevision?: {
+    revisionId: string;
+    revision: number;
+    status: string;
+    fingerprint: string;
+    submittedAt: number;
+    changes: string[];
+  } | null;
 }
 
 export async function listGovernanceCampaigns(): Promise<GovernanceCampaignRow[]> {
@@ -122,18 +138,31 @@ export async function listGovernanceCampaigns(): Promise<GovernanceCampaignRow[]
   const { data: rows, error } = await supabase
     .from('campaigns')
     .select(
-      'campaign_id,organization_id,slug,name,description,status,review_state,reward_type,starts_at,ends_at,submitted_at,review_note,revision,partner_organizations(name,status,is_system)',
+      'campaign_id,organization_id,slug,name,description,status,review_state,reward_type,starts_at,ends_at,submitted_at,review_note,revision,pts_budget,published_revision,partner_organizations(name,status,is_system)',
     )
     .order('submitted_at', { ascending: false, nullsFirst: false });
   if (error) throw new PartnerError(error.message, 500);
   const ids = (rows ?? []).map((r) => r.campaign_id);
   if (!ids.length) return [];
-  const [{ data: tasks }, { data: completions }] = await Promise.all([
+  const [{ data: tasks }, { data: completions }, { data: revisionRows }] = await Promise.all([
     supabase.from('campaign_tasks').select('campaign_id,title,points,rules').in('campaign_id', ids),
     supabase.from('campaign_completions').select('campaign_id').in('campaign_id', ids),
+    supabase
+      .from('campaign_submission_revisions')
+      .select('revision_id,campaign_id,revision,status,fingerprint,snapshot,submitted_at')
+      .in('campaign_id', ids)
+      .order('revision', { ascending: false }),
   ]);
 
   return (rows ?? []).map((r: any) => {
+    const revisions = ((revisionRows ?? []) as any[]).filter((v) => v.campaign_id === r.campaign_id);
+    const pending =
+      revisions.find((v) => v.status === 'submitted') ??
+      revisions.find((v) => v.status === 'approved') ??
+      null;
+    const previous = pending
+      ? revisions.find((v) => v.revision < pending.revision && v.status !== 'withdrawn')
+      : null;
     const own = (tasks ?? []).filter((t) => t.campaign_id === r.campaign_id);
     const reward = (r.reward_type ?? 'campaign_pts') as CampaignRewardType;
     return {
@@ -162,6 +191,19 @@ export async function listGovernanceCampaigns(): Promise<GovernanceCampaignRow[]
           (rule: any) => `${t.title}: ${rule?.type ?? 'RULE'}`,
         ),
       ),
+      ptsBudget: Number(r.pts_budget ?? 0),
+      maxPtsPerWallet: pending?.snapshot ? maxPtsPerWallet(pending.snapshot.tasks ?? []) : 0,
+      publishedRevision: r.published_revision ?? null,
+      pendingRevision: pending
+        ? {
+            revisionId: pending.revision_id,
+            revision: Number(pending.revision),
+            status: pending.status,
+            fingerprint: pending.fingerprint,
+            submittedAt: toMs(pending.submitted_at),
+            changes: diffSnapshots(previous?.snapshot ?? null, pending.snapshot),
+          }
+        : null,
     };
   });
 }
@@ -195,15 +237,53 @@ export async function governanceCampaignAction(
   }
 
   const transition = findTransition(action, from)!;
+  const cleanNote = note?.trim() ? note.trim().slice(0, 1000) : null;
   const patch: Record<string, unknown> = {
     review_state: transition.to,
     reviewed_at: new Date().toISOString(),
     reviewed_by: admin.userId,
-    review_note: note?.trim() ? note.trim().slice(0, 1000) : null,
+    review_note: cleanNote,
     updated_at: new Date().toISOString(),
   };
   if (transition.publishes) patch.status = 'published';
   if (transition.unpublishes) patch.status = transition.to === 'ended' ? 'archived' : 'draft';
+
+  // Partner-originated campaigns are governed through their frozen submission.
+  // Internal (system-org) campaigns authored in /sets have no snapshot and keep
+  // the legacy direct path.
+  const pending = await activeRevision(supabase, row.campaign_id);
+
+  if (action === 'request_changes' && pending && pending.status !== 'published') {
+    await markRevision(supabase, pending.revisionId, 'changes_requested', {
+      reviewerId: admin.userId,
+      note: cleanNote,
+    });
+  }
+
+  if (action === 'approve') {
+    if (pending) {
+      if (pending.status !== 'submitted') {
+        throw new PartnerError('There is no outstanding submission to approve.', 409);
+      }
+      // Re-validate the frozen content at approval time; nothing is trusted.
+      const errors = validateSubmission(pending.snapshot);
+      if (errors.length) throw new PartnerError(`Submission fails policy: ${errors.join(' ')}`, 409);
+      await markRevision(supabase, pending.revisionId, 'approved', {
+        reviewerId: admin.userId,
+        note: cleanNote,
+      });
+    }
+  }
+
+  if (action === 'publish' && pending) {
+    if (pending.status !== 'approved' && pending.status !== 'published') {
+      throw new PartnerError('Approve the submitted revision before publishing it.', 409);
+    }
+    // Materialize exactly the approved snapshot into the canonical engine.
+    await materializeRevision(supabase, { ...pending, status: 'approved' });
+    patch.published_revision = pending.snapshot.revision;
+    patch.published_revision_id = pending.revisionId;
+  }
 
   const { error: updateError } = await supabase
     .from('campaigns')
