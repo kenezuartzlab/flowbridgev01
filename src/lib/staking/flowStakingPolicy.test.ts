@@ -9,12 +9,13 @@ import stakingConfig from "../../../contracts/config/staking-bot-testnet.json";
 const PATH = "contracts/config/staking-bot-testnet.json";
 
 describe("FLOW staking owner-gated policy (V13)", () => {
-  it("keeps the committed testnet config economically unapproved", () => {
+  it("reflects the owner-approved testnet config (BOT Testnet 968 only)", () => {
     const report = buildFlowStakingPolicyReport(stakingConfig as FlowStakingConfig, PATH);
-    expect(report.economicsApproved).toBe(false);
-    expect(report.deployReady).toBe(false);
-    expect(report.unapproved).toContain("vaultOwner");
-    expect(report.unapproved).toContain("economics.rewardBudgetPerEpoch");
+    expect(report.unapproved).not.toContain("vaultOwner");
+    expect(report.unapproved).not.toContain("economics.rewardBudgetPerEpoch");
+    expect(report.verdicts.find((v) => v.parameter === "vaultOwner")!.value).toBe(
+      "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+    );
   });
 
   it("approves the frozen FLOW token as principal", () => {
@@ -44,13 +45,13 @@ describe("FLOW staking owner-gated policy (V13)", () => {
     }
   });
 
-  it("only becomes deploy-ready once an owner address is approved", () => {
+  it("is not deploy-ready without an approved owner address", () => {
     const report = buildFlowStakingPolicyReport(
-      { ...(stakingConfig as FlowStakingConfig), vaultOwner: "0x628e237b73C5a37EF3968527563FA1a26b32BB97" },
+      { ...(stakingConfig as FlowStakingConfig), vaultOwner: null },
       PATH,
     );
-    expect(report.deployReady).toBe(true);
-    expect(report.economicsApproved).toBe(false);
+    expect(report.deployReady).toBe(false);
+    expect(report.unapproved).toContain("vaultOwner");
   });
 
   it("requires budget, duration and start time together for economics approval", () => {
