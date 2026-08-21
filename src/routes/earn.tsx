@@ -393,7 +393,7 @@ function EarnPage() {
               onClaimed={refresh}
             />
 
-            {/* V13 — staking build gate: preview surface only, never a live rate. */}
+            {/* V13.2 — testnet vault live and funded; read-only surface, never a quoted rate. */}
             <Link
               to="/stake"
               className="flex items-center justify-between gap-3 rounded-2xl border border-hairline bg-card px-4 py-3"
@@ -401,11 +401,11 @@ function EarnPage() {
               <span className="min-w-0">
                 <span className="block text-[13px] font-black">FLOW staking</span>
                 <span className="block text-[11px] text-muted-soft">
-                  Testnet preview — pre-funded rewards, no minting, parameters owner-gated.
+                  Testnet vault live — 100,000 FLOW pre-funded rewards, no minting, no lock-up.
                 </span>
               </span>
               <span className="shrink-0 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted">
-                Preview
+                Live
               </span>
             </Link>
           </>

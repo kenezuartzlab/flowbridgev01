@@ -8,20 +8,20 @@ import { useAccountData } from "@/lib/app/useAccountData";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 
 /**
- * FlowBridge V13 — FLOW staking build gate surface.
+ * FlowBridge V13.2 — FLOW staking BOT Testnet surface.
  *
- * Read-only by construction. The vault is not deployed and every economic
- * parameter is still owner-gated, so this page documents the accounting model
- * and shows readiness — it never quotes a yield and cannot submit a stake.
+ * Read-only by construction. The testnet vault is deployed, verified and funded,
+ * so this page shows live schedule state and the accounting model — it never
+ * quotes a yield and cannot submit a stake or approval.
  */
 export const Route = createFileRoute("/stake")({
   head: () => ({
     meta: [
-      { title: "FLOW Staking — Testnet Build Preview | FlowBridge" },
+      { title: "FLOW Staking — BOT Testnet Vault | FlowBridge" },
       {
         name: "description",
         content:
-          "FLOW staking on BOT Testnet: the pre-funded, non-minting reward model, owner-gated parameters and current deployment readiness. Preview only — staking is not live.",
+          "FLOW staking on BOT Testnet: the pre-funded, non-minting reward model, owner-gated parameters and the live BOT Testnet reward schedule. Read-only surface.",
       },
       { property: "og:title", content: "FLOW Staking on FlowBridge" },
       {
@@ -91,7 +91,7 @@ function StakePage() {
         </Surface>
 
         <p className="px-1 text-[11px] leading-relaxed text-muted-soft">
-          Testnet preview for validation only. FLOW Points and Campaign PTS are separate off-chain
+          BOT Testnet validation vault — deployed, verified and funded. FLOW Points and Campaign PTS are separate off-chain
           metrics and are never staking principal or a staking multiplier. BOT Mainnet staking
           remains pending promotion.
         </p>
