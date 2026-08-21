@@ -16,8 +16,11 @@
 import { validateStudioCampaign, newCampaignId } from '@/lib/campaign/campaignStudio';
 import type { StudioCampaignInput } from '@/lib/campaign/campaignStudio';
 import { PartnerError, type PartnerContext } from './partnerGate.server';
+import { PTS_LIMITS } from './partnerRevision';
+import { activeRevision, freezeSubmission, listRevisions, markRevision } from './partnerRevisions.server';
 import {
   PARTNER_EDITABLE_STATES,
+  canEditDrafts,
   canSubmit,
   canTransition,
   findTransition,
@@ -31,7 +34,7 @@ import {
 } from './partnerTypes';
 
 const CAMPAIGN_COLUMNS =
-  'campaign_id,organization_id,slug,name,description,status,review_state,reward_type,starts_at,ends_at,updated_at,submitted_at,review_note,revision';
+  'campaign_id,organization_id,slug,name,description,status,review_state,reward_type,starts_at,ends_at,updated_at,submitted_at,review_note,revision,pts_budget,published_revision';
 
 async function db() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
@@ -75,6 +78,8 @@ async function summarize(rows: any[]): Promise<PartnerCampaignSummary[]> {
       completionCount: (completions ?? []).filter((c) => c.campaign_id === r.campaign_id).length,
       taskCount: own.length,
       totalPoints: own.reduce((sum, t) => sum + Number(t.points ?? 0), 0),
+      ptsBudget: Number((r as any).pts_budget ?? 0),
+      publishedRevision: (r as any).published_revision ?? null,
     };
   });
 }
@@ -136,7 +141,10 @@ export async function getPartnerCampaign(partner: PartnerContext, campaignId: st
         sortOrder: Number(t.sort_order),
       })),
     } satisfies StudioCampaignInput,
+    rewardType: rewardType(data.reward_type),
+    ptsBudget: Number((data as any).pts_budget ?? 0),
     reviewEvents: await listReviewEvents(campaignId),
+    revisions: await listRevisions(supabase, campaignId),
   };
 }
 
@@ -186,7 +194,9 @@ export async function recordReviewEvent(input: {
   });
 }
 
-function normalizeInput(raw: any): StudioCampaignInput & { rewardType: CampaignRewardType } {
+function normalizeInput(
+  raw: any,
+): StudioCampaignInput & { rewardType: CampaignRewardType; ptsBudget: number } {
   if (!raw || typeof raw !== 'object') throw new PartnerError('Invalid campaign payload.');
   const tasks = Array.isArray(raw.tasks) ? raw.tasks : [];
   return {
@@ -199,6 +209,7 @@ function normalizeInput(raw: any): StudioCampaignInput & { rewardType: CampaignR
     startsAt: Number(raw.startsAt),
     endsAt: Number(raw.endsAt),
     rewardType: rewardType(raw.rewardType),
+    ptsBudget: Number.isFinite(Number(raw.ptsBudget)) ? Math.trunc(Number(raw.ptsBudget)) : 0,
     tasks: tasks.map((t: any, i: number) => ({
       taskId: String(t?.taskId ?? '').trim().toLowerCase(),
       title: String(t?.title ?? '').trim(),
@@ -219,8 +230,31 @@ export async function savePartnerCampaign(
   raw: unknown,
   opts: { campaignId?: string } = {},
 ): Promise<PartnerCampaignSummary> {
+  if (!canEditDrafts(partner.role)) {
+    throw new PartnerError('This account has read-only access to Studio.', 403);
+  }
   const input = normalizeInput(raw);
   const errors = validateStudioCampaign(input);
+  // Platform PTS ceilings apply even to drafts, so a partner never builds a
+  // campaign that could never be approved.
+  if (input.tasks.length > PTS_LIMITS.maxTasks) {
+    errors.push(`A campaign may hold at most ${PTS_LIMITS.maxTasks} tasks.`);
+  }
+  for (const t of input.tasks) {
+    if (t.points > PTS_LIMITS.maxTaskPts) {
+      errors.push(`"${t.title}": PTS per completion exceeds the platform limit of ${PTS_LIMITS.maxTaskPts}.`);
+    }
+    if (t.completionLimitPerWallet > PTS_LIMITS.maxCompletionLimitPerWallet) {
+      errors.push(
+        `"${t.title}": completions per wallet exceeds the platform limit of ${PTS_LIMITS.maxCompletionLimitPerWallet}.`,
+      );
+    }
+  }
+  if (input.ptsBudget > PTS_LIMITS.maxCampaignBudget) {
+    errors.push(
+      `Campaign PTS budget exceeds the platform limit of ${PTS_LIMITS.maxCampaignBudget.toLocaleString()} PTS.`,
+    );
+  }
   if (!isRewardTypePartnerConfigurable(input.rewardType) && input.tasks.some((t) => t.points > 0)) {
     // Proposal drafts are allowed, but they can never claim PTS authority.
     errors.push(
@@ -273,6 +307,7 @@ export async function savePartnerCampaign(
       status: 'draft',
       review_state: 'draft',
       reward_type: input.rewardType,
+      pts_budget: input.rewardType === 'campaign_pts' ? input.ptsBudget : 0,
       created_by: partner.userId,
       starts_at: toIso(input.startsAt),
       ends_at: toIso(input.endsAt),
@@ -342,7 +377,9 @@ export async function partnerTransition(
   const supabase = await db();
   const { data: row, error } = await supabase
     .from('campaigns')
-    .select('campaign_id,review_state,reward_type,revision')
+    .select(
+      'campaign_id,review_state,reward_type,revision,slug,name,description,starts_at,ends_at,pts_budget',
+    )
     .eq('campaign_id', campaignId.toLowerCase())
     .eq('organization_id', partner.orgId)
     .maybeSingle();
@@ -363,9 +400,55 @@ export async function partnerTransition(
     review_state: target,
     updated_at: new Date().toISOString(),
   };
+
   if (action === 'submit') {
+    // Freeze the draft. The frozen snapshot — not the mutable draft — is what a
+    // reviewer approves and what publishing later materializes.
+    const { data: taskRows, error: taskReadError } = await supabase
+      .from('campaign_tasks')
+      .select(
+        'task_id,title,description,points,required_count,completion_limit_per_wallet,rules,sort_order',
+      )
+      .eq('campaign_id', row.campaign_id)
+      .order('sort_order', { ascending: true });
+    if (taskReadError) throw new PartnerError(taskReadError.message, 500);
+
+    const frozen = await freezeSubmission(supabase, {
+      campaignId: row.campaign_id,
+      organizationId: partner.orgId,
+      orgSlug: partner.org.slug,
+      orgName: partner.org.name,
+      submittedBy: partner.userId,
+      slug: row.slug,
+      name: row.name,
+      description: row.description,
+      startsAt: toMs(row.starts_at),
+      endsAt: toMs(row.ends_at),
+      rewardType: rewardType(row.reward_type),
+      ptsBudget: Number((row as any).pts_budget ?? 0),
+      tasks: (taskRows ?? []).map((t: any, i: number) => ({
+        taskId: t.task_id,
+        title: t.title,
+        description: t.description ?? null,
+        points: Number(t.points),
+        requiredCount: Number(t.required_count),
+        completionLimitPerWallet: Number(t.completion_limit_per_wallet),
+        rules: Array.isArray(t.rules) ? (t.rules as unknown[]) : [],
+        sortOrder: Number.isFinite(Number(t.sort_order)) ? Number(t.sort_order) : i,
+      })),
+    });
     patch.submitted_at = new Date().toISOString();
-    patch.revision = Number(row.revision ?? 1) + (from === 'changes_requested' ? 1 : 0);
+    patch.revision = frozen.revision;
+    patch.review_note = null;
+  }
+
+  if (action === 'withdraw') {
+    const outstanding = await activeRevision(supabase, row.campaign_id);
+    if (outstanding && outstanding.status === 'submitted') {
+      await markRevision(supabase, outstanding.revisionId, 'withdrawn', {
+        reviewerId: partner.userId,
+      });
+    }
   }
 
   const { error: updateError } = await supabase
