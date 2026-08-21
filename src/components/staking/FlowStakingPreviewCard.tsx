@@ -21,6 +21,8 @@ import {
  */
 
 const FLOW_DECIMALS = 18n;
+const BOT_TESTNET_RPC_URL = "https://rpc.bohr.life";
+const BOT_TESTNET_CHAIN_HEX = `0x${BOT_TESTNET_CHAIN_ID.toString(16)}`;
 const SELECTORS = {
   balanceOf: "0x70a08231",
   allowance: "0xdd62ed3e",
