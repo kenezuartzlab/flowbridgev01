@@ -18,7 +18,6 @@ import { AppTopBar } from "@/components/layout/AppTopBar";
 import { useGreeting } from "@/lib/greetings";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TokenIcon } from "@/components/TokenIcon";
-import { PageIcon } from "@/components/layout/PageIcon";
 
 import { BannerRotator } from "@/components/banners/BannerRotator";
 import { FeaturedBanner } from "@/components/banners/FeaturedBanner";
@@ -28,7 +27,6 @@ import { HeroCard } from "@/components/layout/HeroCard";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
-import { PTS } from "@/lib/points";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
 import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
