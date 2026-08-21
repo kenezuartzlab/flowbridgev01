@@ -54,6 +54,7 @@ import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
 import { TokenIcon } from "@/components/TokenIcon";
 import { CampaignStudioWorkspace } from "@/components/campaigns/CampaignStudioWorkspace";
+import { PartnerGovernancePanel } from "@/components/studio/PartnerGovernancePanel";
 
 const SECTIONS = [
   "tokens",
@@ -67,6 +68,7 @@ const SECTIONS = [
   "social",
   "content",
   "campaigns",
+  "governance",
 ] as const;
 
 export const Route = createFileRoute("/sets")({
@@ -106,7 +108,8 @@ type Tab =
   | "flags"
   | "social"
   | "content"
-  | "campaigns";
+  | "campaigns"
+  | "governance";
 
 /** Grouped navigation so the panel reads like a real control panel. */
 const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
@@ -134,7 +137,13 @@ const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
       ["rewards", "Rewards"],
     ],
   },
-  { group: "Growth", items: [["campaigns", "Campaigns & Visuals"]] },
+  {
+    group: "Growth",
+    items: [
+      ["campaigns", "Campaigns & Visuals"],
+      ["governance", "Partner Review"],
+    ],
+  },
   { group: "System", items: [["flags", "Feature Flags"]] },
 ];
 
@@ -266,6 +275,8 @@ function AdminPage() {
         <PagesPanel wallet={wallet!} />
       ) : tab === "campaigns" ? (
         <CampaignStudioWorkspace embedded />
+      ) : tab === "governance" ? (
+        <PartnerGovernancePanel wallet={wallet!} />
       ) : (
         <SettingsPanel wallet={wallet!} tab={tab} />
       )}
