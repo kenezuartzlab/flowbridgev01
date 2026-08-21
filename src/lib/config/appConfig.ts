@@ -384,7 +384,7 @@ export const DEFAULT_BANNERS: BannerSettings = {
       {
         id: "home-campaign",
         title: "BOT Chain Campaign",
-        body: "Swap on BOT Chain and earn bonus FLOW points.",
+        body: "Swap on BOT Chain and grow your FLOW Points.",
         imageUrl: null,
         href: "/rewards",
         theme: "swap",
