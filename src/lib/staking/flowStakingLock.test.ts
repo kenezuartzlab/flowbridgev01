@@ -28,13 +28,13 @@ const approved: FlowStakingLockConfig = {
 };
 
 describe("V13.1 staking parameter lock", () => {
-  it("blocks the shipped canonical testnet config (nothing owner-approved yet)", () => {
+  it("locks the shipped canonical testnet config with the owner-approved values", () => {
     const r = buildFlowStakingLockReport(config as FlowStakingLockConfig, "contracts/config/staking-bot-testnet.json");
-    expect(r.parameterLockPass).toBe(false);
-    expect(r.blocked).toContain("vaultOwner");
-    expect(r.blocked).toContain("rewardTreasury");
-    expect(r.blocked).toContain("safety.emergencyWithdrawPolicy");
-    expect(r.solvency.budget).toBeNull();
+    expect(r.parameterLockPass).toBe(true);
+    expect(r.blocked).toEqual([]);
+    expect(r.solvency.budget).toBe("100000000000000000000000");
+    expect(r.solvency.durationSeconds).toBe("2592000");
+    expect(BigInt(r.solvency.requiredInventory!)).toBeLessThanOrEqual(BigInt(r.solvency.budget!));
   });
 
   it("passes only when every mandatory decision is approved", () => {
