@@ -253,10 +253,13 @@ export async function answerFlowAiQuestion(input: {
     degraded.push("your FlowBridge account record");
   }
 
+  // V15.3B §2 — the bound wallet is a PERSISTED ACCOUNT FACT. It must not depend
+  // on which skills the planner selected, nor on the connector's current chain.
   const boundWallet =
-    (accountEvidence.find((e) => e.id === "db.account.points")?.value as
+    ((accountEvidence.find((e) => e.id === "db.account.points")?.value as
       | { walletAddress?: string | null }
-      | undefined)?.walletAddress ?? null;
+      | undefined)?.walletAddress ?? null) || (await resolveBoundWallet(input.actor));
+
 
   // V15.1 §4 — refuse cross-actor private reads at the boundary, before retrieval
   // of anything else, using the SERVER-known bound wallet as the only "self".
