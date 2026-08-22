@@ -79,6 +79,14 @@ interface UniversalSwapCardProps {
   getUsdPrice?: (symbol: string) => number | null | undefined;
   rewardsActive?: boolean;
   txUrlPrefix: string;
+  /**
+   * V15.3F — one-shot prefill from a Flow AI prepared plan. Hints only: the card
+   * still re-resolves registry, balance, allowance, live fee and quote, and only
+   * the user's wallet can sign. Applied at most once per plan key so a manual
+   * edit afterwards always wins.
+   */
+  hydration?: SwapHydrationPlan | null;
+  onHydrationApplied?: (plan: SwapHydrationPlan) => void;
 }
 
 export function UniversalSwapCard({
@@ -92,7 +100,10 @@ export function UniversalSwapCard({
   getUsdPrice,
   rewardsActive = false,
   txUrlPrefix,
+  hydration = null,
+  onHydrationApplied,
 }: UniversalSwapCardProps) {
+
   const { address } = useAccount();
   const publicClient = usePublicClient();
   const contracts = useMemo(() => getContracts(isMainnet), [isMainnet]);
