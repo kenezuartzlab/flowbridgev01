@@ -3096,10 +3096,12 @@ export default function App() {
             />
           )}
 
-          {/* V15.3 — Flow AI handoff freshness notice. Hints only: Trade revalidates. */}
+          {/* V15.3J — server-resolved handoff status. Advisory only: Trade revalidates. */}
           {(activeTab === 'BOT/USDT' || activeTab === 'BRIDGE') && (
             <AiHandoffBanner
               currentChainId={currentChainId ?? null}
+              resolutionStatus={handoffResolution?.status ?? null}
+              resolutionMessage={handoffResolution?.message ?? null}
               onSwitchChain={async (cid) => {
                 if (cid === 968 || cid === 97) setIsMainnet(false);
                 if (cid === 677 || cid === 56) setIsMainnet(true);
@@ -3109,6 +3111,7 @@ export default function App() {
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
             />
           )}
+
 
           {activeTab === 'BOT/USDT' && campaignSwapCtx && (
             <SwapCampaignTaskBanner ctx={campaignSwapCtx} currentChainId={currentChainId ?? null} />
