@@ -66,6 +66,20 @@ export const canonicalPreparedIntentSchema = z.object({
 });
 export type CanonicalPreparedIntent = z.infer<typeof canonicalPreparedIntentSchema>;
 
+/**
+ * Renders an intent amount as a plain decimal string, accepting either a string
+ * or a finite number. Exponent notation and non-finite values are rejected as ""
+ * so the caller reports a normalization failure instead of guessing.
+ */
+export function decimalDisplayOf(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    const s = String(value);
+    return /e/i.test(s) ? value.toFixed(18).replace(/0+$/, "").replace(/\.$/, "") : s;
+  }
+  return "";
+}
+
 /** bigint-safe decimal → base units. Never uses floats. */
 export function toRawAmount(display: string, decimals: number): string {
   const v = display.trim();
@@ -121,7 +135,10 @@ export function normalizePreparedIntent(intent: ActionIntent): CanonicalizationR
   let swap: CanonicalSwapLeg | null = null;
   if (intent.type === "SWAP") {
     const decimalsIn = Number(p.decimalsIn);
-    const display = typeof p.amountIn === "string" ? p.amountIn.trim() : "";
+    // §4 — the intent may hold the amount as a string or as a number (both
+    // preparation paths converge here); render a number without exponent
+    // notation so the display/raw round-trip stays exact.
+    const display = decimalDisplayOf(p.amountIn);
     if (!Number.isInteger(decimalsIn)) errors.push("decimalsIn unresolved");
     if (!display) errors.push("amountIn missing");
     if (!p.tokenIn || !p.tokenOut) errors.push("token identities unresolved");
