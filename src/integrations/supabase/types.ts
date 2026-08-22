@@ -56,6 +56,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_action_intents: {
+        Row: {
+          canonical: Json
+          chain_id: number
+          created_at: string
+          digest: string
+          expires_at: string
+          id: string
+          intent_type: string
+          schema_version: string
+          user_id: string
+        }
+        Insert: {
+          canonical: Json
+          chain_id: number
+          created_at?: string
+          digest: string
+          expires_at: string
+          id: string
+          intent_type: string
+          schema_version: string
+          user_id: string
+        }
+        Update: {
+          canonical?: Json
+          chain_id?: number
+          created_at?: string
+          digest?: string
+          expires_at?: string
+          id?: string
+          intent_type?: string
+          schema_version?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_user_memory: {
         Row: {
           created_at: string

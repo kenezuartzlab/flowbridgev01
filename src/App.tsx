@@ -52,9 +52,13 @@ import { SwapCampaignTaskBanner } from './components/app/SwapCampaignTaskBanner'
 import { parseHandoffHint, type HandoffHint } from './lib/ai/intentHandoff';
 import {
   buildSwapHydration,
+  buildSwapHydrationFromCanonical,
   hydrationTabFor,
   HYDRATION_FAILURE_COPY,
 } from './lib/ai/handoffHydration';
+import { resolveHandoffIntent } from './lib/ai/handoffResolutionClient';
+import type { HandoffResolution } from './lib/ai/handoffResolution';
+
 import { applyExplicitChainTarget, useSelectedNetwork } from './lib/network/networkSession';
 import {
   applyDefaultTradeTab,
@@ -598,21 +602,54 @@ export default function App() {
   }, [applyHandoffHint]);
 
   /**
-   * V15.3F §1 — translate the handoff hints into swap form state. Pure
-   * derivation against the registry this network actually uses: an unresolvable
-   * pair or amount yields a stated reason instead of a half-filled form. The
-   * swap card still re-resolves balance, allowance, live fee and quote, and only
-   * the user's wallet can authorize anything.
+   * V15.3J §3 — SERVER-RESOLVED handoff. The link is only a pointer, so Trade asks
+   * the server for the canonical prepared snapshot by opaque intent id. Ownership,
+   * expiry and the integrity digest are verified server-side; MISSING / EXPIRED /
+   * TAMPERED are distinct outcomes and never reported as MALFORMED.
+   */
+  const [handoffResolution, setHandoffResolution] = useState<HandoffResolution | null>(null);
+  const resolvedIntentRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!handoffHint) return;
+    const key = `${handoffHint.intentId}:${handoffHint.digest}`;
+    if (resolvedIntentRef.current === key) return;
+    resolvedIntentRef.current = key;
+    let alive = true;
+    void resolveHandoffIntent({ intentId: handoffHint.intentId, digest: handoffHint.digest }).then(
+      (r) => {
+        if (alive) setHandoffResolution(r);
+      },
+    );
+    return () => {
+      alive = false;
+    };
+  }, [handoffHint]);
+
+  /**
+   * V15.3J §5 — hydrate from the canonical snapshot, never from URL text. The
+   * amount comes from the bigint-safe raw value stored server-side, so a prepared
+   * 10 USDT arrives as exactly 10. Legacy links with no resolvable snapshot fall
+   * back to the old advisory hints only when the server says the intent is
+   * unavailable, and never override a resolved snapshot. The swap card still
+   * re-resolves balance, allowance, live fee/nonce and quote before any signing.
    */
   const swapHydration = useMemo(() => {
     if (!handoffHint) return null;
-    return buildSwapHydration({ hint: handoffHint, tokens: getCuratedTokens(isMainnet) });
-  }, [handoffHint, isMainnet]);
+    const tokens = getCuratedTokens(isMainnet);
+    if (handoffResolution?.status === 'RESOLVED' && handoffResolution.canonical) {
+      return buildSwapHydrationFromCanonical({ canonical: handoffResolution.canonical, tokens });
+    }
+    if (handoffResolution && handoffResolution.status !== 'UNAVAILABLE') return null;
+    return buildSwapHydration({ hint: handoffHint, tokens });
+  }, [handoffHint, handoffResolution, isMainnet]);
   const swapHydrationPlan = swapHydration?.ok ? swapHydration.plan : null;
   const swapHydrationNotice =
-    swapHydration && !swapHydration.ok && swapHydration.reason !== 'NOT_SWAP'
-      ? HYDRATION_FAILURE_COPY[swapHydration.reason as keyof typeof HYDRATION_FAILURE_COPY]
-      : null;
+    handoffResolution && handoffResolution.status !== 'RESOLVED'
+      ? handoffResolution.message
+      : swapHydration && !swapHydration.ok && swapHydration.reason !== 'NOT_SWAP'
+        ? HYDRATION_FAILURE_COPY[swapHydration.reason as keyof typeof HYDRATION_FAILURE_COPY]
+        : null;
+
 
   /**
    * V15.3G §6 — report the hydration outcome back into the conversation as an
@@ -3059,10 +3096,12 @@ export default function App() {
             />
           )}
 
-          {/* V15.3 — Flow AI handoff freshness notice. Hints only: Trade revalidates. */}
+          {/* V15.3J — server-resolved handoff status. Advisory only: Trade revalidates. */}
           {(activeTab === 'BOT/USDT' || activeTab === 'BRIDGE') && (
             <AiHandoffBanner
               currentChainId={currentChainId ?? null}
+              resolutionStatus={handoffResolution?.status ?? null}
+              resolutionMessage={handoffResolution?.message ?? null}
               onSwitchChain={async (cid) => {
                 if (cid === 968 || cid === 97) setIsMainnet(false);
                 if (cid === 677 || cid === 56) setIsMainnet(true);
@@ -3072,6 +3111,7 @@ export default function App() {
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
             />
           )}
+
 
           {activeTab === 'BOT/USDT' && campaignSwapCtx && (
             <SwapCampaignTaskBanner ctx={campaignSwapCtx} currentChainId={currentChainId ?? null} />

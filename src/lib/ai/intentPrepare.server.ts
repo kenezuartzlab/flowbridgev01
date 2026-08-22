@@ -8,6 +8,7 @@
  */
 import type { FlowAiActor } from "./aiTypes";
 import {
+  ACTION_INTENT_TTL_MS,
   BOT_MAINNET_CHAIN_ID,
   BOT_TESTNET_CHAIN_ID,
   buildHandoff,
@@ -19,6 +20,8 @@ import {
   type ActionIntent,
   type ActionIntentType,
 } from "./actionIntent";
+import type { CanonicalPreparedIntent } from "./canonicalIntent";
+
 import {
   authorizePreparation,
   evaluateIntentPolicy,
@@ -269,6 +272,8 @@ export interface PreparedIntentResponse {
   riskFlags: readonly string[];
   missingEvidence: readonly string[];
   handoff: ReturnType<typeof buildHandoff> | null;
+  /** V15.3J — canonical prepared snapshot (server authority for the handoff). */
+  canonical?: CanonicalPreparedIntent | null;
   /** Constant: Flow AI never executed anything. */
   executed: false;
 }
@@ -362,6 +367,46 @@ export async function prepareActionIntent(input: {
 
   intent = withStatus(intent, "SIMULATED");
   intent = { ...withStatus(intent, "READY_FOR_USER"), riskFlags: [...evaluation.riskFlags] };
+  /**
+   * V15.3J §7 — the 90s lifetime starts when READY_FOR_USER is created, not when
+   * the conversational turn began. Live reads + simulation used part of the
+   * original window, which is why users saw a 0s timer on a fresh card.
+   */
+  const readyAt = new Date();
+  intent = {
+    ...intent,
+    expiresAt: new Date(readyAt.getTime() + ACTION_INTENT_TTL_MS).toISOString(),
+  };
+
+  /**
+   * V15.3J §2/§3 — normalize into the single canonical snapshot and store it under
+   * server authority BEFORE advertising READY_FOR_USER. If normalization fails the
+   * plan is rejected here rather than rendering a card Trade cannot consume.
+   */
+  const { persistPreparedIntent } = await import("./preparedIntentStore.server");
+  const persisted = await persistPreparedIntent({ intent, userId: input.actor.userId });
+  if (!persisted.ok) {
+    const rejected = {
+      ...withStatus(intent, "REJECTED"),
+      blockers: persisted.errors,
+      riskFlags: [...evaluation.riskFlags],
+    };
+    logIntentAudit(buildIntentAudit({ intent: rejected, evaluation, handoffTarget: null }));
+    return {
+      ok: true,
+      response: {
+        intent: rejected,
+        economics,
+        decision: "BLOCKED",
+        blockers: persisted.errors,
+        riskFlags: evaluation.riskFlags,
+        missingEvidence: [],
+        handoff: null,
+        executed: false,
+      },
+    };
+  }
+
   const handoff = buildHandoff(intent);
   logIntentAudit(buildIntentAudit({ intent, evaluation, handoffTarget: handoff.surface }));
 
@@ -375,10 +420,12 @@ export async function prepareActionIntent(input: {
       riskFlags: evaluation.riskFlags,
       missingEvidence: [],
       handoff,
+      canonical: persisted.canonical,
       executed: false,
     },
   };
 }
+
 
 /**
  * §3/§5 — mandatory revalidation immediately before UI/wallet handoff. A stale

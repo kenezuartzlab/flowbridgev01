@@ -13,6 +13,10 @@ import {
   type HandoffObservation,
 } from "@/lib/ai/intentHandoff";
 import { resolveCanonicalTargets, canonicalTargetFor } from "@/lib/ai/actionIntent";
+import {
+  HANDOFF_RESOLUTION_COPY,
+  type HandoffResolutionStatus,
+} from "@/lib/ai/handoffResolution";
 
 /**
  * V15.3 §4/§5 — Trade-side handoff notice.
@@ -27,10 +31,20 @@ export function AiHandoffBanner({
   observedTxHash,
   txUrlPrefix,
   onSwitchChain,
+  resolutionStatus = null,
+  resolutionMessage = null,
 }: {
   currentChainId: number | null;
   observedTxHash?: string | null;
   txUrlPrefix?: string;
+  /**
+   * V15.3J §3/§6 — server-resolved handoff outcome. When present it OUTRANKS the
+   * local fingerprint check, because the opaque link no longer carries economic
+   * fields for the client to recompute. Distinguishes MISSING / EXPIRED /
+   * TAMPERED / UNAUTHENTICATED instead of collapsing them into "malformed".
+   */
+  resolutionStatus?: HandoffResolutionStatus | null;
+  resolutionMessage?: string | null;
   /** V15.3B — user-initiated network switch to the immutable intent chain. */
   onSwitchChain?: (chainId: number) => void | Promise<void>;
 }) {
@@ -76,7 +90,19 @@ export function AiHandoffBanner({
   }, [hint, currentChainId, tick]);
 
   if (!hint || !evaluation) return null;
-  const fresh = evaluation.verdict === "FRESH";
+  // V15.3J — server authority first; fall back to the local freshness check only
+  // while the resolution is still in flight (or for legacy hint-bearing links).
+  const serverResolved = resolutionStatus !== null;
+  const fresh = serverResolved
+    ? resolutionStatus === "RESOLVED" && evaluation.verdict !== "CHAIN_MISMATCH"
+    : evaluation.verdict === "FRESH";
+  const statusLabel = (serverResolved ? resolutionStatus! : evaluation.verdict)
+    .replace(/_/g, " ")
+    .toLowerCase();
+  const statusMessage =
+    serverResolved && resolutionStatus !== "RESOLVED"
+      ? (resolutionMessage ?? HANDOFF_RESOLUTION_COPY[resolutionStatus!])
+      : evaluation.message;
   const stored = observation ?? readHandoffObservation(hint.intentId);
 
   return (
@@ -97,12 +123,12 @@ export function AiHandoffBanner({
           <p className="fb-eyebrow">Flow AI handoff</p>
           <p className="truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
             {hint.type.replace(/_/g, " ")} · intent {hint.intentId.slice(0, 10)} ·{" "}
-            {evaluation.verdict.replace(/_/g, " ").toLowerCase()}
+            {statusLabel}
           </p>
         </div>
       </header>
 
-      <p className="font-mono text-[10px] leading-relaxed text-muted">{evaluation.message}</p>
+      <p className="font-mono text-[10px] leading-relaxed text-muted">{statusMessage}</p>
 
       {evaluation.verdict === "CHAIN_MISMATCH" && onSwitchChain ? (
         <button

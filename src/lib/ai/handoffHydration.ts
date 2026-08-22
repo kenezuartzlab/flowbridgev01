@@ -15,6 +15,11 @@
  * itself, and only the user's wallet can sign.
  */
 import type { HandoffHint } from "./intentHandoff";
+import {
+  fromRawAmount,
+  normalizeDisplay,
+  type CanonicalPreparedIntent,
+} from "./canonicalIntent";
 
 export interface HydrationTokenLike {
   address: string;
@@ -114,3 +119,47 @@ export const HYDRATION_FAILURE_COPY: Record<
   AMOUNT_INVALID:
     "The prepared amount did not survive the handoff, so Trade refused to guess it. Ask Flow AI to prepare it again.",
 };
+
+/* -------------------- V15.3J §3/§5 — canonical hydration -------------------- */
+
+/**
+ * Builds the swap hydration plan from the SERVER-RESOLVED canonical snapshot.
+ * No value comes from the URL: the amount is taken from `amountInDisplay` and
+ * cross-checked against the bigint-safe `amountInRaw`, so a prepared 10 USDT
+ * survives the handoff exactly. Trade still re-reads balance, allowance, live
+ * fee/nonce, quote and simulation, and only the user's wallet can sign.
+ */
+export function buildSwapHydrationFromCanonical<T extends HydrationTokenLike>(input: {
+  canonical: CanonicalPreparedIntent;
+  tokens: readonly T[];
+}): SwapHydrationResult {
+  const { canonical, tokens } = input;
+  if (canonical.type !== "SWAP" || !canonical.swap) return { ok: false, reason: "NOT_SWAP" };
+  const leg = canonical.swap;
+  const tokenIn = resolveHydrationToken(leg.tokenInAddress, tokens);
+  const tokenOut = resolveHydrationToken(leg.tokenOutAddress, tokens);
+  if (!tokenIn || !tokenOut || tokenIn.symbol === tokenOut.symbol) {
+    return { ok: false, reason: "TOKEN_UNRESOLVED" };
+  }
+  // §4 — raw/display round-trip proof at the consuming boundary.
+  let display: string;
+  try {
+    if (BigInt(leg.amountInRaw) <= 0n) return { ok: false, reason: "AMOUNT_INVALID" };
+    display = fromRawAmount(leg.amountInRaw, leg.decimalsIn);
+  } catch {
+    return { ok: false, reason: "AMOUNT_INVALID" };
+  }
+  if (normalizeDisplay(leg.amountInDisplay) !== display) {
+    return { ok: false, reason: "AMOUNT_INVALID" };
+  }
+  return {
+    ok: true,
+    plan: {
+      key: `${canonical.intentId}:${canonical.digest}`,
+      intentId: canonical.intentId,
+      tokenInSymbol: tokenIn.symbol,
+      tokenOutSymbol: tokenOut.symbol,
+      amount: display,
+    },
+  };
+}

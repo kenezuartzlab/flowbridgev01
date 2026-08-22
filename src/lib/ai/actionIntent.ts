@@ -383,9 +383,13 @@ export interface ActionHandoff {
 
 export function buildHandoff(intent: ActionIntent): ActionHandoff {
   const p = intent.parameters as Record<string, any>;
-  // V15.3 §4 — correlation metadata: intent id, economic fingerprint digest and
-  // expiry travel with the link so the target surface can refuse stale or
-  // altered hints. These are hints, never authority.
+  // V15.3J §3 — the link is now OPAQUE. It carries the intent id, the economic
+  // fingerprint digest, the expiry and the surface routing hint only. No
+  // authoritative economic field (amount, token, destination) depends on URL text
+  // any more: Trade resolves the canonical snapshot by id from server authority.
+  // Root cause fixed: the SPA router re-serialized a numeric search string
+  // through JSON, so a prepared `amount=10` arrived as `amount="10"` and Trade
+  // rejected the prepared amount as MALFORMED.
   const correlation = {
     intent: intent.id,
     fp: fingerprintDigest(
@@ -413,18 +417,19 @@ export function buildHandoff(intent: ActionIntent): ActionHandoff {
   switch (intent.type) {
     case "SWAP":
       return {
-        href: `/trade?${q({ tab: "swap", from: p.tokenIn, to: p.tokenOut, amount: p.amountIn })}`,
+        href: `/trade?${q({ tab: "swap" })}`,
         cta: "Review in Trade",
         surface: "/trade",
         revalidatedByTarget: true,
       };
     case "BRIDGE":
       return {
-        href: `/trade?${q({ tab: "bridge", token: p.token, amount: p.amountIn, dest: p.destinationChainId })}`,
+        href: `/trade?${q({ tab: "bridge" })}`,
         cta: "Review in Bridge",
         surface: "/trade",
         revalidatedByTarget: true,
       };
+
     case "CLAIM_FLOW":
       return {
         href: `/earn?${q({})}`,

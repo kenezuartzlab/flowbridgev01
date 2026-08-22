@@ -37,19 +37,29 @@ function swapIntent(amount = "10") {
   });
 }
 
-function recompute(search: string) {
+/**
+ * V15.3J — the link is now OPAQUE, so the fingerprint is recomputed from the
+ * SERVER-side intent parameters, not from query-string text. `intent` stands in
+ * for the canonical snapshot Trade resolves by id.
+ */
+function recompute(search: string, intent?: ReturnType<typeof swapIntent>) {
   const hint = parseHandoffHint(search)!;
+  const p = (intent?.parameters ?? {}) as Record<string, any>;
   const targets = resolveCanonicalTargets(hint.chainId);
   return {
     hint,
     fingerprint: handoffFingerprint({
-      type: hint.type,
-      chainId: hint.chainId,
-      targetContract: targets ? canonicalTargetFor(hint.type as any, targets) : null,
-      tokenIn: hint.hints.from ?? hint.hints.token ?? null,
-      tokenOut: hint.hints.to ?? null,
-      amount: hint.hints.amount ?? null,
-      destinationChainId: hint.hints.dest ?? null,
+      type: intent?.type ?? hint.type,
+      chainId: intent?.chainId ?? hint.chainId,
+      targetContract: intent
+        ? intent.targetContract
+        : targets
+          ? canonicalTargetFor(hint.type as any, targets)
+          : null,
+      tokenIn: p.tokenIn ?? p.token ?? null,
+      tokenOut: p.tokenOut ?? null,
+      amount: p.amountIn ?? null,
+      destinationChainId: p.destinationChainId ?? null,
     }),
   };
 }
@@ -65,8 +75,9 @@ describe("V15.3 handoff freshness", () => {
   });
 
   it("accepts an untouched, unexpired handoff and still grants no execution", () => {
-    const href = buildHandoff(swapIntent()).href;
-    const { hint, fingerprint } = recompute(href.slice(href.indexOf("?")));
+    const intent = swapIntent();
+    const href = buildHandoff(intent).href;
+    const { hint, fingerprint } = recompute(href.slice(href.indexOf("?")), intent);
     const out = evaluateHandoff({
       hint,
       recomputedFingerprint: fingerprint,
@@ -77,10 +88,13 @@ describe("V15.3 handoff freshness", () => {
     expect(out.grantsExecution).toBe(false);
   });
 
-  it("refuses when an economic field is altered in the link", () => {
-    const href = buildHandoff(swapIntent("10")).href;
-    const tampered = href.replace("amount=10", "amount=250");
-    const { hint, fingerprint } = recompute(tampered.slice(tampered.indexOf("?")));
+  it("refuses when the link digest does not match the prepared plan", () => {
+    const intent = swapIntent("10");
+    const href = buildHandoff(intent).href;
+    // The economic values no longer live in the URL, so tampering can only touch
+    // the integrity digest — which the freshness check still rejects.
+    const tampered = href.replace(/fp=[^&]+/, "fp=deadbeef");
+    const { hint, fingerprint } = recompute(tampered.slice(tampered.indexOf("?")), intent);
     expect(
       evaluateHandoff({
         hint,
@@ -90,15 +104,12 @@ describe("V15.3 handoff freshness", () => {
     ).toBe("FINGERPRINT_MISMATCH");
   });
 
-  it("refuses a swapped token address", () => {
+  it("refuses when the stored plan differs from the digest the link carries", () => {
     const intent = swapIntent();
     const href = buildHandoff(intent).href;
-    const p = intent.parameters as Record<string, string>;
-    const tampered = href.replace(
-      `to=${p.tokenOut}`,
-      "to=0x000000000000000000000000000000000000dead",
-    );
-    const { hint, fingerprint } = recompute(tampered.slice(tampered.indexOf("?")));
+    // Same link, different server-side plan: the recomputed fingerprint wins.
+    const other = swapIntent("250");
+    const { hint, fingerprint } = recompute(href.slice(href.indexOf("?")), other);
     expect(
       evaluateHandoff({
         hint,
@@ -109,8 +120,9 @@ describe("V15.3 handoff freshness", () => {
   });
 
   it("refuses an expired plan even when untouched", () => {
-    const href = buildHandoff(swapIntent()).href;
-    const { hint, fingerprint } = recompute(href.slice(href.indexOf("?")));
+    const intent = swapIntent();
+    const href = buildHandoff(intent).href;
+    const { hint, fingerprint } = recompute(href.slice(href.indexOf("?")), intent);
     const out = evaluateHandoff({
       hint,
       recomputedFingerprint: fingerprint,
@@ -122,8 +134,9 @@ describe("V15.3 handoff freshness", () => {
   });
 
   it("refuses a plan opened on another network", () => {
-    const href = buildHandoff(swapIntent()).href;
-    const { hint, fingerprint } = recompute(href.slice(href.indexOf("?")));
+    const intent = swapIntent();
+    const href = buildHandoff(intent).href;
+    const { hint, fingerprint } = recompute(href.slice(href.indexOf("?")), intent);
     expect(
       evaluateHandoff({ hint, recomputedFingerprint: fingerprint, currentChainId: 56 }).verdict,
     ).toBe("CHAIN_MISMATCH");
