@@ -104,21 +104,28 @@ async function verifySwapReceipt(
  * from the browser payload.
  */
 async function canonicalSwapEvidence(txHash: string, walletAddress: string) {
+  // V15.3M — a single canonical SwapActivity must be resolvable. Ambiguity
+  // (more than one verified swap row for the same tx + wallet) fails closed.
   const { data } = await supabaseAdmin
     .from("verified_activities")
-    .select("source_chain_id, source_log_index, amount_raw, token, kind, status")
+    .select("activity_id, source_chain_id, source_log_index, amount_raw, token, kind, status")
     .eq("source_tx_hash", txHash.toLowerCase())
     .eq("user_wallet", walletAddress.toLowerCase())
     .eq("kind", "SWAP_EXECUTED")
     .order("source_log_index", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  if (!data) return null;
+    .limit(2);
+  const rows = data ?? [];
+  if (rows.length !== 1) return null;
+  const row: any = rows[0];
+  const logIndex = Number(row.source_log_index);
+  // Never substitute a log index: unknown is not 0.
+  if (!Number.isInteger(logIndex) || logIndex < 0) return null;
   return {
-    chainId: Number(data.source_chain_id),
-    logIndex: Number(data.source_log_index),
-    amountRaw: String(data.amount_raw),
-    token: String(data.token).toLowerCase(),
+    activityId: String(row.activity_id).toLowerCase(),
+    chainId: Number(row.source_chain_id),
+    logIndex,
+    amountRaw: String(row.amount_raw),
+    token: String(row.token).toLowerCase(),
   };
 }
 
