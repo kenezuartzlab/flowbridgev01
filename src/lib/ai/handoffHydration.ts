@@ -136,8 +136,18 @@ export function buildSwapHydrationFromCanonical<T extends HydrationTokenLike>(in
   const { canonical, tokens } = input;
   if (canonical.type !== "SWAP" || !canonical.swap) return { ok: false, reason: "NOT_SWAP" };
   const leg = canonical.swap;
-  const tokenIn = resolveHydrationToken(leg.tokenInAddress, tokens);
-  const tokenOut = resolveHydrationToken(leg.tokenOutAddress, tokens);
+  /**
+   * V15.3K §5 — native BOT vs wrapped WBOT. The route leg address is the wrapped
+   * contract in both cases, so the asset the user reviewed is carried explicitly:
+   * a native leg hydrates the native token, a wrapped leg hydrates WBOT. Trade
+   * therefore shows exactly the asset the review card described.
+   */
+  const tokenIn = leg.tokenInIsNative
+    ? resolveHydrationToken("native", tokens)
+    : resolveHydrationToken(leg.tokenInAddress, tokens);
+  const tokenOut = leg.tokenOutIsNative
+    ? resolveHydrationToken("native", tokens)
+    : resolveHydrationToken(leg.tokenOutAddress, tokens);
   if (!tokenIn || !tokenOut || tokenIn.symbol === tokenOut.symbol) {
     return { ok: false, reason: "TOKEN_UNRESOLVED" };
   }
