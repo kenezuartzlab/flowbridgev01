@@ -17,6 +17,7 @@ import { anyProviderAvailable, routeModelRequest } from "./modelGateway.server";
 import { evaluatePrivacy } from "./privacyGuard";
 import { listUserMemory, renderMemoryForPrompt } from "./memoryStore.server";
 import { loadCampaignPointsEvidence, loadStakingEvidence } from "./stakingEvidence.server";
+import { proposeIntent, type IntentProposal } from "./intentProposal";
 
 export interface FlowAiAnswer {
   answer: string;
@@ -31,6 +32,13 @@ export interface FlowAiAnswer {
   refused: readonly { skillId: string; reason: string }[];
   /** Domains that could not be read this request (disclosed, never estimated). */
   degraded?: readonly string[];
+  /**
+   * V15.2 — candidate action the client may ask the server to PREPARE.
+   * Never a permission to execute: preparation, policy checks and simulation all
+   * happen server-side afterwards, and the user still signs in their own wallet.
+   */
+  proposal?: IntentProposal | null;
+
   evidence: readonly {
     id: string;
     label: string;
@@ -227,6 +235,18 @@ export async function answerFlowAiQuestion(input: {
     return refusalAnswer(plan, privacy.refusal!);
   }
 
+  // V15.2 §3 — deterministic candidate extraction. Only signed-in actors get a
+  // proposal, and it is a request to PREPARE, never an authorization to execute.
+  const proposal = input.actor.userId
+    ? proposeIntent({
+        question: input.question,
+        wallet: boundWallet,
+        organizationId: input.actor.orgIds[0] ?? null,
+      })
+    : null;
+
+
+
   if (skillIds.has("campaign_scout")) evidence.push(...(await loadCampaignEvidence()));
   if (skillIds.has("bot_ecosystem_researcher")) evidence.push(...loadBotStatusEvidence());
 
@@ -352,6 +372,7 @@ export async function answerFlowAiQuestion(input: {
     skills: plan.skills.map((s) => s.skillId),
     refused: plan.refused.map((r) => ({ skillId: r.skillId, reason: r.reason })),
     degraded,
+    proposal,
     evidence: evidence.map((e) => ({
       id: e.id,
       label: e.label,
@@ -405,6 +426,7 @@ function refusalAnswer(plan: OrchestrationPlan, refusal: string): FlowAiAnswer {
     skills: [],
     refused: [{ skillId: "privacy_boundary", reason: "cross-actor private data request" }],
     degraded: [],
+    proposal: null,
     evidence: [],
   };
 }

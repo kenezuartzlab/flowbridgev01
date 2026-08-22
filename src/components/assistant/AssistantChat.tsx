@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Bot, ChevronDown, ShieldCheck, Sparkles, User } from "lucide-react";
 import { assistantFetch } from "@/lib/ai/assistantClient";
 import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
+import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
 
 export interface EvidenceRef {
   id: string;
@@ -13,6 +14,13 @@ export interface EvidenceRef {
   excerpt?: string;
 }
 
+interface IntentProposalRef {
+  type: string;
+  chainId: number;
+  parameters: Record<string, unknown>;
+  recognized?: string[];
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -22,6 +30,9 @@ export interface ChatMessage {
   notice?: string | null;
   skills?: string[];
   evidence?: EvidenceRef[];
+  /** V15.2 — server-prepared, never-executed action plan. */
+  prepared?: PreparedIntentPayload | null;
+  preparationError?: string | null;
 }
 
 const SUGGESTIONS = [
@@ -30,6 +41,7 @@ const SUGGESTIONS = [
   "What's actually live on BOT Chain today?",
   "How do I bridge USDT from BOT to BNB?",
 ];
+
 
 /**
  * Flow AI surface. Presentation + fetch only — it never touches swap/bridge
@@ -73,6 +85,7 @@ export function AssistantChat() {
         notice?: string | null;
         skills?: string[];
         evidence?: EvidenceRef[];
+        proposal?: IntentProposalRef | null;
       };
       if (!res.ok || !data.answer) {
         throw new Error(data.error ?? "Flow AI is unavailable right now.");
@@ -92,6 +105,9 @@ export function AssistantChat() {
         };
         return copy;
       });
+
+      if (data.proposal) void prepare(data.proposal);
+
     } catch (e: any) {
       setMessages((prev) => prev.slice(0, -1));
       setError(e?.message ?? "Something went wrong.");
@@ -99,6 +115,55 @@ export function AssistantChat() {
       setBusy(false);
     }
   }
+
+  /**
+   * Asks the SERVER to prepare, policy-check and simulate the candidate action.
+   * Nothing is executed here: the result is a review card whose CTA links to the
+   * product surface, which revalidates before the user's wallet signs.
+   */
+  async function prepare(proposal: IntentProposalRef) {
+    try {
+      const res = await assistantFetch("/api/assistant/intent", {
+        method: "POST",
+        body: JSON.stringify({
+          type: proposal.type,
+          chainId: proposal.chainId,
+          parameters: proposal.parameters,
+        }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as
+        | (PreparedIntentPayload & { error?: string })
+        | { error?: string };
+      setMessages((prev) => {
+        const copy = [...prev];
+        const i = copy.length - 1;
+        if (i < 0 || copy[i].role !== "assistant") return prev;
+        copy[i] =
+          res.ok && "intent" in payload
+            ? { ...copy[i], prepared: payload as PreparedIntentPayload }
+            : {
+                ...copy[i],
+                preparationError:
+                  (payload as { error?: string }).error ??
+                  "I couldn't prepare that plan, so I won't guess at it.",
+              };
+        return copy;
+      });
+    } catch {
+      setMessages((prev) => {
+        const copy = [...prev];
+        const i = copy.length - 1;
+        if (i < 0 || copy[i].role !== "assistant") return prev;
+        copy[i] = {
+          ...copy[i],
+          preparationError: "Action preparation is unavailable right now.",
+        };
+        return copy;
+      });
+    }
+  }
+
+
 
   return (
     <div className="flex flex-col gap-3">
@@ -234,7 +299,15 @@ export function AssistantChat() {
                           ) : null}
                         </div>
                       ) : null}
+
+                      {m.prepared ? <ActionIntentCard payload={m.prepared} /> : null}
+                      {m.preparationError ? (
+                        <p className="fb-inset px-2.5 py-2 font-mono text-[10px] leading-relaxed text-muted">
+                          {m.preparationError}
+                        </p>
+                      ) : null}
                     </div>
+
                   ) : null}
                 </div>
               </div>

@@ -61,6 +61,7 @@ import { Route as ApiCampaignsLeaderboardRouteImport } from './routes/api/campai
 import { Route as ApiCampaignsAdminRouteImport } from './routes/api/campaigns.admin'
 import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-image.$'
 import { Route as ApiAssistantMemoryRouteImport } from './routes/api/assistant.memory'
+import { Route as ApiAssistantIntentRouteImport } from './routes/api/assistant.intent'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
@@ -344,6 +345,11 @@ const ApiAssistantMemoryRoute = ApiAssistantMemoryRouteImport.update({
   path: '/memory',
   getParentRoute: () => ApiAssistantRoute,
 } as any)
+const ApiAssistantIntentRoute = ApiAssistantIntentRouteImport.update({
+  id: '/intent',
+  path: '/intent',
+  getParentRoute: () => ApiAssistantRoute,
+} as any)
 const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
   id: '/api/admin/whoami',
   path: '/api/admin/whoami',
@@ -489,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
@@ -562,6 +569,7 @@ export interface FileRoutesByTo {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
@@ -636,6 +644,7 @@ export interface FileRoutesById {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
@@ -711,6 +720,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/assistant/intent'
     | '/api/assistant/memory'
     | '/api/banner-image/$'
     | '/api/campaigns/admin'
@@ -784,6 +794,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/assistant/intent'
     | '/api/assistant/memory'
     | '/api/banner-image/$'
     | '/api/campaigns/admin'
@@ -857,6 +868,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/assistant/intent'
     | '/api/assistant/memory'
     | '/api/banner-image/$'
     | '/api/campaigns/admin'
@@ -1318,6 +1330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAssistantMemoryRouteImport
       parentRoute: typeof ApiAssistantRoute
     }
+    '/api/assistant/intent': {
+      id: '/api/assistant/intent'
+      path: '/intent'
+      fullPath: '/api/assistant/intent'
+      preLoaderRoute: typeof ApiAssistantIntentRouteImport
+      parentRoute: typeof ApiAssistantRoute
+    }
     '/api/admin/whoami': {
       id: '/api/admin/whoami'
       path: '/api/admin/whoami'
@@ -1455,10 +1474,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface ApiAssistantRouteChildren {
+  ApiAssistantIntentRoute: typeof ApiAssistantIntentRoute
   ApiAssistantMemoryRoute: typeof ApiAssistantMemoryRoute
 }
 
 const ApiAssistantRouteChildren: ApiAssistantRouteChildren = {
+  ApiAssistantIntentRoute: ApiAssistantIntentRoute,
   ApiAssistantMemoryRoute: ApiAssistantMemoryRoute,
 }
 
