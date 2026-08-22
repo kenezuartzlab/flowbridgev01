@@ -280,6 +280,8 @@ export function AssistantChat() {
         </form>
       </section>
 
+      <AssistantMemoryPanel />
+
       <p className="px-1 font-mono text-[9.5px] leading-relaxed text-muted">
         Flow AI is read-only: it cannot swap, bridge, claim, stake or publish for you. FlowBridge
         will never ask for your seed phrase or private key. Always confirm amounts in the trade or
