@@ -325,6 +325,11 @@ export async function answerFlowAiQuestion(input: {
     answer = `${answer}\n\n${plan.actionNotice}`;
   }
 
+  if (degraded.length > 0) {
+    answer = `${answer}\n\nI couldn't read ${degraded.join(" or ")} for this answer, so nothing above covers it.`;
+  }
+
+
   const audit = buildAuditRecord({
     plan,
     evidence,
