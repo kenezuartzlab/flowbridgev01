@@ -326,6 +326,21 @@ export async function answerFlowAiQuestion(input: {
     return refusalAnswer(plan, privacy.refusal!);
   }
 
+  // V15.3H §6 — product-state awareness. "No review card" / "nothing was
+  // prefilled" is answered from the reported render + handoff state, never with
+  // "it should be there" and never by blaming another app.
+  const complaint = detectProductComplaint(input.question);
+  if (complaint) {
+    const state: ProductState = input.productState ?? {
+      renderStatus: "NONE",
+      hasPreparedHandle: Boolean(input.prepared),
+      handoff: null,
+    };
+    const reply = answerProductState({ complaint, state });
+    return productStateAnswer(plan, reply);
+  }
+
+
   // V15.2 §3 — deterministic candidate extraction. Only signed-in actors get a
   // proposal, and it is a request to PREPARE, never an authorization to execute.
   let proposal = input.actor.userId
