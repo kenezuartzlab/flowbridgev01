@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useSignMessage, useWriteContract } from "wagmi";
@@ -23,6 +23,7 @@ import {
   type Token,
 } from "@/lib/swap/tokenRegistry";
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
+import type { SwapHydrationPlan } from "@/lib/ai/handoffHydration";
 import {
   captureVerifiedSwapAttribution,
   scheduleVerifiedSwapHandoff,
@@ -79,6 +80,14 @@ interface UniversalSwapCardProps {
   getUsdPrice?: (symbol: string) => number | null | undefined;
   rewardsActive?: boolean;
   txUrlPrefix: string;
+  /**
+   * V15.3F — one-shot prefill from a Flow AI prepared plan. Hints only: the card
+   * still re-resolves registry, balance, allowance, live fee and quote, and only
+   * the user's wallet can sign. Applied at most once per plan key so a manual
+   * edit afterwards always wins.
+   */
+  hydration?: SwapHydrationPlan | null;
+  onHydrationApplied?: (plan: SwapHydrationPlan) => void;
 }
 
 export function UniversalSwapCard({
@@ -92,7 +101,10 @@ export function UniversalSwapCard({
   getUsdPrice,
   rewardsActive = false,
   txUrlPrefix,
+  hydration = null,
+  onHydrationApplied,
 }: UniversalSwapCardProps) {
+
   const { address } = useAccount();
   const publicClient = usePublicClient();
   const contracts = useMemo(() => getContracts(isMainnet), [isMainnet]);
@@ -130,6 +142,28 @@ export function UniversalSwapCard({
     setQuote(null);
     setLastTx(null);
   }, [isMainnet, curated]);
+
+  /**
+   * V15.3F — apply a Flow AI prepared plan to the form exactly once per plan key.
+   * Only symbols present in THIS network's curated registry are accepted; a
+   * partially resolvable plan is ignored rather than half-filled. Nothing about
+   * authorization changes: quote, fee, allowance and simulation are re-run below.
+   */
+  const appliedHydrationRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!hydration || appliedHydrationRef.current === hydration.key) return;
+    const nextIn = curated.find((t) => t.symbol === hydration.tokenInSymbol);
+    const nextOut = curated.find((t) => t.symbol === hydration.tokenOutSymbol);
+    if (!nextIn || !nextOut || nextIn.symbol === nextOut.symbol) return;
+    appliedHydrationRef.current = hydration.key;
+    setTokenIn(nextIn);
+    setTokenOut(nextOut);
+    setAmountIn(hydration.amount);
+    setQuote(null);
+    setQuoteError(null);
+    onHydrationApplied?.(hydration);
+  }, [hydration, curated, onHydrationApplied]);
+
 
   // ── Balances ──────────────────────────────────────────────────────────────
   // Pin every balance read to BOT Chain. Without an explicit chainId these

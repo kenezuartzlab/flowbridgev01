@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 import {
@@ -42,11 +42,17 @@ import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
 import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
+import { getCuratedTokens } from './lib/swap/tokenRegistry';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
 import { CampaignTaskContextBanner } from './components/app/CampaignTaskContextBanner';
 import { SwapCampaignTaskBanner } from './components/app/SwapCampaignTaskBanner';
-import { parseHandoffHint } from './lib/ai/intentHandoff';
+import { parseHandoffHint, type HandoffHint } from './lib/ai/intentHandoff';
+import {
+  buildSwapHydration,
+  hydrationTabFor,
+  HYDRATION_FAILURE_COPY,
+} from './lib/ai/handoffHydration';
 import { applyExplicitChainTarget, useSelectedNetwork } from './lib/network/networkSession';
 
 import { AiHandoffBanner } from './components/assistant/AiHandoffBanner';
@@ -530,16 +536,38 @@ export default function App() {
    * URL hint over a deliberate user selection. Presentation only: no addresses,
    * amounts, signing or verification change, and nothing is auto-submitted.
    */
+  const [handoffHint, setHandoffHint] = useState<HandoffHint | null>(null);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const hint = parseHandoffHint(window.location.search);
     if (!hint) return;
+    setHandoffHint(hint);
+    if (hydrationTabFor(hint) === 'swap') setActiveTab('BOT/USDT');
     applyExplicitChainTarget({
       chainId: hint.chainId,
       hintKey: `handoff:${hint.chainId}:${window.location.search}`,
       source: 'ACTION_INTENT',
     });
   }, []);
+
+  /**
+   * V15.3F §1 — translate the handoff hints into swap form state. Pure
+   * derivation against the registry this network actually uses: an unresolvable
+   * pair or amount yields a stated reason instead of a half-filled form. The
+   * swap card still re-resolves balance, allowance, live fee and quote, and only
+   * the user's wallet can authorize anything.
+   */
+  const swapHydration = useMemo(() => {
+    if (!handoffHint) return null;
+    return buildSwapHydration({ hint: handoffHint, tokens: getCuratedTokens(isMainnet) });
+  }, [handoffHint, isMainnet]);
+  const swapHydrationPlan = swapHydration?.ok ? swapHydration.plan : null;
+  const swapHydrationNotice =
+    swapHydration && !swapHydration.ok && swapHydration.reason !== 'NOT_SWAP'
+      ? HYDRATION_FAILURE_COPY[swapHydration.reason as keyof typeof HYDRATION_FAILURE_COPY]
+      : null;
+
+
 
 
   /**
@@ -2964,9 +2992,17 @@ export default function App() {
             <SwapCampaignTaskBanner ctx={campaignSwapCtx} currentChainId={currentChainId ?? null} />
           )}
 
+          {activeTab === 'BOT/USDT' && swapHydrationNotice && (
+            <p className="fb-inset px-3 py-2 font-mono text-[10px] leading-relaxed text-muted">
+              {swapHydrationNotice}
+            </p>
+          )}
+
           {activeTab === 'BOT/USDT' && (
             <UniversalSwapCard
+              hydration={swapHydrationPlan}
               isMainnet={isMainnet}
+
               isConnected={isConnected}
               onConnect={handleConnect}
               isNetworkCorrect={isNetworkCorrect}
