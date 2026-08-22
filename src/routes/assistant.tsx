@@ -29,12 +29,13 @@ export const Route = createFileRoute("/assistant")({
 function AssistantPage() {
   const router = useRouter();
   /**
-   * V15.3I §6 — Hide leaves the assistant surface without destroying anything:
-   * the transcript, composer draft and prepared action live in module-scope
-   * stores, so reopening Flow AI resumes exactly where the user left off.
+   * V15.3J — Close the AI surface without redirecting or refreshing the app.
+   * Going back preserves the user's previous page and navigation context.
    */
   const hide = () => {
-    void router.navigate({ to: "/home" });
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.history.back();
+    }
   };
   return (
     <div className="min-h-screen bg-background text-foreground">
