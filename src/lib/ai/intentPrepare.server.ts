@@ -269,6 +269,8 @@ export interface PreparedIntentResponse {
   riskFlags: readonly string[];
   missingEvidence: readonly string[];
   handoff: ReturnType<typeof buildHandoff> | null;
+  /** V15.3J — canonical prepared snapshot (server authority for the handoff). */
+  canonical?: CanonicalPreparedIntent | null;
   /** Constant: Flow AI never executed anything. */
   executed: false;
 }
