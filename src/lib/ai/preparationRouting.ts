@@ -43,12 +43,18 @@ export interface PendingPreparation extends Omit<PreparationShape, "amount"> {
   actorKey: string;
 }
 
-const SYMBOLS: Record<string, { key: "usdtBot" | "caToken" | "wbot"; decimals: number }> = {
+const SYMBOLS: Record<
+  string,
+  { key: "usdtBot" | "caToken" | "wbot"; decimals: number; native?: true }
+> = {
   USDT: { key: "usdtBot", decimals: 6 },
   CA: { key: "caToken", decimals: 18 },
   WBOT: { key: "wbot", decimals: 18 },
-  BOT: { key: "wbot", decimals: 18 },
+  // V15.3K §5 — "BOT" means NATIVE BOT. The route leg is the canonical wrapped
+  // contract, but the asset the user reviews and receives stays native BOT.
+  BOT: { key: "wbot", decimals: 18, native: true },
 };
+
 
 /** Imperative preparation language — routed to ACTION_PREPARATION first. */
 const PREPARE_RE =
