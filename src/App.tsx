@@ -2986,9 +2986,17 @@ export default function App() {
             <SwapCampaignTaskBanner ctx={campaignSwapCtx} currentChainId={currentChainId ?? null} />
           )}
 
+          {activeTab === 'BOT/USDT' && swapHydrationNotice && (
+            <p className="fb-inset px-3 py-2 font-mono text-[10px] leading-relaxed text-muted">
+              {swapHydrationNotice}
+            </p>
+          )}
+
           {activeTab === 'BOT/USDT' && (
             <UniversalSwapCard
+              hydration={swapHydrationPlan}
               isMainnet={isMainnet}
+
               isConnected={isConnected}
               onConnect={handleConnect}
               isNetworkCorrect={isNetworkCorrect}
