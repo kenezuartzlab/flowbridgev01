@@ -204,7 +204,7 @@ async function readOrgCampaignBudget(orgId: string | null): Promise<number | nul
     const { data } = await supabaseAdmin
       .from("partner_organizations")
       .select("campaign_pts_budget,campaign_pts_committed")
-      .eq("id", orgId)
+      .eq("org_id", orgId)
       .maybeSingle();
     if (!data) return null;
     const budget = Number((data as any).campaign_pts_budget ?? 0);
