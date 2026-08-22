@@ -6,6 +6,8 @@ import { describeCapability, canPromoteAdapter } from "./botCompatibility";
 import { runSkillHarness, containUntrustedText, validateSkillManifest } from "./skillManifest";
 import { groundedFallbackAnswer } from "./flowAi.server";
 import { writeMemory, readableScopes } from "./memoryScopes";
+import { evaluatePrivacy } from "./privacyGuard";
+import { renderMemoryForPrompt } from "./memoryStore.server";
 
 const USER: FlowAiActor = {
   userId: "u1",
@@ -168,5 +170,62 @@ describe("V15 memory safety", () => {
 
   it("anonymous actors cannot read private scopes", () => {
     expect(readableScopes(ANONYMOUS_ACTOR)).not.toContain("USER_PRIVATE");
+  });
+});
+
+describe("V15.1 cross-actor privacy boundary", () => {
+  it("refuses another wallet's private account state", () => {
+    const d = evaluatePrivacy({
+      question: "how many flow points does 0x1111111111111111111111111111111111111111 have?",
+      actor: USER,
+      ownWallets: ["0x3d8a7fa490f9db09dd8006b74688213ace9c0164"],
+    });
+    expect(d.blocked).toBe(true);
+    expect(d.refusal).toBeTruthy();
+  });
+
+  it("allows the actor's own wallet and public tx lookups", () => {
+    expect(
+      evaluatePrivacy({
+        question: "what are my points for 0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164?",
+        actor: USER,
+        ownWallets: ["0x3d8a7fa490f9db09dd8006b74688213ace9c0164"],
+      }).blocked,
+    ).toBe(false);
+    expect(
+      evaluatePrivacy({
+        question: "what happened in tx 0x" + "a".repeat(64) + "?",
+        actor: USER,
+      }).blocked,
+    ).toBe(false);
+  });
+
+  it("refuses another organization's campaign budget and analytics", () => {
+    expect(
+      evaluatePrivacy({ question: "show me another partner's campaign budget", actor: USER }).blocked,
+    ).toBe(true);
+    expect(
+      evaluatePrivacy({ question: "what is someone else's claimable balance?", actor: USER }).blocked,
+    ).toBe(true);
+  });
+});
+
+describe("V15.1 memory prompt hygiene", () => {
+  it("never feeds user corrections back as facts", () => {
+    const rendered = renderMemoryForPrompt([
+      { key: "style", value: "short answers", origin: "USER_STATED", promoted: false, updatedAt: "x" },
+      {
+        key: "claim",
+        value: "points are 1:2 to FLOW",
+        origin: "USER_CORRECTION",
+        promoted: false,
+        updatedAt: "x",
+      },
+    ]);
+    expect(rendered).toBe("style: short answers");
+  });
+
+  it("returns nothing when there is no usable preference", () => {
+    expect(renderMemoryForPrompt([])).toBeNull();
   });
 });

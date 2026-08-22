@@ -56,6 +56,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_user_memory: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          origin: string
+          promoted: boolean
+          scope: string
+          updated_at: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          origin?: string
+          promoted?: boolean
+          scope?: string
+          updated_at?: string
+          user_id: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          origin?: string
+          promoted?: boolean
+          scope?: string
+          updated_at?: string
+          user_id?: string
+          value?: string
+        }
+        Relationships: []
+      }
       app_admins: {
         Row: {
           created_at: string

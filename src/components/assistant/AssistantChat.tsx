@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Bot, ChevronDown, ShieldCheck, Sparkles, User } from "lucide-react";
+import { assistantFetch } from "@/lib/ai/assistantClient";
+import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
 
 export interface EvidenceRef {
   id: string;
@@ -23,9 +25,9 @@ export interface ChatMessage {
 }
 
 const SUGGESTIONS = [
-  "How many FLOW Points do I have and what's claimable?",
+  "Summarize my rewards, staking and campaigns right now",
   "Why did my $11 swap earn that many points?",
-  "What's live on BOT Chain today?",
+  "What's actually live on BOT Chain today?",
   "How do I bridge USDT from BOT to BNB?",
 ];
 
@@ -56,9 +58,8 @@ export function AssistantChat() {
     setBusy(true);
 
     try {
-      const res = await fetch("/api/assistant", {
+      const res = await assistantFetch("/api/assistant", {
         method: "POST",
-        headers: { "content-type": "application/json" },
         body: JSON.stringify({
           messages: next.map((m) => ({ role: m.role, content: m.content })),
         }),
@@ -278,6 +279,8 @@ export function AssistantChat() {
           </button>
         </form>
       </section>
+
+      <AssistantMemoryPanel />
 
       <p className="px-1 font-mono text-[9.5px] leading-relaxed text-muted">
         Flow AI is read-only: it cannot swap, bridge, claim, stake or publish for you. FlowBridge

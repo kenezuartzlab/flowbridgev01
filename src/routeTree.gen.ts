@@ -60,6 +60,7 @@ import { Route as ApiCampaignsMeRouteImport } from './routes/api/campaigns.me'
 import { Route as ApiCampaignsLeaderboardRouteImport } from './routes/api/campaigns.leaderboard'
 import { Route as ApiCampaignsAdminRouteImport } from './routes/api/campaigns.admin'
 import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-image.$'
+import { Route as ApiAssistantMemoryRouteImport } from './routes/api/assistant.memory'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
@@ -338,6 +339,11 @@ const ApiBannerImageSplatRoute = ApiBannerImageSplatRouteImport.update({
   path: '/api/banner-image/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAssistantMemoryRoute = ApiAssistantMemoryRouteImport.update({
+  id: '/memory',
+  path: '/memory',
+  getParentRoute: () => ApiAssistantRoute,
+} as any)
 const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
   id: '/api/admin/whoami',
   path: '/api/admin/whoami',
@@ -464,7 +470,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/api/assistant': typeof ApiAssistantRoute
+  '/api/assistant': typeof ApiAssistantRouteWithChildren
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
@@ -483,6 +489,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/assistant/memory': typeof ApiAssistantMemoryRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
@@ -536,7 +543,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/api/assistant': typeof ApiAssistantRoute
+  '/api/assistant': typeof ApiAssistantRouteWithChildren
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
@@ -555,6 +562,7 @@ export interface FileRoutesByTo {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/assistant/memory': typeof ApiAssistantMemoryRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
@@ -609,7 +617,7 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/api/assistant': typeof ApiAssistantRoute
+  '/api/assistant': typeof ApiAssistantRouteWithChildren
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
@@ -628,6 +636,7 @@ export interface FileRoutesById {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/assistant/memory': typeof ApiAssistantMemoryRoute
   '/api/banner-image/$': typeof ApiBannerImageSplatRoute
   '/api/campaigns/admin': typeof ApiCampaignsAdminRouteWithChildren
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
@@ -702,6 +711,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/assistant/memory'
     | '/api/banner-image/$'
     | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
@@ -774,6 +784,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/assistant/memory'
     | '/api/banner-image/$'
     | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
@@ -846,6 +857,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/assistant/memory'
     | '/api/banner-image/$'
     | '/api/campaigns/admin'
     | '/api/campaigns/leaderboard'
@@ -900,7 +912,7 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  ApiAssistantRoute: typeof ApiAssistantRoute
+  ApiAssistantRoute: typeof ApiAssistantRouteWithChildren
   ApiBannerEventsRoute: typeof ApiBannerEventsRoute
   ApiCampaignsRoute: typeof ApiCampaignsRouteWithChildren
   ApiConfigRoute: typeof ApiConfigRoute
@@ -1299,6 +1311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBannerImageSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/assistant/memory': {
+      id: '/api/assistant/memory'
+      path: '/memory'
+      fullPath: '/api/assistant/memory'
+      preLoaderRoute: typeof ApiAssistantMemoryRouteImport
+      parentRoute: typeof ApiAssistantRoute
+    }
     '/api/admin/whoami': {
       id: '/api/admin/whoami'
       path: '/api/admin/whoami'
@@ -1435,6 +1454,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ApiAssistantRouteChildren {
+  ApiAssistantMemoryRoute: typeof ApiAssistantMemoryRoute
+}
+
+const ApiAssistantRouteChildren: ApiAssistantRouteChildren = {
+  ApiAssistantMemoryRoute: ApiAssistantMemoryRoute,
+}
+
+const ApiAssistantRouteWithChildren = ApiAssistantRoute._addFileChildren(
+  ApiAssistantRouteChildren,
+)
+
 interface ApiCampaignsAdminIdRouteChildren {
   ApiCampaignsAdminIdAnalyticsRoute: typeof ApiCampaignsAdminIdAnalyticsRoute
 }
@@ -1524,7 +1555,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
-  ApiAssistantRoute: ApiAssistantRoute,
+  ApiAssistantRoute: ApiAssistantRouteWithChildren,
   ApiBannerEventsRoute: ApiBannerEventsRoute,
   ApiCampaignsRoute: ApiCampaignsRouteWithChildren,
   ApiConfigRoute: ApiConfigRoute,

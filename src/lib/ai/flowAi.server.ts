@@ -14,6 +14,9 @@ import { computeClaimable, explainSwapPoints, formatUsdAmount } from "./determin
 import { BOT_ADAPTERS, describeCapability } from "./botCompatibility";
 import { containUntrustedText } from "./skillManifest";
 import { anyProviderAvailable, routeModelRequest } from "./modelGateway.server";
+import { evaluatePrivacy } from "./privacyGuard";
+import { listUserMemory, renderMemoryForPrompt } from "./memoryStore.server";
+import { loadCampaignPointsEvidence, loadStakingEvidence } from "./stakingEvidence.server";
 
 export interface FlowAiAnswer {
   answer: string;
@@ -26,6 +29,8 @@ export interface FlowAiAnswer {
   notice: string | null;
   skills: readonly string[];
   refused: readonly { skillId: string; reason: string }[];
+  /** Domains that could not be read this request (disclosed, never estimated). */
+  degraded?: readonly string[];
   evidence: readonly {
     id: string;
     label: string;
@@ -187,6 +192,8 @@ export async function answerFlowAiQuestion(input: {
   });
 
   const evidence: EvidenceItem[] = [];
+  /** Domains that were requested but could not be read; disclosed, never guessed. */
+  const degraded: string[] = [];
 
   const knowledge = retrieveKnowledge({
     text: input.question,
@@ -196,9 +203,46 @@ export async function answerFlowAiQuestion(input: {
   evidence.push(...knowledge.map(factToEvidence));
 
   const skillIds = new Set(plan.skills.map((s) => s.skillId));
-  if (skillIds.has("account_analyst")) evidence.push(...(await loadAccountEvidence(input.actor)));
+  const accountEvidence = skillIds.has("account_analyst")
+    ? await loadAccountEvidence(input.actor)
+    : [];
+  evidence.push(...accountEvidence);
+  if (skillIds.has("account_analyst") && accountEvidence.length === 0 && input.actor.userId) {
+    degraded.push("your FlowBridge account record");
+  }
+
+  const boundWallet =
+    (accountEvidence.find((e) => e.id === "db.account.points")?.value as
+      | { walletAddress?: string | null }
+      | undefined)?.walletAddress ?? null;
+
+  // V15.1 §4 — refuse cross-actor private reads at the boundary, before retrieval
+  // of anything else, using the SERVER-known bound wallet as the only "self".
+  const privacy = evaluatePrivacy({
+    question: input.question,
+    actor: input.actor,
+    ownWallets: boundWallet ? [boundWallet] : [],
+  });
+  if (privacy.blocked) {
+    return refusalAnswer(plan, privacy.refusal!);
+  }
+
   if (skillIds.has("campaign_scout")) evidence.push(...(await loadCampaignEvidence()));
   if (skillIds.has("bot_ecosystem_researcher")) evidence.push(...loadBotStatusEvidence());
+
+  if (skillIds.has("staking_analyst")) {
+    const staking = await loadStakingEvidence(boundWallet);
+    if (staking.length === 0) degraded.push("live FLOW staking vault state");
+    evidence.push(...staking);
+  }
+  if (skillIds.has("campaign_scout") && boundWallet) {
+    evidence.push(...(await loadCampaignPointsEvidence(boundWallet)));
+  }
+
+  // Opt-in, user-private preferences (tone/verbosity/default chain). Never a
+  // source of facts: corrections stay candidates and are excluded from prompts.
+  const memories = input.actor.userId ? await listUserMemory(input.actor) : [];
+  const memoryLine = renderMemoryForPrompt(memories);
 
   // Deterministic "why did I earn +N" math, when the question carries an amount.
   const usd = input.question.match(/\$\s?(\d+(?:\.\d+)?)/);
@@ -238,10 +282,17 @@ export async function answerFlowAiQuestion(input: {
     )
     .join("\n\n");
 
+  const degradedNote =
+    degraded.length > 0
+      ? `Unavailable this request (say so plainly, do not estimate): ${degraded.join("; ")}.`
+      : null;
+
   const scopeNotes = [
     plan.refused.length > 0
       ? `Unavailable specialists: ${plan.refused.map((r) => `${r.skillId} (${r.reason})`).join("; ")}`
       : null,
+    degradedNote,
+    memoryLine ? `User preferences (style only, not facts): ${memoryLine}` : null,
     plan.actionNotice,
     verification.disclosure,
   ]
@@ -276,6 +327,11 @@ export async function answerFlowAiQuestion(input: {
     answer = `${answer}\n\n${plan.actionNotice}`;
   }
 
+  if (degraded.length > 0) {
+    answer = `${answer}\n\nI couldn't read ${degraded.join(" or ")} for this answer, so nothing above covers it.`;
+  }
+
+
   const audit = buildAuditRecord({
     plan,
     evidence,
@@ -295,6 +351,7 @@ export async function answerFlowAiQuestion(input: {
     notice: plan.actionNotice,
     skills: plan.skills.map((s) => s.skillId),
     refused: plan.refused.map((r) => ({ skillId: r.skillId, reason: r.reason })),
+    degraded,
     evidence: evidence.map((e) => ({
       id: e.id,
       label: e.label,
@@ -325,4 +382,29 @@ function safeJson(v: unknown): string {
   } catch {
     return "";
   }
+}
+
+/**
+ * V15.1 §4 — boundary refusal. Returned WITHOUT calling a model and without
+ * retrieving anything, so a blocked cross-actor request cannot leak evidence.
+ */
+function refusalAnswer(plan: OrchestrationPlan, refusal: string): FlowAiAnswer {
+  console.log(
+    "[flow-ai]",
+    JSON.stringify({ requestId: plan.requestId, intent: plan.intent, refusedForPrivacy: true }),
+  );
+  return {
+    answer: refusal,
+    mode: plan.mode,
+    intent: plan.intent,
+    confidence: "UNAVAILABLE",
+    confidenceLabel: CONFIDENCE_LABEL.UNAVAILABLE,
+    asOf: null,
+    disclosure: null,
+    notice: null,
+    skills: [],
+    refused: [{ skillId: "privacy_boundary", reason: "cross-actor private data request" }],
+    degraded: [],
+    evidence: [],
+  };
 }

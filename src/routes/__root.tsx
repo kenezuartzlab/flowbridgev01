@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
 import { THEME_BOOTSTRAP } from "../lib/theme";
 import { ReturnToRedirect } from "../components/auth/ReturnToRedirect";
+import { FlowAiLauncher } from "../components/assistant/FlowAiLauncher";
 import { readPrefs, unlockPrefsFormatting } from "../lib/prefs";
 
 function NotFoundComponent() {
@@ -160,6 +161,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ReturnToRedirect />
       <Outlet />
+      <FlowAiLauncher />
       <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
   );
