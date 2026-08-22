@@ -84,7 +84,7 @@ describe("V15 BOT compatibility honesty", () => {
     expect(
       canPromoteAdapter({
         id: "BotLaunchpadAdapter",
-        targetAvailability: "live",
+        targetAvailability: "testnet",
         releaseEvidence: null,
       }).allowed,
     ).toBe(false);
