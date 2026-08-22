@@ -3055,10 +3055,19 @@ export default function App() {
           )}
 
           {activeTab === 'BOT/USDT' && swapHydrationNotice && (
-            <p className="fb-inset px-3 py-2 font-mono text-[10px] leading-relaxed text-muted">
-              {swapHydrationNotice}
-            </p>
+            <div className="fb-inset space-y-1.5 px-3 py-2">
+              <p className="font-mono text-[10px] leading-relaxed text-muted">
+                {swapHydrationNotice}
+              </p>
+              <Link
+                to="/assistant"
+                className="inline-flex min-h-[32px] items-center font-mono text-[9.5px] uppercase tracking-[0.06em] text-primary"
+              >
+                Ask Flow AI to prepare it again
+              </Link>
+            </div>
           )}
+
 
           {activeTab === 'BOT/USDT' && (
             <UniversalSwapCard
