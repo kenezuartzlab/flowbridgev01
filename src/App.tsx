@@ -516,23 +516,31 @@ export default function App() {
     setCampaignActionCtx(ctx);
     setActiveTab('BRIDGE');
     setBridgeDirection(ctx.direction);
-    setIsMainnet(isMainnetActionSearch(ctx));
+    applyExplicitChainTarget({
+      chainId: isMainnetActionSearch(ctx) ? 677 : 968,
+      hintKey: `campaign:${window.location.search}`,
+      source: 'ROUTE',
+    });
   }, []);
 
   /**
-   * V15.3B §3 — target-chain precedence for a Flow AI handoff.
-   * A validated handoff link carries an IMMUTABLE target chain. Hydrating it on
-   * mount stops the workspace from resetting to Mainnet while the prepared plan
-   * targets BOT Testnet. Presentation only: no addresses, amounts, signing or
-   * verification behavior changes, and nothing is auto-submitted.
+   * V15.3B §3 / V15.3C — target-chain precedence for a Flow AI handoff.
+   * A validated handoff link carries an IMMUTABLE target chain. It is applied at
+   * most once per runtime, so returning to Trade later never re-applies a stale
+   * URL hint over a deliberate user selection. Presentation only: no addresses,
+   * amounts, signing or verification change, and nothing is auto-submitted.
    */
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const hint = parseHandoffHint(window.location.search);
     if (!hint) return;
-    if (hint.chainId === 968 || hint.chainId === 97) setIsMainnet(false);
-    else if (hint.chainId === 677 || hint.chainId === 56) setIsMainnet(true);
+    applyExplicitChainTarget({
+      chainId: hint.chainId,
+      hintKey: `handoff:${hint.chainId}:${window.location.search}`,
+      source: 'ACTION_INTENT',
+    });
   }, []);
+
 
   /**
    * V8: a validated verified-swap deep link may preselect the swap workspace.
