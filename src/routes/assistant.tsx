@@ -40,7 +40,8 @@ function AssistantPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl p-3 sm:p-4">
+      {/* V15.3H §3 — bottom nav must never overlay the review CTA on mobile. */}
+      <main className="mx-auto max-w-2xl p-3 pb-28 sm:p-4 sm:pb-28">
         <AssistantChat />
       </main>
 

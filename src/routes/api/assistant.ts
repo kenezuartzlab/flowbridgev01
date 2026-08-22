@@ -8,31 +8,148 @@ import { ANONYMOUS_ACTOR, type FlowAiActor } from "@/lib/ai/aiTypes";
 import { answerFlowAiQuestion } from "@/lib/ai/flowAi.server";
 import type { PendingPreparation } from "@/lib/ai/preparationRouting";
 import type { PreparedHandle } from "@/lib/ai/actionContinuation";
+import type { ProductState } from "@/lib/ai/productStateAnswers";
+import type { IntentProposal } from "@/lib/ai/intentProposal";
+import type { FlowAiActor as Actor } from "@/lib/ai/aiTypes";
+import {
+  ASSISTANT_RESPONSE_CONTRACT_VERSION,
+  buildReviewAction,
+  enforceProseHonesty,
+  validateStructuredAction,
+  type AssistantMode,
+  type ReviewAction,
+} from "@/lib/ai/actionRender";
+
+/**
+ * V15.3H §2 — prepare + validate in the SAME turn as the answer. Returns a
+ * structured plan or an explicit NOT_READY; it never returns prose and never
+ * executes anything (preparation is `eth_call` + policy only).
+ */
+async function prepareStructuredAction(input: {
+  proposal: IntentProposal;
+  actor: Actor;
+  wallet: string | null;
+  requestId: string;
+}): Promise<{
+  mode: AssistantMode;
+  prepared: Record<string, any> | null;
+  reviewAction: ReviewAction | null;
+  blockers: string[];
+}> {
+  try {
+    const { prepareActionIntent } = await import("@/lib/ai/intentPrepare.server");
+    const result = await prepareActionIntent({
+      type: input.proposal.type as any,
+      chainId: input.proposal.chainId,
+      parameters: input.proposal.parameters as Record<string, unknown>,
+      actor: input.actor,
+      actorWallet: input.wallet,
+      organizationId: input.actor.orgIds[0] ?? null,
+      sourceEvidenceRefs: [],
+      requested: { userId: input.actor.userId, wallet: input.wallet, orgId: null },
+    });
+    if (!result.ok) {
+      return { mode: "NOT_READY", prepared: null, reviewAction: null, blockers: [result.error] };
+    }
+    const response = result.response as any;
+    const intent = response.intent;
+    const handoff = response.handoff;
+    if (intent?.status !== "READY_FOR_USER" || !handoff) {
+      return {
+        mode: "NOT_READY",
+        prepared: null,
+        reviewAction: null,
+        blockers: (response.blockers ?? []).map(String),
+      };
+    }
+    const reviewAction = buildReviewAction({
+      intentId: intent.id,
+      href: handoff.href,
+      cta: handoff.cta,
+      surface: handoff.surface,
+    });
+    if (!reviewAction) {
+      return {
+        mode: "NOT_READY",
+        prepared: null,
+        reviewAction: null,
+        blockers: ["the review target could not be resolved"],
+      };
+    }
+    // The link digest doubles as the intent's transportable fingerprint, so the
+    // contract can require one without inventing a new value.
+    const fingerprint = reviewAction.search.fp ?? "";
+    return {
+      mode: "READY_FOR_USER",
+      prepared: { ...response, intent: { ...intent, fingerprint } },
+      reviewAction,
+      blockers: [],
+    };
+  } catch (e) {
+    console.error("[flow-ai] preparation failed", input.requestId, e);
+    return {
+      mode: "ERROR",
+      prepared: null,
+      reviewAction: null,
+      blockers: ["preparation is unavailable right now"],
+    };
+  }
+}
 
 const INTERNAL_OPERATOR_EMAILS = ["kenezuartzlab@gmail.com"];
 
-async function resolveActor(request: Request): Promise<FlowAiActor> {
+async function resolveActor(
+  request: Request,
+): Promise<{ actor: FlowAiActor; wallet: string | null }> {
   const user = await getAuthUser(request);
-  if (!user) return ANONYMOUS_ACTOR;
+  if (!user) return { actor: ANONYMOUS_ACTOR, wallet: null };
 
   let orgIds: string[] = [];
+  let wallet: string | null = null;
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("partner_org_members")
-      .select("org_id")
-      .eq("user_id", user.id);
-    orgIds = (data ?? []).map((r: any) => String(r.org_id));
+    const [{ data: orgs }, { data: profile }] = await Promise.all([
+      supabaseAdmin.from("partner_org_members").select("org_id").eq("user_id", user.id),
+      supabaseAdmin.from("profiles").select("wallet_address").eq("id", user.id).maybeSingle(),
+    ]);
+    orgIds = (orgs ?? []).map((r: any) => String(r.org_id));
+    const addr = (profile as any)?.wallet_address;
+    wallet = typeof addr === "string" && /^0x[a-fA-F0-9]{40}$/.test(addr) ? addr : null;
   } catch {
     orgIds = [];
   }
 
   return {
-    userId: user.id,
-    email: user.email,
-    orgIds,
-    isInternalOperator: INTERNAL_OPERATOR_EMAILS.includes(user.email.toLowerCase()),
+    actor: {
+      userId: user.id,
+      email: user.email,
+      orgIds,
+      isInternalOperator: INTERNAL_OPERATOR_EMAILS.includes(user.email.toLowerCase()),
+    },
+    wallet,
   };
+}
+
+/**
+ * V15.3H §2 — client-reported render/handoff state. Untrusted telemetry: it can
+ * only make Flow AI report a failure honestly; it grants no authority.
+ */
+function normalizeProductState(raw: unknown): ProductState | null {
+  if (!raw || typeof raw !== "object") return null;
+  const p = raw as Record<string, any>;
+  const status = ["RENDERED", "RENDER_FAILED", "NONE"].includes(String(p.renderStatus))
+    ? (String(p.renderStatus) as ProductState["renderStatus"])
+    : "NONE";
+  const h = p.handoff;
+  const handoff =
+    h && (h.code === "HANDOFF_HYDRATED" || h.code === "HANDOFF_HYDRATION_FAILED")
+      ? {
+          code: h.code as "HANDOFF_HYDRATED" | "HANDOFF_HYDRATION_FAILED",
+          surface: String(h.surface ?? "Trade").slice(0, 40),
+          detail: String(h.detail ?? "").slice(0, 300),
+        }
+      : null;
+  return { renderStatus: status, hasPreparedHandle: Boolean(p.hasPreparedHandle), handoff };
 }
 
 /**
@@ -109,15 +226,18 @@ export const Route = createFileRoute("/api/assistant")({
         // V15.3B — untrusted connector hints: never used to decide whether a
         // wallet is bound, only to explain wrong-network / wrong-wallet state.
         let connector: { address: string | null; chainId: number | null } | null = null;
+        let productState: ProductState | null = null;
         try {
           const body = (await request.json()) as {
             messages?: { role?: string; content?: string }[];
             pending?: unknown;
             prepared?: unknown;
+            productState?: unknown;
             connector?: { address?: unknown; chainId?: unknown };
           };
           pending = normalizePending(body.pending);
           prepared = normalizePrepared(body.prepared);
+          productState = normalizeProductState(body.productState);
           const rawAddress =
             typeof body.connector?.address === "string" ? body.connector.address.toLowerCase() : null;
           connector = {
@@ -145,7 +265,7 @@ export const Route = createFileRoute("/api/assistant")({
         const last = [...messages].reverse().find((m) => m.role === "user");
         if (!last) return jsonResponse({ error: "Ask a question first." }, 400);
 
-        const actor = await resolveActor(request);
+        const { actor, wallet } = await resolveActor(request);
         const requestId = crypto.randomUUID();
 
         try {
@@ -157,8 +277,69 @@ export const Route = createFileRoute("/api/assistant")({
             pending,
             prepared,
             connector,
+            productState,
           });
-          return jsonResponse({ requestId, ...result });
+
+          /**
+           * V15.3H §1/§2 — the assistant response is the single contract. When a
+           * proposal exists, preparation happens HERE, server-side, in the same
+           * turn: either the response carries a schema-valid `actionIntent` plus a
+           * structured `reviewAction` (mode READY_FOR_USER), or it degrades to
+           * NOT_READY and the prose loses any "prepared" claim. The client no
+           * longer makes a second call whose failure could leave prose implying a
+           * button that was never rendered.
+           */
+          const structured = result.proposal
+            ? await prepareStructuredAction({
+                proposal: result.proposal,
+                actor,
+                wallet,
+                requestId,
+              })
+            : null;
+
+          const mode: AssistantMode = structured
+            ? structured.mode
+            : result.actionPreparation
+              ? "PREPARATION"
+              : "INFO";
+          const verdict = validateStructuredAction({
+            mode,
+            actionIntent: structured?.prepared?.intent ?? null,
+            reviewAction: structured?.reviewAction ?? null,
+          });
+          const finalMode = verdict.mode;
+          const answer = enforceProseHonesty({
+            mode: finalMode,
+            message: result.answer,
+            hasStructuredAction: verdict.ok && finalMode === "READY_FOR_USER",
+          });
+          if (!verdict.ok) {
+            console.warn(
+              "[flow-ai] structured action rejected",
+              requestId,
+              verdict.errors.join("; "),
+            );
+          }
+
+          return jsonResponse({
+            requestId,
+            ...result,
+            answer,
+            // Structured contract fields (§1). `plannerMode` keeps the old
+            // orchestration mode for telemetry without overloading `mode`.
+            mode: finalMode,
+            plannerMode: result.mode,
+            contractVersion: ASSISTANT_RESPONSE_CONTRACT_VERSION,
+            actionIntent:
+              finalMode === "READY_FOR_USER" ? (structured?.prepared?.intent ?? null) : null,
+            /** Full prepared plan (intent + live economics) the card renders from. */
+            actionPlan: finalMode === "READY_FOR_USER" ? (structured?.prepared ?? null) : null,
+            reviewAction: finalMode === "READY_FOR_USER" ? (structured?.reviewAction ?? null) : null,
+            notReadyReasons: verdict.ok ? (structured?.blockers ?? []) : verdict.errors,
+            // The client can no longer prepare on its own — preparation is done.
+            proposal: null,
+          });
         } catch (e) {
           console.error("[flow-ai] failed", requestId, e);
           return jsonResponse(

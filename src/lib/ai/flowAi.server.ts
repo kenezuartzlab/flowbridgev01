@@ -35,6 +35,12 @@ import {
   type PreparedHandle,
 } from "./actionContinuation";
 import {
+  answerProductState,
+  detectProductComplaint,
+  type ProductState,
+  type ProductStateAnswer,
+} from "./productStateAnswers";
+import {
   applyEconomicsGuard,
   mentionsMutableEconomics,
   type RuntimeFeeTruth,
@@ -85,6 +91,8 @@ export interface FlowAiAnswer {
   economicsCorrections?: readonly string[];
   /** True when at least one piece of evidence was read live this request. */
   hasLiveEvidence?: boolean;
+  /** V15.3H §6 — resolved product/render state code when the user reported a UI gap. */
+  productState?: { code: ProductStateAnswer["code"]; offerRetry: boolean } | null;
 
   evidence: readonly {
     id: string;
@@ -275,6 +283,12 @@ export async function answerFlowAiQuestion(input: {
    * generic chat. It never authorizes anything.
    */
   prepared?: PreparedHandle | null;
+  /**
+   * V15.3H §6 — client-reported render/handoff state for the active prepared
+   * plan. Untrusted UI telemetry: it can only make Flow AI more honest (report a
+   * failure), never authorize anything.
+   */
+  productState?: ProductState | null;
   /** Test seam: force offline behavior. */
   online?: boolean;
 }): Promise<FlowAiAnswer> {
@@ -325,6 +339,21 @@ export async function answerFlowAiQuestion(input: {
   if (privacy.blocked) {
     return refusalAnswer(plan, privacy.refusal!);
   }
+
+  // V15.3H §6 — product-state awareness. "No review card" / "nothing was
+  // prefilled" is answered from the reported render + handoff state, never with
+  // "it should be there" and never by blaming another app.
+  const complaint = detectProductComplaint(input.question);
+  if (complaint) {
+    const state: ProductState = input.productState ?? {
+      renderStatus: "NONE",
+      hasPreparedHandle: Boolean(input.prepared),
+      handoff: null,
+    };
+    const reply = answerProductState({ complaint, state });
+    return productStateAnswer(plan, reply);
+  }
+
 
   // V15.2 §3 — deterministic candidate extraction. Only signed-in actors get a
   // proposal, and it is a request to PREPARE, never an authorization to execute.
@@ -671,6 +700,32 @@ function preparationClarificationAnswer(
     proposal: null,
     pending,
     actionPreparation: true,
+    hasLiveEvidence: false,
+    evidence: [],
+  };
+}
+
+/**
+ * V15.3H §6 — deterministic product-state reply. No model call: the reported
+ * render/handoff state decides the wording, so Flow AI can never invent a button.
+ */
+function productStateAnswer(plan: OrchestrationPlan, reply: ProductStateAnswer): FlowAiAnswer {
+  return {
+    answer: reply.message,
+    mode: plan.mode,
+    intent: "ACTION_PREPARATION",
+    confidence: "CURRENT",
+    confidenceLabel: CONFIDENCE_LABEL.CURRENT,
+    asOf: null,
+    disclosure: null,
+    notice: null,
+    skills: [],
+    refused: [],
+    degraded: [],
+    proposal: null,
+    pending: null,
+    actionPreparation: true,
+    productState: { code: reply.code, offerRetry: reply.offerRetry },
     hasLiveEvidence: false,
     evidence: [],
   };

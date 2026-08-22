@@ -3,6 +3,7 @@ import { AlertTriangle, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import type { ActionIntent, ActionHandoff } from "@/lib/ai/actionIntent";
 import { ACTION_STATUS_COPY } from "@/lib/ai/actionIntent";
 import { getConversation, markConversationHandoff } from "@/lib/ai/conversationStore";
+import { STRUCTURED_ACTION_TESTIDS, type ReviewAction } from "@/lib/ai/actionRender";
 
 
 export interface PreparedIntentPayload {
@@ -32,7 +33,14 @@ const AMOUNT_FIELDS = ["amountIn", "amountFlow", "claimableFlow", "rewardAmount"
  * Flow AI prepared and simulated it; the linked product surface revalidates and
  * the user's own wallet signs.
  */
-export function ActionIntentCard({ payload }: { payload: PreparedIntentPayload }) {
+export function ActionIntentCard({
+  payload,
+  reviewAction = null,
+}: {
+  payload: PreparedIntentPayload;
+  /** V15.3H §3 — structured CTA descriptor. Preferred over the raw handoff href. */
+  reviewAction?: ReviewAction | null;
+}) {
   const { intent, handoff } = payload;
   const p = intent.parameters as Record<string, any>;
   const amountField = AMOUNT_FIELDS.find((f) => p[f] !== undefined);
@@ -48,15 +56,22 @@ export function ActionIntentCard({ payload }: { payload: PreparedIntentPayload }
    * hints never reached Trade and the form opened empty. Split path from search
    * and pass the search record, plus the conversation id for correlation.
    */
-  const [handoffPath, handoffQuery] = (handoff?.href ?? "/trade").split("?");
-  const handoffSearch: Record<string, string> = Object.fromEntries(
-    new URLSearchParams(handoffQuery ?? ""),
-  );
+  const [fallbackPath, fallbackQuery] = (handoff?.href ?? "/trade").split("?");
+  const handoffPath = reviewAction?.route ?? fallbackPath;
+  const handoffSearch: Record<string, string> = {
+    ...(reviewAction?.search ?? Object.fromEntries(new URLSearchParams(fallbackQuery ?? ""))),
+  };
   handoffSearch.conv = getConversation().conversationId;
+  const ctaLabel = reviewAction?.label ?? handoff?.cta ?? "Review in Trade";
+  const ctaSurface = reviewAction?.surface ?? handoff?.surface ?? "Trade";
 
 
   return (
-    <section className="fb-inset space-y-2 p-3">
+    <section
+      data-testid={STRUCTURED_ACTION_TESTIDS.card}
+      data-intent-id={intent.id}
+      className="fb-inset space-y-2 p-3"
+    >
       <header className="flex items-center gap-2">
         <span
           className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg ${
@@ -152,23 +167,24 @@ export function ActionIntentCard({ payload }: { payload: PreparedIntentPayload }
         </ul>
       ) : null}
 
-      {ready && handoff ? (
+      {ready && (reviewAction || handoff) ? (
         <Link
           to={handoffPath}
           search={handoffSearch as never}
+          data-testid={STRUCTURED_ACTION_TESTIDS.cta}
           onClick={() => markConversationHandoff(intent.id)}
-          className="fb-glow inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 font-mono text-[10.5px] uppercase tracking-[0.06em] text-primary-foreground"
+          className="fb-glow inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-center font-mono text-[10.5px] uppercase tracking-[0.06em] text-primary-foreground"
         >
-          <ShieldCheck className="h-3.5 w-3.5" />
-          {handoff.cta}
+          <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+          {ctaLabel}
         </Link>
       ) : null}
 
       <p className="font-mono text-[9px] leading-relaxed text-muted">
         Prepared and simulated only — nothing was signed or submitted, and no chat confirmation is
         needed or possible.{" "}
-        {handoff
-          ? `${handoff.surface} prefills these values, then rechecks fee, allowance, quote and simulation before your wallet can confirm.`
+        {handoff || reviewAction
+          ? `${ctaSurface} prefills these values, then rechecks fee, allowance, quote and simulation before your wallet can confirm.`
           : ""}
       </p>
 

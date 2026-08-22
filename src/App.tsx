@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link } from '@tanstack/react-router';
 
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
@@ -65,6 +65,7 @@ import { recordConversationObservation } from './lib/ai/conversationStore';
 
 
 import { AiHandoffBanner } from './components/assistant/AiHandoffBanner';
+import { PreparedActionAvailableCard } from './components/assistant/PreparedActionAvailableCard';
 import {
   isMainnetActionSearch,
   parseCampaignActionSearchString,
@@ -564,25 +565,37 @@ export default function App() {
    * amounts, signing or verification change, and nothing is auto-submitted.
    */
   const [handoffHint, setHandoffHint] = useState<HandoffHint | null>(null);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const hint = parseHandoffHint(window.location.search);
-    if (!hint) return;
+  const [hasUrlHandoffHint, setHasUrlHandoffHint] = useState(false);
+
+  /**
+   * V15.3H §4 — one application path for a prepared plan, whether the user came
+   * through the review CTA (hint in the URL) or tapped the bottom Trade nav and
+   * then applied the session's prepared plan. Presentation only: chain + tab +
+   * prefill hints. Nothing is signed, submitted or auto-confirmed.
+   */
+  const applyHandoffHint = useCallback((hint: HandoffHint, source: string) => {
     setHandoffHint(hint);
     if (hydrationTabFor(hint) === 'swap') {
       applyExplicitTradeTab({
         tab: 'BOT/USDT',
-        hintKey: `handoff-tab:${hint.intentId}:${hint.digest}`,
+        hintKey: `handoff-tab:${source}:${hint.intentId}:${hint.digest}`,
         source: 'ACTION_INTENT',
       });
     }
-
     applyExplicitChainTarget({
       chainId: hint.chainId,
-      hintKey: `handoff:${hint.chainId}:${window.location.search}`,
+      hintKey: `handoff:${source}:${hint.chainId}:${hint.intentId}:${hint.digest}`,
       source: 'ACTION_INTENT',
     });
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hint = parseHandoffHint(window.location.search);
+    if (!hint) return;
+    setHasUrlHandoffHint(true);
+    applyHandoffHint(hint, 'url');
+  }, [applyHandoffHint]);
 
   /**
    * V15.3F §1 — translate the handoff hints into swap form state. Pure
@@ -3035,6 +3048,14 @@ export default function App() {
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
               onReset={resetStep1}
               livePrice={getLiveBotPrice()}
+            />
+          )}
+
+          {/* V15.3H §4 — bottom-nav arrival with an active prepared plan. */}
+          {(activeTab === 'BOT/USDT' || activeTab === 'BRIDGE') && (
+            <PreparedActionAvailableCard
+              hasUrlHint={hasUrlHandoffHint || Boolean(handoffHint)}
+              onApply={(hint) => applyHandoffHint(hint, 'session')}
             />
           )}
 
