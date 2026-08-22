@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import type { ActionIntent, ActionHandoff } from "@/lib/ai/actionIntent";
 import { ACTION_STATUS_COPY } from "@/lib/ai/actionIntent";
+import { getConversation, markConversationHandoff } from "@/lib/ai/conversationStore";
+
 
 export interface PreparedIntentPayload {
   intent: ActionIntent;
