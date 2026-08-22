@@ -530,16 +530,38 @@ export default function App() {
    * URL hint over a deliberate user selection. Presentation only: no addresses,
    * amounts, signing or verification change, and nothing is auto-submitted.
    */
+  const [handoffHint, setHandoffHint] = useState<HandoffHint | null>(null);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const hint = parseHandoffHint(window.location.search);
     if (!hint) return;
+    setHandoffHint(hint);
+    if (hydrationTabFor(hint) === 'swap') setActiveTab('BOT/USDT');
     applyExplicitChainTarget({
       chainId: hint.chainId,
       hintKey: `handoff:${hint.chainId}:${window.location.search}`,
       source: 'ACTION_INTENT',
     });
   }, []);
+
+  /**
+   * V15.3F §1 — translate the handoff hints into swap form state. Pure
+   * derivation against the registry this network actually uses: an unresolvable
+   * pair or amount yields a stated reason instead of a half-filled form. The
+   * swap card still re-resolves balance, allowance, live fee and quote, and only
+   * the user's wallet can authorize anything.
+   */
+  const swapHydration = useMemo(() => {
+    if (!handoffHint) return null;
+    return buildSwapHydration({ hint: handoffHint, tokens: getCuratedTokens(isMainnet) });
+  }, [handoffHint, isMainnet]);
+  const swapHydrationPlan = swapHydration?.ok ? swapHydration.plan : null;
+  const swapHydrationNotice =
+    swapHydration && !swapHydration.ok && swapHydration.reason !== 'NOT_SWAP'
+      ? HYDRATION_FAILURE_COPY[swapHydration.reason]
+      : null;
+
+
 
 
   /**
