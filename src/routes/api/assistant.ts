@@ -12,6 +12,11 @@ import type { ProductState } from "@/lib/ai/productStateAnswers";
 import type { IntentProposal } from "@/lib/ai/intentProposal";
 import type { FlowAiActor as Actor } from "@/lib/ai/aiTypes";
 import {
+  classifyPreparationFailure,
+  type ActionSession,
+  type PreparationFailure,
+} from "@/lib/ai/actionSession";
+import {
   ASSISTANT_RESPONSE_CONTRACT_VERSION,
   buildReviewAction,
   enforceProseHonesty,
@@ -216,6 +221,66 @@ function normalizePrepared(raw: unknown): PreparedHandle | null {
   };
 }
 
+/**
+ * V15.3I §1 — the action session is an UNTRUSTED client hint: it can only retain
+ * what the user already said (action type, chain, token symbols, amount). Every
+ * economic value is still re-resolved and re-simulated server-side.
+ */
+function normalizeActionSession(raw: unknown): ActionSession | null {
+  if (!raw || typeof raw !== "object") return null;
+  const p = raw as Record<string, any>;
+  const slots = p.slots;
+  if (!slots || typeof slots !== "object") return null;
+  const str = (v: unknown, n = 40) => (typeof v === "string" ? v.slice(0, n) : null);
+  const chainId = Number(slots.chainId);
+  const actionType = str(slots.actionType, 24);
+  const expiresAt = str(p.expiresAt, 40);
+  if (!actionType || !Number.isInteger(chainId) || !expiresAt) return null;
+  if (new Date(expiresAt).getTime() <= Date.now()) return null;
+  const amount = typeof slots.amount === "string" && /^\d{1,30}(\.\d{1,18})?$/.test(slots.amount)
+    ? slots.amount
+    : null;
+  return {
+    id: str(p.id, 64) ?? "",
+    actorKey: str(p.actorKey, 200) ?? "",
+    slots: {
+      actionType: actionType as any,
+      chainId,
+      tokenInSymbol: str(slots.tokenInSymbol, 12),
+      tokenOutSymbol: str(slots.tokenOutSymbol, 12),
+      destinationChainId: Number.isInteger(Number(slots.destinationChainId))
+        ? Number(slots.destinationChainId)
+        : null,
+      amount,
+      recognized: Array.isArray(slots.recognized)
+        ? slots.recognized.slice(0, 8).map((r: unknown) => String(r).slice(0, 80))
+        : [],
+    },
+    attempts: Number.isInteger(Number(p.attempts)) ? Number(p.attempts) : 0,
+    createdAt: str(p.createdAt, 40) ?? new Date().toISOString(),
+    updatedAt: str(p.updatedAt, 40) ?? new Date().toISOString(),
+    expiresAt,
+    lastError: normalizePreparationFailure(p.lastError),
+  };
+}
+
+function normalizePreparationFailure(raw: unknown): PreparationFailure | null {
+  if (!raw || typeof raw !== "object") return null;
+  const p = raw as Record<string, any>;
+  if (typeof p.errorCode !== "string" || typeof p.stage !== "string") return null;
+  return {
+    errorCode: p.errorCode.slice(0, 40) as PreparationFailure["errorCode"],
+    stage: p.stage.slice(0, 20) as PreparationFailure["stage"],
+    retryable: Boolean(p.retryable),
+    detail: String(p.detail ?? "").slice(0, 400),
+    degraded: Array.isArray(p.degraded) ? p.degraded.slice(0, 6).map(String) : [],
+    retainedSlots: Array.isArray(p.retainedSlots)
+      ? p.retainedSlots.slice(0, 8).map((r: unknown) => String(r).slice(0, 80))
+      : [],
+    at: String(p.at ?? new Date().toISOString()).slice(0, 40),
+  };
+}
+
 export const Route = createFileRoute("/api/assistant")({
   server: {
     handlers: {
@@ -227,17 +292,25 @@ export const Route = createFileRoute("/api/assistant")({
         // wallet is bound, only to explain wrong-network / wrong-wallet state.
         let connector: { address: string | null; chainId: number | null } | null = null;
         let productState: ProductState | null = null;
+        // V15.3I §1/§3 — client-carried action session + last failure. Slots and
+        // an error code only: no calldata, no economics, no authority.
+        let actionSession: ActionSession | null = null;
+        let lastFailure: PreparationFailure | null = null;
         try {
           const body = (await request.json()) as {
             messages?: { role?: string; content?: string }[];
             pending?: unknown;
             prepared?: unknown;
             productState?: unknown;
+            actionSession?: unknown;
+            preparationFailure?: unknown;
             connector?: { address?: unknown; chainId?: unknown };
           };
           pending = normalizePending(body.pending);
           prepared = normalizePrepared(body.prepared);
           productState = normalizeProductState(body.productState);
+          actionSession = normalizeActionSession(body.actionSession);
+          lastFailure = normalizePreparationFailure(body.preparationFailure);
           const rawAddress =
             typeof body.connector?.address === "string" ? body.connector.address.toLowerCase() : null;
           connector = {
@@ -278,6 +351,8 @@ export const Route = createFileRoute("/api/assistant")({
             prepared,
             connector,
             productState,
+            actionSession,
+            preparationFailure: lastFailure,
           });
 
           /**
@@ -322,10 +397,28 @@ export const Route = createFileRoute("/api/assistant")({
             );
           }
 
+          const sessionOut = result.actionSession ?? actionSession ?? null;
+          const failure =
+            finalMode === "READY_FOR_USER"
+              ? null
+              : structured
+                ? classifyPreparationFailure({
+                    reasons: verdict.ok ? (structured.blockers ?? []) : verdict.errors,
+                    slots: sessionOut?.slots ?? null,
+                    degraded: result.degraded ?? [],
+                  })
+                : null;
+
           return jsonResponse({
             requestId,
             ...result,
             answer,
+            actionSession: sessionOut
+              ? { ...sessionOut, lastError: failure ?? sessionOut.lastError ?? null }
+              : null,
+            preparationFailure: failure,
+            // §8 — dynamic preparation state is CURRENT, never "cached as of".
+            asOf: structured ? null : result.asOf,
             // Structured contract fields (§1). `plannerMode` keeps the old
             // orchestration mode for telemetry without overloading `mode`.
             mode: finalMode,

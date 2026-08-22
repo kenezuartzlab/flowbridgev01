@@ -30,7 +30,6 @@ import {
   type PreparationShape,
 } from "./preparationRouting";
 import {
-  classifyPreparationFailure,
   createActionSession,
   describeSlots,
   isRetryRequest,
