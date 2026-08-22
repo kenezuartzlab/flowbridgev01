@@ -45,6 +45,20 @@ export interface PreparedHandleRef {
   actorKey: string;
 }
 
+/**
+ * V15.3G §6 — a product surface may report back what happened to a prepared
+ * plan. It is an OBSERVATION, never an authorization: it carries no calldata and
+ * grants nothing. Flow AI reads it to explain the failure and offer to prepare
+ * the action again instead of pretending the handoff succeeded.
+ */
+export interface ConversationObservation {
+  code: "HANDOFF_HYDRATION_FAILED" | "HANDOFF_HYDRATED";
+  surface: string;
+  detail: string;
+  intentId: string | null;
+  at: string;
+}
+
 export interface ConversationState {
   conversationId: string;
   ownerKey: string;
@@ -53,8 +67,13 @@ export interface ConversationState {
   prepared: PreparedHandleRef | null;
   /** Intent id most recently handed off to a product surface (correlation only). */
   handedOffIntentId: string | null;
+  /** V15.3G §5 — unsent composer text, so navigation cannot erase a draft. */
+  composerDraft: string;
+  /** V15.3G §6 — latest product-surface observation about the handoff. */
+  observation: ConversationObservation | null;
   updatedAt: string;
 }
+
 
 const STORAGE_KEY = "flowbridge_ai_conversation_v1";
 const MAX_MESSAGES = 40;
@@ -75,6 +94,9 @@ function emptyState(ownerKey = "anonymous"): ConversationState {
     pending: null,
     prepared: null,
     handedOffIntentId: null,
+    composerDraft: "",
+    observation: null,
+
     updatedAt: new Date().toISOString(),
   };
 }
@@ -154,6 +176,40 @@ export function setConversationPrepared(prepared: PreparedHandleRef | null): voi
 export function markConversationHandoff(intentId: string): void {
   commit({ ...state, handedOffIntentId: intentId });
 }
+
+/** V15.3G §5 — unsent composer text survives SPA navigation. */
+export function setConversationDraft(draft: string): void {
+  const next = draft.slice(0, 2000);
+  if (state.composerDraft === next) return;
+  commit({ ...state, composerDraft: next });
+}
+
+/** V15.3G §6 — a product surface reports what happened to the prepared plan. */
+export function recordConversationObservation(
+  observation: Omit<ConversationObservation, "at"> & { at?: string },
+): void {
+  const next: ConversationObservation = {
+    ...observation,
+    at: observation.at ?? new Date().toISOString(),
+  };
+  const prev = state.observation;
+  if (
+    prev &&
+    prev.code === next.code &&
+    prev.surface === next.surface &&
+    prev.detail === next.detail &&
+    prev.intentId === next.intentId
+  ) {
+    return;
+  }
+  commit({ ...state, observation: next });
+}
+
+export function clearConversationObservation(): void {
+  if (!state.observation) return;
+  commit({ ...state, observation: null });
+}
+
 
 export function resetConversation(): void {
   commit(emptyState(state.ownerKey));

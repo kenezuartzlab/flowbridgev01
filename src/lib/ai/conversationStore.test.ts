@@ -1,13 +1,17 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   __resetConversationForTests,
+  clearConversationObservation,
   ensureConversationOwner,
   getConversation,
   markConversationHandoff,
   pruneExpiredPreparation,
+  recordConversationObservation,
+  setConversationDraft,
   setConversationMessages,
   setConversationPrepared,
 } from "./conversationStore";
+
 
 const prepared = (expiresInMs: number) => ({
   intentId: "intent_1",
@@ -65,5 +69,35 @@ describe("V15.3F conversation continuity store", () => {
     setConversationPrepared(prepared(60_000));
     pruneExpiredPreparation();
     expect(getConversation().prepared?.state).toBe("READY_FOR_USER");
+  });
+});
+
+describe("V15.3G composer draft + product observation", () => {
+  beforeEach(() => __resetConversationForTests());
+
+  it("keeps an unsent composer draft across navigation", () => {
+    setConversationDraft("prepare a 5 usdt swap");
+    expect(getConversation().composerDraft).toBe("prepare a 5 usdt swap");
+  });
+
+  it("records a hydration failure observation without granting authority", () => {
+    recordConversationObservation({
+      code: "HANDOFF_HYDRATION_FAILED",
+      surface: "Trade",
+      detail: "amount did not survive",
+      intentId: "intent_1",
+    });
+    const obs = getConversation().observation;
+    expect(obs?.code).toBe("HANDOFF_HYDRATION_FAILED");
+    expect(obs?.intentId).toBe("intent_1");
+    clearConversationObservation();
+    expect(getConversation().observation).toBeNull();
+  });
+
+  it("drops the draft when the conversation owner changes", () => {
+    ensureConversationOwner("user-a");
+    setConversationDraft("private half-typed question");
+    ensureConversationOwner("user-b");
+    expect(getConversation().composerDraft).toBe("");
   });
 });

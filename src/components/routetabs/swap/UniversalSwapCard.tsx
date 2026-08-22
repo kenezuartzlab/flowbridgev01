@@ -25,6 +25,13 @@ import {
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
 import type { SwapHydrationPlan } from "@/lib/ai/handoffHydration";
 import {
+  clearSwapDraft,
+  readSwapDraft,
+  setSwapDraft,
+  type SwapDraftScope,
+} from "@/lib/trade/tradeSession";
+
+import {
   captureVerifiedSwapAttribution,
   scheduleVerifiedSwapHandoff,
 } from "@/lib/swap/verifiedSwapAttribution";
@@ -118,9 +125,24 @@ export function UniversalSwapCard({
   const platformFeeBps = appConfig.fees.platformFeeBps;
   const platformFeeLabel = feeBpsLabel(platformFeeBps);
   const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet, appConfig]);
-  const [tokenIn, setTokenIn] = useState<Token>(curated[0]); // BOT
-  const [tokenOut, setTokenOut] = useState<Token>(curated[2]); // USDT
-  const [amountIn, setAmountIn] = useState("");
+  /**
+   * V15.3G §2 — the in-progress swap form is app-session state. It was local to
+   * this component, so navigating away and back erased the pair and typed amount.
+   * The draft is restored from `tradeSession` (scoped to the network being
+   * rendered) and is a HINT only: quote, fee, allowance, balance and simulation
+   * are all re-resolved below, and only the user's wallet can sign.
+   */
+  const draftScope: SwapDraftScope = isMainnet ? "MAINNET" : "TESTNET";
+  const restoredDraft = useMemo(() => readSwapDraft(draftScope), [draftScope]);
+  const pickToken = (symbol: string | undefined, fallback: Token) =>
+    (symbol ? curated.find((t) => t.symbol === symbol) : undefined) ?? fallback;
+  const [tokenIn, setTokenIn] = useState<Token>(() =>
+    pickToken(restoredDraft?.tokenInSymbol, curated[0]),
+  );
+  const [tokenOut, setTokenOut] = useState<Token>(() =>
+    pickToken(restoredDraft?.tokenOutSymbol, curated[2]),
+  );
+  const [amountIn, setAmountIn] = useState(restoredDraft?.amount ?? "");
   const [slippage, setSlippage] = useState(appConfig.fees.defaultSlippagePct);
 
   const [pickerOpen, setPickerOpen] = useState<"in" | "out" | null>(null);
@@ -135,13 +157,30 @@ export function UniversalSwapCard({
   const [lastTx, setLastTx] = useState<`0x${string}` | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Reset curated tokens if mainnet toggles
+  // Reset curated tokens when the NETWORK actually changes (not on remount —
+  // remount must restore the session draft instead of clobbering it).
+  const scopeRef = useRef<SwapDraftScope>(draftScope);
   useEffect(() => {
+    if (scopeRef.current === draftScope) return;
+    scopeRef.current = draftScope;
     setTokenIn(curated[0]);
     setTokenOut(curated[2]);
+    setAmountIn("");
+    clearSwapDraft();
     setQuote(null);
     setLastTx(null);
-  }, [isMainnet, curated]);
+  }, [draftScope, curated]);
+
+  // Persist the draft so SPA navigation cannot erase it.
+  useEffect(() => {
+    setSwapDraft({
+      chainScope: draftScope,
+      tokenInSymbol: tokenIn.symbol,
+      tokenOutSymbol: tokenOut.symbol,
+      amount: amountIn,
+    });
+  }, [draftScope, tokenIn.symbol, tokenOut.symbol, amountIn]);
+
 
   /**
    * V15.3F — apply a Flow AI prepared plan to the form exactly once per plan key.

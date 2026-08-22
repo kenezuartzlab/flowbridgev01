@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { Link } from '@tanstack/react-router';
+
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 import {
@@ -54,6 +56,13 @@ import {
   HYDRATION_FAILURE_COPY,
 } from './lib/ai/handoffHydration';
 import { applyExplicitChainTarget, useSelectedNetwork } from './lib/network/networkSession';
+import {
+  applyDefaultTradeTab,
+  applyExplicitTradeTab,
+  useTradeTab,
+} from './lib/trade/tradeSession';
+import { recordConversationObservation } from './lib/ai/conversationStore';
+
 
 import { AiHandoffBanner } from './components/assistant/AiHandoffBanner';
 import {
@@ -486,11 +495,24 @@ export default function App() {
   const handleToggleTheme = () => setTheme();
 
   const [session, setSession] = useState<RouteSession>(getLocalSession());
-  const [activeTab, setActiveTab] = useState<TabId>(() => {
-    if (session.step1.status !== 'done') return 'CA/BOT';
-    if (session.step2.status !== 'done') return 'BOT/USDT';
-    return 'BRIDGE';
-  });
+  /**
+   * V15.3G §1 — Trade mode is APP-SESSION state, owned by `tradeSession` above the
+   * route tree. `/` and `/trade` render this workspace, so route-local state was
+   * destroyed on every navigation; now the pair mode survives it. The
+   * route-progress default only applies while the user has not chosen a tab.
+   */
+  const [activeTab, setActiveTab] = useTradeTab();
+  useEffect(() => {
+    applyDefaultTradeTab(
+      session.step1.status !== 'done'
+        ? 'CA/BOT'
+        : session.step2.status !== 'done'
+          ? 'BOT/USDT'
+          : 'BRIDGE',
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const appConfig = useAppConfig();
   // Admin-published platform fee (bps) mirroring FlowBridgeRouter's globalFeeBps.
@@ -520,7 +542,12 @@ export default function App() {
     const ctx = parseCampaignActionSearchString(window.location.search);
     if (!ctx) return;
     setCampaignActionCtx(ctx);
-    setActiveTab('BRIDGE');
+    applyExplicitTradeTab({
+      tab: 'BRIDGE',
+      hintKey: `campaign:${window.location.search}`,
+      source: 'ROUTE',
+    });
+
     setBridgeDirection(ctx.direction);
     applyExplicitChainTarget({
       chainId: isMainnetActionSearch(ctx) ? 677 : 968,
@@ -542,7 +569,14 @@ export default function App() {
     const hint = parseHandoffHint(window.location.search);
     if (!hint) return;
     setHandoffHint(hint);
-    if (hydrationTabFor(hint) === 'swap') setActiveTab('BOT/USDT');
+    if (hydrationTabFor(hint) === 'swap') {
+      applyExplicitTradeTab({
+        tab: 'BOT/USDT',
+        hintKey: `handoff-tab:${hint.intentId}:${hint.digest}`,
+        source: 'ACTION_INTENT',
+      });
+    }
+
     applyExplicitChainTarget({
       chainId: hint.chainId,
       hintKey: `handoff:${hint.chainId}:${window.location.search}`,
@@ -567,6 +601,31 @@ export default function App() {
       ? HYDRATION_FAILURE_COPY[swapHydration.reason as keyof typeof HYDRATION_FAILURE_COPY]
       : null;
 
+  /**
+   * V15.3G §6 — report the hydration outcome back into the conversation as an
+   * OBSERVATION, so Flow AI can say the handoff failed and offer to prepare the
+   * action again instead of implying it went through. It carries no authority.
+   */
+  useEffect(() => {
+    if (!handoffHint) return;
+    if (swapHydrationNotice) {
+      recordConversationObservation({
+        code: 'HANDOFF_HYDRATION_FAILED',
+        surface: 'Trade',
+        detail: swapHydrationNotice,
+        intentId: handoffHint.intentId,
+      });
+    } else if (swapHydrationPlan) {
+      recordConversationObservation({
+        code: 'HANDOFF_HYDRATED',
+        surface: 'Trade',
+        detail: `Prefilled ${swapHydrationPlan.amount} ${swapHydrationPlan.tokenInSymbol} → ${swapHydrationPlan.tokenOutSymbol}; revalidating before signing.`,
+        intentId: handoffHint.intentId,
+      });
+    }
+  }, [handoffHint, swapHydrationNotice, swapHydrationPlan]);
+
+
 
 
 
@@ -581,7 +640,12 @@ export default function App() {
     const ctx = parseCampaignSwapActionSearchString(window.location.search);
     if (!ctx) return;
     setCampaignSwapCtx(ctx);
-    setActiveTab('BOT/USDT');
+    applyExplicitTradeTab({
+      tab: 'BOT/USDT',
+      hintKey: `campaign-swap:${window.location.search}`,
+      source: 'ROUTE',
+    });
+
     saveCampaignActionReturn({ campaignSlug: ctx.campaign, taskId: ctx.task });
   }, []);
 
@@ -2993,10 +3057,19 @@ export default function App() {
           )}
 
           {activeTab === 'BOT/USDT' && swapHydrationNotice && (
-            <p className="fb-inset px-3 py-2 font-mono text-[10px] leading-relaxed text-muted">
-              {swapHydrationNotice}
-            </p>
+            <div className="fb-inset space-y-1.5 px-3 py-2">
+              <p className="font-mono text-[10px] leading-relaxed text-muted">
+                {swapHydrationNotice}
+              </p>
+              <Link
+                to="/assistant"
+                className="inline-flex min-h-[32px] items-center font-mono text-[9.5px] uppercase tracking-[0.06em] text-primary"
+              >
+                Ask Flow AI to prepare it again
+              </Link>
+            </div>
           )}
+
 
           {activeTab === 'BOT/USDT' && (
             <UniversalSwapCard
@@ -3251,12 +3324,13 @@ export default function App() {
           )}
         </div>
         {googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com' && (
-          <a
-            href="/sets"
+          <Link
+            to="/sets"
             className="text-[9px] tracking-[0.2em] font-black text-[#32FF8B]/80 hover:text-[#32FF8B] transition-colors"
           >
             ⚙ Admin console
-          </a>
+          </Link>
+
         )}
         <span className="text-[9px] text-[#C5C1B9]/70 tracking-[0.2em] font-medium">
           {appConfig.content.footerNote}

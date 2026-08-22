@@ -5,9 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
 import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
 import {
+  clearConversationObservation,
   ensureConversationOwner,
   markConversationHandoff,
   pruneExpiredPreparation,
+  setConversationDraft,
   setConversationMessages,
   setConversationPending,
   setConversationPrepared,
@@ -16,6 +18,7 @@ import {
   type PendingPreparationRef,
   type PreparedHandleRef,
 } from "@/lib/ai/conversationStore";
+
 import type { ChatMessage, EvidenceRef } from "@/lib/ai/conversationTypes";
 
 export type { ChatMessage, EvidenceRef };
@@ -69,9 +72,15 @@ export function AssistantChat() {
   const messages = conversation.messages;
   const pending = conversation.pending;
   const preparedHandle = conversation.prepared;
-  const [input, setInput] = useState("");
+  /**
+   * V15.3G §5 — the composer draft is session state, not component state, so an
+   * unsent question survives Assistant → Trade → Assistant.
+   */
+  const input = conversation.composerDraft;
+  const setInput = setConversationDraft;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const [openEvidence, setOpenEvidence] = useState<number | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
@@ -401,7 +410,36 @@ export function AssistantChat() {
           <div ref={endRef} />
         </div>
 
+        {conversation.observation?.code === "HANDOFF_HYDRATION_FAILED" ? (
+          <div className="space-y-1.5 border-t border-hairline px-4 py-2.5">
+            <p className="font-mono text-[10px] leading-relaxed text-muted">
+              {conversation.observation.surface} could not prefill the prepared plan:{" "}
+              {conversation.observation.detail} Nothing was signed or submitted.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  clearConversationObservation();
+                  void send("The Trade screen could not prefill that plan — prepare it again.");
+                }}
+                className="fb-inset min-h-[36px] px-2.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-foreground"
+              >
+                Prepare it again
+              </button>
+              <button
+                type="button"
+                onClick={() => clearConversationObservation()}
+                className="min-h-[36px] px-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         {error ? (
+
           <p
             role="alert"
             className="border-t border-hairline px-4 py-2 font-mono text-[10.5px] text-danger"
