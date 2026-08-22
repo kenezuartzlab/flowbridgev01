@@ -178,7 +178,7 @@ export const Route = createFileRoute("/api/assistant")({
         const last = [...messages].reverse().find((m) => m.role === "user");
         if (!last) return jsonResponse({ error: "Ask a question first." }, 400);
 
-        const actor = await resolveActor(request);
+        const { actor, wallet } = await resolveActor(request);
         const requestId = crypto.randomUUID();
 
         try {
@@ -190,8 +190,66 @@ export const Route = createFileRoute("/api/assistant")({
             pending,
             prepared,
             connector,
+            productState,
           });
-          return jsonResponse({ requestId, ...result });
+
+          /**
+           * V15.3H §1/§2 — the assistant response is the single contract. When a
+           * proposal exists, preparation happens HERE, server-side, in the same
+           * turn: either the response carries a schema-valid `actionIntent` plus a
+           * structured `reviewAction` (mode READY_FOR_USER), or it degrades to
+           * NOT_READY and the prose loses any "prepared" claim. The client no
+           * longer makes a second call whose failure could leave prose implying a
+           * button that was never rendered.
+           */
+          const structured = result.proposal
+            ? await prepareStructuredAction({
+                proposal: result.proposal,
+                actor,
+                wallet,
+                requestId,
+              })
+            : null;
+
+          const mode: AssistantMode = structured
+            ? structured.mode
+            : result.actionPreparation
+              ? "PREPARATION"
+              : "INFO";
+          const verdict = validateStructuredAction({
+            mode,
+            actionIntent: structured?.prepared?.intent ?? null,
+            reviewAction: structured?.reviewAction ?? null,
+          });
+          const finalMode = verdict.mode;
+          const answer = enforceProseHonesty({
+            mode: finalMode,
+            message: result.answer,
+            hasStructuredAction: verdict.ok && finalMode === "READY_FOR_USER",
+          });
+          if (!verdict.ok) {
+            console.warn(
+              "[flow-ai] structured action rejected",
+              requestId,
+              verdict.errors.join("; "),
+            );
+          }
+
+          return jsonResponse({
+            requestId,
+            ...result,
+            answer,
+            // Structured contract fields (§1). `plannerMode` keeps the old
+            // orchestration mode for telemetry without overloading `mode`.
+            mode: finalMode,
+            plannerMode: result.mode,
+            contractVersion: ASSISTANT_RESPONSE_CONTRACT_VERSION,
+            actionIntent: finalMode === "READY_FOR_USER" ? (structured?.prepared ?? null) : null,
+            reviewAction: finalMode === "READY_FOR_USER" ? (structured?.reviewAction ?? null) : null,
+            notReadyReasons: verdict.ok ? (structured?.blockers ?? []) : verdict.errors,
+            // The client can no longer prepare on its own — preparation is done.
+            proposal: null,
+          });
         } catch (e) {
           console.error("[flow-ai] failed", requestId, e);
           return jsonResponse(
