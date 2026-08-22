@@ -31,7 +31,7 @@ export function SlippagePopover({ value, onChange }: SlippagePopoverProps) {
         title="Slippage tolerance"
       >
         <SlidersHorizontal className="w-3 h-3" />
-        <span>Auto: {value}%</span>
+        <span>{value}% slippage</span>
       </button>
       {open && (
         <div className="absolute right-0 mt-2 z-40 w-[240px] bg-[#010C1B] border border-white/15 rounded-xl p-3 shadow-2xl space-y-2.5">

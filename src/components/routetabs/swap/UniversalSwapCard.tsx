@@ -955,7 +955,7 @@ export function UniversalSwapCard({
           usdValue={usdValueFor(tokenIn, amountIn)}
           maxHint={
             maxSpendableRaw > 0n
-              ? `Max swappable ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} — the 0.1% platform fee${tokenIn.isNative ? " and gas reserve are" : " is"} taken on top of your amount.`
+              ? `Max swappable ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} — the ${feeBpsLabel(disclosedFeeBps)} platform fee${tokenIn.isNative ? " and gas reserve are" : " is"} taken on top of your amount.`
               : undefined
           }
           clampedNotice={
