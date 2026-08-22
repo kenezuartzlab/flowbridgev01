@@ -54,6 +54,13 @@ import {
   HYDRATION_FAILURE_COPY,
 } from './lib/ai/handoffHydration';
 import { applyExplicitChainTarget, useSelectedNetwork } from './lib/network/networkSession';
+import {
+  applyDefaultTradeTab,
+  applyExplicitTradeTab,
+  useTradeTab,
+} from './lib/trade/tradeSession';
+import { recordConversationObservation } from './lib/ai/conversationStore';
+
 
 import { AiHandoffBanner } from './components/assistant/AiHandoffBanner';
 import {
@@ -486,11 +493,24 @@ export default function App() {
   const handleToggleTheme = () => setTheme();
 
   const [session, setSession] = useState<RouteSession>(getLocalSession());
-  const [activeTab, setActiveTab] = useState<TabId>(() => {
-    if (session.step1.status !== 'done') return 'CA/BOT';
-    if (session.step2.status !== 'done') return 'BOT/USDT';
-    return 'BRIDGE';
-  });
+  /**
+   * V15.3G §1 — Trade mode is APP-SESSION state, owned by `tradeSession` above the
+   * route tree. `/` and `/trade` render this workspace, so route-local state was
+   * destroyed on every navigation; now the pair mode survives it. The
+   * route-progress default only applies while the user has not chosen a tab.
+   */
+  const [activeTab, setActiveTab] = useTradeTab();
+  useEffect(() => {
+    applyDefaultTradeTab(
+      session.step1.status !== 'done'
+        ? 'CA/BOT'
+        : session.step2.status !== 'done'
+          ? 'BOT/USDT'
+          : 'BRIDGE',
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const appConfig = useAppConfig();
   // Admin-published platform fee (bps) mirroring FlowBridgeRouter's globalFeeBps.
@@ -520,7 +540,12 @@ export default function App() {
     const ctx = parseCampaignActionSearchString(window.location.search);
     if (!ctx) return;
     setCampaignActionCtx(ctx);
-    setActiveTab('BRIDGE');
+    applyExplicitTradeTab({
+      tab: 'BRIDGE',
+      hintKey: `campaign:${window.location.search}`,
+      source: 'ROUTE',
+    });
+
     setBridgeDirection(ctx.direction);
     applyExplicitChainTarget({
       chainId: isMainnetActionSearch(ctx) ? 677 : 968,
@@ -542,7 +567,14 @@ export default function App() {
     const hint = parseHandoffHint(window.location.search);
     if (!hint) return;
     setHandoffHint(hint);
-    if (hydrationTabFor(hint) === 'swap') setActiveTab('BOT/USDT');
+    if (hydrationTabFor(hint) === 'swap') {
+      applyExplicitTradeTab({
+        tab: 'BOT/USDT',
+        hintKey: `handoff-tab:${hint.intentId}:${hint.digest}`,
+        source: 'ACTION_INTENT',
+      });
+    }
+
     applyExplicitChainTarget({
       chainId: hint.chainId,
       hintKey: `handoff:${hint.chainId}:${window.location.search}`,
@@ -581,7 +613,12 @@ export default function App() {
     const ctx = parseCampaignSwapActionSearchString(window.location.search);
     if (!ctx) return;
     setCampaignSwapCtx(ctx);
-    setActiveTab('BOT/USDT');
+    applyExplicitTradeTab({
+      tab: 'BOT/USDT',
+      hintKey: `campaign-swap:${window.location.search}`,
+      source: 'ROUTE',
+    });
+
     saveCampaignActionReturn({ campaignSlug: ctx.campaign, taskId: ctx.task });
   }, []);
 
