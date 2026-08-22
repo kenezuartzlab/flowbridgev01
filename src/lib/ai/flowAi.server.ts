@@ -17,6 +17,7 @@ import { anyProviderAvailable, routeModelRequest } from "./modelGateway.server";
 import { evaluatePrivacy } from "./privacyGuard";
 import { listUserMemory, renderMemoryForPrompt } from "./memoryStore.server";
 import { loadCampaignPointsEvidence, loadStakingEvidence } from "./stakingEvidence.server";
+import { proposeIntent, type IntentProposal } from "./intentProposal";
 
 export interface FlowAiAnswer {
   answer: string;
