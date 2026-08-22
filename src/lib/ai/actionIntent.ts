@@ -381,6 +381,20 @@ export interface ActionHandoff {
   revalidatedByTarget: true;
 }
 
+/**
+ * V15.3K §5 — canonical output asset semantics. A SWAP whose parameters mark the
+ * output as native keeps NATIVE BOT semantics through fingerprint, handoff and
+ * hydration; an ERC-20 output (WBOT) stays wrapped. The value the user reviewed
+ * can therefore never be silently substituted for the other one.
+ */
+export function outputAssetKindOf(parameters: Record<string, unknown>): "native" | "erc20" | null {
+  const p = parameters as Record<string, any>;
+  if (p.tokenOut === undefined && p.token === undefined) return null;
+  if (p.tokenOutIsNative === true) return "native";
+  if (p.tokenOutIsNative === false) return "erc20";
+  return null;
+}
+
 export function buildHandoff(intent: ActionIntent): ActionHandoff {
   const p = intent.parameters as Record<string, any>;
   // V15.3J §3 — the link is now OPAQUE. It carries the intent id, the economic
@@ -401,8 +415,10 @@ export function buildHandoff(intent: ActionIntent): ActionHandoff {
         tokenOut: p.tokenOut ?? null,
         amount: p.amountIn ?? p.amountFlow ?? p.claimableFlow ?? null,
         destinationChainId: p.destinationChainId ?? null,
+        outputAssetKind: outputAssetKindOf(intent.parameters),
       }),
     ),
+
     exp: intent.expiresAt,
     itype: intent.type,
     ichain: intent.chainId,
