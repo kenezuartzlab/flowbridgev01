@@ -14,6 +14,9 @@ import { computeClaimable, explainSwapPoints, formatUsdAmount } from "./determin
 import { BOT_ADAPTERS, describeCapability } from "./botCompatibility";
 import { containUntrustedText } from "./skillManifest";
 import { anyProviderAvailable, routeModelRequest } from "./modelGateway.server";
+import { evaluatePrivacy } from "./privacyGuard";
+import { listUserMemory, renderMemoryForPrompt } from "./memoryStore.server";
+import { loadCampaignPointsEvidence, loadStakingEvidence } from "./stakingEvidence.server";
 
 export interface FlowAiAnswer {
   answer: string;
