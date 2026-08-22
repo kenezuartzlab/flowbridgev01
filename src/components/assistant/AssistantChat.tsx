@@ -85,6 +85,7 @@ export function AssistantChat() {
         notice?: string | null;
         skills?: string[];
         evidence?: EvidenceRef[];
+        proposal?: IntentProposalRef | null;
       };
       if (!res.ok || !data.answer) {
         throw new Error(data.error ?? "Flow AI is unavailable right now.");
@@ -104,6 +105,9 @@ export function AssistantChat() {
         };
         return copy;
       });
+
+      if (data.proposal) void prepare(data.proposal);
+
     } catch (e: any) {
       setMessages((prev) => prev.slice(0, -1));
       setError(e?.message ?? "Something went wrong.");
