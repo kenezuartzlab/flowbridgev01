@@ -190,6 +190,8 @@ export async function answerFlowAiQuestion(input: {
   });
 
   const evidence: EvidenceItem[] = [];
+  /** Domains that were requested but could not be read; disclosed, never guessed. */
+  const degraded: string[] = [];
 
   const knowledge = retrieveKnowledge({
     text: input.question,
@@ -199,9 +201,46 @@ export async function answerFlowAiQuestion(input: {
   evidence.push(...knowledge.map(factToEvidence));
 
   const skillIds = new Set(plan.skills.map((s) => s.skillId));
-  if (skillIds.has("account_analyst")) evidence.push(...(await loadAccountEvidence(input.actor)));
+  const accountEvidence = skillIds.has("account_analyst")
+    ? await loadAccountEvidence(input.actor)
+    : [];
+  evidence.push(...accountEvidence);
+  if (skillIds.has("account_analyst") && accountEvidence.length === 0 && input.actor.userId) {
+    degraded.push("your FlowBridge account record");
+  }
+
+  const boundWallet =
+    (accountEvidence.find((e) => e.id === "db.account.points")?.value as
+      | { walletAddress?: string | null }
+      | undefined)?.walletAddress ?? null;
+
+  // V15.1 §4 — refuse cross-actor private reads at the boundary, before retrieval
+  // of anything else, using the SERVER-known bound wallet as the only "self".
+  const privacy = evaluatePrivacy({
+    question: input.question,
+    actor: input.actor,
+    ownWallets: boundWallet ? [boundWallet] : [],
+  });
+  if (privacy.blocked) {
+    return refusalAnswer(plan, privacy.refusal!);
+  }
+
   if (skillIds.has("campaign_scout")) evidence.push(...(await loadCampaignEvidence()));
   if (skillIds.has("bot_ecosystem_researcher")) evidence.push(...loadBotStatusEvidence());
+
+  if (skillIds.has("staking_analyst")) {
+    const staking = await loadStakingEvidence(boundWallet);
+    if (staking.length === 0) degraded.push("live FLOW staking vault state");
+    evidence.push(...staking);
+  }
+  if (skillIds.has("campaign_scout") && boundWallet) {
+    evidence.push(...(await loadCampaignPointsEvidence(boundWallet)));
+  }
+
+  // Opt-in, user-private preferences (tone/verbosity/default chain). Never a
+  // source of facts: corrections stay candidates and are excluded from prompts.
+  const memories = input.actor.userId ? await listUserMemory(input.actor) : [];
+  const memoryLine = renderMemoryForPrompt(memories);
 
   // Deterministic "why did I earn +N" math, when the question carries an amount.
   const usd = input.question.match(/\$\s?(\d+(?:\.\d+)?)/);
