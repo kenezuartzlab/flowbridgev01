@@ -217,7 +217,7 @@ describe('V14.1A · partner organization isolation', () => {
   });
 
   it('a suspended organization cannot operate', async () => {
-    fake.tables.partner_organizations[0].status = 'suspended';
+    fake.tables.partner_organizations[0]!.status = 'suspended';
     authUser = { id: 'user_a', email: 'a@acme.test', emailVerified: true };
     const gate = await requirePartner(new Request('http://x'));
     expect(gate.ok).toBe(false);
@@ -370,20 +370,20 @@ describe('V14.1A · canonical publish materialization', () => {
 
     const canonical = fake.tables.campaigns.filter((c) => c.campaign_id === campaignId);
     expect(canonical).toHaveLength(1);
-    expect(canonical[0].status).toBe('published');
-    expect(canonical[0].name).toBe('Acme Swap Quest v2');
-    expect(canonical[0].organization_id).toBe('org_a');
+    expect(canonical[0]!.status).toBe('published');
+    expect(canonical[0]!.name).toBe('Acme Swap Quest v2');
+    expect(canonical[0]!.organization_id).toBe('org_a');
     // Provenance: org -> submission -> approved revision -> canonical campaign.
     const revision = fake.tables.campaign_submission_revisions.find(
-      (r) => r.revision_id === canonical[0].published_revision_id,
-    );
+      (r) => r.revision_id === canonical[0]!.published_revision_id,
+    )!;
     expect(revision.campaign_id).toBe(campaignId);
     expect(revision.organization_id).toBe('org_a');
     expect(revision.revision).toBe(2);
 
     const tasks = fake.tables.campaign_tasks.filter((t) => t.campaign_id === campaignId);
     expect(tasks).toHaveLength(1);
-    expect(Number(tasks[0].points)).toBe(75);
+    expect(Number(tasks[0]!.points)).toBe(75);
   });
 
   it('Explore reads the canonical live campaign, not a Studio duplicate', async () => {
@@ -433,7 +433,7 @@ describe('V14.1A · canonical publish materialization', () => {
   it('a suspended organization pauses its live campaigns and keeps evidence', async () => {
     const { campaignId } = await publishOnce();
     await governanceOrgAction(superAdmin as any, 'org_a', 'suspend_org', 'risk review');
-    const row = fake.tables.campaigns.find((c) => c.campaign_id === campaignId);
+    const row = fake.tables.campaigns.find((c) => c.campaign_id === campaignId)!;
     expect(row.review_state).toBe('paused');
     expect(row.status).toBe('draft');
     expect(
@@ -473,7 +473,7 @@ describe('V14.1A · Campaign PTS-only reward authority', () => {
     await expect(partnerTransition(partnerA as any, proposal.campaignId, 'submit')).rejects.toThrow(
       /budget authorization/i,
     );
-    fake.tables.campaigns.find((c) => c.campaign_id === proposal.campaignId).review_state =
+    fake.tables.campaigns.find((c) => c.campaign_id === proposal.campaignId)!.review_state =
       'submitted';
     await expect(
       governanceCampaignAction(operator as any, proposal.campaignId, 'approve'),
