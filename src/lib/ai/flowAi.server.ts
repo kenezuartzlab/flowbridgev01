@@ -18,6 +18,16 @@ import { evaluatePrivacy } from "./privacyGuard";
 import { listUserMemory, renderMemoryForPrompt } from "./memoryStore.server";
 import { loadCampaignPointsEvidence, loadStakingEvidence } from "./stakingEvidence.server";
 import { proposeIntent, type IntentProposal } from "./intentProposal";
+import {
+  buildActorKey,
+  clarificationFor,
+  createPending,
+  detectPreparationRequest,
+  parametersForShape,
+  resolvePending,
+  type PendingPreparation,
+  type PreparationShape,
+} from "./preparationRouting";
 
 export interface FlowAiAnswer {
   answer: string;
@@ -38,6 +48,14 @@ export interface FlowAiAnswer {
    * happen server-side afterwards, and the user still signs in their own wallet.
    */
   proposal?: IntentProposal | null;
+  /**
+   * V15.3A — short-lived pending preparation slot. Present when Flow AI has
+   * recognized an action-preparation request but a genuinely required economic
+   * input (normally the exact amount) is still missing. Never a default value.
+   */
+  pending?: PendingPreparation | null;
+  /** True when the request was routed to ACTION_PREPARATION, not generic Q&A. */
+  actionPreparation?: boolean;
 
   evidence: readonly {
     id: string;
@@ -45,6 +63,9 @@ export interface FlowAiAnswer {
     group: string;
     freshness: string;
     observedAt: string;
+    /** V15.3A — per-source freshness class, so live and cached never blur. */
+    liveness: "LIVE" | "CACHED";
+    fetchedAt: string;
     url?: string;
     excerpt?: string;
   }[];

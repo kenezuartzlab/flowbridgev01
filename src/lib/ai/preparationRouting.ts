@@ -172,7 +172,7 @@ export function detectPreparationRequest(input: {
   // A vague qualifier such as "small" can never become an amount; only an
   // explicit numeric value attached to the token counts.
   const amount = needsAmount ? extractExactAmount(input.question, tokenInSymbol) : null;
-  void VAGUE_AMOUNT_RE;
+  if (!amount && VAGUE_AMOUNT_RE.test(q)) recognized.push("vague size qualifier — exact amount required");
 
   return {
     type: action.type,
