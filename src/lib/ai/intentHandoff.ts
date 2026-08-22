@@ -48,8 +48,14 @@ export function handoffFingerprint(input: {
   tokenOut?: string | null;
   amount?: string | null;
   destinationChainId?: number | string | null;
+  /**
+   * V15.3K §5 — canonical OUTPUT ASSET SEMANTICS ("native" vs "erc20"). Included
+   * only when known, so BOT↔WBOT substitution changes the digest and cannot pass
+   * unnoticed during handoff, while older fingerprints stay byte-identical.
+   */
+  outputAssetKind?: "native" | "erc20" | null;
 }): string {
-  return [
+  const fields: (string | number)[] = [
     input.type,
     input.chainId,
     input.targetContract ?? "",
@@ -57,10 +63,11 @@ export function handoffFingerprint(input: {
     input.tokenOut ?? "",
     input.amount ?? "",
     input.destinationChainId ?? "",
-  ]
-    .map((f) => String(f).toLowerCase())
-    .join("|");
+  ];
+  if (input.outputAssetKind) fields.push(`out:${input.outputAssetKind}`);
+  return fields.map((f) => String(f).toLowerCase()).join("|");
 }
+
 
 export interface HandoffHint {
   intentId: string;
