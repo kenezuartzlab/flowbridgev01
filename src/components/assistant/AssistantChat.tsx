@@ -1,27 +1,45 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Bot, Sparkles, User } from "lucide-react";
+import { ArrowUp, Bot, ChevronDown, ShieldCheck, Sparkles, User } from "lucide-react";
+
+export interface EvidenceRef {
+  id: string;
+  label: string;
+  group: string;
+  freshness: string;
+  observedAt: string;
+  url?: string;
+  excerpt?: string;
+}
 
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  mode?: string;
+  confidenceLabel?: string;
+  asOf?: string | null;
+  notice?: string | null;
+  skills?: string[];
+  evidence?: EvidenceRef[];
 }
 
 const SUGGESTIONS = [
-  "How do I bridge USDT to BNB?",
-  "How do FLOW points work?",
-  "Why did my swap need an approval?",
-  "What fees does FlowBridge charge?",
+  "How many FLOW Points do I have and what's claimable?",
+  "Why did my $11 swap earn that many points?",
+  "What's live on BOT Chain today?",
+  "How do I bridge USDT from BOT to BNB?",
 ];
 
 /**
- * Streaming assistant chat surface. Presentation + fetch only — it never touches
- * swap/bridge execution state and gets all answers from /api/assistant.
+ * Flow AI surface. Presentation + fetch only — it never touches swap/bridge
+ * execution state, and every answer arrives with its evidence trail from
+ * /api/assistant.
  */
 export function AssistantChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openEvidence, setOpenEvidence] = useState<number | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -41,57 +59,38 @@ export function AssistantChat() {
       const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({
+          messages: next.map((m) => ({ role: m.role, content: m.content })),
+        }),
       });
-
-      if (!res.ok || !res.body) {
-        const data = await res.json().catch(() => ({}) as { error?: string });
-        throw new Error(data.error ?? "The assistant is unavailable right now.");
+      const data = (await res.json().catch(() => ({}))) as {
+        answer?: string;
+        error?: string;
+        mode?: string;
+        confidenceLabel?: string;
+        asOf?: string | null;
+        notice?: string | null;
+        skills?: string[];
+        evidence?: EvidenceRef[];
+      };
+      if (!res.ok || !data.answer) {
+        throw new Error(data.error ?? "Flow AI is unavailable right now.");
       }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let answer = "";
-
-      for (;;) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const raw of lines) {
-          const line = raw.trim();
-          if (!line.startsWith("data:")) continue;
-          const payload = line.slice(5).trim();
-          if (!payload || payload === "[DONE]") continue;
-          try {
-            const json = JSON.parse(payload);
-            const delta: string = json?.choices?.[0]?.delta?.content ?? "";
-            if (delta) {
-              answer += delta;
-              setMessages((prev) => {
-                const copy = [...prev];
-                copy[copy.length - 1] = { role: "assistant", content: answer };
-                return copy;
-              });
-            }
-          } catch {
-            /* partial JSON chunk — wait for more */
-          }
-        }
-      }
-
-      if (!answer) {
-        setMessages((prev) => {
-          const copy = [...prev];
-          copy[copy.length - 1] = {
-            role: "assistant",
-            content: "I couldn't produce an answer for that. Try rephrasing?",
-          };
-          return copy;
-        });
-      }
+      setMessages((prev) => {
+        const copy = [...prev];
+        copy[copy.length - 1] = {
+          role: "assistant",
+          content: data.answer!,
+          mode: data.mode,
+          confidenceLabel: data.confidenceLabel,
+          asOf: data.asOf ?? null,
+          notice: data.notice ?? null,
+          skills: data.skills ?? [],
+          evidence: data.evidence ?? [],
+        };
+        return copy;
+      });
     } catch (e: any) {
       setMessages((prev) => prev.slice(0, -1));
       setError(e?.message ?? "Something went wrong.");
@@ -107,10 +106,10 @@ export function AssistantChat() {
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary">
             <Sparkles className="h-4 w-4" />
           </span>
-          <div className="min-w-0">
-            <p className="fb-eyebrow">Flow assistant</p>
+          <div className="min-w-0 flex-1">
+            <p className="fb-eyebrow">Flow AI</p>
             <p className="truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-              Guides only — never asks for keys
+              Evidence-grounded · read-only · never asks for keys
             </p>
           </div>
         </div>
@@ -119,8 +118,9 @@ export function AssistantChat() {
           {messages.length === 0 ? (
             <div className="space-y-3">
               <p className="font-mono text-[11px] leading-relaxed text-muted">
-                Ask about swapping, bridging, fees, gas or FLOW points. Answers explain how
-                FlowBridge works — they are never financial advice.
+                Ask about your rewards, a transaction, staking, campaigns or BOT Chain. Flow AI
+                answers from your FlowBridge data and on-chain evidence — it can explain and
+                prepare, but it never signs or submits anything.
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {SUGGESTIONS.map((s) => (
@@ -151,17 +151,90 @@ export function AssistantChat() {
                 >
                   {m.role === "user" ? <User className="h-3 w-3" /> : <Bot className="h-3 w-3" />}
                 </span>
-                <div
-                  className={`max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-[12.5px] leading-relaxed ${
-                    m.role === "user"
-                      ? "bg-primary/12 text-foreground"
-                      : "fb-inset text-foreground"
-                  }`}
-                >
-                  {m.content ||
-                    (busy && i === messages.length - 1 ? (
-                      <span className="font-mono text-[10.5px] text-muted">Thinking…</span>
-                    ) : null)}
+                <div className="max-w-[85%] space-y-1.5">
+                  <div
+                    className={`whitespace-pre-wrap rounded-xl px-3 py-2 text-[12.5px] leading-relaxed ${
+                      m.role === "user"
+                        ? "bg-primary/12 text-foreground"
+                        : "fb-inset text-foreground"
+                    }`}
+                  >
+                    {m.content ||
+                      (busy && i === messages.length - 1 ? (
+                        <span className="font-mono text-[10.5px] text-muted">
+                          Gathering evidence…
+                        </span>
+                      ) : null)}
+                  </div>
+
+                  {m.role === "assistant" && m.content ? (
+                    <div className="space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {m.confidenceLabel ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted">
+                            <ShieldCheck className="h-2.5 w-2.5" />
+                            {m.confidenceLabel}
+                          </span>
+                        ) : null}
+                        {m.mode ? (
+                          <span className="rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted">
+                            {m.mode}
+                          </span>
+                        ) : null}
+                        {m.asOf ? (
+                          <span className="rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted">
+                            as of {new Date(m.asOf).toLocaleString()}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {m.evidence && m.evidence.length > 0 ? (
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => setOpenEvidence(openEvidence === i ? null : i)}
+                            aria-expanded={openEvidence === i}
+                            className="inline-flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted transition-colors hover:text-foreground"
+                          >
+                            <ChevronDown
+                              className={`h-3 w-3 transition-transform ${openEvidence === i ? "rotate-180" : ""}`}
+                            />
+                            {m.evidence.length} source{m.evidence.length === 1 ? "" : "s"}
+                          </button>
+                          {openEvidence === i ? (
+                            <ul className="fb-inset mt-1.5 space-y-2 p-2.5">
+                              {m.evidence.map((e) => (
+                                <li key={e.id} className="space-y-0.5">
+                                  <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-primary">
+                                    {e.group} · {e.freshness}
+                                  </p>
+                                  <p className="text-[11px] leading-snug text-foreground">
+                                    {e.url ? (
+                                      <a
+                                        href={e.url}
+                                        target="_blank"
+                                        rel="noreferrer noopener"
+                                        className="underline decoration-dotted"
+                                      >
+                                        {e.label}
+                                      </a>
+                                    ) : (
+                                      e.label
+                                    )}
+                                  </p>
+                                  {e.excerpt ? (
+                                    <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+                                      {e.excerpt}
+                                    </p>
+                                  ) : null}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ))
@@ -186,13 +259,13 @@ export function AssistantChat() {
           className="flex items-center gap-2 border-t border-hairline p-2.5 sm:p-3"
         >
           <label className="sr-only" htmlFor="assistant-input">
-            Ask the FlowBridge assistant
+            Ask Flow AI
           </label>
           <input
             id="assistant-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about swaps, bridging, fees…"
+            placeholder="Ask about rewards, a tx hash, staking…"
             className="fb-inset min-h-[44px] min-w-0 flex-1 bg-transparent px-3 text-[12.5px] text-foreground outline-none placeholder:text-muted focus-visible:ring-2 focus-visible:ring-primary/60"
           />
           <button
@@ -207,8 +280,9 @@ export function AssistantChat() {
       </section>
 
       <p className="px-1 font-mono text-[9.5px] leading-relaxed text-muted">
-        FlowBridge will never ask for your seed phrase or private key. The assistant can be wrong —
-        always confirm amounts in the swap or bridge screen before signing.
+        Flow AI is read-only: it cannot swap, bridge, claim, stake or publish for you. FlowBridge
+        will never ask for your seed phrase or private key. Always confirm amounts in the trade or
+        stake screen before signing.
       </p>
     </div>
   );
