@@ -34,6 +34,34 @@ export function fingerprintDigest(fingerprint: string): string {
   return h.toString(16).padStart(8, "0");
 }
 
+/**
+ * Canonicalized digest input over exactly the fields that travel in the link,
+ * plus the registry-resolved target contract. Both the builder and the target
+ * surface derive it the same way, so altering any linked economic value breaks
+ * the digest.
+ */
+export function handoffFingerprint(input: {
+  type: string;
+  chainId: number;
+  targetContract: string | null;
+  tokenIn?: string | null;
+  tokenOut?: string | null;
+  amount?: string | null;
+  destinationChainId?: number | string | null;
+}): string {
+  return [
+    input.type,
+    input.chainId,
+    input.targetContract ?? "",
+    input.tokenIn ?? "",
+    input.tokenOut ?? "",
+    input.amount ?? "",
+    input.destinationChainId ?? "",
+  ]
+    .map((f) => String(f).toLowerCase())
+    .join("|");
+}
+
 export interface HandoffHint {
   intentId: string;
   digest: string;

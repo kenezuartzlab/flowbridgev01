@@ -15,7 +15,7 @@ import { getContracts, MAINNET_CONTRACTS, TESTNET_CONTRACTS } from "@/lib/contra
 import { resolveFlowBridgeExecution } from "@/lib/flowbridge/executionRegistry";
 import { getFlowRewardsChainConfig } from "@/lib/rewards/flowRewardsRegistry";
 import { getFlowStakingChainConfig } from "@/lib/staking/flowStakingRegistry";
-import { fingerprintDigest } from "./intentHandoff";
+import { fingerprintDigest, handoffFingerprint } from "./intentHandoff";
 
 export const ACTION_INTENT_SCHEMA_VERSION = "flowbridge.action-intent/1" as const;
 export const ACTION_POLICY_VERSION = "V15.2" as const;
@@ -388,7 +388,17 @@ export function buildHandoff(intent: ActionIntent): ActionHandoff {
   // altered hints. These are hints, never authority.
   const correlation = {
     intent: intent.id,
-    fp: fingerprintDigest(economicFingerprint(intent)),
+    fp: fingerprintDigest(
+      handoffFingerprint({
+        type: intent.type,
+        chainId: intent.chainId,
+        targetContract: intent.targetContract,
+        tokenIn: p.tokenIn ?? p.token ?? null,
+        tokenOut: p.tokenOut ?? null,
+        amount: p.amountIn ?? p.amountFlow ?? p.claimableFlow ?? null,
+        destinationChainId: p.destinationChainId ?? null,
+      }),
+    ),
     exp: intent.expiresAt,
     itype: intent.type,
     ichain: intent.chainId,
