@@ -47,6 +47,8 @@ import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
 import { CampaignTaskContextBanner } from './components/app/CampaignTaskContextBanner';
 import { SwapCampaignTaskBanner } from './components/app/SwapCampaignTaskBanner';
 import { parseHandoffHint } from './lib/ai/intentHandoff';
+import { applyExplicitChainTarget, useSelectedNetwork } from './lib/network/networkSession';
+
 import { AiHandoffBanner } from './components/assistant/AiHandoffBanner';
 import {
   isMainnetActionSearch,
