@@ -38,6 +38,7 @@ export class FakeSupabase {
     let orderBy: { column: string; ascending: boolean } | null = null;
     let limitTo: number | null = null;
     let single = false;
+    let embedded: string[] = [];
 
     const matches = (row: Row) =>
       filters.every((f) => {
