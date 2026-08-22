@@ -123,7 +123,37 @@ export function UniversalSwapCard({
   // drives the disclosed fee plus MAX/percentage head-room. Execution still reads the
   // exact fee from the contract before each swap.
   const platformFeeBps = appConfig.fees.platformFeeBps;
-  const platformFeeLabel = feeBpsLabel(platformFeeBps);
+  /**
+   * V15.3K §4 — ONE fee truth on this surface. The published config is only a
+   * head-room hint; the disclosed fee row reads FlowBridgeRouter's mutable
+   * `getFeeConfig()` live, so Trade can never show "0.1%" while the router
+   * charges 0 bps (or vice versa).
+   */
+  const [liveFeeBps, setLiveFeeBps] = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (!publicClient) return;
+    (async () => {
+      try {
+        const cfg = (await publicClient.readContract({
+          address: contracts.flowBridgeRouterV3 as `0x${string}`,
+          abi: FLOW_BRIDGE_ROUTER_V3_ABI,
+          functionName: "getFeeConfig",
+        })) as readonly [bigint, bigint, string];
+        if (!cancelled) setLiveFeeBps(Number(cfg[0]));
+      } catch {
+        if (!cancelled) setLiveFeeBps(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [publicClient, contracts.flowBridgeRouterV3]);
+  const disclosedFeeBps = liveFeeBps ?? platformFeeBps;
+  const platformFeeLabel =
+    liveFeeBps !== null
+      ? `${feeBpsLabel(liveFeeBps)} · live`
+      : `${feeBpsLabel(platformFeeBps)} · rechecked before signing`;
   const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet, appConfig]);
   /**
    * V15.3G §2 — the in-progress swap form is app-session state. It was local to
@@ -849,7 +879,8 @@ export function UniversalSwapCard({
     buttonLabel = "No route";
     buttonDisabled = true;
   } else if (needsApproval) {
-    buttonLabel = busy ? busyMsg : `Approve ${tokenIn.symbol} & Swap`;
+    // V15.3K §6 — two wallet confirmations, stated up front.
+    buttonLabel = busy ? busyMsg : `Approve then Swap · 2 wallet confirmations`;
   } else {
     buttonLabel = busy ? busyMsg : "Swap";
   }
@@ -924,7 +955,7 @@ export function UniversalSwapCard({
           usdValue={usdValueFor(tokenIn, amountIn)}
           maxHint={
             maxSpendableRaw > 0n
-              ? `Max swappable ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} — the 0.1% platform fee${tokenIn.isNative ? " and gas reserve are" : " is"} taken on top of your amount.`
+              ? `Max swappable ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} — the ${feeBpsLabel(disclosedFeeBps)} platform fee${tokenIn.isNative ? " and gas reserve are" : " is"} taken on top of your amount.`
               : undefined
           }
           clampedNotice={
@@ -1006,6 +1037,9 @@ export function UniversalSwapCard({
                 <Row label="Trading fee" value="0.30%" />
                 <Row label="Quote basis" value="Executable (on-chain)" />
                 <Row label="Platform fee" value={platformFeeLabel} />
+                {disclosedFeeBps === 0 ? (
+                  <Row label="Fee status" value="Router fee currently 0 bps" />
+                ) : null}
                 
                 <Row
                   label="FLOW Points estimate"

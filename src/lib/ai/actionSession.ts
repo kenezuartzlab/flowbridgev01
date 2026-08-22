@@ -22,7 +22,12 @@
  * READY_FOR_USER.
  */
 import type { ActionIntentType } from "./actionIntent";
-import { tokenFor, type PreparationShape, type PendingField } from "./preparationRouting";
+import {
+  extractExactAmount,
+  tokenFor,
+  type PreparationShape,
+  type PendingField,
+} from "./preparationRouting";
 
 /** An action session lives a little longer than a pending slot: retries need it. */
 export const ACTION_SESSION_TTL_MS = 15 * 60_000;
@@ -192,6 +197,47 @@ export function mergeActionSession(input: {
     updatedAt: now.toISOString(),
     expiresAt: new Date(now.getTime() + ACTION_SESSION_TTL_MS).toISOString(),
   };
+}
+
+/**
+ * V15.3K §2 — second-turn convergence. When the pending slot has already been
+ * consumed but the durable session still knows the action, an amount-only reply
+ * ("10", "10 USDT") completes THAT session instead of being re-parsed as a fresh
+ * sentence. The resulting shape is byte-identical to the one-shot shape, so both
+ * paths normalize to the same canonical request and the same fingerprint inputs.
+ */
+export function applyAmountToSession(input: {
+  session: ActionSession | null;
+  question: string;
+  actorKey: string;
+  now?: Date;
+}): { kind: "NONE" } | { kind: "COMPLETED"; session: ActionSession; shape: PreparationShape } {
+  const session = input.session;
+  if (!session) return { kind: "NONE" };
+  const now = input.now ?? new Date();
+  if (new Date(session.expiresAt).getTime() <= now.getTime()) return { kind: "NONE" };
+  if (session.actorKey !== input.actorKey) return { kind: "NONE" };
+  if (session.slots.amount) return { kind: "NONE" };
+
+  const amount = extractExactAmount(input.question, session.slots.tokenInSymbol);
+  if (!amount) return { kind: "NONE" };
+
+  const slots: ActionSessionSlots = {
+    ...session.slots,
+    amount,
+    recognized: [
+      ...session.slots.recognized,
+      `${amount} ${session.slots.tokenInSymbol ?? ""}`.trim(),
+    ],
+  };
+  const next: ActionSession = {
+    ...session,
+    slots,
+    lastError: null,
+    updatedAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + ACTION_SESSION_TTL_MS).toISOString(),
+  };
+  return { kind: "COMPLETED", session: next, shape: shapeFromSlots(slots) };
 }
 
 export type RetryOutcome =

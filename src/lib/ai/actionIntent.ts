@@ -343,6 +343,30 @@ export function isExpired(intent: ActionIntent, now: Date = new Date()): boolean
   return new Date(intent.expiresAt).getTime() <= now.getTime();
 }
 
+/**
+ * V15.3K §3 — the ONE expiry authority. A stored status is never trusted past
+ * the deadline: at `now >= expiresAt` every surface (card, session, Trade parser,
+ * API) reads EXPIRED. There is therefore no way to render READY_FOR_USER with 0s
+ * remaining.
+ */
+export function effectiveStatus(
+  intent: ActionIntent,
+  now: Date = new Date(),
+): ActionIntentStatus {
+  if (intent.status === "REJECTED") return "REJECTED";
+  return isExpired(intent, now) ? "EXPIRED" : intent.status;
+}
+
+/** True only while the plan is genuinely reviewable: READY_FOR_USER and unexpired. */
+export function isReadyForUser(intent: ActionIntent, now: Date = new Date()): boolean {
+  return effectiveStatus(intent, now) === "READY_FOR_USER";
+}
+
+/** Whole seconds left in the review window; never negative. */
+export function secondsRemaining(intent: ActionIntent, now: Date = new Date()): number {
+  return Math.max(0, Math.round((new Date(intent.expiresAt).getTime() - now.getTime()) / 1000));
+}
+
 export function withStatus(intent: ActionIntent, status: ActionIntentStatus): ActionIntent {
   if (!canTransition(intent.status, status)) {
     throw new Error(`illegal ActionIntent transition ${intent.status} → ${status}`);
@@ -353,6 +377,7 @@ export function withStatus(intent: ActionIntent, status: ActionIntentStatus): Ac
 /**
  * §5 — economic fingerprint. Any change to an economic field produces a new
  * fingerprint, so a stale simulation can never be reused for a changed plan.
+ * V15.3K §5 — output asset semantics (native BOT vs wrapped WBOT) are part of it.
  */
 export function economicFingerprint(intent: ActionIntent): string {
   const p = intent.parameters as Record<string, unknown>;
@@ -366,9 +391,11 @@ export function economicFingerprint(intent: ActionIntent): string {
     p.slippageBps ?? "",
     p.destinationChainId ?? "",
     p.recipient ?? "",
+    p.tokenOutIsNative === undefined ? "" : p.tokenOutIsNative ? "native" : "erc20",
   ];
   return fields.map((f) => String(f).toLowerCase()).join("|");
 }
+
 
 /* -------------------------------- handoff --------------------------------- */
 
@@ -379,6 +406,20 @@ export interface ActionHandoff {
   surface: string;
   /** Always true: the target surface revalidates everything before signing. */
   revalidatedByTarget: true;
+}
+
+/**
+ * V15.3K §5 — canonical output asset semantics. A SWAP whose parameters mark the
+ * output as native keeps NATIVE BOT semantics through fingerprint, handoff and
+ * hydration; an ERC-20 output (WBOT) stays wrapped. The value the user reviewed
+ * can therefore never be silently substituted for the other one.
+ */
+export function outputAssetKindOf(parameters: Record<string, unknown>): "native" | "erc20" | null {
+  const p = parameters as Record<string, any>;
+  if (p.tokenOut === undefined && p.token === undefined) return null;
+  if (p.tokenOutIsNative === true) return "native";
+  if (p.tokenOutIsNative === false) return "erc20";
+  return null;
 }
 
 export function buildHandoff(intent: ActionIntent): ActionHandoff {
@@ -401,8 +442,10 @@ export function buildHandoff(intent: ActionIntent): ActionHandoff {
         tokenOut: p.tokenOut ?? null,
         amount: p.amountIn ?? p.amountFlow ?? p.claimableFlow ?? null,
         destinationChainId: p.destinationChainId ?? null,
+        outputAssetKind: outputAssetKindOf(intent.parameters),
       }),
     ),
+
     exp: intent.expiresAt,
     itype: intent.type,
     ichain: intent.chainId,

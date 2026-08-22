@@ -30,7 +30,9 @@ import {
   type PreparationShape,
 } from "./preparationRouting";
 import {
+  applyAmountToSession,
   createActionSession,
+
   describeSlots,
   isRetryRequest,
   mergeActionSession,
@@ -471,11 +473,28 @@ export async function answerFlowAiQuestion(input: {
       missingFields: resolution.pending.missingFields,
     } as PreparationShape;
   } else {
-    shape = detectPreparationRequest({
+    /**
+     * V15.3K §2 — before re-parsing this turn as a fresh sentence, let an
+     * amount-only reply complete the durable session. This is why "prepare a
+     * small USDT→BOT swap" + "10" now converges on exactly the same canonical
+     * request as the one-shot form instead of asking for tokens again.
+     */
+    const completed = applyAmountToSession({
+      session: sessionOut,
       question: input.question,
-      defaultChainId: DEFAULT_PREPARATION_CHAIN_ID,
+      actorKey,
     });
+    if (completed.kind === "COMPLETED") {
+      sessionOut = completed.session;
+      shape = completed.shape;
+    } else {
+      shape = detectPreparationRequest({
+        question: input.question,
+        defaultChainId: DEFAULT_PREPARATION_CHAIN_ID,
+      });
+    }
   }
+
 
   let pendingOut: PendingPreparation | null = null;
   let bindingNotice: string | null = null;
