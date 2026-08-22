@@ -1,13 +1,17 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   __resetConversationForTests,
+  clearConversationObservation,
   ensureConversationOwner,
   getConversation,
   markConversationHandoff,
   pruneExpiredPreparation,
+  recordConversationObservation,
+  setConversationDraft,
   setConversationMessages,
   setConversationPrepared,
 } from "./conversationStore";
+
 
 const prepared = (expiresInMs: number) => ({
   intentId: "intent_1",
