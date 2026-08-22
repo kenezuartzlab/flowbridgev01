@@ -47,7 +47,7 @@ describe("V15.3J canonical amount fidelity", () => {
 describe("V15.3J resolution classification", () => {
   const canonical = (() => {
     const n = normalizePreparedIntent(readyIntent(10));
-    if (!n.ok) throw new Error("fixture");
+    if (!n.ok) throw new Error(`fixture: ${n.errors.join(", ")}`);
     return n.canonical;
   })();
 
