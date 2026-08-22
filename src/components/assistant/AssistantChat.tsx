@@ -25,9 +25,9 @@ export interface ChatMessage {
 }
 
 const SUGGESTIONS = [
-  "How many FLOW Points do I have and what's claimable?",
+  "Summarize my rewards, staking and campaigns right now",
   "Why did my $11 swap earn that many points?",
-  "What's live on BOT Chain today?",
+  "What's actually live on BOT Chain today?",
   "How do I bridge USDT from BOT to BNB?",
 ];
 
