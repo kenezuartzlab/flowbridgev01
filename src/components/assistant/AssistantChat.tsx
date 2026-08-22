@@ -31,6 +31,19 @@ interface PendingPreparationRef {
   actorKey: string;
 }
 
+/** V15.3D — client-carried handle for the last prepared action (hint only). */
+interface PreparedHandleRef {
+  intentId: string;
+  type: string;
+  chainId: number;
+  state: string;
+  expiresAt: string;
+  handoffHref: string | null;
+  handoffCta: string | null;
+  surface: string | null;
+  actorKey: string;
+}
+
 interface IntentProposalRef {
   type: string;
   chainId: number;
@@ -95,6 +108,11 @@ export function AssistantChat() {
   const [openEvidence, setOpenEvidence] = useState<number | null>(null);
   /** Live only for the next turn or two: the field Flow AI still needs. */
   const [pending, setPending] = useState<PendingPreparationRef | null>(null);
+  /**
+   * V15.3D — the prepared plan the next turn may continue. Cleared as soon as it
+   * expires, is cancelled, or its context changes. Never an authorization.
+   */
+  const [preparedHandle, setPreparedHandle] = useState<PreparedHandleRef | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -116,6 +134,7 @@ export function AssistantChat() {
         body: JSON.stringify({
           messages: next.map((m) => ({ role: m.role, content: m.content })),
           pending,
+          prepared: preparedHandle,
           connector: await readConnectorHint(),
         }),
       });
@@ -132,6 +151,7 @@ export function AssistantChat() {
         pending?: PendingPreparationRef | null;
         actionPreparation?: boolean;
         hasLiveEvidence?: boolean;
+        continuation?: { kind: string; keepPrepared: boolean } | null;
       };
       if (!res.ok || !data.answer) {
         throw new Error(data.error ?? "Flow AI is unavailable right now.");
@@ -155,6 +175,10 @@ export function AssistantChat() {
       });
 
       setPending(data.pending ?? null);
+
+      // V15.3D — a continuation turn either keeps the prepared plan alive or
+      // retires it. Either way it never re-prepares silently.
+      if (data.continuation && !data.continuation.keepPrepared) setPreparedHandle(null);
 
       if (data.proposal) void prepare(data.proposal);
 
@@ -190,7 +214,7 @@ export function AssistantChat() {
         if (i < 0 || copy[i].role !== "assistant") return prev;
         copy[i] =
           res.ok && "intent" in payload
-            ? { ...copy[i], prepared: payload as PreparedIntentPayload }
+            ? { ...copy[i], prepared: payload as PreparedIntentPayload, preparationError: null }
             : {
                 ...copy[i],
                 preparationError:
@@ -199,7 +223,24 @@ export function AssistantChat() {
               };
         return copy;
       });
+      if (res.ok && "intent" in payload) {
+        const ready = payload as PreparedIntentPayload;
+        setPreparedHandle({
+          intentId: ready.intent.id,
+          type: ready.intent.type,
+          chainId: ready.intent.chainId,
+          state: ready.intent.status,
+          expiresAt: ready.intent.expiresAt,
+          handoffHref: ready.handoff?.href ?? null,
+          handoffCta: ready.handoff?.cta ?? null,
+          surface: ready.handoff?.surface ?? null,
+          actorKey: "",
+        });
+      } else {
+        setPreparedHandle(null);
+      }
     } catch {
+      setPreparedHandle(null);
       setMessages((prev) => {
         const copy = [...prev];
         const i = copy.length - 1;

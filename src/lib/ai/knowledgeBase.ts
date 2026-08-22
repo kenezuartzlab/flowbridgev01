@@ -95,13 +95,13 @@ export const FLOW_AI_KNOWLEDGE: readonly KnowledgeFact[] = [
   fact({
     id: "kb.fees.swap",
     entity: "FlowBridge/fees",
-    relation: "platformFee",
-    value: { swapFeeBps: 10, bridgeFee: 0, bridgeMinimumUsdt: 10 },
+    relation: "platformFeePolicy",
+    value: { swapFeeSource: "ROUTER_FEE_CONFIG_ON_CHAIN", bridgeMinimumUsdt: 10 },
     statement:
-      "A 0.1% platform fee applies to swaps only and is disclosed before signing. Bridging charges no platform fee and has a 10 USDT minimum.",
+      "The swap platform fee is mutable on-chain configuration read live from FlowBridgeRouter's fee config (globalFeeBps + feeConfigNonce) — it must never be quoted from documentation. The fee is charged on top of the swap amount and disclosed on /trade before signing. Bridging charges no platform fee and has a 10 USDT minimum.",
     validFrom: "2026-08-01T00:00:00.000Z",
     freshnessClass: "SLOW",
-    keywords: ["fee", "fees", "cost", "0.1%", "minimum", "bridge"],
+    keywords: ["fee", "fees", "cost", "minimum", "bridge", "bps"],
     ...PRODUCT_DOC("src/lib/swap/platformFee.ts"),
   }),
   fact({
