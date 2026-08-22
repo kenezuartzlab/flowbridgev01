@@ -142,6 +142,28 @@ export function UniversalSwapCard({
     setLastTx(null);
   }, [isMainnet, curated]);
 
+  /**
+   * V15.3F — apply a Flow AI prepared plan to the form exactly once per plan key.
+   * Only symbols present in THIS network's curated registry are accepted; a
+   * partially resolvable plan is ignored rather than half-filled. Nothing about
+   * authorization changes: quote, fee, allowance and simulation are re-run below.
+   */
+  const appliedHydrationRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!hydration || appliedHydrationRef.current === hydration.key) return;
+    const nextIn = curated.find((t) => t.symbol === hydration.tokenInSymbol);
+    const nextOut = curated.find((t) => t.symbol === hydration.tokenOutSymbol);
+    if (!nextIn || !nextOut || nextIn.symbol === nextOut.symbol) return;
+    appliedHydrationRef.current = hydration.key;
+    setTokenIn(nextIn);
+    setTokenOut(nextOut);
+    setAmountIn(hydration.amount);
+    setQuote(null);
+    setQuoteError(null);
+    onHydrationApplied?.(hydration);
+  }, [hydration, curated, onHydrationApplied]);
+
+
   // ── Balances ──────────────────────────────────────────────────────────────
   // Pin every balance read to BOT Chain. Without an explicit chainId these
   // resolve against whatever chain the wallet happens to be on (e.g. BSC),
