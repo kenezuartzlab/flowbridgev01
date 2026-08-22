@@ -299,7 +299,15 @@ export function AssistantChat() {
                           ) : null}
                         </div>
                       ) : null}
+
+                      {m.prepared ? <ActionIntentCard payload={m.prepared} /> : null}
+                      {m.preparationError ? (
+                        <p className="fb-inset px-2.5 py-2 font-mono text-[10px] leading-relaxed text-muted">
+                          {m.preparationError}
+                        </p>
+                      ) : null}
                     </div>
+
                   ) : null}
                 </div>
               </div>
