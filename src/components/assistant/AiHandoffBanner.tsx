@@ -26,10 +26,13 @@ export function AiHandoffBanner({
   currentChainId,
   observedTxHash,
   txUrlPrefix,
+  onSwitchChain,
 }: {
   currentChainId: number | null;
   observedTxHash?: string | null;
   txUrlPrefix?: string;
+  /** V15.3B — user-initiated network switch to the immutable intent chain. */
+  onSwitchChain?: (chainId: number) => void | Promise<void>;
 }) {
   const [hint, setHint] = useState<HandoffHint | null>(null);
   const [observation, setObservation] = useState<HandoffObservation | null>(null);
@@ -100,6 +103,16 @@ export function AiHandoffBanner({
       </header>
 
       <p className="font-mono text-[10px] leading-relaxed text-muted">{evaluation.message}</p>
+
+      {evaluation.verdict === "CHAIN_MISMATCH" && onSwitchChain ? (
+        <button
+          type="button"
+          onClick={() => void onSwitchChain(hint.chainId)}
+          className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl bg-primary px-3 font-mono text-[10px] uppercase tracking-[0.06em] text-primary-foreground"
+        >
+          Switch to {hint.chainId === 968 ? "BOT Testnet" : hint.chainId === 677 ? "BOT Mainnet" : `chain ${hint.chainId}`}
+        </button>
+      ) : null}
 
       {!fresh ? (
         <Link
