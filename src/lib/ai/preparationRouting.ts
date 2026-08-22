@@ -79,8 +79,11 @@ export function tokenFor(symbol: string, chainId: number) {
     address: c[entry.key].toLowerCase(),
     decimals: entry.decimals,
     symbol: symbol.toUpperCase(),
+    /** V15.3K §5 — true when the user's asset is native BOT, not wrapped WBOT. */
+    isNative: entry.native === true,
   };
 }
+
 
 function chainFromText(q: string, fallback: number): number {
   if (/\b968\b/.test(q) || /\btestnet\b/.test(q)) return BOT_TESTNET_CHAIN_ID;
