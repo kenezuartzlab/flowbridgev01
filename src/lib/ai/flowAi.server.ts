@@ -32,6 +32,13 @@ export interface FlowAiAnswer {
   refused: readonly { skillId: string; reason: string }[];
   /** Domains that could not be read this request (disclosed, never estimated). */
   degraded?: readonly string[];
+  /**
+   * V15.2 — candidate action the client may ask the server to PREPARE.
+   * Never a permission to execute: preparation, policy checks and simulation all
+   * happen server-side afterwards, and the user still signs in their own wallet.
+   */
+  proposal?: IntentProposal | null;
+
   evidence: readonly {
     id: string;
     label: string;
