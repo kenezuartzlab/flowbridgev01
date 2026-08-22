@@ -46,6 +46,7 @@ import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
 import { CampaignTaskContextBanner } from './components/app/CampaignTaskContextBanner';
 import { SwapCampaignTaskBanner } from './components/app/SwapCampaignTaskBanner';
+import { parseHandoffHint } from './lib/ai/intentHandoff';
 import { AiHandoffBanner } from './components/assistant/AiHandoffBanner';
 import {
   isMainnetActionSearch,
@@ -509,6 +510,21 @@ export default function App() {
     setActiveTab('BRIDGE');
     setBridgeDirection(ctx.direction);
     setIsMainnet(isMainnetActionSearch(ctx));
+  }, []);
+
+  /**
+   * V15.3B §3 — target-chain precedence for a Flow AI handoff.
+   * A validated handoff link carries an IMMUTABLE target chain. Hydrating it on
+   * mount stops the workspace from resetting to Mainnet while the prepared plan
+   * targets BOT Testnet. Presentation only: no addresses, amounts, signing or
+   * verification behavior changes, and nothing is auto-submitted.
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hint = parseHandoffHint(window.location.search);
+    if (!hint) return;
+    if (hint.chainId === 968 || hint.chainId === 97) setIsMainnet(false);
+    else if (hint.chainId === 677 || hint.chainId === 56) setIsMainnet(true);
   }, []);
 
   /**
@@ -2919,6 +2935,11 @@ export default function App() {
           {(activeTab === 'BOT/USDT' || activeTab === 'BRIDGE') && (
             <AiHandoffBanner
               currentChainId={currentChainId ?? null}
+              onSwitchChain={async (cid) => {
+                if (cid === 968 || cid === 97) setIsMainnet(false);
+                if (cid === 677 || cid === 56) setIsMainnet(true);
+                try { await switchChain({ chainId: cid }); } catch { /* user rejected */ }
+              }}
               observedTxHash={receiptTxHash}
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
             />
