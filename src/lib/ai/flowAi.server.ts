@@ -215,9 +215,16 @@ export async function answerFlowAiQuestion(input: {
   requestId: string;
   /** V15.3A — pending preparation slot carried by the client from the last turn. */
   pending?: PendingPreparation | null;
+  /**
+   * V15.3B — untrusted connector hints. They never decide whether a wallet is
+   * bound (that is a server-side account fact); they only let Flow AI say
+   * "wrong network" or "wrong wallet connected" instead of "no wallet bound".
+   */
+  connector?: { address?: string | null; chainId?: number | null } | null;
   /** Test seam: force offline behavior. */
   online?: boolean;
 }): Promise<FlowAiAnswer> {
+
   const online = input.online ?? anyProviderAvailable();
   const plan = planRequest({
     question: input.question,
