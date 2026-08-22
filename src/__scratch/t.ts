@@ -1,0 +1,10 @@
+import { detectPreparationRequest, resolvePending, createPending, buildActorKey, parametersForShape } from "../lib/ai/preparationRouting";
+const ak = buildActorKey({ userId: "u", wallet: "0xaaa", chainId: 968 });
+const one = detectPreparationRequest({ question: "Prepare a small 10 USDT to BOT swap for me on BOT Testnet", defaultChainId: 968 });
+console.log("ONE", one);
+const t1 = detectPreparationRequest({ question: "Prepare a small USDT to BOT swap for me on BOT Testnet", defaultChainId: 968 });
+console.log("T1", t1);
+const p = createPending({ shape: t1!, actorKey: ak });
+const r = resolvePending({ pending: p, question: "10", actorKey: ak });
+console.log("R", JSON.stringify(r));
+if (r.kind==="COMPLETED") console.log("PARAMS", parametersForShape({shape:r.shape, wallet:"0xaaa"}), parametersForShape({shape:one!, wallet:"0xaaa"}));
