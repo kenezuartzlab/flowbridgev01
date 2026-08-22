@@ -250,6 +250,20 @@ async function simulate(intent: ActionIntent): Promise<ActionIntent["simulationR
 
 export interface PreparedIntentResponse {
   intent: ActionIntent;
+  /**
+   * V15.3E — live economics for this plan, read at preparation time. `feeTruth`
+   * comes from the router's own mutable fee configuration; `expectedOut` from the
+   * canonical quoter. Both are evidence, never a promise: /trade re-reads them.
+   */
+  economics?: {
+    feeBps: number | null;
+    feeConfigNonce: string | null;
+    feeSource: "ON_CHAIN" | "UNAVAILABLE";
+    expectedOut: number | null;
+    balance: number | null;
+    allowance: number | null;
+    observedAt: string;
+  } | null;
   decision: string;
   blockers: readonly string[];
   riskFlags: readonly string[];
@@ -303,6 +317,18 @@ export async function prepareActionIntent(input: {
 
   const live = await readLiveState(intent);
   const simulation = await simulate(intent);
+  // V15.3E — mutable fee configuration read live from the router for this chain.
+  const { readRuntimeFeeTruth } = await import("./runtimeFeeTruth.server");
+  const feeRead = await readRuntimeFeeTruth(intent.chainId);
+  const economics = {
+    feeBps: feeRead.ok ? feeRead.truth.globalFeeBps : null,
+    feeConfigNonce: feeRead.ok ? feeRead.truth.feeConfigNonce : null,
+    feeSource: (feeRead.ok ? "ON_CHAIN" : "UNAVAILABLE") as "ON_CHAIN" | "UNAVAILABLE",
+    expectedOut: live?.expectedOut ?? null,
+    balance: live?.balance ?? null,
+    allowance: live?.allowance ?? null,
+    observedAt: new Date().toISOString(),
+  };
   intent = { ...intent, simulationResult: simulation };
 
   const evaluation = evaluateIntentPolicy({ intent, live });
@@ -323,6 +349,7 @@ export async function prepareActionIntent(input: {
       ok: true,
       response: {
         intent,
+        economics,
         decision: evaluation.decision,
         blockers,
         riskFlags: evaluation.riskFlags,
@@ -342,6 +369,7 @@ export async function prepareActionIntent(input: {
     ok: true,
     response: {
       intent,
+      economics,
       decision: "READY",
       blockers: [],
       riskFlags: evaluation.riskFlags,
