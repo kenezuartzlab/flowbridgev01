@@ -169,11 +169,10 @@ export function detectPreparationRequest(input: {
 
   const needsAmount =
     action.type === "SWAP" || action.type === "BRIDGE" || action.type === "STAKE_FLOW";
-  const amount = needsAmount
-    ? VAGUE_AMOUNT_RE.test(q)
-      ? extractExactAmount(input.question, tokenInSymbol)
-      : extractExactAmount(input.question, tokenInSymbol)
-    : null;
+  // A vague qualifier such as "small" can never become an amount; only an
+  // explicit numeric value attached to the token counts.
+  const amount = needsAmount ? extractExactAmount(input.question, tokenInSymbol) : null;
+  void VAGUE_AMOUNT_RE;
 
   return {
     type: action.type,
