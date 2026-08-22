@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Bot, ChevronDown, ShieldCheck, Sparkles, User } from "lucide-react";
+import { ArrowUp, Bot, ChevronDown, RotateCcw, ShieldCheck, Sparkles, User, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { assistantFetch } from "@/lib/ai/assistantClient";
 import { supabase } from "@/integrations/supabase/client";
 import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
@@ -9,6 +10,9 @@ import {
   ensureConversationOwner,
   markConversationHandoff,
   pruneExpiredPreparation,
+  resetConversation,
+  setConversationActionSession,
+  setConversationPreparationFailure,
   setConversationDraft,
   setConversationMessages,
   setConversationPending,
@@ -21,6 +25,7 @@ import {
 } from "@/lib/ai/conversationStore";
 
 import type { ChatMessage, EvidenceRef } from "@/lib/ai/conversationTypes";
+import type { ActionSession, PreparationFailure } from "@/lib/ai/actionSession";
 import {
   RENDER_FAILED_MESSAGE,
   STRUCTURED_ACTION_TESTIDS,
@@ -75,7 +80,7 @@ async function readConnectorHint(): Promise<{ address: string | null; chainId: n
   }
 }
 
-export function AssistantChat() {
+export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
   const conversation = useConversation();
   const messages = conversation.messages;
   const pending = conversation.pending;
@@ -145,6 +150,10 @@ export function AssistantChat() {
                 }
               : null,
           },
+          // V15.3I §1/§2 — carry the canonical action session so a retry keeps
+          // the user's explicit slots instead of re-asking for them.
+          actionSession: conversation.actionSession,
+          preparationFailure: conversation.preparationFailure,
           connector: await readConnectorHint(),
         }),
       });
@@ -166,6 +175,8 @@ export function AssistantChat() {
         actionPreparation?: boolean;
         hasLiveEvidence?: boolean;
         continuation?: { kind: string; keepPrepared: boolean } | null;
+        actionSession?: ActionSession | null;
+        preparationFailure?: PreparationFailure | null;
       };
       if (!res.ok || !data.answer) {
         throw new Error(data.error ?? "Flow AI is unavailable right now.");
@@ -202,6 +213,7 @@ export function AssistantChat() {
           prepared: ready ? (data.actionPlan as PreparedIntentPayload) : null,
           reviewAction: ready ? (data.reviewAction ?? null) : null,
           renderFailed,
+          preparationFailure: ready ? null : (data.preparationFailure ?? null),
           preparationError:
             !ready && (data.notReadyReasons?.length ?? 0) > 0
               ? `Not prepared: ${data.notReadyReasons!.join("; ")}. Nothing was signed or submitted.`
@@ -211,6 +223,9 @@ export function AssistantChat() {
       });
 
       setConversationPending(data.pending ?? null);
+      // V15.3I §1/§3 — durable slots + machine-readable failure state.
+      setConversationActionSession(data.actionSession ?? null);
+      setConversationPreparationFailure(ready ? null : (data.preparationFailure ?? null));
 
       // V15.3D — a continuation turn either keeps the prepared plan alive or
       // retires it. Either way it never re-prepares silently.
@@ -258,6 +273,31 @@ export function AssistantChat() {
               Evidence-grounded · prepares actions · never signs
             </p>
           </div>
+          {/*
+            V15.3I §6 — New chat is the ONLY destructive control; Hide never
+            deletes the transcript, draft or prepared action.
+          */}
+          <button
+            type="button"
+            onClick={() => resetConversation()}
+            aria-label="Start a new conversation"
+            title="New chat"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-muted transition-colors hover:text-foreground"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+          {onHide ? (
+            <button
+              type="button"
+              onClick={onHide}
+              aria-label="Hide Flow AI"
+              title="Hide"
+              data-testid="ai-hide"
+              className="fb-inset grid h-11 w-11 shrink-0 place-items-center rounded-xl text-muted transition-colors hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
         </div>
 
         <div className="flex-1 space-y-3 overflow-y-auto p-3 sm:p-4">
@@ -408,14 +448,49 @@ export function AssistantChat() {
                           </p>
                           <button
                             type="button"
-                            onClick={() => void send("Prepare that action again.")}
+                            onClick={() => void send("Retry preparation.")}
                             className="fb-inset min-h-[36px] px-2.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-foreground"
                           >
                             Retry preparation
                           </button>
                         </div>
                       ) : null}
-                      {m.preparationError ? (
+                      {m.preparationFailure ? (
+                        <div
+                          data-testid="ai-preparation-error"
+                          className="fb-inset space-y-2 border border-danger/40 p-3"
+                        >
+                          <p className="fb-eyebrow text-danger">
+                            {m.preparationFailure.errorCode} · stage {m.preparationFailure.stage}
+                          </p>
+                          <p className="font-mono text-[10px] leading-relaxed text-muted">
+                            {m.preparationFailure.detail}. Nothing was signed or submitted.
+                          </p>
+                          {m.preparationFailure.retainedSlots.length > 0 ? (
+                            <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+                              Kept: {m.preparationFailure.retainedSlots.join(" · ")}
+                            </p>
+                          ) : null}
+                          <div className="flex flex-wrap items-center gap-2">
+                            {m.preparationFailure.retryable ? (
+                              <button
+                                type="button"
+                                data-testid="ai-retry-preparation"
+                                onClick={() => void send("Retry preparation.")}
+                                className="fb-inset min-h-[40px] px-2.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-foreground"
+                              >
+                                Retry preparation
+                              </button>
+                            ) : null}
+                            <Link
+                              to="/trade"
+                              className="min-h-[40px] px-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted"
+                            >
+                              Open Trade manually
+                            </Link>
+                          </div>
+                        </div>
+                      ) : m.preparationError ? (
                         <p className="fb-inset px-2.5 py-2 font-mono text-[10px] leading-relaxed text-muted">
                           {m.preparationError}
                         </p>

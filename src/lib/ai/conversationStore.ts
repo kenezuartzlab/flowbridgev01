@@ -20,6 +20,7 @@
 import { useSyncExternalStore } from "react";
 import type { ChatMessage } from "./conversationTypes";
 import type { ActionRenderStatus } from "./actionRender";
+import type { ActionSession, PreparationFailure } from "./actionSession";
 
 export interface PendingPreparationRef {
   type: string;
@@ -77,6 +78,13 @@ export interface ConversationState {
    * active prepared plan? Flow AI reads this before ever mentioning a button.
    */
   renderStatus: ActionRenderStatus;
+  /**
+   * V15.3I §1 — canonical pending-action session. Explicit user slots live here
+   * so a retry never re-asks for chain / token / amount.
+   */
+  actionSession: ActionSession | null;
+  /** V15.3I §3 — machine-readable reason the last preparation stopped. */
+  preparationFailure: PreparationFailure | null;
   updatedAt: string;
 }
 
@@ -103,6 +111,8 @@ function emptyState(ownerKey = "anonymous"): ConversationState {
     composerDraft: "",
     observation: null,
     renderStatus: "NONE",
+    actionSession: null,
+    preparationFailure: null,
 
     updatedAt: new Date().toISOString(),
   };
@@ -220,6 +230,16 @@ export function recordConversationObservation(
 export function setConversationRenderStatus(status: ActionRenderStatus): void {
   if (state.renderStatus === status) return;
   commit({ ...state, renderStatus: status });
+}
+
+/** V15.3I §1 — replace the canonical action session (null clears it). */
+export function setConversationActionSession(session: ActionSession | null): void {
+  commit({ ...state, actionSession: session });
+}
+
+/** V15.3I §3 — record/clear the structured preparation failure. */
+export function setConversationPreparationFailure(failure: PreparationFailure | null): void {
+  commit({ ...state, preparationFailure: failure });
 }
 
 export function clearConversationObservation(): void {

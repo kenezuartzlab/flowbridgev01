@@ -38,4 +38,6 @@ export interface ChatMessage {
   /** V15.3H §2 — READY_FOR_USER arrived but could not be rendered as a card. */
   renderFailed?: boolean;
   preparationError?: string | null;
+  /** V15.3I §3 — machine-readable failure attached to this turn. */
+  preparationFailure?: import("./actionSession").PreparationFailure | null;
 }
