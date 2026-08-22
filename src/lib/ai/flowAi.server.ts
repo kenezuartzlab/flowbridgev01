@@ -478,7 +478,7 @@ export async function answerFlowAiQuestion(input: {
     confidenceLabel: CONFIDENCE_LABEL[verification.confidence],
     asOf: verification.asOf,
     disclosure: verification.disclosure,
-    notice: plan.actionNotice,
+    notice: bindingNotice ? `${bindingNotice}${plan.actionNotice ? ` ${plan.actionNotice}` : ""}` : plan.actionNotice,
     skills: plan.skills.map((s) => s.skillId),
     refused: plan.refused.map((r) => ({ skillId: r.skillId, reason: r.reason })),
     degraded,
