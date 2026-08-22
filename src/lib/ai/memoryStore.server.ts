@@ -68,6 +68,7 @@ export async function saveUserMemory(input: {
     optedIn: input.optedIn,
   });
   if (!validated.accepted) return validated;
+  if (!input.actor.userId) return { accepted: false, reason: "sign in required" };
 
   const entry = validated.entry;
   try {
