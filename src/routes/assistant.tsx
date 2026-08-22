@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
@@ -27,6 +27,15 @@ export const Route = createFileRoute("/assistant")({
 });
 
 function AssistantPage() {
+  const router = useRouter();
+  /**
+   * V15.3I §6 — Hide leaves the assistant surface without destroying anything:
+   * the transcript, composer draft and prepared action live in module-scope
+   * stores, so reopening Flow AI resumes exactly where the user left off.
+   */
+  const hide = () => {
+    void router.navigate({ to: "/home" });
+  };
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 border-b border-hairline bg-card-alt px-4 py-3 backdrop-blur-xl">
@@ -42,7 +51,7 @@ function AssistantPage() {
 
       {/* V15.3H §3 — bottom nav must never overlay the review CTA on mobile. */}
       <main className="mx-auto max-w-2xl p-3 pb-28 sm:p-4 sm:pb-28">
-        <AssistantChat />
+        <AssistantChat onHide={hide} />
       </main>
 
       <BottomNav />
