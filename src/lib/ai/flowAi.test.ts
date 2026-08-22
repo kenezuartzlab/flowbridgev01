@@ -38,7 +38,7 @@ describe("V15 authority boundaries", () => {
   });
 
   it("classifies core intents", () => {
-    expect(classifyIntent("why did my swap earn points")).toBe("REWARDS");
+    expect(classifyIntent("how many flow points did this swap earn")).toBe("REWARDS");
     expect(classifyIntent("0x" + "a".repeat(64))).toBe("TX_EVIDENCE");
   });
 });
