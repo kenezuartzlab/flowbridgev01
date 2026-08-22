@@ -74,15 +74,15 @@ describe("V15 evidence discipline", () => {
 
 describe("V15 BOT compatibility honesty", () => {
   it("does not describe announced features as live", () => {
-    const launchpad = describeCapability("agent_launchpad");
+    const launchpad = describeCapability("BotLaunchpadAdapter");
     expect(launchpad.live).toBe(false);
     expect(launchpad.sentence.toLowerCase()).not.toContain("is live");
-    expect(describeCapability("evm_rpc").live).toBe(true);
+    expect(describeCapability("BotEvmAdapter").live).toBe(true);
   });
 
   it("blocks promotion without verified release evidence", () => {
     expect(
-      canPromoteAdapter({ id: "agent_launchpad", hasVerifiedReleaseEvidence: false }).allowed,
+      canPromoteAdapter({ id: "BotLaunchpadAdapter", hasVerifiedReleaseEvidence: false }).allowed,
     ).toBe(false);
   });
 });
@@ -154,9 +154,12 @@ describe("V15 memory safety", () => {
       actor: USER,
       scope: "USER_PRIVATE",
       key: "note",
-      value: "my seed phrase is abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+      value:
+        "my seed phrase is abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+      origin: "USER_STATED",
+      optedIn: true,
     });
-    expect(res.stored).toBe(false);
+    expect(res.accepted).toBe(false);
   });
 
   it("anonymous actors cannot read private scopes", () => {
