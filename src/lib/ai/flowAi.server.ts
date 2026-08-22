@@ -426,6 +426,7 @@ function refusalAnswer(plan: OrchestrationPlan, refusal: string): FlowAiAnswer {
     skills: [],
     refused: [{ skillId: "privacy_boundary", reason: "cross-actor private data request" }],
     degraded: [],
+    proposal: null,
     evidence: [],
   };
 }
