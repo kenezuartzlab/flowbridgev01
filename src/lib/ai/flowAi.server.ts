@@ -30,6 +30,17 @@ import {
   type PreparationShape,
 } from "./preparationRouting";
 import {
+  classifyPreparationFailure,
+  createActionSession,
+  describeSlots,
+  isRetryRequest,
+  mergeActionSession,
+  preparationFailureMessage,
+  retryActionSession,
+  type ActionSession,
+  type PreparationFailure,
+} from "./actionSession";
+import {
   continuationMessage,
   resolveContinuation,
   type PreparedHandle,
@@ -91,6 +102,11 @@ export interface FlowAiAnswer {
   economicsCorrections?: readonly string[];
   /** True when at least one piece of evidence was read live this request. */
   hasLiveEvidence?: boolean;
+  /**
+   * V15.3I §1 — canonical pending-action session echoed back to the client. The
+   * client stores it and returns it next turn so a retry keeps explicit slots.
+   */
+  actionSession?: ActionSession | null;
   /** V15.3H §6 — resolved product/render state code when the user reported a UI gap. */
   productState?: { code: ProductStateAnswer["code"]; offerRetry: boolean } | null;
 
@@ -289,6 +305,10 @@ export async function answerFlowAiQuestion(input: {
    * failure), never authorize anything.
    */
   productState?: ProductState | null;
+  /** V15.3I §1 — client-carried action session (slots only; nothing economic). */
+  actionSession?: ActionSession | null;
+  /** V15.3I §3 — last structured preparation failure, for "why did it fail?". */
+  preparationFailure?: PreparationFailure | null;
   /** Test seam: force offline behavior. */
   online?: boolean;
 }): Promise<FlowAiAnswer> {
@@ -391,14 +411,59 @@ export async function answerFlowAiQuestion(input: {
     }
   }
 
+  /**
+   * V15.3I §3 — "why did preparation fail?" is answered from the STRUCTURED
+   * error state, deterministically, with no model call and no cached "as of".
+   */
+  if (
+    input.preparationFailure &&
+    /\b(why|what went wrong|what happened|reason)\b/i.test(input.question) &&
+    /\b(fail|failed|error|not prepared|preparation)\b/i.test(input.question)
+  ) {
+    return preparationBlockedAnswer(
+      plan,
+      preparationFailureMessage(input.preparationFailure),
+      input.actionSession ?? null,
+    );
+  }
+
+  let sessionOut: ActionSession | null = input.actionSession ?? null;
+
+  /**
+   * V15.3I §2 — RETRY is a deterministic operation over the existing session,
+   * never a fresh parsing turn. Explicit slots (chain, tokens, amount) are
+   * retained; only volatile preparation output was cleared.
+   */
+  let retryShape: PreparationShape | null = null;
+  if (isRetryRequest(input.question) && sessionOut) {
+    const retry = retryActionSession({ session: sessionOut, actorKey });
+    if (retry.kind === "RETRY") {
+      sessionOut = retry.session;
+      retryShape = retry.shape;
+    } else if (retry.kind === "SLOT_CONFLICT") {
+      return preparationBlockedAnswer(plan, retry.conflict, retry.session);
+    } else if (retry.kind === "MISSING_SLOT") {
+      return preparationClarificationAnswer(
+        plan,
+        createPending({ shape: shapeOf(retry.session), actorKey }),
+        clarificationFor(shapeOf(retry.session)),
+        retry.session,
+      );
+    } else if (retry.kind === "EXPIRED" || retry.kind === "CONTEXT_CHANGED") {
+      sessionOut = null;
+    }
+  }
+
   const resolution = resolvePending({
     pending: input.pending ?? null,
     question: input.question,
     actorKey,
   });
 
-  let shape: PreparationShape | null = null;
-  if (resolution.kind === "COMPLETED" || resolution.kind === "SUPERSEDED") {
+  let shape: PreparationShape | null = retryShape;
+  if (shape) {
+    // retry-driven shape already resolved deterministically
+  } else if (resolution.kind === "COMPLETED" || resolution.kind === "SUPERSEDED") {
     shape = resolution.shape;
   } else if (resolution.kind === "STILL_MISSING") {
     shape = {
@@ -416,10 +481,19 @@ export async function answerFlowAiQuestion(input: {
   let pendingOut: PendingPreparation | null = null;
   let bindingNotice: string | null = null;
   if (shape) {
+    // V15.3I §1 — the session is the durable slot holder, so a later retry does
+    // not depend on the sentence still containing the tokens and network.
+    sessionOut =
+      sessionOut && sessionOut.slots.actionType === shape.type && !retryShape
+        ? mergeActionSession({ session: sessionOut, shape })
+        : retryShape
+          ? sessionOut
+          : createActionSession({ shape, actorKey });
     if (!input.actor.userId) {
       return preparationBlockedAnswer(
         plan,
         "Sign in first and bind your wallet — then I can prepare that action for you to review and sign yourself.",
+        sessionOut,
       );
     }
     // V15.3B §2 — connector state refines the message; only a missing PERSISTED
@@ -435,12 +509,18 @@ export async function answerFlowAiQuestion(input: {
       return preparationBlockedAnswer(
         plan,
         `I recognized that as an action to prepare, but ${binding.message}`,
+        sessionOut,
       );
     }
     bindingNotice = binding.message;
     if (shape.missingFields.length > 0) {
       pendingOut = createPending({ shape, actorKey });
-      return preparationClarificationAnswer(plan, pendingOut, clarificationFor(shape));
+      return preparationClarificationAnswer(
+        plan,
+        pendingOut,
+        clarificationFor(shape),
+        sessionOut,
+      );
     }
     const built = parametersForShape({ shape, wallet: binding.boundWallet! });
     if (built) {
@@ -605,6 +685,7 @@ export async function answerFlowAiQuestion(input: {
     degraded,
     proposal,
     pending: pendingOut,
+    actionSession: sessionOut,
     actionPreparation: Boolean(shape),
     continuation: null,
     feeTruth,
@@ -621,6 +702,20 @@ export async function answerFlowAiQuestion(input: {
       url: e.url,
       excerpt: e.excerpt,
     })),
+  };
+}
+
+/** V15.3I — slots → shape, for retry clarification paths. */
+function shapeOf(session: ActionSession): PreparationShape {
+  return {
+    type: session.slots.actionType,
+    chainId: session.slots.chainId,
+    tokenInSymbol: session.slots.tokenInSymbol,
+    tokenOutSymbol: session.slots.tokenOutSymbol,
+    destinationChainId: session.slots.destinationChainId,
+    amount: session.slots.amount,
+    missingFields: session.slots.amount ? [] : ["amount"],
+    recognized: describeSlots(session.slots),
   };
 }
 
@@ -683,6 +778,7 @@ function preparationClarificationAnswer(
   plan: OrchestrationPlan,
   pending: PendingPreparation,
   message: string,
+  actionSession: ActionSession | null = null,
 ): FlowAiAnswer {
   return {
     answer: message,
@@ -699,6 +795,7 @@ function preparationClarificationAnswer(
     degraded: [],
     proposal: null,
     pending,
+    actionSession,
     actionPreparation: true,
     hasLiveEvidence: false,
     evidence: [],
@@ -732,7 +829,11 @@ function productStateAnswer(plan: OrchestrationPlan, reply: ProductStateAnswer):
 }
 
 /** Preparation recognized but impossible for this actor (no session / no wallet). */
-function preparationBlockedAnswer(plan: OrchestrationPlan, message: string): FlowAiAnswer {
+function preparationBlockedAnswer(
+  plan: OrchestrationPlan,
+  message: string,
+  actionSession: ActionSession | null = null,
+): FlowAiAnswer {
   return {
     answer: message,
     mode: plan.mode,
@@ -747,6 +848,7 @@ function preparationBlockedAnswer(plan: OrchestrationPlan, message: string): Flo
     degraded: [],
     proposal: null,
     pending: null,
+    actionSession,
     actionPreparation: true,
     hasLiveEvidence: false,
     evidence: [],
