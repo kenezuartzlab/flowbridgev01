@@ -372,6 +372,7 @@ export async function answerFlowAiQuestion(input: {
     skills: plan.skills.map((s) => s.skillId),
     refused: plan.refused.map((r) => ({ skillId: r.skillId, reason: r.reason })),
     degraded,
+    proposal,
     evidence: evidence.map((e) => ({
       id: e.id,
       label: e.label,
