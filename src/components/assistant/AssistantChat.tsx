@@ -1,70 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Bot, ChevronDown, ShieldCheck, Sparkles, User } from "lucide-react";
 import { assistantFetch } from "@/lib/ai/assistantClient";
+import { supabase } from "@/integrations/supabase/client";
 import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
 import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
+import {
+  ensureConversationOwner,
+  markConversationHandoff,
+  pruneExpiredPreparation,
+  setConversationMessages,
+  setConversationPending,
+  setConversationPrepared,
+  updateConversationMessages,
+  useConversation,
+  type PendingPreparationRef,
+  type PreparedHandleRef,
+} from "@/lib/ai/conversationStore";
+import type { ChatMessage, EvidenceRef } from "@/lib/ai/conversationTypes";
 
-export interface EvidenceRef {
-  id: string;
-  label: string;
-  group: string;
-  freshness: string;
-  observedAt: string;
-  /** V15.3A — per-source freshness: read live this request, or cached. */
-  liveness?: "LIVE" | "CACHED";
-  fetchedAt?: string;
-  url?: string;
-  excerpt?: string;
-}
-
-/** V15.3A — client-carried pending preparation slot (hint only, never trusted). */
-interface PendingPreparationRef {
-  type: string;
-  chainId: number;
-  tokenInSymbol: string | null;
-  tokenOutSymbol: string | null;
-  destinationChainId: number | null;
-  missingFields: string[];
-  recognized: string[];
-  createdAt: string;
-  expiresAt: string;
-  actorKey: string;
-}
-
-/** V15.3D — client-carried handle for the last prepared action (hint only). */
-interface PreparedHandleRef {
-  intentId: string;
-  type: string;
-  chainId: number;
-  state: string;
-  expiresAt: string;
-  handoffHref: string | null;
-  handoffCta: string | null;
-  surface: string | null;
-  actorKey: string;
-}
+export type { ChatMessage, EvidenceRef };
 
 interface IntentProposalRef {
   type: string;
   chainId: number;
   parameters: Record<string, unknown>;
   recognized?: string[];
-}
-
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  mode?: string;
-  confidenceLabel?: string;
-  asOf?: string | null;
-  notice?: string | null;
-  skills?: string[];
-  evidence?: EvidenceRef[];
-  hasLiveEvidence?: boolean;
-  actionPreparation?: boolean;
-  /** V15.2 — server-prepared, never-executed action plan. */
-  prepared?: PreparedIntentPayload | null;
-  preparationError?: string | null;
 }
 
 const SUGGESTIONS = [
@@ -79,6 +39,10 @@ const SUGGESTIONS = [
  * Flow AI surface. Presentation + fetch only — it never touches swap/bridge
  * execution state, and every answer arrives with its evidence trail from
  * /api/assistant.
+ *
+ * V15.3F — the transcript, pending slot and prepared review card live in the
+ * module-scope conversation store, so Assistant → Trade → Home → Assistant
+ * restores the same conversation instead of mounting an empty chat.
  */
 /**
  * V15.3B — reads the browser wallet's current address and chain as HINTS only.
@@ -101,23 +65,40 @@ async function readConnectorHint(): Promise<{ address: string | null; chainId: n
 }
 
 export function AssistantChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const conversation = useConversation();
+  const messages = conversation.messages;
+  const pending = conversation.pending;
+  const preparedHandle = conversation.prepared;
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openEvidence, setOpenEvidence] = useState<number | null>(null);
-  /** Live only for the next turn or two: the field Flow AI still needs. */
-  const [pending, setPending] = useState<PendingPreparationRef | null>(null);
-  /**
-   * V15.3D — the prepared plan the next turn may continue. Cleared as soon as it
-   * expires, is cancelled, or its context changes. Never an authorization.
-   */
-  const [preparedHandle, setPreparedHandle] = useState<PreparedHandleRef | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * Ownership gate: the transcript is scoped to the signed-in account. A
+   * different account (or signing out) discards it rather than showing it.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (cancelled) return;
+      ensureConversationOwner(data.user?.id ?? "anonymous");
+      pruneExpiredPreparation();
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      ensureConversationOwner(session?.user?.id ?? "anonymous");
+    });
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, busy]);
+
 
   async function send(text: string) {
     const question = text.trim();
