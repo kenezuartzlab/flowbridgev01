@@ -46,7 +46,12 @@ import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
 import { CampaignTaskContextBanner } from './components/app/CampaignTaskContextBanner';
 import { SwapCampaignTaskBanner } from './components/app/SwapCampaignTaskBanner';
-import { parseHandoffHint } from './lib/ai/intentHandoff';
+import { parseHandoffHint, type HandoffHint } from './lib/ai/intentHandoff';
+import {
+  buildSwapHydration,
+  hydrationTabFor,
+  HYDRATION_FAILURE_COPY,
+} from './lib/ai/handoffHydration';
 import { applyExplicitChainTarget, useSelectedNetwork } from './lib/network/networkSession';
 
 import { AiHandoffBanner } from './components/assistant/AiHandoffBanner';
