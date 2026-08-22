@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance, useReadContract, useWriteContract, useSwitchChain, useChainId, useSendTransaction, usePublicClient, useSignMessage, useReconnect } from 'wagmi';
 import { clearWalletVerified, ensureWalletVerified, isWalletVerified, WalletVerificationRejectedError } from './lib/walletVerification';
 import {
@@ -564,7 +564,7 @@ export default function App() {
   const swapHydrationPlan = swapHydration?.ok ? swapHydration.plan : null;
   const swapHydrationNotice =
     swapHydration && !swapHydration.ok && swapHydration.reason !== 'NOT_SWAP'
-      ? HYDRATION_FAILURE_COPY[swapHydration.reason]
+      ? HYDRATION_FAILURE_COPY[swapHydration.reason as keyof typeof HYDRATION_FAILURE_COPY]
       : null;
 
 
