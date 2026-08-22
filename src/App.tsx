@@ -52,9 +52,13 @@ import { SwapCampaignTaskBanner } from './components/app/SwapCampaignTaskBanner'
 import { parseHandoffHint, type HandoffHint } from './lib/ai/intentHandoff';
 import {
   buildSwapHydration,
+  buildSwapHydrationFromCanonical,
   hydrationTabFor,
   HYDRATION_FAILURE_COPY,
 } from './lib/ai/handoffHydration';
+import { resolveHandoffIntent } from './lib/ai/handoffResolutionClient';
+import type { HandoffResolution } from './lib/ai/handoffResolution';
+
 import { applyExplicitChainTarget, useSelectedNetwork } from './lib/network/networkSession';
 import {
   applyDefaultTradeTab,
