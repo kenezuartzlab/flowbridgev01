@@ -524,14 +524,10 @@ describe('V14.1A · Campaign PTS-only reward authority', () => {
       ),
     ).rejects.toThrow(/unsupported rule type/i);
 
-    // A rule-less task is likewise unsubmittable even though it can be drafted.
-    const ruleless = await savePartnerCampaign(
-      partnerA as any,
-      draft({ tasks: [{ ...draft().tasks[0], rules: [] }] }),
-    );
+    // A rule-less task is refused for the same reason.
     await expect(
-      partnerTransition(partnerA as any, ruleless.campaignId, 'submit'),
-    ).rejects.toThrow(/verified-activity rule/i);
+      savePartnerCampaign(partnerA as any, draft({ tasks: [{ ...draft().tasks[0], rules: [] }] })),
+    ).rejects.toThrow(/at least one verified rule/i);
     expect(await listPublishedCampaigns()).toHaveLength(0);
   });
 });
