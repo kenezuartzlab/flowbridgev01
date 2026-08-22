@@ -418,7 +418,12 @@ export default function App() {
   }, [address]);
 
   // Environment and Mode states
-  const [isMainnet, setIsMainnet] = useState<boolean>(true);
+  // V15.3C — the selected product network is app-session state, held above the
+  // router so navigating Home → Explore → Trade can never reset it to Mainnet.
+  const [isMainnet, setMainnetSelection] = useSelectedNetwork();
+  const setIsMainnet = (next: boolean | ((prev: boolean) => boolean)) =>
+    setMainnetSelection(typeof next === 'function' ? next(isMainnet) : next);
+
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
   // Live market prices in USD from BDEX public price API (mainnet only).
