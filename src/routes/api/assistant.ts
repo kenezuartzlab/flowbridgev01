@@ -11,28 +11,58 @@ import type { PreparedHandle } from "@/lib/ai/actionContinuation";
 
 const INTERNAL_OPERATOR_EMAILS = ["kenezuartzlab@gmail.com"];
 
-async function resolveActor(request: Request): Promise<FlowAiActor> {
+async function resolveActor(
+  request: Request,
+): Promise<{ actor: FlowAiActor; wallet: string | null }> {
   const user = await getAuthUser(request);
-  if (!user) return ANONYMOUS_ACTOR;
+  if (!user) return { actor: ANONYMOUS_ACTOR, wallet: null };
 
   let orgIds: string[] = [];
+  let wallet: string | null = null;
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("partner_org_members")
-      .select("org_id")
-      .eq("user_id", user.id);
-    orgIds = (data ?? []).map((r: any) => String(r.org_id));
+    const [{ data: orgs }, { data: profile }] = await Promise.all([
+      supabaseAdmin.from("partner_org_members").select("org_id").eq("user_id", user.id),
+      supabaseAdmin.from("profiles").select("wallet_address").eq("id", user.id).maybeSingle(),
+    ]);
+    orgIds = (orgs ?? []).map((r: any) => String(r.org_id));
+    const addr = (profile as any)?.wallet_address;
+    wallet = typeof addr === "string" && /^0x[a-fA-F0-9]{40}$/.test(addr) ? addr : null;
   } catch {
     orgIds = [];
   }
 
   return {
-    userId: user.id,
-    email: user.email,
-    orgIds,
-    isInternalOperator: INTERNAL_OPERATOR_EMAILS.includes(user.email.toLowerCase()),
+    actor: {
+      userId: user.id,
+      email: user.email,
+      orgIds,
+      isInternalOperator: INTERNAL_OPERATOR_EMAILS.includes(user.email.toLowerCase()),
+    },
+    wallet,
   };
+}
+
+/**
+ * V15.3H §2 — client-reported render/handoff state. Untrusted telemetry: it can
+ * only make Flow AI report a failure honestly; it grants no authority.
+ */
+function normalizeProductState(raw: unknown): ProductState | null {
+  if (!raw || typeof raw !== "object") return null;
+  const p = raw as Record<string, any>;
+  const status = ["RENDERED", "RENDER_FAILED", "NONE"].includes(String(p.renderStatus))
+    ? (String(p.renderStatus) as ProductState["renderStatus"])
+    : "NONE";
+  const h = p.handoff;
+  const handoff =
+    h && (h.code === "HANDOFF_HYDRATED" || h.code === "HANDOFF_HYDRATION_FAILED")
+      ? {
+          code: h.code as "HANDOFF_HYDRATED" | "HANDOFF_HYDRATION_FAILED",
+          surface: String(h.surface ?? "Trade").slice(0, 40),
+          detail: String(h.detail ?? "").slice(0, 300),
+        }
+      : null;
+  return { renderStatus: status, hasPreparedHandle: Boolean(p.hasPreparedHandle), handoff };
 }
 
 /**
