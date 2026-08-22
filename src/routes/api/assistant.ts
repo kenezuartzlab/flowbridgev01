@@ -139,15 +139,18 @@ export const Route = createFileRoute("/api/assistant")({
         // V15.3B — untrusted connector hints: never used to decide whether a
         // wallet is bound, only to explain wrong-network / wrong-wallet state.
         let connector: { address: string | null; chainId: number | null } | null = null;
+        let productState: ProductState | null = null;
         try {
           const body = (await request.json()) as {
             messages?: { role?: string; content?: string }[];
             pending?: unknown;
             prepared?: unknown;
+            productState?: unknown;
             connector?: { address?: unknown; chainId?: unknown };
           };
           pending = normalizePending(body.pending);
           prepared = normalizePrepared(body.prepared);
+          productState = normalizeProductState(body.productState);
           const rawAddress =
             typeof body.connector?.address === "string" ? body.connector.address.toLowerCase() : null;
           connector = {
