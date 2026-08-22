@@ -139,7 +139,9 @@ export function ActionIntentCard({ payload }: { payload: PreparedIntentPayload }
 
       {ready && handoff ? (
         <Link
-          to={handoff.href}
+          to={handoffPath}
+          search={handoffSearch as never}
+          onClick={() => markConversationHandoff(intent.id)}
           className="fb-glow inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 font-mono text-[10.5px] uppercase tracking-[0.06em] text-primary-foreground"
         >
           <ShieldCheck className="h-3.5 w-3.5" />
@@ -150,8 +152,11 @@ export function ActionIntentCard({ payload }: { payload: PreparedIntentPayload }
       <p className="font-mono text-[9px] leading-relaxed text-muted">
         Prepared and simulated only — nothing was signed or submitted, and no chat confirmation is
         needed or possible.{" "}
-        {handoff ? `${handoff.surface} rechecks every value before your wallet can confirm.` : ""}
+        {handoff
+          ? `${handoff.surface} prefills these values, then rechecks fee, allowance, quote and simulation before your wallet can confirm.`
+          : ""}
       </p>
+
     </section>
   );
 }
