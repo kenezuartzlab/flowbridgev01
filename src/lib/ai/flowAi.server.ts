@@ -383,3 +383,28 @@ function safeJson(v: unknown): string {
     return "";
   }
 }
+
+/**
+ * V15.1 §4 — boundary refusal. Returned WITHOUT calling a model and without
+ * retrieving anything, so a blocked cross-actor request cannot leak evidence.
+ */
+function refusalAnswer(plan: OrchestrationPlan, refusal: string): FlowAiAnswer {
+  console.log(
+    "[flow-ai]",
+    JSON.stringify({ requestId: plan.requestId, intent: plan.intent, refusedForPrivacy: true }),
+  );
+  return {
+    answer: refusal,
+    mode: plan.mode,
+    intent: plan.intent,
+    confidence: "UNAVAILABLE",
+    confidenceLabel: CONFIDENCE_LABEL.UNAVAILABLE,
+    asOf: null,
+    disclosure: null,
+    notice: null,
+    skills: [],
+    refused: [{ skillId: "privacy_boundary", reason: "cross-actor private data request" }],
+    degraded: [],
+    evidence: [],
+  };
+}
