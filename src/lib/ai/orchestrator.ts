@@ -18,7 +18,9 @@ export type FlowAiIntent =
   | "PARTNER_DRAFT"
   | "BOT_ECOSYSTEM"
   | "SAFETY"
-  | "PRODUCT_HOWTO";
+  | "PRODUCT_HOWTO"
+  /** V15.3A — imperative request routed to bounded action preparation. */
+  | "ACTION_PREPARATION";
 
 export interface OrchestrationRequest {
   question: string;

@@ -327,9 +327,8 @@ export async function answerFlowAiQuestion(input: {
         type: built.type,
         chainId: built.chainId,
         parameters: built.parameters,
-        organizationId: input.actor.orgIds[0] ?? null,
         recognized: shape.recognized,
-      } as IntentProposal;
+      } satisfies IntentProposal;
     }
   }
 
