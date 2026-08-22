@@ -76,12 +76,24 @@ export const Route = createFileRoute("/api/assistant")({
       POST: async ({ request }) => {
         let messages: { role: "user" | "assistant"; content: string }[] = [];
         let pending: PendingPreparation | null = null;
+        // V15.3B — untrusted connector hints: never used to decide whether a
+        // wallet is bound, only to explain wrong-network / wrong-wallet state.
+        let connector: { address: string | null; chainId: number | null } | null = null;
         try {
           const body = (await request.json()) as {
             messages?: { role?: string; content?: string }[];
             pending?: unknown;
+            connector?: { address?: unknown; chainId?: unknown };
           };
           pending = normalizePending(body.pending);
+          const rawAddress =
+            typeof body.connector?.address === "string" ? body.connector.address.toLowerCase() : null;
+          connector = {
+            address: rawAddress && /^0x[0-9a-f]{40}$/.test(rawAddress) ? rawAddress : null,
+            chainId: Number.isInteger(Number(body.connector?.chainId))
+              ? Number(body.connector?.chainId)
+              : null,
+          };
           messages = (body.messages ?? [])
             .filter(
               (m) =>
@@ -111,6 +123,7 @@ export const Route = createFileRoute("/api/assistant")({
             actor,
             requestId,
             pending,
+            connector,
           });
           return jsonResponse({ requestId, ...result });
         } catch (e) {

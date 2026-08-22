@@ -67,6 +67,26 @@ const SUGGESTIONS = [
  * execution state, and every answer arrives with its evidence trail from
  * /api/assistant.
  */
+/**
+ * V15.3B — reads the browser wallet's current address and chain as HINTS only.
+ * Read-only: it never prompts a connection, and the server treats these values
+ * as untrusted (binding itself is a persisted account fact).
+ */
+async function readConnectorHint(): Promise<{ address: string | null; chainId: number | null }> {
+  try {
+    const eth = (globalThis as any)?.ethereum;
+    if (!eth?.request) return { address: null, chainId: null };
+    const accounts: string[] = await eth.request({ method: "eth_accounts" });
+    const hex: string = await eth.request({ method: "eth_chainId" });
+    return {
+      address: accounts?.[0] ? String(accounts[0]).toLowerCase() : null,
+      chainId: Number.parseInt(hex, 16) || null,
+    };
+  } catch {
+    return { address: null, chainId: null };
+  }
+}
+
 export function AssistantChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -96,6 +116,7 @@ export function AssistantChat() {
         body: JSON.stringify({
           messages: next.map((m) => ({ role: m.role, content: m.content })),
           pending,
+          connector: await readConnectorHint(),
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {

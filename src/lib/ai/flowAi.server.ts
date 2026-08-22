@@ -18,6 +18,7 @@ import { evaluatePrivacy } from "./privacyGuard";
 import { listUserMemory, renderMemoryForPrompt } from "./memoryStore.server";
 import { loadCampaignPointsEvidence, loadStakingEvidence } from "./stakingEvidence.server";
 import { proposeIntent, type IntentProposal } from "./intentProposal";
+import { resolveWalletBinding } from "./walletBinding";
 import {
   buildActorKey,
   clarificationFor,
@@ -71,6 +72,23 @@ export interface FlowAiAnswer {
     url?: string;
     excerpt?: string;
   }[];
+}
+
+/**
+ * V15.3B §2 — persisted bound wallet, resolved independently of the planner and
+ * of the browser connector. Returns null only when the account truly has no
+ * binding; a read failure also returns null but is never presented as proof.
+ */
+async function resolveBoundWallet(actor: FlowAiActor): Promise<string | null> {
+  if (!actor.userId) return null;
+  try {
+    const { getUserPointsAndReferrals } = await import("@/lib/flowbridge-db.server");
+    const points = await getUserPointsAndReferrals(actor.userId);
+    const wallet = (points as { walletAddress?: string | null }).walletAddress ?? null;
+    return wallet ? String(wallet).toLowerCase() : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Deterministic facts pulled for the signed-in user, if any. */
@@ -215,9 +233,16 @@ export async function answerFlowAiQuestion(input: {
   requestId: string;
   /** V15.3A — pending preparation slot carried by the client from the last turn. */
   pending?: PendingPreparation | null;
+  /**
+   * V15.3B — untrusted connector hints. They never decide whether a wallet is
+   * bound (that is a server-side account fact); they only let Flow AI say
+   * "wrong network" or "wrong wallet connected" instead of "no wallet bound".
+   */
+  connector?: { address?: string | null; chainId?: number | null } | null;
   /** Test seam: force offline behavior. */
   online?: boolean;
 }): Promise<FlowAiAnswer> {
+
   const online = input.online ?? anyProviderAvailable();
   const plan = planRequest({
     question: input.question,
@@ -246,10 +271,13 @@ export async function answerFlowAiQuestion(input: {
     degraded.push("your FlowBridge account record");
   }
 
+  // V15.3B §2 — the bound wallet is a PERSISTED ACCOUNT FACT. It must not depend
+  // on which skills the planner selected, nor on the connector's current chain.
   const boundWallet =
-    (accountEvidence.find((e) => e.id === "db.account.points")?.value as
+    ((accountEvidence.find((e) => e.id === "db.account.points")?.value as
       | { walletAddress?: string | null }
-      | undefined)?.walletAddress ?? null;
+      | undefined)?.walletAddress ?? null) || (await resolveBoundWallet(input.actor));
+
 
   // V15.1 §4 — refuse cross-actor private reads at the boundary, before retrieval
   // of anything else, using the SERVER-known bound wallet as the only "self".
@@ -304,6 +332,7 @@ export async function answerFlowAiQuestion(input: {
   }
 
   let pendingOut: PendingPreparation | null = null;
+  let bindingNotice: string | null = null;
   if (shape) {
     if (!input.actor.userId) {
       return preparationBlockedAnswer(
@@ -311,17 +340,27 @@ export async function answerFlowAiQuestion(input: {
         "Sign in first and bind your wallet — then I can prepare that action for you to review and sign yourself.",
       );
     }
-    if (!boundWallet) {
+    // V15.3B §2 — connector state refines the message; only a missing PERSISTED
+    // binding can block preparation.
+    const binding = resolveWalletBinding({
+      boundWallet,
+      connectedWallet: input.connector?.address ?? null,
+      connectedChainId:
+        typeof input.connector?.chainId === "number" ? input.connector.chainId : null,
+      targetChainId: shape.chainId,
+    });
+    if (!binding.canPrepare) {
       return preparationBlockedAnswer(
         plan,
-        "I recognized that as an action to prepare, but no wallet is bound to your account yet. Bind your wallet on /earn and ask me again — you always sign it yourself.",
+        `I recognized that as an action to prepare, but ${binding.message}`,
       );
     }
+    bindingNotice = binding.message;
     if (shape.missingFields.length > 0) {
       pendingOut = createPending({ shape, actorKey });
       return preparationClarificationAnswer(plan, pendingOut, clarificationFor(shape));
     }
-    const built = parametersForShape({ shape, wallet: boundWallet });
+    const built = parametersForShape({ shape, wallet: binding.boundWallet! });
     if (built) {
       proposal = {
         type: built.type,
@@ -331,6 +370,7 @@ export async function answerFlowAiQuestion(input: {
       } satisfies IntentProposal;
     }
   }
+
 
 
 
@@ -455,7 +495,7 @@ export async function answerFlowAiQuestion(input: {
     confidenceLabel: CONFIDENCE_LABEL[verification.confidence],
     asOf: verification.asOf,
     disclosure: verification.disclosure,
-    notice: plan.actionNotice,
+    notice: bindingNotice ? `${bindingNotice}${plan.actionNotice ? ` ${plan.actionNotice}` : ""}` : plan.actionNotice,
     skills: plan.skills.map((s) => s.skillId),
     refused: plan.refused.map((r) => ({ skillId: r.skillId, reason: r.reason })),
     degraded,
