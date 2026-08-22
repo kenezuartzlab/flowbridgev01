@@ -53,3 +53,12 @@ fell through to generic prose, and a single global "as of" badge made live reads
 Invariants: a vague size qualifier never becomes an amount, an example is not consent,
 expired or context-changed pending slots are dropped, and `READY_FOR_USER` still requires
 fresh live state — the user's wallet remains the only execution authority.
+
+## V15.3B — Wallet binding + network/intent persistence fix
+
+- Bound wallet is a persisted account fact (`resolveBoundWallet` in `flowAi.server.ts`), resolved regardless of which skills the planner selected and regardless of the connector's chain.
+- `src/lib/ai/walletBinding.ts` (pure) maps persisted binding + untrusted connector hints to `NO_BOUND_WALLET | BOUND_AND_READY | BOUND_WALLET_DISCONNECTED | BOUND_WALLET_MISMATCH | BOUND_WRONG_NETWORK`. Only a missing persisted binding blocks preparation; wrong network is reported as wrong network.
+- `/api/assistant` accepts `connector: { address, chainId }` as hints only; amounts, decimals, routers, recipients and actor key stay server-resolved.
+- Target-chain precedence on Trade: AI handoff hint > campaign deep link > default. `App.tsx` hydrates the network from the handoff hint on mount, so a BOT Testnet plan no longer resets to Mainnet.
+- `AiHandoffBanner` shows a user-initiated "Switch to BOT Testnet" CTA on `CHAIN_MISMATCH`; execution authority stays with the user's wallet.
+- Invariants covered by `src/lib/ai/walletBinding.test.ts` (6 tests).
