@@ -391,6 +391,13 @@ export async function partnerTransition(
   if (action === 'submit' && !canSubmit(partner.role)) {
     throw new PartnerError('Only a Partner Admin may submit a campaign for review.', 403);
   }
+  if (action === 'submit') {
+    // V14.1A: only Campaign PTS carries reward authority. A non-PTS reward
+    // request may exist as a draft proposal but can never enter review.
+    const blocked = rewardTypeBlocksPublish(rewardType(row.reward_type));
+    if (blocked) throw new PartnerError(blocked, 403);
+  }
+
   if (!canTransition(action, from, actor)) {
     throw new PartnerError(`Cannot ${action} a campaign in state "${from}".`, 409);
   }
