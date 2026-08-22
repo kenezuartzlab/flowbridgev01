@@ -29,6 +29,8 @@ export interface FlowAiAnswer {
   notice: string | null;
   skills: readonly string[];
   refused: readonly { skillId: string; reason: string }[];
+  /** Domains that could not be read this request (disclosed, never estimated). */
+  degraded?: readonly string[];
   evidence: readonly {
     id: string;
     label: string;
