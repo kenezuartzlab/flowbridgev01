@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Bot, ChevronDown, ShieldCheck, Sparkles, User } from "lucide-react";
 import { assistantFetch } from "@/lib/ai/assistantClient";
 import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
+import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
 
 export interface EvidenceRef {
   id: string;
@@ -13,6 +14,13 @@ export interface EvidenceRef {
   excerpt?: string;
 }
 
+interface IntentProposalRef {
+  type: string;
+  chainId: number;
+  parameters: Record<string, unknown>;
+  recognized?: string[];
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -22,6 +30,9 @@ export interface ChatMessage {
   notice?: string | null;
   skills?: string[];
   evidence?: EvidenceRef[];
+  /** V15.2 — server-prepared, never-executed action plan. */
+  prepared?: PreparedIntentPayload | null;
+  preparationError?: string | null;
 }
 
 const SUGGESTIONS = [
@@ -30,6 +41,7 @@ const SUGGESTIONS = [
   "What's actually live on BOT Chain today?",
   "How do I bridge USDT from BOT to BNB?",
 ];
+
 
 /**
  * Flow AI surface. Presentation + fetch only — it never touches swap/bridge
