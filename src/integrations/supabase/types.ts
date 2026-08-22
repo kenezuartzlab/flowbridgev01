@@ -1180,7 +1180,6 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
-      is_org_member: { Args: { _org: string; _user: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
