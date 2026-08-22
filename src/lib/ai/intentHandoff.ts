@@ -72,25 +72,38 @@ export interface HandoffHint {
   hints: Readonly<Record<string, string>>;
 }
 
+/**
+ * V15.3J §3 — SPA routers may re-serialize a search string through JSON, so a
+ * value can arrive quoted (`"10"`). Strip that transport artefact before reading;
+ * the hints are advisory only and never authoritative any more.
+ */
+function unquote(v: string | null): string {
+  if (!v) return "";
+  const t = v.trim();
+  if (t.length >= 2 && t.startsWith('"') && t.endsWith('"')) return t.slice(1, -1);
+  return t;
+}
+
 export function parseHandoffHint(search: string): HandoffHint | null {
   const p = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
-  const intentId = p.get(HANDOFF_PARAMS.intentId);
+  const intentId = unquote(p.get(HANDOFF_PARAMS.intentId));
   if (!intentId) return null;
-  const chainId = Number(p.get(HANDOFF_PARAMS.chainId) ?? "0");
+  const chainId = Number(unquote(p.get(HANDOFF_PARAMS.chainId)) || "0");
   const hints: Record<string, string> = {};
   for (const key of ["from", "to", "token", "amount", "dest", "tab", "action"]) {
-    const v = p.get(key);
+    const v = unquote(p.get(key));
     if (v) hints[key] = v;
   }
   return {
     intentId,
-    digest: (p.get(HANDOFF_PARAMS.fingerprint) ?? "").toLowerCase(),
-    expiresAt: p.get(HANDOFF_PARAMS.expiresAt) ?? "",
-    type: p.get(HANDOFF_PARAMS.type) ?? "",
+    digest: unquote(p.get(HANDOFF_PARAMS.fingerprint)).toLowerCase(),
+    expiresAt: unquote(p.get(HANDOFF_PARAMS.expiresAt)),
+    type: unquote(p.get(HANDOFF_PARAMS.type)),
     chainId: Number.isFinite(chainId) ? chainId : 0,
     hints,
   };
 }
+
 
 export type HandoffVerdict =
   | "FRESH"
