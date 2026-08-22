@@ -24,6 +24,7 @@ import { z } from "zod";
 import {
   actionIntentSchema,
   economicFingerprint,
+  outputAssetKindOf,
   type ActionIntent,
   type ActionIntentType,
 } from "./actionIntent";
@@ -44,6 +45,15 @@ export const canonicalSwapLegSchema = z.object({
   amountInRaw: rawString,
   slippageBps: z.number().int().min(1).max(500),
   recipient: hex40,
+  /**
+   * V15.3K §5 — user-facing asset semantics. `tokenOutIsNative` distinguishes
+   * native BOT from wrapped WBOT; the addresses alone cannot, because the route
+   * leg is the wrapped contract in both cases.
+   */
+  tokenInSymbol: z.string().min(1).max(12).nullable().default(null),
+  tokenOutSymbol: z.string().min(1).max(12).nullable().default(null),
+  tokenInIsNative: z.boolean().default(false),
+  tokenOutIsNative: z.boolean().default(false),
 });
 export type CanonicalSwapLeg = z.infer<typeof canonicalSwapLegSchema>;
 
@@ -115,6 +125,7 @@ export function canonicalDigest(intent: ActionIntent): string {
       tokenOut: p.tokenOut ?? null,
       amount: p.amountIn ?? p.amountFlow ?? p.claimableFlow ?? null,
       destinationChainId: p.destinationChainId ?? null,
+      outputAssetKind: outputAssetKindOf(intent.parameters),
     }),
   );
 }
@@ -165,6 +176,10 @@ export function normalizePreparedIntent(intent: ActionIntent): CanonicalizationR
           amountInRaw: raw,
           slippageBps: Number(p.slippageBps),
           recipient: String(p.recipient),
+          tokenInSymbol: typeof p.tokenInSymbol === "string" ? p.tokenInSymbol : null,
+          tokenOutSymbol: typeof p.tokenOutSymbol === "string" ? p.tokenOutSymbol : null,
+          tokenInIsNative: p.tokenInIsNative === true,
+          tokenOutIsNative: p.tokenOutIsNative === true,
         });
         if (!parsed.success) errors.push(...parsed.error.issues.map((i) => `swap.${i.path.join(".")}: ${i.message}`));
         else swap = parsed.data;
