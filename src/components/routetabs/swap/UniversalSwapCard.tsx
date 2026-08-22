@@ -25,6 +25,13 @@ import {
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
 import type { SwapHydrationPlan } from "@/lib/ai/handoffHydration";
 import {
+  clearSwapDraft,
+  readSwapDraft,
+  setSwapDraft,
+  type SwapDraftScope,
+} from "@/lib/trade/tradeSession";
+
+import {
   captureVerifiedSwapAttribution,
   scheduleVerifiedSwapHandoff,
 } from "@/lib/swap/verifiedSwapAttribution";
