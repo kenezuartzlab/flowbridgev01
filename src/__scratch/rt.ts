@@ -1,0 +1,14 @@
+import { buildHandoff, createActionIntent } from "@/lib/ai/actionIntent";
+import { parseHandoffHint } from "@/lib/ai/intentHandoff";
+import { buildSwapHydration } from "@/lib/ai/handoffHydration";
+import { getCuratedTokens } from "@/lib/swap/tokenRegistry";
+import { tokenFor } from "@/lib/ai/preparationRouting";
+const toks = getCuratedTokens(false);
+console.log(toks.map(t=>[t.symbol,t.address]));
+const tin = toks.find(t=>t.symbol==="USDT")!, tout = toks.find(t=>t.isNative)!;
+const intent = createActionIntent({ id:"ai_12345678", type:"SWAP", actorUserId:"u", actorWallet:"0x"+"1".repeat(40), chainId:968, targetContract:"0x"+"2".repeat(40), parameters:{tokenIn:tin.address,tokenOut:tout.address,decimalsIn:tin.decimals,decimalsOut:tout.decimals,amountIn:"10",slippageBps:50,recipient:"0x"+"1".repeat(40)} });
+const h = buildHandoff(intent);
+console.log(h.href);
+const hint = parseHandoffHint(h.href.split("?")[1]);
+console.log(hint);
+console.log(buildSwapHydration({hint:hint!, tokens: toks}));
