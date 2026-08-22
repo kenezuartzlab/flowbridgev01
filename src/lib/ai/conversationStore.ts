@@ -19,6 +19,7 @@
  */
 import { useSyncExternalStore } from "react";
 import type { ChatMessage } from "./conversationTypes";
+import type { ActionRenderStatus } from "./actionRender";
 
 export interface PendingPreparationRef {
   type: string;
@@ -71,6 +72,11 @@ export interface ConversationState {
   composerDraft: string;
   /** V15.3G §6 — latest product-surface observation about the handoff. */
   observation: ConversationObservation | null;
+  /**
+   * V15.3H §2 — did the client actually RENDER the structured action card for the
+   * active prepared plan? Flow AI reads this before ever mentioning a button.
+   */
+  renderStatus: ActionRenderStatus;
   updatedAt: string;
 }
 
@@ -96,6 +102,7 @@ function emptyState(ownerKey = "anonymous"): ConversationState {
     handedOffIntentId: null,
     composerDraft: "",
     observation: null,
+    renderStatus: "NONE",
 
     updatedAt: new Date().toISOString(),
   };
@@ -205,6 +212,16 @@ export function recordConversationObservation(
   commit({ ...state, observation: next });
 }
 
+/**
+ * V15.3H §2 — the UI reports whether the structured card actually rendered.
+ * RENDER_FAILED is a first-class state: the assistant then says so instead of
+ * telling the user to tap a control that does not exist.
+ */
+export function setConversationRenderStatus(status: ActionRenderStatus): void {
+  if (state.renderStatus === status) return;
+  commit({ ...state, renderStatus: status });
+}
+
 export function clearConversationObservation(): void {
   if (!state.observation) return;
   commit({ ...state, observation: null });
@@ -220,7 +237,7 @@ export function pruneExpiredPreparation(now: Date = new Date()): void {
   const p = state.prepared;
   if (!p) return;
   if (new Date(p.expiresAt).getTime() <= now.getTime()) {
-    commit({ ...state, prepared: null });
+    commit({ ...state, prepared: null, renderStatus: "NONE" });
   }
 }
 
