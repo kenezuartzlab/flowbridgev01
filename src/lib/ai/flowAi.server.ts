@@ -18,6 +18,7 @@ import { evaluatePrivacy } from "./privacyGuard";
 import { listUserMemory, renderMemoryForPrompt } from "./memoryStore.server";
 import { loadCampaignPointsEvidence, loadStakingEvidence } from "./stakingEvidence.server";
 import { proposeIntent, type IntentProposal } from "./intentProposal";
+import { resolveWalletBinding } from "./walletBinding";
 import {
   buildActorKey,
   clarificationFor,
@@ -71,6 +72,23 @@ export interface FlowAiAnswer {
     url?: string;
     excerpt?: string;
   }[];
+}
+
+/**
+ * V15.3B §2 — persisted bound wallet, resolved independently of the planner and
+ * of the browser connector. Returns null only when the account truly has no
+ * binding; a read failure also returns null but is never presented as proof.
+ */
+async function resolveBoundWallet(actor: FlowAiActor): Promise<string | null> {
+  if (!actor.userId) return null;
+  try {
+    const { getUserPointsAndReferrals } = await import("@/lib/flowbridge-db.server");
+    const points = await getUserPointsAndReferrals(actor.userId);
+    const wallet = (points as { walletAddress?: string | null }).walletAddress ?? null;
+    return wallet ? String(wallet).toLowerCase() : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Deterministic facts pulled for the signed-in user, if any. */
@@ -352,7 +370,6 @@ export async function answerFlowAiQuestion(input: {
       } satisfies IntentProposal;
     }
   }
-  void bindingNotice;
 
 
 
