@@ -17,6 +17,7 @@ function readyIntent(amount = 10) {
       decimalsIn: 18,
       decimalsOut: 18,
       amountIn: amount,
+      slippageBps: 50,
       recipient: "0x1111111111111111111111111111111111111111",
     },
   });
