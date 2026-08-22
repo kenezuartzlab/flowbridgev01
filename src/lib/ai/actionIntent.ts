@@ -15,6 +15,7 @@ import { getContracts, MAINNET_CONTRACTS, TESTNET_CONTRACTS } from "@/lib/contra
 import { resolveFlowBridgeExecution } from "@/lib/flowbridge/executionRegistry";
 import { getFlowRewardsChainConfig } from "@/lib/rewards/flowRewardsRegistry";
 import { getFlowStakingChainConfig } from "@/lib/staking/flowStakingRegistry";
+import { fingerprintDigest } from "./intentHandoff";
 
 export const ACTION_INTENT_SCHEMA_VERSION = "flowbridge.action-intent/1" as const;
 export const ACTION_POLICY_VERSION = "V15.2" as const;
@@ -402,49 +403,49 @@ export function buildHandoff(intent: ActionIntent): ActionHandoff {
   switch (intent.type) {
     case "SWAP":
       return {
-        href: `/trade?${q({ tab: "swap", from: p.tokenIn, to: p.tokenOut, amount: p.amountIn, intent: intent.id })}`,
+        href: `/trade?${q({ tab: "swap", from: p.tokenIn, to: p.tokenOut, amount: p.amountIn })}`,
         cta: "Review in Trade",
         surface: "/trade",
         revalidatedByTarget: true,
       };
     case "BRIDGE":
       return {
-        href: `/trade?${q({ tab: "bridge", token: p.token, amount: p.amountIn, dest: p.destinationChainId, intent: intent.id })}`,
+        href: `/trade?${q({ tab: "bridge", token: p.token, amount: p.amountIn, dest: p.destinationChainId })}`,
         cta: "Review in Bridge",
         surface: "/trade",
         revalidatedByTarget: true,
       };
     case "CLAIM_FLOW":
       return {
-        href: `/earn?${q({ intent: intent.id })}`,
+        href: `/earn?${q({})}`,
         cta: "Review claim",
         surface: "/earn",
         revalidatedByTarget: true,
       };
     case "STAKE_FLOW":
       return {
-        href: `/stake?${q({ amount: p.amountFlow, intent: intent.id })}`,
+        href: `/stake?${q({ amount: p.amountFlow })}`,
         cta: "Review stake",
         surface: "/stake",
         revalidatedByTarget: true,
       };
     case "UNSTAKE_FLOW":
       return {
-        href: `/stake?${q({ action: "withdraw", intent: intent.id })}`,
+        href: `/stake?${q({ action: "withdraw" })}`,
         cta: "Review withdrawal",
         surface: "/stake",
         revalidatedByTarget: true,
       };
     case "CLAIM_STAKING":
       return {
-        href: `/stake?${q({ action: "claim", intent: intent.id })}`,
+        href: `/stake?${q({ action: "claim" })}`,
         cta: "Review reward claim",
         surface: "/stake",
         revalidatedByTarget: true,
       };
     case "PARTNER_CAMPAIGN_DRAFT":
       return {
-        href: `/studio?${q({ draft: p.slug, intent: intent.id })}`,
+        href: `/studio?${q({ draft: p.slug })}`,
         cta: "Open draft in Studio",
         surface: "/studio",
         revalidatedByTarget: true,
