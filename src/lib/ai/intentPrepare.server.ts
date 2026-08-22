@@ -8,6 +8,7 @@
  */
 import type { FlowAiActor } from "./aiTypes";
 import {
+  ACTION_INTENT_TTL_MS,
   BOT_MAINNET_CHAIN_ID,
   BOT_TESTNET_CHAIN_ID,
   buildHandoff,
@@ -19,6 +20,8 @@ import {
   type ActionIntent,
   type ActionIntentType,
 } from "./actionIntent";
+import type { CanonicalPreparedIntent } from "./canonicalIntent";
+
 import {
   authorizePreparation,
   evaluateIntentPolicy,
