@@ -235,6 +235,18 @@ export async function answerFlowAiQuestion(input: {
     return refusalAnswer(plan, privacy.refusal!);
   }
 
+  // V15.2 §3 — deterministic candidate extraction. Only signed-in actors get a
+  // proposal, and it is a request to PREPARE, never an authorization to execute.
+  const proposal = input.actor.userId
+    ? proposeIntent({
+        question: input.question,
+        wallet: boundWallet,
+        organizationId: input.actor.orgIds[0] ?? null,
+      })
+    : null;
+
+
+
   if (skillIds.has("campaign_scout")) evidence.push(...(await loadCampaignEvidence()));
   if (skillIds.has("bot_ecosystem_researcher")) evidence.push(...loadBotStatusEvidence());
 
