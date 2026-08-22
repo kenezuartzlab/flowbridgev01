@@ -93,13 +93,27 @@ export class FakeSupabase {
         });
       }
       if (limitTo != null) out = out.slice(0, limitTo);
+      // Embedded relations (`partner_organizations(*)`) resolved by convention.
+      for (const relation of embedded) {
+        const related = self.rows(relation);
+        out = out.map((row) => {
+          const key = row.organization_id ?? row.org_id ?? null;
+          const hit = related.find((r) => r.org_id === key) ?? null;
+          return { ...row, [relation]: hit ? { ...hit } : null };
+        });
+      }
       return out;
     };
 
     const builder: any = {
-      select() {
+      select(cols?: string) {
+        embedded = [];
+        if (typeof cols === 'string') {
+          for (const match of cols.matchAll(/([a-z_]+)\(/g)) embedded.push(match[1]);
+        }
         return builder;
       },
+
       insert(rows: Row | Row[]) {
         mode = 'insert';
         payload = Array.isArray(rows) ? rows : [rows];
