@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import type { ActionIntent, ActionHandoff } from "@/lib/ai/actionIntent";
-import { ACTION_STATUS_COPY } from "@/lib/ai/actionIntent";
+import { ACTION_STATUS_COPY, effectiveStatus, secondsRemaining } from "@/lib/ai/actionIntent";
 import { getConversation, markConversationHandoff } from "@/lib/ai/conversationStore";
 import { STRUCTURED_ACTION_TESTIDS, type ReviewAction } from "@/lib/ai/actionRender";
 
@@ -44,11 +45,40 @@ export function ActionIntentCard({
   const { intent, handoff } = payload;
   const p = intent.parameters as Record<string, any>;
   const amountField = AMOUNT_FIELDS.find((f) => p[f] !== undefined);
-  const ready = intent.status === "READY_FOR_USER";
-  const expiresIn = Math.max(
-    0,
-    Math.round((new Date(intent.expiresAt).getTime() - Date.now()) / 1000),
-  );
+  /**
+   * V15.3K §3 — ONE expiry authority, ticking. The card derives status from
+   * `effectiveStatus`, so the countdown and the badge can never disagree: at 0s
+   * the badge reads EXPIRED and the review CTA is gone in the same render.
+   */
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 1_000);
+    return () => window.clearInterval(t);
+  }, [intent.id]);
+  const status = effectiveStatus(intent, new Date(now));
+  const ready = status === "READY_FOR_USER";
+  const expired = status === "EXPIRED";
+  const expiresIn = secondsRemaining(intent, new Date(now));
+  /** V15.3K §5 — the asset the user reviewed: native BOT stays native, WBOT stays wrapped. */
+  const assetOut =
+    p.tokenOutSymbol && typeof p.tokenOutSymbol === "string"
+      ? `${p.tokenOutSymbol}${p.tokenOutIsNative ? " (native)" : ""}`
+      : null;
+  const assetIn =
+    p.tokenInSymbol && typeof p.tokenInSymbol === "string"
+      ? `${p.tokenInSymbol}${p.tokenInIsNative ? " (native)" : ""}`
+      : null;
+  /**
+   * V15.3K §6 — approval honesty. When the live allowance read at preparation
+   * time is below the amount, this action needs TWO wallet confirmations
+   * (approve, then the action). The card says so instead of implying one.
+   */
+  const amountNumber = Number(p.amountIn ?? p.amountFlow ?? NaN);
+  const needsApproval =
+    payload.economics?.allowance !== null &&
+    payload.economics?.allowance !== undefined &&
+    Number.isFinite(amountNumber) &&
+    payload.economics.allowance < amountNumber;
 
   /**
    * V15.3F §1 — the CTA must navigate IN-APP with its query hints intact.
@@ -84,12 +114,12 @@ export function ActionIntentCard({
         <div className="min-w-0 flex-1">
           <p className="fb-eyebrow">{intent.type.replace(/_/g, " ")}</p>
           <p className="truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-            {ACTION_STATUS_COPY[intent.status]} · policy {intent.policyVersion}
+            {ACTION_STATUS_COPY[status]} · policy {intent.policyVersion}
           </p>
         </div>
         <span className="inline-flex items-center gap-1 rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted">
           <Clock className="h-2.5 w-2.5" />
-          {expiresIn}s
+          {expired ? "expired" : `${expiresIn}s`}
         </span>
       </header>
 
@@ -102,6 +132,14 @@ export function ActionIntentCard({
           <div>
             <dt className="uppercase tracking-[0.06em]">Amount</dt>
             <dd className="text-foreground">{String(p[amountField])}</dd>
+          </div>
+        ) : null}
+        {assetIn || assetOut ? (
+          <div className="col-span-2 min-w-0">
+            <dt className="uppercase tracking-[0.06em]">Asset</dt>
+            <dd className="truncate text-foreground">
+              {[assetIn, assetOut].filter(Boolean).join(" → ")}
+            </dd>
           </div>
         ) : null}
         {intent.targetContract ? (
@@ -178,6 +216,19 @@ export function ActionIntentCard({
           <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
           {ctaLabel}
         </Link>
+      ) : null}
+
+      {expired ? (
+        <p className="font-mono text-[9.5px] leading-relaxed text-danger">
+          This plan expired, so it is no longer reviewable. Ask me to prepare it again and I will
+          re-read the live fee, allowance, quote and simulation.
+        </p>
+      ) : null}
+
+      {ready && needsApproval ? (
+        <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+          Two wallet confirmations: first an approval for this token, then the action itself.
+        </p>
       ) : null}
 
       <p className="font-mono text-[9px] leading-relaxed text-muted">
