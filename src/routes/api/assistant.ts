@@ -7,6 +7,7 @@ import { getAuthUser, jsonResponse } from "@/lib/api-auth.server";
 import { ANONYMOUS_ACTOR, type FlowAiActor } from "@/lib/ai/aiTypes";
 import { answerFlowAiQuestion } from "@/lib/ai/flowAi.server";
 import type { PendingPreparation } from "@/lib/ai/preparationRouting";
+import type { PreparedHandle } from "@/lib/ai/actionContinuation";
 
 const INTERNAL_OPERATOR_EMAILS = ["kenezuartzlab@gmail.com"];
 
@@ -70,12 +71,41 @@ function normalizePending(raw: unknown): PendingPreparation | null {
   };
 }
 
+/**
+ * V15.3D — the prepared-action handle is likewise a CLIENT-CARRIED HINT. It can
+ * only continue an existing prepared plan's lifecycle; it grants no authority,
+ * carries no calldata, and the target surface still revalidates everything.
+ */
+function normalizePrepared(raw: unknown): PreparedHandle | null {
+  if (!raw || typeof raw !== "object") return null;
+  const p = raw as Record<string, unknown>;
+  const str = (v: unknown, n = 120) => (typeof v === "string" ? v.slice(0, n) : null);
+  const intentId = str(p.intentId, 64);
+  const type = str(p.type, 40);
+  const expiresAt = str(p.expiresAt, 40);
+  const chainId = Number(p.chainId);
+  if (!intentId || !type || !expiresAt || !Number.isInteger(chainId)) return null;
+  const state = str(p.state, 24);
+  return {
+    intentId,
+    type,
+    chainId,
+    state: (state as PreparedHandle["state"]) ?? "READY_FOR_USER",
+    expiresAt,
+    handoffHref: str(p.handoffHref, 300),
+    handoffCta: str(p.handoffCta, 60),
+    surface: str(p.surface, 60),
+    actorKey: str(p.actorKey, 200) ?? "",
+  };
+}
+
 export const Route = createFileRoute("/api/assistant")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         let messages: { role: "user" | "assistant"; content: string }[] = [];
         let pending: PendingPreparation | null = null;
+        let prepared: PreparedHandle | null = null;
         // V15.3B — untrusted connector hints: never used to decide whether a
         // wallet is bound, only to explain wrong-network / wrong-wallet state.
         let connector: { address: string | null; chainId: number | null } | null = null;
@@ -83,9 +113,11 @@ export const Route = createFileRoute("/api/assistant")({
           const body = (await request.json()) as {
             messages?: { role?: string; content?: string }[];
             pending?: unknown;
+            prepared?: unknown;
             connector?: { address?: unknown; chainId?: unknown };
           };
           pending = normalizePending(body.pending);
+          prepared = normalizePrepared(body.prepared);
           const rawAddress =
             typeof body.connector?.address === "string" ? body.connector.address.toLowerCase() : null;
           connector = {
@@ -123,6 +155,7 @@ export const Route = createFileRoute("/api/assistant")({
             actor,
             requestId,
             pending,
+            prepared,
             connector,
           });
           return jsonResponse({ requestId, ...result });

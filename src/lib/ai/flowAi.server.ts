@@ -29,6 +29,16 @@ import {
   type PendingPreparation,
   type PreparationShape,
 } from "./preparationRouting";
+import {
+  continuationMessage,
+  resolveContinuation,
+  type PreparedHandle,
+} from "./actionContinuation";
+import {
+  applyEconomicsGuard,
+  mentionsMutableEconomics,
+  type RuntimeFeeTruth,
+} from "./economicsGuard";
 
 export interface FlowAiAnswer {
   answer: string;
@@ -57,6 +67,22 @@ export interface FlowAiAnswer {
   pending?: PendingPreparation | null;
   /** True when the request was routed to ACTION_PREPARATION, not generic Q&A. */
   actionPreparation?: boolean;
+  /**
+   * V15.3D — set when this turn CONTINUED an already prepared action instead of
+   * answering generically. `keepPrepared` tells the client whether the prepared
+   * review card is still valid, so a "proceed" turn never loses the handoff.
+   */
+  continuation?: {
+    kind: "RESTATE_READY" | "EXPIRED" | "CANCELLED" | "CONTEXT_CHANGED";
+    keepPrepared: boolean;
+  } | null;
+  /**
+   * V15.3E — live, on-chain fee configuration used for this answer. Absent when
+   * the read failed; in that case Flow AI states no fee number at all.
+   */
+  feeTruth?: RuntimeFeeTruth | null;
+  /** V15.3E — contradictions the economics verifier corrected before replying. */
+  economicsCorrections?: readonly string[];
   /** True when at least one piece of evidence was read live this request. */
   hasLiveEvidence?: boolean;
 
@@ -218,6 +244,8 @@ HARD RULES
 - Never describe a BOT Chain capability as live unless the evidence says live. Announced features (AI Agent Launchpad V1, ERC-8004 identity, ERC-4337 Agent Wallet, MemeX, vCompute) must be described as not yet released.
 - You cannot sign, submit, claim, stake, publish or change anything. You explain steps; the user confirms in their own wallet.
 - When a transaction exists, say that you PREPARED the action and the user authorized and signed it in their own wallet. Never say or imply "I executed", "I swapped", "I sent" or "I signed". If the transaction is not yet readable in the evidence, say it is pending or unavailable — never assume it completed.
+- MUTABLE ECONOMICS (swap/bridge fees, fee bps, fee treasury, fee config nonce, staking rates, budgets) may ONLY be stated from evidence marked "on-chain" or "authoritative state" in this request. Documentation and cached knowledge are NOT valid sources for them. If no such evidence is present, say the live value could not be read and point to /trade, which discloses the exact fee before signing. Never quote a remembered fee figure such as a fixed percentage.
+- A prepared action is complete when the user opens the review surface; do not ask the user to confirm anything in chat, because your preparation and simulation are read-only and chat confirmation grants nothing.
 
 - Never ask for a seed phrase or private key, and warn the user if anything else does.
 - No financial advice, price predictions or promises of returns. Staking rates are estimates, never guaranteed APY.
@@ -239,6 +267,12 @@ export async function answerFlowAiQuestion(input: {
    * "wrong network" or "wrong wallet connected" instead of "no wallet bound".
    */
   connector?: { address?: string | null; chainId?: number | null } | null;
+  /**
+   * V15.3D — client-carried handle for the last prepared action. A hint only: it
+   * lets "proceed" continue that action's lifecycle instead of falling into
+   * generic chat. It never authorizes anything.
+   */
+  prepared?: PreparedHandle | null;
   /** Test seam: force offline behavior. */
   online?: boolean;
 }): Promise<FlowAiAnswer> {
@@ -309,6 +343,23 @@ export async function answerFlowAiQuestion(input: {
     chainId: DEFAULT_PREPARATION_CHAIN_ID,
     orgId: input.actor.orgIds[0] ?? null,
   });
+  // V15.3D §2 — a prepared action owns the next turn. "Proceed" / "authorized"
+  // continues THAT lifecycle deterministically; it never becomes a new question,
+  // and it never becomes an execution (Flow AI has no execution authority).
+  const continuation = resolveContinuation({
+    handle: input.prepared ?? null,
+    question: input.question,
+    actorKey,
+  });
+  if (continuation.kind !== "NONE") {
+    const message = continuationMessage(continuation);
+    if (message) {
+      return continuationAnswer(plan, continuation.kind, message, {
+        keepPrepared: continuation.kind === "RESTATE_READY",
+      });
+    }
+  }
+
   const resolution = resolvePending({
     pending: input.pending ?? null,
     question: input.question,
@@ -384,6 +435,22 @@ export async function answerFlowAiQuestion(input: {
   }
   if (skillIds.has("campaign_scout") && boundWallet) {
     evidence.push(...(await loadCampaignPointsEvidence(boundWallet)));
+  }
+
+  // V15.3E §3 — RuntimeFeeTruth. Fees are MUTABLE on-chain configuration, so any
+  // fee-bearing question is grounded in a live `eth_call`, never in prose. A
+  // failed read is disclosed; it is never replaced by a documented number.
+  const economicsAsked = mentionsMutableEconomics(input.question) || Boolean(shape);
+  let feeTruth: RuntimeFeeTruth | null = null;
+  if (economicsAsked) {
+    const { readRuntimeFeeTruth, feeTruthEvidence } = await import("./runtimeFeeTruth.server");
+    const read = await readRuntimeFeeTruth(shape?.chainId ?? DEFAULT_PREPARATION_CHAIN_ID);
+    if (read.ok) {
+      feeTruth = read.truth;
+      evidence.push(feeTruthEvidence(read.truth));
+    } else {
+      degraded.push("the router's live fee configuration");
+    }
   }
 
   // Opt-in, user-private preferences (tone/verbosity/default chain). Never a
@@ -478,6 +545,12 @@ export async function answerFlowAiQuestion(input: {
     answer = `${answer}\n\nI couldn't read ${degraded.join(" or ")} for this answer, so nothing above covers it.`;
   }
 
+  // V15.3E §4 — contradiction verifier: live chain truth outranks the drafted
+  // prose, and a fee stated without authoritative evidence is marked unverified.
+  const economics = applyEconomicsGuard({ answer, truth: feeTruth, economicsAsked });
+  answer = economics.answer;
+
+
 
   const audit = buildAuditRecord({
     plan,
@@ -502,6 +575,9 @@ export async function answerFlowAiQuestion(input: {
     proposal,
     pending: pendingOut,
     actionPreparation: Boolean(shape),
+    continuation: null,
+    feeTruth,
+    economicsCorrections: economics.contradictions,
     hasLiveEvidence: evidence.some((e) => livenessOf(e) === "LIVE"),
     evidence: evidence.map((e) => ({
       id: e.id,
@@ -528,6 +604,44 @@ const DEFAULT_PREPARATION_CHAIN_ID = 968;
 function livenessOf(e: EvidenceItem): "LIVE" | "CACHED" {
   if (e.dataClass === "ON_CHAIN" || e.dataClass === "FLOWBRIDGE_DB") return "LIVE";
   return e.freshness === "REALTIME" && e.authority === "AUTHORITATIVE_STATE" ? "LIVE" : "CACHED";
+}
+
+/**
+ * V15.3D — deterministic continuation turn. No model call and no retrieval: the
+ * prepared plan's own state decides the reply, and the reply always ends at
+ * "review it in the product surface and sign in your own wallet".
+ */
+function continuationAnswer(
+  plan: OrchestrationPlan,
+  kind: "RESTATE_READY" | "EXPIRED" | "CANCELLED" | "CONTEXT_CHANGED",
+  message: string,
+  opts: { keepPrepared: boolean },
+): FlowAiAnswer {
+  return {
+    answer: message,
+    mode: plan.mode,
+    intent: "ACTION_PREPARATION",
+    confidence: kind === "RESTATE_READY" ? "CURRENT" : "UNAVAILABLE",
+    confidenceLabel:
+      CONFIDENCE_LABEL[kind === "RESTATE_READY" ? "CURRENT" : "UNAVAILABLE"],
+    asOf: null,
+    disclosure: null,
+    notice:
+      kind === "RESTATE_READY"
+        ? "I prepare and simulate only. Your wallet is the single authority that can authorize this transaction."
+        : null,
+    skills: [],
+    refused: [],
+    degraded: [],
+    proposal: null,
+    pending: null,
+    actionPreparation: true,
+    continuation: { kind, keepPrepared: opts.keepPrepared },
+    feeTruth: null,
+    economicsCorrections: [],
+    hasLiveEvidence: false,
+    evidence: [],
+  };
 }
 
 /**

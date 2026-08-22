@@ -5,6 +5,16 @@ import { ACTION_STATUS_COPY } from "@/lib/ai/actionIntent";
 
 export interface PreparedIntentPayload {
   intent: ActionIntent;
+  /** V15.3E — live fee/quote/balance evidence read when the plan was prepared. */
+  economics?: {
+    feeBps: number | null;
+    feeConfigNonce: string | null;
+    feeSource: "ON_CHAIN" | "UNAVAILABLE";
+    expectedOut: number | null;
+    balance: number | null;
+    allowance: number | null;
+    observedAt: string;
+  } | null;
   decision: string;
   blockers: string[];
   riskFlags: string[];
@@ -70,6 +80,36 @@ export function ActionIntentCard({ payload }: { payload: PreparedIntentPayload }
             <dd className="truncate text-foreground">{intent.targetContract}</dd>
           </div>
         ) : null}
+        {payload.economics ? (
+          <>
+            <div>
+              <dt className="uppercase tracking-[0.06em]">Router fee (live)</dt>
+              <dd className="text-foreground">
+                {payload.economics.feeSource === "ON_CHAIN" && payload.economics.feeBps !== null
+                  ? `${payload.economics.feeBps / 100}% · ${payload.economics.feeBps} bps`
+                  : "unavailable — shown on /trade"}
+              </dd>
+            </div>
+            {payload.economics.expectedOut !== null ? (
+              <div>
+                <dt className="uppercase tracking-[0.06em]">Expected out</dt>
+                <dd className="text-foreground">{payload.economics.expectedOut}</dd>
+              </div>
+            ) : null}
+            {payload.economics.balance !== null ? (
+              <div>
+                <dt className="uppercase tracking-[0.06em]">Balance</dt>
+                <dd className="text-foreground">{payload.economics.balance}</dd>
+              </div>
+            ) : null}
+            {payload.economics.feeConfigNonce ? (
+              <div>
+                <dt className="uppercase tracking-[0.06em]">Fee config nonce</dt>
+                <dd className="text-foreground">{payload.economics.feeConfigNonce}</dd>
+              </div>
+            ) : null}
+          </>
+        ) : null}
         {intent.simulationResult ? (
           <div className="col-span-2">
             <dt className="uppercase tracking-[0.06em]">Simulation</dt>
@@ -108,7 +148,8 @@ export function ActionIntentCard({ payload }: { payload: PreparedIntentPayload }
       ) : null}
 
       <p className="font-mono text-[9px] leading-relaxed text-muted">
-        Prepared and simulated only — nothing was signed or submitted.{" "}
+        Prepared and simulated only — nothing was signed or submitted, and no chat confirmation is
+        needed or possible.{" "}
         {handoff ? `${handoff.surface} rechecks every value before your wallet can confirm.` : ""}
       </p>
     </section>
