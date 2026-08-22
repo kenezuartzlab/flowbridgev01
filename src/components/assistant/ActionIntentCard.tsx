@@ -40,6 +40,19 @@ export function ActionIntentCard({ payload }: { payload: PreparedIntentPayload }
     Math.round((new Date(intent.expiresAt).getTime() - Date.now()) / 1000),
   );
 
+  /**
+   * V15.3F §1 — the CTA must navigate IN-APP with its query hints intact.
+   * A single `to="/trade?…"` string is treated as a path by the router, so the
+   * hints never reached Trade and the form opened empty. Split path from search
+   * and pass the search record, plus the conversation id for correlation.
+   */
+  const [handoffPath, handoffQuery] = (handoff?.href ?? "/trade").split("?");
+  const handoffSearch: Record<string, string> = Object.fromEntries(
+    new URLSearchParams(handoffQuery ?? ""),
+  );
+  handoffSearch.conv = getConversation().conversationId;
+
+
   return (
     <section className="fb-inset space-y-2 p-3">
       <header className="flex items-center gap-2">
