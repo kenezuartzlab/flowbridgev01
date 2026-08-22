@@ -304,6 +304,39 @@ export function clarificationFor(shape: PreparationShape | PendingPreparation): 
 }
 
 /**
+ * V15.3K §2 — the SINGLE canonical normalized request. One-shot ("prepare a
+ * small 10 USDT to BOT swap on BOT Testnet") and two-turn ("...small USDT to
+ * BOT..." → "10") both reduce to this object before anything economic happens,
+ * so the ActionIntent, its fingerprint inputs and its prepared economics are
+ * identical for both paths.
+ */
+export interface NormalizedActionRequest {
+  actionType: ActionIntentType;
+  chainId: number;
+  amount: string | null;
+  destinationChainId: number | null;
+  tokenIn: { symbol: string; address: string; decimals: number; isNative: boolean } | null;
+  tokenOut: { symbol: string; address: string; decimals: number; isNative: boolean } | null;
+}
+
+export function normalizeRequest(shape: PreparationShape): NormalizedActionRequest | null {
+  const chainId = shape.chainId;
+  const tokenIn = shape.tokenInSymbol ? tokenFor(shape.tokenInSymbol, chainId) : null;
+  const tokenOut = shape.tokenOutSymbol ? tokenFor(shape.tokenOutSymbol, chainId) : null;
+  if (shape.type === "SWAP" && (!tokenIn || !tokenOut || tokenIn.address === tokenOut.address)) {
+    return null;
+  }
+  return {
+    actionType: shape.type,
+    chainId,
+    amount: shape.amount,
+    destinationChainId: shape.destinationChainId,
+    tokenIn,
+    tokenOut,
+  };
+}
+
+/**
  * Turns a completed shape into canonical ActionIntent parameters. Addresses and
  * decimals come from the registry; the sentence only supplies the amount.
  */
@@ -314,12 +347,12 @@ export function parametersForShape(input: {
 }): { type: ActionIntentType; chainId: number; parameters: Record<string, unknown> } | null {
   const { shape, wallet } = input;
   const chainId = shape.chainId;
+  const request = normalizeRequest(shape);
+  if (!request) return null;
 
-  if (shape.type === "SWAP") {
-    if (!shape.amount || !shape.tokenInSymbol || !shape.tokenOutSymbol) return null;
-    const tokenIn = tokenFor(shape.tokenInSymbol, chainId);
-    const tokenOut = tokenFor(shape.tokenOutSymbol, chainId);
-    if (!tokenIn || !tokenOut || tokenIn.address === tokenOut.address) return null;
+  if (request.actionType === "SWAP") {
+    const { tokenIn, tokenOut, amount } = request;
+    if (!amount || !tokenIn || !tokenOut) return null;
     return {
       type: "SWAP",
       chainId,
@@ -328,12 +361,19 @@ export function parametersForShape(input: {
         tokenOut: tokenOut.address,
         decimalsIn: tokenIn.decimals,
         decimalsOut: tokenOut.decimals,
-        amountIn: shape.amount,
+        amountIn: amount,
         slippageBps: 50,
         recipient: wallet,
+        // V15.3K §5 — asset semantics travel WITH the plan, so the review card
+        // and Trade agree on native BOT vs wrapped WBOT.
+        tokenInSymbol: tokenIn.symbol,
+        tokenOutSymbol: tokenOut.symbol,
+        tokenInIsNative: tokenIn.isNative,
+        tokenOutIsNative: tokenOut.isNative,
       },
     };
   }
+
 
   if (shape.type === "BRIDGE") {
     if (!shape.amount || !shape.destinationChainId) return null;
