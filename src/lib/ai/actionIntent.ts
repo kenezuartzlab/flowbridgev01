@@ -382,11 +382,22 @@ export interface ActionHandoff {
 
 export function buildHandoff(intent: ActionIntent): ActionHandoff {
   const p = intent.parameters as Record<string, any>;
+  // V15.3 §4 — correlation metadata: intent id, economic fingerprint digest and
+  // expiry travel with the link so the target surface can refuse stale or
+  // altered hints. These are hints, never authority.
+  const correlation = {
+    intent: intent.id,
+    fp: fingerprintDigest(economicFingerprint(intent)),
+    exp: intent.expiresAt,
+    itype: intent.type,
+    ichain: intent.chainId,
+  };
   const q = (o: Record<string, string | number | undefined>) =>
-    Object.entries(o)
+    Object.entries({ ...o, ...correlation })
       .filter(([, v]) => v !== undefined && v !== "")
       .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
       .join("&");
+
 
   switch (intent.type) {
     case "SWAP":
