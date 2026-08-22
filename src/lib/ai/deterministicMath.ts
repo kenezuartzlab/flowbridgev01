@@ -29,16 +29,16 @@ export function explainSwapPoints(input: {
   const policy = input.policy ?? DEFAULT_FLOW_POINTS_V2_POLICY;
   const volumeUsd = Number.isFinite(input.volumeUsd) ? Math.max(0, input.volumeUsd) : 0;
   const base = coreSwapBasePoints(volumeUsd, policy);
-  const capRemaining = Math.max(0, policy.dailyCorePointsCap - Math.max(0, input.pointsAlreadyToday));
+  const capRemaining = Math.max(0, policy.dailyCoreSwapCap - Math.max(0, input.pointsAlreadyToday));
   const points = Math.min(base, capRemaining);
 
   let reason: string;
   if (base === 0) {
-    reason = `Swaps under $${policy.minimumSwapUsd} don't earn FLOW Points, and this one was $${formatUsdAmount(volumeUsd)}.`;
+    reason = `Swaps under $${policy.minSwapUsd} don't earn FLOW Points, and this one was $${formatUsdAmount(volumeUsd)}.`;
   } else if (points < base) {
-    reason = `This swap qualified for ${base} points but the ${policy.dailyCorePointsCap}-point daily cap left room for ${capRemaining}.`;
+    reason = `This swap qualified for ${base} points but the ${policy.dailyCoreSwapCap}-point daily cap left room for ${capRemaining}.`;
   } else {
-    reason = `$${formatUsdAmount(volumeUsd)} of volume earns ${points} points at 1 point per whole $1 (minimum $${policy.minimumSwapUsd}).`;
+    reason = `$${formatUsdAmount(volumeUsd)} of volume earns ${points} points at 1 point per whole $1 (minimum $${policy.minSwapUsd}).`;
   }
 
   return { qualified: points > 0, points, volumeUsd, reason, capRemaining, cappedTo: base - points };

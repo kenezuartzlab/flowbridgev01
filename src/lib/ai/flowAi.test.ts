@@ -82,7 +82,11 @@ describe("V15 BOT compatibility honesty", () => {
 
   it("blocks promotion without verified release evidence", () => {
     expect(
-      canPromoteAdapter({ id: "BotLaunchpadAdapter", hasVerifiedReleaseEvidence: false }).allowed,
+      canPromoteAdapter({
+        id: "BotLaunchpadAdapter",
+        targetAvailability: "live",
+        releaseEvidence: null,
+      }).allowed,
     ).toBe(false);
   });
 });
