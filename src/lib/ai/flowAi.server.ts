@@ -314,6 +314,7 @@ export async function answerFlowAiQuestion(input: {
   }
 
   let pendingOut: PendingPreparation | null = null;
+  let bindingNotice: string | null = null;
   if (shape) {
     if (!input.actor.userId) {
       return preparationBlockedAnswer(
@@ -321,17 +322,27 @@ export async function answerFlowAiQuestion(input: {
         "Sign in first and bind your wallet — then I can prepare that action for you to review and sign yourself.",
       );
     }
-    if (!boundWallet) {
+    // V15.3B §2 — connector state refines the message; only a missing PERSISTED
+    // binding can block preparation.
+    const binding = resolveWalletBinding({
+      boundWallet,
+      connectedWallet: input.connector?.address ?? null,
+      connectedChainId:
+        typeof input.connector?.chainId === "number" ? input.connector.chainId : null,
+      targetChainId: shape.chainId,
+    });
+    if (!binding.canPrepare) {
       return preparationBlockedAnswer(
         plan,
-        "I recognized that as an action to prepare, but no wallet is bound to your account yet. Bind your wallet on /earn and ask me again — you always sign it yourself.",
+        `I recognized that as an action to prepare, but ${binding.message}`,
       );
     }
+    bindingNotice = binding.message;
     if (shape.missingFields.length > 0) {
       pendingOut = createPending({ shape, actorKey });
       return preparationClarificationAnswer(plan, pendingOut, clarificationFor(shape));
     }
-    const built = parametersForShape({ shape, wallet: boundWallet });
+    const built = parametersForShape({ shape, wallet: binding.boundWallet! });
     if (built) {
       proposal = {
         type: built.type,
@@ -341,6 +352,8 @@ export async function answerFlowAiQuestion(input: {
       } satisfies IntentProposal;
     }
   }
+  void bindingNotice;
+
 
 
 
