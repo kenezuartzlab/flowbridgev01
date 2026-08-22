@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Bot, ChevronDown, ShieldCheck, Sparkles, User } from "lucide-react";
+import { assistantFetch } from "@/lib/ai/assistantClient";
+import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
 
 export interface EvidenceRef {
   id: string;
