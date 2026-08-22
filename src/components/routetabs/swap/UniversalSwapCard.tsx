@@ -136,7 +136,7 @@ export function UniversalSwapCard({
     (async () => {
       try {
         const cfg = (await publicClient.readContract({
-          address: contracts.flowBridgeRouter as `0x${string}`,
+          address: contracts.flowBridgeRouterV3 as `0x${string}`,
           abi: FLOW_BRIDGE_ROUTER_V3_ABI,
           functionName: "getFeeConfig",
         })) as readonly [bigint, bigint, string];
@@ -148,7 +148,7 @@ export function UniversalSwapCard({
     return () => {
       cancelled = true;
     };
-  }, [publicClient, contracts.flowBridgeRouter]);
+  }, [publicClient, contracts.flowBridgeRouterV3]);
   const disclosedFeeBps = liveFeeBps ?? platformFeeBps;
   const platformFeeLabel =
     liveFeeBps !== null
