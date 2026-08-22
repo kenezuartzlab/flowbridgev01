@@ -55,7 +55,7 @@ export async function persistPreparedIntent(input: {
         intent_type: canonical.type,
         chain_id: canonical.chainId,
         digest: canonical.digest,
-        canonical: canonical as unknown as Record<string, unknown>,
+        canonical: JSON.parse(JSON.stringify(canonical)),
         expires_at: canonical.expiresAt,
       },
       { onConflict: "id" },
