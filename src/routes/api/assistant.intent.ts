@@ -31,7 +31,7 @@ async function resolveContext(request: Request): Promise<
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: orgs }, { data: profile }] = await Promise.all([
       supabaseAdmin.from("partner_org_members").select("org_id").eq("user_id", user.id),
-      supabaseAdmin.from("users").select("wallet_address").eq("id", user.id).maybeSingle(),
+      supabaseAdmin.from("profiles").select("wallet_address").eq("id", user.id).maybeSingle(),
     ]);
     orgIds = (orgs ?? []).map((r: any) => String(r.org_id));
     const addr = (profile as any)?.wallet_address;
