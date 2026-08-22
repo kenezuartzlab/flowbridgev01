@@ -116,6 +116,55 @@ export function AssistantChat() {
     }
   }
 
+  /**
+   * Asks the SERVER to prepare, policy-check and simulate the candidate action.
+   * Nothing is executed here: the result is a review card whose CTA links to the
+   * product surface, which revalidates before the user's wallet signs.
+   */
+  async function prepare(proposal: IntentProposalRef) {
+    try {
+      const res = await assistantFetch("/api/assistant/intent", {
+        method: "POST",
+        body: JSON.stringify({
+          type: proposal.type,
+          chainId: proposal.chainId,
+          parameters: proposal.parameters,
+        }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as
+        | (PreparedIntentPayload & { error?: string })
+        | { error?: string };
+      setMessages((prev) => {
+        const copy = [...prev];
+        const i = copy.length - 1;
+        if (i < 0 || copy[i].role !== "assistant") return prev;
+        copy[i] =
+          res.ok && "intent" in payload
+            ? { ...copy[i], prepared: payload as PreparedIntentPayload }
+            : {
+                ...copy[i],
+                preparationError:
+                  (payload as { error?: string }).error ??
+                  "I couldn't prepare that plan, so I won't guess at it.",
+              };
+        return copy;
+      });
+    } catch {
+      setMessages((prev) => {
+        const copy = [...prev];
+        const i = copy.length - 1;
+        if (i < 0 || copy[i].role !== "assistant") return prev;
+        copy[i] = {
+          ...copy[i],
+          preparationError: "Action preparation is unavailable right now.",
+        };
+        return copy;
+      });
+    }
+  }
+
+
+
   return (
     <div className="flex flex-col gap-3">
       <section className="fb-surface flex min-h-[52vh] flex-col overflow-hidden">
