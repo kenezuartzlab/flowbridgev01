@@ -280,10 +280,17 @@ export async function answerFlowAiQuestion(input: {
     )
     .join("\n\n");
 
+  const degradedNote =
+    degraded.length > 0
+      ? `Unavailable this request (say so plainly, do not estimate): ${degraded.join("; ")}.`
+      : null;
+
   const scopeNotes = [
     plan.refused.length > 0
       ? `Unavailable specialists: ${plan.refused.map((r) => `${r.skillId} (${r.reason})`).join("; ")}`
       : null,
+    degradedNote,
+    memoryLine ? `User preferences (style only, not facts): ${memoryLine}` : null,
     plan.actionNotice,
     verification.disclosure,
   ]
