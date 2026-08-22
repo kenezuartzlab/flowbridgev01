@@ -106,7 +106,7 @@ export function AssistantChat() {
     setError(null);
     setInput("");
     const next: ChatMessage[] = [...messages, { role: "user", content: question }];
-    setMessages([...next, { role: "assistant", content: "" }]);
+    setConversationMessages([...next, { role: "assistant", content: "" }]);
     setBusy(true);
 
     try {
@@ -138,7 +138,7 @@ export function AssistantChat() {
         throw new Error(data.error ?? "Flow AI is unavailable right now.");
       }
 
-      setMessages((prev) => {
+      updateConversationMessages((prev) => {
         const copy = [...prev];
         copy[copy.length - 1] = {
           role: "assistant",
@@ -155,16 +155,16 @@ export function AssistantChat() {
         return copy;
       });
 
-      setPending(data.pending ?? null);
+      setConversationPending(data.pending ?? null);
 
       // V15.3D — a continuation turn either keeps the prepared plan alive or
       // retires it. Either way it never re-prepares silently.
-      if (data.continuation && !data.continuation.keepPrepared) setPreparedHandle(null);
+      if (data.continuation && !data.continuation.keepPrepared) setConversationPrepared(null);
 
       if (data.proposal) void prepare(data.proposal);
 
     } catch (e: any) {
-      setMessages((prev) => prev.slice(0, -1));
+      updateConversationMessages((prev) => prev.slice(0, -1));
       setError(e?.message ?? "Something went wrong.");
     } finally {
       setBusy(false);
@@ -189,7 +189,7 @@ export function AssistantChat() {
       const payload = (await res.json().catch(() => ({}))) as
         | (PreparedIntentPayload & { error?: string })
         | { error?: string };
-      setMessages((prev) => {
+      updateConversationMessages((prev) => {
         const copy = [...prev];
         const i = copy.length - 1;
         if (i < 0 || copy[i].role !== "assistant") return prev;
@@ -206,7 +206,7 @@ export function AssistantChat() {
       });
       if (res.ok && "intent" in payload) {
         const ready = payload as PreparedIntentPayload;
-        setPreparedHandle({
+        setConversationPrepared({
           intentId: ready.intent.id,
           type: ready.intent.type,
           chainId: ready.intent.chainId,
@@ -218,11 +218,11 @@ export function AssistantChat() {
           actorKey: "",
         });
       } else {
-        setPreparedHandle(null);
+        setConversationPrepared(null);
       }
     } catch {
-      setPreparedHandle(null);
-      setMessages((prev) => {
+      setConversationPrepared(null);
+      updateConversationMessages((prev) => {
         const copy = [...prev];
         const i = copy.length - 1;
         if (i < 0 || copy[i].role !== "assistant") return prev;
@@ -247,7 +247,7 @@ export function AssistantChat() {
           <div className="min-w-0 flex-1">
             <p className="fb-eyebrow">Flow AI</p>
             <p className="truncate font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-              Evidence-grounded · read-only · never asks for keys
+              Evidence-grounded · prepares actions · never signs
             </p>
           </div>
         </div>
