@@ -56,6 +56,8 @@ export interface FlowAiAnswer {
   pending?: PendingPreparation | null;
   /** True when the request was routed to ACTION_PREPARATION, not generic Q&A. */
   actionPreparation?: boolean;
+  /** True when at least one piece of evidence was read live this request. */
+  hasLiveEvidence?: boolean;
 
   evidence: readonly {
     id: string;
@@ -211,6 +213,8 @@ export async function answerFlowAiQuestion(input: {
   history: readonly { role: "user" | "assistant"; content: string }[];
   actor: FlowAiActor;
   requestId: string;
+  /** V15.3A — pending preparation slot carried by the client from the last turn. */
+  pending?: PendingPreparation | null;
   /** Test seam: force offline behavior. */
   online?: boolean;
 }): Promise<FlowAiAnswer> {
@@ -260,13 +264,74 @@ export async function answerFlowAiQuestion(input: {
 
   // V15.2 §3 — deterministic candidate extraction. Only signed-in actors get a
   // proposal, and it is a request to PREPARE, never an authorization to execute.
-  const proposal = input.actor.userId
+  let proposal = input.actor.userId
     ? proposeIntent({
         question: input.question,
         wallet: boundWallet,
         organizationId: input.actor.orgIds[0] ?? null,
       })
     : null;
+
+  // V15.3A §2/§3 — ACTION PREPARATION routing runs BEFORE generic answering, so
+  // an imperative request can never fall through to a "here's how you'd do it"
+  // reply. A missing exact amount is asked for; it is never invented.
+  const actorKey = buildActorKey({
+    userId: input.actor.userId ?? null,
+    wallet: boundWallet,
+    chainId: DEFAULT_PREPARATION_CHAIN_ID,
+    orgId: input.actor.orgIds[0] ?? null,
+  });
+  const resolution = resolvePending({
+    pending: input.pending ?? null,
+    question: input.question,
+    actorKey,
+  });
+
+  let shape: PreparationShape | null = null;
+  if (resolution.kind === "COMPLETED" || resolution.kind === "SUPERSEDED") {
+    shape = resolution.shape;
+  } else if (resolution.kind === "STILL_MISSING") {
+    shape = {
+      ...resolution.pending,
+      amount: null,
+      missingFields: resolution.pending.missingFields,
+    } as PreparationShape;
+  } else {
+    shape = detectPreparationRequest({
+      question: input.question,
+      defaultChainId: DEFAULT_PREPARATION_CHAIN_ID,
+    });
+  }
+
+  let pendingOut: PendingPreparation | null = null;
+  if (shape) {
+    if (!input.actor.userId) {
+      return preparationBlockedAnswer(
+        plan,
+        "Sign in first and bind your wallet — then I can prepare that action for you to review and sign yourself.",
+      );
+    }
+    if (!boundWallet) {
+      return preparationBlockedAnswer(
+        plan,
+        "I recognized that as an action to prepare, but no wallet is bound to your account yet. Bind your wallet on /earn and ask me again — you always sign it yourself.",
+      );
+    }
+    if (shape.missingFields.length > 0) {
+      pendingOut = createPending({ shape, actorKey });
+      return preparationClarificationAnswer(plan, pendingOut, clarificationFor(shape));
+    }
+    const built = parametersForShape({ shape, wallet: boundWallet });
+    if (built) {
+      proposal = {
+        type: built.type,
+        chainId: built.chainId,
+        parameters: built.parameters,
+        organizationId: input.actor.orgIds[0] ?? null,
+        recognized: shape.recognized,
+      } as IntentProposal;
+    }
+  }
 
 
 
@@ -396,15 +461,85 @@ export async function answerFlowAiQuestion(input: {
     refused: plan.refused.map((r) => ({ skillId: r.skillId, reason: r.reason })),
     degraded,
     proposal,
+    pending: pendingOut,
+    actionPreparation: Boolean(shape),
+    hasLiveEvidence: evidence.some((e) => livenessOf(e) === "LIVE"),
     evidence: evidence.map((e) => ({
       id: e.id,
       label: e.label,
       group: DATA_CLASS_LABEL[e.dataClass] ?? e.dataClass,
       freshness: e.freshness,
       observedAt: e.observedAt,
+      liveness: livenessOf(e),
+      fetchedAt: e.observedAt,
       url: e.url,
       excerpt: e.excerpt,
     })),
+  };
+}
+
+/** BOT Testnet is the chain every V15.3 canary action is prepared against. */
+const DEFAULT_PREPARATION_CHAIN_ID = 968;
+
+/**
+ * V15.3A §4 — per-source freshness. Evidence read from chain/DB this request is
+ * LIVE; documentation and snapshots are CACHED. The two are never merged into a
+ * single global "as of" claim.
+ */
+function livenessOf(e: EvidenceItem): "LIVE" | "CACHED" {
+  if (e.dataClass === "ON_CHAIN" || e.dataClass === "FLOWBRIDGE_DB") return "LIVE";
+  return e.freshness === "REALTIME" && e.authority === "AUTHORITATIVE_STATE" ? "LIVE" : "CACHED";
+}
+
+/**
+ * Clarification turn: recognized as a preparation request, one required economic
+ * value missing. No intent is prepared, nothing is simulated, no amount guessed.
+ */
+function preparationClarificationAnswer(
+  plan: OrchestrationPlan,
+  pending: PendingPreparation,
+  message: string,
+): FlowAiAnswer {
+  return {
+    answer: message,
+    mode: plan.mode,
+    intent: "ACTION_PREPARATION",
+    confidence: "CURRENT",
+    confidenceLabel: CONFIDENCE_LABEL.CURRENT,
+    asOf: null,
+    disclosure: null,
+    notice:
+      "I only prepare and simulate. You review the plan and authorize it in your own wallet.",
+    skills: [],
+    refused: [],
+    degraded: [],
+    proposal: null,
+    pending,
+    actionPreparation: true,
+    hasLiveEvidence: false,
+    evidence: [],
+  };
+}
+
+/** Preparation recognized but impossible for this actor (no session / no wallet). */
+function preparationBlockedAnswer(plan: OrchestrationPlan, message: string): FlowAiAnswer {
+  return {
+    answer: message,
+    mode: plan.mode,
+    intent: "ACTION_PREPARATION",
+    confidence: "UNAVAILABLE",
+    confidenceLabel: CONFIDENCE_LABEL.UNAVAILABLE,
+    asOf: null,
+    disclosure: null,
+    notice: null,
+    skills: [],
+    refused: [],
+    degraded: [],
+    proposal: null,
+    pending: null,
+    actionPreparation: true,
+    hasLiveEvidence: false,
+    evidence: [],
   };
 }
 
@@ -450,6 +585,9 @@ function refusalAnswer(plan: OrchestrationPlan, refusal: string): FlowAiAnswer {
     refused: [{ skillId: "privacy_boundary", reason: "cross-actor private data request" }],
     degraded: [],
     proposal: null,
+    pending: null,
+    actionPreparation: false,
+    hasLiveEvidence: false,
     evidence: [],
   };
 }
