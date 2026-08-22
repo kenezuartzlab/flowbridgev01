@@ -599,6 +599,31 @@ export default function App() {
       ? HYDRATION_FAILURE_COPY[swapHydration.reason as keyof typeof HYDRATION_FAILURE_COPY]
       : null;
 
+  /**
+   * V15.3G §6 — report the hydration outcome back into the conversation as an
+   * OBSERVATION, so Flow AI can say the handoff failed and offer to prepare the
+   * action again instead of implying it went through. It carries no authority.
+   */
+  useEffect(() => {
+    if (!handoffHint) return;
+    if (swapHydrationNotice) {
+      recordConversationObservation({
+        code: 'HANDOFF_HYDRATION_FAILED',
+        surface: 'Trade',
+        detail: swapHydrationNotice,
+        intentId: handoffHint.intentId,
+      });
+    } else if (swapHydrationPlan) {
+      recordConversationObservation({
+        code: 'HANDOFF_HYDRATED',
+        surface: 'Trade',
+        detail: `Prefilled ${swapHydrationPlan.amount} ${swapHydrationPlan.tokenInSymbol} → ${swapHydrationPlan.tokenOutSymbol}; revalidating before signing.`,
+        intentId: handoffHint.intentId,
+      });
+    }
+  }, [handoffHint, swapHydrationNotice, swapHydrationPlan]);
+
+
 
 
 
