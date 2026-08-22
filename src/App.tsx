@@ -3322,12 +3322,13 @@ export default function App() {
           )}
         </div>
         {googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com' && (
-          <a
-            href="/sets"
+          <Link
+            to="/sets"
             className="text-[9px] tracking-[0.2em] font-black text-[#32FF8B]/80 hover:text-[#32FF8B] transition-colors"
           >
             ⚙ Admin console
-          </a>
+          </Link>
+
         )}
         <span className="text-[9px] text-[#C5C1B9]/70 tracking-[0.2em] font-medium">
           {appConfig.content.footerNote}
