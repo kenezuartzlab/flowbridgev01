@@ -5,15 +5,19 @@ import { createActionIntent, withStatus } from "./actionIntent";
 
 function readyIntent(amount = 10) {
   const base = createActionIntent({
+    id: `intent-${amount}`,
     type: "SWAP",
     chainId: 968,
-    actor: { userId: "u1", walletAddress: "0x1111111111111111111111111111111111111111" },
+    actorUserId: "u1",
+    actorWallet: "0x1111111111111111111111111111111111111111",
+    targetContract: "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
     parameters: {
       tokenIn: "0x2222222222222222222222222222222222222222",
       tokenOut: "0x3333333333333333333333333333333333333333",
       decimalsIn: 18,
       decimalsOut: 18,
       amountIn: amount,
+      recipient: "0x1111111111111111111111111111111111111111",
     },
   });
   return {
