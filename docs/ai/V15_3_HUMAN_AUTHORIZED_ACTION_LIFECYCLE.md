@@ -36,3 +36,20 @@ The one blockchain transaction in this gate can only be broadcast by the user's 
 5. Re-prepare, follow the fresh link, and authorize the swap in the wallet — exactly one transaction.
 6. Ask Flow AI: `What happened with the swap you prepared for me?` Flow AI must explain from canonical evidence and state that it prepared while the user authorized and signed.
 7. Report tx hash, block, receipt status, router target, SwapActivity identity, and the independent FLOW Points V2 / campaign PTS deltas before and after.
+
+## V15.3A — runtime activation + freshness fix
+
+Defect: an imperative request ("Prepare a small USDT to BOT swap for me on BOT Testnet")
+fell through to generic prose, and a single global "as of" badge made live reads look stale.
+
+| Piece | Change |
+| --- | --- |
+| `src/lib/ai/preparationRouting.ts` | Detects preparation requests before generic answering, models the short-lived pending slot (5 min, actor-bound), and builds canonical parameters from the registry. |
+| `src/lib/ai/flowAi.server.ts` | Routes to `ACTION_PREPARATION` first, asks one clarifying question when the exact amount is missing, and returns per-source `liveness` plus `hasLiveEvidence`. |
+| `src/routes/api/assistant.ts` | Accepts the pending slot as an untrusted hint; actor key, amounts, addresses and simulation stay server-resolved. |
+| `src/components/assistant/AssistantChat.tsx` | Carries the pending slot, shows a LIVE indicator instead of a global stale timestamp, and labels each source live/cached. |
+| `src/lib/ai/knowledgeBase.ts` | Gas guidance now derives from the app's authoritative low-gas threshold instead of hardcoded prose. |
+
+Invariants: a vague size qualifier never becomes an amount, an example is not consent,
+expired or context-changed pending slots are dropped, and `READY_FOR_USER` still requires
+fresh live state — the user's wallet remains the only execution authority.
