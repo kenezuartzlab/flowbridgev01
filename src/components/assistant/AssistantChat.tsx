@@ -58,9 +58,8 @@ export function AssistantChat() {
     setBusy(true);
 
     try {
-      const res = await fetch("/api/assistant", {
+      const res = await assistantFetch("/api/assistant", {
         method: "POST",
-        headers: { "content-type": "application/json" },
         body: JSON.stringify({
           messages: next.map((m) => ({ role: m.role, content: m.content })),
         }),
