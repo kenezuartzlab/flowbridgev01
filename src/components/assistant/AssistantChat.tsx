@@ -13,6 +13,7 @@ import {
   setConversationMessages,
   setConversationPending,
   setConversationPrepared,
+  setConversationRenderStatus,
   updateConversationMessages,
   useConversation,
   type PendingPreparationRef,
@@ -20,6 +21,13 @@ import {
 } from "@/lib/ai/conversationStore";
 
 import type { ChatMessage, EvidenceRef } from "@/lib/ai/conversationTypes";
+import {
+  RENDER_FAILED_MESSAGE,
+  STRUCTURED_ACTION_TESTIDS,
+  validateStructuredAction,
+  type AssistantMode,
+  type ReviewAction,
+} from "@/lib/ai/actionRender";
 
 export type { ChatMessage, EvidenceRef };
 
@@ -125,6 +133,18 @@ export function AssistantChat() {
           messages: next.map((m) => ({ role: m.role, content: m.content })),
           pending,
           prepared: preparedHandle,
+          // V15.3H §6 — report what the UI actually rendered / what Trade reported.
+          productState: {
+            renderStatus: conversation.renderStatus,
+            hasPreparedHandle: Boolean(preparedHandle),
+            handoff: conversation.observation
+              ? {
+                  code: conversation.observation.code,
+                  surface: conversation.observation.surface,
+                  detail: conversation.observation.detail,
+                }
+              : null,
+          },
           connector: await readConnectorHint(),
         }),
       });
@@ -138,6 +158,10 @@ export function AssistantChat() {
         skills?: string[];
         evidence?: EvidenceRef[];
         proposal?: IntentProposalRef | null;
+        actionIntent?: Record<string, any> | null;
+        actionPlan?: PreparedIntentPayload | null;
+        reviewAction?: ReviewAction | null;
+        notReadyReasons?: string[];
         pending?: PendingPreparationRef | null;
         actionPreparation?: boolean;
         hasLiveEvidence?: boolean;
@@ -147,12 +171,27 @@ export function AssistantChat() {
         throw new Error(data.error ?? "Flow AI is unavailable right now.");
       }
 
+      /**
+       * V15.3H §2 — the CARD comes from the structured payload, never from the
+       * prose. The same validator the server used runs here too: a
+       * READY_FOR_USER answer without a valid intent + reviewAction is treated
+       * as a render failure, not narrated as if a button existed.
+       */
+      const mode = (data.mode ?? "INFO") as AssistantMode;
+      const verdict = validateStructuredAction({
+        mode,
+        actionIntent: data.actionIntent ?? null,
+        reviewAction: data.reviewAction ?? null,
+      });
+      const ready = mode === "READY_FOR_USER" && verdict.ok && Boolean(data.actionPlan);
+      const renderFailed = mode === "READY_FOR_USER" && !ready;
+
       updateConversationMessages((prev) => {
         const copy = [...prev];
         copy[copy.length - 1] = {
           role: "assistant",
-          content: data.answer!,
-          mode: data.mode,
+          content: renderFailed ? RENDER_FAILED_MESSAGE : data.answer!,
+          mode: renderFailed ? "NOT_READY" : mode,
           confidenceLabel: data.confidenceLabel,
           asOf: data.asOf ?? null,
           notice: data.notice ?? null,
@@ -160,6 +199,13 @@ export function AssistantChat() {
           evidence: data.evidence ?? [],
           hasLiveEvidence: data.hasLiveEvidence ?? false,
           actionPreparation: data.actionPreparation ?? false,
+          prepared: ready ? (data.actionPlan as PreparedIntentPayload) : null,
+          reviewAction: ready ? (data.reviewAction ?? null) : null,
+          renderFailed,
+          preparationError:
+            !ready && (data.notReadyReasons?.length ?? 0) > 0
+              ? `Not prepared: ${data.notReadyReasons!.join("; ")}. Nothing was signed or submitted.`
+              : null,
         };
         return copy;
       });
@@ -170,7 +216,26 @@ export function AssistantChat() {
       // retires it. Either way it never re-prepares silently.
       if (data.continuation && !data.continuation.keepPrepared) setConversationPrepared(null);
 
-      if (data.proposal) void prepare(data.proposal);
+      if (ready) {
+        const intent = data.actionPlan!.intent;
+        setConversationPrepared({
+          intentId: intent.id,
+          type: intent.type,
+          chainId: intent.chainId,
+          state: intent.status,
+          expiresAt: intent.expiresAt,
+          handoffHref: data.actionPlan!.handoff?.href ?? null,
+          handoffCta: data.reviewAction?.label ?? null,
+          surface: data.reviewAction?.surface ?? null,
+          actorKey: "",
+        });
+        setConversationRenderStatus("RENDERED");
+      } else if (renderFailed) {
+        setConversationPrepared(null);
+        setConversationRenderStatus("RENDER_FAILED");
+      } else if (mode !== "PREPARATION") {
+        setConversationRenderStatus("NONE");
+      }
 
     } catch (e: any) {
       updateConversationMessages((prev) => prev.slice(0, -1));
@@ -179,72 +244,6 @@ export function AssistantChat() {
       setBusy(false);
     }
   }
-
-  /**
-   * Asks the SERVER to prepare, policy-check and simulate the candidate action.
-   * Nothing is executed here: the result is a review card whose CTA links to the
-   * product surface, which revalidates before the user's wallet signs.
-   */
-  async function prepare(proposal: IntentProposalRef) {
-    try {
-      const res = await assistantFetch("/api/assistant/intent", {
-        method: "POST",
-        body: JSON.stringify({
-          type: proposal.type,
-          chainId: proposal.chainId,
-          parameters: proposal.parameters,
-        }),
-      });
-      const payload = (await res.json().catch(() => ({}))) as
-        | (PreparedIntentPayload & { error?: string })
-        | { error?: string };
-      updateConversationMessages((prev) => {
-        const copy = [...prev];
-        const i = copy.length - 1;
-        if (i < 0 || copy[i].role !== "assistant") return prev;
-        copy[i] =
-          res.ok && "intent" in payload
-            ? { ...copy[i], prepared: payload as PreparedIntentPayload, preparationError: null }
-            : {
-                ...copy[i],
-                preparationError:
-                  (payload as { error?: string }).error ??
-                  "I couldn't prepare that plan, so I won't guess at it.",
-              };
-        return copy;
-      });
-      if (res.ok && "intent" in payload) {
-        const ready = payload as PreparedIntentPayload;
-        setConversationPrepared({
-          intentId: ready.intent.id,
-          type: ready.intent.type,
-          chainId: ready.intent.chainId,
-          state: ready.intent.status,
-          expiresAt: ready.intent.expiresAt,
-          handoffHref: ready.handoff?.href ?? null,
-          handoffCta: ready.handoff?.cta ?? null,
-          surface: ready.handoff?.surface ?? null,
-          actorKey: "",
-        });
-      } else {
-        setConversationPrepared(null);
-      }
-    } catch {
-      setConversationPrepared(null);
-      updateConversationMessages((prev) => {
-        const copy = [...prev];
-        const i = copy.length - 1;
-        if (i < 0 || copy[i].role !== "assistant") return prev;
-        copy[i] = {
-          ...copy[i],
-          preparationError: "Action preparation is unavailable right now.",
-        };
-        return copy;
-      });
-    }
-  }
-
-
 
   return (
     <div className="flex flex-col gap-3">
@@ -394,7 +393,28 @@ export function AssistantChat() {
                         </div>
                       ) : null}
 
-                      {m.prepared ? <ActionIntentCard payload={m.prepared} /> : null}
+                      {m.prepared ? (
+                        <ActionIntentCard payload={m.prepared} reviewAction={m.reviewAction ?? null} />
+                      ) : null}
+                      {m.renderFailed ? (
+                        <div
+                          data-testid={STRUCTURED_ACTION_TESTIDS.renderFailed}
+                          className="fb-inset space-y-2 border border-danger/40 p-3"
+                        >
+                          <p className="fb-eyebrow text-danger">HANDOFF_RENDER_FAILED</p>
+                          <p className="font-mono text-[10px] leading-relaxed text-muted">
+                            The prepared plan did not arrive in a renderable form, so there is no
+                            review card and no button to tap.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => void send("Prepare that action again.")}
+                            className="fb-inset min-h-[36px] px-2.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-foreground"
+                          >
+                            Retry preparation
+                          </button>
+                        </div>
+                      ) : null}
                       {m.preparationError ? (
                         <p className="fb-inset px-2.5 py-2 font-mono text-[10px] leading-relaxed text-muted">
                           {m.preparationError}
