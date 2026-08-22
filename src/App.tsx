@@ -46,6 +46,7 @@ import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
 import { CampaignTaskContextBanner } from './components/app/CampaignTaskContextBanner';
 import { SwapCampaignTaskBanner } from './components/app/SwapCampaignTaskBanner';
+import { AiHandoffBanner } from './components/assistant/AiHandoffBanner';
 import {
   isMainnetActionSearch,
   parseCampaignActionSearchString,
@@ -2911,6 +2912,15 @@ export default function App() {
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
               onReset={resetStep1}
               livePrice={getLiveBotPrice()}
+            />
+          )}
+
+          {/* V15.3 — Flow AI handoff freshness notice. Hints only: Trade revalidates. */}
+          {(activeTab === 'BOT/USDT' || activeTab === 'BRIDGE') && (
+            <AiHandoffBanner
+              currentChainId={currentChainId ?? null}
+              observedTxHash={receiptTxHash}
+              txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
             />
           )}
 
