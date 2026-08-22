@@ -471,7 +471,7 @@ describe('V14.1A · Campaign PTS-only reward authority', () => {
     expect(proposal.ptsBudget).toBe(0);
 
     await expect(partnerTransition(partnerA as any, proposal.campaignId, 'submit')).rejects.toThrow(
-      /Campaign PTS/i,
+      /budget authorization/i,
     );
     fake.tables.campaigns.find((c) => c.campaign_id === proposal.campaignId).review_state =
       'submitted';
@@ -517,11 +517,21 @@ describe('V14.1A · Campaign PTS-only reward authority', () => {
   });
 
   it('a non-parsing verification rule can never become executable', async () => {
-    const bogus = await savePartnerCampaign(
+    await expect(
+      savePartnerCampaign(
+        partnerA as any,
+        draft({ tasks: [{ ...draft().tasks[0], rules: [{ type: 'GIVE_ME_FLOW' }] }] }),
+      ),
+    ).rejects.toThrow(/unsupported rule type/i);
+
+    // A rule-less task is likewise unsubmittable even though it can be drafted.
+    const ruleless = await savePartnerCampaign(
       partnerA as any,
-      draft({ tasks: [{ ...draft().tasks[0], rules: [{ type: 'GIVE_ME_FLOW' }] }] }),
+      draft({ tasks: [{ ...draft().tasks[0], rules: [] }] }),
     );
-    await expect(partnerTransition(partnerA as any, bogus.campaignId, 'submit')).rejects.toThrow();
+    await expect(
+      partnerTransition(partnerA as any, ruleless.campaignId, 'submit'),
+    ).rejects.toThrow(/verified-activity rule/i);
     expect(await listPublishedCampaigns()).toHaveLength(0);
   });
 });
