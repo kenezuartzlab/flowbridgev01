@@ -306,11 +306,11 @@ export async function prepareActionIntent(input: {
   intent = { ...intent, simulationResult: simulation };
 
   const evaluation = evaluateIntentPolicy({ intent, live });
-  const simulationFailed = !simulation.ok;
+  const simulationFailed = !simulation || !simulation.ok;
 
   if (evaluation.decision !== "READY" || simulationFailed) {
     const blockers = simulationFailed
-      ? [...evaluation.blockers, simulation.revertReason ?? "simulation failed"]
+      ? [...evaluation.blockers, simulation?.revertReason ?? "simulation failed"]
       : evaluation.blockers;
     intent = {
       ...withStatus(intent, "REJECTED"),
