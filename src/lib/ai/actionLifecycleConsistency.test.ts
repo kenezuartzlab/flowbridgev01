@@ -160,7 +160,7 @@ describe("V15.3K §5 — native BOT vs wrapped WBOT semantics", () => {
     const mk = (question: string) =>
       economicFingerprint(
         createActionIntent({
-          id: "i",
+          id: "intent-fp-1",
           type: "SWAP",
           actorUserId: "user-1",
           actorWallet: WALLET,
