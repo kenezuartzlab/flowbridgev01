@@ -10,8 +10,25 @@ export interface EvidenceRef {
   group: string;
   freshness: string;
   observedAt: string;
+  /** V15.3A — per-source freshness: read live this request, or cached. */
+  liveness?: "LIVE" | "CACHED";
+  fetchedAt?: string;
   url?: string;
   excerpt?: string;
+}
+
+/** V15.3A — client-carried pending preparation slot (hint only, never trusted). */
+interface PendingPreparationRef {
+  type: string;
+  chainId: number;
+  tokenInSymbol: string | null;
+  tokenOutSymbol: string | null;
+  destinationChainId: number | null;
+  missingFields: string[];
+  recognized: string[];
+  createdAt: string;
+  expiresAt: string;
+  actorKey: string;
 }
 
 interface IntentProposalRef {
@@ -30,6 +47,8 @@ export interface ChatMessage {
   notice?: string | null;
   skills?: string[];
   evidence?: EvidenceRef[];
+  hasLiveEvidence?: boolean;
+  actionPreparation?: boolean;
   /** V15.2 — server-prepared, never-executed action plan. */
   prepared?: PreparedIntentPayload | null;
   preparationError?: string | null;
@@ -54,6 +73,8 @@ export function AssistantChat() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openEvidence, setOpenEvidence] = useState<number | null>(null);
+  /** Live only for the next turn or two: the field Flow AI still needs. */
+  const [pending, setPending] = useState<PendingPreparationRef | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -74,6 +95,7 @@ export function AssistantChat() {
         method: "POST",
         body: JSON.stringify({
           messages: next.map((m) => ({ role: m.role, content: m.content })),
+          pending,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
@@ -86,6 +108,9 @@ export function AssistantChat() {
         skills?: string[];
         evidence?: EvidenceRef[];
         proposal?: IntentProposalRef | null;
+        pending?: PendingPreparationRef | null;
+        actionPreparation?: boolean;
+        hasLiveEvidence?: boolean;
       };
       if (!res.ok || !data.answer) {
         throw new Error(data.error ?? "Flow AI is unavailable right now.");
@@ -102,9 +127,13 @@ export function AssistantChat() {
           notice: data.notice ?? null,
           skills: data.skills ?? [],
           evidence: data.evidence ?? [],
+          hasLiveEvidence: data.hasLiveEvidence ?? false,
+          actionPreparation: data.actionPreparation ?? false,
         };
         return copy;
       });
+
+      setPending(data.pending ?? null);
 
       if (data.proposal) void prepare(data.proposal);
 
@@ -247,9 +276,19 @@ export function AssistantChat() {
                             {m.mode}
                           </span>
                         ) : null}
-                        {m.asOf ? (
+                        {m.hasLiveEvidence ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-primary/12 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-primary">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+                            live
+                          </span>
+                        ) : m.asOf ? (
                           <span className="rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted">
-                            as of {new Date(m.asOf).toLocaleString()}
+                            cached · as of {new Date(m.asOf).toLocaleString()}
+                          </span>
+                        ) : null}
+                        {m.actionPreparation ? (
+                          <span className="rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted">
+                            preparation
                           </span>
                         ) : null}
                       </div>
@@ -272,7 +311,10 @@ export function AssistantChat() {
                               {m.evidence.map((e) => (
                                 <li key={e.id} className="space-y-0.5">
                                   <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-primary">
-                                    {e.group} · {e.freshness}
+                                    {e.group} · {e.liveness === "LIVE" ? "live" : "cached"}
+                                    {e.liveness === "LIVE"
+                                      ? ""
+                                      : ` · as of ${new Date(e.fetchedAt ?? e.observedAt).toLocaleString()}`}
                                   </p>
                                   <p className="text-[11px] leading-snug text-foreground">
                                     {e.url ? (

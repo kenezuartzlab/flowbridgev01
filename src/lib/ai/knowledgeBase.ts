@@ -6,6 +6,7 @@
  * always appends a new revision; user corrections land as CANDIDATES that must
  * pass deterministic validation or admin review before promotion.
  */
+import { LOW_GAS_MIN_ETHER_DEFAULTS } from "@/lib/friendlyError";
 import type {
   DataClass,
   EvidenceItem,
@@ -167,9 +168,9 @@ export const FLOW_AI_KNOWLEDGE: readonly KnowledgeFact[] = [
     id: "kb.gas.bot",
     entity: "FlowBridge/gas",
     relation: "guidance",
-    value: { warnBelowBot: 0.05 },
+    value: { warnBelowBot: LOW_GAS_MIN_ETHER_DEFAULTS.BOT },
     statement:
-      "Transactions on BOT Chain need a small BOT balance for gas; below 0.05 BOT FlowBridge warns you before you try to sign.",
+      `Transactions on BOT Chain need a small BOT balance for gas; below ${LOW_GAS_MIN_ETHER_DEFAULTS.BOT} BOT (FlowBridge's own current warning threshold, which you can change in low-gas settings) FlowBridge warns you before you try to sign. Your actual BOT balance is a live read, not part of this note.`,
     validFrom: "2026-08-01T00:00:00.000Z",
     freshnessClass: "SLOW",
     keywords: ["gas", "bot", "balance", "fail", "low"],
