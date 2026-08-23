@@ -66,7 +66,14 @@ export const Route = createFileRoute("/api/opportunities")({
           return jsonResponse({ error: "key and action (SEEN|DISMISS|SNOOZE) are required" }, 400);
         }
         const now = new Date();
-        const patch: Record<string, string | null> = {
+        const patch: {
+          user_id: string;
+          opportunity_key: string;
+          updated_at: string;
+          last_seen_at?: string;
+          dismissed_at?: string;
+          snoozed_until?: string;
+        } = {
           user_id: user.id,
           opportunity_key: key,
           updated_at: now.toISOString(),
@@ -80,7 +87,7 @@ export const Route = createFileRoute("/api/opportunities")({
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { error } = await supabaseAdmin
             .from("ai_opportunity_state")
-            .upsert(patch, { onConflict: "user_id,opportunity_key" });
+            .upsert([patch], { onConflict: "user_id,opportunity_key" });
           if (error) throw new Error(error.message);
           return jsonResponse({ success: true });
         } catch (e: any) {
