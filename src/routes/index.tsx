@@ -6,13 +6,13 @@ import App from "@/App";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FlowBridge — Swap & Cross-Chain Bridge for BOT Chain" },
+      { title: "FlowBridge — Web3 Toolkit for BOT Chain" },
       {
         name: "description",
         content:
           "Swap BOT, CA and USDT on BOT Chain with a 0.1% fee, bridge to BNB, Ethereum and TRON, and earn FLOW point rewards.",
       },
-      { property: "og:title", content: "FlowBridge — Swap & Cross-Chain Bridge for BOT Chain" },
+      { property: "og:title", content: "FlowBridge — Web3 Toolkit for BOT Chain" },
       {
         property: "og:description",
         content:

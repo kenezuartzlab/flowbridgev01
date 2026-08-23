@@ -7,13 +7,13 @@ import { PartnersDirectory } from "@/components/partners/PartnersDirectory";
 export const Route = createFileRoute("/campaigns/partners")({
   head: () => ({
     meta: [
-      { title: "Partners & Mini-Apps — FlowBridge Explore" },
+      { title: "Partners & Mini-Apps — FlowBridge" },
       {
         name: "description",
         content:
           "Discover FlowBridge partner mini-apps on BOT Chain — infrastructure, community and game experiences — with clear live, coming soon and in-development states.",
       },
-      { property: "og:title", content: "FlowBridge Partners & Mini-Apps" },
+      { property: "og:title", content: "Partners & Mini-Apps — FlowBridge" },
       {
         property: "og:description",
         content: "Partner mini-apps on BOT Chain inside FlowBridge Explore.",

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/studio")({
         content:
           "Build, submit and track FlowBridge partner campaigns. Verified on-chain tasks, Campaign PTS rewards and FlowBridge review before anything goes live.",
       },
-      { property: "og:title", content: "FlowBridge Partner Campaign Studio" },
+      { property: "og:title", content: "Partner Campaign Studio — FlowBridge" },
       {
         property: "og:description",
         content:

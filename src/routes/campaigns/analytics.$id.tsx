@@ -32,13 +32,13 @@ import {
 export const Route = createFileRoute("/campaigns/analytics/$id")({
   head: () => ({
     meta: [
-      { title: "Campaign Analytics — FlowBridge Operator Console" },
+      { title: "Campaign Analytics — FlowBridge" },
       {
         name: "description",
         content:
           "Operator-only FlowBridge campaign analytics: participants, completions, Campaign PTS awarded and verified activity volume from authoritative data.",
       },
-      { property: "og:title", content: "FlowBridge Campaign Analytics" },
+      { property: "og:title", content: "Campaign Analytics — FlowBridge" },
       {
         property: "og:description",
         content: "Read-only operator analytics for verified FlowBridge campaigns.",

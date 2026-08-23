@@ -14,13 +14,13 @@ import App from "@/App";
 export const Route = createFileRoute("/trade")({
   head: () => ({
     meta: [
-      { title: "Trade — Swap & Bridge on FlowBridge" },
+      { title: "Trade — FlowBridge" },
       {
         name: "description",
         content:
           "One FlowBridge workspace for swapping BOT, CA and USDT on BOT Chain and bridging USDT to BNB Chain, with live quotes and verified activity.",
       },
-      { property: "og:title", content: "Trade — Swap & Bridge on FlowBridge" },
+      { property: "og:title", content: "Trade — FlowBridge" },
       {
         property: "og:description",
         content:

@@ -35,13 +35,13 @@ import { GREETING_STYLES, greetingVariants, type GreetingStyleId } from "@/lib/g
 export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
-      { title: "Account — Profile & Settings | FlowBridge" },
+      { title: "Account — FlowBridge" },
       {
         name: "description",
         content:
           "Manage your FlowBridge profile: FLOW Points (PTS), appearance, notifications, display currency, language, data export and sign-out — all in one place.",
       },
-      { property: "og:title", content: "FlowBridge Account" },
+      { property: "og:title", content: "Account — FlowBridge" },
       {
         property: "og:description",
         content: "Your FlowBridge profile, preferences and data controls.",

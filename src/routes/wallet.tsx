@@ -34,13 +34,13 @@ import { useAccountData } from "@/lib/app/useAccountData";
 export const Route = createFileRoute("/wallet")({
   head: () => ({
     meta: [
-      { title: "Wallet — Multi-Chain Balances & History | FlowBridge" },
+      { title: "Wallet — FlowBridge" },
       {
         name: "description",
         content:
           "FlowBridge auto-detects your connected network and shows live balances, USD values, send and receive, plus a filterable swap, bridge and transfer history.",
       },
-      { property: "og:title", content: "FlowBridge Wallet" },
+      { property: "og:title", content: "Wallet — FlowBridge" },
       {
         property: "og:description",
         content:

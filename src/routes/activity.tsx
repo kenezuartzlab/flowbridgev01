@@ -32,14 +32,14 @@ import {
 export const Route = createFileRoute("/activity")({
   head: () => ({
     meta: [
-      { title: "Activity — Swap & Bridge History | FlowBridge" },
+      { title: "Activity — FlowBridge" },
       {
         name: "description",
         content:
           "Every FlowBridge swap and bridge recorded against your verified email and bound wallet, with status, amounts and FLOW earned.",
       },
-      { property: "og:title", content: "FlowBridge Activity" },
-      { property: "og:description", content: "Your recorded swap and bridge history on FlowBridge." },
+      { property: "og:title", content: "Activity — FlowBridge" },
+      { property: "og:description", content: "Your FlowBridge swap and bridge activity history with status and rewards." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

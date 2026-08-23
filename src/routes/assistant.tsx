@@ -7,13 +7,13 @@ import { MissionPanel } from "@/components/assistant/MissionPanel";
 export const Route = createFileRoute("/assistant")({
   head: () => ({
     meta: [
-      { title: "Flow Assistant — Ask Anything About FlowBridge" },
+      { title: "Flow Assistant — FlowBridge" },
       {
         name: "description",
         content:
           "Ask the FlowBridge assistant how to swap on BOT Chain, bridge USDT to BNB, ETH or TRON, cut gas costs and earn FLOW points — plain answers, no jargon.",
       },
-      { property: "og:title", content: "FlowBridge Flow Assistant" },
+      { property: "og:title", content: "Flow Assistant — FlowBridge" },
       {
         property: "og:description",
         content: "In-app guidance for swaps, bridging, fees, gas and FLOW points.",
