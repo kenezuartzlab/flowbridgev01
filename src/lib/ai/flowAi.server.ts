@@ -398,14 +398,12 @@ export async function answerFlowAiQuestion(input: {
           cumulativeFlowPoints: Number(ledger?.flowPoints ?? 0),
           claimedFlow: Number(ledger?.claimedTokens ?? 0),
         }).claimableFlow;
-      } catch (err) {
-        console.error("[v16.1] claimable ledger read failed", err);
+      } catch {
         canonicalClaimableFlow = null;
       }
     }
   }
 
-  console.error("[v16.1] canonicalClaimableFlow", canonicalClaimableFlow, "acct evidence", accountEvidence.length);
   // V15.2 §3 — deterministic candidate extraction. Only signed-in actors get a
   // proposal, and it is a request to PREPARE, never an authorization to execute.
   let proposal = input.actor.userId
