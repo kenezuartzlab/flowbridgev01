@@ -488,11 +488,18 @@ export function FlowStakingPreviewCard({
             </p>
           )}
 
+          {(missionNote || missionStatus) && (
+            <p className="text-[11px] leading-relaxed text-muted" data-testid="stake-mission-note">
+              {missionStatus ?? missionNote}
+            </p>
+          )}
+
           {lastTx && (
             <p className="break-all font-mono text-[10px] text-muted-soft">
               Last {lastTx.kind} tx: {lastTx.hash}
             </p>
           )}
+
         </div>
 
         {error && <p className="break-words text-[11px] text-destructive">{error}</p>}
