@@ -67,7 +67,10 @@ export function FederatedInsightPanel() {
         body: JSON.stringify({
           skillId: "bot.mock.research",
           capabilityKind: "GENERAL_ANALYSIS",
-          inputs: { question: "Is staking worth reviewing on BOT chain right now?" },
+          inputs: {
+            question:
+              "What should I look at on BOT chain right now — rewards, claims or staking?",
+          },
         }),
       });
       const json = await res.json();
