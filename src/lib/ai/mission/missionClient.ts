@@ -15,6 +15,8 @@ import type {
 } from "./missionTypes";
 import type { EditPreview } from "./missionPlanner";
 import type { MissionRecoveryAdvice } from "./missionProgress";
+import type { CanonicalStakeHandoff, StakeHandoffFailure } from "./stakeHandoff";
+
 
 async function authHeaders(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
@@ -55,7 +57,29 @@ export interface MissionActionResponse {
   frozen?: boolean;
   /** V17.1C §2 — opaque correlation for the review surface (no economics). */
   correlation?: { missionId: string; stepId: string; intentId: string | null } | null;
+  /** V17.1E §3 — canonical, server-resolved stake handoff (or its failure). */
+  stakeHandoff?: CanonicalStakeHandoff | null;
+  stakeHandoffFailure?: StakeHandoffFailure | null;
 }
+
+/**
+ * V17.1E §3 — asks the server to resolve a mission stake handoff. The client
+ * sends opaque correlation only; the amount, actor wallet, chain and vault come
+ * back re-derived from the mission's own state.
+ */
+export async function resolveStakeHandoffFromServer(correlation: {
+  missionId: string;
+  stepId: string;
+  intentId: string | null;
+}): Promise<MissionActionResponse> {
+  return missionAction({
+    action: "stake-handoff",
+    missionId: correlation.missionId,
+    stepId: correlation.stepId,
+    intentId: correlation.intentId,
+  });
+}
+
 
 
 export async function listMissions(): Promise<Mission[]> {

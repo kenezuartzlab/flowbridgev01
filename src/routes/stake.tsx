@@ -5,12 +5,14 @@ import { ArrowLeft, Coins, ShieldCheck } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SafeAreaPage, SectionHeader, Surface } from "@/components/ui-kit/primitives";
 import { FlowStakingPreviewCard } from "@/components/staking/FlowStakingPreviewCard";
-import { listMissions } from "@/lib/ai/mission/missionClient";
+import { resolveStakeHandoffFromServer } from "@/lib/ai/mission/missionClient";
 import {
   parseStakeHandoff,
-  resolveStakeHandoff,
-  type StakeHandoffResolution,
+  STAKE_HANDOFF_FAILURE_COPY,
+  type CanonicalStakeHandoff,
+  type StakeHandoffFailure,
 } from "@/lib/ai/mission/stakeHandoff";
+
 import { useAccountData } from "@/lib/app/useAccountData";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 
@@ -47,12 +49,18 @@ function StakePage() {
   const { campaignPointsTotal, authenticated } = useCampaignProgress();
 
   /**
-   * V17.1D §5 — a mission may have derived this stake from a VERIFIED claim. The
-   * link carries opaque correlation only; the authoritative derived amount is
-   * read back from the mission's own server state. Anything malformed, stale or
-   * inconsistent fails closed with no prefill.
+   * V17.1E §2 — a mission handoff is resolved BEFORE the standalone staking form
+   * initializes. While `pending` is true the card shows no default amount, so a
+   * prepared mission stake can never be replaced by the standalone 10 FLOW
+   * default. Every failure is explicit and blocks the write actions.
    */
-  const [handoff, setHandoff] = useState<StakeHandoffResolution | null>(null);
+  const [pending, setPending] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return parseStakeHandoff(window.location.search).correlation != null;
+  });
+  const [handoff, setHandoff] = useState<CanonicalStakeHandoff | null>(null);
+  const [failure, setFailure] = useState<StakeHandoffFailure | null>(null);
+  const [failureCopy, setFailureCopy] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -61,12 +69,36 @@ function StakePage() {
     let cancelled = false;
     void (async () => {
       try {
-        const missions = await listMissions();
-        if (!cancelled) setHandoff(resolveStakeHandoff({ hint, missions }));
+        const res = await resolveStakeHandoffFromServer(hint.correlation!);
+        if (cancelled) return;
+        if (res.stakeHandoff) {
+          setHandoff(res.stakeHandoff);
+          /**
+           * §4 — a link amount hint is display only. If it disagrees with the
+           * server-derived amount we surface it and never coerce the form.
+           */
+          if (
+            hint.amountHint &&
+            Number(hint.amountHint) !== Number(res.stakeHandoff.amount)
+          ) {
+            setFailureCopy(
+              "The amount in this link disagrees with your mission's canonical prepared stake — the mission amount is used.",
+            );
+          }
+        } else {
+          setFailure(res.stakeHandoffFailure ?? "HANDOFF_HYDRATION_FAILED");
+          setFailureCopy(
+            res.message ??
+              STAKE_HANDOFF_FAILURE_COPY[res.stakeHandoffFailure ?? "HANDOFF_HYDRATION_FAILED"],
+          );
+        }
       } catch {
         if (!cancelled) {
-          setHandoff({ ok: false, reason: "Your mission could not be read, so nothing was prefilled." });
+          setFailure("HANDOFF_HYDRATION_FAILED");
+          setFailureCopy(STAKE_HANDOFF_FAILURE_COPY.HANDOFF_HYDRATION_FAILED);
         }
+      } finally {
+        if (!cancelled) setPending(false);
       }
     })();
     return () => {
@@ -90,14 +122,12 @@ function StakePage() {
         <FlowStakingPreviewCard
           flowPoints={Number(incentives?.flowPoints ?? 0)}
           campaignPts={authenticated ? campaignPointsTotal : null}
-          presetAmount={handoff?.ok ? handoff.amount : null}
-          missionCorrelation={
-            handoff?.ok ? { missionId: handoff.missionId, stepId: handoff.stepId } : null
-          }
-          missionNote={
-            handoff ? (handoff.ok ? handoff.note : handoff.reason === "NO_CORRELATION" ? null : handoff.reason) : null
-          }
+          missionHandoff={handoff}
+          missionHandoffPending={pending}
+          missionHandoffFailure={failure}
+          missionNote={failureCopy ?? handoff?.note ?? null}
         />
+
 
 
         <Surface>

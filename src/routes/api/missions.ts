@@ -236,7 +236,33 @@ export const Route = createFileRoute("/api/missions")({
          * server never signs or resubmits, and a zero claimable balance after a
          * submitted claim is settlement rather than failure.
          */
+        /**
+         * V17.1E §3 — server-resolved stake handoff. `/stake` sends opaque
+         * correlation only; every economic field is re-derived here from the
+         * owning user's mission plus the canonical prepared ActionIntent.
+         */
+        if (action === "stake-handoff") {
+          const { resolveStakeHandoffForUser } = await import(
+            "@/lib/ai/mission/stakeHandoffResolve.server"
+          );
+          const result = await resolveStakeHandoffForUser({
+            mission: loaded,
+            stepId: body.stepId ? String(body.stepId) : null,
+            intentId: body.intentId ? String(body.intentId) : null,
+            userId: ctx.user.id,
+            boundWallet: ctx.wallet,
+          });
+          return jsonResponse({
+            success: result.ok,
+            stakeHandoff: result.ok ? result.handoff : null,
+            stakeHandoffFailure: result.ok ? null : result.failure,
+            message: result.ok ? result.handoff.note : result.message,
+            executed: false,
+          });
+        }
+
         if (action === "settle") {
+
           const txHash = String(body.txHash ?? "");
           if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
             return jsonResponse({ error: "A transaction hash is required." }, 400);

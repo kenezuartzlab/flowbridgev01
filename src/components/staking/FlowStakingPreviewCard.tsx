@@ -9,6 +9,13 @@ import {
   getFlowStakingChainConfig,
   resolveFlowStakingReadiness,
 } from "@/lib/staking/flowStakingRegistry";
+import {
+  pinStakeExecutionContext,
+  STAKE_HANDOFF_FAILURE_COPY,
+  type CanonicalStakeHandoff,
+  type StakeHandoffFailure,
+} from "@/lib/ai/mission/stakeHandoff";
+
 
 /**
  * FlowBridge V13.3 — FLOW staking BOT Testnet panel.
@@ -82,19 +89,22 @@ type TxKind = "approve" | "stake" | "claim" | "withdraw";
 export function FlowStakingPreviewCard({
   flowPoints,
   campaignPts,
-  presetAmount = null,
-  missionCorrelation = null,
+  missionHandoff = null,
+  missionHandoffPending = false,
+  missionHandoffFailure = null,
   missionNote = null,
 }: {
   flowPoints?: number | null;
   campaignPts?: number | null;
   /**
-   * V17.1D §5 — the stake amount derived from a mission's VERIFIED claim
-   * settlement. Presentation only: the amount is still revalidated on chain here
-   * (balance, allowance, minimum, pause) and the user's wallet signs.
+   * V17.1E §3/§4 — the canonical, server-resolved mission stake handoff. When it
+   * is present its amount is the ONLY initializer for the form; the standalone
+   * default is used only when no mission handoff exists at all.
    */
-  presetAmount?: string | null;
-  missionCorrelation?: { missionId: string; stepId: string } | null;
+  missionHandoff?: CanonicalStakeHandoff | null;
+  /** True while the handoff is still being resolved: no default is shown yet. */
+  missionHandoffPending?: boolean;
+  missionHandoffFailure?: StakeHandoffFailure | null;
   missionNote?: string | null;
 }) {
 
@@ -116,13 +126,34 @@ export function FlowStakingPreviewCard({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<TxKind | null>(null);
   const [lastTx, setLastTx] = useState<{ kind: TxKind; hash: string } | null>(null);
-  const [amountInput, setAmountInput] = useState(presetAmount ?? "10");
+  /**
+   * §2 — mission handoff BEFORE standalone defaults. While a handoff is pending
+   * the field stays empty rather than showing 10 FLOW and overlaying later.
+   */
+  const [amountInput, setAmountInput] = useState(
+    missionHandoff ? missionHandoff.amount : missionHandoffPending ? "" : "10",
+  );
+  const [hydratedMissionStep, setHydratedMissionStep] = useState<string | null>(
+    missionHandoff?.missionStepId ?? null,
+  );
   const [missionStatus, setMissionStatus] = useState<string | null>(null);
 
-  // A mission-derived amount replaces the default; the user can still edit it.
+  // The mission amount wins over any earlier standalone form state; it is applied
+  // exactly once per mission step, and the user may still edit it afterwards.
   useEffect(() => {
-    if (presetAmount) setAmountInput(presetAmount);
-  }, [presetAmount]);
+    if (!missionHandoff) return;
+    if (hydratedMissionStep === missionHandoff.missionStepId && amountInput !== "") return;
+    setAmountInput(missionHandoff.amount);
+    setHydratedMissionStep(missionHandoff.missionStepId);
+  }, [missionHandoff, hydratedMissionStep, amountInput]);
+
+  // No mission handoff at all → the ordinary standalone default is allowed.
+  useEffect(() => {
+    if (missionHandoffPending || missionHandoff || amountInput !== "") return;
+    if (missionHandoffFailure) return;
+    setAmountInput("10");
+  }, [missionHandoffPending, missionHandoff, missionHandoffFailure, amountInput]);
+
 
 
   const scheduleFunded = (inventory ?? 0n) > 0n && (rewardRate ?? 0n) > 0n;
@@ -141,6 +172,25 @@ export function FlowStakingPreviewCard({
   const belowMin = amount != null && minStake != null && amount < minStake && (staked ?? 0n) === 0n;
   const overBalance = amount != null && balance != null && amount > balance;
   const needsApproval = amount != null && (allowance ?? 0n) < amount;
+
+  /**
+   * V17.1E §5/§6 — actor, chain and vault pinning for a mission stake. A mission
+   * prepared for another wallet is BLOCKED and visible; the surface never
+   * silently substitutes a wallet, a chain or a vault. Treasury/admin addresses
+   * get no special case.
+   */
+  const pinFailure = missionHandoff
+    ? pinStakeExecutionContext({
+        handoff: missionHandoff,
+        connectedWallet: account,
+        connectedChainId: chainId,
+        canonicalVault: chain.vault ?? null,
+      })
+    : null;
+  const missionBlock: StakeHandoffFailure | null = missionHandoffFailure ?? pinFailure;
+  /** Writes stay blocked while a handoff resolves or a handoff failure stands. */
+  const missionGate = missionHandoffPending || missionBlock != null;
+
 
   const readState = useCallback(async () => {
     if (!chain.token || !chain.vault) return;
@@ -237,13 +287,13 @@ export function FlowStakingPreviewCard({
          * their own stake. Canonical settlement is verified server-side from the
          * vault position; nothing here signs, resubmits or advances a mission.
          */
-        if (kind === "stake" && missionCorrelation) {
+        if (kind === "stake" && missionHandoff) {
           try {
             const { missionAction } = await import("@/lib/ai/mission/missionClient");
             const res = await missionAction({
               action: "settle",
-              missionId: missionCorrelation.missionId,
-              stepId: missionCorrelation.stepId,
+              missionId: missionHandoff.missionId,
+              stepId: missionHandoff.missionStepId,
               txHash: hash,
             });
             setMissionStatus(
@@ -272,7 +322,8 @@ export function FlowStakingPreviewCard({
         setPending(null);
       }
     },
-    [readState, missionCorrelation],
+    [readState, missionHandoff],
+
   );
 
   const connectWallet = useCallback(async () => {
@@ -339,7 +390,9 @@ export function FlowStakingPreviewCard({
     };
   }, [readState]);
 
-  const disabledBase = !account || !onRightChain || pending != null || !chain.vault || !chain.token;
+  const disabledBase =
+    !account || !onRightChain || pending != null || !chain.vault || !chain.token || missionGate;
+
 
   return (
     <Surface>
@@ -413,10 +466,21 @@ export function FlowStakingPreviewCard({
 
         {/* Amount + lifecycle actions — each button is one explicit wallet signature. */}
         <div className="space-y-2 rounded-xl border border-hairline p-3">
+          {missionHandoffPending && (
+            <p className="rounded-lg border border-hairline bg-card px-2.5 py-2 text-[10px] font-bold text-muted">
+              Loading your mission's prepared stake…
+            </p>
+          )}
+          {missionBlock && (
+            <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-2.5 py-2 text-[10px] font-bold leading-relaxed text-destructive">
+              {STAKE_HANDOFF_FAILURE_COPY[missionBlock]}
+            </p>
+          )}
           <label className="block font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted-soft">
             Amount to stake (FLOW)
           </label>
           <div className="flex items-center gap-2">
+
             <input
               inputMode="decimal"
               value={amountInput}
