@@ -402,12 +402,18 @@ export function parametersForShape(input: {
   }
 
   if (shape.type === "CLAIM_FLOW") {
+    /**
+     * V16.1 — an unknown claimable balance is NOT zero. Without the canonical
+     * ledger amount there is no plan to review, so nothing is proposed.
+     */
+    if (input.claimableFlow == null || !Number.isFinite(input.claimableFlow)) return null;
     return {
       type: "CLAIM_FLOW",
       chainId,
-      parameters: { claimableFlow: String(input.claimableFlow ?? 0), recipient: wallet },
+      parameters: { claimableFlow: String(input.claimableFlow), recipient: wallet },
     };
   }
+
 
   return null;
 }

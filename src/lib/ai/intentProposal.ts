@@ -72,16 +72,19 @@ export function proposeIntent(input: {
   }
 
   if (/\bclaim\b/.test(q) && wallet) {
+    // V16.1 — an unknown claimable balance is not zero: no plan is proposed.
+    if (input.claimableFlow == null || !Number.isFinite(input.claimableFlow)) return null;
     return {
       type: "CLAIM_FLOW",
       chainId,
       parameters: {
-        claimableFlow: String(input.claimableFlow ?? 0),
+        claimableFlow: String(input.claimableFlow),
         recipient: wallet,
       },
       recognized: ["claimable FLOW", "FlowRewardsDistributor"],
     };
   }
+
 
   // BRIDGE — "bridge 5 usdt to bnb"
   if (/\bbridge\b/.test(q) && wallet) {

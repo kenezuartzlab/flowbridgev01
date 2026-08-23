@@ -21,7 +21,9 @@ import {
   X,
 } from "lucide-react";
 import { assistantFetch } from "@/lib/ai/assistantClient";
-import { setConversationDraft } from "@/lib/ai/conversationStore";
+import { ensureConversationOwner, setConversationDraft } from "@/lib/ai/conversationStore";
+import { supabase } from "@/integrations/supabase/client";
+
 import type { OpportunityFeed as Feed, RankedOpportunity } from "@/lib/ai/opportunity/opportunityTypes";
 
 const DOMAIN_ICON = {
@@ -98,13 +100,25 @@ export function OpportunityFeed() {
     }).catch(() => {});
   }, []);
 
+  /**
+   * V16.1 — the owner gate must be settled BEFORE the draft is written,
+   * otherwise the Assistant's own ownership check discards the anonymous-owned
+   * session (draft included) the moment it mounts.
+   */
   const explain = useCallback(
-    (item: RankedOpportunity) => {
+    async (item: RankedOpportunity) => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        ensureConversationOwner(data.user?.id ?? "anonymous");
+      } catch {
+        /* presentation-only: a failed owner read simply keeps the current session */
+      }
       setConversationDraft(`Explain this opportunity: ${item.title} (${item.id})`);
       void router.navigate({ to: "/assistant" });
     },
     [router],
   );
+
 
   if (loading) {
     return (
@@ -173,7 +187,7 @@ export function OpportunityFeed() {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => explain(item)}
+                      onClick={() => void explain(item)}
                       className="rounded-xl border border-hairline px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:text-foreground"
                     >
                       Ask Flow AI
