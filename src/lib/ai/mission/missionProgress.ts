@@ -85,14 +85,55 @@ export function markStepReady(input: {
   );
 }
 
-/** The user has been handed the plan; the mission now waits for their wallet. */
+/**
+ * The user has been handed the plan; the mission now waits for their wallet.
+ *
+ * V17.1C §1 — preparation history FREEZES here. Once a step has been handed to
+ * the user with a prepared intent, later reads of live state (for example a
+ * claimable balance that becomes 0 precisely BECAUSE the user claimed) may never
+ * rewrite this step into BLOCKED or FAILED. The settlement verifier owns the
+ * truth from this point on.
+ */
 export function markStepWaitingForUser(input: {
   mission: Mission;
   stepId: string;
   now?: Date;
 }): MissionMutation {
-  return transition(input.mission, input.stepId, "WAITING_FOR_USER", {}, input.now ?? new Date());
+  const now = input.now ?? new Date();
+  const step = input.mission.steps.find((s) => s.id === input.stepId);
+  return transition(
+    input.mission,
+    input.stepId,
+    "WAITING_FOR_USER",
+    {
+      outputs: {
+        ...(step?.outputs ?? {}),
+        preparationFrozenAt: (step?.outputs.preparationFrozenAt as string | undefined) ?? now.toISOString(),
+        preparedActionIntentId:
+          step?.linkedActionIntentId ??
+          (step?.outputs.preparedActionIntentId as string | undefined) ??
+          null,
+      },
+      blockingReason: null,
+      failureClass: null,
+    },
+    now,
+  );
 }
+
+/**
+ * V17.1C §1 — true when a step's preparation is frozen: it was prepared, handed
+ * to the user and is either awaiting their wallet or awaiting settlement.
+ */
+export function isPreparationFrozen(step: MissionStep): boolean {
+  if (!step.outputs.preparationFrozenAt) return false;
+  return (
+    step.state === "WAITING_FOR_USER" ||
+    step.state === "WAITING_FOR_CONFIRMATION" ||
+    step.state === "READY"
+  );
+}
+
 
 /** A tx hash was observed — NOT progress yet. Confirmation must be canonical. */
 export function markStepSubmitted(input: {
@@ -348,6 +389,19 @@ export function blockStep(input: {
   now?: Date;
 }): MissionMutation {
   const advice = RECOVERY[input.failureClass];
+  /**
+   * V17.1C §1 — a frozen preparation is never retroactively failed. A live read
+   * taken AFTER the plan was handed over (claimable now 0, allowance consumed)
+   * is settlement evidence, not a preparation failure.
+   */
+  const existing = input.mission.steps.find((s) => s.id === input.stepId);
+  if (existing && isPreparationFrozen(existing)) {
+    return {
+      ok: false,
+      error:
+        "This step was already prepared and handed to your wallet, so it cannot be failed by a later read. Its settlement is verified instead.",
+    };
+  }
   return transition(
     input.mission,
     input.stepId,
@@ -358,20 +412,30 @@ export function blockStep(input: {
 }
 
 
+
 export function recoveryAdvice(failureClass: MissionFailureClass): MissionRecoveryAdvice {
   return { failureClass, ...RECOVERY[failureClass] };
 }
 
-/** Retry always re-enters preparation; a stale ActionIntent is never revived. */
+/**
+ * Retry always re-enters preparation; a stale ActionIntent is never revived.
+ * V17.1C §1 — retrying also releases the freeze, because the next preparation is
+ * a brand-new plan with fresh evidence.
+ */
 export function retryStep(input: { mission: Mission; stepId: string; now?: Date }): MissionMutation {
+  const step = input.mission.steps.find((s) => s.id === input.stepId);
+  const outputs = { ...(step?.outputs ?? {}) };
+  delete outputs.preparationFrozenAt;
+  delete outputs.preparedActionIntentId;
   return transition(
     input.mission,
     input.stepId,
     "PLANNED",
-    { linkedActionIntentId: null, blockingReason: null, failureClass: null },
+    { linkedActionIntentId: null, blockingReason: null, failureClass: null, outputs },
     input.now ?? new Date(),
   );
 }
+
 
 export function pauseMission(mission: Mission, now: Date = new Date()): Mission {
   return { ...mission, status: "PAUSED", updatedAt: now.toISOString(), version: mission.version + 1 };

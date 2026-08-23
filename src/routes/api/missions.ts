@@ -162,12 +162,16 @@ export const Route = createFileRoute("/api/missions")({
             step: result.step,
             prepared: result.prepared,
             conversionConfirmation: result.conversionConfirmation ?? null,
+            /** V17.1C §1/§2 — frozen preparation + opaque handoff correlation. */
+            frozen: result.frozen ?? false,
+            correlation: result.correlation ?? null,
             rewardState,
             failureClass: result.failureClass,
             recovery: result.failureClass ? progress.recoveryAdvice(result.failureClass) : null,
             message: result.message,
             executed: false,
           });
+
         }
 
         /** V17.1B §5 — the user explicitly confirms the off-chain conversion. */
@@ -225,6 +229,35 @@ export const Route = createFileRoute("/api/missions")({
             executed: false,
           });
         }
+
+        /**
+         * V17.1C §3 — the user submitted their own transaction on a review
+         * surface (e.g. /earn). Bookkeeping + canonical verification only; the
+         * server never signs or resubmits, and a zero claimable balance after a
+         * submitted claim is settlement rather than failure.
+         */
+        if (action === "settle") {
+          const txHash = String(body.txHash ?? "");
+          if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+            return jsonResponse({ error: "A transaction hash is required." }, 400);
+          }
+          const result = await engine.settleMissionSubmission({
+            mission: loaded,
+            stepId: String(body.stepId ?? loaded.currentStepId ?? ""),
+            txHash,
+            userId: ctx.user.id,
+            wallet: ctx.wallet,
+          });
+          await store.saveMission(result.mission);
+          return jsonResponse({
+            success: true,
+            mission: result.mission,
+            advanced: result.advanced,
+            message: result.message,
+            executed: false,
+          });
+        }
+
 
         if (action === "submitted") {
           const mutated = progress.markStepSubmitted({

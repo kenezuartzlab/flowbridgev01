@@ -5,6 +5,8 @@ import type { ActionIntent, ActionHandoff } from "@/lib/ai/actionIntent";
 import { ACTION_STATUS_COPY, effectiveStatus, secondsRemaining } from "@/lib/ai/actionIntent";
 import { getConversation, markConversationHandoff } from "@/lib/ai/conversationStore";
 import { STRUCTURED_ACTION_TESTIDS, type ReviewAction } from "@/lib/ai/actionRender";
+import { buildClaimHandoffSearch } from "@/lib/ai/mission/claimHandoff";
+
 
 
 export interface PreparedIntentPayload {
@@ -37,12 +39,19 @@ const AMOUNT_FIELDS = ["amountIn", "amountFlow", "claimableFlow", "rewardAmount"
 export function ActionIntentCard({
   payload,
   reviewAction = null,
+  correlation = null,
 }: {
   payload: PreparedIntentPayload;
   /** V15.3H §3 — structured CTA descriptor. Preferred over the raw handoff href. */
   reviewAction?: ReviewAction | null;
+  /**
+   * V17.1C §2 — opaque mission correlation carried into the review surface so the
+   * user's own submission can be reported back. Never economics, never authority.
+   */
+  correlation?: { missionId: string; stepId: string; intentId: string | null } | null;
 }) {
   const { intent, handoff } = payload;
+
   const p = intent.parameters as Record<string, any>;
   const amountField = AMOUNT_FIELDS.find((f) => p[f] !== undefined);
   /**
@@ -92,6 +101,11 @@ export function ActionIntentCard({
     ...(reviewAction?.search ?? Object.fromEntries(new URLSearchParams(fallbackQuery ?? ""))),
   };
   handoffSearch.conv = getConversation().conversationId;
+  if (correlation) Object.assign(handoffSearch, buildClaimHandoffSearch(correlation));
+  /** V17.1C §4 — only router-mediated actions have fee/quote economics. */
+  const routerEconomics = intent.type === "SWAP" || intent.type === "BRIDGE";
+
+
   const ctaLabel = reviewAction?.label ?? handoff?.cta ?? "Review in Trade";
   const ctaSurface = reviewAction?.surface ?? handoff?.surface ?? "Trade";
 
@@ -148,7 +162,12 @@ export function ActionIntentCard({
             <dd className="truncate text-foreground">{intent.targetContract}</dd>
           </div>
         ) : null}
-        {payload.economics ? (
+        {/**
+          * V17.1C §4 — router-only economics (swap fee, expected out, quote
+          * nonce) do not exist for a distributor claim. Showing them there
+          * described a trade the user is not making, so they are omitted.
+          */}
+        {payload.economics && routerEconomics ? (
           <>
             <div>
               <dt className="uppercase tracking-[0.06em]">Router fee (live)</dt>
@@ -178,6 +197,7 @@ export function ActionIntentCard({
             ) : null}
           </>
         ) : null}
+
         {intent.simulationResult ? (
           <div className="col-span-2">
             <dt className="uppercase tracking-[0.06em]">Simulation</dt>

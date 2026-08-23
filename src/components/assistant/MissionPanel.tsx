@@ -77,7 +77,10 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
     NonNullable<MissionActionResponse["conversionConfirmation"]> | null
   >(null);
   const [rewardState, setRewardState] = useState<MissionActionResponse["rewardState"]>(null);
+  /** V17.1C §2 — opaque correlation handed to the review surface with the plan. */
+  const [correlation, setCorrelation] = useState<MissionActionResponse["correlation"]>(null);
   const [open, setOpen] = useState(true);
+
 
   const refresh = useCallback(async () => {
     setMissions(await listMissions());
@@ -109,9 +112,11 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
         if (res.error) setMessage(res.error);
         else setMessage(res.message ?? null);
         if (res.prepared) setPrepared(res.prepared);
+        if (res.correlation !== undefined) setCorrelation(res.correlation);
         if (res.conversionConfirmation !== undefined) setConversion(res.conversionConfirmation);
         if (res.rewardState !== undefined) setRewardState(res.rewardState);
         await refresh();
+
       } finally {
         setBusy(false);
       }
@@ -297,7 +302,7 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
             </p>
           )}
 
-          {prepared && <ActionIntentCard payload={prepared} />}
+          {prepared && <ActionIntentCard payload={prepared} correlation={correlation} />}
 
           <p className="font-mono text-[9.5px] leading-relaxed text-muted">
             Missions plan and prepare only. Flow AI cannot sign, submit, approve or continue a step

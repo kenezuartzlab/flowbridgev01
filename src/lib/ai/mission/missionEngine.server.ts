@@ -22,11 +22,15 @@ import { actionTypeForStep, nextEligibleStep } from "./missionPlanner";
 import {
   blockStep,
   completeStepFromEvidence,
+  isPreparationFrozen,
   markStepReady,
+  markStepSubmitted,
   markStepWaitingForUser,
+
   skipStep,
   type MissionMutation,
 } from "./missionProgress";
+
 import { deriveFromSettlement, formatUnitsExact, parseUnitsExact } from "./settlementDerivation";
 import type {
   Mission,
@@ -115,9 +119,17 @@ export interface PrepareNextStepResult {
   message: string;
   /** V17.1B §5 — an explicit conversion confirmation the user must accept. */
   conversionConfirmation?: MissionConversionConfirmation | null;
+  /**
+   * V17.1C §1 — true when this step's preparation is frozen: already prepared,
+   * already handed over, now owned by the settlement verifier.
+   */
+  frozen?: boolean;
+  /** V17.1C §2 — opaque correlation the claim surface reports settlement with. */
+  correlation?: { missionId: string; stepId: string; intentId: string | null } | null;
   /** Constant: the orchestrator executed nothing. */
   executed: false;
 }
+
 
 export async function prepareNextMissionStep(input: {
   mission: Mission;
@@ -151,7 +163,31 @@ export async function prepareNextMissionStep(input: {
     };
   }
 
-  // Non-economic steps carry no wallet authority and complete from live checks.
+  /**
+   * V17.1C §1 — the step is already prepared and waiting for the user. Do NOT
+   * re-read reward state and do NOT re-gate it: a claimable balance that is now
+   * zero is exactly what a completed claim looks like. Report the frozen plan and
+   * let the settlement verifier decide.
+   */
+  if (isPreparationFrozen(step)) {
+    const intentId =
+      step.linkedActionIntentId ?? (step.outputs.preparedActionIntentId as string | null) ?? null;
+    return {
+      mission,
+      step,
+      prepared: null,
+      failureClass: null,
+      frozen: true,
+      correlation: { missionId: mission.id, stepId: step.id, intentId },
+      message:
+        step.state === "WAITING_FOR_CONFIRMATION"
+          ? "Your transaction was submitted. This step now waits for canonical settlement — nothing is re-prepared."
+          : "This step is already prepared and waiting for your own wallet confirmation. Use 'Check confirmation' once you have signed.",
+      executed: false,
+    };
+  }
+
+
   if (step.type === "CHECK_WALLET_CHAIN") {
     if (!input.wallet) {
       const blocked = blockStep({ mission, stepId: step.id, failureClass: "EVIDENCE_UNAVAILABLE" });
@@ -602,10 +638,13 @@ export async function prepareNextMissionStep(input: {
     step,
     prepared: response,
     failureClass: null,
+    /** V17.1C §2 — correlation only; the review surface carries no economics. */
+    correlation: { missionId: mission.id, stepId: step.id, intentId: response.intent.id },
     message:
       "Prepared and ready for YOUR wallet confirmation — Flow AI cannot sign or submit this for you.",
     executed: false,
   };
+
 }
 
 /**
@@ -790,16 +829,34 @@ export async function advanceMissionStep(input: {
         message: "The distributor read is unavailable, so the mission does not advance.",
       };
     }
-    const deltaWei = state.claimedWei - BigInt(baselineRaw);
+    /**
+     * V17.1C §3 — the settlement verifier owns post-submission truth. "Claimable
+     * is now 0" is the SUCCESS signature of a delivered claim, never a failure:
+     * the proof is the delivered delta, taken from the distributor's cumulative
+     * `claimed[account]`, with the wallet FLOW increase as the corroborating read.
+     */
+    let deltaWei = state.claimedWei - BigInt(baselineRaw);
+    let settlementKind: "DISTRIBUTOR_CLAIMED_DELTA" | "WALLET_BALANCE_DELTA" = "DISTRIBUTOR_CLAIMED_DELTA";
     if (deltaWei <= 0n) {
-      return {
-        mission: input.mission,
-        advanced: false,
-        message:
-          "The distributor still shows no additional FLOW delivered — the claim is not canonically settled yet.",
-      };
+      const walletBaseline = prepareStep?.outputs.walletFlowBaselineWei as string | undefined;
+      const walletDelta =
+        walletBaseline != null && state.walletFlowWei != null
+          ? state.walletFlowWei - BigInt(walletBaseline)
+          : 0n;
+      if (walletDelta > 0n) {
+        deltaWei = walletDelta;
+        settlementKind = "WALLET_BALANCE_DELTA";
+      } else {
+        return {
+          mission: input.mission,
+          advanced: false,
+          message:
+            "The distributor still shows no additional FLOW delivered — the claim is not canonically settled yet. Your prepared claim stays exactly as it was.",
+        };
+      }
     }
-    const identity = `claimed:${state.distributor.toLowerCase()}:${input.wallet.toLowerCase()}@${state.blockNumber ?? "latest"}`;
+    const identity = `${settlementKind === "WALLET_BALANCE_DELTA" ? "flowBalance" : "claimed"}:${state.distributor.toLowerCase()}:${input.wallet.toLowerCase()}@${state.blockNumber ?? "latest"}`;
+
     const result = completeStepFromEvidence({
       mission: input.mission,
       stepId: input.stepId,
@@ -1041,4 +1098,74 @@ export async function confirmMissionConversion(input: {
     message: `Converted ${before.convertibleFlowPoints.toLocaleString()} FLOW Points. ${after.copy.readiness} — your on-chain claim is a separate wallet confirmation.`,
     executed: false,
   };
+}
+
+/**
+ * V17.1C §2/§3 — the user submitted their own transaction on the review surface.
+ *
+ * The submission is bookkeeping, never progress: the prepared step closes as
+ * "handed over and submitted", the wallet step is pinned to the observed hash,
+ * and the SETTLEMENT VERIFIER then decides the outcome from canonical reads. A
+ * zero claimable balance afterwards is settlement, not failure.
+ */
+export async function settleMissionSubmission(input: {
+  mission: Mission;
+  stepId: string;
+  txHash: string;
+  userId: string;
+  wallet: string | null;
+}): Promise<{ mission: Mission; advanced: boolean; message: string; executed: false }> {
+  let mission = input.mission;
+  const step = mission.steps.find((s) => s.id === input.stepId);
+  if (!step) {
+    return { mission, advanced: false, message: "Unknown step.", executed: false };
+  }
+
+  // A prepare step closes on hand-over + submission; it is not economic proof.
+  if (!step.requiresWalletSignature && step.state !== "COMPLETED") {
+    const submitted = markStepSubmitted({ mission, stepId: step.id, txHash: input.txHash });
+    if (submitted.ok) mission = submitted.mission;
+    const closed = completeStepFromEvidence({
+      mission,
+      stepId: step.id,
+      outcome: { onChainConfirmed: true, txHash: input.txHash },
+    });
+    if (closed.ok) mission = closed.mission;
+  }
+
+  // Pin the observed hash onto the wallet step that follows, then let canonical
+  // verification run. Nothing here signs, submits or retries a transaction.
+  const walletStep = mission.steps.find(
+    (s) => s.requiresWalletSignature && s.state !== "COMPLETED" && s.state !== "CANCELLED",
+  );
+  if (walletStep) {
+    if (walletStep.state === "PLANNED" || walletStep.state === "BLOCKED") {
+      const ready = markStepReady({ mission, stepId: walletStep.id, actionIntentId: null });
+      if (ready.ok) mission = ready.mission;
+      const waiting = markStepWaitingForUser({ mission, stepId: walletStep.id });
+      if (waiting.ok) mission = waiting.mission;
+    }
+    const submitted = markStepSubmitted({ mission, stepId: walletStep.id, txHash: input.txHash });
+    if (submitted.ok) mission = submitted.mission;
+  }
+
+  let advanced = false;
+  let message = "Your submission was recorded. Canonical settlement is verified next.";
+  for (let i = 0; i < 4; i += 1) {
+    const target = mission.currentStepId;
+    if (!target) break;
+    const result = await advanceMissionStep({
+      mission,
+      stepId: target,
+      txHash: input.txHash,
+      userId: input.userId,
+      wallet: input.wallet,
+    });
+    mission = result.mission;
+    message = result.message;
+    if (!result.advanced) break;
+    advanced = true;
+  }
+
+  return { mission, advanced, message, executed: false };
 }

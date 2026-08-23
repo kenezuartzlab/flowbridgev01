@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Coins, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
 
 import { getIdToken } from "@/lib/auth";
 import { BOT_TESTNET_CHAIN_ID } from "@/lib/rewards/flowRewardsRegistry";
 import { SectionHeader, StatusPill, Surface } from "@/components/ui-kit/primitives";
+import {
+  parseClaimHandoffCorrelation,
+  type ClaimHandoffCorrelation,
+} from "@/lib/ai/mission/claimHandoff";
+import { missionAction } from "@/lib/ai/mission/missionClient";
+
 
 /**
  * FlowBridge V12.3 — on-chain FLOW claim, BOT Testnet 968.
@@ -68,8 +74,44 @@ export function FlowTokenClaimCard({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  /**
+   * V17.1C §2 — a mission may have prepared this claim. The link carries opaque
+   * correlation only: this card still requests its own server-signed
+   * authorization and only the user's wallet signs. After the user submits, the
+   * submission is reported back so the mission's settlement verifier — not this
+   * screen, and not a zero claimable balance — decides the outcome.
+   */
+  const [correlation, setCorrelation] = useState<ClaimHandoffCorrelation | null>(null);
+  const [missionNote, setMissionNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setCorrelation(parseClaimHandoffCorrelation(window.location.search));
+  }, []);
+
+  const reportToMission = async (hash: string) => {
+    if (!correlation) return;
+    try {
+      const res = await missionAction({
+        action: "settle",
+        missionId: correlation.missionId,
+        stepId: correlation.stepId,
+        txHash: hash,
+      });
+      setMissionNote(
+        res.message ??
+          "Your submission was reported to the mission — settlement is verified on chain.",
+      );
+    } catch {
+      setMissionNote(
+        "Your claim was submitted. The mission could not be updated right now; it will verify settlement on your next check.",
+      );
+    }
+  };
+
 
   const requestAuthorization = async () => {
+
     setLoading(true);
     setError(null);
     setTxHash(null);
@@ -112,9 +154,15 @@ export function FlowTokenClaimCard({
         params: [{ from, to: auth.distributor, data: encodeClaim(auth), value: "0x0" }],
       });
       setTxHash(hash);
+      await reportToMission(hash);
       await onClaimed?.();
-      // Re-read authoritative state; unchanged points must now yield zero delta.
+      /**
+       * V17.1C §3 — re-read authoritative state. A zero delta AFTER a submitted
+       * claim is the settled state, not a failure: the card says so instead of
+       * reading like the claim disappeared.
+       */
       await requestAuthorization();
+
     } catch (e: any) {
       setError(e?.shortMessage ?? e?.message ?? "Claim transaction failed.");
     } finally {
@@ -165,8 +213,20 @@ export function FlowTokenClaimCard({
         )}
 
         {auth && !auth.authorized ? (
-          <p className="text-[12px] leading-relaxed text-muted">{auth.message}</p>
+          <p className="text-[12px] leading-relaxed text-muted">
+            {txHash
+              ? "Your claim was submitted and the distributor now shows nothing further to claim — that is the settled state, not a failure. The transaction below is the record."
+              : auth.message}
+          </p>
         ) : null}
+
+        {correlation ? (
+          <p className="text-[11.5px] leading-relaxed text-muted">
+            Opened from a Flow AI mission. The mission carried no amounts or calldata here: this card
+            requested its own server-signed authorization, and only your wallet can sign it.
+          </p>
+        ) : null}
+
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
@@ -204,7 +264,12 @@ export function FlowTokenClaimCard({
           </a>
         ) : null}
 
+        {missionNote ? (
+          <p className="text-[11.5px] leading-relaxed text-muted">{missionNote}</p>
+        ) : null}
+
         {error ? <p className="text-[12px] leading-relaxed text-destructive">{error}</p> : null}
+
 
         <p className="text-[11px] leading-relaxed text-muted-soft">
           On BOT Testnet, 1 eligible FLOW Point converts to 1 FLOW. This is a testnet validation
