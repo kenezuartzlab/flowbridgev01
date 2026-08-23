@@ -187,7 +187,7 @@ export function OpportunityFeed() {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => explain(item)}
+                      onClick={() => void explain(item)}
                       className="rounded-xl border border-hairline px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:text-foreground"
                     >
                       Ask Flow AI
