@@ -27,12 +27,40 @@ function toRow(mission: Mission) {
     version: mission.version,
     expires_at: mission.expiresAt,
     updated_at: mission.updatedAt,
+    completed_at: mission.status === "COMPLETED" ? (mission.completedAt ?? mission.updatedAt) : null,
   };
 }
 
+/**
+ * V17.1F §2/§7 — persistence is append-only for terminal missions.
+ *
+ * A COMPLETED row is never deleted, cleared, downgraded or recycled: a retried
+ * settlement observer, remount or duplicate callback writes the SAME record.
+ */
 export async function saveMission(mission: Mission): Promise<{ ok: boolean; error?: string }> {
   try {
     const db = await admin();
+    const { data: existing } = await db
+      .from("ai_missions")
+      .select("status,completed_at,mission")
+      .eq("id", mission.id)
+      .eq("user_id", mission.actorUserId)
+      .maybeSingle();
+
+    if ((existing as any)?.status === "COMPLETED") {
+      const stored = (existing as any).mission as Mission | undefined;
+      if (mission.status !== "COMPLETED") {
+        // Idempotent terminalization: never regress persisted history.
+        return { ok: true };
+      }
+      const completedAt =
+        (existing as any).completed_at ?? stored?.completedAt ?? mission.completedAt ?? mission.updatedAt;
+      const row = toRow({ ...mission, completedAt });
+      const { error } = await db.from("ai_missions").upsert(row, { onConflict: "id" });
+      if (error) return { ok: false, error: error.message };
+      return { ok: true };
+    }
+
     const { error } = await db.from("ai_missions").upsert(toRow(mission), { onConflict: "id" });
     if (error) return { ok: false, error: error.message };
     return { ok: true };
