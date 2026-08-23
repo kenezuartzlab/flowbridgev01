@@ -1128,6 +1128,15 @@ export async function settleMissionSubmission(input: {
   wallet: string | null;
 }): Promise<{ mission: Mission; advanced: boolean; message: string; executed: false }> {
   let mission = input.mission;
+  /** V17.1F §7 — idempotent terminalization: a repeat settlement is a no-op. */
+  if (mission.status === "COMPLETED") {
+    return {
+      mission,
+      advanced: false,
+      message: "This mission is already complete. Its history is unchanged.",
+      executed: false,
+    };
+  }
   const step = mission.steps.find((s) => s.id === input.stepId);
   if (!step) {
     return { mission, advanced: false, message: "Unknown step.", executed: false };
