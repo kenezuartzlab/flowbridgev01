@@ -1097,3 +1097,73 @@ export async function confirmMissionConversion(input: {
     executed: false,
   };
 }
+
+/**
+ * V17.1C §2/§3 — the user submitted their own transaction on the review surface.
+ *
+ * The submission is bookkeeping, never progress: the prepared step closes as
+ * "handed over and submitted", the wallet step is pinned to the observed hash,
+ * and the SETTLEMENT VERIFIER then decides the outcome from canonical reads. A
+ * zero claimable balance afterwards is settlement, not failure.
+ */
+export async function settleMissionSubmission(input: {
+  mission: Mission;
+  stepId: string;
+  txHash: string;
+  userId: string;
+  wallet: string | null;
+}): Promise<{ mission: Mission; advanced: boolean; message: string; executed: false }> {
+  let mission = input.mission;
+  const step = mission.steps.find((s) => s.id === input.stepId);
+  if (!step) {
+    return { mission, advanced: false, message: "Unknown step.", executed: false };
+  }
+
+  // A prepare step closes on hand-over + submission; it is not economic proof.
+  if (!step.requiresWalletSignature && step.state !== "COMPLETED") {
+    const submitted = markStepSubmitted({ mission, stepId: step.id, txHash: input.txHash });
+    if (submitted.ok) mission = submitted.mission;
+    const closed = completeStepFromEvidence({
+      mission,
+      stepId: step.id,
+      outcome: { onChainConfirmed: true, txHash: input.txHash },
+    });
+    if (closed.ok) mission = closed.mission;
+  }
+
+  // Pin the observed hash onto the wallet step that follows, then let canonical
+  // verification run. Nothing here signs, submits or retries a transaction.
+  const walletStep = mission.steps.find(
+    (s) => s.requiresWalletSignature && s.state !== "COMPLETED" && s.state !== "CANCELLED",
+  );
+  if (walletStep) {
+    if (walletStep.state === "PLANNED" || walletStep.state === "BLOCKED") {
+      const ready = markStepReady({ mission, stepId: walletStep.id, actionIntentId: null });
+      if (ready.ok) mission = ready.mission;
+      const waiting = markStepWaitingForUser({ mission, stepId: walletStep.id });
+      if (waiting.ok) mission = waiting.mission;
+    }
+    const submitted = markStepSubmitted({ mission, stepId: walletStep.id, txHash: input.txHash });
+    if (submitted.ok) mission = submitted.mission;
+  }
+
+  let advanced = false;
+  let message = "Your submission was recorded. Canonical settlement is verified next.";
+  for (let i = 0; i < 4; i += 1) {
+    const target = mission.currentStepId;
+    if (!target) break;
+    const result = await advanceMissionStep({
+      mission,
+      stepId: target,
+      txHash: input.txHash,
+      userId: input.userId,
+      wallet: input.wallet,
+    });
+    mission = result.mission;
+    message = result.message;
+    if (!result.advanced) break;
+    advanced = true;
+  }
+
+  return { mission, advanced, message, executed: false };
+}
