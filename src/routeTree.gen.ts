@@ -67,6 +67,7 @@ import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-ima
 import { Route as ApiAssistantMemoryRouteImport } from './routes/api/assistant.memory'
 import { Route as ApiAssistantIntentRouteImport } from './routes/api/assistant.intent'
 import { Route as ApiAssistantHandoffRouteImport } from './routes/api/assistant.handoff'
+import { Route as ApiAiFederationRouteImport } from './routes/api/ai.federation'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
@@ -380,6 +381,11 @@ const ApiAssistantHandoffRoute = ApiAssistantHandoffRouteImport.update({
   path: '/handoff',
   getParentRoute: () => ApiAssistantRoute,
 } as any)
+const ApiAiFederationRoute = ApiAiFederationRouteImport.update({
+  id: '/api/ai/federation',
+  path: '/api/ai/federation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
   id: '/api/admin/whoami',
   path: '/api/admin/whoami',
@@ -527,6 +533,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/ai/federation': typeof ApiAiFederationRoute
   '/api/assistant/handoff': typeof ApiAssistantHandoffRoute
   '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
@@ -606,6 +613,7 @@ export interface FileRoutesByTo {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/ai/federation': typeof ApiAiFederationRoute
   '/api/assistant/handoff': typeof ApiAssistantHandoffRoute
   '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
@@ -686,6 +694,7 @@ export interface FileRoutesById {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
+  '/api/ai/federation': typeof ApiAiFederationRoute
   '/api/assistant/handoff': typeof ApiAssistantHandoffRoute
   '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
@@ -767,6 +776,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/ai/federation'
     | '/api/assistant/handoff'
     | '/api/assistant/intent'
     | '/api/assistant/memory'
@@ -846,6 +856,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/ai/federation'
     | '/api/assistant/handoff'
     | '/api/assistant/intent'
     | '/api/assistant/memory'
@@ -925,6 +936,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
+    | '/api/ai/federation'
     | '/api/assistant/handoff'
     | '/api/assistant/intent'
     | '/api/assistant/memory'
@@ -1005,6 +1017,7 @@ export interface RootRouteChildren {
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
   ApiAdminWhoamiRoute: typeof ApiAdminWhoamiRoute
+  ApiAiFederationRoute: typeof ApiAiFederationRoute
   ApiBannerImageSplatRoute: typeof ApiBannerImageSplatRoute
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
@@ -1436,6 +1449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAssistantHandoffRouteImport
       parentRoute: typeof ApiAssistantRoute
     }
+    '/api/ai/federation': {
+      id: '/api/ai/federation'
+      path: '/api/ai/federation'
+      fullPath: '/api/ai/federation'
+      preLoaderRoute: typeof ApiAiFederationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/whoami': {
       id: '/api/admin/whoami'
       path: '/api/admin/whoami'
@@ -1698,6 +1718,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
   ApiAdminWhoamiRoute: ApiAdminWhoamiRoute,
+  ApiAiFederationRoute: ApiAiFederationRoute,
   ApiBannerImageSplatRoute: ApiBannerImageSplatRoute,
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
