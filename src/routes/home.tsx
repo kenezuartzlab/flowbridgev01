@@ -30,6 +30,7 @@ import { formatUsd } from "@/lib/format";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
 import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
+import { useRewardState } from "@/lib/rewards/useRewardState";
 import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 
 
@@ -104,6 +105,12 @@ function HomePage() {
   const recent = useMemo(() => transactions.slice(0, 4), [transactions]);
 
   /**
+   * V17.1B §2/§8 — the canonical reward state is the single authority for the
+   * claim/convert wording in the hero. Home never recomputes claimability.
+   */
+  const { rewardState } = useRewardState(!!user);
+
+  /**
    * Real verified swap volume, server-computed on the profile
    * (`total_swap_volume_usd`) and returned by /api/users/incentives.
    */
@@ -152,6 +159,7 @@ function HomePage() {
             claimableFlow={claimableFlow}
             claimedFlow={claimedFlow}
             volumeUsd={volumeUsd}
+            rewardState={rewardState}
           />
 
 
