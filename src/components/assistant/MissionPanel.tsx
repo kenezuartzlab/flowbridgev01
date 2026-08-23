@@ -352,6 +352,36 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
 
           {prepared && <ActionIntentCard payload={prepared} correlation={correlation} />}
 
+          {history.length > 0 && (
+            <div className="fb-inset overflow-hidden rounded-xl" data-testid="mission-history">
+              <button
+                type="button"
+                onClick={() => setHistoryOpen((v) => !v)}
+                className="flex w-full items-center justify-between px-3.5 py-2.5 text-left"
+              >
+                <span className="font-mono text-[10px] font-black uppercase tracking-[0.08em] text-muted">
+                  Mission history ({history.length})
+                </span>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-muted transition-transform ${historyOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {historyOpen && (
+                <>
+                  <ul className="divide-y divide-hairline border-t border-hairline">
+                    {history.map((m) => (
+                      <HistoryRow key={m.id} mission={m} />
+                    ))}
+                  </ul>
+                  <p className="border-t border-hairline px-3.5 py-2 font-mono text-[9px] leading-relaxed text-muted">
+                    Completed missions are permanent read-only records. They keep their verified
+                    transaction evidence and can never be resumed, replayed or reopened.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+
           <p className="font-mono text-[9.5px] leading-relaxed text-muted">
             Missions plan and prepare only. Flow AI cannot sign, submit, approve or continue a step
             for you, and a step advances only from canonical verified settlement.
