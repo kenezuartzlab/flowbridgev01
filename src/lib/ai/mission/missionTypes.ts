@@ -72,11 +72,18 @@ export const MISSION_STEP_TYPES = [
   "PREPARE_STAKE",
   "USER_STAKE",
   "VERIFY_STAKE",
+  /**
+   * V17.1B §4 — automatic prerequisite: an explicit, user-confirmed off-chain
+   * conversion of eligible FLOW Points into claimable FLOW. It is NOT a wallet
+   * signature and it is never implicit.
+   */
+  "CONVERT_FLOW_POINTS",
   "PREPARE_CLAIM",
   "USER_CLAIM",
   "VERIFY_CLAIM",
   "COMPLETE_CAMPAIGN_TASK",
 ] as const;
+
 export type MissionStepType = (typeof MISSION_STEP_TYPES)[number];
 
 /** Steps that require the user's own wallet signature. */
