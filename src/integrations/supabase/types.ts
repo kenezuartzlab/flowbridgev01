@@ -92,6 +92,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_missions: {
+        Row: {
+          created_at: string
+          current_step_id: string | null
+          expires_at: string
+          goal_text: string
+          id: string
+          mission: Json
+          schema_version: string
+          status: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          current_step_id?: string | null
+          expires_at: string
+          goal_text: string
+          id: string
+          mission: Json
+          schema_version: string
+          status: string
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          current_step_id?: string | null
+          expires_at?: string
+          goal_text?: string
+          id?: string
+          mission?: Json
+          schema_version?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
       ai_opportunity_state: {
         Row: {
           created_at: string
