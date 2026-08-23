@@ -99,6 +99,8 @@ export function ActionIntentCard({
     ...(reviewAction?.search ?? Object.fromEntries(new URLSearchParams(fallbackQuery ?? ""))),
   };
   handoffSearch.conv = getConversation().conversationId;
+  if (correlation) Object.assign(handoffSearch, buildClaimHandoffSearch(correlation));
+
   const ctaLabel = reviewAction?.label ?? handoff?.cta ?? "Review in Trade";
   const ctaSurface = reviewAction?.surface ?? handoff?.surface ?? "Trade";
 
