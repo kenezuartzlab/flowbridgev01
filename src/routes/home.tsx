@@ -30,6 +30,8 @@ import { formatUsd } from "@/lib/format";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
 import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
+import { OpportunityFeed } from "@/components/home/OpportunityFeed";
+
 
 
 export const Route = createFileRoute("/home")({
@@ -167,6 +169,11 @@ function HomePage() {
             </div>
           )}
         </HeroCard>
+
+        {/* V16 — Flow AI proactive insights, evidence-backed and read-only */}
+        <OpportunityFeed />
+
+
 
 
         {/*

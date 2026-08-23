@@ -38,6 +38,7 @@ import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
 import { Route as CampaignsSlugRouteImport } from './routes/campaigns/$slug'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
+import { Route as ApiOpportunitiesRouteImport } from './routes/api/opportunities'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
@@ -226,6 +227,11 @@ const ApiTransactionsRoute = ApiTransactionsRouteImport.update({
 const ApiProposalsRoute = ApiProposalsRouteImport.update({
   id: '/api/proposals',
   path: '/api/proposals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpportunitiesRoute = ApiOpportunitiesRouteImport.update({
+  id: '/api/opportunities',
+  path: '/api/opportunities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -487,6 +493,7 @@ export interface FileRoutesByFullPath {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/opportunities': typeof ApiOpportunitiesRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
@@ -562,6 +569,7 @@ export interface FileRoutesByTo {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/opportunities': typeof ApiOpportunitiesRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
@@ -638,6 +646,7 @@ export interface FileRoutesById {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/opportunities': typeof ApiOpportunitiesRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/transactions': typeof ApiTransactionsRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
@@ -715,6 +724,7 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/opportunities'
     | '/api/proposals'
     | '/api/transactions'
     | '/campaigns/$slug'
@@ -790,6 +800,7 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/opportunities'
     | '/api/proposals'
     | '/api/transactions'
     | '/campaigns/$slug'
@@ -865,6 +876,7 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/opportunities'
     | '/api/proposals'
     | '/api/transactions'
     | '/campaigns/$slug'
@@ -941,6 +953,7 @@ export interface RootRouteChildren {
   ApiCampaignsRoute: typeof ApiCampaignsRouteWithChildren
   ApiConfigRoute: typeof ApiConfigRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiOpportunitiesRoute: typeof ApiOpportunitiesRoute
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
   ApiTransactionsRoute: typeof ApiTransactionsRoute
   CampaignsSlugRoute: typeof CampaignsSlugRoute
@@ -1179,6 +1192,13 @@ declare module '@tanstack/react-router' {
       path: '/api/proposals'
       fullPath: '/api/proposals'
       preLoaderRoute: typeof ApiProposalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/opportunities': {
+      id: '/api/opportunities'
+      path: '/api/opportunities'
+      fullPath: '/api/opportunities'
+      preLoaderRoute: typeof ApiOpportunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -1602,6 +1622,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCampaignsRoute: ApiCampaignsRouteWithChildren,
   ApiConfigRoute: ApiConfigRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiOpportunitiesRoute: ApiOpportunitiesRoute,
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
   ApiTransactionsRoute: ApiTransactionsRoute,
   CampaignsSlugRoute: CampaignsSlugRoute,
