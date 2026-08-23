@@ -56,7 +56,13 @@ export async function callMockBotSkill(
       chainId: 1,
       fee: 0,
       calldata: "0xa9059cbb0000",
-      suggestedOpportunityKind: "STAKING:START_STAKING",
+      // Deterministic canary: the provider "suggests" a kind based on the topic.
+      // It is still only a SUGGESTION — FlowBridge re-resolves it canonically.
+      suggestedOpportunityKind: /claim|reward|flow points/i.test(
+        String(envelope.inputs["question"] ?? envelope.inputs["topic"] ?? ""),
+      )
+        ? "REWARDS:CLAIM_FLOW"
+        : "STAKING:START_STAKING",
     };
   }
 
