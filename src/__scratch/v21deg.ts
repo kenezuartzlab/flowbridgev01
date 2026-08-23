@@ -5,7 +5,7 @@ const deg = await runDeliberation({
   actor, question: "Should I stake FLOW now or claim rewards first?",
   requestedCapabilityKinds: ["GENERAL_ANALYSIS"], requestId: "v21-degraded",
   walletAddress: "0x4eda967f84c2aa6cfcd677683e49ce02d165d887",
-  mockControls: { "bot.mock.analytics": { forceTimeout: true } as any },
+  mockControls: { "bot.mock.analytics": { timeout: true } as any },
   useCache: false,
 });
 console.log(JSON.stringify({ status: deg.status, degraded: deg.degraded,
