@@ -170,9 +170,16 @@ export function completeStepFromEvidence(input: {
     const steps = done.mission.steps.map((s) => {
       if (!s.amountUnresolved || s.state === "COMPLETED") return s;
       if (!s.dependencies.includes(input.stepId)) return s;
+      /**
+       * A portion constraint applies ONCE, where the amount is actually spent
+       * (the prepare step); pass-through resolution steps carry the full result.
+       */
       const pct = input.mission.goal.constraints.stakePortionPercent;
       const base = Number(input.outcome.resolvedAmount);
-      const amount = pct ? String((base * pct) / 100) : input.outcome.resolvedAmount!;
+      const amount =
+        pct && s.type.startsWith("PREPARE_")
+          ? String((base * pct) / 100)
+          : input.outcome.resolvedAmount!;
       return { ...s, outputs: { ...s.outputs, resolvedAmount: amount }, inputs: { ...s.inputs, amount } };
     });
     const mission = { ...done.mission, steps };
