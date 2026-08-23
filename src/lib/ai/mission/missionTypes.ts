@@ -123,7 +123,14 @@ export const MISSION_FAILURE_CLASSES = [
   "TX_REVERTED",
   "CONFIRMATION_PENDING",
   "VERIFICATION_MISMATCH",
+  /** V17.1B §7 — canonical reward-state failures. */
+  "NO_CLAIMABLE_FLOW",
+  "NO_CONVERTIBLE_OR_CLAIMABLE_FLOW",
+  "CONVERSION_REQUIRED",
+  "CONVERSION_REQUIREMENTS_UNMET",
+  "REWARD_STATE_UNAVAILABLE",
 ] as const;
+
 export type MissionFailureClass = (typeof MISSION_FAILURE_CLASSES)[number];
 
 export type MissionOutcome =
