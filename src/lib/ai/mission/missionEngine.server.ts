@@ -1,13 +1,19 @@
 /**
- * FlowBridge V17 §4/§5 — the mission orchestrator's server side.
+ * FlowBridge V17 §4/§5 + V17.1 — the mission orchestrator's server side.
  *
  * It does exactly two privileged things:
  *  1. Prepare the ONE next eligible step by re-entering the frozen V15.3
  *     ActionIntent pipeline (live evidence, policy, simulation, canonical
  *     snapshot). It never signs, submits, approves or auto-continues.
- *  2. Advance a step from CANONICAL verification only — a `verified_activity`
- *     row for swaps, an on-chain position/ledger read for stake and claim. A
- *     bare tx hash, a click, or assistant prose can never advance a mission.
+ *  2. Advance a step from CANONICAL evidence only — a `verified_activity` row
+ *     for swaps, an on-chain claim/position reconciliation for claim and stake.
+ *     A bare tx hash, a click, or assistant prose can never advance a mission.
+ *
+ * V17.1 additions:
+ *  - Baselines are captured at preparation time so a settlement delta is exact.
+ *  - Downstream amounts are derived with integer base-unit math and provenance.
+ *  - The settling wallet is pinned; a wallet change blocks further progress.
+ *  - Vault pause, minimum stake and bounded allowance are live gates.
  */
 import type { FlowAiActor } from "../aiTypes";
 import { prepareActionIntent } from "../intentPrepare.server";
@@ -21,16 +27,27 @@ import {
   skipStep,
   type MissionMutation,
 } from "./missionProgress";
+import { deriveFromSettlement, formatUnitsExact, parseUnitsExact } from "./settlementDerivation";
 import type { Mission, MissionFailureClass, MissionStep } from "./missionTypes";
+
+const FLOW_DECIMALS = 18;
 
 /** Exact base-unit → decimal string conversion (no floats, no rounding). */
 function formatRaw(raw: string, decimals: number): string {
   const digits = raw.replace(/[^0-9]/g, "") || "0";
-  if (decimals <= 0) return digits;
-  const padded = digits.padStart(decimals + 1, "0");
-  const whole = padded.slice(0, padded.length - decimals);
-  const frac = padded.slice(padded.length - decimals).replace(/0+$/, "");
-  return frac ? `${whole}.${frac}` : whole;
+  return formatUnitsExact(BigInt(digits), decimals);
+}
+
+/** Writes non-authoritative bookkeeping (baselines, live gates) onto a step. */
+function patchStepOutputs(
+  mission: Mission,
+  stepId: string,
+  patch: Record<string, unknown>,
+): Mission {
+  const steps = mission.steps.map((s) =>
+    s.id === stepId ? { ...s, outputs: { ...s.outputs, ...patch } } : s,
+  );
+  return { ...mission, steps, updatedAt: new Date().toISOString() };
 }
 
 function classifyBlockers(input: {
@@ -68,6 +85,22 @@ function shapeForStep(mission: Mission, step: MissionStep): PreparationShape | n
   };
 }
 
+/**
+ * V17.1 §7 — the wallet that settled an earlier economic step is pinned. If the
+ * bound wallet changed, no later step may be prepared until it is revalidated.
+ */
+function walletMismatch(mission: Mission, wallet: string | null): string | null {
+  const pinned = mission.steps
+    .map((s) => s.outputs.settlementWallet)
+    .find((w): w is string => typeof w === "string" && w.length > 0);
+  if (!pinned) return null;
+  if (!wallet) return "The wallet that settled the earlier step is no longer bound.";
+  if (wallet.toLowerCase() !== pinned.toLowerCase()) {
+    return `This mission settled with ${pinned.slice(0, 6)}…${pinned.slice(-4)}; the bound wallet is different, so nothing further was prepared.`;
+  }
+  return null;
+}
+
 export interface PrepareNextStepResult {
   mission: Mission;
   step: MissionStep | null;
@@ -85,15 +118,16 @@ export async function prepareNextMissionStep(input: {
   wallet: string | null;
   claimableFlow?: number | null;
 }): Promise<PrepareNextStepResult> {
-  const step = nextEligibleStep(input.mission);
+  let mission = input.mission;
+  const step = nextEligibleStep(mission);
   if (!step) {
     return {
-      mission: input.mission,
+      mission,
       step: null,
       prepared: null,
       failureClass: null,
       message:
-        input.mission.status === "COMPLETED"
+        mission.status === "COMPLETED"
           ? "This mission is complete."
           : "There is no eligible next step right now.",
       executed: false,
@@ -103,9 +137,9 @@ export async function prepareNextMissionStep(input: {
   // Non-economic steps carry no wallet authority and complete from live checks.
   if (step.type === "CHECK_WALLET_CHAIN") {
     if (!input.wallet) {
-      const blocked = blockStep({ mission: input.mission, stepId: step.id, failureClass: "EVIDENCE_UNAVAILABLE" });
+      const blocked = blockStep({ mission, stepId: step.id, failureClass: "EVIDENCE_UNAVAILABLE" });
       return {
-        mission: blocked.ok ? blocked.mission : input.mission,
+        mission: blocked.ok ? blocked.mission : mission,
         step,
         prepared: null,
         failureClass: "EVIDENCE_UNAVAILABLE",
@@ -114,12 +148,12 @@ export async function prepareNextMissionStep(input: {
       };
     }
     const done = skipStep({
-      mission: input.mission,
+      mission,
       stepId: step.id,
-      reason: `wallet bound, chain ${input.mission.goal.chainId}`,
+      reason: `wallet bound, chain ${mission.goal.chainId}`,
     });
     return {
-      mission: done.ok ? done.mission : input.mission,
+      mission: done.ok ? done.mission : mission,
       step,
       prepared: null,
       failureClass: null,
@@ -128,9 +162,28 @@ export async function prepareNextMissionStep(input: {
     };
   }
 
+  // §7 — actor/wallet revalidation before anything downstream is prepared.
+  const mismatch = walletMismatch(mission, input.wallet);
+  if (mismatch) {
+    const blocked = blockStep({
+      mission,
+      stepId: step.id,
+      failureClass: "VERIFICATION_MISMATCH",
+      reason: mismatch,
+    });
+    return {
+      mission: blocked.ok ? blocked.mission : mission,
+      step,
+      prepared: null,
+      failureClass: "VERIFICATION_MISMATCH",
+      message: mismatch,
+      executed: false,
+    };
+  }
+
   if (step.amountUnresolved && !step.outputs.resolvedAmount) {
     return {
-      mission: input.mission,
+      mission,
       step,
       prepared: null,
       failureClass: "CONFIRMATION_PENDING",
@@ -140,10 +193,71 @@ export async function prepareNextMissionStep(input: {
     };
   }
 
+  // §6 — bounded allowance is a separate, explicit user confirmation.
+  if (step.type === "USER_APPROVAL_IF_REQUIRED") {
+    const stakeStep = mission.steps.find((s) => s.type === "PREPARE_STAKE");
+    const required = stakeStep?.outputs.resolvedAmountWei as string | undefined;
+    if (!required || !input.wallet) {
+      return {
+        mission,
+        step,
+        prepared: null,
+        failureClass: null,
+        message: "This approval is only decided once the amount to spend is canonical.",
+        executed: false,
+      };
+    }
+    const { readStakeState } = await import("./missionChainReads.server");
+    const state = await readStakeState({ chainId: mission.goal.chainId, account: input.wallet });
+    if (!state) {
+      return {
+        mission,
+        step,
+        prepared: null,
+        failureClass: "EVIDENCE_UNAVAILABLE",
+        message: "The allowance read is unavailable, so no approval was proposed.",
+        executed: false,
+      };
+    }
+    if ((state.allowanceWei ?? 0n) >= BigInt(required)) {
+      const done = skipStep({
+        mission,
+        stepId: step.id,
+        reason: `allowance ${formatUnitsExact(state.allowanceWei ?? 0n, FLOW_DECIMALS)} FLOW already covers the stake`,
+      });
+      return {
+        mission: done.ok ? done.mission : mission,
+        step,
+        prepared: null,
+        failureClass: null,
+        message: "Your existing FLOW allowance already covers this stake — no approval is needed.",
+        executed: false,
+      };
+    }
+    mission = patchStepOutputs(mission, step.id, {
+      approvalRequired: {
+        token: state.token,
+        spender: state.vault,
+        exactAmountWei: required,
+        exactAmount: formatUnitsExact(BigInt(required), FLOW_DECIMALS),
+        currentAllowanceWei: (state.allowanceWei ?? 0n).toString(),
+        unlimited: false,
+      },
+    });
+    return {
+      mission,
+      step,
+      prepared: null,
+      failureClass: "ALLOWANCE_REQUIRED",
+      message: `Approve exactly ${formatUnitsExact(BigInt(required), FLOW_DECIMALS)} FLOW for the staking vault in your own wallet — Flow AI never approves for you and never requests an unlimited allowance.`,
+      executed: false,
+    };
+  }
+
   const actionType = actionTypeForStep(step);
   if (!actionType) {
     return {
-      mission: input.mission,
+      mission,
       step,
       prepared: null,
       failureClass: null,
@@ -152,15 +266,129 @@ export async function prepareNextMissionStep(input: {
     };
   }
 
-  const shape = shapeForStep(input.mission, step);
+  // §2/§5 — capture the canonical baseline BEFORE the user's transaction, so a
+  // settlement delta later is exact instead of inferred.
+  if (input.wallet && (step.type === "PREPARE_CLAIM" || step.type === "PREPARE_STAKE")) {
+    if (step.type === "PREPARE_CLAIM") {
+      const { readClaimState } = await import("./missionChainReads.server");
+      const claimState = await readClaimState({ chainId: mission.goal.chainId, account: input.wallet });
+      if (!claimState) {
+        const blocked = blockStep({
+          mission,
+          stepId: step.id,
+          failureClass: "EVIDENCE_UNAVAILABLE",
+          reason: "The distributor state could not be read, so no claim was prepared.",
+        });
+        return {
+          mission: blocked.ok ? blocked.mission : mission,
+          step,
+          prepared: null,
+          failureClass: "EVIDENCE_UNAVAILABLE",
+          message: "The distributor state could not be read, so no claim was prepared.",
+          executed: false,
+        };
+      }
+      mission = patchStepOutputs(mission, step.id, {
+        claimedBaselineWei: claimState.claimedWei.toString(),
+        baselineBlockNumber: claimState.blockNumber,
+        walletFlowBaselineWei: claimState.walletFlowWei.toString(),
+        distributor: claimState.distributor,
+      });
+    } else {
+      const { readStakeState } = await import("./missionChainReads.server");
+      const stakeState = await readStakeState({ chainId: mission.goal.chainId, account: input.wallet });
+      if (!stakeState) {
+        const blocked = blockStep({
+          mission,
+          stepId: step.id,
+          failureClass: "EVIDENCE_UNAVAILABLE",
+          reason: "The staking vault state could not be read, so nothing was prepared.",
+        });
+        return {
+          mission: blocked.ok ? blocked.mission : mission,
+          step,
+          prepared: null,
+          failureClass: "EVIDENCE_UNAVAILABLE",
+          message: "The staking vault state could not be read, so nothing was prepared.",
+          executed: false,
+        };
+      }
+      if (stakeState.paused) {
+        const blocked = blockStep({
+          mission,
+          stepId: step.id,
+          failureClass: "SIMULATION_REVERT",
+          reason: "The staking vault is paused right now — your FLOW stays in your wallet.",
+        });
+        return {
+          mission: blocked.ok ? blocked.mission : mission,
+          step,
+          prepared: null,
+          failureClass: "SIMULATION_REVERT",
+          message: "The staking vault is paused right now — your FLOW stays in your wallet.",
+          executed: false,
+        };
+      }
+      const amountStr =
+        (step.outputs.resolvedAmount as string | undefined) ??
+        (step.inputs.amount as string | undefined) ??
+        mission.goal.amount ??
+        null;
+      const amountWei = amountStr ? parseUnitsExact(amountStr, FLOW_DECIMALS) : null;
+      if (amountWei != null && stakeState.minStakeWei != null && amountWei < stakeState.minStakeWei) {
+        const reason = `The derived stake (${amountStr} FLOW) is below the vault minimum of ${formatUnitsExact(stakeState.minStakeWei, FLOW_DECIMALS)} FLOW.`;
+        const blocked = blockStep({
+          mission,
+          stepId: step.id,
+          failureClass: "INSUFFICIENT_BALANCE",
+          reason,
+        });
+        return {
+          mission: blocked.ok ? blocked.mission : mission,
+          step,
+          prepared: null,
+          failureClass: "INSUFFICIENT_BALANCE",
+          message: reason,
+          executed: false,
+        };
+      }
+      if (amountWei != null && stakeState.walletFlowWei != null && amountWei > stakeState.walletFlowWei) {
+        const reason = `Your wallet holds ${formatUnitsExact(stakeState.walletFlowWei, FLOW_DECIMALS)} FLOW, which is less than the derived stake of ${amountStr} FLOW.`;
+        const blocked = blockStep({
+          mission,
+          stepId: step.id,
+          failureClass: "INSUFFICIENT_BALANCE",
+          reason,
+        });
+        return {
+          mission: blocked.ok ? blocked.mission : mission,
+          step,
+          prepared: null,
+          failureClass: "INSUFFICIENT_BALANCE",
+          message: reason,
+          executed: false,
+        };
+      }
+      mission = patchStepOutputs(mission, step.id, {
+        stakedBaselineWei: stakeState.stakedWei.toString(),
+        baselineBlockNumber: stakeState.blockNumber,
+        minStakeWei: stakeState.minStakeWei?.toString() ?? null,
+        allowanceWei: (stakeState.allowanceWei ?? 0n).toString(),
+        vault: stakeState.vault,
+        resolvedAmountWei: amountWei?.toString() ?? null,
+      });
+    }
+  }
+
+  const shape = shapeForStep(mission, step);
   const built =
     shape && input.wallet
       ? parametersForShape({ shape, wallet: input.wallet, claimableFlow: input.claimableFlow ?? null })
       : null;
   if (!built) {
-    const blocked = blockStep({ mission: input.mission, stepId: step.id, failureClass: "EVIDENCE_UNAVAILABLE" });
+    const blocked = blockStep({ mission, stepId: step.id, failureClass: "EVIDENCE_UNAVAILABLE" });
     return {
-      mission: blocked.ok ? blocked.mission : input.mission,
+      mission: blocked.ok ? blocked.mission : mission,
       step,
       prepared: null,
       failureClass: "EVIDENCE_UNAVAILABLE",
@@ -175,14 +403,14 @@ export async function prepareNextMissionStep(input: {
     parameters: built.parameters,
     actor: input.actor,
     actorWallet: input.wallet,
-    sourceEvidenceRefs: [`mission:${input.mission.id}`, `mission-step:${step.id}`],
+    sourceEvidenceRefs: [`mission:${mission.id}`, `mission-step:${step.id}`],
   });
 
   if (!prepared.ok) {
     const failureClass = classifyBlockers({ decision: prepared.error, blockers: [] });
-    const blocked = blockStep({ mission: input.mission, stepId: step.id, failureClass });
+    const blocked = blockStep({ mission, stepId: step.id, failureClass, reason: prepared.error });
     return {
-      mission: blocked.ok ? blocked.mission : input.mission,
+      mission: blocked.ok ? blocked.mission : mission,
       step,
       prepared: null,
       failureClass,
@@ -198,9 +426,9 @@ export async function prepareNextMissionStep(input: {
       decision: response.decision,
       blockers: response.blockers,
     });
-    const blocked = blockStep({ mission: input.mission, stepId: step.id, failureClass });
+    const blocked = blockStep({ mission, stepId: step.id, failureClass, reason: response.decision });
     return {
-      mission: blocked.ok ? blocked.mission : input.mission,
+      mission: blocked.ok ? blocked.mission : mission,
       step,
       prepared: response,
       failureClass,
@@ -210,7 +438,7 @@ export async function prepareNextMissionStep(input: {
   }
 
   let mutated: MissionMutation = markStepReady({
-    mission: input.mission,
+    mission,
     stepId: step.id,
     actionIntentId: response.intent.id,
   });
@@ -219,7 +447,7 @@ export async function prepareNextMissionStep(input: {
   }
 
   return {
-    mission: mutated.ok ? mutated.mission : input.mission,
+    mission: mutated.ok ? mutated.mission : mission,
     step,
     prepared: response,
     failureClass: null,
@@ -242,6 +470,69 @@ export async function advanceMissionStep(input: {
 }): Promise<{ mission: Mission; advanced: boolean; message: string }> {
   const step = input.mission.steps.find((s) => s.id === input.stepId);
   if (!step) return { mission: input.mission, advanced: false, message: "Unknown step." };
+
+  /**
+   * V17.1 §3 — a user wallet step closes on a SUCCESSFUL receipt for the user's
+   * own transaction. That proves inclusion only; the following VERIFY_* step
+   * still requires canonical state reconciliation before the mission advances
+   * economically, and an approval receipt never proves a stake occurred.
+   */
+  if (step.requiresWalletSignature) {
+    if (!input.txHash) {
+      return {
+        mission: input.mission,
+        advanced: false,
+        message: "A transaction hash from your own wallet confirmation is required.",
+      };
+    }
+    const { readReceipt } = await import("./missionChainReads.server");
+    const receipt = await readReceipt({ chainId: input.mission.goal.chainId, txHash: input.txHash });
+    if (!receipt) {
+      return {
+        mission: input.mission,
+        advanced: false,
+        message: "The receipt is not available yet — the mission stays exactly where it is.",
+      };
+    }
+    if (receipt.status !== "success") {
+      const blocked = blockStep({
+        mission: input.mission,
+        stepId: step.id,
+        failureClass: "TX_REVERTED",
+        reason: "The transaction reverted on chain, so this step did not complete.",
+      });
+      return {
+        mission: blocked.ok ? blocked.mission : input.mission,
+        advanced: false,
+        message: "The transaction reverted on chain, so this step did not complete.",
+      };
+    }
+    if (input.wallet && receipt.from && receipt.from !== input.wallet.toLowerCase()) {
+      const blocked = blockStep({
+        mission: input.mission,
+        stepId: step.id,
+        failureClass: "VERIFICATION_MISMATCH",
+        reason: "The transaction was sent by a different wallet than the bound one.",
+      });
+      return {
+        mission: blocked.ok ? blocked.mission : input.mission,
+        advanced: false,
+        message: "The transaction was sent by a different wallet than the bound one.",
+      };
+    }
+    const result = completeStepFromEvidence({
+      mission: input.mission,
+      stepId: input.stepId,
+      outcome: { onChainConfirmed: true, txHash: input.txHash },
+    });
+    return result.ok
+      ? {
+          mission: result.mission,
+          advanced: true,
+          message: "Your transaction is included — canonical verification is next.",
+        }
+      : { mission: input.mission, advanced: false, message: result.error };
+  }
 
   if (step.type === "VERIFY_SWAP") {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -273,7 +564,8 @@ export async function advanceMissionStep(input: {
         .filter(Boolean)
         .map((sym) => tokenFor(String(sym), Number(row.source_chain_id) || input.mission.goal.chainId))
         .find((t) => t && t.address === String(row.token ?? "").toLowerCase())?.decimals ?? 18;
-    const resolvedAmount = formatRaw(String(row.amount_raw ?? "0"), decimals);
+    const rawDigits = String(row.amount_raw ?? "0").replace(/[^0-9]/g, "") || "0";
+    const resolvedAmount = formatRaw(rawDigits, decimals);
     const result = completeStepFromEvidence({
       mission: input.mission,
       stepId: input.stepId,
@@ -281,6 +573,11 @@ export async function advanceMissionStep(input: {
         verifiedActivityId: String(row.activity_id),
         txHash: row.source_tx_hash ?? input.txHash ?? null,
         resolvedAmount,
+        resolvedAmountWei: rawDigits,
+        decimals,
+        sourceKind: "VERIFIED_ACTIVITY",
+        sourceIdentity: String(row.activity_id),
+        settlementWallet: input.wallet,
       },
     });
     return result.ok
@@ -301,31 +598,154 @@ export async function advanceMissionStep(input: {
     const result = completeStepFromEvidence({
       mission: input.mission,
       stepId: input.stepId,
-      outcome: { onChainConfirmed: true, resolvedAmount: resolved },
+      outcome: {
+        onChainConfirmed: true,
+        resolvedAmount: resolved,
+        resolvedAmountWei: (swapStep?.outputs.resolvedAmountWei as string | undefined) ?? null,
+        decimals: 18,
+        sourceKind: "VERIFIED_ACTIVITY",
+        sourceIdentity: (swapStep?.outputs.verifiedActivityId as string | undefined) ?? null,
+      },
     });
     return result.ok
       ? { mission: result.mission, advanced: true, message: `Actual output resolved: ${resolved}.` }
       : { mission: input.mission, advanced: false, message: result.error };
   }
 
-  if (step.type === "VERIFY_STAKE" || step.type === "VERIFY_CLAIM") {
-    const { loadStakingEvidence } = await import("../stakingEvidence.server");
-    const evidence = await loadStakingEvidence(input.wallet);
-    const position = evidence.find((e) => /position|staked|claim/i.test(e.id));
-    if (!position) {
+  /**
+   * §3/§4 — canonical claim settlement. The exact FLOW delivered is the increase
+   * of `distributor.claimed[account]` over the baseline captured at preparation.
+   * Only after this may a downstream amount be derived.
+   */
+  if (step.type === "VERIFY_CLAIM") {
+    if (!input.wallet) {
+      return { mission: input.mission, advanced: false, message: "No bound wallet to reconcile against." };
+    }
+    const prepareStep = input.mission.steps.find((s) => s.type === "PREPARE_CLAIM");
+    const baselineRaw = prepareStep?.outputs.claimedBaselineWei as string | undefined;
+    if (baselineRaw == null) {
       return {
         mission: input.mission,
         advanced: false,
-        message: "The on-chain read is unavailable, so the mission does not advance.",
+        message: "No pre-claim baseline was recorded, so the delivered FLOW cannot be proven.",
+      };
+    }
+    const { readClaimState } = await import("./missionChainReads.server");
+    const state = await readClaimState({ chainId: input.mission.goal.chainId, account: input.wallet });
+    if (!state) {
+      return {
+        mission: input.mission,
+        advanced: false,
+        message: "The distributor read is unavailable, so the mission does not advance.",
+      };
+    }
+    const deltaWei = state.claimedWei - BigInt(baselineRaw);
+    if (deltaWei <= 0n) {
+      return {
+        mission: input.mission,
+        advanced: false,
+        message:
+          "The distributor still shows no additional FLOW delivered — the claim is not canonically settled yet.",
+      };
+    }
+    const identity = `claimed:${state.distributor.toLowerCase()}:${input.wallet.toLowerCase()}@${state.blockNumber ?? "latest"}`;
+    const result = completeStepFromEvidence({
+      mission: input.mission,
+      stepId: input.stepId,
+      outcome: {
+        onChainConfirmed: true,
+        txHash: input.txHash ?? null,
+        resolvedAmount: formatUnitsExact(deltaWei, FLOW_DECIMALS),
+        resolvedAmountWei: deltaWei.toString(),
+        decimals: FLOW_DECIMALS,
+        sourceKind: "ON_CHAIN_CLAIM",
+        sourceIdentity: identity,
+        settlementWallet: input.wallet,
+      },
+    });
+    if (!result.ok) return { mission: input.mission, advanced: false, message: result.error };
+    const pct = input.mission.goal.constraints.stakePortionPercent;
+    const derived = pct
+      ? deriveFromSettlement({
+          actualWei: deltaWei,
+          decimals: FLOW_DECIMALS,
+          ratioPercent: pct,
+          sourceStepId: input.stepId,
+          sourceKind: "ON_CHAIN_CLAIM",
+          sourceIdentity: identity,
+        })
+      : null;
+    return {
+      mission: result.mission,
+      advanced: true,
+      message: `Claim verified from canonical distributor state: ${formatUnitsExact(deltaWei, FLOW_DECIMALS)} FLOW delivered.${
+        derived ? ` Derived stake target: ${derived.derivedAmount} FLOW (${pct}% of the verified claim).` : ""
+      }`,
+    };
+  }
+
+  /** §6 — the stake is proven by the increase of the user's vault position. */
+  if (step.type === "VERIFY_STAKE") {
+    if (!input.wallet) {
+      return { mission: input.mission, advanced: false, message: "No bound wallet to reconcile against." };
+    }
+    const prepareStep = input.mission.steps.find((s) => s.type === "PREPARE_STAKE");
+    const baselineRaw = prepareStep?.outputs.stakedBaselineWei as string | undefined;
+    const expectedRaw = prepareStep?.outputs.resolvedAmountWei as string | undefined;
+    const { readStakeState } = await import("./missionChainReads.server");
+    const state = await readStakeState({ chainId: input.mission.goal.chainId, account: input.wallet });
+    if (!state) {
+      return {
+        mission: input.mission,
+        advanced: false,
+        message: "The on-chain position read is unavailable, so the mission does not advance.",
+      };
+    }
+    if (baselineRaw == null) {
+      return {
+        mission: input.mission,
+        advanced: false,
+        message: "No pre-stake position baseline was recorded, so the stake cannot be reconciled.",
+      };
+    }
+    const deltaWei = state.stakedWei - BigInt(baselineRaw);
+    if (deltaWei <= 0n) {
+      return {
+        mission: input.mission,
+        advanced: false,
+        message: "Your vault position has not increased yet — the stake is not canonically settled.",
+      };
+    }
+    if (expectedRaw && deltaWei < BigInt(expectedRaw)) {
+      const blocked = blockStep({
+        mission: input.mission,
+        stepId: step.id,
+        failureClass: "VERIFICATION_MISMATCH",
+        reason: `Your position rose by ${formatUnitsExact(deltaWei, FLOW_DECIMALS)} FLOW but the prepared stake was ${formatUnitsExact(BigInt(expectedRaw), FLOW_DECIMALS)} FLOW.`,
+      });
+      return {
+        mission: blocked.ok ? blocked.mission : input.mission,
+        advanced: false,
+        message: "The settled stake does not match the prepared amount, so the mission stopped for review.",
       };
     }
     const result = completeStepFromEvidence({
       mission: input.mission,
       stepId: input.stepId,
-      outcome: { onChainConfirmed: true, txHash: input.txHash ?? null },
+      outcome: {
+        onChainConfirmed: true,
+        txHash: input.txHash ?? null,
+        sourceKind: "ON_CHAIN_POSITION",
+        sourceIdentity: `staked:${state.vault.toLowerCase()}:${input.wallet.toLowerCase()}@${state.blockNumber ?? "latest"}`,
+        settlementWallet: input.wallet,
+      },
     });
     return result.ok
-      ? { mission: result.mission, advanced: true, message: "Confirmed from an on-chain read." }
+      ? {
+          mission: result.mission,
+          advanced: true,
+          message: `Stake verified on chain: position increased by ${formatUnitsExact(deltaWei, FLOW_DECIMALS)} FLOW (total ${formatUnitsExact(state.stakedWei, FLOW_DECIMALS)} FLOW).`,
+        }
       : { mission: input.mission, advanced: false, message: result.error };
   }
 

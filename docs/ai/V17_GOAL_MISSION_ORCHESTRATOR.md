@@ -43,3 +43,31 @@ never authority: `Mission = Plan`, `ActionIntent = Authority`.
 - Goal "Claim my FLOW rewards and stake it" produced the 7-step graph and its
   first economic step reached `READY_FOR_USER` → `WAITING_FOR_USER`, stopping
   before any wallet signature.
+
+## V17.1 — Live settlement advancement
+
+| File | Role |
+| --- | --- |
+| `src/lib/ai/mission/settlementDerivation.ts` | Integer base-unit derivation (`floor(actual × ratio / 100)`) + provenance |
+| `src/lib/ai/mission/missionChainReads.server.ts` | Canonical reads: `claimed(account)`, vault `balanceOf`, `minStake`, `paused`, allowance, receipts |
+
+Rules added:
+
+1. **Baselines before signatures.** Preparing a claim/stake records the pre-tx
+   `claimed[account]` / vault position. The settled amount is the *delta*, never
+   an estimate or a quote.
+2. **Derivation, not restatement.** A downstream amount is `floor(actualWei ×
+   ratio / 100)` in base units, stored with provenance (source step, source
+   identity, actual amount, ratio, calculation version).
+3. **Receipts prove inclusion only.** A wallet step closes on a successful
+   receipt from the bound sender; the following `VERIFY_*` step still requires
+   canonical state reconciliation. A reverted tx blocks (`TX_REVERTED`).
+4. **Wallet pinned.** Once a step settles, a different bound wallet blocks
+   further preparation (`VERIFICATION_MISMATCH`).
+5. **Live stake gates.** Vault paused, below `minStake`, or insufficient wallet
+   FLOW blocks with the live figure instead of preparing.
+6. **Bounded approval.** `approve-flow-if-required` proposes exactly the derived
+   stake amount for the vault — never unlimited — and is skipped when the live
+   allowance already covers it.
+7. **Mismatch stops the mission.** A position increase smaller than the prepared
+   stake blocks for review rather than completing.

@@ -116,12 +116,20 @@ function stakeLegs(dependsOn: string, unresolved: boolean, goal: MissionGoal): S
       amountUnresolved: unresolved,
     },
     {
+      id: "approve-flow-if-required",
+      type: "USER_APPROVAL_IF_REQUIRED",
+      title: "Approve exactly the FLOW to be staked (only if allowance is short)",
+      dependencies: ["prepare-stake"],
+      requiredEvidence: ["ALLOWANCE"],
+    },
+    {
       id: "user-stake",
       type: "USER_STAKE",
       title: "You confirm the stake in your own wallet",
-      dependencies: ["prepare-stake"],
+      dependencies: ["approve-flow-if-required"],
       requiredEvidence: ["ACTION_INTENT_READY"],
     },
+
     {
       id: "verify-stake",
       type: "VERIFY_STAKE",

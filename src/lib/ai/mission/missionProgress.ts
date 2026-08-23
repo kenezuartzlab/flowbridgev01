@@ -17,6 +17,12 @@ import {
   type MissionStepState,
 } from "./missionTypes";
 import { nextEligibleStep } from "./missionPlanner";
+import {
+  deriveFromSettlement,
+  parseUnitsExact,
+  type SettlementSourceKind,
+} from "./settlementDerivation";
+
 
 function replaceStep(mission: Mission, next: MissionStep, now: Date): Mission {
   const steps = mission.steps.map((s) => (s.id === next.id ? next : s));
@@ -111,6 +117,17 @@ export interface CanonicalOutcome {
   onChainConfirmed?: boolean;
   /** Actual received/settled amount, as an exact decimal string. */
   resolvedAmount?: string | null;
+  /**
+   * V17.1 §4 — the same actual amount in base units. When present it is the
+   * ONLY input to derivation, so downstream amounts never touch float math.
+   */
+  resolvedAmountWei?: string | null;
+  decimals?: number;
+  /** Canonical settlement identity for on-chain settlements. */
+  sourceIdentity?: string | null;
+  sourceKind?: SettlementSourceKind;
+  /** Wallet that actually settled. Later steps must revalidate against it. */
+  settlementWallet?: string | null;
   txHash?: string | null;
 }
 
@@ -144,7 +161,12 @@ export function completeStepFromEvidence(input: {
 
   const outputs: Record<string, unknown> = { ...step.outputs };
   if (input.outcome.resolvedAmount) outputs.resolvedAmount = input.outcome.resolvedAmount;
+  if (input.outcome.resolvedAmountWei) outputs.resolvedAmountWei = input.outcome.resolvedAmountWei;
   if (input.outcome.verifiedActivityId) outputs.verifiedActivityId = input.outcome.verifiedActivityId;
+  if (input.outcome.sourceIdentity) outputs.settlementIdentity = input.outcome.sourceIdentity;
+  if (input.outcome.settlementWallet) {
+    outputs.settlementWallet = input.outcome.settlementWallet.toLowerCase();
+  }
 
   const done = transition(
     input.mission,
@@ -162,31 +184,52 @@ export function completeStepFromEvidence(input: {
   if (!done.ok) return done;
 
   /**
-   * §3 — the resolved actual output is propagated to the dependent step that was
+   * §4 — the resolved actual output is propagated to the dependent step that was
    * deliberately left unresolved. This is the ONLY way an unresolved amount is
-   * ever filled: from a verified result, never from a pre-trade estimate.
+   * ever filled: from a canonical settlement, never from a pre-trade estimate.
+   * A portion constraint applies ONCE, where the amount is actually spent (the
+   * prepare step); pass-through resolution steps carry the full settled result.
    */
-  if (input.outcome.resolvedAmount) {
+  if (input.outcome.resolvedAmount || input.outcome.resolvedAmountWei) {
+    const decimals = input.outcome.decimals ?? 18;
+    const actualWei = input.outcome.resolvedAmountWei
+      ? BigInt(input.outcome.resolvedAmountWei)
+      : parseUnitsExact(String(input.outcome.resolvedAmount), decimals);
+    const pct = input.mission.goal.constraints.stakePortionPercent;
+    const identity =
+      input.outcome.sourceIdentity ?? input.outcome.verifiedActivityId ?? input.outcome.txHash ?? step.id;
+    const kind: SettlementSourceKind =
+      input.outcome.sourceKind ?? (input.outcome.verifiedActivityId ? "VERIFIED_ACTIVITY" : "ON_CHAIN_CLAIM");
+
     const steps = done.mission.steps.map((s) => {
       if (!s.amountUnresolved || s.state === "COMPLETED") return s;
       if (!s.dependencies.includes(input.stepId)) return s;
-      /**
-       * A portion constraint applies ONCE, where the amount is actually spent
-       * (the prepare step); pass-through resolution steps carry the full result.
-       */
-      const pct = input.mission.goal.constraints.stakePortionPercent;
-      const base = Number(input.outcome.resolvedAmount);
-      const amount =
-        pct && s.type.startsWith("PREPARE_")
-          ? String((base * pct) / 100)
-          : input.outcome.resolvedAmount!;
-      return { ...s, outputs: { ...s.outputs, resolvedAmount: amount }, inputs: { ...s.inputs, amount } };
+      const derivation = deriveFromSettlement({
+        actualWei,
+        decimals,
+        ratioPercent: pct && s.type.startsWith("PREPARE_") ? pct : 100,
+        sourceStepId: input.stepId,
+        sourceKind: kind,
+        sourceIdentity: String(identity),
+        now,
+      });
+      return {
+        ...s,
+        outputs: {
+          ...s.outputs,
+          resolvedAmount: derivation.derivedAmount,
+          resolvedAmountWei: derivation.derivedWei.toString(),
+          derivation: derivation.provenance,
+        },
+        inputs: { ...s.inputs, amount: derivation.derivedAmount },
+      };
     });
     const mission = { ...done.mission, steps };
     return { ok: true, mission: { ...mission, currentStepId: nextEligibleStep(mission)?.id ?? null } };
   }
   return done;
 }
+
 
 /** Skips a conditional step that turned out not to be needed (e.g. allowance ok). */
 export function skipStep(input: { mission: Mission; stepId: string; reason: string; now?: Date }): MissionMutation {
@@ -270,6 +313,8 @@ export function blockStep(input: {
   mission: Mission;
   stepId: string;
   failureClass: MissionFailureClass;
+  /** Live, machine-readable reason (e.g. "vault paused"). Never invented. */
+  reason?: string | null;
   now?: Date;
 }): MissionMutation {
   const advice = RECOVERY[input.failureClass];
@@ -277,10 +322,11 @@ export function blockStep(input: {
     input.mission,
     input.stepId,
     "BLOCKED",
-    { failureClass: input.failureClass, blockingReason: advice.message },
+    { failureClass: input.failureClass, blockingReason: input.reason || advice.message },
     input.now ?? new Date(),
   );
 }
+
 
 export function recoveryAdvice(failureClass: MissionFailureClass): MissionRecoveryAdvice {
   return { failureClass, ...RECOVERY[failureClass] };
