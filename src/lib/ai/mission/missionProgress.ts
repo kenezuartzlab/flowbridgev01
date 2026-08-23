@@ -24,25 +24,46 @@ import {
 } from "./settlementDerivation";
 
 
+/**
+ * V17.1F §2/§5/§7 — a COMPLETED mission is terminal and read-only.
+ *
+ * Once every step is terminal and the mission has been terminalized, repeated
+ * observers (route remounts, polling, duplicate settlement callbacks) must
+ * produce the same record: no status regression to ACTIVE/BLOCKED/FAILED, no
+ * second completion timestamp, no new step transitions.
+ */
+export function missionIsTerminal(mission: Mission): boolean {
+  return mission.status === "COMPLETED" || mission.status === "CANCELLED";
+}
+
 function replaceStep(mission: Mission, next: MissionStep, now: Date): Mission {
   const steps = mission.steps.map((s) => (s.id === next.id ? next : s));
   const allDone = steps.every((s) => s.state === "COMPLETED" || s.state === "CANCELLED");
   const blocked = steps.some((s) => s.state === "BLOCKED");
-  const status: MissionStatus = allDone
-    ? "COMPLETED"
-    : blocked
-      ? "BLOCKED"
-      : mission.status === "DRAFT"
-        ? "DRAFT"
-        : "ACTIVE";
+  const status: MissionStatus =
+    mission.status === "COMPLETED"
+      ? "COMPLETED"
+      : allDone
+        ? "COMPLETED"
+        : blocked
+          ? "BLOCKED"
+          : mission.status === "DRAFT"
+            ? "DRAFT"
+            : "ACTIVE";
   const updated: Mission = {
     ...mission,
     steps,
     status,
+    // Persisted once, from the transition that terminalized the mission.
+    completedAt:
+      status === "COMPLETED" ? (mission.completedAt ?? now.toISOString()) : (mission.completedAt ?? null),
     updatedAt: now.toISOString(),
     version: mission.version + 1,
   };
-  return { ...updated, currentStepId: nextEligibleStep(updated)?.id ?? null };
+  return {
+    ...updated,
+    currentStepId: status === "COMPLETED" ? null : (nextEligibleStep(updated)?.id ?? null),
+  };
 }
 
 export type MissionMutation =
