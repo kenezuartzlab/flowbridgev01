@@ -376,6 +376,34 @@ export async function answerFlowAiQuestion(input: {
   }
 
 
+  /**
+   * V16.1 — the claimable FLOW amount in any CLAIM_FLOW plan is a CANONICAL
+   * LEDGER FACT. Like the wallet binding it must not depend on which skills the
+   * planner selected, and an unresolvable ledger stays `null` (reported as
+   * missing) rather than collapsing to 0 and contradicting the prose.
+   */
+  let canonicalClaimableFlow: number | null = null;
+  if (input.actor.userId && /\bclaim\b/i.test(input.question)) {
+    const fromEvidence = (
+      accountEvidence.find((e) => e.id === "db.account.points")?.value as
+        | { claimableFlow?: number | null }
+        | undefined
+    )?.claimableFlow;
+    if (typeof fromEvidence === "number") canonicalClaimableFlow = fromEvidence;
+    else {
+      try {
+        const { getUserPointsAndReferrals } = await import("@/lib/flowbridge-db.server");
+        const ledger: any = await getUserPointsAndReferrals(input.actor.userId);
+        canonicalClaimableFlow = computeClaimable({
+          cumulativeFlowPoints: Number(ledger?.flowPoints ?? 0),
+          claimedFlow: Number(ledger?.claimedTokens ?? 0),
+        }).claimableFlow;
+      } catch {
+        canonicalClaimableFlow = null;
+      }
+    }
+  }
+
   // V15.2 §3 — deterministic candidate extraction. Only signed-in actors get a
   // proposal, and it is a request to PREPARE, never an authorization to execute.
   let proposal = input.actor.userId
@@ -383,8 +411,10 @@ export async function answerFlowAiQuestion(input: {
         question: input.question,
         wallet: boundWallet,
         organizationId: input.actor.orgIds[0] ?? null,
+        claimableFlow: canonicalClaimableFlow,
       })
     : null;
+
 
   // V15.3A §2/§3 — ACTION PREPARATION routing runs BEFORE generic answering, so
   // an imperative request can never fall through to a "here's how you'd do it"
