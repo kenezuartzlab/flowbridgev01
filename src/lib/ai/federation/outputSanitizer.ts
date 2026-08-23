@@ -62,19 +62,19 @@ export const FORBIDDEN_OUTPUT_FIELDS = [
 ] as const;
 
 const INJECTION_PATTERNS: readonly RegExp[] = [
-  /ignore (all |any |previous |prior )?(instructions|rules|policies)/i,
-  /disregard (the )?(above|previous|system)/i,
-  /you are (now )?(an? )?(admin|owner|operator|root|system)/i,
-  /(system|developer) prompt/i,
-  /send (the )?funds/i,
-  /transfer (all )?(funds|tokens|balance)/i,
-  /approve (unlimited|max)/i,
-  /(sign|submit|broadcast) (this|the) (tx|transaction|message)/i,
-  /seed phrase|private key|mnemonic/i,
-  /execute (this|the following)/i,
-  /\bon behalf of the user\b/i,
-  /i (am|have) (full )?(authority|authorized)/i,
-  /<\/?(script|iframe|system)\b/i,
+  /ignore\s+(?:all\s+|any\s+|previous\s+|prior\s+|the\s+)*(instructions|rules|policies)/gi,
+  /disregard\s+(?:the\s+)?(above|previous|system)/gi,
+  /you are (now )?(an? )?(admin|owner|operator|root|system)/gi,
+  /(system|developer) prompt/gi,
+  /send (the )?funds/gi,
+  /transfer (all )?(funds|tokens|balance)/gi,
+  /approve (unlimited|max)/gi,
+  /(sign|submit|broadcast) (this|the) (tx|transaction|message)/gi,
+  /seed phrase|private key|mnemonic/gi,
+  /execute (this|the following)/gi,
+  /\bon behalf of the user\b/gi,
+  /i (am|have) (full )?(authority|authorized)/gi,
+  /<\/?(script|iframe|system)\b/gi,
 ];
 
 /** Loose inbound schema: unknown keys are detected, not silently accepted. */
