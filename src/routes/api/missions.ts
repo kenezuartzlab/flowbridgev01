@@ -37,19 +37,19 @@ async function resolveContext(request: Request) {
   };
 }
 
-async function canonicalClaimable(userId: string): Promise<number | null> {
+/**
+ * V17.1B §2 — reward truth comes from the ONE canonical resolver. Missions never
+ * derive claimability from points arithmetic of their own.
+ */
+async function canonicalRewardState(userId: string, emailVerified: boolean, chainId?: number) {
   try {
-    const { getUserPointsAndReferrals } = await import("@/lib/flowbridge-db.server");
-    const { computeClaimable } = await import("@/lib/ai/deterministicMath");
-    const ledger: any = await getUserPointsAndReferrals(userId);
-    return computeClaimable({
-      cumulativeFlowPoints: Number(ledger?.flowPoints ?? 0),
-      claimedFlow: Number(ledger?.claimedTokens ?? 0),
-    }).claimableFlow;
+    const { resolveRewardStateForUser } = await import("@/lib/rewards/rewardState.server");
+    return await resolveRewardStateForUser({ userId, emailVerified, chainId: chainId ?? null });
   } catch {
     return null;
   }
 }
+
 
 export const Route = createFileRoute("/api/missions")({
   server: {
