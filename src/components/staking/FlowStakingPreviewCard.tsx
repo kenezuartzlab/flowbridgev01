@@ -82,10 +82,22 @@ type TxKind = "approve" | "stake" | "claim" | "withdraw";
 export function FlowStakingPreviewCard({
   flowPoints,
   campaignPts,
+  presetAmount = null,
+  missionCorrelation = null,
+  missionNote = null,
 }: {
   flowPoints?: number | null;
   campaignPts?: number | null;
+  /**
+   * V17.1D §5 — the stake amount derived from a mission's VERIFIED claim
+   * settlement. Presentation only: the amount is still revalidated on chain here
+   * (balance, allowance, minimum, pause) and the user's wallet signs.
+   */
+  presetAmount?: string | null;
+  missionCorrelation?: { missionId: string; stepId: string } | null;
+  missionNote?: string | null;
 }) {
+
   const chain = getFlowStakingChainConfig(BOT_TESTNET_CHAIN_ID)!;
 
   const [account, setAccount] = useState<string | null>(null);
