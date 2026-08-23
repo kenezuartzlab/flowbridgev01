@@ -206,7 +206,7 @@ describe("V17.1 settlement derivation", () => {
     let m = createMission({
       id: "m2",
       actorUserId: "u1",
-      goalText: goal.rawText,
+      goalText: "Claim my available FLOW, then stake 50% of the FLOW actually received",
       goal,
       linkedOpportunityId: null,
     });
