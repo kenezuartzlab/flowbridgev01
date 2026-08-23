@@ -466,10 +466,21 @@ export function FlowStakingPreviewCard({
 
         {/* Amount + lifecycle actions — each button is one explicit wallet signature. */}
         <div className="space-y-2 rounded-xl border border-hairline p-3">
+          {missionHandoffPending && (
+            <p className="rounded-lg border border-hairline bg-card px-2.5 py-2 text-[10px] font-bold text-muted">
+              Loading your mission's prepared stake…
+            </p>
+          )}
+          {missionBlock && (
+            <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-2.5 py-2 text-[10px] font-bold leading-relaxed text-destructive">
+              {STAKE_HANDOFF_FAILURE_COPY[missionBlock]}
+            </p>
+          )}
           <label className="block font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted-soft">
             Amount to stake (FLOW)
           </label>
           <div className="flex items-center gap-2">
+
             <input
               inputMode="decimal"
               value={amountInput}
