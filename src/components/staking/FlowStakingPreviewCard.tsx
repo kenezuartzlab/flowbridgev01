@@ -390,7 +390,9 @@ export function FlowStakingPreviewCard({
     };
   }, [readState]);
 
-  const disabledBase = !account || !onRightChain || pending != null || !chain.vault || !chain.token;
+  const disabledBase =
+    !account || !onRightChain || pending != null || !chain.vault || !chain.token || missionGate;
+
 
   return (
     <Surface>
