@@ -119,6 +119,46 @@ export const Route = createFileRoute("/api/missions")({
           return jsonResponse({ success: true, mission, rewardState, executed: false });
         }
 
+        /**
+         * V18 §2/§3 — compile a canonical opportunity into a typed mission plan.
+         * The client sends an opportunity IDENTITY only; the server re-resolves
+         * it for this actor, picks the template, dedupes and persists provenance.
+         * This creates a PLAN. It authorizes no transaction.
+         */
+        if (action === "compile-opportunity") {
+          const opportunityId = String(body.opportunityId ?? "").slice(0, 200);
+          if (!opportunityId) {
+            return jsonResponse({ error: "An opportunity id is required." }, 400);
+          }
+          const { compileOpportunityMission } = await import(
+            "@/lib/ai/opportunity/missionCompiler.server"
+          );
+          const result = await compileOpportunityMission({
+            actor: ctx.actor as any,
+            opportunityId,
+          });
+          if (!result.ok) {
+            return jsonResponse(
+              {
+                success: false,
+                code: result.code,
+                message: result.message,
+                error: result.message,
+                executed: false,
+              },
+              result.code === "NOT_SIGNED_IN" ? 401 : 409,
+            );
+          }
+          return jsonResponse({
+            success: true,
+            code: result.code,
+            mission: result.mission,
+            template: result.template,
+            message: result.message,
+            executed: false,
+          });
+        }
+
         const missionId = String(body.missionId ?? "");
         if (!missionId) return jsonResponse({ error: "A mission id is required." }, 400);
         const loaded = await store.loadMission({ id: missionId, userId: ctx.user.id });
