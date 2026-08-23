@@ -1,11 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Coins, ShieldCheck } from "lucide-react";
 
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SafeAreaPage, SectionHeader, Surface } from "@/components/ui-kit/primitives";
 import { FlowStakingPreviewCard } from "@/components/staking/FlowStakingPreviewCard";
+import { listMissions } from "@/lib/ai/mission/missionClient";
+import {
+  parseStakeHandoff,
+  resolveStakeHandoff,
+  type StakeHandoffResolution,
+} from "@/lib/ai/mission/stakeHandoff";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
+
 
 /**
  * FlowBridge V13.2 — FLOW staking BOT Testnet surface.
@@ -38,6 +46,34 @@ function StakePage() {
   const { incentives } = useAccountData();
   const { campaignPointsTotal, authenticated } = useCampaignProgress();
 
+  /**
+   * V17.1D §5 — a mission may have derived this stake from a VERIFIED claim. The
+   * link carries opaque correlation only; the authoritative derived amount is
+   * read back from the mission's own server state. Anything malformed, stale or
+   * inconsistent fails closed with no prefill.
+   */
+  const [handoff, setHandoff] = useState<StakeHandoffResolution | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hint = parseStakeHandoff(window.location.search);
+    if (!hint.correlation) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const missions = await listMissions();
+        if (!cancelled) setHandoff(resolveStakeHandoff({ hint, missions }));
+      } catch {
+        if (!cancelled) {
+          setHandoff({ ok: false, reason: "Your mission could not be read, so nothing was prefilled." });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <>
       <SafeAreaPage>
@@ -54,7 +90,15 @@ function StakePage() {
         <FlowStakingPreviewCard
           flowPoints={Number(incentives?.flowPoints ?? 0)}
           campaignPts={authenticated ? campaignPointsTotal : null}
+          presetAmount={handoff?.ok ? handoff.amount : null}
+          missionCorrelation={
+            handoff?.ok ? { missionId: handoff.missionId, stepId: handoff.stepId } : null
+          }
+          missionNote={
+            handoff ? (handoff.ok ? handoff.note : handoff.reason === "NO_CORRELATION" ? null : handoff.reason) : null
+          }
         />
+
 
         <Surface>
           <SectionHeader title="How the vault will work" hint="Accounting model, fixed before launch" />

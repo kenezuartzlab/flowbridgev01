@@ -254,8 +254,22 @@ export function completeStepFromEvidence(input: {
         sourceIdentity: String(identity),
         now,
       });
+      /**
+       * V17.1D §3 — once the amount is derived from canonical settlement the step
+       * stops advertising itself as unresolved: its title states the exact amount.
+       */
+      const unit = s.type === "PREPARE_STAKE" ? "FLOW" : "";
+      const title = s.type.startsWith("PREPARE_")
+        ? `${s.type === "PREPARE_STAKE" ? "Stake" : "Prepare"} ${derivation.derivedAmount}${unit ? ` ${unit}` : ""}${
+            derivation.provenance.ratioPercent < 100
+              ? ` (${derivation.provenance.ratioPercent}% of the verified result)`
+              : ""
+          }`
+        : s.title;
       return {
         ...s,
+        title,
+        amountUnresolved: false,
         outputs: {
           ...s.outputs,
           resolvedAmount: derivation.derivedAmount,
@@ -264,6 +278,7 @@ export function completeStepFromEvidence(input: {
         },
         inputs: { ...s.inputs, amount: derivation.derivedAmount },
       };
+
     });
     const mission = { ...done.mission, steps };
     return { ok: true, mission: { ...mission, currentStepId: nextEligibleStep(mission)?.id ?? null } };

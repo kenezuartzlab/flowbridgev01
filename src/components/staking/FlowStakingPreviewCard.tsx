@@ -82,10 +82,22 @@ type TxKind = "approve" | "stake" | "claim" | "withdraw";
 export function FlowStakingPreviewCard({
   flowPoints,
   campaignPts,
+  presetAmount = null,
+  missionCorrelation = null,
+  missionNote = null,
 }: {
   flowPoints?: number | null;
   campaignPts?: number | null;
+  /**
+   * V17.1D §5 — the stake amount derived from a mission's VERIFIED claim
+   * settlement. Presentation only: the amount is still revalidated on chain here
+   * (balance, allowance, minimum, pause) and the user's wallet signs.
+   */
+  presetAmount?: string | null;
+  missionCorrelation?: { missionId: string; stepId: string } | null;
+  missionNote?: string | null;
 }) {
+
   const chain = getFlowStakingChainConfig(BOT_TESTNET_CHAIN_ID)!;
 
   const [account, setAccount] = useState<string | null>(null);
@@ -104,7 +116,14 @@ export function FlowStakingPreviewCard({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<TxKind | null>(null);
   const [lastTx, setLastTx] = useState<{ kind: TxKind; hash: string } | null>(null);
-  const [amountInput, setAmountInput] = useState("10");
+  const [amountInput, setAmountInput] = useState(presetAmount ?? "10");
+  const [missionStatus, setMissionStatus] = useState<string | null>(null);
+
+  // A mission-derived amount replaces the default; the user can still edit it.
+  useEffect(() => {
+    if (presetAmount) setAmountInput(presetAmount);
+  }, [presetAmount]);
+
 
   const scheduleFunded = (inventory ?? 0n) > 0n && (rewardRate ?? 0n) > 0n;
   const readiness = resolveFlowStakingReadiness(BOT_TESTNET_CHAIN_ID, scheduleFunded);
@@ -213,6 +232,29 @@ export function FlowStakingPreviewCard({
           params: [{ from, to, data }],
         });
         setLastTx({ kind, hash });
+        /**
+         * V17.1D §5 — bookkeeping only: the mission is told the user submitted
+         * their own stake. Canonical settlement is verified server-side from the
+         * vault position; nothing here signs, resubmits or advances a mission.
+         */
+        if (kind === "stake" && missionCorrelation) {
+          try {
+            const { missionAction } = await import("@/lib/ai/mission/missionClient");
+            const res = await missionAction({
+              action: "settle",
+              missionId: missionCorrelation.missionId,
+              stepId: missionCorrelation.stepId,
+              txHash: hash,
+            });
+            setMissionStatus(
+              res.message ?? "Your stake was reported to the mission — settlement is verified on chain.",
+            );
+          } catch {
+            setMissionStatus(
+              "Your stake was submitted. The mission could not be updated right now; it will verify settlement on your next check.",
+            );
+          }
+        }
         // Poll for the receipt; never auto-submit anything else.
         for (let i = 0; i < 60; i += 1) {
           const receipt = await eth.request({ method: "eth_getTransactionReceipt", params: [hash] });
@@ -223,13 +265,14 @@ export function FlowStakingPreviewCard({
           await new Promise((r) => setTimeout(r, 2000));
         }
         await readState();
+
       } catch (e: any) {
         setError(e?.message ? String(e.message) : "Wallet request failed.");
       } finally {
         setPending(null);
       }
     },
-    [readState],
+    [readState, missionCorrelation],
   );
 
   const connectWallet = useCallback(async () => {
@@ -445,11 +488,18 @@ export function FlowStakingPreviewCard({
             </p>
           )}
 
+          {(missionNote || missionStatus) && (
+            <p className="text-[11px] leading-relaxed text-muted" data-testid="stake-mission-note">
+              {missionStatus ?? missionNote}
+            </p>
+          )}
+
           {lastTx && (
             <p className="break-all font-mono text-[10px] text-muted-soft">
               Last {lastTx.kind} tx: {lastTx.hash}
             </p>
           )}
+
         </div>
 
         {error && <p className="break-words text-[11px] text-destructive">{error}</p>}
