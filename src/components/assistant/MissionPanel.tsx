@@ -77,7 +77,10 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
     NonNullable<MissionActionResponse["conversionConfirmation"]> | null
   >(null);
   const [rewardState, setRewardState] = useState<MissionActionResponse["rewardState"]>(null);
+  /** V17.1C §2 — opaque correlation handed to the review surface with the plan. */
+  const [correlation, setCorrelation] = useState<MissionActionResponse["correlation"]>(null);
   const [open, setOpen] = useState(true);
+
 
   const refresh = useCallback(async () => {
     setMissions(await listMissions());
