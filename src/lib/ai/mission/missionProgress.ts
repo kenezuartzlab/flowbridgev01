@@ -77,6 +77,9 @@ function transition(
   patch: Partial<MissionStep>,
   now: Date,
 ): MissionMutation {
+  if (missionIsTerminal(mission)) {
+    return { ok: false, error: `mission is ${mission.status.toLowerCase()} and is read-only history` };
+  }
   const step = mission.steps.find((s) => s.id === stepId);
   if (!step) return { ok: false, error: "unknown step" };
   if (step.state !== to && !canStepTransition(step.state, to)) {
