@@ -82,19 +82,22 @@ type TxKind = "approve" | "stake" | "claim" | "withdraw";
 export function FlowStakingPreviewCard({
   flowPoints,
   campaignPts,
-  presetAmount = null,
-  missionCorrelation = null,
+  missionHandoff = null,
+  missionHandoffPending = false,
+  missionHandoffFailure = null,
   missionNote = null,
 }: {
   flowPoints?: number | null;
   campaignPts?: number | null;
   /**
-   * V17.1D §5 — the stake amount derived from a mission's VERIFIED claim
-   * settlement. Presentation only: the amount is still revalidated on chain here
-   * (balance, allowance, minimum, pause) and the user's wallet signs.
+   * V17.1E §3/§4 — the canonical, server-resolved mission stake handoff. When it
+   * is present its amount is the ONLY initializer for the form; the standalone
+   * default is used only when no mission handoff exists at all.
    */
-  presetAmount?: string | null;
-  missionCorrelation?: { missionId: string; stepId: string } | null;
+  missionHandoff?: CanonicalStakeHandoff | null;
+  /** True while the handoff is still being resolved: no default is shown yet. */
+  missionHandoffPending?: boolean;
+  missionHandoffFailure?: StakeHandoffFailure | null;
   missionNote?: string | null;
 }) {
 
@@ -116,13 +119,34 @@ export function FlowStakingPreviewCard({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<TxKind | null>(null);
   const [lastTx, setLastTx] = useState<{ kind: TxKind; hash: string } | null>(null);
-  const [amountInput, setAmountInput] = useState(presetAmount ?? "10");
+  /**
+   * §2 — mission handoff BEFORE standalone defaults. While a handoff is pending
+   * the field stays empty rather than showing 10 FLOW and overlaying later.
+   */
+  const [amountInput, setAmountInput] = useState(
+    missionHandoff ? missionHandoff.amount : missionHandoffPending ? "" : "10",
+  );
+  const [hydratedMissionStep, setHydratedMissionStep] = useState<string | null>(
+    missionHandoff?.missionStepId ?? null,
+  );
   const [missionStatus, setMissionStatus] = useState<string | null>(null);
 
-  // A mission-derived amount replaces the default; the user can still edit it.
+  // The mission amount wins over any earlier standalone form state; it is applied
+  // exactly once per mission step, and the user may still edit it afterwards.
   useEffect(() => {
-    if (presetAmount) setAmountInput(presetAmount);
-  }, [presetAmount]);
+    if (!missionHandoff) return;
+    if (hydratedMissionStep === missionHandoff.missionStepId && amountInput !== "") return;
+    setAmountInput(missionHandoff.amount);
+    setHydratedMissionStep(missionHandoff.missionStepId);
+  }, [missionHandoff, hydratedMissionStep, amountInput]);
+
+  // No mission handoff at all → the ordinary standalone default is allowed.
+  useEffect(() => {
+    if (missionHandoffPending || missionHandoff || amountInput !== "") return;
+    if (missionHandoffFailure) return;
+    setAmountInput("10");
+  }, [missionHandoffPending, missionHandoff, missionHandoffFailure, amountInput]);
+
 
 
   const scheduleFunded = (inventory ?? 0n) > 0n && (rewardRate ?? 0n) > 0n;
