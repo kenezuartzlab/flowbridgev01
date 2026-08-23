@@ -166,6 +166,25 @@ export function FlowStakingPreviewCard({
   const overBalance = amount != null && balance != null && amount > balance;
   const needsApproval = amount != null && (allowance ?? 0n) < amount;
 
+  /**
+   * V17.1E §5/§6 — actor, chain and vault pinning for a mission stake. A mission
+   * prepared for another wallet is BLOCKED and visible; the surface never
+   * silently substitutes a wallet, a chain or a vault. Treasury/admin addresses
+   * get no special case.
+   */
+  const pinFailure = missionHandoff
+    ? pinStakeExecutionContext({
+        handoff: missionHandoff,
+        connectedWallet: account,
+        connectedChainId: chainId,
+        canonicalVault: chain.vault ?? null,
+      })
+    : null;
+  const missionBlock: StakeHandoffFailure | null = missionHandoffFailure ?? pinFailure;
+  /** Writes stay blocked while a handoff resolves or a handoff failure stands. */
+  const missionGate = missionHandoffPending || missionBlock != null;
+
+
   const readState = useCallback(async () => {
     if (!chain.token || !chain.vault) return;
     const eth = (window as any).ethereum;
