@@ -30,6 +30,8 @@ import { formatUsd } from "@/lib/format";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
 import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
+import { OpportunityFeed } from "@/components/home/OpportunityFeed";
+
 
 
 export const Route = createFileRoute("/home")({
