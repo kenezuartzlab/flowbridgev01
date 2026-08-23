@@ -232,6 +232,29 @@ export function FlowStakingPreviewCard({
           params: [{ from, to, data }],
         });
         setLastTx({ kind, hash });
+        /**
+         * V17.1D §5 — bookkeeping only: the mission is told the user submitted
+         * their own stake. Canonical settlement is verified server-side from the
+         * vault position; nothing here signs, resubmits or advances a mission.
+         */
+        if (kind === "stake" && missionCorrelation) {
+          try {
+            const { missionAction } = await import("@/lib/ai/mission/missionClient");
+            const res = await missionAction({
+              action: "settle",
+              missionId: missionCorrelation.missionId,
+              stepId: missionCorrelation.stepId,
+              txHash: hash,
+            });
+            setMissionStatus(
+              res.message ?? "Your stake was reported to the mission — settlement is verified on chain.",
+            );
+          } catch {
+            setMissionStatus(
+              "Your stake was submitted. The mission could not be updated right now; it will verify settlement on your next check.",
+            );
+          }
+        }
         // Poll for the receipt; never auto-submit anything else.
         for (let i = 0; i < 60; i += 1) {
           const receipt = await eth.request({ method: "eth_getTransactionReceipt", params: [hash] });
@@ -242,6 +265,7 @@ export function FlowStakingPreviewCard({
           await new Promise((r) => setTimeout(r, 2000));
         }
         await readState();
+
       } catch (e: any) {
         setError(e?.message ? String(e.message) : "Wallet request failed.");
       } finally {
