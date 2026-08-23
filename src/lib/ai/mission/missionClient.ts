@@ -51,7 +51,12 @@ export interface MissionActionResponse {
   } | null;
   converted?: boolean;
   convertedFlowPoints?: number;
+  /** V17.1C §1 — the step is already prepared; nothing was re-prepared. */
+  frozen?: boolean;
+  /** V17.1C §2 — opaque correlation for the review surface (no economics). */
+  correlation?: { missionId: string; stepId: string; intentId: string | null } | null;
 }
+
 
 export async function listMissions(): Promise<Mission[]> {
   const res = await fetch("/api/missions", { headers: await authHeaders() });

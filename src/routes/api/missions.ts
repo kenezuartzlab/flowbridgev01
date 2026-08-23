@@ -162,12 +162,16 @@ export const Route = createFileRoute("/api/missions")({
             step: result.step,
             prepared: result.prepared,
             conversionConfirmation: result.conversionConfirmation ?? null,
+            /** V17.1C §1/§2 — frozen preparation + opaque handoff correlation. */
+            frozen: result.frozen ?? false,
+            correlation: result.correlation ?? null,
             rewardState,
             failureClass: result.failureClass,
             recovery: result.failureClass ? progress.recoveryAdvice(result.failureClass) : null,
             message: result.message,
             executed: false,
           });
+
         }
 
         /** V17.1B §5 — the user explicitly confirms the off-chain conversion. */

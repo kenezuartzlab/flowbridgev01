@@ -37,12 +37,19 @@ const AMOUNT_FIELDS = ["amountIn", "amountFlow", "claimableFlow", "rewardAmount"
 export function ActionIntentCard({
   payload,
   reviewAction = null,
+  correlation = null,
 }: {
   payload: PreparedIntentPayload;
   /** V15.3H §3 — structured CTA descriptor. Preferred over the raw handoff href. */
   reviewAction?: ReviewAction | null;
+  /**
+   * V17.1C §2 — opaque mission correlation carried into the review surface so the
+   * user's own submission can be reported back. Never economics, never authority.
+   */
+  correlation?: { missionId: string; stepId: string; intentId: string | null } | null;
 }) {
   const { intent, handoff } = payload;
+
   const p = intent.parameters as Record<string, any>;
   const amountField = AMOUNT_FIELDS.find((f) => p[f] !== undefined);
   /**

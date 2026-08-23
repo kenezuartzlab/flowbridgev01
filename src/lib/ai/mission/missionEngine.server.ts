@@ -22,11 +22,13 @@ import { actionTypeForStep, nextEligibleStep } from "./missionPlanner";
 import {
   blockStep,
   completeStepFromEvidence,
+  isPreparationFrozen,
   markStepReady,
   markStepWaitingForUser,
   skipStep,
   type MissionMutation,
 } from "./missionProgress";
+
 import { deriveFromSettlement, formatUnitsExact, parseUnitsExact } from "./settlementDerivation";
 import type {
   Mission,
@@ -115,9 +117,17 @@ export interface PrepareNextStepResult {
   message: string;
   /** V17.1B §5 — an explicit conversion confirmation the user must accept. */
   conversionConfirmation?: MissionConversionConfirmation | null;
+  /**
+   * V17.1C §1 — true when this step's preparation is frozen: already prepared,
+   * already handed over, now owned by the settlement verifier.
+   */
+  frozen?: boolean;
+  /** V17.1C §2 — opaque correlation the claim surface reports settlement with. */
+  correlation?: { missionId: string; stepId: string; intentId: string | null } | null;
   /** Constant: the orchestrator executed nothing. */
   executed: false;
 }
+
 
 export async function prepareNextMissionStep(input: {
   mission: Mission;
@@ -151,7 +161,31 @@ export async function prepareNextMissionStep(input: {
     };
   }
 
-  // Non-economic steps carry no wallet authority and complete from live checks.
+  /**
+   * V17.1C §1 — the step is already prepared and waiting for the user. Do NOT
+   * re-read reward state and do NOT re-gate it: a claimable balance that is now
+   * zero is exactly what a completed claim looks like. Report the frozen plan and
+   * let the settlement verifier decide.
+   */
+  if (isPreparationFrozen(step)) {
+    const intentId =
+      step.linkedActionIntentId ?? (step.outputs.preparedActionIntentId as string | null) ?? null;
+    return {
+      mission,
+      step,
+      prepared: null,
+      failureClass: null,
+      frozen: true,
+      correlation: { missionId: mission.id, stepId: step.id, intentId },
+      message:
+        step.state === "WAITING_FOR_CONFIRMATION"
+          ? "Your transaction was submitted. This step now waits for canonical settlement — nothing is re-prepared."
+          : "This step is already prepared and waiting for your own wallet confirmation. Use 'Check confirmation' once you have signed.",
+      executed: false,
+    };
+  }
+
+
   if (step.type === "CHECK_WALLET_CHAIN") {
     if (!input.wallet) {
       const blocked = blockStep({ mission, stepId: step.id, failureClass: "EVIDENCE_UNAVAILABLE" });
@@ -602,10 +636,13 @@ export async function prepareNextMissionStep(input: {
     step,
     prepared: response,
     failureClass: null,
+    /** V17.1C §2 — correlation only; the review surface carries no economics. */
+    correlation: { missionId: mission.id, stepId: step.id, intentId: response.intent.id },
     message:
       "Prepared and ready for YOUR wallet confirmation — Flow AI cannot sign or submit this for you.",
     executed: false,
   };
+
 }
 
 /**
@@ -790,16 +827,34 @@ export async function advanceMissionStep(input: {
         message: "The distributor read is unavailable, so the mission does not advance.",
       };
     }
-    const deltaWei = state.claimedWei - BigInt(baselineRaw);
+    /**
+     * V17.1C §3 — the settlement verifier owns post-submission truth. "Claimable
+     * is now 0" is the SUCCESS signature of a delivered claim, never a failure:
+     * the proof is the delivered delta, taken from the distributor's cumulative
+     * `claimed[account]`, with the wallet FLOW increase as the corroborating read.
+     */
+    let deltaWei = state.claimedWei - BigInt(baselineRaw);
+    let settlementKind: "DISTRIBUTOR_CLAIMED_DELTA" | "WALLET_BALANCE_DELTA" = "DISTRIBUTOR_CLAIMED_DELTA";
     if (deltaWei <= 0n) {
-      return {
-        mission: input.mission,
-        advanced: false,
-        message:
-          "The distributor still shows no additional FLOW delivered — the claim is not canonically settled yet.",
-      };
+      const walletBaseline = prepareStep?.outputs.walletFlowBaselineWei as string | undefined;
+      const walletDelta =
+        walletBaseline != null && state.walletFlowWei != null
+          ? state.walletFlowWei - BigInt(walletBaseline)
+          : 0n;
+      if (walletDelta > 0n) {
+        deltaWei = walletDelta;
+        settlementKind = "WALLET_BALANCE_DELTA";
+      } else {
+        return {
+          mission: input.mission,
+          advanced: false,
+          message:
+            "The distributor still shows no additional FLOW delivered — the claim is not canonically settled yet. Your prepared claim stays exactly as it was.",
+        };
+      }
     }
-    const identity = `claimed:${state.distributor.toLowerCase()}:${input.wallet.toLowerCase()}@${state.blockNumber ?? "latest"}`;
+    const identity = `${settlementKind === "WALLET_BALANCE_DELTA" ? "flowBalance" : "claimed"}:${state.distributor.toLowerCase()}:${input.wallet.toLowerCase()}@${state.blockNumber ?? "latest"}`;
+
     const result = completeStepFromEvidence({
       mission: input.mission,
       stepId: input.stepId,
