@@ -189,7 +189,9 @@ describe("V17 mission edits", () => {
       "verify-swap",
       "resolve-output",
       "prepare-stake",
+      "approve-flow-if-required",
       "user-stake",
+
       "verify-stake",
     ]);
   });
