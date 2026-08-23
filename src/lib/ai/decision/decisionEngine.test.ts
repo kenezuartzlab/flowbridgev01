@@ -111,12 +111,22 @@ describe("V22 decision engine", () => {
   it("keeps dismissed items economically valid while hiding them", () => {
     const r = base({
       opportunities: [opp({ id: "claim" })],
-      viewStates: [{ key: "claim", dismissedAt: new Date(NOW.getTime() + 1000).toISOString() }],
+      viewStates: [{ key: "claim", dismissedAt: new Date(NOW.getTime() - 1000).toISOString() }],
     });
     expect(r.items.some((i) => i.opportunityId === "claim")).toBe(false);
     const s = r.suppressed.find((x) => x.id === "claim")!;
     expect(s.reasonCodes).toContain("DISMISSED_BY_USER");
     expect(s.explanation).toMatch(/still valid/i);
+  });
+
+  it("lets a dismissed identity resurface after the dismissal window", () => {
+    const r = base({
+      opportunities: [opp({ id: "claim" })],
+      viewStates: [
+        { key: "claim", dismissedAt: new Date(NOW.getTime() - 8 * 24 * 3_600_000).toISOString() },
+      ],
+    });
+    expect(r.items[0]!.opportunityId).toBe("claim");
   });
 
   it("downgrades stale evidence to non-actionable instead of guessing", () => {

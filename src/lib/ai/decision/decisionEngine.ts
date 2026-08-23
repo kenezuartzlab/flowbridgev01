@@ -34,6 +34,8 @@ import {
 /** Non-urgent repeat bound (V22 §11): same seen item cools down for 12h. */
 const REPEAT_COOLDOWN_MS = 12 * 60 * 60 * 1000;
 const RECENTLY_COMPLETED_MS = 24 * 60 * 60 * 1000;
+/** A dismissal hides the same identity for a week, then it may resurface. */
+const DISMISS_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 const ACTIVE_STATUSES = new Set(["PLANNED", "ACTIVE", "PAUSED", "BLOCKED"]);
 
@@ -126,9 +128,15 @@ export function runDecisionEngine(input: DecisionEngineInput): DecisionResult {
       });
       continue;
     }
+    /**
+     * Dismissal is keyed to the opportunity IDENTITY, which is a hash of the
+     * underlying canonical condition — a materially different condition yields a
+     * new id and reappears. `createdAt` is re-stamped on every resolve, so it
+     * must never gate the dismissal.
+     */
     if (
       state?.dismissedAt &&
-      new Date(item.createdAt).getTime() <= new Date(state.dismissedAt).getTime()
+      now.getTime() - new Date(state.dismissedAt).getTime() < DISMISS_WINDOW_MS
     ) {
       suppressed.push({
         id: item.id,
