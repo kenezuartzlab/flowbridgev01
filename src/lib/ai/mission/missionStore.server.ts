@@ -69,6 +69,22 @@ export async function saveMission(mission: Mission): Promise<{ ok: boolean; erro
   }
 }
 
+/**
+ * V17.1F §4/§5 — a COMPLETED mission is history: it never expires away and its
+ * completion timestamp is hydrated from the persisted column when the embedded
+ * document predates V17.1F.
+ */
+function hydrate(mission: Mission, completedAt?: string | null): Mission {
+  const withCompletion: Mission =
+    mission.status === "COMPLETED"
+      ? { ...mission, completedAt: mission.completedAt ?? completedAt ?? mission.updatedAt }
+      : mission;
+  if (withCompletion.status === "COMPLETED" || withCompletion.status === "CANCELLED") {
+    return withCompletion;
+  }
+  return missionExpired(withCompletion) ? { ...withCompletion, status: "EXPIRED" } : withCompletion;
+}
+
 /** Fails closed: a mission is returned only to its owner. */
 export async function loadMission(input: {
   id: string;
@@ -78,16 +94,13 @@ export async function loadMission(input: {
     const db = await admin();
     const { data } = await db
       .from("ai_missions")
-      .select("mission,user_id")
+      .select("mission,user_id,completed_at")
       .eq("id", input.id)
       .eq("user_id", input.userId)
       .maybeSingle();
     const mission = (data as any)?.mission as Mission | undefined;
     if (!mission) return null;
-    if (missionExpired(mission) && mission.status !== "COMPLETED") {
-      return { ...mission, status: "EXPIRED" };
-    }
-    return mission;
+    return hydrate(mission, (data as any)?.completed_at ?? null);
   } catch {
     return null;
   }
@@ -101,14 +114,13 @@ export async function listMissions(input: {
     const db = await admin();
     const { data } = await db
       .from("ai_missions")
-      .select("mission")
+      .select("mission,completed_at")
       .eq("user_id", input.userId)
       .order("updated_at", { ascending: false })
-      .limit(Math.min(20, Math.max(1, input.limit ?? 10)));
+      .limit(Math.min(50, Math.max(1, input.limit ?? 20)));
     return ((data ?? []) as any[])
-      .map((r) => r.mission as Mission)
-      .filter(Boolean)
-      .map((m) => (missionExpired(m) && m.status !== "COMPLETED" ? { ...m, status: "EXPIRED" as const } : m));
+      .filter((r) => r.mission)
+      .map((r) => hydrate(r.mission as Mission, r.completed_at ?? null));
   } catch {
     return [];
   }
