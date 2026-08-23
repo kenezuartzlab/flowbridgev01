@@ -102,6 +102,9 @@ export function ActionIntentCard({
   };
   handoffSearch.conv = getConversation().conversationId;
   if (correlation) Object.assign(handoffSearch, buildClaimHandoffSearch(correlation));
+  /** V17.1C §4 — only router-mediated actions have fee/quote economics. */
+  const routerEconomics = intent.type === "SWAP" || intent.type === "BRIDGE";
+
 
   const ctaLabel = reviewAction?.label ?? handoff?.cta ?? "Review in Trade";
   const ctaSurface = reviewAction?.surface ?? handoff?.surface ?? "Trade";
