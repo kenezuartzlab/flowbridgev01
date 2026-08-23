@@ -116,6 +116,8 @@ export interface DecisionItem {
   blockerText: string | null;
   domain: OpportunityDomain | null;
   provenance: OpportunityProvenance;
+  expiresAt: string | null;
+  containsPrivateEvidence: boolean;
   freshness: string;
   surface: { label: string; href: string };
   facts: readonly DecisionFact[];

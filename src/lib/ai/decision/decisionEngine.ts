@@ -297,6 +297,8 @@ export function runDecisionEngine(input: DecisionEngineInput): DecisionResult {
       blockerText: continueMission.status === "BLOCKED" ? continueMission.blockingReason : null,
       domain: null,
       provenance: "LIVE",
+      expiresAt: null,
+      containsPrivateEvidence: true,
       freshness: "REALTIME",
       surface: { label: "Open mission", href: "/assistant" },
       facts: [
@@ -338,6 +340,8 @@ export function runDecisionEngine(input: DecisionEngineInput): DecisionResult {
       blockerText: entry.blockerText,
       domain: item.domain,
       provenance: item.provenance,
+      expiresAt: item.expiresAt,
+      containsPrivateEvidence: item.containsPrivateEvidence,
       freshness: item.evidenceRefs[0]?.freshness ?? "UNKNOWN",
       surface: item.recommendedSurface,
       facts: factsFor(item),
