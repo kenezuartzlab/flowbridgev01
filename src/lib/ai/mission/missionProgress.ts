@@ -17,6 +17,12 @@ import {
   type MissionStepState,
 } from "./missionTypes";
 import { nextEligibleStep } from "./missionPlanner";
+import {
+  deriveFromSettlement,
+  parseUnitsExact,
+  type SettlementSourceKind,
+} from "./settlementDerivation";
+
 
 function replaceStep(mission: Mission, next: MissionStep, now: Date): Mission {
   const steps = mission.steps.map((s) => (s.id === next.id ? next : s));
