@@ -95,7 +95,7 @@ function HistoryRow({ mission }: { mission: Mission }) {
           {evidence.map((s) => (
             <li key={s.id} className="font-mono text-[9.5px] text-muted">
               {s.title}
-              {s.outputs.resolvedAmount ? ` · ${s.outputs.resolvedAmount}` : ""} ·{" "}
+              {s.outputs.resolvedAmount ? ` · ${String(s.outputs.resolvedAmount)}` : ""} ·{" "}
               {String(s.outputs.txHash).slice(0, 10)}…{String(s.outputs.txHash).slice(-8)}
             </li>
           ))}
