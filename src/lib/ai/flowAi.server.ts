@@ -540,7 +540,39 @@ export async function answerFlowAiQuestion(input: {
         sessionOut,
       );
     }
-    const built = parametersForShape({ shape, wallet: binding.boundWallet! });
+    /**
+     * V16.1 — a CLAIM_FLOW plan's amount is a CANONICAL LEDGER FACT, never a
+     * sentence or planner artifact. Like the wallet binding, it must not depend
+     * on which skills the planner happened to select, otherwise preparation
+     * simulates a 0 FLOW claim and fails against prose that says otherwise.
+     */
+    let canonicalClaimable: number | null = null;
+    if (shape.type === "CLAIM_FLOW") {
+      const fromEvidence = (
+        accountEvidence.find((e) => e.id === "db.account.points")?.value as
+          | { claimableFlow?: number | null }
+          | undefined
+      )?.claimableFlow;
+      if (typeof fromEvidence === "number") canonicalClaimable = fromEvidence;
+      else {
+        try {
+          const { getUserPointsAndReferrals } = await import("@/lib/flowbridge-db.server");
+          const points: any = await getUserPointsAndReferrals(input.actor.userId!);
+          canonicalClaimable = computeClaimable({
+            cumulativeFlowPoints: Number(points?.flowPoints ?? 0),
+            claimedFlow: Number(points?.claimedTokens ?? 0),
+          }).claimableFlow;
+        } catch {
+          canonicalClaimable = null; // policy reports MISSING, never assumes zero
+        }
+      }
+    }
+    const built = parametersForShape({
+      shape,
+      wallet: binding.boundWallet!,
+      claimableFlow: canonicalClaimable,
+    });
+
     if (built) {
       proposal = {
         type: built.type,
