@@ -67,6 +67,8 @@ export async function resolveDecision(input: {
   requestId: string;
   limit?: number;
   now?: Date;
+  /** V24 §11 kill switch: false = canonical ranking with zero memory reads. */
+  personalizationEnabled?: boolean;
 }): Promise<DecisionResult> {
   const now = input.now ?? new Date();
   const actor = input.actor;
@@ -103,11 +105,17 @@ export async function resolveDecision(input: {
       missions = [];
     }
 
-    try {
-      const { listUserMemory } = await import("../memoryStore.server");
-      preferences = extractDecisionPreferences(await listUserMemory(actor));
-    } catch {
-      preferences = EMPTY_PREFERENCES;
+    /**
+     * V24 §11 — with the personalization layer disabled, no preference signal is
+     * read at all and ranking falls back to canonical order only.
+     */
+    if (input.personalizationEnabled !== false) {
+      try {
+        const { listUserMemory } = await import("../memoryStore.server");
+        preferences = extractDecisionPreferences(await listUserMemory(actor));
+      } catch {
+        preferences = EMPTY_PREFERENCES;
+      }
     }
   }
 

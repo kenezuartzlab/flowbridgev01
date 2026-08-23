@@ -17,6 +17,34 @@ export const Route = createFileRoute("/api/ai/deliberate")({
         const { runDeliberation } = await import(
           "@/lib/ai/federation/deliberationRouter.server"
         );
+        const { isLayerEnabled } = await import("@/lib/ai/hardening/killSwitches");
+        const { normalizeLegacyStatus, statusNotice } = await import(
+          "@/lib/ai/hardening/intelligenceStatus"
+        );
+        const { buildTelemetry, logIntelligenceTelemetry } = await import(
+          "@/lib/ai/hardening/telemetry"
+        );
+        const { createStageTimer } = await import("@/lib/ai/hardening/budgets");
+
+        /** V24 §11 — layer disabled: no external call, canonical product intact. */
+        if (!isLayerEnabled("DELIBERATION")) {
+          const blockedId = crypto.randomUUID();
+          logIntelligenceTelemetry(
+            buildTelemetry({
+              surface: "DELIBERATION",
+              requestId: blockedId,
+              status: "BLOCKED",
+              degradedReasons: ["DELIBERATION_LAYER_DISABLED"],
+            }),
+          );
+          return jsonResponse({
+            success: true,
+            requestId: blockedId,
+            deliberation: null,
+            intelligenceStatus: "BLOCKED",
+            statusNotice: statusNotice("BLOCKED", "Multi-source deliberation"),
+          });
+        }
 
         let body: any;
         try {
