@@ -19,7 +19,11 @@ import {
   X,
 } from "lucide-react";
 import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
-import { listMissions, missionAction } from "@/lib/ai/mission/missionClient";
+import {
+  listMissions,
+  missionAction,
+  type MissionActionResponse,
+} from "@/lib/ai/mission/missionClient";
 import { missionProgress, type Mission, type MissionStep } from "@/lib/ai/mission/missionTypes";
 
 const STATE_ICON: Record<string, ReactNode> = {
@@ -65,6 +69,14 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [prepared, setPrepared] = useState<PreparedIntentPayload | null>(null);
+  /**
+   * V17.1B §5 — an off-chain conversion is NEVER implicit. The server hands back
+   * a confirmation payload and nothing happens until the user accepts it here.
+   */
+  const [conversion, setConversion] = useState<
+    NonNullable<MissionActionResponse["conversionConfirmation"]> | null
+  >(null);
+  const [rewardState, setRewardState] = useState<MissionActionResponse["rewardState"]>(null);
   const [open, setOpen] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -77,6 +89,17 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
 
   const active = missions.find((m) => m.status !== "CANCELLED" && m.status !== "COMPLETED") ?? null;
 
+  /**
+   * V17.1B §8 — when the canonical reward state says there is no eligible
+   * economic action, the CTA is disabled instead of preparing an empty claim.
+   */
+  const rewardOnlyMission =
+    !!active &&
+    active.steps.every((s) =>
+      ["PREPARE_CLAIM", "CONVERT_FLOW_POINTS", "AWAIT_SETTLEMENT", "VERIFY"].includes(s.type),
+    );
+  const noEligibleAction = rewardOnlyMission && rewardState?.nextEconomicStep === "NONE";
+
   const run = useCallback(
     async (body: Record<string, unknown>) => {
       setBusy(true);
@@ -86,6 +109,8 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
         if (res.error) setMessage(res.error);
         else setMessage(res.message ?? null);
         if (res.prepared) setPrepared(res.prepared);
+        if (res.conversionConfirmation !== undefined) setConversion(res.conversionConfirmation);
+        if (res.rewardState !== undefined) setRewardState(res.rewardState);
         await refresh();
       } finally {
         setBusy(false);
@@ -151,7 +176,8 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
               <div className="flex flex-wrap gap-2 border-t border-hairline p-3">
                 <button
                   type="button"
-                  disabled={busy}
+                  disabled={busy || noEligibleAction}
+                  title={noEligibleAction ? rewardState?.copy.readiness : undefined}
                   onClick={() => void run({ action: "prepare-next", missionId: active.id })}
                   className="rounded-lg bg-primary px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.08em] text-primary-foreground disabled:opacity-50"
                   data-testid="mission-prepare-next"
@@ -210,6 +236,65 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
 
           {message && (
             <p className="font-mono text-[10.5px] leading-relaxed text-muted">{message}</p>
+          )}
+
+          {conversion && (
+            <div className="fb-inset space-y-2.5 rounded-xl p-3.5" data-testid="conversion-confirmation">
+              <p className="font-mono text-[11.5px] font-black uppercase tracking-[0.05em]">
+                {conversion.title}
+              </p>
+              <p className="font-mono text-[10.5px] leading-relaxed text-muted">{conversion.body}</p>
+              <ul className="space-y-1">
+                {conversion.requirements.map((r) => (
+                  <li
+                    key={r.id}
+                    className={`font-mono text-[10px] uppercase tracking-[0.06em] ${
+                      r.met ? "text-success" : "text-danger"
+                    }`}
+                  >
+                    {r.met ? "✓" : "✗"} {r.label}
+                    {!r.met && r.hint ? ` — ${r.hint}` : ""}
+                  </li>
+                ))}
+              </ul>
+              <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+                Confirming authorizes the off-chain conversion only. It moves no tokens and signs
+                nothing; the on-chain claim stays a separate wallet confirmation you control.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={busy || conversion.requirements.some((r) => !r.met)}
+                  onClick={() =>
+                    void run({
+                      action: "convert-confirm",
+                      missionId: active?.id,
+                      stepId: conversion.stepId,
+                      confirm: true,
+                      expectedConvertibleFlowPoints: conversion.convertibleFlowPoints,
+                    })
+                  }
+                  className="rounded-lg bg-primary px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.08em] text-primary-foreground disabled:opacity-50"
+                  data-testid="conversion-confirm"
+                >
+                  Convert {conversion.convertibleFlowPoints.toLocaleString("en-US")} PTS
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setConversion(null)}
+                  className="rounded-lg border border-hairline px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.08em] text-muted disabled:opacity-50"
+                >
+                  Not now
+                </button>
+              </div>
+            </div>
+          )}
+
+          {rewardState && (
+            <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+              {rewardState.copy.readiness}
+            </p>
           )}
 
           {prepared && <ActionIntentCard payload={prepared} />}
