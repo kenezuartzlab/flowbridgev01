@@ -107,7 +107,9 @@ describe("V21 deliberation", () => {
     const claims = [...claimsFor("a", supportA), ...claimsFor("b", supportB)];
     const result = run(claims, false, 2);
     expect(result.candidateOpportunityKind).toBe("STAKING:START_STAKING");
-    expect(JSON.stringify(result)).not.toContain('"amount"');
+    const json = JSON.stringify(result);
+    expect(json).not.toContain("500");
+    expect(json).not.toContain('"amount":');
     expect(result.missionsCreated).toBe(0);
     expect(result.directExternalActionIntents).toBe(0);
     expect(result.blockchainTransactions).toBe(0);
@@ -123,7 +125,6 @@ describe("V21 deliberation", () => {
   it("surfaces disagreement instead of averaging it", () => {
     const claims = [...claimsFor("a", supportA), ...claimsFor("c", contrarianC)];
     const result = run(claims, false, 2);
-    console.log(JSON.stringify({e:result.edges,c:claims.map(x=>[x.id,x.subject,x.claimKind,x.skillId])}));
     expect(result.contradictionIds.length).toBeGreaterThan(0);
     expect(result.unresolvedQuestions.length).toBeGreaterThan(0);
     expect(result.candidateOpportunityKind).toBeNull();
@@ -133,9 +134,11 @@ describe("V21 deliberation", () => {
     const claims = [...claimsFor("a", supportA), ...claimsFor("b", supportB), ...claimsFor("c", contrarianC)];
     const support = subjectSupport(claims);
     expect(support[0].subject).toBe("STAKING:START_STAKING");
+    expect(support[0].weight).toBeGreaterThan(support[1].weight);
     const result = run(claims);
-    expect(result.reconciliation ?? null).toBeNull();
-    expect(result.candidateOpportunityKind).toBe("STAKING:START_STAKING");
+    /** Ranking is advisory only: a contradicted field stays unpublished. */
+    expect(result.candidateOpportunityKind).toBeNull();
+    expect(result.missionsCreated).toBe(0);
   });
 
   it("freshness affects ranking but external evidence is capped below canonical", () => {

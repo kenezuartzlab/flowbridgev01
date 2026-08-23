@@ -35,6 +35,19 @@ export function overridesFromClaims(claims: readonly EvidenceClaim[]): Canonical
   return out;
 }
 
+/** True when the edge joins two *different* opportunity suggestions (§5). */
+function contradictingSuggestions(claims: readonly EvidenceClaim[], edge: ClaimEdge): boolean {
+  const a = claims.find((c) => c.id === edge.fromClaimId);
+  const b = claims.find((c) => c.id === edge.toClaimId);
+  return (
+    !!a &&
+    !!b &&
+    a.claimKind === "OPPORTUNITY_SUGGESTION" &&
+    b.claimKind === "OPPORTUNITY_SUGGESTION" &&
+    a.subject !== b.subject
+  );
+}
+
 export function deliberate(input: {
   requestId: string;
   question: string;
@@ -58,7 +71,11 @@ export function deliberate(input: {
   const top = support[0] ?? null;
   const runnerUp = support[1] ?? null;
   /** §5/§10 — a contested subject is surfaced, never blended or auto-promoted. */
-  const contested = !!(top && runnerUp && runnerUp.weight >= top.weight * 0.75);
+  const suggestionConflict = edges.some(
+    (e) => e.relation === "CONTRADICTS" && contradictingSuggestions(claims, e),
+  );
+  const contested =
+    suggestionConflict || !!(top && runnerUp && runnerUp.weight >= top.weight * 0.75);
 
   const candidateOpportunityKind = top && !contested ? top.subject : null;
 
@@ -69,6 +86,11 @@ export function deliberate(input: {
     unresolvedQuestions.push(
       `Sources disagree on what to do next (${top.subject} vs ${runnerUp.subject}). FlowBridge will not pick one from external agreement alone.`,
     );
+  }
+  for (const e of edges) {
+    if (e.relation === "CONTRADICTS" && !unresolvedQuestions.includes(e.reason)) {
+      unresolvedQuestions.push(e.reason);
+    }
   }
   for (const e of unresolvedEdges) unresolvedQuestions.push(e.reason);
   if (input.anySourceFailed) {
