@@ -61,6 +61,14 @@ export const FORBIDDEN_OUTPUT_FIELDS = [
   "tools",
 ] as const;
 
+/**
+ * §6 — providers also rename economic fields (recommendedAmount, targetContract,
+ * suggestedFee...). Any key that *looks* economic/executable is discarded and
+ * reported, so renaming cannot smuggle a value past the allowlist.
+ */
+export const FORBIDDEN_FIELD_PATTERN =
+  /(amount|value|balance|claimable|allowance|contract|target|address|spender|calldata|payload|chain|gas|nonce|signature|fee|token|vault|tx|transaction|intent|execute)/i;
+
 const INJECTION_PATTERNS: readonly RegExp[] = [
   /ignore\s+(?:all\s+|any\s+|previous\s+|prior\s+|the\s+)*(instructions|rules|policies)/gi,
   /disregard\s+(?:the\s+)?(above|previous|system)/gi,
@@ -169,7 +177,12 @@ export function sanitizeCapabilityOutput(input: {
       return;
     }
     for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
-      if ((FORBIDDEN_OUTPUT_FIELDS as readonly string[]).includes(k)) stripped.add(k);
+      if (
+        (FORBIDDEN_OUTPUT_FIELDS as readonly string[]).includes(k) ||
+        (k !== "insights" && k !== "suggestedOpportunityKind" && FORBIDDEN_FIELD_PATTERN.test(k))
+      ) {
+        stripped.add(k);
+      }
       collectForbidden(v, depth + 1);
     }
   };
