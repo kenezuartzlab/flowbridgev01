@@ -5,6 +5,7 @@ import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { MissionPanel } from "@/components/assistant/MissionPanel";
 import { ExternalSkillEvidence } from "@/components/assistant/ExternalSkillEvidence";
 import { FederatedInsightPanel } from "@/components/assistant/FederatedInsightPanel";
+import { DeliberationPanel } from "@/components/assistant/DeliberationPanel";
 
 export const Route = createFileRoute("/assistant")({
   head: () => ({
@@ -60,6 +61,8 @@ function AssistantPage() {
         <AssistantChat onHide={hide} />
         {/* V19 — federated BOT Chain skills: advisory, external, never executable. */}
         <FederatedInsightPanel />
+        {/* V21 — multi-skill deliberation: advisory comparison, canonical decisioning. */}
+        <DeliberationPanel />
         <ExternalSkillEvidence />
       </main>
 
