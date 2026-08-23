@@ -98,13 +98,25 @@ export function OpportunityFeed() {
     }).catch(() => {});
   }, []);
 
+  /**
+   * V16.1 — the owner gate must be settled BEFORE the draft is written,
+   * otherwise the Assistant's own ownership check discards the anonymous-owned
+   * session (draft included) the moment it mounts.
+   */
   const explain = useCallback(
-    (item: RankedOpportunity) => {
+    async (item: RankedOpportunity) => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        ensureConversationOwner(data.user?.id ?? "anonymous");
+      } catch {
+        /* presentation-only: a failed owner read simply keeps the current session */
+      }
       setConversationDraft(`Explain this opportunity: ${item.title} (${item.id})`);
       void router.navigate({ to: "/assistant" });
     },
     [router],
   );
+
 
   if (loading) {
     return (
