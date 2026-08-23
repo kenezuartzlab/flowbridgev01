@@ -92,15 +92,31 @@ export const Route = createFileRoute("/api/missions")({
               400,
             );
           }
+          /**
+           * V17.1B §4 — automatic prerequisite discovery at plan time: a claim
+           * goal with zero on-chain claimable but eligible convertible points
+           * gets a CONVERT_FLOW_POINTS step instead of "nothing to claim".
+           */
+          const needsReward = goal.outcome === "CLAIM_ONLY" || goal.outcome === "CLAIM_THEN_STAKE";
+          const rewardState = needsReward
+            ? await canonicalRewardState(ctx.user.id, ctx.user.emailVerified, goal.chainId)
+            : null;
           const mission = planner.createMission({
             id: crypto.randomUUID(),
             actorUserId: ctx.user.id,
             goalText,
             goal,
             linkedOpportunityId: body.opportunityId ? String(body.opportunityId) : null,
+            rewardPrerequisite: rewardState
+              ? {
+                  insertConversion: rewardState.nextEconomicStep === "CONVERT_FLOW_POINTS",
+                  convertibleFlowPoints: rewardState.convertibleFlowPoints,
+                  claimableFlow: rewardState.claimableFlow,
+                }
+              : null,
           });
           await store.saveMission(mission);
-          return jsonResponse({ success: true, mission, executed: false });
+          return jsonResponse({ success: true, mission, rewardState, executed: false });
         }
 
         const missionId = String(body.missionId ?? "");
@@ -127,12 +143,17 @@ export const Route = createFileRoute("/api/missions")({
         }
 
         if (action === "prepare-next") {
-          const claimableFlow = await canonicalClaimable(ctx.user.id);
+          const rewardState = await canonicalRewardState(
+            ctx.user.id,
+            ctx.user.emailVerified,
+            loaded.goal.chainId,
+          );
           const result = await engine.prepareNextMissionStep({
             mission: loaded,
             actor: ctx.actor as any,
             wallet: ctx.wallet,
-            claimableFlow,
+            claimableFlow: rewardState?.claimableFlow ?? null,
+            rewardState: rewardState as any,
           });
           await store.saveMission(result.mission);
           return jsonResponse({
@@ -140,12 +161,52 @@ export const Route = createFileRoute("/api/missions")({
             mission: result.mission,
             step: result.step,
             prepared: result.prepared,
+            conversionConfirmation: result.conversionConfirmation ?? null,
+            rewardState,
             failureClass: result.failureClass,
             recovery: result.failureClass ? progress.recoveryAdvice(result.failureClass) : null,
             message: result.message,
             executed: false,
           });
         }
+
+        /** V17.1B §5 — the user explicitly confirms the off-chain conversion. */
+        if (action === "convert-confirm") {
+          if (body.confirm !== true) {
+            return jsonResponse(
+              { error: "Conversion requires an explicit confirmation.", code: "CONFIRMATION_REQUIRED" },
+              400,
+            );
+          }
+          const result = await engine.confirmMissionConversion({
+            mission: loaded,
+            stepId: String(body.stepId ?? loaded.currentStepId ?? ""),
+            userId: ctx.user.id,
+            emailVerified: ctx.user.emailVerified,
+            expectedConvertibleFlowPoints:
+              typeof body.expectedConvertibleFlowPoints === "number"
+                ? body.expectedConvertibleFlowPoints
+                : null,
+          });
+          await store.saveMission(result.mission);
+          const rewardState = await canonicalRewardState(
+            ctx.user.id,
+            ctx.user.emailVerified,
+            loaded.goal.chainId,
+          );
+          return jsonResponse({
+            success: true,
+            mission: result.mission,
+            converted: result.converted,
+            convertedFlowPoints: result.convertedFlowPoints,
+            failureClass: result.failureClass,
+            message: result.message,
+            rewardState,
+            executed: false,
+          });
+        }
+
+
 
         if (action === "advance") {
           const result = await engine.advanceMissionStep({
