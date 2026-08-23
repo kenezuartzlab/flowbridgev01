@@ -51,20 +51,8 @@ export async function resolveScenarioSet(input: {
       degradedDomains.push("REWARDS");
     }
     try {
-      const { getBoundWallet } = await import("../walletBinding");
-      boundWallet = null;
-      void getBoundWallet;
-    } catch {
-      boundWallet = null;
-    }
-    try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data } = await supabaseAdmin
-        .from("profiles")
-        .select("wallet_address")
-        .eq("id", actor.userId)
-        .maybeSingle();
-      boundWallet = (data as any)?.wallet_address ?? null;
+      const { getProfileWallet } = await import("@/lib/campaign/campaignApi.server");
+      boundWallet = await getProfileWallet(actor.userId);
     } catch {
       boundWallet = null;
     }
