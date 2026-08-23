@@ -348,19 +348,29 @@ export async function createTransactionHistory(
         ? await canonicalEvidenceUsd(evidence)
         : await estimateSwapUsd(payload.direction, payload.fromAmount);
       if (v2Live) {
-        // V12.4A FLOW Points V2: floor(verifiedUsd) from $minSwapUsd, bounded by
-        // the per-wallet daily cap, recorded once per canonical activity
-        // (chainId + txHash + sourceLogIndex).
-        const accrual = await accrueCoreSwapPoints({
-          userId,
-          walletAddress: submittedWallet,
-          verifiedUsd: verifiedSwapUsd,
-          chainId: evidence?.chainId ?? verifiedChainId,
-          txHash: normalizedTxHash,
-          sourceLogIndex: evidence?.logIndex ?? null,
-        });
-        pointsToEarn = accrual.award;
-        if (!accrual.recorded) verifiedSwapUsd = 0;
+        // V12.4A/V15.3M FLOW Points V2: settlement requires a single canonical
+        // verified activity. Its activity_id is the economic identity and its
+        // receipt log index is used verbatim — no `?? 0` substitution.
+        if (!evidence) {
+          verifiedSwapUsd = 0;
+          pointsToEarn = 0;
+          console.warn("[flow-points-v2] CORE_SWAP fail-closed: no canonical verified activity", {
+            txHash: normalizedTxHash,
+          });
+        } else {
+          const accrual = await accrueCoreSwapPoints({
+            userId,
+            walletAddress: submittedWallet,
+            verifiedUsd: verifiedSwapUsd,
+            chainId: evidence.chainId,
+            txHash: normalizedTxHash,
+            sourceLogIndex: evidence.logIndex,
+            verifiedActivityId: evidence.activityId,
+          });
+          pointsToEarn = accrual.award;
+          if (!accrual.recorded) verifiedSwapUsd = 0;
+        }
+
 
       } else {
         const rules = await getRewardSettings();
