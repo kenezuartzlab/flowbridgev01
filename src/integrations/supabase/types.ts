@@ -676,6 +676,7 @@ export type Database = {
           source_log_index: number | null
           tx_hash: string | null
           user_id: string
+          verified_activity_id: string | null
           verified_usd: number | null
           wallet_address: string | null
         }
@@ -693,6 +694,7 @@ export type Database = {
           source_log_index?: number | null
           tx_hash?: string | null
           user_id: string
+          verified_activity_id?: string | null
           verified_usd?: number | null
           wallet_address?: string | null
         }
@@ -710,10 +712,19 @@ export type Database = {
           source_log_index?: number | null
           tx_hash?: string | null
           user_id?: string
+          verified_activity_id?: string | null
           verified_usd?: number | null
           wallet_address?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "flow_points_ledger_verified_activity_id_fkey"
+            columns: ["verified_activity_id"]
+            isOneToOne: false
+            referencedRelation: "verified_activities"
+            referencedColumns: ["activity_id"]
+          },
+        ]
       }
       partner_org_members: {
         Row: {

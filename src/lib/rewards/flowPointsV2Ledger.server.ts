@@ -64,11 +64,21 @@ export interface CoreSwapAccrual {
   /** false when the canonical activity was already recorded (replay). */
   recorded: boolean;
   policy: FlowPointsV2Policy;
+  /** V15.3M — set when settlement was refused for missing canonical identity. */
+  failClosedReason?: 'MISSING_VERIFIED_ACTIVITY_ID' | 'MISSING_SOURCE_LOG_INDEX';
 }
 
 /**
- * Compute and record the V2 core-swap accrual for one canonical activity.
- * Returns `award: 0, recorded: false` for a replay of the same activity key.
+ * Compute and record the V2 core-swap accrual for one canonical verified
+ * activity.
+ *
+ * V15.3M — canonical economic identity:
+ *   • `verifiedActivityId` is the economic idempotency identity (unique index).
+ *   • `sourceLogIndex` is the ACTUAL receipt log index of the canonical
+ *     SwapActivity event. It is never substituted or invented — `?? 0` is
+ *     forbidden, because log index 0 is a real event position.
+ *   • Missing either value fails closed: no ledger row, no points.
+ * Returns `award: 0, recorded: false` for a replay of the same activity.
  */
 export async function accrueCoreSwapPoints(input: {
   userId: string;
@@ -76,14 +86,41 @@ export async function accrueCoreSwapPoints(input: {
   verifiedUsd: number;
   chainId: number;
   txHash: string;
-  sourceLogIndex?: number | null;
+  /** Canonical verified_activities.activity_id. Required. */
+  verifiedActivityId: string;
+  /** Actual canonical SwapActivity receipt log index. Required. */
+  sourceLogIndex: number;
   at?: Date;
 }): Promise<CoreSwapAccrual> {
   const policy = await resolveFlowPointsV2Policy();
   const at = input.at ?? new Date();
   const dayKey = utcDayKey(at);
   const wallet = input.walletAddress.toLowerCase();
-  const activityKey = `${input.chainId}:${input.txHash.toLowerCase()}:${input.sourceLogIndex ?? 0}`;
+
+  const activityId = input.verifiedActivityId?.trim().toLowerCase();
+  if (!activityId) {
+    return {
+      award: 0,
+      base: 0,
+      reason: "CORE_SWAP",
+      recorded: false,
+      policy,
+      failClosedReason: "MISSING_VERIFIED_ACTIVITY_ID",
+    };
+  }
+  const logIndex = input.sourceLogIndex;
+  if (!Number.isInteger(logIndex) || logIndex < 0) {
+    return {
+      award: 0,
+      base: 0,
+      reason: "CORE_SWAP",
+      recorded: false,
+      policy,
+      failClosedReason: "MISSING_SOURCE_LOG_INDEX",
+    };
+  }
+
+  const activityKey = `${input.chainId}:${input.txHash.toLowerCase()}:${logIndex}`;
 
   const alreadyToday = await awardedCoreSwapPointsToday(wallet, dayKey);
   const computed = coreSwapAward(input.verifiedUsd, alreadyToday, policy);
@@ -97,12 +134,13 @@ export async function accrueCoreSwapPoints(input: {
     verified_usd: input.verifiedUsd,
     chain_id: input.chainId,
     tx_hash: input.txHash.toLowerCase(),
-    source_log_index: input.sourceLogIndex ?? null,
+    source_log_index: logIndex,
+    verified_activity_id: activityId,
     activity_key: activityKey,
     wallet_address: wallet,
     day_key: dayKey,
     metadata: { dailyCoreSwapCap: policy.dailyCoreSwapCap, alreadyAwardedToday: alreadyToday },
-  });
+  } as never);
 
   if (error) {
     // 23505 = the canonical activity is already in the ledger: never pay twice.
