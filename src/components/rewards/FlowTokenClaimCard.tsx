@@ -218,8 +218,20 @@ export function FlowTokenClaimCard({
         )}
 
         {auth && !auth.authorized ? (
-          <p className="text-[12px] leading-relaxed text-muted">{auth.message}</p>
+          <p className="text-[12px] leading-relaxed text-muted">
+            {txHash
+              ? "Your claim was submitted and the distributor now shows nothing further to claim — that is the settled state, not a failure. The transaction below is the record."
+              : auth.message}
+          </p>
         ) : null}
+
+        {correlation ? (
+          <p className="text-[11.5px] leading-relaxed text-muted">
+            Opened from a Flow AI mission. The mission carried no amounts or calldata here: this card
+            requested its own server-signed authorization, and only your wallet can sign it.
+          </p>
+        ) : null}
+
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
