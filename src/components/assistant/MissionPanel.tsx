@@ -97,6 +97,12 @@ function HistoryRow({ mission }: { mission: Mission }) {
         {p.completed}/{p.total} steps ·{" "}
         {completed ? new Date(completed).toLocaleString("en-US") : "time unavailable"}
       </p>
+      {mission.source && (
+        <p className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+          Built from your insight · {mission.source.opportunityKind.toLowerCase()} · template{" "}
+          {mission.source.templateId}
+        </p>
+      )}
       {(settlementWallet || derivation) && (
         <p className="mt-0.5 break-all font-mono text-[9.5px] text-muted">
           {settlementWallet ? `${settlementWallet} · chain ${mission.goal.chainId}` : null}
@@ -233,6 +239,12 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
                   {active.status} · {missionProgress(active).completed}/{missionProgress(active).total} steps ·{" "}
                   {missionProgress(active).expectedUserConfirmations} wallet confirmations expected
                 </p>
+                {active.source && (
+                  <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+                    Built from your insight · {active.source.opportunityKind.toLowerCase()} ·
+                    template {active.source.templateId} {active.source.templateVersion}
+                  </p>
+                )}
                 {active.goal.missingSlots.length > 0 && (
                   <p className="mt-1 font-mono text-[10px] text-muted">
                     Missing: {active.goal.missingSlots.join(", ")} — tell me the exact amount and I'll

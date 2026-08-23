@@ -23,6 +23,8 @@ import {
 import { assistantFetch } from "@/lib/ai/assistantClient";
 import { ensureConversationOwner, setConversationDraft } from "@/lib/ai/conversationStore";
 import { supabase } from "@/integrations/supabase/client";
+import { compileOpportunityIntoMission } from "@/lib/ai/mission/missionClient";
+import { opportunitySupportsMission } from "@/lib/ai/opportunity/missionTemplates";
 
 import type { OpportunityFeed as Feed, RankedOpportunity } from "@/lib/ai/opportunity/opportunityTypes";
 
@@ -57,6 +59,8 @@ export function OpportunityFeed() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [hidden, setHidden] = useState<string[]>([]);
+  const [compiling, setCompiling] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ id: string; text: string; ok: boolean } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,6 +123,42 @@ export function OpportunityFeed() {
     [router],
   );
 
+
+  /**
+   * V18 §3 — explicit initiation. Tapping this asks the SERVER to re-resolve the
+   * opportunity and compile a typed plan; it never sends a transaction and never
+   * carries the card's displayed numbers into the mission.
+   */
+  const buildMission = useCallback(
+    async (item: RankedOpportunity) => {
+      setCompiling(item.id);
+      setNotice(null);
+      try {
+        const res = await compileOpportunityIntoMission(item.id);
+        if (!res.success || !res.mission) {
+          setNotice({
+            id: item.id,
+            ok: false,
+            text: res.message ?? res.error ?? "This opportunity could not be turned into a mission.",
+          });
+          return;
+        }
+        try {
+          const { data } = await supabase.auth.getUser();
+          ensureConversationOwner(data.user?.id ?? "anonymous");
+        } catch {
+          /* presentation-only */
+        }
+        setConversationDraft(`Open my mission: ${res.mission.goalText}`);
+        void router.navigate({ to: "/assistant" });
+      } catch {
+        setNotice({ id: item.id, ok: false, text: "The mission could not be built right now." });
+      } finally {
+        setCompiling(null);
+      }
+    },
+    [router],
+  );
 
   if (loading) {
     return (
@@ -185,6 +225,16 @@ export function OpportunityFeed() {
                     >
                       {item.recommendedSurface.label}
                     </Link>
+                    {opportunitySupportsMission(item) && (
+                      <button
+                        type="button"
+                        disabled={compiling === item.id}
+                        onClick={() => void buildMission(item)}
+                        className="rounded-xl border border-primary/40 bg-primary/10 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary transition-opacity disabled:opacity-50"
+                      >
+                        {compiling === item.id ? "Building…" : "Build mission"}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => void explain(item)}
@@ -214,6 +264,15 @@ export function OpportunityFeed() {
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
+
+              {notice?.id === item.id && (
+                <p
+                  className={`mt-2 font-mono text-[9.5px] leading-relaxed ${notice.ok ? "text-success" : "text-danger"}`}
+                  role="status"
+                >
+                  {notice.text}
+                </p>
+              )}
 
               {expanded && (
                 <div className="fb-inset mt-2.5 space-y-2 p-3">

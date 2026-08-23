@@ -20,6 +20,7 @@ import {
   type Mission,
   type MissionGoal,
   type MissionStep,
+  type MissionSourceRef,
   type MissionStepType,
 } from "./missionTypes";
 
@@ -260,6 +261,8 @@ export function createMission(input: {
   goalText: string;
   goal: MissionGoal;
   linkedOpportunityId?: string | null;
+  /** V18 §3 — opportunity/template provenance, never an economic input. */
+  source?: MissionSourceRef | null;
   /** V17.1B §4 — canonical reward facts, used to insert prerequisites. */
   rewardPrerequisite?: MissionRewardPrerequisite | null;
   now?: Date;
@@ -284,6 +287,7 @@ export function createMission(input: {
     version: 1,
     evidenceRefs: [],
     linkedOpportunityId: input.linkedOpportunityId ?? null,
+    source: input.source ?? null,
   };
 }
 

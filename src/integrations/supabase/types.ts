@@ -102,7 +102,11 @@ export type Database = {
           id: string
           mission: Json
           schema_version: string
+          source_opportunity_id: string | null
+          source_opportunity_kind: string | null
           status: string
+          template_id: string | null
+          template_version: string | null
           updated_at: string
           user_id: string
           version: number
@@ -116,7 +120,11 @@ export type Database = {
           id: string
           mission: Json
           schema_version: string
+          source_opportunity_id?: string | null
+          source_opportunity_kind?: string | null
           status: string
+          template_id?: string | null
+          template_version?: string | null
           updated_at?: string
           user_id: string
           version?: number
@@ -130,7 +138,11 @@ export type Database = {
           id?: string
           mission?: Json
           schema_version?: string
+          source_opportunity_id?: string | null
+          source_opportunity_kind?: string | null
           status?: string
+          template_id?: string | null
+          template_version?: string | null
           updated_at?: string
           user_id?: string
           version?: number

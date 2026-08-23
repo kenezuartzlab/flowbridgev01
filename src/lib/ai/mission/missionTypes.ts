@@ -224,6 +224,21 @@ export interface Mission {
   /** Informational evidence attached at planning time. Never authority. */
   evidenceRefs: readonly EvidenceItem[];
   linkedOpportunityId: string | null;
+  /**
+   * V18 §3/§10 — provenance for a mission compiled from a canonical opportunity.
+   * Presentation/audit metadata only: it is never economic proof and never an
+   * executable input. Absent for missions typed straight from a user goal.
+   */
+  source?: MissionSourceRef | null;
+}
+
+/** V18 §3 — persisted opportunity + template provenance. */
+export interface MissionSourceRef {
+  opportunityId: string;
+  opportunityKind: string;
+  templateId: string;
+  templateVersion: string;
+  compiledAt: string;
 }
 
 export interface MissionProgress {

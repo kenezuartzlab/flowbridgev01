@@ -28,6 +28,11 @@ function toRow(mission: Mission) {
     expires_at: mission.expiresAt,
     updated_at: mission.updatedAt,
     completed_at: mission.status === "COMPLETED" ? (mission.completedAt ?? mission.updatedAt) : null,
+    /** V18 §3/§7 — persisted provenance, also the server-owned dedupe key. */
+    source_opportunity_id: mission.source?.opportunityId ?? null,
+    source_opportunity_kind: mission.source?.opportunityKind ?? null,
+    template_id: mission.source?.templateId ?? null,
+    template_version: mission.source?.templateVersion ?? null,
   };
 }
 
@@ -123,5 +128,37 @@ export async function listMissions(input: {
       .map((r) => hydrate(r.mission as Mission, r.completed_at ?? null));
   } catch {
     return [];
+  }
+}
+
+/**
+ * V18 §7 — server-owned deduplication. Returns the caller's existing
+ * non-terminal mission compiled from the same opportunity + template, so
+ * repeated or concurrent Build Mission taps converge on one active mission.
+ * Completed/cancelled history never blocks a genuinely new mission.
+ */
+export async function findActiveMissionBySource(input: {
+  userId: string;
+  opportunityId: string;
+  templateId: string;
+}): Promise<Mission | null> {
+  try {
+    const db = await admin();
+    const { data } = await db
+      .from("ai_missions")
+      .select("mission,completed_at,status")
+      .eq("user_id", input.userId)
+      .eq("source_opportunity_id", input.opportunityId)
+      .eq("template_id", input.templateId)
+      .not("status", "in", "(COMPLETED,CANCELLED,EXPIRED)")
+      .order("updated_at", { ascending: false })
+      .limit(1);
+    const row = (data ?? [])[0] as any;
+    if (!row?.mission) return null;
+    const mission = hydrate(row.mission as Mission, row.completed_at ?? null);
+    // A row that expired since it was written is not an active mission.
+    return mission.status === "EXPIRED" ? null : mission;
+  } catch {
+    return null;
   }
 }
