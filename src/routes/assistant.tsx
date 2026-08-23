@@ -60,6 +60,8 @@ function AssistantPage() {
         {/* V17 — goal missions: plan and prepare only, never execute. */}
         <MissionPanel />
         <AssistantChat onHide={hide} />
+        {/* V23 — simulation + scenario intelligence: advisory preview only. */}
+        <ScenarioComparePanel />
         {/* V19 — federated BOT Chain skills: advisory, external, never executable. */}
         <FederatedInsightPanel />
         {/* V21 — multi-skill deliberation: advisory comparison, canonical decisioning. */}
