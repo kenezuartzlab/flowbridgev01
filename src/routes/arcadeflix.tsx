@@ -4,10 +4,10 @@ import { SoonPage } from "./fortune";
 export const Route = createFileRoute("/arcadeflix")({
   head: () => ({
     meta: [
-      { title: "ArcadeFlix P2E — Coming Soon | FlowBridge" },
-      { name: "description", content: "Play-to-earn arcade powered by BOT Chain. Compete, climb leaderboards, earn FLOW." },
-      { property: "og:title", content: "ArcadeFlix P2E — Skill-Based Arcade on BOT Chain" },
-      { property: "og:description", content: "A curated library of skill-based arcade games with weekly prize pools and FLOW payouts by leaderboard rank." },
+      { title: "ArcadeFlix P2E — FlowBridge" },
+      { name: "description", content: "Play-to-earn arcade on BOT Chain: compete, climb leaderboards and earn FLOW." },
+      { property: "og:title", content: "ArcadeFlix P2E — FlowBridge" },
+      { property: "og:description", content: "Play-to-earn arcade on BOT Chain: compete, climb leaderboards and earn FLOW." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/arcadeflix" },
       { name: "twitter:card", content: "summary" },

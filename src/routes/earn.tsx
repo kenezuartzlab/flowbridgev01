@@ -70,17 +70,17 @@ import { FlowTokenClaimCard } from "@/components/rewards/FlowTokenClaimCard";
 export const Route = createFileRoute("/earn")({
   head: () => ({
     meta: [
-      { title: "Earn — FLOW Points, Campaign PTS & Rewards | FlowBridge" },
+      { title: "Earn — FlowBridge" },
       {
         name: "description",
         content:
-          "Your FlowBridge earning summary: FLOW Points (PTS) balance, claimable points, verified Campaign PTS, referral progress and how every point is earned.",
+          "Your FlowBridge earning summary: FLOW Points, Campaign PTS, rewards and referral progress.",
       },
-      { property: "og:title", content: "Earn on FlowBridge" },
+      { property: "og:title", content: "Earn — FlowBridge" },
       {
         property: "og:description",
         content:
-          "FLOW Points (PTS), Campaign PTS, claim readiness and referral progress in one place.",
+          "Your FlowBridge earning summary: FLOW Points, Campaign PTS, rewards and referral progress.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/earn" },

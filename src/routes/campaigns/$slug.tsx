@@ -50,16 +50,16 @@ import { CampaignVisual } from "@/components/campaigns/CampaignVisual";
 export const Route = createFileRoute("/campaigns/$slug")({
   head: () => ({
     meta: [
-      { title: "Campaign Details — FlowBridge Growth Hub" },
+      { title: "Campaign Details — FlowBridge" },
       {
         name: "description",
         content:
-          "Campaign details, verified task requirements, Campaign PTS rewards and your completion progress on FlowBridge.",
+          "Campaign details, verified tasks, Campaign PTS rewards and your progress on FlowBridge.",
       },
-      { property: "og:title", content: "FlowBridge Campaign Details" },
+      { property: "og:title", content: "Campaign Details — FlowBridge" },
       {
         property: "og:description",
-        content: "Verified task requirements, PTS rewards and completion progress.",
+        content: "Campaign details, verified tasks, Campaign PTS rewards and your progress on FlowBridge.",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },

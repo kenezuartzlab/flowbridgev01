@@ -14,17 +14,17 @@ import App from "@/App";
 export const Route = createFileRoute("/trade")({
   head: () => ({
     meta: [
-      { title: "Trade — Swap & Bridge on FlowBridge" },
+      { title: "Trade — FlowBridge" },
       {
         name: "description",
         content:
-          "One FlowBridge workspace for swapping BOT, CA and USDT on BOT Chain and bridging USDT to BNB Chain, with live quotes and verified activity.",
+          "Swap and bridge on BOT Chain in one FlowBridge workspace.",
       },
-      { property: "og:title", content: "Trade — Swap & Bridge on FlowBridge" },
+      { property: "og:title", content: "Trade — FlowBridge" },
       {
         property: "og:description",
         content:
-          "Swap and bridge in one place: live quotes, protocol fee, minimum received and verified campaign activity.",
+          "Swap and bridge on BOT Chain in one FlowBridge workspace.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/trade" },

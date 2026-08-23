@@ -9,14 +9,14 @@ import { fetchBotChainMarkets, fetchExternalMarkets, type MarketRow } from "@/li
 export const Route = createFileRoute("/markets")({
   head: () => ({
     meta: [
-      { title: "Markets — Live Token Prices | FlowBridge" },
+      { title: "Markets — FlowBridge" },
       {
         name: "description",
         content:
           "Live prices, 24h change, volume and 7-day trends for BOT Chain tokens (BOT, CA, USDT) plus top ETH, BNB and TRON tokens.",
       },
-      { property: "og:title", content: "FlowBridge Markets" },
-      { property: "og:description", content: "BOT Chain + top cross-chain token prices, updated live." },
+      { property: "og:title", content: "Markets — FlowBridge" },
+      { property: "og:description", content: "Live prices, 24h change, volume and 7-day trends for BOT Chain tokens (BOT, CA, USDT) plus top ETH, BNB and TRON tokens." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/markets" },
       { name: "twitter:card", content: "summary" },

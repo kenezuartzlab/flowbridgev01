@@ -37,17 +37,14 @@ import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
-      { title: "Home — Your FlowBridge Dashboard" },
+      { title: "Home — FlowBridge" },
       {
         name: "description",
         content:
           "Your FlowBridge home: FLOW Points (PTS), recent swap and bridge activity, live BOT Chain prices and one-tap access to swap, bridge and rewards.",
       },
-      { property: "og:title", content: "FlowBridge Home Dashboard" },
-      {
-        property: "og:description",
-        content: "FLOW Points (PTS), live BOT Chain prices and recent activity in one place.",
-      },
+      { property: "og:title", content: "Home — FlowBridge" },
+      { property: "og:description", content: "Your FlowBridge home: FLOW Points (PTS), recent swap and bridge activity, live BOT Chain prices and one-tap access to swap, bridge and rewards." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/home" },
       { name: "twitter:card", content: "summary" },

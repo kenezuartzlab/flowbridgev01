@@ -78,17 +78,14 @@ export const Route = createFileRoute("/sets")({
       : {},
   head: () => ({
     meta: [
-      { title: "FlowBridge Control Panel — Sets" },
+      { title: "Control Panel — FlowBridge" },
       {
         name: "description",
         content:
           "Private FlowBridge admin console for publishing swap tokens and tuning fee, reward and feature settings.",
       },
-      { property: "og:title", content: "FlowBridge Control Panel — Sets" },
-      {
-        property: "og:description",
-        content: "Publish swap tokens and manage FlowBridge runtime settings.",
-      },
+      { property: "og:title", content: "Control Panel — FlowBridge" },
+      { property: "og:description", content: "Private FlowBridge admin console for publishing swap tokens and tuning fee, reward and feature settings." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex,nofollow" },

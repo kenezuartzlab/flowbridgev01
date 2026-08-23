@@ -6,17 +6,17 @@ import App from "@/App";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FlowBridge — Swap & Cross-Chain Bridge for BOT Chain" },
+      { title: "FlowBridge — Web3 Toolkit for BOT Chain" },
       {
         name: "description",
         content:
-          "Swap BOT, CA and USDT on BOT Chain with a 0.1% fee, bridge to BNB, Ethereum and TRON, and earn FLOW point rewards.",
+          "Swap, bridge, stake and earn on FlowBridge. The community Web3 toolkit for BOT Chain with cross-chain USDT transfers, verified campaigns, and AI-assisted trades.",
       },
-      { property: "og:title", content: "FlowBridge — Swap & Cross-Chain Bridge for BOT Chain" },
+      { property: "og:title", content: "FlowBridge — Web3 Toolkit for BOT Chain" },
       {
         property: "og:description",
         content:
-          "Guided swaps on BOT Chain plus cross-chain USDT bridging to BNB, Ethereum and TRON — with live pricing and FLOW rewards.",
+          "Swap, bridge, stake and earn on FlowBridge. The community Web3 toolkit for BOT Chain with cross-chain USDT transfers, verified campaigns, and AI-assisted trades.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/" },

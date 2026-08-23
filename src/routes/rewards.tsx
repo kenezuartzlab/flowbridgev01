@@ -37,14 +37,14 @@ import { FLOW_TOKEN, PTS, XP, formatPts, xpLevel } from "@/lib/points";
 export const Route = createFileRoute("/rewards")({
   head: () => ({
     meta: [
-      { title: "FLOW Portal — Points, XP & Referrals | FlowBridge" },
+      { title: "FLOW Portal — FlowBridge" },
       {
         name: "description",
         content:
           "Track FLOW Points (PTS) from swaps and referrals, your XP level, claim eligibility, swap volume progress and referral link on FlowBridge.",
       },
-      { property: "og:title", content: "FlowBridge FLOW Portal" },
-      { property: "og:description", content: "Swap-powered FLOW Points (PTS), XP levels and claim progress." },
+      { property: "og:title", content: "FLOW Portal — FlowBridge" },
+      { property: "og:description", content: "Track FLOW Points (PTS) from swaps and referrals, your XP level, claim eligibility, swap volume progress and referral link on FlowBridge." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

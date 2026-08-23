@@ -20,17 +20,14 @@ import {
 export const Route = createFileRoute("/campaigns/")({
   head: () => ({
     meta: [
-      { title: "Campaign Growth Hub — FlowBridge Quests & Campaign PTS" },
+      { title: "Campaign Growth Hub — FlowBridge" },
       {
         name: "description",
         content:
           "Explore live FlowBridge campaigns on BOT Chain, complete verified bridge quests and track your Campaign PTS progress in one polished hub.",
       },
-      { property: "og:title", content: "FlowBridge Campaign Growth Hub" },
-      {
-        property: "og:description",
-        content: "Live BOT Chain campaigns, verified bridge tasks and Campaign PTS progress.",
-      },
+      { property: "og:title", content: "Campaign Growth Hub — FlowBridge" },
+      { property: "og:description", content: "Explore live FlowBridge campaigns on BOT Chain, complete verified bridge quests and track your Campaign PTS progress in one polished hub." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
