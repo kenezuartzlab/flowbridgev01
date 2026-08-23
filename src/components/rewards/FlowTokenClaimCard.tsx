@@ -74,8 +74,49 @@ export function FlowTokenClaimCard({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  /**
+   * V17.1C §2 — a mission may have prepared this claim. The link carries opaque
+   * correlation only: this card still requests its own server-signed
+   * authorization and only the user's wallet signs. After the user submits, the
+   * submission is reported back so the mission's settlement verifier — not this
+   * screen, and not a zero claimable balance — decides the outcome.
+   */
+  const [correlation, setCorrelation] = useState<ClaimHandoffCorrelation | null>(null);
+  const [missionNote, setMissionNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setCorrelation(parseClaimHandoffCorrelation(window.location.search));
+  }, []);
+
+  const reportToMission = async (hash: string) => {
+    if (!correlation) return;
+    try {
+      await missionAction({
+        action: "submitted",
+        missionId: correlation.missionId,
+        stepId: correlation.stepId,
+        txHash: hash,
+      });
+      const res = await missionAction({
+        action: "advance",
+        missionId: correlation.missionId,
+        stepId: correlation.stepId,
+        txHash: hash,
+      });
+      setMissionNote(
+        res.message ??
+          "Your submission was reported to the mission — settlement is verified on chain.",
+      );
+    } catch {
+      setMissionNote(
+        "Your claim was submitted. The mission could not be updated right now; it will verify settlement on your next check.",
+      );
+    }
+  };
 
   const requestAuthorization = async () => {
+
     setLoading(true);
     setError(null);
     setTxHash(null);
