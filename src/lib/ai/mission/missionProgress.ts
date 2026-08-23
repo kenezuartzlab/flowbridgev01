@@ -313,6 +313,8 @@ export function blockStep(input: {
   mission: Mission;
   stepId: string;
   failureClass: MissionFailureClass;
+  /** Live, machine-readable reason (e.g. "vault paused"). Never invented. */
+  reason?: string | null;
   now?: Date;
 }): MissionMutation {
   const advice = RECOVERY[input.failureClass];
@@ -320,10 +322,11 @@ export function blockStep(input: {
     input.mission,
     input.stepId,
     "BLOCKED",
-    { failureClass: input.failureClass, blockingReason: advice.message },
+    { failureClass: input.failureClass, blockingReason: input.reason || advice.message },
     input.now ?? new Date(),
   );
 }
+
 
 export function recoveryAdvice(failureClass: MissionFailureClass): MissionRecoveryAdvice {
   return { failureClass, ...RECOVERY[failureClass] };
