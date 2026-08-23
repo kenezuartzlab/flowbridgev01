@@ -32,9 +32,9 @@ function provenance(observedAt = NOW.toISOString()): ExternalEvidenceProvenance 
 }
 
 function candidateFrom(raw: unknown, observedAt?: string) {
-  const output = sanitizeCapabilityOutput(raw);
-  if (!output.ok || !output.value) throw new Error("sanitizer rejected fixture");
-  return toCandidateInsight({ output: output.value, provenance: provenance(observedAt) });
+  const result = sanitizeCapabilityOutput({ raw, maxBytes: 32_768 });
+  if (!result.ok) throw new Error("sanitizer rejected fixture");
+  return toCandidateInsight({ output: result.output, provenance: provenance(observedAt) });
 }
 
 const stakingOpportunity: RankedOpportunity = {
