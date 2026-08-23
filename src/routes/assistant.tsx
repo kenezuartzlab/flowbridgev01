@@ -51,7 +51,9 @@ function AssistantPage() {
       </header>
 
       {/* V15.3H §3 — bottom nav must never overlay the review CTA on mobile. */}
-      <main className="mx-auto max-w-2xl p-3 pb-28 sm:p-4 sm:pb-28">
+      <main className="mx-auto max-w-2xl space-y-3 p-3 pb-28 sm:p-4 sm:pb-28">
+        {/* V17 — goal missions: plan and prepare only, never execute. */}
+        <MissionPanel />
         <AssistantChat onHide={hide} />
       </main>
 
