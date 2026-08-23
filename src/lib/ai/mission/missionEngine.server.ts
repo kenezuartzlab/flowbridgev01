@@ -268,10 +268,7 @@ export async function prepareNextMissionStep(input: {
     }
     const waiting = markStepWaitingForUser({ mission, stepId: step.id });
     const { conversionConfirmationCopy } = await import("@/lib/rewards/rewardStateTruth");
-    const copy = conversionConfirmationCopy({
-      convertibleFlowPoints: rs.convertibleFlowPoints,
-      conversionMinimum: 0,
-    } as never);
+    const copy = conversionConfirmationCopy({ convertibleFlowPoints: rs.convertibleFlowPoints });
     return {
       mission: waiting.ok ? waiting.mission : mission,
       step,

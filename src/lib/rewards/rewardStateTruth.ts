@@ -279,7 +279,7 @@ export function missionPrerequisiteDecision(state: RewardState): MissionPrerequi
 }
 
 /** The exact confirmation copy for the off-chain conversion mutation (§5). */
-export function conversionConfirmationCopy(state: RewardState): {
+export function conversionConfirmationCopy(state: Pick<RewardState, "convertibleFlowPoints">): {
   title: string;
   body: string;
   amount: number;
