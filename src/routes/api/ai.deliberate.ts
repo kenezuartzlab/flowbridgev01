@@ -73,20 +73,48 @@ export const Route = createFileRoute("/api/ai/deliberate")({
           : [];
 
         const requestId = crypto.randomUUID();
-        const result = await runDeliberation({
-          actor: {
-            userId: user.id,
-            email: user.email,
-            orgIds: [],
-            isInternalOperator: false,
-          },
-          question: question.slice(0, 400),
-          requestedCapabilityKinds: kinds,
-          clientSkillIds,
-          requestId,
-        });
+        const timer = createStageTimer("DELIBERATION");
+        const result = await timer.measure("EXTERNAL_SKILL", async () =>
+          runDeliberation({
+            actor: {
+              userId: user.id,
+              email: user.email,
+              orgIds: [],
+              isInternalOperator: false,
+            },
+            question: question.slice(0, 400),
+            requestedCapabilityKinds: kinds,
+            clientSkillIds,
+            requestId,
+          }),
+        );
 
-        return jsonResponse({ success: true, requestId, deliberation: result });
+        /** V24 §4 — a visible contradiction is its own status, never averaged away. */
+        const status =
+          result.contradictionIds.length > 0
+            ? ("CONFLICTED" as const)
+            : normalizeLegacyStatus(result.status);
+        logIntelligenceTelemetry(
+          buildTelemetry({
+            surface: "DELIBERATION",
+            requestId,
+            userId: user.id,
+            status,
+            degradedReasons: result.degraded ? ["EXTERNAL_SOURCE_DEGRADED"] : [],
+            evidenceIds: result.claims.map((c) => c.id),
+            selectedSkillIds: result.selectedSkills.map((s) => s.skillId),
+            latencyMs: timer.stages(),
+          }),
+        );
+
+        return jsonResponse({
+          success: true,
+          requestId,
+          deliberation: result,
+          intelligenceStatus: status,
+          statusNotice: statusNotice(status, "Multi-source deliberation"),
+          latencyMs: timer.stages(),
+        });
       },
     },
   },
