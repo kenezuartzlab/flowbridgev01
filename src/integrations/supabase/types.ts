@@ -92,6 +92,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_opportunity_state: {
+        Row: {
+          created_at: string
+          dismissed_at: string | null
+          id: string
+          last_seen_at: string | null
+          opportunity_key: string
+          snoozed_until: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          last_seen_at?: string | null
+          opportunity_key: string
+          snoozed_until?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          last_seen_at?: string | null
+          opportunity_key?: string
+          snoozed_until?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_user_memory: {
         Row: {
           created_at: string
