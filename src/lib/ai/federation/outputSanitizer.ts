@@ -104,11 +104,14 @@ function neutralize(raw: string): { text: string; flagged: boolean } {
   let flagged = false;
   let text = raw.replace(/[\u0000-\u001f\u007f]/g, " ");
   for (const re of INJECTION_PATTERNS) {
+    re.lastIndex = 0;
     if (re.test(text)) {
       flagged = true;
+      re.lastIndex = 0;
       text = text.replace(re, "[removed: unsafe instruction]");
     }
   }
+
   // Strip anything that looks like an executable target or calldata blob.
   if (/0x[a-fA-F0-9]{8,}/.test(text)) {
     flagged = true;
