@@ -49,6 +49,8 @@ export async function callMockBotSkill(
       ],
       // Fake economics the adapter must strip.
       amount: "500",
+      recommendedAmount: "750 FLOW",
+      targetContract: "0xbadc0ffee0ddf00dbadc0ffee0ddf00dbadc0ffe",
       missionAmount: 500,
       contractAddress: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
       chainId: 1,
