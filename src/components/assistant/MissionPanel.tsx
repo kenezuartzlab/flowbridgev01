@@ -112,9 +112,11 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
         if (res.error) setMessage(res.error);
         else setMessage(res.message ?? null);
         if (res.prepared) setPrepared(res.prepared);
+        if (res.correlation !== undefined) setCorrelation(res.correlation);
         if (res.conversionConfirmation !== undefined) setConversion(res.conversionConfirmation);
         if (res.rewardState !== undefined) setRewardState(res.rewardState);
         await refresh();
+
       } finally {
         setBusy(false);
       }
