@@ -5,6 +5,8 @@ import type { ActionIntent, ActionHandoff } from "@/lib/ai/actionIntent";
 import { ACTION_STATUS_COPY, effectiveStatus, secondsRemaining } from "@/lib/ai/actionIntent";
 import { getConversation, markConversationHandoff } from "@/lib/ai/conversationStore";
 import { STRUCTURED_ACTION_TESTIDS, type ReviewAction } from "@/lib/ai/actionRender";
+import { buildClaimHandoffSearch } from "@/lib/ai/mission/claimHandoff";
+
 
 
 export interface PreparedIntentPayload {
