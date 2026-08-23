@@ -95,10 +95,11 @@ export interface RankedOpportunity extends Opportunity {
 /** Presentation-only state. Never touches economic state. */
 export interface OpportunityViewState {
   key: string;
-  lastSeenAt: string | null;
-  dismissedAt: string | null;
-  snoozedUntil: string | null;
+  lastSeenAt?: string | null;
+  dismissedAt?: string | null;
+  snoozedUntil?: string | null;
 }
+
 
 export interface OpportunityFeed {
   generatedAt: string;
