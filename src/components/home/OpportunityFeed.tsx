@@ -185,6 +185,16 @@ export function OpportunityFeed() {
                     >
                       {item.recommendedSurface.label}
                     </Link>
+                    {opportunitySupportsMission(item) && (
+                      <button
+                        type="button"
+                        disabled={compiling === item.id}
+                        onClick={() => void buildMission(item)}
+                        className="rounded-xl border border-primary/40 bg-primary/10 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary transition-opacity disabled:opacity-50"
+                      >
+                        {compiling === item.id ? "Building…" : "Build mission"}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => void explain(item)}
