@@ -269,7 +269,12 @@ export function FlowTokenClaimCard({
           </a>
         ) : null}
 
+        {missionNote ? (
+          <p className="text-[11.5px] leading-relaxed text-muted">{missionNote}</p>
+        ) : null}
+
         {error ? <p className="text-[12px] leading-relaxed text-destructive">{error}</p> : null}
+
 
         <p className="text-[11px] leading-relaxed text-muted-soft">
           On BOT Testnet, 1 eligible FLOW Point converts to 1 FLOW. This is a testnet validation
