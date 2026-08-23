@@ -92,14 +92,8 @@ export function FlowTokenClaimCard({
   const reportToMission = async (hash: string) => {
     if (!correlation) return;
     try {
-      await missionAction({
-        action: "submitted",
-        missionId: correlation.missionId,
-        stepId: correlation.stepId,
-        txHash: hash,
-      });
       const res = await missionAction({
-        action: "advance",
+        action: "settle",
         missionId: correlation.missionId,
         stepId: correlation.stepId,
         txHash: hash,
@@ -114,6 +108,7 @@ export function FlowTokenClaimCard({
       );
     }
   };
+
 
   const requestAuthorization = async () => {
 
