@@ -260,6 +260,8 @@ export function createMission(input: {
   goalText: string;
   goal: MissionGoal;
   linkedOpportunityId?: string | null;
+  /** V18 §3 — opportunity/template provenance, never an economic input. */
+  source?: MissionSourceRef | null;
   /** V17.1B §4 — canonical reward facts, used to insert prerequisites. */
   rewardPrerequisite?: MissionRewardPrerequisite | null;
   now?: Date;
