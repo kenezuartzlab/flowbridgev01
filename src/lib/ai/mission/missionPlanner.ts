@@ -260,10 +260,13 @@ export function createMission(input: {
   goalText: string;
   goal: MissionGoal;
   linkedOpportunityId?: string | null;
+  /** V17.1B §4 — canonical reward facts, used to insert prerequisites. */
+  rewardPrerequisite?: MissionRewardPrerequisite | null;
   now?: Date;
 }): Mission {
   const now = input.now ?? new Date();
-  const steps = planSteps(input.goal);
+  const steps = planSteps(input.goal, input.rewardPrerequisite ?? undefined);
+
   const planned = input.goal.missingSlots.length === 0;
   return {
     schemaVersion: MISSION_SCHEMA_VERSION,
