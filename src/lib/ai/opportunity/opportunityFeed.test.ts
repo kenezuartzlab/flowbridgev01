@@ -57,7 +57,7 @@ describe("V16 opportunity candidates", () => {
     expect(claim.actorScope).toBe("AUTHENTICATED_USER");
   });
 
-  it("never shows staking opportunities while the vault is paused", () => {
+  it("reports the paused vault as a notice and never as a stake invitation", () => {
     const items = buildStakingOpportunities(
       {
         chainId: 968,
@@ -72,7 +72,7 @@ describe("V16 opportunity candidates", () => {
       },
       now,
     );
-    expect(items).toHaveLength(0);
+    expect(items.map((i) => i.type)).toEqual(["VAULT_PAUSED"]);
   });
 
   it("skips campaigns that already ended", () => {
@@ -162,14 +162,30 @@ describe("V16 ranking, dedupe and suppression", () => {
   });
 
   it("ranks urgent claimable FLOW above ambient campaign discovery", () => {
+    const ambient = buildCampaignOpportunities(
+      [
+        {
+          campaignId: "0xdef",
+          slug: "ambient",
+          name: "Ambient campaign",
+          endsAt: now.getTime() + 30 * 24 * 3_600_000,
+          remainingCampaignPoints: 10,
+          completedTasks: 0,
+          totalTasks: 1,
+          provenance: "LIVE",
+          evidence: ev,
+        },
+      ],
+      now,
+    );
     const rewards = buildRewardOpportunities(
       { claimableFlow: 500, flowPoints: 500, flowPointsToday: 0, dailyCoreSwapCap: 50, provenance: "LIVE", evidence: ev },
       now,
     );
-    const ranked = rankOpportunities({ items: [...campaign, ...rewards], now });
+    const ranked = rankOpportunities({ items: [...ambient, ...rewards], now });
     expect(ranked[0].domain).toBe("REWARDS");
     // deterministic: same input, same order
-    expect(rankOpportunities({ items: [...rewards, ...campaign], now }).map((i) => i.id)).toEqual(
+    expect(rankOpportunities({ items: [...rewards, ...ambient], now }).map((i) => i.id)).toEqual(
       ranked.map((i) => i.id),
     );
   });
