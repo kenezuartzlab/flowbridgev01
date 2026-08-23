@@ -2,6 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
+import { MissionPanel } from "@/components/assistant/MissionPanel";
 
 export const Route = createFileRoute("/assistant")({
   head: () => ({
