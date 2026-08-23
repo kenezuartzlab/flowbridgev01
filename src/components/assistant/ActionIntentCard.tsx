@@ -159,7 +159,12 @@ export function ActionIntentCard({
             <dd className="truncate text-foreground">{intent.targetContract}</dd>
           </div>
         ) : null}
-        {payload.economics ? (
+        {/**
+          * V17.1C §4 — router-only economics (swap fee, expected out, quote
+          * nonce) do not exist for a distributor claim. Showing them there
+          * described a trade the user is not making, so they are omitted.
+          */}
+        {payload.economics && routerEconomics ? (
           <>
             <div>
               <dt className="uppercase tracking-[0.06em]">Router fee (live)</dt>
@@ -189,6 +194,7 @@ export function ActionIntentCard({
             ) : null}
           </>
         ) : null}
+
         {intent.simulationResult ? (
           <div className="col-span-2">
             <dt className="uppercase tracking-[0.06em]">Simulation</dt>
