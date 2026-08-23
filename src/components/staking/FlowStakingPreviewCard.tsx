@@ -272,7 +272,7 @@ export function FlowStakingPreviewCard({
         setPending(null);
       }
     },
-    [readState],
+    [readState, missionCorrelation],
   );
 
   const connectWallet = useCallback(async () => {
