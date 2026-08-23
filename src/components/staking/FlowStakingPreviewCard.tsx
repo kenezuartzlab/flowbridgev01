@@ -9,6 +9,13 @@ import {
   getFlowStakingChainConfig,
   resolveFlowStakingReadiness,
 } from "@/lib/staking/flowStakingRegistry";
+import {
+  pinStakeExecutionContext,
+  STAKE_HANDOFF_FAILURE_COPY,
+  type CanonicalStakeHandoff,
+  type StakeHandoffFailure,
+} from "@/lib/ai/mission/stakeHandoff";
+
 
 /**
  * FlowBridge V13.3 — FLOW staking BOT Testnet panel.
