@@ -123,6 +123,7 @@ describe("V21 deliberation", () => {
   it("surfaces disagreement instead of averaging it", () => {
     const claims = [...claimsFor("a", supportA), ...claimsFor("c", contrarianC)];
     const result = run(claims, false, 2);
+    console.log(JSON.stringify({e:result.edges,c:claims.map(x=>[x.id,x.subject,x.claimKind,x.skillId])}));
     expect(result.contradictionIds.length).toBeGreaterThan(0);
     expect(result.unresolvedQuestions.length).toBeGreaterThan(0);
     expect(result.candidateOpportunityKind).toBeNull();
