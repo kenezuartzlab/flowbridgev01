@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Coins, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
 
 import { getIdToken } from "@/lib/auth";
 import { BOT_TESTNET_CHAIN_ID } from "@/lib/rewards/flowRewardsRegistry";
 import { SectionHeader, StatusPill, Surface } from "@/components/ui-kit/primitives";
+import {
+  parseClaimHandoffCorrelation,
+  type ClaimHandoffCorrelation,
+} from "@/lib/ai/mission/claimHandoff";
+import { missionAction } from "@/lib/ai/mission/missionClient";
+
 
 /**
  * FlowBridge V12.3 — on-chain FLOW claim, BOT Testnet 968.
