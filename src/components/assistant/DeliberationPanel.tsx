@@ -117,7 +117,12 @@ export function DeliberationPanel() {
     try {
       const result = await compileOpportunityIntoMission(id);
       if (result?.mission?.id) navigate({ to: "/assistant" });
-      else setNotice(result?.notice ?? "FlowBridge could not compile a mission from that opportunity.");
+      else
+        setNotice(
+          result?.error ??
+            result?.message ??
+            "FlowBridge could not compile a mission from that opportunity.",
+        );
     } catch {
       setNotice("Mission compilation failed. Nothing was executed.");
     } finally {
