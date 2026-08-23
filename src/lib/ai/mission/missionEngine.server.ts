@@ -28,7 +28,12 @@ import {
   type MissionMutation,
 } from "./missionProgress";
 import { deriveFromSettlement, formatUnitsExact, parseUnitsExact } from "./settlementDerivation";
-import type { Mission, MissionFailureClass, MissionStep } from "./missionTypes";
+import type {
+  Mission,
+  MissionConversionConfirmation,
+  MissionFailureClass,
+  MissionStep,
+} from "./missionTypes";
 
 const FLOW_DECIMALS = 18;
 
