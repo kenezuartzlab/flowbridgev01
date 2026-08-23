@@ -159,9 +159,15 @@ export function FlowTokenClaimCard({
         params: [{ from, to: auth.distributor, data: encodeClaim(auth), value: "0x0" }],
       });
       setTxHash(hash);
+      await reportToMission(hash);
       await onClaimed?.();
-      // Re-read authoritative state; unchanged points must now yield zero delta.
+      /**
+       * V17.1C §3 — re-read authoritative state. A zero delta AFTER a submitted
+       * claim is the settled state, not a failure: the card says so instead of
+       * reading like the claim disappeared.
+       */
       await requestAuthorization();
+
     } catch (e: any) {
       setError(e?.shortMessage ?? e?.message ?? "Claim transaction failed.");
     } finally {
