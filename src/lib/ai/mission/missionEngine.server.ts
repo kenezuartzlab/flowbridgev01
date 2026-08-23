@@ -101,17 +101,6 @@ function walletMismatch(mission: Mission, wallet: string | null): string | null 
   return null;
 }
 
-export interface MissionConversionConfirmation {
-  stepId: string;
-  title: string;
-  body: string;
-  convertibleFlowPoints: number;
-  chainId: number;
-  requirements: readonly { id: string; label: string; met: boolean; hint?: string }[];
-  /** Constant: confirming this authorizes the off-chain conversion only. */
-  authorizes: "OFF_CHAIN_CONVERSION_ONLY";
-}
-
 export interface PrepareNextStepResult {
   mission: Mission;
   step: MissionStep | null;

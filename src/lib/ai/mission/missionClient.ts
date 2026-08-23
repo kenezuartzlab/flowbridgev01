@@ -7,10 +7,14 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { PreparedIntentPayload } from "@/components/assistant/ActionIntentCard";
-import type { Mission, MissionFailureClass, MissionStep } from "./missionTypes";
+import type {
+  Mission,
+  MissionConversionConfirmation,
+  MissionFailureClass,
+  MissionStep,
+} from "./missionTypes";
 import type { EditPreview } from "./missionPlanner";
 import type { MissionRecoveryAdvice } from "./missionProgress";
-import type { MissionConversionConfirmation } from "./missionEngine.server";
 
 async function authHeaders(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();

@@ -245,3 +245,18 @@ export function missionProgress(mission: Mission): MissionProgress {
 export function missionExpired(mission: Mission, now: Date = new Date()): boolean {
   return new Date(mission.expiresAt).getTime() <= now.getTime();
 }
+
+/**
+ * V17.1B §5 — the explicit off-chain conversion confirmation contract. Shared by
+ * the server engine and the browser surface, so it lives in client-safe types.
+ */
+export interface MissionConversionConfirmation {
+  stepId: string;
+  title: string;
+  body: string;
+  convertibleFlowPoints: number;
+  chainId: number;
+  requirements: readonly { id: string; label: string; met: boolean; hint?: string }[];
+  /** Constant: confirming this authorizes the off-chain conversion only. */
+  authorizes: "OFF_CHAIN_CONVERSION_ONLY";
+}
