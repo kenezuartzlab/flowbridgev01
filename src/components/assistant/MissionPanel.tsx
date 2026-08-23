@@ -302,7 +302,7 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
             </p>
           )}
 
-          {prepared && <ActionIntentCard payload={prepared} />}
+          {prepared && <ActionIntentCard payload={prepared} correlation={correlation} />}
 
           <p className="font-mono text-[9.5px] leading-relaxed text-muted">
             Missions plan and prepare only. Flow AI cannot sign, submit, approve or continue a step
