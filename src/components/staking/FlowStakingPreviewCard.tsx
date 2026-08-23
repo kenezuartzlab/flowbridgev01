@@ -261,13 +261,13 @@ export function FlowStakingPreviewCard({
          * their own stake. Canonical settlement is verified server-side from the
          * vault position; nothing here signs, resubmits or advances a mission.
          */
-        if (kind === "stake" && missionCorrelation) {
+        if (kind === "stake" && missionHandoff) {
           try {
             const { missionAction } = await import("@/lib/ai/mission/missionClient");
             const res = await missionAction({
               action: "settle",
-              missionId: missionCorrelation.missionId,
-              stepId: missionCorrelation.stepId,
+              missionId: missionHandoff.missionId,
+              stepId: missionHandoff.missionStepId,
               txHash: hash,
             });
             setMissionStatus(
@@ -296,7 +296,8 @@ export function FlowStakingPreviewCard({
         setPending(null);
       }
     },
-    [readState, missionCorrelation],
+    [readState, missionHandoff],
+
   );
 
   const connectWallet = useCallback(async () => {
