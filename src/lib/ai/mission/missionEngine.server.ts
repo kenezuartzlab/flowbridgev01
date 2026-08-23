@@ -23,6 +23,16 @@ import {
 } from "./missionProgress";
 import type { Mission, MissionFailureClass, MissionStep } from "./missionTypes";
 
+/** Exact base-unit → decimal string conversion (no floats, no rounding). */
+function formatRaw(raw: string, decimals: number): string {
+  const digits = raw.replace(/[^0-9]/g, "") || "0";
+  if (decimals <= 0) return digits;
+  const padded = digits.padStart(decimals + 1, "0");
+  const whole = padded.slice(0, padded.length - decimals);
+  const frac = padded.slice(padded.length - decimals).replace(/0+$/, "");
+  return frac ? `${whole}.${frac}` : whole;
+}
+
 function classifyBlockers(input: {
   decision: string;
   blockers: readonly string[];
@@ -237,28 +247,40 @@ export async function advanceMissionStep(input: {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let query = supabaseAdmin
       .from("verified_activities")
-      .select("id,tx_hash,amount_usd,output_amount,created_at")
-      .eq("user_id", input.userId)
-      .order("created_at", { ascending: false })
+      .select("activity_id,source_tx_hash,amount_raw,token,source_chain_id,status,occurred_at")
+      .order("occurred_at", { ascending: false })
       .limit(1);
-    if (input.txHash) query = query.eq("tx_hash", input.txHash);
+    if (input.wallet) query = query.eq("user_wallet", input.wallet.toLowerCase());
+    if (input.txHash) query = query.eq("source_tx_hash", input.txHash);
     const { data } = await query;
     const row: any = (data ?? [])[0];
-    if (!row?.id) {
+    if (!row?.activity_id) {
       return {
         mission: input.mission,
         advanced: false,
         message:
-          "No canonical verified activity yet — the mission stays where it is until settlement is verified.",
+          "No canonical verified activity yet \u2014 the mission stays where it is until settlement is verified.",
       };
     }
+    /**
+     * V15.3M canonical identity: the settled amount is the ledger's own
+     * `amount_raw`, decoded with the registry decimals for the settled token.
+     * Nothing here is an estimate.
+     */
+    const { tokenFor } = await import("../preparationRouting");
+    const decimals =
+      [input.mission.goal.assetOutSymbol, input.mission.goal.assetInSymbol, "BOT"]
+        .filter(Boolean)
+        .map((sym) => tokenFor(String(sym), Number(row.source_chain_id) || input.mission.goal.chainId))
+        .find((t) => t && t.address === String(row.token ?? "").toLowerCase())?.decimals ?? 18;
+    const resolvedAmount = formatRaw(String(row.amount_raw ?? "0"), decimals);
     const result = completeStepFromEvidence({
       mission: input.mission,
       stepId: input.stepId,
       outcome: {
-        verifiedActivityId: String(row.id),
-        txHash: row.tx_hash ?? input.txHash ?? null,
-        resolvedAmount: row.output_amount != null ? String(row.output_amount) : null,
+        verifiedActivityId: String(row.activity_id),
+        txHash: row.source_tx_hash ?? input.txHash ?? null,
+        resolvedAmount,
       },
     });
     return result.ok
