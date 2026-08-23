@@ -72,11 +72,18 @@ export const MISSION_STEP_TYPES = [
   "PREPARE_STAKE",
   "USER_STAKE",
   "VERIFY_STAKE",
+  /**
+   * V17.1B §4 — automatic prerequisite: an explicit, user-confirmed off-chain
+   * conversion of eligible FLOW Points into claimable FLOW. It is NOT a wallet
+   * signature and it is never implicit.
+   */
+  "CONVERT_FLOW_POINTS",
   "PREPARE_CLAIM",
   "USER_CLAIM",
   "VERIFY_CLAIM",
   "COMPLETE_CAMPAIGN_TASK",
 ] as const;
+
 export type MissionStepType = (typeof MISSION_STEP_TYPES)[number];
 
 /** Steps that require the user's own wallet signature. */
@@ -116,7 +123,14 @@ export const MISSION_FAILURE_CLASSES = [
   "TX_REVERTED",
   "CONFIRMATION_PENDING",
   "VERIFICATION_MISMATCH",
+  /** V17.1B §7 — canonical reward-state failures. */
+  "NO_CLAIMABLE_FLOW",
+  "NO_CONVERTIBLE_OR_CLAIMABLE_FLOW",
+  "CONVERSION_REQUIRED",
+  "CONVERSION_REQUIREMENTS_UNMET",
+  "REWARD_STATE_UNAVAILABLE",
 ] as const;
+
 export type MissionFailureClass = (typeof MISSION_FAILURE_CLASSES)[number];
 
 export type MissionOutcome =
@@ -230,4 +244,19 @@ export function missionProgress(mission: Mission): MissionProgress {
 
 export function missionExpired(mission: Mission, now: Date = new Date()): boolean {
   return new Date(mission.expiresAt).getTime() <= now.getTime();
+}
+
+/**
+ * V17.1B §5 — the explicit off-chain conversion confirmation contract. Shared by
+ * the server engine and the browser surface, so it lives in client-safe types.
+ */
+export interface MissionConversionConfirmation {
+  stepId: string;
+  title: string;
+  body: string;
+  convertibleFlowPoints: number;
+  chainId: number;
+  requirements: readonly { id: string; label: string; met: boolean; hint?: string }[];
+  /** Constant: confirming this authorizes the off-chain conversion only. */
+  authorizes: "OFF_CHAIN_CONVERSION_ONLY";
 }

@@ -140,15 +140,47 @@ function stakeLegs(dependsOn: string, unresolved: boolean, goal: MissionGoal): S
   ];
 }
 
-function claimLegs(goal: MissionGoal): StepSeed[] {
-  return [
+/**
+ * V17.1B §4 — claim legs, with the AUTOMATIC conversion prerequisite.
+ *
+ * When the canonical reward state reports zero on-chain claimable FLOW but
+ * eligible convertible FLOW Points, a CONVERT_FLOW_POINTS step is inserted
+ * BEFORE the claim preparation instead of failing with "nothing to claim".
+ * The inserted step still needs its own explicit user confirmation.
+ */
+function claimLegs(goal: MissionGoal, prereq?: MissionRewardPrerequisite): StepSeed[] {
+  const seeds: StepSeed[] = [];
+  let claimDependency = "check-wallet";
+
+  if (prereq?.insertConversion) {
+    const amount = prereq.convertibleFlowPoints ?? null;
+    seeds.push({
+      id: "convert-flow-points",
+      type: "CONVERT_FLOW_POINTS",
+      title: amount
+        ? `Convert ${amount.toLocaleString()} FLOW Points to claimable FLOW (you confirm)`
+        : "Convert eligible FLOW Points to claimable FLOW (you confirm)",
+      dependencies: ["check-wallet"],
+      requiredEvidence: ["REWARD_STATE", "CONVERSION_REQUIREMENTS"],
+      inputs: {
+        chainId: goal.chainId,
+        convertibleFlowPoints: amount,
+        requiresExplicitConfirmation: true,
+      },
+      amountUnresolved: amount == null,
+    });
+    claimDependency = "convert-flow-points";
+  }
+
+  seeds.push(
     {
       id: "prepare-claim",
       type: "PREPARE_CLAIM",
       title: "Prepare your FLOW claim from the canonical ledger",
-      dependencies: ["check-wallet"],
-      requiredEvidence: ["LEDGER_CLAIMABLE", "DISTRIBUTOR_STATE", "SIMULATION"],
+      dependencies: [claimDependency],
+      requiredEvidence: ["REWARD_STATE", "LEDGER_CLAIMABLE", "DISTRIBUTOR_STATE", "SIMULATION"],
       inputs: { chainId: goal.chainId },
+      amountUnresolved: prereq?.insertConversion === true,
     },
     {
       id: "user-claim",
@@ -164,10 +196,21 @@ function claimLegs(goal: MissionGoal): StepSeed[] {
       dependencies: ["user-claim"],
       requiredEvidence: ["LEDGER_SETTLEMENT"],
     },
-  ];
+  );
+  return seeds;
 }
 
-export function planSteps(goal: MissionGoal): MissionStep[] {
+/**
+ * Canonical reward-state facts the planner may consult. They come from the
+ * V17.1B resolver only — never from a model, never from client input.
+ */
+export interface MissionRewardPrerequisite {
+  insertConversion: boolean;
+  convertibleFlowPoints?: number | null;
+  claimableFlow?: number | null;
+}
+
+export function planSteps(goal: MissionGoal, prereq?: MissionRewardPrerequisite): MissionStep[] {
   const seeds: StepSeed[] = [
     {
       id: "check-wallet",
@@ -187,10 +230,10 @@ export function planSteps(goal: MissionGoal): MissionStep[] {
       seeds.push(...swapLegs(goal));
       break;
     case "CLAIM_THEN_STAKE":
-      seeds.push(...claimLegs(goal), ...stakeLegs("verify-claim", true, goal));
+      seeds.push(...claimLegs(goal, prereq), ...stakeLegs("verify-claim", true, goal));
       break;
     case "CLAIM_ONLY":
-      seeds.push(...claimLegs(goal));
+      seeds.push(...claimLegs(goal, prereq));
       break;
     case "STAKE_ONLY":
       seeds.push(...stakeLegs("check-wallet", false, goal));
@@ -210,16 +253,20 @@ export function planSteps(goal: MissionGoal): MissionStep[] {
   return seeds.map(seedToStep);
 }
 
+
 export function createMission(input: {
   id: string;
   actorUserId: string;
   goalText: string;
   goal: MissionGoal;
   linkedOpportunityId?: string | null;
+  /** V17.1B §4 — canonical reward facts, used to insert prerequisites. */
+  rewardPrerequisite?: MissionRewardPrerequisite | null;
   now?: Date;
 }): Mission {
   const now = input.now ?? new Date();
-  const steps = planSteps(input.goal);
+  const steps = planSteps(input.goal, input.rewardPrerequisite ?? undefined);
+
   const planned = input.goal.missingSlots.length === 0;
   return {
     schemaVersion: MISSION_SCHEMA_VERSION,

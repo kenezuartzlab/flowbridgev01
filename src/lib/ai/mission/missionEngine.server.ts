@@ -28,7 +28,12 @@ import {
   type MissionMutation,
 } from "./missionProgress";
 import { deriveFromSettlement, formatUnitsExact, parseUnitsExact } from "./settlementDerivation";
-import type { Mission, MissionFailureClass, MissionStep } from "./missionTypes";
+import type {
+  Mission,
+  MissionConversionConfirmation,
+  MissionFailureClass,
+  MissionStep,
+} from "./missionTypes";
 
 const FLOW_DECIMALS = 18;
 
@@ -108,6 +113,8 @@ export interface PrepareNextStepResult {
   /** Present when preparation could not be offered. */
   failureClass: MissionFailureClass | null;
   message: string;
+  /** V17.1B §5 — an explicit conversion confirmation the user must accept. */
+  conversionConfirmation?: MissionConversionConfirmation | null;
   /** Constant: the orchestrator executed nothing. */
   executed: false;
 }
@@ -117,7 +124,17 @@ export async function prepareNextMissionStep(input: {
   actor: FlowAiActor;
   wallet: string | null;
   claimableFlow?: number | null;
+  /** V17.1B §2 — canonical reward state resolved by the server, never inferred. */
+  rewardState?: {
+    nextEconomicStep: "CLAIM_FLOW" | "CONVERT_FLOW_POINTS" | "NONE";
+    claimableFlow: number | null;
+    convertibleFlowPoints: number;
+    requirements: readonly { id: string; label: string; met: boolean; hint?: string }[];
+    reasonCodes: readonly string[];
+    copy: { nextAction: string; readiness: string };
+  } | null;
 }): Promise<PrepareNextStepResult> {
+
   let mission = input.mission;
   const step = nextEligibleStep(mission);
   if (!step) {
@@ -181,6 +198,138 @@ export async function prepareNextMissionStep(input: {
     };
   }
 
+  /**
+   * V17.1B §4/§5 — the automatic conversion prerequisite. Discovery of the need
+   * grants no authority: the step only ever returns a confirmation card, and the
+   * mutation happens through the separate `convert-confirm` action.
+   */
+  if (step.type === "CONVERT_FLOW_POINTS") {
+    const rs = input.rewardState ?? null;
+    if (!rs) {
+      const blocked = blockStep({
+        mission,
+        stepId: step.id,
+        failureClass: "REWARD_STATE_UNAVAILABLE",
+        reason: "The canonical reward state could not be read, so no conversion was offered.",
+      });
+      return {
+        mission: blocked.ok ? blocked.mission : mission,
+        step,
+        prepared: null,
+        failureClass: "REWARD_STATE_UNAVAILABLE",
+        message: "The canonical reward state could not be read, so no conversion was offered.",
+        conversionConfirmation: null,
+        executed: false,
+      };
+    }
+    if (rs.nextEconomicStep === "CLAIM_FLOW") {
+      const done = skipStep({
+        mission,
+        stepId: step.id,
+        reason: "FLOW is already claimable on chain — no conversion is needed.",
+      });
+      return {
+        mission: done.ok ? done.mission : mission,
+        step,
+        prepared: null,
+        failureClass: null,
+        message: `${rs.copy.readiness} — no conversion is needed, so the claim is next.`,
+        conversionConfirmation: null,
+        executed: false,
+      };
+    }
+    if (rs.nextEconomicStep !== "CONVERT_FLOW_POINTS") {
+      const failureClass: MissionFailureClass = rs.reasonCodes.includes(
+        "CONVERSION_REQUIREMENTS_UNMET",
+      )
+        ? "CONVERSION_REQUIREMENTS_UNMET"
+        : "NO_CONVERTIBLE_OR_CLAIMABLE_FLOW";
+      const blocked = blockStep({
+        mission,
+        stepId: step.id,
+        failureClass,
+        reason: rs.copy.nextAction,
+      });
+      return {
+        mission: blocked.ok ? blocked.mission : mission,
+        step,
+        prepared: null,
+        failureClass,
+        message: rs.copy.nextAction,
+        conversionConfirmation: null,
+        executed: false,
+      };
+    }
+    const waiting = markStepWaitingForUser({ mission, stepId: step.id });
+    const { conversionConfirmationCopy } = await import("@/lib/rewards/rewardStateTruth");
+    const copy = conversionConfirmationCopy({ convertibleFlowPoints: rs.convertibleFlowPoints });
+    return {
+      mission: waiting.ok ? waiting.mission : mission,
+      step,
+      prepared: null,
+      failureClass: null,
+      message: `${rs.convertibleFlowPoints.toLocaleString()} FLOW Points are eligible to convert. Confirm the conversion; your on-chain claim is still a separate confirmation.`,
+      conversionConfirmation: {
+        stepId: step.id,
+        title: copy.title,
+        body: copy.body,
+        convertibleFlowPoints: rs.convertibleFlowPoints,
+        chainId: mission.goal.chainId,
+        requirements: rs.requirements,
+        authorizes: "OFF_CHAIN_CONVERSION_ONLY",
+      },
+      executed: false,
+    };
+  }
+
+  /**
+   * V17.1B §7 — a claim is never prepared against invented entitlement. The
+   * canonical resolver decides; "0 claimable but points convertible" says so.
+   */
+  if (step.type === "PREPARE_CLAIM") {
+    const rs = input.rewardState ?? null;
+    if (!rs) {
+      const blocked = blockStep({
+        mission,
+        stepId: step.id,
+        failureClass: "REWARD_STATE_UNAVAILABLE",
+        reason: "The canonical reward state could not be read, so no claim was prepared.",
+      });
+      return {
+        mission: blocked.ok ? blocked.mission : mission,
+        step,
+        prepared: null,
+        failureClass: "REWARD_STATE_UNAVAILABLE",
+        message: "The canonical reward state could not be read, so no claim was prepared.",
+        executed: false,
+      };
+    }
+    if (rs.nextEconomicStep !== "CLAIM_FLOW") {
+      const failureClass: MissionFailureClass =
+        rs.nextEconomicStep === "CONVERT_FLOW_POINTS"
+          ? "CONVERSION_REQUIRED"
+          : rs.reasonCodes.includes("CONVERSION_REQUIREMENTS_UNMET")
+            ? "CONVERSION_REQUIREMENTS_UNMET"
+            : rs.convertibleFlowPoints > 0
+              ? "CONVERSION_REQUIRED"
+              : "NO_CLAIMABLE_FLOW";
+      const blocked = blockStep({
+        mission,
+        stepId: step.id,
+        failureClass,
+        reason: rs.copy.nextAction,
+      });
+      return {
+        mission: blocked.ok ? blocked.mission : mission,
+        step,
+        prepared: null,
+        failureClass,
+        message: rs.copy.nextAction,
+        executed: false,
+      };
+    }
+  }
+
   if (step.amountUnresolved && !step.outputs.resolvedAmount) {
     return {
       mission,
@@ -192,6 +341,8 @@ export async function prepareNextMissionStep(input: {
       executed: false,
     };
   }
+
+
 
   // §6 — bounded allowance is a separate, explicit user confirmation.
   if (step.type === "USER_APPROVAL_IF_REQUIRED") {
@@ -753,5 +904,141 @@ export async function advanceMissionStep(input: {
     mission: input.mission,
     advanced: false,
     message: "This step does not advance from on-chain evidence.",
+  };
+}
+
+/**
+ * V17.1B §5/§6 — perform the explicitly confirmed off-chain conversion and
+ * advance the mission's CONVERT_FLOW_POINTS step.
+ *
+ * Authority: this mutates only the off-chain ledger, after re-validating every
+ * requirement server-side. It never signs, never claims on chain and never
+ * touches Campaign PTS. Idempotent: once the eligible balance has moved, a
+ * repeated confirmation converts nothing.
+ */
+export async function confirmMissionConversion(input: {
+  mission: Mission;
+  stepId: string;
+  userId: string;
+  emailVerified: boolean;
+  expectedConvertibleFlowPoints?: number | null;
+}): Promise<{
+  mission: Mission;
+  converted: boolean;
+  convertedFlowPoints: number;
+  failureClass: MissionFailureClass | null;
+  message: string;
+  executed: false;
+}> {
+  const step = input.mission.steps.find((s) => s.id === input.stepId);
+  if (!step || step.type !== "CONVERT_FLOW_POINTS") {
+    return {
+      mission: input.mission,
+      converted: false,
+      convertedFlowPoints: 0,
+      failureClass: "VERIFICATION_MISMATCH",
+      message: "That step is not a FLOW Points conversion.",
+      executed: false,
+    };
+  }
+
+  const { resolveRewardStateForUser } = await import("@/lib/rewards/rewardState.server");
+  const before = await resolveRewardStateForUser({
+    userId: input.userId,
+    emailVerified: input.emailVerified,
+    chainId: input.mission.goal.chainId,
+  });
+
+  if (before.nextEconomicStep === "CLAIM_FLOW") {
+    const done = skipStep({
+      mission: input.mission,
+      stepId: step.id,
+      reason: "already converted — FLOW is claimable on chain",
+    });
+    return {
+      mission: done.ok ? done.mission : input.mission,
+      converted: false,
+      convertedFlowPoints: 0,
+      failureClass: null,
+      message: `${before.copy.readiness}. Nothing was converted twice.`,
+      executed: false,
+    };
+  }
+
+  if (before.nextEconomicStep !== "CONVERT_FLOW_POINTS") {
+    return {
+      mission: input.mission,
+      converted: false,
+      convertedFlowPoints: 0,
+      failureClass: before.reasonCodes.includes("CONVERSION_REQUIREMENTS_UNMET")
+        ? "CONVERSION_REQUIREMENTS_UNMET"
+        : "NO_CONVERTIBLE_OR_CLAIMABLE_FLOW",
+      message: before.copy.nextAction,
+      executed: false,
+    };
+  }
+
+  const expected = Number(input.expectedConvertibleFlowPoints);
+  if (Number.isFinite(expected) && expected !== before.convertibleFlowPoints) {
+    return {
+      mission: input.mission,
+      converted: false,
+      convertedFlowPoints: 0,
+      failureClass: "VERIFICATION_MISMATCH",
+      message: `Your convertible balance changed to ${before.convertibleFlowPoints.toLocaleString()} FLOW Points. Review and confirm again.`,
+      executed: false,
+    };
+  }
+
+  const { claimFlowPoints } = await import("@/lib/flowbridge-db.server");
+  try {
+    await claimFlowPoints(input.userId, input.emailVerified);
+  } catch (e: any) {
+    return {
+      mission: input.mission,
+      converted: false,
+      convertedFlowPoints: 0,
+      failureClass: "CONVERSION_REQUIREMENTS_UNMET",
+      message: e?.message ?? "The conversion was rejected.",
+      executed: false,
+    };
+  }
+
+  const after = await resolveRewardStateForUser({
+    userId: input.userId,
+    emailVerified: input.emailVerified,
+    chainId: input.mission.goal.chainId,
+  });
+
+  const completed = completeStepFromEvidence({
+    mission: input.mission,
+    stepId: step.id,
+    outcome: {
+      onChainConfirmed: false,
+      txHash: null,
+      sourceKind: "LEDGER_SETTLEMENT",
+      sourceIdentity: `conversion:${input.userId}:${before.convertibleFlowPoints}:${after.claimableFlow ?? "unknown"}`,
+      settlementWallet: after.walletAddress,
+    } as never,
+  });
+  let mission = completed.ok ? completed.mission : input.mission;
+
+  // The claim's amount is now resolved by canonical state, not by inference.
+  const claimStep = mission.steps.find((s) => s.type === "PREPARE_CLAIM");
+  if (claimStep && after.claimableFlow != null) {
+    mission = patchStepOutputs(mission, claimStep.id, {
+      resolvedAmount: String(after.claimableFlow),
+      resolvedAmountProvenance: "REWARD_STATE_CONVERSION",
+      convertedFlowPoints: before.convertibleFlowPoints,
+    });
+  }
+
+  return {
+    mission,
+    converted: true,
+    convertedFlowPoints: before.convertibleFlowPoints,
+    failureClass: null,
+    message: `Converted ${before.convertibleFlowPoints.toLocaleString()} FLOW Points. ${after.copy.readiness} — your on-chain claim is a separate wallet confirmation.`,
+    executed: false,
   };
 }

@@ -55,6 +55,8 @@ import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
 import { Route as ApiStudioSessionRouteImport } from './routes/api/studio.session'
 import { Route as ApiStudioCampaignsRouteImport } from './routes/api/studio.campaigns'
+import { Route as ApiRewardsStateRouteImport } from './routes/api/rewards.state'
+import { Route as ApiRewardsConvertRouteImport } from './routes/api/rewards.convert'
 import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
@@ -317,6 +319,16 @@ const ApiStudioCampaignsRoute = ApiStudioCampaignsRouteImport.update({
   path: '/api/studio/campaigns',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRewardsStateRoute = ApiRewardsStateRouteImport.update({
+  id: '/api/rewards/state',
+  path: '/api/rewards/state',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRewardsConvertRoute = ApiRewardsConvertRouteImport.update({
+  id: '/api/rewards/convert',
+  path: '/api/rewards/convert',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRewardsClaimAuthorizationRoute =
   ApiRewardsClaimAuthorizationRouteImport.update({
     id: '/api/rewards/claim-authorization',
@@ -525,6 +537,8 @@ export interface FileRoutesByFullPath {
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
+  '/api/rewards/convert': typeof ApiRewardsConvertRoute
+  '/api/rewards/state': typeof ApiRewardsStateRoute
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -602,6 +616,8 @@ export interface FileRoutesByTo {
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
+  '/api/rewards/convert': typeof ApiRewardsConvertRoute
+  '/api/rewards/state': typeof ApiRewardsStateRoute
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -680,6 +696,8 @@ export interface FileRoutesById {
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
+  '/api/rewards/convert': typeof ApiRewardsConvertRoute
+  '/api/rewards/state': typeof ApiRewardsStateRoute
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -759,6 +777,8 @@ export interface FileRouteTypes {
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
+    | '/api/rewards/convert'
+    | '/api/rewards/state'
     | '/api/studio/campaigns'
     | '/api/studio/session'
     | '/api/users/bind-wallet'
@@ -836,6 +856,8 @@ export interface FileRouteTypes {
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
+    | '/api/rewards/convert'
+    | '/api/rewards/state'
     | '/api/studio/campaigns'
     | '/api/studio/session'
     | '/api/users/bind-wallet'
@@ -913,6 +935,8 @@ export interface FileRouteTypes {
     | '/api/incentives/global'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
+    | '/api/rewards/convert'
+    | '/api/rewards/state'
     | '/api/studio/campaigns'
     | '/api/studio/session'
     | '/api/users/bind-wallet'
@@ -985,6 +1009,8 @@ export interface RootRouteChildren {
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiRewardsClaimAuthorizationRoute: typeof ApiRewardsClaimAuthorizationRoute
+  ApiRewardsConvertRoute: typeof ApiRewardsConvertRoute
+  ApiRewardsStateRoute: typeof ApiRewardsStateRoute
   ApiStudioCampaignsRoute: typeof ApiStudioCampaignsRouteWithChildren
   ApiStudioSessionRoute: typeof ApiStudioSessionRoute
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
@@ -1326,6 +1352,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStudioCampaignsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rewards/state': {
+      id: '/api/rewards/state'
+      path: '/api/rewards/state'
+      fullPath: '/api/rewards/state'
+      preLoaderRoute: typeof ApiRewardsStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rewards/convert': {
+      id: '/api/rewards/convert'
+      path: '/api/rewards/convert'
+      fullPath: '/api/rewards/convert'
+      preLoaderRoute: typeof ApiRewardsConvertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rewards/claim-authorization': {
       id: '/api/rewards/claim-authorization'
       path: '/api/rewards/claim-authorization'
@@ -1662,6 +1702,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiRewardsClaimAuthorizationRoute: ApiRewardsClaimAuthorizationRoute,
+  ApiRewardsConvertRoute: ApiRewardsConvertRoute,
+  ApiRewardsStateRoute: ApiRewardsStateRoute,
   ApiStudioCampaignsRoute: ApiStudioCampaignsRouteWithChildren,
   ApiStudioSessionRoute: ApiStudioSessionRoute,
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,

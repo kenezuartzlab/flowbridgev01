@@ -14,6 +14,7 @@ import { ArrowUpRight, Check, Sparkles } from "lucide-react";
 import { PageIcon } from "@/components/layout/PageIcon";
 import { formatUsd } from "@/lib/format";
 import { FLOW_TOKEN, PTS, formatPts } from "@/lib/points";
+import type { RewardStateClient } from "@/lib/rewards/useRewardState";
 
 export interface RewardsHeroContentProps {
   label: string;
@@ -27,6 +28,12 @@ export interface RewardsHeroContentProps {
   claimableFlow: number;
   claimedFlow: number;
   volumeUsd: number;
+  /**
+   * V17.1B §8 — the canonical reward state. When present it is the ONLY source
+   * of claim/convert wording: off-chain points read "ready to convert" and only
+   * on-chain entitlement reads "ready to claim".
+   */
+  rewardState?: RewardStateClient | null;
 }
 
 function usePrefersReducedMotion() {
@@ -80,6 +87,7 @@ export function RewardsHeroContent({
   claimableFlow,
   claimedFlow,
   volumeUsd,
+  rewardState = null,
 }: RewardsHeroContentProps) {
   const reduced = usePrefersReducedMotion();
   const shown = useCountUp(flowPoints, hasData && !reduced);
@@ -87,7 +95,38 @@ export function RewardsHeroContent({
 
   const capProgress = dailyCap > 0 ? Math.min(1, corePointsToday / dailyCap) : 0;
   const remainingToCap = Math.max(0, dailyCap - corePointsToday);
-  const ready = claimableFlow > 0;
+
+  /**
+   * V17.1B §8 — stage-accurate readiness. Without canonical state we fall back to
+   * the legacy props, but we never call off-chain points "claimable".
+   */
+  const canonicalClaimable = rewardState ? rewardState.claimableFlow : claimableFlow;
+  const canonicalClaimed = rewardState ? rewardState.claimedFlow : claimedFlow;
+  const stateUnavailable = rewardState ? rewardState.claimableFlow === null : false;
+  const ready = (canonicalClaimable ?? 0) > 0;
+  const readyToConvert = rewardState?.nextEconomicStep === "CONVERT_FLOW_POINTS";
+  const readinessLine = rewardState
+    ? rewardState.copy.readiness
+    : ready
+      ? `${formatPts(claimableFlow)} ${FLOW_TOKEN} ready to claim`
+      : claimedFlow > 0
+        ? "All FLOW claimed"
+        : "No FLOW ready to claim";
+  const stageEyebrow = rewardState
+    ? ready
+      ? `${FLOW_TOKEN} ready`
+      : readyToConvert
+        ? `${PTS} ready to convert`
+        : `${FLOW_TOKEN} rewards`
+    : ready
+      ? `${FLOW_TOKEN} ready`
+      : `${FLOW_TOKEN} rewards`;
+  const ctaText = ready
+    ? `Claim ${FLOW_TOKEN}`
+    : readyToConvert
+      ? `Convert ${PTS}`
+      : ctaLabel;
+  const highlight = ready || readyToConvert;
 
   return (
     <>
@@ -98,12 +137,12 @@ export function RewardsHeroContent({
         <Link
           to="/earn"
           className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors ${
-            ready
+            highlight
               ? "bg-white/90 text-black hover:bg-white"
               : "bg-white/20 hover:bg-white/30"
           }`}
         >
-          {ready ? `Claim ${FLOW_TOKEN}` : ctaLabel} <ArrowUpRight className="h-3 w-3" />
+          {ctaText} <ArrowUpRight className="h-3 w-3" />
         </Link>
       </div>
 
@@ -149,7 +188,7 @@ export function RewardsHeroContent({
       <div className="relative mt-3 grid grid-cols-2 gap-2 sm:mt-4">
         <div
           className={`fb-hero-tile flex items-center gap-2 px-2.5 py-2 sm:px-3 sm:py-2.5 ${
-            ready && !reduced ? "fb-ready-glow" : ""
+            highlight && !reduced ? "fb-ready-glow" : ""
           }`}
         >
           {ready ? (
@@ -161,21 +200,20 @@ export function RewardsHeroContent({
           )}
           <span className="min-w-0">
             <span className="block truncate font-mono text-[9px] font-black uppercase tracking-[0.12em] opacity-80">
-              {ready ? `${FLOW_TOKEN} ready` : `${FLOW_TOKEN} rewards`}
+              {stageEyebrow}
             </span>
-            <span className="block truncate font-mono text-[13px] font-black tabular-nums sm:text-[14px]">
-              {pending
-                ? "—"
-                : ready
-                  ? `${formatPts(claimableFlow)} ${FLOW_TOKEN} ready`
-                  : "All FLOW claimed"}
+            <span
+              className="block truncate font-mono text-[13px] font-black tabular-nums sm:text-[14px]"
+              data-testid="reward-readiness"
+            >
+              {pending ? "—" : stateUnavailable ? "Reward state unavailable" : readinessLine}
             </span>
-            {!pending && !ready && claimedFlow > 0 && (
+            {!pending && !ready && !stateUnavailable && (canonicalClaimed ?? 0) > 0 && (
               <span className="block truncate font-mono text-[9px] uppercase tracking-[0.08em] opacity-65">
-                {formatPts(claimedFlow)} {FLOW_TOKEN} claimed
+                {formatPts(canonicalClaimed ?? 0)} {FLOW_TOKEN} claimed
               </span>
             )}
-            {!pending && !ready && claimedFlow === 0 && (
+            {!pending && !ready && !readyToConvert && !stateUnavailable && (canonicalClaimed ?? 0) === 0 && (
               <span className="block truncate font-mono text-[9px] uppercase tracking-[0.08em] opacity-65">
                 Earn more by swapping
               </span>

@@ -7,7 +7,12 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { PreparedIntentPayload } from "@/components/assistant/ActionIntentCard";
-import type { Mission, MissionFailureClass, MissionStep } from "./missionTypes";
+import type {
+  Mission,
+  MissionConversionConfirmation,
+  MissionFailureClass,
+  MissionStep,
+} from "./missionTypes";
 import type { EditPreview } from "./missionPlanner";
 import type { MissionRecoveryAdvice } from "./missionProgress";
 
@@ -32,6 +37,20 @@ export interface MissionActionResponse {
   recovery?: MissionRecoveryAdvice | null;
   advanced?: boolean;
   message?: string;
+  /** V17.1B §5 — explicit off-chain conversion confirmation payload. */
+  conversionConfirmation?: MissionConversionConfirmation | null;
+  /** V17.1B §2 — canonical reward state resolved server-side. */
+  rewardState?: {
+    flowPointsTotal: number;
+    convertibleFlowPoints: number;
+    claimableFlow: number | null;
+    claimedFlow: number | null;
+    walletFlow: number | null;
+    nextEconomicStep: "CLAIM_FLOW" | "CONVERT_FLOW_POINTS" | "NONE";
+    copy: { nextAction: string; readiness: string };
+  } | null;
+  converted?: boolean;
+  convertedFlowPoints?: number;
 }
 
 export async function listMissions(): Promise<Mission[]> {
