@@ -67,6 +67,7 @@ import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-ima
 import { Route as ApiAssistantMemoryRouteImport } from './routes/api/assistant.memory'
 import { Route as ApiAssistantIntentRouteImport } from './routes/api/assistant.intent'
 import { Route as ApiAssistantHandoffRouteImport } from './routes/api/assistant.handoff'
+import { Route as ApiAiScenariosRouteImport } from './routes/api/ai.scenarios'
 import { Route as ApiAiFederationRouteImport } from './routes/api/ai.federation'
 import { Route as ApiAiFederatedInsightRouteImport } from './routes/api/ai.federated-insight'
 import { Route as ApiAiDeliberateRouteImport } from './routes/api/ai.deliberate'
@@ -384,6 +385,11 @@ const ApiAssistantHandoffRoute = ApiAssistantHandoffRouteImport.update({
   path: '/handoff',
   getParentRoute: () => ApiAssistantRoute,
 } as any)
+const ApiAiScenariosRoute = ApiAiScenariosRouteImport.update({
+  id: '/api/ai/scenarios',
+  path: '/api/ai/scenarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAiFederationRoute = ApiAiFederationRouteImport.update({
   id: '/api/ai/federation',
   path: '/api/ai/federation',
@@ -555,6 +561,7 @@ export interface FileRoutesByFullPath {
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
   '/api/ai/federated-insight': typeof ApiAiFederatedInsightRoute
   '/api/ai/federation': typeof ApiAiFederationRoute
+  '/api/ai/scenarios': typeof ApiAiScenariosRoute
   '/api/assistant/handoff': typeof ApiAssistantHandoffRoute
   '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
@@ -638,6 +645,7 @@ export interface FileRoutesByTo {
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
   '/api/ai/federated-insight': typeof ApiAiFederatedInsightRoute
   '/api/ai/federation': typeof ApiAiFederationRoute
+  '/api/ai/scenarios': typeof ApiAiScenariosRoute
   '/api/assistant/handoff': typeof ApiAssistantHandoffRoute
   '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
@@ -722,6 +730,7 @@ export interface FileRoutesById {
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
   '/api/ai/federated-insight': typeof ApiAiFederatedInsightRoute
   '/api/ai/federation': typeof ApiAiFederationRoute
+  '/api/ai/scenarios': typeof ApiAiScenariosRoute
   '/api/assistant/handoff': typeof ApiAssistantHandoffRoute
   '/api/assistant/intent': typeof ApiAssistantIntentRoute
   '/api/assistant/memory': typeof ApiAssistantMemoryRoute
@@ -807,6 +816,7 @@ export interface FileRouteTypes {
     | '/api/ai/deliberate'
     | '/api/ai/federated-insight'
     | '/api/ai/federation'
+    | '/api/ai/scenarios'
     | '/api/assistant/handoff'
     | '/api/assistant/intent'
     | '/api/assistant/memory'
@@ -890,6 +900,7 @@ export interface FileRouteTypes {
     | '/api/ai/deliberate'
     | '/api/ai/federated-insight'
     | '/api/ai/federation'
+    | '/api/ai/scenarios'
     | '/api/assistant/handoff'
     | '/api/assistant/intent'
     | '/api/assistant/memory'
@@ -973,6 +984,7 @@ export interface FileRouteTypes {
     | '/api/ai/deliberate'
     | '/api/ai/federated-insight'
     | '/api/ai/federation'
+    | '/api/ai/scenarios'
     | '/api/assistant/handoff'
     | '/api/assistant/intent'
     | '/api/assistant/memory'
@@ -1057,6 +1069,7 @@ export interface RootRouteChildren {
   ApiAiDeliberateRoute: typeof ApiAiDeliberateRoute
   ApiAiFederatedInsightRoute: typeof ApiAiFederatedInsightRoute
   ApiAiFederationRoute: typeof ApiAiFederationRoute
+  ApiAiScenariosRoute: typeof ApiAiScenariosRoute
   ApiBannerImageSplatRoute: typeof ApiBannerImageSplatRoute
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
@@ -1488,6 +1501,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAssistantHandoffRouteImport
       parentRoute: typeof ApiAssistantRoute
     }
+    '/api/ai/scenarios': {
+      id: '/api/ai/scenarios'
+      path: '/api/ai/scenarios'
+      fullPath: '/api/ai/scenarios'
+      preLoaderRoute: typeof ApiAiScenariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ai/federation': {
       id: '/api/ai/federation'
       path: '/api/ai/federation'
@@ -1782,6 +1802,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiDeliberateRoute: ApiAiDeliberateRoute,
   ApiAiFederatedInsightRoute: ApiAiFederatedInsightRoute,
   ApiAiFederationRoute: ApiAiFederationRoute,
+  ApiAiScenariosRoute: ApiAiScenariosRoute,
   ApiBannerImageSplatRoute: ApiBannerImageSplatRoute,
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
