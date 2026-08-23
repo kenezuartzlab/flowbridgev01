@@ -44,7 +44,7 @@ export const Route = createFileRoute("/rewards")({
           "Track FLOW Points (PTS) from swaps and referrals, your XP level, claim eligibility, swap volume progress and referral link on FlowBridge.",
       },
       { property: "og:title", content: "FLOW Portal — FlowBridge" },
-      { property: "og:description", content: "Track FLOW Points, XP, claim eligibility and referral progress on FlowBridge." },
+      { property: "og:description", content: "Track FLOW Points (PTS) from swaps and referrals, your XP level, claim eligibility, swap volume progress and referral link on FlowBridge." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

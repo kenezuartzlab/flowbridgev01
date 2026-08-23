@@ -24,11 +24,7 @@ export const Route = createFileRoute("/stake")({
           "FLOW staking on BOT Testnet: the pre-funded, non-minting reward model, owner-gated parameters and the live BOT Testnet reward schedule. Read-only surface.",
       },
       { property: "og:title", content: "FLOW Staking — FlowBridge" },
-      {
-        property: "og:description",
-        content:
-          "How FLOW staking works: fixed-supply principal, separately funded reward inventory, no minting and no lock-up.",
-      },
+      { property: "og:description", content: "FLOW staking on BOT Testnet: the pre-funded, non-minting reward model, owner-gated parameters and the live BOT Testnet reward schedule. Read-only surface." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/stake" },
       { name: "twitter:card", content: "summary" },

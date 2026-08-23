@@ -27,10 +27,7 @@ export const Route = createFileRoute("/campaigns/me")({
           "Track your FlowBridge Campaign PTS, completed campaign tasks, verified on-chain activity history and leaderboard rank in one participant center.",
       },
       { property: "og:title", content: "My Progress — FlowBridge" },
-      {
-        property: "og:description",
-        content: "Campaign PTS, verified activity history and leaderboard rank.",
-      },
+      { property: "og:description", content: "Track your FlowBridge Campaign PTS, completed campaign tasks, verified on-chain activity history and leaderboard rank in one participant center." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

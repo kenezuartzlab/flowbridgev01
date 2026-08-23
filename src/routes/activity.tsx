@@ -39,7 +39,7 @@ export const Route = createFileRoute("/activity")({
           "Every FlowBridge swap and bridge recorded against your verified email and bound wallet, with status, amounts and FLOW earned.",
       },
       { property: "og:title", content: "Activity — FlowBridge" },
-      { property: "og:description", content: "Your FlowBridge swap and bridge activity history with status and rewards." },
+      { property: "og:description", content: "Every FlowBridge swap and bridge recorded against your verified email and bound wallet, with status, amounts and FLOW earned." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

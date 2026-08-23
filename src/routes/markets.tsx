@@ -16,7 +16,7 @@ export const Route = createFileRoute("/markets")({
           "Live prices, 24h change, volume and 7-day trends for BOT Chain tokens (BOT, CA, USDT) plus top ETH, BNB and TRON tokens.",
       },
       { property: "og:title", content: "Markets — FlowBridge" },
-      { property: "og:description", content: "Live token prices and trends for BOT Chain and cross-chain assets on FlowBridge." },
+      { property: "og:description", content: "Live prices, 24h change, volume and 7-day trends for BOT Chain tokens (BOT, CA, USDT) plus top ETH, BNB and TRON tokens." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/markets" },
       { name: "twitter:card", content: "summary" },

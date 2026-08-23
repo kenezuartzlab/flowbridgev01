@@ -14,10 +14,7 @@ export const Route = createFileRoute("/campaigns/partners")({
           "Discover FlowBridge partner mini-apps on BOT Chain — infrastructure, community and game experiences — with clear live, coming soon and in-development states.",
       },
       { property: "og:title", content: "Partners & Mini-Apps — FlowBridge" },
-      {
-        property: "og:description",
-        content: "Partner mini-apps on BOT Chain inside FlowBridge Explore.",
-      },
+      { property: "og:description", content: "Discover FlowBridge partner mini-apps on BOT Chain — infrastructure, community and game experiences — with clear live, coming soon and in-development states." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/campaigns/partners" },
       { name: "twitter:card", content: "summary" },

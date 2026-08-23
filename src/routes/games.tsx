@@ -32,10 +32,7 @@ export const Route = createFileRoute("/games")({
           "Spin the daily wheel, clear challenges and climb the FlowBridge arcade. Off-chain Play Points that keep the ecosystem fun alongside real swap rewards.",
       },
       { property: "og:title", content: "Games — FlowBridge" },
-      {
-        property: "og:description",
-        content: "Daily Lucky Spin, streak challenges and arcade tiles inside FlowBridge.",
-      },
+      { property: "og:description", content: "Spin the daily wheel, clear challenges and climb the FlowBridge arcade. Off-chain Play Points that keep the ecosystem fun alongside real swap rewards." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/games" },
       { name: "twitter:card", content: "summary" },

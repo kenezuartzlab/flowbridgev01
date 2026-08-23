@@ -27,10 +27,7 @@ export const Route = createFileRoute("/campaigns/")({
           "Explore live FlowBridge campaigns on BOT Chain, complete verified bridge quests and track your Campaign PTS progress in one polished hub.",
       },
       { property: "og:title", content: "Campaign Growth Hub — FlowBridge" },
-      {
-        property: "og:description",
-        content: "Live BOT Chain campaigns, verified bridge tasks and Campaign PTS progress.",
-      },
+      { property: "og:description", content: "Explore live FlowBridge campaigns on BOT Chain, complete verified bridge quests and track your Campaign PTS progress in one polished hub." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

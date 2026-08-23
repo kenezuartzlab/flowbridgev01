@@ -39,10 +39,7 @@ export const Route = createFileRoute("/campaigns/analytics/$id")({
           "Operator-only FlowBridge campaign analytics: participants, completions, Campaign PTS awarded and verified activity volume from authoritative data.",
       },
       { property: "og:title", content: "Campaign Analytics — FlowBridge" },
-      {
-        property: "og:description",
-        content: "Read-only operator analytics for verified FlowBridge campaigns.",
-      },
+      { property: "og:description", content: "Operator-only FlowBridge campaign analytics: participants, completions, Campaign PTS awarded and verified activity volume from authoritative data." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

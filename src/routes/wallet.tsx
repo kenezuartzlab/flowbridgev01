@@ -41,11 +41,7 @@ export const Route = createFileRoute("/wallet")({
           "FlowBridge auto-detects your connected network and shows live balances, USD values, send and receive, plus a filterable swap, bridge and transfer history.",
       },
       { property: "og:title", content: "Wallet — FlowBridge" },
-      {
-        property: "og:description",
-        content:
-          "Auto-detected network balances, send/receive and filterable transaction history in one screen.",
-      },
+      { property: "og:description", content: "FlowBridge auto-detects your connected network and shows live balances, USD values, send and receive, plus a filterable swap, bridge and transfer history." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/wallet" },
       { name: "twitter:card", content: "summary" },
