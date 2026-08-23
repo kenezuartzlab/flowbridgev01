@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { MissionPanel } from "@/components/assistant/MissionPanel";
+import { ExternalSkillEvidence } from "@/components/assistant/ExternalSkillEvidence";
 
 export const Route = createFileRoute("/assistant")({
   head: () => ({
@@ -56,6 +57,8 @@ function AssistantPage() {
         {/* V17 — goal missions: plan and prepare only, never execute. */}
         <MissionPanel />
         <AssistantChat onHide={hide} />
+        {/* V19 — federated BOT Chain skills: advisory, external, never executable. */}
+        <ExternalSkillEvidence />
       </main>
 
       <BottomNav />
