@@ -157,7 +157,7 @@ export function OpportunityFeed() {
                         {expiry}
                       </span>
                     )}
-                    {item.containsPrivateEvidence && (
+                    {item.containsPrivateEvidence && item.actorScope !== "PUBLIC" && (
                       <span className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted">
                         Private to you
                       </span>
@@ -213,9 +213,10 @@ export function OpportunityFeed() {
                           {ev.label}
                         </p>
                         <p className="font-mono text-[9.5px] leading-relaxed text-muted">
-                          {ev.dataClass === "FLOWBRIDGE_DB" || ev.dataClass === "USER_MEMORY"
+                          {item.actorScope !== "PUBLIC" &&
+                          (ev.dataClass === "FLOWBRIDGE_DB" || ev.dataClass === "USER_MEMORY")
                             ? "Your private FlowBridge data"
-                            : "Public ecosystem / on-chain data"}{" "}
+                            : "Canonical FlowBridge / on-chain data"}{" "}
                           · {ev.authority} · {ev.freshness} ·{" "}
                           {new Date(ev.observedAt).toLocaleTimeString([], {
                             hour: "2-digit",
