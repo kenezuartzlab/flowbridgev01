@@ -49,7 +49,9 @@ export interface FederatedSkillEntry {
   /** Transport: MOCK is the deterministic in-process V19 canary provider. */
   transport: "MOCK" | "HTTPS";
   /** Only for HTTPS transport; server-pinned, never client supplied. */
-  endpoint: string | null;
+  /** Server-side only; null for in-process skills. Never client-supplied. */
+  endpoint?: string | null;
+
 }
 
 /**
