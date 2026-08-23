@@ -22,7 +22,7 @@ function toRow(mission: Mission) {
     schema_version: mission.schemaVersion,
     goal_text: mission.goalText,
     status: mission.status,
-    mission: JSON.parse(JSON.stringify(mission)) as Record<string, unknown>,
+    mission: JSON.parse(JSON.stringify(mission)) as any,
     current_step_id: mission.currentStepId,
     version: mission.version,
     expires_at: mission.expiresAt,

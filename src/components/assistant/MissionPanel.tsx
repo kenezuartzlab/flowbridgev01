@@ -5,7 +5,7 @@
  * many wallet confirmations the user should still expect. Copy never implies
  * automation: Flow AI plans and prepares, the user signs.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   CheckCircle2,
   ChevronDown,
@@ -22,7 +22,7 @@ import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard
 import { listMissions, missionAction } from "@/lib/ai/mission/missionClient";
 import { missionProgress, type Mission, type MissionStep } from "@/lib/ai/mission/missionTypes";
 
-const STATE_ICON: Record<string, JSX.Element> = {
+const STATE_ICON: Record<string, ReactNode> = {
   COMPLETED: <CheckCircle2 className="h-3.5 w-3.5 text-success" />,
   WAITING_FOR_USER: <Lock className="h-3.5 w-3.5 text-primary" />,
   WAITING_FOR_CONFIRMATION: <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />,
