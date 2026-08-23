@@ -70,8 +70,15 @@ function StepRow({ step, isNext }: { step: MissionStep; isNext: boolean }) {
  */
 function HistoryRow({ mission }: { mission: Mission }) {
   const p = missionProgress(mission);
-  const evidence = mission.steps.filter((s) => s.outputs?.txHash);
+  /** Canonical settlement evidence lives on the step's linked tx hash. */
+  const evidence = mission.steps.filter((s) => s.linkedTxHash || s.outputs?.txHash);
   const completed = mission.completedAt ?? mission.updatedAt;
+  const settlementWallet = mission.steps
+    .map((s) => s.outputs?.settlementWallet)
+    .find((w): w is string => typeof w === "string");
+  const derivation = mission.steps
+    .map((s) => s.outputs?.derivation as { derivedAmount?: string; ratioPercent?: number; sourceKind?: string } | undefined)
+    .find((d) => d?.derivedAmount);
   return (
     <li className="px-3.5 py-2.5" data-testid="mission-history-item">
       <div className="flex items-start justify-between gap-2">
@@ -90,20 +97,32 @@ function HistoryRow({ mission }: { mission: Mission }) {
         {p.completed}/{p.total} steps ·{" "}
         {completed ? new Date(completed).toLocaleString("en-US") : "time unavailable"}
       </p>
+      {(settlementWallet || derivation) && (
+        <p className="mt-0.5 break-all font-mono text-[9.5px] text-muted">
+          {settlementWallet ? `${settlementWallet} · chain ${mission.goal.chainId}` : null}
+          {derivation
+            ? ` · derived ${derivation.derivedAmount} FLOW (${derivation.ratioPercent ?? "?"}% of ${derivation.sourceKind ?? "verified result"})`
+            : null}
+        </p>
+      )}
       {evidence.length > 0 && (
         <ul className="mt-1.5 space-y-0.5">
-          {evidence.map((s) => (
-            <li key={s.id} className="font-mono text-[9.5px] text-muted">
-              {s.title}
-              {s.outputs.resolvedAmount ? ` · ${String(s.outputs.resolvedAmount)}` : ""} ·{" "}
-              {String(s.outputs.txHash).slice(0, 10)}…{String(s.outputs.txHash).slice(-8)}
-            </li>
-          ))}
+          {evidence.map((s) => {
+            const tx = String(s.linkedTxHash ?? s.outputs?.txHash ?? "");
+            return (
+              <li key={s.id} className="font-mono text-[9.5px] text-muted">
+                {s.title}
+                {s.outputs?.resolvedAmount ? ` · ${String(s.outputs.resolvedAmount)}` : ""} ·{" "}
+                {tx.slice(0, 10)}…{tx.slice(-8)}
+              </li>
+            );
+          })}
         </ul>
       )}
     </li>
   );
 }
+
 
 export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: string }) {
   const [missions, setMissions] = useState<Mission[]>([]);
