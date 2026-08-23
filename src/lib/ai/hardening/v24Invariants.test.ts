@@ -315,7 +315,7 @@ const cases: EvalCase<any>[] = [
       if (r.ok === false) return null;
       const json = JSON.stringify(r);
       if (/0xabcdef|deadbeef/.test(json)) return `unsafe external field survived: ${json}`;
-      return r.unsafeContentDetected || (r.strippedFields?.length ?? 0) > 0
+      return r.output.unsafeContentFlagged || r.output.strippedFields.length > 0
         ? null
         : "no stripped fields reported";
     },
