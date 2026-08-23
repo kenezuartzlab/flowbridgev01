@@ -230,6 +230,35 @@ export const Route = createFileRoute("/api/missions")({
           });
         }
 
+        /**
+         * V17.1C §3 — the user submitted their own transaction on a review
+         * surface (e.g. /earn). Bookkeeping + canonical verification only; the
+         * server never signs or resubmits, and a zero claimable balance after a
+         * submitted claim is settlement rather than failure.
+         */
+        if (action === "settle") {
+          const txHash = String(body.txHash ?? "");
+          if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+            return jsonResponse({ error: "A transaction hash is required." }, 400);
+          }
+          const result = await engine.settleMissionSubmission({
+            mission: loaded,
+            stepId: String(body.stepId ?? loaded.currentStepId ?? ""),
+            txHash,
+            userId: ctx.user.id,
+            wallet: ctx.wallet,
+          });
+          await store.saveMission(result.mission);
+          return jsonResponse({
+            success: true,
+            mission: result.mission,
+            advanced: result.advanced,
+            message: result.message,
+            executed: false,
+          });
+        }
+
+
         if (action === "submitted") {
           const mutated = progress.markStepSubmitted({
             mission: loaded,
