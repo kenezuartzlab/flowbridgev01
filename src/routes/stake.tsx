@@ -5,12 +5,14 @@ import { ArrowLeft, Coins, ShieldCheck } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SafeAreaPage, SectionHeader, Surface } from "@/components/ui-kit/primitives";
 import { FlowStakingPreviewCard } from "@/components/staking/FlowStakingPreviewCard";
-import { listMissions } from "@/lib/ai/mission/missionClient";
+import { resolveStakeHandoffFromServer } from "@/lib/ai/mission/missionClient";
 import {
   parseStakeHandoff,
-  resolveStakeHandoff,
-  type StakeHandoffResolution,
+  STAKE_HANDOFF_FAILURE_COPY,
+  type CanonicalStakeHandoff,
+  type StakeHandoffFailure,
 } from "@/lib/ai/mission/stakeHandoff";
+
 import { useAccountData } from "@/lib/app/useAccountData";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 
