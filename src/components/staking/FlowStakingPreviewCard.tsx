@@ -116,7 +116,14 @@ export function FlowStakingPreviewCard({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<TxKind | null>(null);
   const [lastTx, setLastTx] = useState<{ kind: TxKind; hash: string } | null>(null);
-  const [amountInput, setAmountInput] = useState("10");
+  const [amountInput, setAmountInput] = useState(presetAmount ?? "10");
+  const [missionStatus, setMissionStatus] = useState<string | null>(null);
+
+  // A mission-derived amount replaces the default; the user can still edit it.
+  useEffect(() => {
+    if (presetAmount) setAmountInput(presetAmount);
+  }, [presetAmount]);
+
 
   const scheduleFunded = (inventory ?? 0n) > 0n && (rewardRate ?? 0n) > 0n;
   const readiness = resolveFlowStakingReadiness(BOT_TESTNET_CHAIN_ID, scheduleFunded);
