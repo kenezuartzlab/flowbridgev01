@@ -658,6 +658,18 @@ export async function advanceMissionStep(input: {
   userId: string;
   wallet: string | null;
 }): Promise<{ mission: Mission; advanced: boolean; message: string }> {
+  /**
+   * V17.1F §5/§7 — a canonically COMPLETED mission is terminal. Duplicate
+   * settlement observers, polls and remounts read back the same record instead
+   * of re-verifying or regressing it.
+   */
+  if (input.mission.status === "COMPLETED") {
+    return {
+      mission: input.mission,
+      advanced: false,
+      message: "This mission is already complete. It is kept as read-only history.",
+    };
+  }
   const step = input.mission.steps.find((s) => s.id === input.stepId);
   if (!step) return { mission: input.mission, advanced: false, message: "Unknown step." };
 
@@ -1116,6 +1128,15 @@ export async function settleMissionSubmission(input: {
   wallet: string | null;
 }): Promise<{ mission: Mission; advanced: boolean; message: string; executed: false }> {
   let mission = input.mission;
+  /** V17.1F §7 — idempotent terminalization: a repeat settlement is a no-op. */
+  if (mission.status === "COMPLETED") {
+    return {
+      mission,
+      advanced: false,
+      message: "This mission is already complete. Its history is unchanged.",
+      executed: false,
+    };
+  }
   const step = mission.steps.find((s) => s.id === input.stepId);
   if (!step) {
     return { mission, advanced: false, message: "Unknown step.", executed: false };

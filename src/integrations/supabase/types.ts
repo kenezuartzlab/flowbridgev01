@@ -94,6 +94,7 @@ export type Database = {
       }
       ai_missions: {
         Row: {
+          completed_at: string | null
           created_at: string
           current_step_id: string | null
           expires_at: string
@@ -107,6 +108,7 @@ export type Database = {
           version: number
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           current_step_id?: string | null
           expires_at: string
@@ -120,6 +122,7 @@ export type Database = {
           version?: number
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           current_step_id?: string | null
           expires_at?: string

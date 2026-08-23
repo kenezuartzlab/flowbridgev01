@@ -63,6 +63,48 @@ function StepRow({ step, isNext }: { step: MissionStep; isNext: boolean }) {
   );
 }
 
+/**
+ * V17.1F §4/§6 — a terminal mission rendered as read-only history: outcome,
+ * completion time and the transaction evidence that closed each economic step.
+ * There are no action controls here; history can never be resumed or replayed.
+ */
+function HistoryRow({ mission }: { mission: Mission }) {
+  const p = missionProgress(mission);
+  const evidence = mission.steps.filter((s) => s.outputs?.txHash);
+  const completed = mission.completedAt ?? mission.updatedAt;
+  return (
+    <li className="px-3.5 py-2.5" data-testid="mission-history-item">
+      <div className="flex items-start justify-between gap-2">
+        <p className="min-w-0 flex-1 font-mono text-[11px] font-black uppercase tracking-[0.05em]">
+          {mission.goalText}
+        </p>
+        <span
+          className={`shrink-0 font-mono text-[9px] font-black uppercase tracking-[0.08em] ${
+            mission.status === "COMPLETED" ? "text-success" : "text-muted"
+          }`}
+        >
+          {mission.status}
+        </span>
+      </div>
+      <p className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+        {p.completed}/{p.total} steps ·{" "}
+        {completed ? new Date(completed).toLocaleString("en-US") : "time unavailable"}
+      </p>
+      {evidence.length > 0 && (
+        <ul className="mt-1.5 space-y-0.5">
+          {evidence.map((s) => (
+            <li key={s.id} className="font-mono text-[9.5px] text-muted">
+              {s.title}
+              {s.outputs.resolvedAmount ? ` · ${String(s.outputs.resolvedAmount)}` : ""} ·{" "}
+              {String(s.outputs.txHash).slice(0, 10)}…{String(s.outputs.txHash).slice(-8)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
 export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: string }) {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [goalText, setGoalText] = useState(initialGoalText);
@@ -91,6 +133,12 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
   }, [refresh]);
 
   const active = missions.find((m) => m.status !== "CANCELLED" && m.status !== "COMPLETED") ?? null;
+  /**
+   * V17.1F §4/§6 — completion is history, not disappearance. Terminal missions
+   * stay visible, read-only, with their evidence, and are never re-openable.
+   */
+  const history = missions.filter((m) => m.status === "COMPLETED" || m.status === "CANCELLED");
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   /**
    * V17.1B §8 — when the canonical reward state says there is no eligible
@@ -303,6 +351,36 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
           )}
 
           {prepared && <ActionIntentCard payload={prepared} correlation={correlation} />}
+
+          {history.length > 0 && (
+            <div className="fb-inset overflow-hidden rounded-xl" data-testid="mission-history">
+              <button
+                type="button"
+                onClick={() => setHistoryOpen((v) => !v)}
+                className="flex w-full items-center justify-between px-3.5 py-2.5 text-left"
+              >
+                <span className="font-mono text-[10px] font-black uppercase tracking-[0.08em] text-muted">
+                  Mission history ({history.length})
+                </span>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-muted transition-transform ${historyOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {historyOpen && (
+                <>
+                  <ul className="divide-y divide-hairline border-t border-hairline">
+                    {history.map((m) => (
+                      <HistoryRow key={m.id} mission={m} />
+                    ))}
+                  </ul>
+                  <p className="border-t border-hairline px-3.5 py-2 font-mono text-[9px] leading-relaxed text-muted">
+                    Completed missions are permanent read-only records. They keep their verified
+                    transaction evidence and can never be resumed, replayed or reopened.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
 
           <p className="font-mono text-[9.5px] leading-relaxed text-muted">
             Missions plan and prepare only. Flow AI cannot sign, submit, approve or continue a step

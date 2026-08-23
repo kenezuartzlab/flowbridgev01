@@ -213,6 +213,12 @@ export interface Mission {
   currentStepId: string | null;
   createdAt: string;
   updatedAt: string;
+  /**
+   * V17.1F §2/§3 — completion is a TERMINAL PERSISTED STATE, never a deletion.
+   * Set exactly once, when the final economic step is canonically verified, and
+   * never rewritten by a later refresh, remount, poll or duplicate observer.
+   */
+  completedAt?: string | null;
   expiresAt: string;
   version: number;
   /** Informational evidence attached at planning time. Never authority. */

@@ -124,6 +124,22 @@ export const Route = createFileRoute("/api/missions")({
         const loaded = await store.loadMission({ id: missionId, userId: ctx.user.id });
         if (!loaded) return jsonResponse({ error: "Mission not found." }, 404);
 
+        /**
+         * V17.1F §4/§5 — a COMPLETED mission is read-only history. It may be
+         * fetched and rendered, but it can never re-prepare an ActionIntent,
+         * re-submit, re-advance or be reopened by a later UI refresh.
+         */
+        if (loaded.status === "COMPLETED" && action !== "read") {
+          return jsonResponse({
+            success: true,
+            mission: loaded,
+            readOnly: true,
+            message:
+              "This mission is complete and kept as read-only history. Start a new mission for another action.",
+            executed: false,
+          });
+        }
+
         if (action === "refine") {
           const goal = mergeGoalTurn({ goal: loaded.goal, text: String(body.text ?? "") });
           const mission = planner.applyEdit({ mission: loaded, nextGoal: goal });
