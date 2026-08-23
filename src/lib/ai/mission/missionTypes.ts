@@ -45,7 +45,9 @@ export type MissionStepState = (typeof MISSION_STEP_STATES)[number];
 
 const STEP_TRANSITIONS: Record<MissionStepState, readonly MissionStepState[]> = {
   DRAFT: ["PLANNED", "CANCELLED"],
-  PLANNED: ["READY", "BLOCKED", "CANCELLED", "EXPIRED"],
+  // COMPLETED direct from PLANNED covers non-economic checks and conditional
+  // steps that turn out not to be needed (e.g. allowance already sufficient).
+  PLANNED: ["READY", "COMPLETED", "BLOCKED", "CANCELLED", "EXPIRED"],
   READY: ["WAITING_FOR_USER", "BLOCKED", "CANCELLED", "EXPIRED", "PLANNED"],
   WAITING_FOR_USER: ["WAITING_FOR_CONFIRMATION", "PLANNED", "BLOCKED", "CANCELLED", "EXPIRED"],
   WAITING_FOR_CONFIRMATION: ["COMPLETED", "BLOCKED", "EXPIRED", "CANCELLED"],
