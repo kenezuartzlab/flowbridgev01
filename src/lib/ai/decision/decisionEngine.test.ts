@@ -55,6 +55,7 @@ function mission(over: Partial<DecisionMissionContext>): DecisionMissionContext 
     domains: over.domains ?? ["REWARDS", "STAKING"],
     currentStepTitle: over.currentStepTitle ?? "Stake 500 FLOW",
     currentStepRequiresWallet: over.currentStepRequiresWallet ?? true,
+    hasPendingWalletStep: over.hasPendingWalletStep ?? true,
     blockingReason: over.blockingReason ?? null,
     completedAt: over.completedAt ?? null,
     updatedAt: over.updatedAt ?? NOW.toISOString(),
@@ -156,6 +157,46 @@ describe("V22 decision engine", () => {
     expect(r.items[0]!.reasonCodes).toContain("USER_PREFERS_STAKING");
     // Preference text never becomes an economic value.
     expect(JSON.stringify(r.items[0]!.facts)).not.toMatch(/250/);
+  });
+
+  it("keeps actors isolated: nothing is cached or shared between callers", () => {
+    const a = base({
+      actorScopes: ["AUTHENTICATED_USER"],
+      opportunities: [opp({ id: "actorA-claim", economicSnapshot: { claimableFlow: 500 } })],
+      missions: [mission({ id: "mA" })],
+    });
+    const b = base({
+      actorScopes: ["PUBLIC"],
+      opportunities: [opp({ id: "actorB-campaign", domain: "CAMPAIGNS", type: "CAMPAIGN_ELIGIBLE", economicSnapshot: { campaignPoints: 10 } })],
+      missions: [],
+    });
+    expect(b.activeMissionIds).toEqual([]);
+    expect(JSON.stringify(b)).not.toMatch(/actorA|mA|claimableFlow/);
+    expect(a.activeMissionIds).toEqual(["mA"]);
+    // Re-running actor A after actor B is unaffected by B.
+    const a2 = base({
+      actorScopes: ["AUTHENTICATED_USER"],
+      opportunities: [opp({ id: "actorA-claim", economicSnapshot: { claimableFlow: 500 } })],
+      missions: [mission({ id: "mA" })],
+    });
+    expect(JSON.stringify(a2.items)).toBe(JSON.stringify(a.items));
+  });
+
+  it("does not permanently suppress a new opportunity after a completed mission", () => {
+    const r = base({
+      opportunities: [opp({ id: "claim" })],
+      missions: [
+        mission({
+          id: "old",
+          status: "COMPLETED",
+          completedAt: new Date(NOW.getTime() - 60_000).toISOString(),
+          domains: ["REWARDS"],
+        }),
+      ],
+    });
+    expect(r.items[0]!.opportunityId).toBe("claim");
+    expect(r.items[0]!.reasonCodes).toContain("RECENTLY_COMPLETED_SIMILAR");
+    expect(r.items[0]!.actionable).toBe(true);
   });
 
   it("is deterministic for identical input", () => {

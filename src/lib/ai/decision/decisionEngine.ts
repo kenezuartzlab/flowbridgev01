@@ -290,8 +290,11 @@ export function runDecisionEngine(input: DecisionEngineInput): DecisionResult {
           : `You are ${continueMission.percent}% through this plan${continueMission.currentStepTitle ? ` — next: ${continueMission.currentStepTitle}` : ""}.`,
       whatNext: continueMission.currentStepRequiresWallet
         ? "The next step needs your own wallet confirmation. FlowBridge prepares it; you sign it."
-        : "FlowBridge re-checks canonical state for the next step. Nothing is signed automatically.",
-      requiresWalletConfirmation: continueMission.currentStepRequiresWallet,
+        : continueMission.hasPendingWalletStep
+          ? "FlowBridge re-checks canonical state for the next step; a later step will still need your own wallet confirmation."
+          : "FlowBridge re-checks canonical state for the next step. Nothing is signed automatically.",
+      requiresWalletConfirmation:
+        continueMission.currentStepRequiresWallet || continueMission.hasPendingWalletStep,
       actionable: true,
       blocked: continueMission.status === "BLOCKED",
       blockerText: continueMission.status === "BLOCKED" ? continueMission.blockingReason : null,

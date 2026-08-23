@@ -56,6 +56,8 @@ export interface DecisionMissionContext {
   domains: readonly OpportunityDomain[];
   currentStepTitle: string | null;
   currentStepRequiresWallet: boolean;
+  /** Any remaining wallet-signature step — "will this eventually need me?" */
+  hasPendingWalletStep: boolean;
   blockingReason: string | null;
   completedAt: string | null;
   updatedAt: string;
