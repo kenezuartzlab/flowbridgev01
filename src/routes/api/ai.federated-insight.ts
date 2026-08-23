@@ -46,6 +46,21 @@ export const Route = createFileRoute("/api/ai/federated-insight")({
         }
 
         const requestId = crypto.randomUUID();
+
+        /** V24 §11 — federation kill switch: no external call at all. */
+        const { isLayerEnabled } = await import("@/lib/ai/hardening/killSwitches");
+        const { statusNotice } = await import("@/lib/ai/hardening/intelligenceStatus");
+        if (!isLayerEnabled("FEDERATION")) {
+          return jsonResponse({
+            success: true,
+            requestId,
+            insight: null,
+            reconciliation: null,
+            intelligenceStatus: "BLOCKED",
+            statusNotice: statusNotice("BLOCKED", "External skill federation"),
+          });
+        }
+
         const result = await callCapability({
           skillId,
           capabilityKind,
