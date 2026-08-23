@@ -20,6 +20,7 @@ import {
   type Mission,
   type MissionGoal,
   type MissionStep,
+  type MissionSourceRef,
   type MissionStepType,
 } from "./missionTypes";
 
@@ -286,6 +287,7 @@ export function createMission(input: {
     version: 1,
     evidenceRefs: [],
     linkedOpportunityId: input.linkedOpportunityId ?? null,
+    source: input.source ?? null,
   };
 }
 
