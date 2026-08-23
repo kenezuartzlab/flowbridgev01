@@ -91,6 +91,12 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
   }, [refresh]);
 
   const active = missions.find((m) => m.status !== "CANCELLED" && m.status !== "COMPLETED") ?? null;
+  /**
+   * V17.1F §4/§6 — completion is history, not disappearance. Terminal missions
+   * stay visible, read-only, with their evidence, and are never re-openable.
+   */
+  const history = missions.filter((m) => m.status === "COMPLETED" || m.status === "CANCELLED");
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   /**
    * V17.1B §8 — when the canonical reward state says there is no eligible
