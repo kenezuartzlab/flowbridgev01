@@ -1,11 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Coins, ShieldCheck } from "lucide-react";
 
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SafeAreaPage, SectionHeader, Surface } from "@/components/ui-kit/primitives";
 import { FlowStakingPreviewCard } from "@/components/staking/FlowStakingPreviewCard";
+import { listMissions } from "@/lib/ai/mission/missionClient";
+import {
+  parseStakeHandoff,
+  resolveStakeHandoff,
+  type StakeHandoffResolution,
+} from "@/lib/ai/mission/stakeHandoff";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
+
 
 /**
  * FlowBridge V13.2 — FLOW staking BOT Testnet surface.
