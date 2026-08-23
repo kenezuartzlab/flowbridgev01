@@ -196,3 +196,55 @@ describe("V17 mission edits", () => {
     ]);
   });
 });
+
+// ================= V17.1 — settlement-driven advancement =================
+describe("V17.1 settlement derivation", () => {
+  it("derives a 50% stake from the canonical claim delta, with provenance", () => {
+    const goal = normalizeGoal({
+      text: "Claim my available FLOW, then stake 50% of the FLOW actually received",
+    })!;
+    let m = createMission({
+      id: "m2",
+      actorUserId: "u1",
+      goalText: goal.rawText,
+      goal,
+      linkedOpportunityId: null,
+    });
+    expect(goal.constraints.stakePortionPercent).toBe(50);
+
+    const verifyClaim = m.steps.find((s) => s.type === "VERIFY_CLAIM")!;
+    // Force the graph forward to the verification step deterministically.
+    m = {
+      ...m,
+      steps: m.steps.map((s) =>
+        s.id === verifyClaim.id || s.state === "COMPLETED"
+          ? s
+          : verifyClaim.dependencies.includes(s.id) || s.dependencies.length === 0
+            ? { ...s, state: "COMPLETED" as const }
+            : s,
+      ),
+    };
+
+    const res = completeStepFromEvidence({
+      mission: m,
+      stepId: verifyClaim.id,
+      outcome: {
+        onChainConfirmed: true,
+        resolvedAmountWei: "1017000000000000000001",
+        decimals: 18,
+        sourceKind: "ON_CHAIN_CLAIM",
+        sourceIdentity: "claimed:0xdist:0xuser@123",
+        settlementWallet: "0xUser",
+      },
+    });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const stake = res.mission.steps.find((s) => s.type === "PREPARE_STAKE")!;
+    expect(stake.outputs.resolvedAmountWei).toBe("508500000000000000000");
+    expect(stake.outputs.resolvedAmount).toBe("508.5");
+    const prov: any = stake.outputs.derivation;
+    expect(prov.ratioPercent).toBe(50);
+    expect(prov.sourceKind).toBe("ON_CHAIN_CLAIM");
+    expect(prov.actualWei).toBe("1017000000000000000001");
+  });
+});
