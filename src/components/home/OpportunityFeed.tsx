@@ -21,7 +21,9 @@ import {
   X,
 } from "lucide-react";
 import { assistantFetch } from "@/lib/ai/assistantClient";
-import { setConversationDraft } from "@/lib/ai/conversationStore";
+import { ensureConversationOwner, setConversationDraft } from "@/lib/ai/conversationStore";
+import { supabase } from "@/integrations/supabase/client";
+
 import type { OpportunityFeed as Feed, RankedOpportunity } from "@/lib/ai/opportunity/opportunityTypes";
 
 const DOMAIN_ICON = {
