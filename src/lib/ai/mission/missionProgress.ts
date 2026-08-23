@@ -476,15 +476,19 @@ export function retryStep(input: { mission: Mission; stepId: string; now?: Date 
 }
 
 
+/** V17.1F §2 — history is immutable: pause/resume/cancel never touch a terminal mission. */
 export function pauseMission(mission: Mission, now: Date = new Date()): Mission {
+  if (missionIsTerminal(mission)) return mission;
   return { ...mission, status: "PAUSED", updatedAt: now.toISOString(), version: mission.version + 1 };
 }
 
 export function resumeMission(mission: Mission, now: Date = new Date()): Mission {
+  if (missionIsTerminal(mission)) return mission;
   return { ...mission, status: "ACTIVE", updatedAt: now.toISOString(), version: mission.version + 1 };
 }
 
 export function cancelMission(mission: Mission, now: Date = new Date()): Mission {
+  if (missionIsTerminal(mission)) return mission;
   return {
     ...mission,
     status: "CANCELLED",
