@@ -101,6 +101,17 @@ function walletMismatch(mission: Mission, wallet: string | null): string | null 
   return null;
 }
 
+export interface MissionConversionConfirmation {
+  stepId: string;
+  title: string;
+  body: string;
+  convertibleFlowPoints: number;
+  chainId: number;
+  requirements: readonly { id: string; label: string; met: boolean; hint?: string }[];
+  /** Constant: confirming this authorizes the off-chain conversion only. */
+  authorizes: "OFF_CHAIN_CONVERSION_ONLY";
+}
+
 export interface PrepareNextStepResult {
   mission: Mission;
   step: MissionStep | null;
@@ -108,6 +119,8 @@ export interface PrepareNextStepResult {
   /** Present when preparation could not be offered. */
   failureClass: MissionFailureClass | null;
   message: string;
+  /** V17.1B §5 — an explicit conversion confirmation the user must accept. */
+  conversionConfirmation?: MissionConversionConfirmation | null;
   /** Constant: the orchestrator executed nothing. */
   executed: false;
 }
@@ -117,7 +130,17 @@ export async function prepareNextMissionStep(input: {
   actor: FlowAiActor;
   wallet: string | null;
   claimableFlow?: number | null;
+  /** V17.1B §2 — canonical reward state resolved by the server, never inferred. */
+  rewardState?: {
+    nextEconomicStep: "CLAIM_FLOW" | "CONVERT_FLOW_POINTS" | "NONE";
+    claimableFlow: number | null;
+    convertibleFlowPoints: number;
+    requirements: readonly { id: string; label: string; met: boolean; hint?: string }[];
+    reasonCodes: readonly string[];
+    copy: { nextAction: string; readiness: string };
+  } | null;
 }): Promise<PrepareNextStepResult> {
+
   let mission = input.mission;
   const step = nextEligibleStep(mission);
   if (!step) {
