@@ -1,14 +1,14 @@
 /**
- * FlowBridge V16 §3/§4/§10 — "For you now" insight module.
+ * FlowBridge V22 §8 — "For you now" personalized decision module.
  *
- * Presentation only. Every number rendered here comes from the server feed's
- * canonical `economicSnapshot`; this component never computes economics, never
- * estimates and never signs. Actionable items link to the existing product
- * surface, which owns the frozen V15.3 human-authorized action path.
+ * Presentation only. Ranking, reason codes and every economic fact come from the
+ * server-side V22 decision engine (grounded in canonical V16 snapshots). This
+ * component never computes economics, never estimates, never signs, and never
+ * creates a mission implicitly — Build mission stays an explicit tap that asks
+ * the server to re-resolve the canonical opportunity.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
   AlertTriangle,
   ChevronDown,
@@ -24,9 +24,7 @@ import { assistantFetch } from "@/lib/ai/assistantClient";
 import { ensureConversationOwner, setConversationDraft } from "@/lib/ai/conversationStore";
 import { supabase } from "@/integrations/supabase/client";
 import { compileOpportunityIntoMission } from "@/lib/ai/mission/missionClient";
-import { opportunitySupportsMission } from "@/lib/ai/opportunity/missionTemplates";
-
-import type { OpportunityFeed as Feed, RankedOpportunity } from "@/lib/ai/opportunity/opportunityTypes";
+import type { DecisionItem, DecisionResult } from "@/lib/ai/decision/decisionTypes";
 
 const DOMAIN_ICON = {
   REWARDS: Gift,
@@ -37,7 +35,7 @@ const DOMAIN_ICON = {
   ECOSYSTEM: Sparkles,
 } as const;
 
-function provenanceTone(p: RankedOpportunity["provenance"]) {
+function provenanceTone(p: DecisionItem["provenance"]) {
   if (p === "LIVE") return "text-success";
   if (p === "CACHED") return "text-muted";
   return "text-danger";
@@ -55,7 +53,7 @@ function expiryLabel(iso: string | null): string | null {
 
 export function OpportunityFeed() {
   const router = useRouter();
-  const [feed, setFeed] = useState<Feed | null>(null);
+  const [decision, setDecision] = useState<DecisionResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [hidden, setHidden] = useState<string[]>([]);
@@ -66,9 +64,9 @@ export function OpportunityFeed() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await assistantFetch("/api/opportunities?limit=4");
+        const res = await assistantFetch("/api/ai/decision?limit=3");
         const json = await res.json();
-        if (!cancelled && json?.feed) setFeed(json.feed as Feed);
+        if (!cancelled && json?.decision) setDecision(json.decision as DecisionResult);
       } catch {
         /* degraded: the module simply does not render */
       } finally {
@@ -81,60 +79,62 @@ export function OpportunityFeed() {
   }, []);
 
   const items = useMemo(
-    () => (feed?.items ?? []).filter((i) => !hidden.includes(i.id)),
-    [feed, hidden],
+    () => (decision?.items ?? []).filter((i) => !hidden.includes(i.id)),
+    [decision, hidden],
   );
 
-  /** V16 §6 — mark seen once so unchanged state stops nagging on later visits. */
+  /** V22 §11 — mark seen once so unchanged state stops repeating on later visits. */
   useEffect(() => {
-    if (!feed || feed.items.length === 0) return;
-    for (const item of feed.items) {
+    if (!decision) return;
+    for (const item of decision.items) {
+      if (!item.opportunityId) continue;
       void assistantFetch("/api/opportunities", {
         method: "POST",
-        body: JSON.stringify({ key: item.id, action: "SEEN" }),
+        body: JSON.stringify({ key: item.opportunityId, action: "SEEN" }),
       }).catch(() => {});
     }
-  }, [feed]);
+  }, [decision]);
 
-  const mutateState = useCallback((key: string, action: "DISMISS" | "SNOOZE") => {
-    setHidden((prev) => [...prev, key]);
+  /** Presentation-only state. Never an economic invalidation (V22 §7). */
+  const mutateState = useCallback((item: DecisionItem, action: "DISMISS" | "SNOOZE") => {
+    setHidden((prev) => [...prev, item.id]);
+    if (!item.opportunityId) return;
     void assistantFetch("/api/opportunities", {
       method: "POST",
-      body: JSON.stringify({ key, action }),
+      body: JSON.stringify({ key: item.opportunityId, action }),
     }).catch(() => {});
   }, []);
 
-  /**
-   * V16.1 — the owner gate must be settled BEFORE the draft is written,
-   * otherwise the Assistant's own ownership check discards the anonymous-owned
-   * session (draft included) the moment it mounts.
-   */
   const explain = useCallback(
-    async (item: RankedOpportunity) => {
+    async (item: DecisionItem) => {
       try {
         const { data } = await supabase.auth.getUser();
         ensureConversationOwner(data.user?.id ?? "anonymous");
       } catch {
-        /* presentation-only: a failed owner read simply keeps the current session */
+        /* presentation-only */
       }
-      setConversationDraft(`Explain this opportunity: ${item.title} (${item.id})`);
+      setConversationDraft(
+        item.kind === "CONTINUE_MISSION"
+          ? `Explain my active mission: ${item.what}`
+          : `Explain this opportunity: ${item.title} (${item.id})`,
+      );
       void router.navigate({ to: "/assistant" });
     },
     [router],
   );
 
-
   /**
-   * V18 §3 — explicit initiation. Tapping this asks the SERVER to re-resolve the
-   * opportunity and compile a typed plan; it never sends a transaction and never
-   * carries the card's displayed numbers into the mission.
+   * V18 §3 / V22 §10 — explicit initiation. Tapping this asks the SERVER to
+   * re-resolve the opportunity and compile a typed plan; it never sends a
+   * transaction and never carries the card's displayed numbers into the mission.
    */
   const buildMission = useCallback(
-    async (item: RankedOpportunity) => {
+    async (item: DecisionItem) => {
+      if (!item.opportunityId) return;
       setCompiling(item.id);
       setNotice(null);
       try {
-        const res = await compileOpportunityIntoMission(item.id);
+        const res = await compileOpportunityIntoMission(item.opportunityId);
         if (!res.success || !res.mission) {
           setNotice({
             id: item.id,
@@ -177,13 +177,13 @@ export function OpportunityFeed() {
           For you now
         </p>
         <span className="font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted">
-          Flow AI insights
+          {decision?.memoryUsed ? "Personalized · your preferences" : "Flow AI insights"}
         </span>
       </div>
 
       <ul className="divide-y divide-hairline">
         {items.map((item) => {
-          const Icon = DOMAIN_ICON[item.domain] ?? Sparkles;
+          const Icon = item.domain ? (DOMAIN_ICON[item.domain] ?? Sparkles) : Target;
           const expiry = expiryLabel(item.expiresAt);
           const expanded = open === item.id;
           return (
@@ -193,11 +193,19 @@ export function OpportunityFeed() {
                   <Icon className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-mono text-[12px] font-black uppercase tracking-[0.05em]">
-                    {item.title}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted">
+                      #{item.rank}
+                    </span>
+                    <p className="truncate font-mono text-[12px] font-black uppercase tracking-[0.05em]">
+                      {item.title}
+                    </p>
+                  </div>
                   <p className="mt-0.5 line-clamp-2 font-mono text-[10px] leading-relaxed text-muted">
-                    {item.reason}
+                    {item.whyNow}
+                  </p>
+                  <p className="mt-1 line-clamp-2 font-mono text-[9.5px] leading-relaxed text-muted">
+                    {item.whatNext}
                   </p>
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
                     <span
@@ -205,27 +213,38 @@ export function OpportunityFeed() {
                     >
                       {item.provenance}
                     </span>
+                    {item.requiresWalletConfirmation && (
+                      <span className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-primary">
+                        Your wallet confirms
+                      </span>
+                    )}
                     {expiry && (
                       <span className="flex items-center gap-1 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted">
                         <Clock className="h-3 w-3" />
                         {expiry}
                       </span>
                     )}
-                    {item.containsPrivateEvidence && item.actorScope !== "PUBLIC" && (
+                    {item.containsPrivateEvidence && (
                       <span className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted">
                         Private to you
                       </span>
                     )}
                   </div>
 
+                  {item.blocked && item.blockerText && (
+                    <p className="mt-1.5 font-mono text-[9.5px] leading-relaxed text-danger">
+                      {item.blockerText}
+                    </p>
+                  )}
+
                   <div className="mt-2.5 flex flex-wrap items-center gap-2">
                     <Link
-                      to={item.recommendedSurface.href}
+                      to={item.surface.href}
                       className="rounded-xl bg-primary px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary-foreground"
                     >
-                      {item.recommendedSurface.label}
+                      {item.surface.label}
                     </Link>
-                    {opportunitySupportsMission(item) && (
+                    {item.supportsMission && (
                       <button
                         type="button"
                         disabled={compiling === item.id}
@@ -248,21 +267,23 @@ export function OpportunityFeed() {
                       aria-expanded={expanded}
                       className="flex items-center gap-1 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-primary"
                     >
-                      Why this matters
+                      Why this is first
                       <ChevronDown
                         className={`h-3 w-3 transition-transform ${expanded ? "rotate-180" : ""}`}
                       />
                     </button>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  aria-label="Dismiss"
-                  onClick={() => mutateState(item.id, "DISMISS")}
-                  className="shrink-0 rounded-lg p-1 text-muted transition-colors hover:text-foreground"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                {item.kind === "OPPORTUNITY" && (
+                  <button
+                    type="button"
+                    aria-label="Dismiss"
+                    onClick={() => mutateState(item, "DISMISS")}
+                    className="shrink-0 rounded-lg p-1 text-muted transition-colors hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
 
               {notice?.id === item.id && (
@@ -277,43 +298,63 @@ export function OpportunityFeed() {
               {expanded && (
                 <div className="fb-inset mt-2.5 space-y-2 p-3">
                   <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
-                    Evidence used
+                    Why this is ranked here
                   </p>
-                  <ul className="space-y-2">
-                    {item.evidenceRefs.map((ev) => (
-                      <li key={ev.id}>
-                        <p className="font-mono text-[10px] font-black uppercase tracking-[0.06em]">
-                          {ev.label}
-                        </p>
-                        <p className="font-mono text-[9.5px] leading-relaxed text-muted">
-                          {item.actorScope !== "PUBLIC" &&
-                          (ev.dataClass === "FLOWBRIDGE_DB" || ev.dataClass === "USER_MEMORY")
-                            ? "Your private FlowBridge data"
-                            : "Canonical FlowBridge / on-chain data"}{" "}
-                          · {ev.authority} · {ev.freshness} ·{" "}
-                          {new Date(ev.observedAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                        {ev.excerpt && (
-                          <p className="mt-0.5 font-mono text-[9.5px] leading-relaxed text-muted">
-                            {ev.excerpt}
-                          </p>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="font-mono text-[9px] leading-relaxed text-muted">
-                    Reason codes: {item.reasonCodes.join(", ")} · id {item.id}
+                  <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+                    {item.reasonCodes.join(" · ")}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => mutateState(item.id, "SNOOZE")}
-                    className="rounded-xl border border-hairline px-3 py-1.5 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted"
-                  >
-                    Snooze 24h
-                  </button>
+                  {item.facts.length > 0 && (
+                    <>
+                      <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+                        Canonical facts used
+                      </p>
+                      <ul className="space-y-1">
+                        {item.facts.map((f) => (
+                          <li
+                            key={`${item.id}-${f.label}`}
+                            className="font-mono text-[9.5px] leading-relaxed text-muted"
+                          >
+                            {f.label}: {f.value} · {f.source.replace(/_/g, " ").toLowerCase()}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {item.evidenceRefs.length > 0 && (
+                    <>
+                      <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+                        Evidence used
+                      </p>
+                      <ul className="space-y-2">
+                        {item.evidenceRefs.map((ev) => (
+                          <li key={ev.id}>
+                            <p className="font-mono text-[10px] font-black uppercase tracking-[0.06em]">
+                              {ev.label}
+                            </p>
+                            <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+                              {ev.dataClass === "FLOWBRIDGE_DB" || ev.dataClass === "USER_MEMORY"
+                                ? "Your private FlowBridge data"
+                                : "Canonical FlowBridge / on-chain data"}{" "}
+                              · {ev.authority} · {ev.freshness} ·{" "}
+                              {new Date(ev.observedAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {item.kind === "OPPORTUNITY" && (
+                    <button
+                      type="button"
+                      onClick={() => mutateState(item, "SNOOZE")}
+                      className="rounded-xl border border-hairline px-3 py-1.5 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted"
+                    >
+                      Snooze 24h
+                    </button>
+                  )}
                 </div>
               )}
             </li>
@@ -321,11 +362,10 @@ export function OpportunityFeed() {
         })}
       </ul>
 
-      {feed && feed.degradedDomains.length > 0 && (
+      {decision?.notice && (
         <p className="flex items-start gap-1.5 border-t border-hairline px-4 py-2.5 font-mono text-[9.5px] leading-relaxed text-muted">
           <AlertTriangle className="mt-[1px] h-3 w-3 shrink-0" />
-          {feed.degradedDomains.join(", ").toLowerCase()} data is unavailable right now, so nothing is
-          shown for it — no values are estimated.
+          {decision.notice}
         </p>
       )}
     </section>
