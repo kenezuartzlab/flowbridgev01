@@ -52,6 +52,9 @@ export function toMissionContext(mission: Mission): DecisionMissionContext {
     domains: missionDomains(mission),
     currentStepTitle: step?.title ?? null,
     currentStepRequiresWallet: !!step?.requiresWalletSignature,
+    hasPendingWalletStep: mission.steps.some(
+      (st) => st.requiresWalletSignature && st.state !== "COMPLETED" && st.state !== "CANCELLED",
+    ),
     blockingReason: step?.blockingReason ?? null,
     completedAt: mission.completedAt ?? null,
     updatedAt: mission.updatedAt,
