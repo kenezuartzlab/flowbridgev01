@@ -39,6 +39,17 @@ export interface MissionActionResponse {
   recovery?: MissionRecoveryAdvice | null;
   advanced?: boolean;
   message?: string;
+  /** V18 §5 — machine-readable compile outcome. */
+  code?: string;
+  template?: {
+    id: string;
+    version: string;
+    outcome: string;
+    goalText: string;
+    summary: string;
+    stakePortionPercent: number | null;
+    requiresUserInput: readonly string[];
+  } | null;
   /** V17.1B §5 — explicit off-chain conversion confirmation payload. */
   conversionConfirmation?: MissionConversionConfirmation | null;
   /** V17.1B §2 — canonical reward state resolved server-side. */
@@ -81,6 +92,17 @@ export async function resolveStakeHandoffFromServer(correlation: {
 }
 
 
+
+/**
+ * V18 §3 — explicit user initiation of a plan from a canonical opportunity.
+ * Sends the opportunity identity only; the server re-resolves the economics,
+ * chooses the typed template and owns deduplication. No transaction is sent.
+ */
+export async function compileOpportunityIntoMission(
+  opportunityId: string,
+): Promise<MissionActionResponse> {
+  return missionAction({ action: "compile-opportunity", opportunityId });
+}
 
 export async function listMissions(): Promise<Mission[]> {
   const res = await fetch("/api/missions", { headers: await authHeaders() });
