@@ -6,6 +6,7 @@ import { MissionPanel } from "@/components/assistant/MissionPanel";
 import { ExternalSkillEvidence } from "@/components/assistant/ExternalSkillEvidence";
 import { FederatedInsightPanel } from "@/components/assistant/FederatedInsightPanel";
 import { DeliberationPanel } from "@/components/assistant/DeliberationPanel";
+import { ScenarioComparePanel } from "@/components/assistant/ScenarioComparePanel";
 
 export const Route = createFileRoute("/assistant")({
   head: () => ({
