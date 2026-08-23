@@ -168,6 +168,11 @@ function HomePage() {
           )}
         </HeroCard>
 
+        {/* V16 — Flow AI proactive insights, evidence-backed and read-only */}
+        <OpportunityFeed />
+
+
+
 
         {/*
          * V10 — the Quick actions grid is gone: it was a dashboard-of-links that
