@@ -225,6 +225,20 @@ export function DeliberationPanel() {
             </div>
           )}
 
+          {!data.reconciliation && (
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-600">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Verified by FlowBridge · CANONICAL ONLY
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Nothing above became actionable. FlowBridge published no opportunity, amount, target
+                or mission from these external sources — your live FlowBridge state is unchanged and
+                remains the only basis for anything you can sign.
+              </p>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
