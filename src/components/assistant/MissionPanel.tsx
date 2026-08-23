@@ -63,6 +63,48 @@ function StepRow({ step, isNext }: { step: MissionStep; isNext: boolean }) {
   );
 }
 
+/**
+ * V17.1F §4/§6 — a terminal mission rendered as read-only history: outcome,
+ * completion time and the transaction evidence that closed each economic step.
+ * There are no action controls here; history can never be resumed or replayed.
+ */
+function HistoryRow({ mission }: { mission: Mission }) {
+  const p = missionProgress(mission);
+  const evidence = mission.steps.filter((s) => s.outputs?.txHash);
+  const completed = mission.completedAt ?? mission.updatedAt;
+  return (
+    <li className="px-3.5 py-2.5" data-testid="mission-history-item">
+      <div className="flex items-start justify-between gap-2">
+        <p className="min-w-0 flex-1 font-mono text-[11px] font-black uppercase tracking-[0.05em]">
+          {mission.goalText}
+        </p>
+        <span
+          className={`shrink-0 font-mono text-[9px] font-black uppercase tracking-[0.08em] ${
+            mission.status === "COMPLETED" ? "text-success" : "text-muted"
+          }`}
+        >
+          {mission.status}
+        </span>
+      </div>
+      <p className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+        {p.completed}/{p.total} steps ·{" "}
+        {completed ? new Date(completed).toLocaleString("en-US") : "time unavailable"}
+      </p>
+      {evidence.length > 0 && (
+        <ul className="mt-1.5 space-y-0.5">
+          {evidence.map((s) => (
+            <li key={s.id} className="font-mono text-[9.5px] text-muted">
+              {s.title}
+              {s.outputs.resolvedAmount ? ` · ${s.outputs.resolvedAmount}` : ""} ·{" "}
+              {String(s.outputs.txHash).slice(0, 10)}…{String(s.outputs.txHash).slice(-8)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
 export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: string }) {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [goalText, setGoalText] = useState(initialGoalText);
