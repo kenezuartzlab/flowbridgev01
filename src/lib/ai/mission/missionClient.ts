@@ -15,6 +15,8 @@ import type {
 } from "./missionTypes";
 import type { EditPreview } from "./missionPlanner";
 import type { MissionRecoveryAdvice } from "./missionProgress";
+import type { CanonicalStakeHandoff, StakeHandoffFailure } from "./stakeHandoff";
+
 
 async function authHeaders(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
