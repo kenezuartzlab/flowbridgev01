@@ -307,7 +307,37 @@ const RECOVERY: Record<MissionFailureClass, Omit<MissionRecoveryAdvice, "failure
     retryable: false,
     requiresFreshPreparation: true,
   },
+  /** V17.1B §7 — canonical reward-state failures. */
+  NO_CLAIMABLE_FLOW: {
+    message: "The canonical reward state reports no claimable FLOW on chain, so no claim was prepared.",
+    retryable: true,
+    requiresFreshPreparation: true,
+  },
+  NO_CONVERTIBLE_OR_CLAIMABLE_FLOW: {
+    message:
+      "You have no convertible FLOW Points and no claimable FLOW. Swap to accrue more FLOW Points, then prepare again.",
+    retryable: true,
+    requiresFreshPreparation: true,
+  },
+  CONVERSION_REQUIRED: {
+    message:
+      "Your FLOW Points must be converted to claimable FLOW first. That conversion is its own explicit confirmation.",
+    retryable: true,
+    requiresFreshPreparation: false,
+  },
+  CONVERSION_REQUIREMENTS_UNMET: {
+    message:
+      "The conversion requirements are not met yet (verified email, bound wallet, community channels).",
+    retryable: true,
+    requiresFreshPreparation: false,
+  },
+  REWARD_STATE_UNAVAILABLE: {
+    message: "Your canonical reward state could not be read, so nothing was offered. Try again shortly.",
+    retryable: true,
+    requiresFreshPreparation: true,
+  },
 };
+
 
 export function blockStep(input: {
   mission: Mission;
