@@ -97,10 +97,15 @@ function HistoryRow({ mission }: { mission: Mission }) {
           {mission.status}
         </span>
       </div>
+      {/* V25 §6 — one durable sentence built only from verified step outputs. */}
+      <p className="mt-0.5 font-mono text-[10px] leading-relaxed text-muted">
+        {completionSummary(mission).sentence}
+      </p>
       <p className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
         {p.completed}/{p.total} steps ·{" "}
         {completed ? new Date(completed).toLocaleString("en-US") : "time unavailable"}
       </p>
+
       {mission.source && (
         <p className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
           Built from your insight · {mission.source.opportunityKind.toLowerCase()} · template{" "}
