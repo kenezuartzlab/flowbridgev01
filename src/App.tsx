@@ -148,8 +148,10 @@ export default function App() {
     try {
       const stats = await fetchGlobalIncentiveStats();
       if (stats) setGlobalTotalClaimed(stats.globalTotalClaimed || 0);
-    } catch (e) {
-      console.error("Failed to load global stats:", e);
+    } catch {
+      // V30 §9 — this is a decorative community total. If it cannot be
+      // confirmed we keep the last known value and stay silent rather than
+      // reporting a failure the user cannot act on. No fake zero is shown.
     }
   };
 
