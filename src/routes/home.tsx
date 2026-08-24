@@ -180,6 +180,14 @@ function HomePage() {
         {/* V16 — Flow AI proactive insights, evidence-backed and read-only */}
         <OpportunityFeed />
 
+        {/*
+         * V26 — the guided journey sits UNDER the V25 state-aware summary: it
+         * teaches the next useful step without replacing the dominant
+         * recommendation and without creating anything economic.
+         */}
+        <JourneyCard />
+
+
 
 
 
