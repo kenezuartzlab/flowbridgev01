@@ -317,6 +317,16 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
                 answers from your FlowBridge data and on-chain evidence — it can explain and
                 prepare, but it never signs or submits anything.
               </p>
+              {/* V26 §9 — where you are, stated plainly. Never "you must". */}
+              {journeyLine && (
+                <p
+                  data-testid="assistant-journey-context"
+                  className="font-mono text-[10px] leading-relaxed text-primary"
+                >
+                  You're on: {journeyLine}
+                </p>
+              )}
+
               <div className="grid gap-2 sm:grid-cols-2">
                 {suggestions.map((s) => (
                   <button
