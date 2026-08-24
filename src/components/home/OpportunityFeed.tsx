@@ -1,8 +1,9 @@
 /**
- * FlowBridge V22 §8 — "For you now" personalized decision module.
+ * FlowBridge V25 §2/§3/§8/§10 — "For you now" as the primary intelligence
+ * surface, plus the compact Flow AI summary that sits above it.
  *
  * Presentation only. Ranking, reason codes and every economic fact come from the
- * server-side V22 decision engine (grounded in canonical V16 snapshots). This
+ * frozen V22 decision engine (grounded in canonical V16 snapshots). This
  * component never computes economics, never estimates, never signs, and never
  * creates a mission implicitly — Build mission stays an explicit tap that asks
  * the server to re-resolve the canonical opportunity.
@@ -24,7 +25,16 @@ import { assistantFetch } from "@/lib/ai/assistantClient";
 import { ensureConversationOwner, setConversationDraft } from "@/lib/ai/conversationStore";
 import { supabase } from "@/integrations/supabase/client";
 import { compileOpportunityIntoMission } from "@/lib/ai/mission/missionClient";
-import type { DecisionItem, DecisionResult } from "@/lib/ai/decision/decisionTypes";
+import type { DecisionItem } from "@/lib/ai/decision/decisionTypes";
+import { useDecisionFeed } from "@/lib/ai/experience/useDecisionFeed";
+import {
+  evidenceLevel,
+  itemStatus,
+  plainReasons,
+  primaryCta,
+  resolveExperience,
+} from "@/lib/ai/experience/experienceModel";
+import { EvidenceChip, StatusChip } from "@/components/ai/StatusChip";
 
 const DOMAIN_ICON = {
   REWARDS: Gift,
@@ -34,12 +44,6 @@ const DOMAIN_ICON = {
   WALLET: Wallet,
   ECOSYSTEM: Sparkles,
 } as const;
-
-function provenanceTone(p: DecisionItem["provenance"]) {
-  if (p === "LIVE") return "text-success";
-  if (p === "CACHED") return "text-muted";
-  return "text-danger";
-}
 
 function expiryLabel(iso: string | null): string | null {
   if (!iso) return null;
@@ -53,34 +57,15 @@ function expiryLabel(iso: string | null): string | null {
 
 export function OpportunityFeed() {
   const router = useRouter();
-  const [decision, setDecision] = useState<DecisionResult | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { decision, signedIn, loading } = useDecisionFeed();
   const [open, setOpen] = useState<string | null>(null);
   const [hidden, setHidden] = useState<string[]>([]);
   const [compiling, setCompiling] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ id: string; text: string; ok: boolean } | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await assistantFetch("/api/ai/decision?limit=3");
-        const json = await res.json();
-        if (!cancelled && json?.decision) setDecision(json.decision as DecisionResult);
-      } catch {
-        /* degraded: the module simply does not render */
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const items = useMemo(
-    () => (decision?.items ?? []).filter((i) => !hidden.includes(i.id)),
-    [decision, hidden],
+  const experience = useMemo(
+    () => resolveExperience({ decision, signedIn, hiddenIds: hidden }),
+    [decision, signedIn, hidden],
   );
 
   /** V22 §11 — mark seen once so unchanged state stops repeating on later visits. */
@@ -123,6 +108,20 @@ export function OpportunityFeed() {
     [router],
   );
 
+  const ask = useCallback(
+    async (prompt: string) => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        ensureConversationOwner(data.user?.id ?? "anonymous");
+      } catch {
+        /* presentation-only */
+      }
+      setConversationDraft(prompt);
+      void router.navigate({ to: "/assistant" });
+    },
+    [router],
+  );
+
   /**
    * V18 §3 / V22 §10 — explicit initiation. Tapping this asks the SERVER to
    * re-resolve the opportunity and compile a typed plan; it never sends a
@@ -160,6 +159,212 @@ export function OpportunityFeed() {
     [router],
   );
 
+  const Header = (
+    <div className="border-b border-hairline px-4 py-3">
+      <p className="fb-eyebrow flex items-center gap-1.5">
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
+        Flow AI · for you now
+      </p>
+      <p className="mt-1 font-mono text-[13px] font-black uppercase leading-snug tracking-[0.04em]">
+        {experience.headline}
+      </p>
+      <p className="mt-1 font-mono text-[10px] leading-relaxed text-muted">{experience.subline}</p>
+    </div>
+  );
+
+  const cardBody = (item: DecisionItem, dominant: boolean) => {
+    const Icon = item.domain ? (DOMAIN_ICON[item.domain] ?? Sparkles) : Target;
+    const expiry = expiryLabel(item.expiresAt);
+    const expanded = open === item.id;
+    const reasons = plainReasons(item.reasonCodes);
+    return (
+      <>
+        <div className="flex items-start gap-2.5">
+          <span
+            className={`grid shrink-0 place-items-center rounded-xl bg-primary/12 text-primary ${dominant ? "h-9 w-9" : "h-8 w-8"}`}
+          >
+            <Icon className={dominant ? "h-4.5 w-4.5" : "h-4 w-4"} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p
+              className={`font-mono font-black uppercase leading-snug tracking-[0.05em] ${dominant ? "text-[13px]" : "truncate text-[11.5px]"}`}
+            >
+              {item.title}
+            </p>
+            {/* §2 — what is this, why now, what happens next, wallet? */}
+            <p
+              className={`mt-1 font-mono leading-relaxed text-muted ${dominant ? "text-[11px]" : "line-clamp-2 text-[10px]"}`}
+            >
+              {dominant ? item.what : item.whyNow}
+            </p>
+            {dominant && (
+              <p className="mt-1 font-mono text-[10.5px] leading-relaxed text-muted">
+                Why now: {item.whyNow}
+              </p>
+            )}
+            <p
+              className={`mt-1 font-mono leading-relaxed text-muted ${dominant ? "text-[10.5px]" : "line-clamp-1 text-[9.5px]"}`}
+            >
+              Next: {item.whatNext}
+            </p>
+
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <StatusChip status={itemStatus(item)} />
+              {item.requiresWalletConfirmation && itemStatus(item) !== "WAITING_FOR_USER" && (
+                <StatusChip status="WAITING_FOR_USER" />
+              )}
+              {expiry && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.08em] text-muted">
+                  <Clock className="h-2.5 w-2.5" />
+                  {expiry}
+                </span>
+              )}
+              {reasons.map((r) => (
+                <span
+                  key={r}
+                  className="rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted"
+                >
+                  {r}
+                </span>
+              ))}
+            </div>
+
+            {item.blocked && item.blockerText && (
+              <p className="mt-1.5 font-mono text-[9.5px] leading-relaxed text-danger">
+                {item.blockerText}
+              </p>
+            )}
+
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <Link
+                to={item.surface.href}
+                className={`rounded-xl bg-primary font-mono font-black uppercase tracking-[0.1em] text-primary-foreground ${dominant ? "px-4 py-2 text-[11px]" : "px-3 py-1.5 text-[10px]"}`}
+              >
+                {primaryCta(item)}
+              </Link>
+              {item.supportsMission && (
+                <button
+                  type="button"
+                  disabled={compiling === item.id}
+                  onClick={() => void buildMission(item)}
+                  className="rounded-xl border border-primary/40 bg-primary/10 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary transition-opacity disabled:opacity-50"
+                >
+                  {compiling === item.id ? "Building…" : "Build mission"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => void explain(item)}
+                className="rounded-xl border border-hairline px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:text-foreground"
+              >
+                Ask Flow AI
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpen(expanded ? null : item.id)}
+                aria-expanded={expanded}
+                className="flex items-center gap-1 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-primary"
+              >
+                Details
+                <ChevronDown
+                  className={`h-3 w-3 transition-transform ${expanded ? "rotate-180" : ""}`}
+                />
+              </button>
+            </div>
+          </div>
+          {item.kind === "OPPORTUNITY" && (
+            <button
+              type="button"
+              aria-label="Dismiss"
+              onClick={() => mutateState(item, "DISMISS")}
+              className="shrink-0 rounded-lg p-1 text-muted transition-colors hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        {notice?.id === item.id && (
+          <p
+            className={`mt-2 font-mono text-[9.5px] leading-relaxed ${notice.ok ? "text-success" : "text-danger"}`}
+            role="status"
+          >
+            {notice.text}
+          </p>
+        )}
+
+        {expanded && (
+          <div className="fb-inset mt-2.5 space-y-2 p-3">
+            <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+              Why this is ranked here
+            </p>
+            <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+              {item.reasonCodes.join(" · ")}
+            </p>
+            {item.facts.length > 0 && (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <EvidenceChip level="VERIFIED" />
+                  <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+                    Canonical facts used
+                  </p>
+                </div>
+                <ul className="space-y-1">
+                  {item.facts.map((f) => (
+                    <li
+                      key={`${item.id}-${f.label}`}
+                      className="font-mono text-[9.5px] leading-relaxed text-muted"
+                    >
+                      {f.label}: {f.value} · {f.source.replace(/_/g, " ").toLowerCase()}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {item.evidenceRefs.length > 0 && (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <EvidenceChip level={evidenceLevel(item)} />
+                  <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+                    Evidence used
+                  </p>
+                </div>
+                <ul className="space-y-2">
+                  {item.evidenceRefs.map((ev) => (
+                    <li key={ev.id}>
+                      <p className="font-mono text-[10px] font-black uppercase tracking-[0.06em]">
+                        {ev.label}
+                      </p>
+                      <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+                        {ev.dataClass === "FLOWBRIDGE_DB" || ev.dataClass === "USER_MEMORY"
+                          ? "Your private FlowBridge data"
+                          : "Canonical FlowBridge / on-chain data"}{" "}
+                        · {ev.authority} · {ev.freshness} ·{" "}
+                        {new Date(ev.observedAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {item.kind === "OPPORTUNITY" && (
+              <button
+                type="button"
+                onClick={() => mutateState(item, "SNOOZE")}
+                className="rounded-xl border border-hairline px-3 py-1.5 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted"
+              >
+                Snooze 24h
+              </button>
+            )}
+          </div>
+        )}
+      </>
+    );
+  };
+
   if (loading) {
     return (
       <section className="fb-surface p-4">
@@ -167,205 +372,64 @@ export function OpportunityFeed() {
       </section>
     );
   }
-  if (items.length === 0) return null;
+
+  /** V25 §10 — an empty state teaches the product instead of going blank. */
+  if (!experience.primary) {
+    return (
+      <section className="fb-surface overflow-hidden" data-testid="ai-summary">
+        {Header}
+        <div className="flex flex-wrap gap-2 p-3.5 sm:p-4">
+          <Link
+            to="/"
+            className="rounded-xl bg-primary px-3.5 py-2 font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-primary-foreground"
+          >
+            Swap on BOT Chain
+          </Link>
+          <Link
+            to="/rewards"
+            className="rounded-xl border border-hairline px-3.5 py-2 font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-muted"
+          >
+            See rewards
+          </Link>
+          <button
+            type="button"
+            onClick={() => void ask("What should I do now?")}
+            className="rounded-xl border border-primary/40 bg-primary/10 px-3.5 py-2 font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-primary"
+          >
+            Ask Flow AI
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="fb-surface overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
-        <p className="fb-eyebrow flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
-          For you now
-        </p>
-        <span className="font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted">
-          {decision?.memoryUsed ? "Personalized · your preferences" : "Flow AI insights"}
-        </span>
+    <section className="fb-surface overflow-hidden" data-testid="ai-summary">
+      {Header}
+
+      {/* §3 — the single highest-priority action, visually dominant. */}
+      <div
+        className="border-b border-hairline bg-primary/[0.04] px-3.5 py-3.5 sm:px-4"
+        data-testid="decision-primary"
+      >
+        {cardBody(experience.primary, true)}
       </div>
 
-      <ul className="divide-y divide-hairline">
-        {items.map((item) => {
-          const Icon = item.domain ? (DOMAIN_ICON[item.domain] ?? Sparkles) : Target;
-          const expiry = expiryLabel(item.expiresAt);
-          const expanded = open === item.id;
-          return (
-            <li key={item.id} className="px-3 py-3 sm:px-4">
-              <div className="flex items-start gap-2.5">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/12 text-primary">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted">
-                      #{item.rank}
-                    </span>
-                    <p className="truncate font-mono text-[12px] font-black uppercase tracking-[0.05em]">
-                      {item.title}
-                    </p>
-                  </div>
-                  <p className="mt-0.5 line-clamp-2 font-mono text-[10px] leading-relaxed text-muted">
-                    {item.whyNow}
-                  </p>
-                  <p className="mt-1 line-clamp-2 font-mono text-[9.5px] leading-relaxed text-muted">
-                    {item.whatNext}
-                  </p>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                    <span
-                      className={`font-mono text-[9px] font-black uppercase tracking-[0.1em] ${provenanceTone(item.provenance)}`}
-                    >
-                      {item.provenance}
-                    </span>
-                    {item.requiresWalletConfirmation && (
-                      <span className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-primary">
-                        Your wallet confirms
-                      </span>
-                    )}
-                    {expiry && (
-                      <span className="flex items-center gap-1 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted">
-                        <Clock className="h-3 w-3" />
-                        {expiry}
-                      </span>
-                    )}
-                    {item.containsPrivateEvidence && (
-                      <span className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-muted">
-                        Private to you
-                      </span>
-                    )}
-                  </div>
-
-                  {item.blocked && item.blockerText && (
-                    <p className="mt-1.5 font-mono text-[9.5px] leading-relaxed text-danger">
-                      {item.blockerText}
-                    </p>
-                  )}
-
-                  <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                    <Link
-                      to={item.surface.href}
-                      className="rounded-xl bg-primary px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary-foreground"
-                    >
-                      {item.surface.label}
-                    </Link>
-                    {item.supportsMission && (
-                      <button
-                        type="button"
-                        disabled={compiling === item.id}
-                        onClick={() => void buildMission(item)}
-                        className="rounded-xl border border-primary/40 bg-primary/10 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary transition-opacity disabled:opacity-50"
-                      >
-                        {compiling === item.id ? "Building…" : "Build mission"}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => void explain(item)}
-                      className="rounded-xl border border-hairline px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted transition-colors hover:text-foreground"
-                    >
-                      Ask Flow AI
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setOpen(expanded ? null : item.id)}
-                      aria-expanded={expanded}
-                      className="flex items-center gap-1 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-primary"
-                    >
-                      Why this is first
-                      <ChevronDown
-                        className={`h-3 w-3 transition-transform ${expanded ? "rotate-180" : ""}`}
-                      />
-                    </button>
-                  </div>
-                </div>
-                {item.kind === "OPPORTUNITY" && (
-                  <button
-                    type="button"
-                    aria-label="Dismiss"
-                    onClick={() => mutateState(item, "DISMISS")}
-                    className="shrink-0 rounded-lg p-1 text-muted transition-colors hover:text-foreground"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {notice?.id === item.id && (
-                <p
-                  className={`mt-2 font-mono text-[9.5px] leading-relaxed ${notice.ok ? "text-success" : "text-danger"}`}
-                  role="status"
-                >
-                  {notice.text}
-                </p>
-              )}
-
-              {expanded && (
-                <div className="fb-inset mt-2.5 space-y-2 p-3">
-                  <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
-                    Why this is ranked here
-                  </p>
-                  <p className="font-mono text-[9.5px] leading-relaxed text-muted">
-                    {item.reasonCodes.join(" · ")}
-                  </p>
-                  {item.facts.length > 0 && (
-                    <>
-                      <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
-                        Canonical facts used
-                      </p>
-                      <ul className="space-y-1">
-                        {item.facts.map((f) => (
-                          <li
-                            key={`${item.id}-${f.label}`}
-                            className="font-mono text-[9.5px] leading-relaxed text-muted"
-                          >
-                            {f.label}: {f.value} · {f.source.replace(/_/g, " ").toLowerCase()}
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                  {item.evidenceRefs.length > 0 && (
-                    <>
-                      <p className="font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
-                        Evidence used
-                      </p>
-                      <ul className="space-y-2">
-                        {item.evidenceRefs.map((ev) => (
-                          <li key={ev.id}>
-                            <p className="font-mono text-[10px] font-black uppercase tracking-[0.06em]">
-                              {ev.label}
-                            </p>
-                            <p className="font-mono text-[9.5px] leading-relaxed text-muted">
-                              {ev.dataClass === "FLOWBRIDGE_DB" || ev.dataClass === "USER_MEMORY"
-                                ? "Your private FlowBridge data"
-                                : "Canonical FlowBridge / on-chain data"}{" "}
-                              · {ev.authority} · {ev.freshness} ·{" "}
-                              {new Date(ev.observedAt).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                  {item.kind === "OPPORTUNITY" && (
-                    <button
-                      type="button"
-                      onClick={() => mutateState(item, "SNOOZE")}
-                      className="rounded-xl border border-hairline px-3 py-1.5 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted"
-                    >
-                      Snooze 24h
-                    </button>
-                  )}
-                </div>
-              )}
+      {/* Secondary insights stay subordinate: no competing dominant CTA. */}
+      {experience.secondary.length > 0 && (
+        <ul className="divide-y divide-hairline">
+          {experience.secondary.map((item) => (
+            <li key={item.id} className="px-3 py-3 sm:px-4" data-testid="decision-secondary">
+              {cardBody(item, false)}
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
 
-      {decision?.notice && (
+      {experience.notice && (
         <p className="flex items-start gap-1.5 border-t border-hairline px-4 py-2.5 font-mono text-[9.5px] leading-relaxed text-muted">
           <AlertTriangle className="mt-[1px] h-3 w-3 shrink-0" />
-          {decision.notice}
+          {experience.notice}
         </p>
       )}
     </section>
