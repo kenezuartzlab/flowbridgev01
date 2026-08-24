@@ -33,6 +33,10 @@ import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
 import { useRewardState } from "@/lib/rewards/useRewardState";
 import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 import { JourneyCard } from "@/components/home/JourneyCard";
+import { OnboardingOverlay } from "@/components/growth/OnboardingOverlay";
+import { NotificationCenter } from "@/components/growth/NotificationCenter";
+import { GraduationCap } from "lucide-react";
+
 
 
 
@@ -123,6 +127,12 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/*
+       * V27 §4 — animated first-time onboarding. Teaching + navigation only: it
+       * creates no mission, no prepared action and never signs anything.
+       */}
+      <OnboardingOverlay />
+
       <AppTopBar
         eyebrow={page.hero.eyebrow || greeting}
         onEyebrowClick={canCycle ? nextGreeting : undefined}
@@ -132,6 +142,8 @@ function HomePage() {
         actions={
           <>
           <CampaignPtsPill />
+          {/* V27 §9 — in-app notification centre: deep links only. */}
+          <NotificationCenter />
           <Link
             to="/"
             aria-label="Trade"
@@ -142,6 +154,7 @@ function HomePage() {
           </>
         }
       />
+
 
       <main
         className="mx-auto w-full max-w-2xl space-y-4 px-3 pt-3 sm:px-4 sm:pt-4 md:max-w-4xl md:pt-6"
@@ -186,6 +199,29 @@ function HomePage() {
          * recommendation and without creating anything economic.
          */}
         <JourneyCard />
+
+        {/*
+         * V27 §6 — one quiet entry point to the learning centre. Navigation only.
+         */}
+        <Link
+          to="/learn"
+          data-testid="home-learn-link"
+          className="fb-surface flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:border-primary/40"
+        >
+          <span className="min-w-0">
+            <span className="fb-eyebrow flex items-center gap-1.5">
+              <GraduationCap className="h-3.5 w-3.5 text-primary" />
+              Ways to earn
+            </span>
+            <span className="mt-1.5 block text-[11.5px] leading-relaxed text-muted">
+              Points, claims, staking estimates and campaign rules — in plain English, with the
+              limits stated.
+            </span>
+          </span>
+          <ArrowUpRight className="h-4 w-4 shrink-0 text-muted" />
+        </Link>
+
+
 
 
 
