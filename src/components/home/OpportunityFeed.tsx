@@ -372,10 +372,20 @@ export function OpportunityFeed() {
     );
   };
 
+  /**
+   * V30 §3/§6 — the loading state names itself, so a slow read looks like work
+   * in progress rather than a blank or broken card.
+   */
   if (loading) {
     return (
-      <section className="fb-surface p-4">
-        <div className="fb-inset h-16 animate-pulse" />
+      <section className="fb-surface overflow-hidden" data-testid="ai-summary-loading">
+        {Header}
+        <div className="p-3.5 sm:p-4">
+          <div className="fb-inset h-16 motion-safe:animate-pulse" />
+          <p className="mt-2 font-mono text-[9.5px] leading-relaxed text-muted" role="status">
+            Checking your FlowBridge data…
+          </p>
+        </div>
       </section>
     );
   }
