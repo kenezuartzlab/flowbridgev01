@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Bot, ChevronDown, RotateCcw, ShieldCheck, Sparkles, User, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { assistantFetch } from "@/lib/ai/assistantClient";
-import { useDecisionFeed } from "@/lib/ai/experience/useDecisionFeed";
-import { contextualPrompts } from "@/lib/ai/experience/experienceModel";
+import { useJourney } from "@/lib/ai/journey/useJourney";
+import { journeyContextLine, journeyPrompts } from "@/lib/ai/journey/journeyPrompts";
+
 import { supabase } from "@/integrations/supabase/client";
 import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
 import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
