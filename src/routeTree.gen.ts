@@ -61,6 +61,7 @@ import { Route as ApiRewardsStateRouteImport } from './routes/api/rewards.state'
 import { Route as ApiRewardsConvertRouteImport } from './routes/api/rewards.convert'
 import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
+import { Route as ApiProfileParticipationRouteImport } from './routes/api/profile.participation'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
 import { Route as ApiCampaignsMeRouteImport } from './routes/api/campaigns.me'
 import { Route as ApiCampaignsLeaderboardRouteImport } from './routes/api/campaigns.leaderboard'
@@ -357,6 +358,11 @@ const ApiPublicWalletLookupRoute = ApiPublicWalletLookupRouteImport.update({
   path: '/api/public/wallet-lookup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProfileParticipationRoute = ApiProfileParticipationRouteImport.update({
+  id: '/api/profile/participation',
+  path: '/api/profile/participation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
   id: '/api/incentives/global',
   path: '/api/incentives/global',
@@ -584,6 +590,7 @@ export interface FileRoutesByFullPath {
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/profile/participation': typeof ApiProfileParticipationRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
@@ -670,6 +677,7 @@ export interface FileRoutesByTo {
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/profile/participation': typeof ApiProfileParticipationRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
@@ -757,6 +765,7 @@ export interface FileRoutesById {
   '/api/campaigns/leaderboard': typeof ApiCampaignsLeaderboardRoute
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
+  '/api/profile/participation': typeof ApiProfileParticipationRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
@@ -845,6 +854,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
+    | '/api/profile/participation'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
     | '/api/rewards/convert'
@@ -931,6 +941,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
+    | '/api/profile/participation'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
     | '/api/rewards/convert'
@@ -1017,6 +1028,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/leaderboard'
     | '/api/campaigns/me'
     | '/api/incentives/global'
+    | '/api/profile/participation'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
     | '/api/rewards/convert'
@@ -1098,6 +1110,7 @@ export interface RootRouteChildren {
   ApiAiScenariosRoute: typeof ApiAiScenariosRoute
   ApiBannerImageSplatRoute: typeof ApiBannerImageSplatRoute
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
+  ApiProfileParticipationRoute: typeof ApiProfileParticipationRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiRewardsClaimAuthorizationRoute: typeof ApiRewardsClaimAuthorizationRoute
   ApiRewardsConvertRoute: typeof ApiRewardsConvertRoute
@@ -1485,6 +1498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWalletLookupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/profile/participation': {
+      id: '/api/profile/participation'
+      path: '/api/profile/participation'
+      fullPath: '/api/profile/participation'
+      preLoaderRoute: typeof ApiProfileParticipationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/incentives/global': {
       id: '/api/incentives/global'
       path: '/api/incentives/global'
@@ -1847,6 +1867,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiScenariosRoute: ApiAiScenariosRoute,
   ApiBannerImageSplatRoute: ApiBannerImageSplatRoute,
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
+  ApiProfileParticipationRoute: ApiProfileParticipationRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiRewardsClaimAuthorizationRoute: ApiRewardsClaimAuthorizationRoute,
   ApiRewardsConvertRoute: ApiRewardsConvertRoute,
