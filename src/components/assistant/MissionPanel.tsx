@@ -1,22 +1,18 @@
 /**
- * FlowBridge V17 §6 — the mission surface.
+ * FlowBridge V17 §6 + V25 §5/§6 — the mission surface as a narrative.
  *
- * Shows the goal, the typed step graph, what is next, what is blocked and how
- * many wallet confirmations the user should still expect. Copy never implies
- * automation: Flow AI plans and prepares, the user signs.
+ * The first frame answers three questions only: what is done, what is happening
+ * now, what comes next. The typed step graph still exists and is one tap away,
+ * but it is no longer the default reading. Copy never implies automation: Flow AI
+ * plans and prepares, the user signs.
  */
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  CheckCircle2,
   ChevronDown,
-  CircleDashed,
-  Loader2,
-  Lock,
   Pause,
   Play,
   RotateCcw,
   ShieldCheck,
-  X,
 } from "lucide-react";
 import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
 import {
@@ -25,43 +21,51 @@ import {
   type MissionActionResponse,
 } from "@/lib/ai/mission/missionClient";
 import { missionProgress, type Mission, type MissionStep } from "@/lib/ai/mission/missionTypes";
+import {
+  completionSummary,
+  missionNarrative,
+  stepDetail,
+  stepStatus,
+} from "@/lib/ai/experience/missionNarrative";
+import { StatusChip } from "@/components/ai/StatusChip";
 
-const STATE_ICON: Record<string, ReactNode> = {
-  COMPLETED: <CheckCircle2 className="h-3.5 w-3.5 text-success" />,
-  WAITING_FOR_USER: <Lock className="h-3.5 w-3.5 text-primary" />,
-  WAITING_FOR_CONFIRMATION: <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />,
-  BLOCKED: <X className="h-3.5 w-3.5 text-danger" />,
-};
-
-function StepRow({ step, isNext }: { step: MissionStep; isNext: boolean }) {
+function StepRow({
+  step,
+  isNext,
+  emphasis = false,
+  caption,
+}: {
+  step: MissionStep;
+  isNext: boolean;
+  emphasis?: boolean;
+  caption?: string;
+}) {
   return (
     <li
-      className={`flex items-start gap-2.5 px-3.5 py-2.5 ${isNext ? "bg-primary/5" : ""}`}
+      className={`px-3.5 py-2.5 ${isNext ? "bg-primary/5" : ""}`}
       data-testid="mission-step"
     >
-      <span className="mt-[2px] shrink-0">
-        {STATE_ICON[step.state] ?? <CircleDashed className="h-3.5 w-3.5 text-muted" />}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="font-mono text-[11.5px] font-black uppercase tracking-[0.05em]">
-          {step.title}
+      {caption && (
+        <p className="mb-1 font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+          {caption}
         </p>
-        <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-          {step.state.replace(/_/g, " ")}
-          {step.requiresWalletSignature ? " · your wallet signs" : ""}
-          {step.amountUnresolved && !step.outputs.resolvedAmount
-            ? " · amount unresolved until confirmed"
-            : ""}
-        </p>
-        {step.blockingReason && (
-          <p className="mt-1 font-mono text-[10px] leading-relaxed text-danger">
-            {step.blockingReason}
+      )}
+      <div className="flex items-start gap-2.5">
+        <StatusChip status={stepStatus(step)} className="mt-[2px] shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p
+            className={`font-mono font-black uppercase tracking-[0.05em] ${emphasis ? "text-[12.5px]" : "text-[11.5px]"}`}
+          >
+            {step.title}
           </p>
-        )}
+          {/* V25 §5 — unknown amounts are stated honestly, never estimated. */}
+          <p className="font-mono text-[10px] leading-relaxed text-muted">{stepDetail(step)}</p>
+        </div>
       </div>
     </li>
   );
 }
+
 
 /**
  * V17.1F §4/§6 — a terminal mission rendered as read-only history: outcome,
