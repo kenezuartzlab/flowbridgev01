@@ -38,7 +38,7 @@ export function JourneyCard() {
 
   if (loading) {
     return (
-      <section className="fb-surface p-4">
+      <section className="fb-surface p-4" data-testid="journey-loading">
         <div className="fb-inset h-14 animate-pulse" />
       </section>
     );
