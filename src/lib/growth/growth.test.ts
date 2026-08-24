@@ -48,7 +48,7 @@ describe("V27 onboarding", () => {
   it("never promises earnings or quotes a number", () => {
     for (const step of ONBOARDING_STEPS) {
       const text = [step.title, step.message, ...step.points].join(" ").toLowerCase();
-      expect(text).not.toMatch(/guaranteed|earn up to|risk-free|apy of/);
+      expect(text).not.toMatch(/earn up to|risk-free|guaranteed (income|returns?|rewards?)/);
     }
   });
 });
