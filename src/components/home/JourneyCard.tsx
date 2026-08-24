@@ -25,7 +25,7 @@ const CHIP: Record<string, "VERIFIED" | "PREVIEW" | "WAITING_FOR_USER" | "VERIFY
   };
 
 export function JourneyCard() {
-  const { journey, secondary, selection, loading, dismiss, snooze } = useJourney();
+  const { journey, secondary, selection, loading, dismiss, snooze, signedIn } = useJourney();
 
   useEffect(() => {
     if (!journey) return;
