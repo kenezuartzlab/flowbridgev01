@@ -235,32 +235,85 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
 
           {active && (
             <div className="fb-inset overflow-hidden rounded-xl">
-              <div className="border-b border-hairline px-3.5 py-2.5">
-                <p className="font-mono text-[11.5px] font-black uppercase tracking-[0.05em]">
-                  {active.goalText}
-                </p>
-                <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-                  {active.status} · {missionProgress(active).completed}/{missionProgress(active).total} steps ·{" "}
-                  {missionProgress(active).expectedUserConfirmations} wallet confirmations expected
-                </p>
-                {active.source && (
-                  <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-                    Built from your insight · {active.source.opportunityKind.toLowerCase()} ·
-                    template {active.source.templateId} {active.source.templateVersion}
-                  </p>
-                )}
-                {active.goal.missingSlots.length > 0 && (
-                  <p className="mt-1 font-mono text-[10px] text-muted">
-                    Missing: {active.goal.missingSlots.join(", ")} — tell me the exact amount and I'll
-                    plan it; I never pick one for you.
-                  </p>
-                )}
-              </div>
-              <ul className="divide-y divide-hairline">
-                {active.steps.map((s) => (
-                  <StepRow key={s.id} step={s} isNext={s.id === active.currentStepId} />
-                ))}
-              </ul>
+              {(() => {
+                const n = missionNarrative(active);
+                return (
+                  <>
+                    <div className="border-b border-hairline px-3.5 py-2.5">
+                      <p className="font-mono text-[11.5px] font-black uppercase tracking-[0.05em]">
+                        {active.goalText}
+                      </p>
+                      {/* V25 §5 — progress in words first, numbers second. */}
+                      <p className="mt-0.5 font-mono text-[10.5px] leading-relaxed text-muted">
+                        {n.current
+                          ? n.blocked
+                            ? "One thing is holding this up."
+                            : `Now: ${n.current.title}.`
+                          : "Every step is done."}
+                        {n.next ? ` Then: ${n.next.title}.` : ""}
+                      </p>
+                      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-foreground/8">
+                        <span
+                          className="block h-full rounded-full bg-primary"
+                          style={{ width: `${n.percent}%` }}
+                        />
+                      </div>
+                      <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+                        {n.completedCount}/{n.totalCount} done ·{" "}
+                        {n.expectedUserConfirmations === 0
+                          ? "no wallet confirmation left"
+                          : `${n.expectedUserConfirmations} wallet confirmation${n.expectedUserConfirmations === 1 ? "" : "s"} still yours to approve`}
+                      </p>
+                      {active.source && (
+                        <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+                          Built from your insight · {active.source.opportunityKind.toLowerCase()} ·
+                          template {active.source.templateId} {active.source.templateVersion}
+                        </p>
+                      )}
+                      {active.goal.missingSlots.length > 0 && (
+                        <p className="mt-1 font-mono text-[10px] text-muted">
+                          Missing: {active.goal.missingSlots.join(", ")} — tell me the exact amount
+                          and I'll plan it; I never pick one for you.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* The narrative frame: current step, then what follows. */}
+                    <ul className="divide-y divide-hairline">
+                      {n.current && (
+                        <StepRow
+                          step={n.current}
+                          isNext
+                          emphasis
+                          caption={n.blocked ? "Needs attention" : "Happening now"}
+                        />
+                      )}
+                      {n.next && <StepRow step={n.next} isNext={false} caption="Next" />}
+                    </ul>
+
+                    {/* §5 — the full typed graph stays available, one tap away. */}
+                    <button
+                      type="button"
+                      onClick={() => setStepsOpen((v) => !v)}
+                      aria-expanded={stepsOpen}
+                      className="flex w-full items-center justify-between border-t border-hairline px-3.5 py-2 text-left font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted"
+                    >
+                      All {n.totalCount} steps
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform ${stepsOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                    {stepsOpen && (
+                      <ul className="divide-y divide-hairline border-t border-hairline">
+                        {active.steps.map((s) => (
+                          <StepRow key={s.id} step={s} isNext={s.id === active.currentStepId} />
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                );
+              })()}
+
               <div className="flex flex-wrap gap-2 border-t border-hairline p-3">
                 <button
                   type="button"
