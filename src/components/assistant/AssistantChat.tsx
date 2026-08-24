@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Bot, ChevronDown, RotateCcw, ShieldCheck, Sparkles, User, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { assistantFetch } from "@/lib/ai/assistantClient";
-import { useDecisionFeed } from "@/lib/ai/experience/useDecisionFeed";
-import { contextualPrompts } from "@/lib/ai/experience/experienceModel";
+import { useJourney } from "@/lib/ai/journey/useJourney";
+import { journeyContextLine, journeyPrompts } from "@/lib/ai/journey/journeyPrompts";
+
 import { supabase } from "@/integrations/supabase/client";
 import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
 import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
@@ -89,12 +90,16 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
   const input = conversation.composerDraft;
   const setInput = setConversationDraft;
   /**
-   * V25 §4 — quick prompts are derived from the user's REAL current state, so
-   * the assistant opens action-aware instead of asking "how can I help?". They
-   * are prompts only: nothing here prepares, signs or executes.
+   * V25 §4 / V26 §9 — quick prompts are derived from the user's REAL current
+   * state and from the guided journey they are actually on, so the assistant
+   * opens journey-aware instead of asking "how can I help?". They are prompts
+   * only: nothing here prepares, signs or executes, and no prompt implies the
+   * journey is mandatory.
    */
-  const { decision } = useDecisionFeed();
-  const suggestions = useMemo(() => contextualPrompts(decision), [decision]);
+  const { decision, journey } = useJourney();
+  const journeyLine = useMemo(() => journeyContextLine(journey), [journey]);
+  const suggestions = useMemo(() => journeyPrompts({ journey, decision }), [journey, decision]);
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -312,6 +317,16 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
                 answers from your FlowBridge data and on-chain evidence — it can explain and
                 prepare, but it never signs or submits anything.
               </p>
+              {/* V26 §9 — where you are, stated plainly. Never "you must". */}
+              {journeyLine && (
+                <p
+                  data-testid="assistant-journey-context"
+                  className="font-mono text-[10px] leading-relaxed text-primary"
+                >
+                  You're on: {journeyLine}
+                </p>
+              )}
+
               <div className="grid gap-2 sm:grid-cols-2">
                 {suggestions.map((s) => (
                   <button
