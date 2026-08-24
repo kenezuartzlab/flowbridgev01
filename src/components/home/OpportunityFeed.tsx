@@ -57,7 +57,7 @@ function expiryLabel(iso: string | null): string | null {
 
 export function OpportunityFeed() {
   const router = useRouter();
-  const { decision, signedIn, loading } = useDecisionFeed();
+  const { decision, signedIn, loading, error, refresh } = useDecisionFeed();
   const [open, setOpen] = useState<string | null>(null);
   const [hidden, setHidden] = useState<string[]>([]);
   const [compiling, setCompiling] = useState<string | null>(null);
@@ -68,9 +68,13 @@ export function OpportunityFeed() {
     [decision, signedIn, hidden],
   );
 
-  /** V22 §11 — mark seen once so unchanged state stops repeating on later visits. */
+  /**
+   * V22 §11 — mark seen once so unchanged state stops repeating on later visits.
+   * V30 §9: presentation state is private to a signed-in account, so a signed-out
+   * visitor never issues this write (which would only be a noisy expected 401).
+   */
   useEffect(() => {
-    if (!decision) return;
+    if (!decision || !signedIn) return;
     for (const item of decision.items) {
       if (!item.opportunityId) continue;
       void assistantFetch("/api/opportunities", {
@@ -78,17 +82,20 @@ export function OpportunityFeed() {
         body: JSON.stringify({ key: item.opportunityId, action: "SEEN" }),
       }).catch(() => {});
     }
-  }, [decision]);
+  }, [decision, signedIn]);
 
   /** Presentation-only state. Never an economic invalidation (V22 §7). */
-  const mutateState = useCallback((item: DecisionItem, action: "DISMISS" | "SNOOZE") => {
-    setHidden((prev) => [...prev, item.id]);
-    if (!item.opportunityId) return;
-    void assistantFetch("/api/opportunities", {
-      method: "POST",
-      body: JSON.stringify({ key: item.opportunityId, action }),
-    }).catch(() => {});
-  }, []);
+  const mutateState = useCallback(
+    (item: DecisionItem, action: "DISMISS" | "SNOOZE") => {
+      setHidden((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
+      if (!item.opportunityId || !signedIn) return;
+      void assistantFetch("/api/opportunities", {
+        method: "POST",
+        body: JSON.stringify({ key: item.opportunityId, action }),
+      }).catch(() => {});
+    },
+    [signedIn],
+  );
 
   const explain = useCallback(
     async (item: DecisionItem) => {
@@ -373,6 +380,44 @@ export function OpportunityFeed() {
     );
   }
 
+  /**
+   * V30 §3 — a read we could not confirm is stated plainly with a Retry. It is
+   * never presented as "nothing to do" and never becomes a suggestion.
+   */
+  if (error && !experience.primary) {
+    return (
+      <section className="fb-surface overflow-hidden" data-testid="ai-summary-error">
+        <div className="border-b border-hairline px-4 py-3">
+          <p className="fb-eyebrow flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            Flow AI · for you now
+          </p>
+          <p className="mt-1 font-mono text-[13px] font-black uppercase leading-snug tracking-[0.04em]">
+            We could not check your suggestions
+          </p>
+          <p className="mt-1 font-mono text-[10px] leading-relaxed text-muted">
+            Nothing is wrong with your account or your funds. This is only the suggestions panel.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 p-3.5 sm:p-4">
+          <button
+            type="button"
+            onClick={() => void refresh()}
+            className="rounded-xl bg-primary px-3.5 py-2 font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-primary-foreground"
+          >
+            Try again
+          </button>
+          <Link
+            to="/"
+            className="rounded-xl border border-hairline px-3.5 py-2 font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-muted"
+          >
+            Keep browsing
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
   /** V25 §10 — an empty state teaches the product instead of going blank. */
   if (!experience.primary) {
     return (
@@ -431,6 +476,25 @@ export function OpportunityFeed() {
           <AlertTriangle className="mt-[1px] h-3 w-3 shrink-0" />
           {experience.notice}
         </p>
+      )}
+
+      {/* V30 §3 — stale-but-useful is stated honestly, with a way to re-check. */}
+      {error && (
+        <div
+          className="flex flex-wrap items-center gap-2 border-t border-hairline px-4 py-2.5"
+          data-testid="ai-summary-stale"
+        >
+          <p className="font-mono text-[9.5px] leading-relaxed text-muted">
+            This was last checked a moment ago and could not be refreshed.
+          </p>
+          <button
+            type="button"
+            onClick={() => void refresh()}
+            className="rounded-lg border border-hairline px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.1em] text-primary"
+          >
+            Try again
+          </button>
+        </div>
       )}
     </section>
   );
