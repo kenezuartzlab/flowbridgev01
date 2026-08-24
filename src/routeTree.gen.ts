@@ -20,6 +20,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketsRouteImport } from './routes/markets'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as FortuneRouteImport } from './routes/fortune'
@@ -145,6 +146,11 @@ const McpRoute = McpRouteImport.update({
 const MarketsRoute = MarketsRouteImport.update({
   id: '/markets',
   path: '/markets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeRoute = HomeRouteImport.update({
@@ -523,6 +529,7 @@ export interface FileRoutesByFullPath {
   '/fortune': typeof FortuneRoute
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
+  '/learn': typeof LearnRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/partners': typeof PartnersRoute
@@ -607,6 +614,7 @@ export interface FileRoutesByTo {
   '/fortune': typeof FortuneRoute
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
+  '/learn': typeof LearnRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/partners': typeof PartnersRoute
@@ -692,6 +700,7 @@ export interface FileRoutesById {
   '/fortune': typeof FortuneRoute
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
+  '/learn': typeof LearnRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/partners': typeof PartnersRoute
@@ -778,6 +787,7 @@ export interface FileRouteTypes {
     | '/fortune'
     | '/games'
     | '/home'
+    | '/learn'
     | '/markets'
     | '/mcp'
     | '/partners'
@@ -862,6 +872,7 @@ export interface FileRouteTypes {
     | '/fortune'
     | '/games'
     | '/home'
+    | '/learn'
     | '/markets'
     | '/mcp'
     | '/partners'
@@ -946,6 +957,7 @@ export interface FileRouteTypes {
     | '/fortune'
     | '/games'
     | '/home'
+    | '/learn'
     | '/markets'
     | '/mcp'
     | '/partners'
@@ -1031,6 +1043,7 @@ export interface RootRouteChildren {
   FortuneRoute: typeof FortuneRoute
   GamesRoute: typeof GamesRoute
   HomeRoute: typeof HomeRoute
+  LearnRoute: typeof LearnRoute
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
   PartnersRoute: typeof PartnersRoute
@@ -1170,6 +1183,13 @@ declare module '@tanstack/react-router' {
       path: '/markets'
       fullPath: '/markets'
       preLoaderRoute: typeof MarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home': {
@@ -1763,6 +1783,7 @@ const rootRouteChildren: RootRouteChildren = {
   FortuneRoute: FortuneRoute,
   GamesRoute: GamesRoute,
   HomeRoute: HomeRoute,
+  LearnRoute: LearnRoute,
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
   PartnersRoute: PartnersRoute,
