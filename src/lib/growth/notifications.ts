@@ -246,7 +246,8 @@ export function deriveNotifications(input: NotificationDeriveInput): AppNotifica
    * V28 §11 — a single calm reminder while the account is incomplete. It says
    * what completing unlocks and stops immediately once it is complete.
    */
-  const walletBound = input.walletBound ?? !!rs?.walletAddress;
+  const walletBound =
+    input.walletBound ?? (rs?.requirements.find((r) => /wallet/i.test(r.label))?.met ?? false);
   if (input.emailVerified === false || (input.emailVerified === true && !walletBound)) {
     const emailStep = input.emailVerified === false;
     out.push(
