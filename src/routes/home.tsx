@@ -127,6 +127,12 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/*
+       * V27 §4 — animated first-time onboarding. Teaching + navigation only: it
+       * creates no mission, no prepared action and never signs anything.
+       */}
+      <OnboardingOverlay />
+
       <AppTopBar
         eyebrow={page.hero.eyebrow || greeting}
         onEyebrowClick={canCycle ? nextGreeting : undefined}
@@ -136,6 +142,8 @@ function HomePage() {
         actions={
           <>
           <CampaignPtsPill />
+          {/* V27 §9 — in-app notification centre: deep links only. */}
+          <NotificationCenter />
           <Link
             to="/"
             aria-label="Trade"
@@ -146,6 +154,7 @@ function HomePage() {
           </>
         }
       />
+
 
       <main
         className="mx-auto w-full max-w-2xl space-y-4 px-3 pt-3 sm:px-4 sm:pt-4 md:max-w-4xl md:pt-6"
