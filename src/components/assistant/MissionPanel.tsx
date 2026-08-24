@@ -168,6 +168,9 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
    */
   const history = missions.filter((m) => m.status === "COMPLETED" || m.status === "CANCELLED");
   const [historyOpen, setHistoryOpen] = useState(false);
+  /** V25 §5 — the typed step graph is advanced detail, collapsed by default. */
+  const [stepsOpen, setStepsOpen] = useState(false);
+
 
   /**
    * V17.1B §8 — when the canonical reward state says there is no eligible
