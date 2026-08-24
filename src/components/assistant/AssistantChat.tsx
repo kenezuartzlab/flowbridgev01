@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Bot, ChevronDown, RotateCcw, ShieldCheck, Sparkles, User, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { assistantFetch } from "@/lib/ai/assistantClient";
+import { useDecisionFeed } from "@/lib/ai/experience/useDecisionFeed";
+import { contextualPrompts } from "@/lib/ai/experience/experienceModel";
 import { supabase } from "@/integrations/supabase/client";
 import { AssistantMemoryPanel } from "./AssistantMemoryPanel";
 import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
@@ -43,12 +45,7 @@ interface IntentProposalRef {
   recognized?: string[];
 }
 
-const SUGGESTIONS = [
-  "Summarize my rewards, staking and campaigns right now",
-  "Why did my $11 swap earn that many points?",
-  "What's actually live on BOT Chain today?",
-  "How do I bridge USDT from BOT to BNB?",
-];
+
 
 
 /**
@@ -91,6 +88,13 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
    */
   const input = conversation.composerDraft;
   const setInput = setConversationDraft;
+  /**
+   * V25 §4 — quick prompts are derived from the user's REAL current state, so
+   * the assistant opens action-aware instead of asking "how can I help?". They
+   * are prompts only: nothing here prepares, signs or executes.
+   */
+  const { decision } = useDecisionFeed();
+  const suggestions = useMemo(() => contextualPrompts(decision), [decision]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -309,7 +313,7 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
                 prepare, but it never signs or submits anything.
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
-                {SUGGESTIONS.map((s) => (
+                {suggestions.map((s) => (
                   <button
                     key={s}
                     type="button"

@@ -1,22 +1,18 @@
 /**
- * FlowBridge V17 §6 — the mission surface.
+ * FlowBridge V17 §6 + V25 §5/§6 — the mission surface as a narrative.
  *
- * Shows the goal, the typed step graph, what is next, what is blocked and how
- * many wallet confirmations the user should still expect. Copy never implies
- * automation: Flow AI plans and prepares, the user signs.
+ * The first frame answers three questions only: what is done, what is happening
+ * now, what comes next. The typed step graph still exists and is one tap away,
+ * but it is no longer the default reading. Copy never implies automation: Flow AI
+ * plans and prepares, the user signs.
  */
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  CheckCircle2,
   ChevronDown,
-  CircleDashed,
-  Loader2,
-  Lock,
   Pause,
   Play,
   RotateCcw,
   ShieldCheck,
-  X,
 } from "lucide-react";
 import { ActionIntentCard, type PreparedIntentPayload } from "./ActionIntentCard";
 import {
@@ -25,43 +21,51 @@ import {
   type MissionActionResponse,
 } from "@/lib/ai/mission/missionClient";
 import { missionProgress, type Mission, type MissionStep } from "@/lib/ai/mission/missionTypes";
+import {
+  completionSummary,
+  missionNarrative,
+  stepDetail,
+  stepStatus,
+} from "@/lib/ai/experience/missionNarrative";
+import { StatusChip } from "@/components/ai/StatusChip";
 
-const STATE_ICON: Record<string, ReactNode> = {
-  COMPLETED: <CheckCircle2 className="h-3.5 w-3.5 text-success" />,
-  WAITING_FOR_USER: <Lock className="h-3.5 w-3.5 text-primary" />,
-  WAITING_FOR_CONFIRMATION: <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />,
-  BLOCKED: <X className="h-3.5 w-3.5 text-danger" />,
-};
-
-function StepRow({ step, isNext }: { step: MissionStep; isNext: boolean }) {
+function StepRow({
+  step,
+  isNext,
+  emphasis = false,
+  caption,
+}: {
+  step: MissionStep;
+  isNext: boolean;
+  emphasis?: boolean;
+  caption?: string;
+}) {
   return (
     <li
-      className={`flex items-start gap-2.5 px-3.5 py-2.5 ${isNext ? "bg-primary/5" : ""}`}
+      className={`px-3.5 py-2.5 ${isNext ? "bg-primary/5" : ""}`}
       data-testid="mission-step"
     >
-      <span className="mt-[2px] shrink-0">
-        {STATE_ICON[step.state] ?? <CircleDashed className="h-3.5 w-3.5 text-muted" />}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="font-mono text-[11.5px] font-black uppercase tracking-[0.05em]">
-          {step.title}
+      {caption && (
+        <p className="mb-1 font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+          {caption}
         </p>
-        <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-          {step.state.replace(/_/g, " ")}
-          {step.requiresWalletSignature ? " · your wallet signs" : ""}
-          {step.amountUnresolved && !step.outputs.resolvedAmount
-            ? " · amount unresolved until confirmed"
-            : ""}
-        </p>
-        {step.blockingReason && (
-          <p className="mt-1 font-mono text-[10px] leading-relaxed text-danger">
-            {step.blockingReason}
+      )}
+      <div className="flex items-start gap-2.5">
+        <StatusChip status={stepStatus(step)} className="mt-[2px] shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p
+            className={`font-mono font-black uppercase tracking-[0.05em] ${emphasis ? "text-[12.5px]" : "text-[11.5px]"}`}
+          >
+            {step.title}
           </p>
-        )}
+          {/* V25 §5 — unknown amounts are stated honestly, never estimated. */}
+          <p className="font-mono text-[10px] leading-relaxed text-muted">{stepDetail(step)}</p>
+        </div>
       </div>
     </li>
   );
 }
+
 
 /**
  * V17.1F §4/§6 — a terminal mission rendered as read-only history: outcome,
@@ -93,10 +97,15 @@ function HistoryRow({ mission }: { mission: Mission }) {
           {mission.status}
         </span>
       </div>
+      {/* V25 §6 — one durable sentence built only from verified step outputs. */}
+      <p className="mt-0.5 font-mono text-[10px] leading-relaxed text-muted">
+        {completionSummary(mission).sentence}
+      </p>
       <p className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
         {p.completed}/{p.total} steps ·{" "}
         {completed ? new Date(completed).toLocaleString("en-US") : "time unavailable"}
       </p>
+
       {mission.source && (
         <p className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
           Built from your insight · {mission.source.opportunityKind.toLowerCase()} · template{" "}
@@ -164,6 +173,9 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
    */
   const history = missions.filter((m) => m.status === "COMPLETED" || m.status === "CANCELLED");
   const [historyOpen, setHistoryOpen] = useState(false);
+  /** V25 §5 — the typed step graph is advanced detail, collapsed by default. */
+  const [stepsOpen, setStepsOpen] = useState(false);
+
 
   /**
    * V17.1B §8 — when the canonical reward state says there is no eligible
@@ -231,32 +243,85 @@ export function MissionPanel({ initialGoalText = "" }: { initialGoalText?: strin
 
           {active && (
             <div className="fb-inset overflow-hidden rounded-xl">
-              <div className="border-b border-hairline px-3.5 py-2.5">
-                <p className="font-mono text-[11.5px] font-black uppercase tracking-[0.05em]">
-                  {active.goalText}
-                </p>
-                <p className="font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-                  {active.status} · {missionProgress(active).completed}/{missionProgress(active).total} steps ·{" "}
-                  {missionProgress(active).expectedUserConfirmations} wallet confirmations expected
-                </p>
-                {active.source && (
-                  <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
-                    Built from your insight · {active.source.opportunityKind.toLowerCase()} ·
-                    template {active.source.templateId} {active.source.templateVersion}
-                  </p>
-                )}
-                {active.goal.missingSlots.length > 0 && (
-                  <p className="mt-1 font-mono text-[10px] text-muted">
-                    Missing: {active.goal.missingSlots.join(", ")} — tell me the exact amount and I'll
-                    plan it; I never pick one for you.
-                  </p>
-                )}
-              </div>
-              <ul className="divide-y divide-hairline">
-                {active.steps.map((s) => (
-                  <StepRow key={s.id} step={s} isNext={s.id === active.currentStepId} />
-                ))}
-              </ul>
+              {(() => {
+                const n = missionNarrative(active);
+                return (
+                  <>
+                    <div className="border-b border-hairline px-3.5 py-2.5">
+                      <p className="font-mono text-[11.5px] font-black uppercase tracking-[0.05em]">
+                        {active.goalText}
+                      </p>
+                      {/* V25 §5 — progress in words first, numbers second. */}
+                      <p className="mt-0.5 font-mono text-[10.5px] leading-relaxed text-muted">
+                        {n.current
+                          ? n.blocked
+                            ? "One thing is holding this up."
+                            : `Now: ${n.current.title}.`
+                          : "Every step is done."}
+                        {n.next ? ` Then: ${n.next.title}.` : ""}
+                      </p>
+                      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-foreground/8">
+                        <span
+                          className="block h-full rounded-full bg-primary"
+                          style={{ width: `${n.percent}%` }}
+                        />
+                      </div>
+                      <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+                        {n.completedCount}/{n.totalCount} done ·{" "}
+                        {n.expectedUserConfirmations === 0
+                          ? "no wallet confirmation left"
+                          : `${n.expectedUserConfirmations} wallet confirmation${n.expectedUserConfirmations === 1 ? "" : "s"} still yours to approve`}
+                      </p>
+                      {active.source && (
+                        <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.06em] text-muted">
+                          Built from your insight · {active.source.opportunityKind.toLowerCase()} ·
+                          template {active.source.templateId} {active.source.templateVersion}
+                        </p>
+                      )}
+                      {active.goal.missingSlots.length > 0 && (
+                        <p className="mt-1 font-mono text-[10px] text-muted">
+                          Missing: {active.goal.missingSlots.join(", ")} — tell me the exact amount
+                          and I'll plan it; I never pick one for you.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* The narrative frame: current step, then what follows. */}
+                    <ul className="divide-y divide-hairline">
+                      {n.current && (
+                        <StepRow
+                          step={n.current}
+                          isNext
+                          emphasis
+                          caption={n.blocked ? "Needs attention" : "Happening now"}
+                        />
+                      )}
+                      {n.next && <StepRow step={n.next} isNext={false} caption="Next" />}
+                    </ul>
+
+                    {/* §5 — the full typed graph stays available, one tap away. */}
+                    <button
+                      type="button"
+                      onClick={() => setStepsOpen((v) => !v)}
+                      aria-expanded={stepsOpen}
+                      className="flex w-full items-center justify-between border-t border-hairline px-3.5 py-2 text-left font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-muted"
+                    >
+                      All {n.totalCount} steps
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform ${stepsOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                    {stepsOpen && (
+                      <ul className="divide-y divide-hairline border-t border-hairline">
+                        {active.steps.map((s) => (
+                          <StepRow key={s.id} step={s} isNext={s.id === active.currentStepId} />
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                );
+              })()}
+
               <div className="flex flex-wrap gap-2 border-t border-hairline p-3">
                 <button
                   type="button"
