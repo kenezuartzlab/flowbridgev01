@@ -217,7 +217,7 @@ export function deriveNotifications(input: NotificationDeriveInput): AppNotifica
           ),
         );
       }
-      if (item.kind === "OPPORTUNITY" && item.domain === "CAMPAIGN" && item.actionable) {
+      if (item.kind === "OPPORTUNITY" && item.domain === "CAMPAIGNS" && item.actionable) {
         out.push(
           make(
             "CAMPAIGN_AVAILABLE",
