@@ -35,6 +35,7 @@ import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 import { JourneyCard } from "@/components/home/JourneyCard";
 import { OnboardingOverlay } from "@/components/growth/OnboardingOverlay";
 import { NotificationCenter } from "@/components/growth/NotificationCenter";
+import { AccountActivationCard } from "@/components/growth/AccountActivationCard";
 import { GraduationCap } from "lucide-react";
 
 
