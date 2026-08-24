@@ -25,7 +25,7 @@ const CHIP: Record<string, "VERIFIED" | "PREVIEW" | "WAITING_FOR_USER" | "VERIFY
   };
 
 export function JourneyCard() {
-  const { journey, secondary, selection, loading, dismiss, snooze, signedIn } = useJourney();
+  const { journey, secondary, selection, loading, dismiss, snooze } = useJourney();
 
   useEffect(() => {
     if (!journey) return;
@@ -38,7 +38,7 @@ export function JourneyCard() {
 
   if (loading) {
     return (
-      <section className="fb-surface p-4" data-testid="journey-loading" data-dbg={JSON.stringify({ signedIn, loading })}>
+      <section className="fb-surface p-4" data-testid="journey-loading">
         <div className="fb-inset h-14 animate-pulse" />
       </section>
     );
