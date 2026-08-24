@@ -33,6 +33,10 @@ import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
 import { useRewardState } from "@/lib/rewards/useRewardState";
 import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 import { JourneyCard } from "@/components/home/JourneyCard";
+import { OnboardingOverlay } from "@/components/growth/OnboardingOverlay";
+import { NotificationCenter } from "@/components/growth/NotificationCenter";
+import { GraduationCap } from "lucide-react";
+
 
 
 
