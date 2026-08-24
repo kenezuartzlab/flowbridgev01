@@ -379,7 +379,15 @@ export function OpportunityFeed() {
   if (loading) {
     return (
       <section className="fb-surface overflow-hidden" data-testid="ai-summary-loading">
-        {Header}
+        <div className="border-b border-hairline px-4 py-3">
+          <p className="fb-eyebrow flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            Flow AI · for you now
+          </p>
+          <p className="mt-1 font-mono text-[13px] font-black uppercase leading-snug tracking-[0.04em]">
+            Looking at what matters right now
+          </p>
+        </div>
         <div className="p-3.5 sm:p-4">
           <div className="fb-inset h-16 motion-safe:animate-pulse" />
           <p className="mt-2 font-mono text-[9.5px] leading-relaxed text-muted" role="status">
