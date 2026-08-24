@@ -89,12 +89,16 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
   const input = conversation.composerDraft;
   const setInput = setConversationDraft;
   /**
-   * V25 §4 — quick prompts are derived from the user's REAL current state, so
-   * the assistant opens action-aware instead of asking "how can I help?". They
-   * are prompts only: nothing here prepares, signs or executes.
+   * V25 §4 / V26 §9 — quick prompts are derived from the user's REAL current
+   * state and from the guided journey they are actually on, so the assistant
+   * opens journey-aware instead of asking "how can I help?". They are prompts
+   * only: nothing here prepares, signs or executes, and no prompt implies the
+   * journey is mandatory.
    */
-  const { decision } = useDecisionFeed();
-  const suggestions = useMemo(() => contextualPrompts(decision), [decision]);
+  const { decision, journey } = useJourney();
+  const journeyLine = useMemo(() => journeyContextLine(journey), [journey]);
+  const suggestions = useMemo(() => journeyPrompts({ journey, decision }), [journey, decision]);
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
