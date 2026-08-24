@@ -96,9 +96,19 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
    * only: nothing here prepares, signs or executes, and no prompt implies the
    * journey is mandatory.
    */
-  const { decision, journey } = useJourney();
-  const journeyLine = useMemo(() => journeyContextLine(journey), [journey]);
-  const suggestions = useMemo(() => journeyPrompts({ journey, decision }), [journey, decision]);
+  const { decision, journey, loading: journeyLoading } = useJourney();
+  /**
+   * V26 §6 — the assistant must never announce a DIFFERENT journey than Home.
+   * Until the canonical reward state has resolved, the journey is not yet
+   * decided, so we stay silent instead of naming a provisional one.
+   */
+  const resolvedJourney = journeyLoading ? null : journey;
+  const journeyLine = useMemo(() => journeyContextLine(resolvedJourney), [resolvedJourney]);
+  const suggestions = useMemo(
+    () => journeyPrompts({ journey: resolvedJourney, decision }),
+    [resolvedJourney, decision],
+  );
+
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
