@@ -170,6 +170,13 @@ export function ReceiptModal({
           </div>
         </a>
 
+        {/*
+         * V28 §5 — non-blocking account encouragement AFTER the real outcome.
+         * It never hides the receipt, never appears on failure, and respects
+         * "Not now" for a real cooldown.
+         */}
+        <PostActionActivationCard outcomeSuccessful={status === 'success'} onClose={onClose} />
+
         {/* Secondary close button */}
         <button
           onClick={onClose}
