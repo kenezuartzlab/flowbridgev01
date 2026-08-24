@@ -26,6 +26,7 @@ import { Route as GamesRouteImport } from './routes/games'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as EarnRouteImport } from './routes/earn'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -176,6 +177,11 @@ const EcosurgeRoute = EcosurgeRouteImport.update({
 const EarnRoute = EarnRouteImport.update({
   id: '/earn',
   path: '/earn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AssistantRoute = AssistantRouteImport.update({
@@ -524,6 +530,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
+  '/discover': typeof DiscoverRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -609,6 +616,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
+  '/discover': typeof DiscoverRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -695,6 +703,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
+  '/discover': typeof DiscoverRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -782,6 +791,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
+    | '/discover'
     | '/earn'
     | '/ecosurge'
     | '/fortune'
@@ -867,6 +877,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
+    | '/discover'
     | '/earn'
     | '/ecosurge'
     | '/fortune'
@@ -952,6 +963,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
+    | '/discover'
     | '/earn'
     | '/ecosurge'
     | '/fortune'
@@ -1038,6 +1050,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
   AssistantRoute: typeof AssistantRoute
+  DiscoverRoute: typeof DiscoverRoute
   EarnRoute: typeof EarnRoute
   EcosurgeRoute: typeof EcosurgeRoute
   FortuneRoute: typeof FortuneRoute
@@ -1225,6 +1238,13 @@ declare module '@tanstack/react-router' {
       path: '/earn'
       fullPath: '/earn'
       preLoaderRoute: typeof EarnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/assistant': {
@@ -1778,6 +1798,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ArcadeflixRoute: ArcadeflixRoute,
   AssistantRoute: AssistantRoute,
+  DiscoverRoute: DiscoverRoute,
   EarnRoute: EarnRoute,
   EcosurgeRoute: EcosurgeRoute,
   FortuneRoute: FortuneRoute,

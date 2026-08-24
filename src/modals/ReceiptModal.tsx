@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { X, ExternalLink, Sparkles, CheckCircle, XCircle } from 'lucide-react';
 import { ModalPortal } from './ModalPortal';
+import { PostActionActivationCard } from '@/components/growth/PostActionActivationCard';
 
 
 interface ReceiptModalProps {
@@ -169,6 +170,13 @@ export function ReceiptModal({
             <ExternalLink className="w-3.5 h-3.5 text-[#010C1B] shrink-0" />
           </div>
         </a>
+
+        {/*
+         * V28 §5 — non-blocking account encouragement AFTER the real outcome.
+         * It never hides the receipt, never appears on failure, and respects
+         * "Not now" for a real cooldown.
+         */}
+        <PostActionActivationCard outcomeSuccessful={status === 'success'} onClose={onClose} />
 
         {/* Secondary close button */}
         <button

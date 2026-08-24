@@ -35,6 +35,7 @@ import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 import { JourneyCard } from "@/components/home/JourneyCard";
 import { OnboardingOverlay } from "@/components/growth/OnboardingOverlay";
 import { NotificationCenter } from "@/components/growth/NotificationCenter";
+import { AccountActivationCard } from "@/components/growth/AccountActivationCard";
 import { GraduationCap } from "lucide-react";
 
 
@@ -199,6 +200,30 @@ function HomePage() {
          * recommendation and without creating anything economic.
          */}
         <JourneyCard />
+
+        {/*
+         * V28 §3 — account completion: one value message, one primary action.
+         * Teaching + navigation only; it never creates a mission or a reward.
+         */}
+        <AccountActivationCard />
+
+        {/* V28 §6 — quiet entry to BOT Chain ecosystem discovery. */}
+        <Link
+          to="/discover"
+          data-testid="home-discover-link"
+          className="fb-surface flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:border-primary/40"
+        >
+          <span className="min-w-0">
+            <span className="fb-eyebrow flex items-center gap-1.5">
+              <Compass className="h-3.5 w-3.5 text-primary" />
+              Discover BOT Chain
+            </span>
+            <span className="mt-1.5 block text-[11.5px] leading-relaxed text-muted">
+              What is actually live today — with the rules, the labels and how it helps BOT Chain.
+            </span>
+          </span>
+          <ArrowUpRight className="h-4 w-4 shrink-0 text-muted" />
+        </Link>
 
         {/*
          * V27 §6 — one quiet entry point to the learning centre. Navigation only.

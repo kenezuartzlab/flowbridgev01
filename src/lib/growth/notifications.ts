@@ -26,6 +26,8 @@ export const NOTIFICATION_KINDS = [
   "PREPARED_ACTION_EXPIRED",
   "CAMPAIGN_AVAILABLE",
   "WALLET_BINDING_REQUIRED",
+  /** V28 §11 — verification reminder. Presentation only, never urgent. */
+  "ACCOUNT_SETUP_INCOMPLETE",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -39,6 +41,7 @@ export const NOTIFICATION_CATEGORY: Record<NotificationKind, NotificationCategor
   PREPARED_ACTION_EXPIRED: "ACCOUNT",
   CAMPAIGN_AVAILABLE: "GROWTH",
   WALLET_BINDING_REQUIRED: "ACCOUNT",
+  ACCOUNT_SETUP_INCOMPLETE: "ACCOUNT",
 };
 
 /** V27 §9 — per-kind cooldown. Deliberately generous; no nagging. */
@@ -50,6 +53,7 @@ export const NOTIFICATION_COOLDOWN_MS: Record<NotificationKind, number> = {
   PREPARED_ACTION_EXPIRED: 24 * 60 * 60 * 1000,
   CAMPAIGN_AVAILABLE: 24 * 60 * 60 * 1000,
   WALLET_BINDING_REQUIRED: 24 * 60 * 60 * 1000,
+  ACCOUNT_SETUP_INCOMPLETE: 3 * 24 * 60 * 60 * 1000,
 };
 
 export const NOTIFICATION_SNOOZE_MS = 24 * 60 * 60 * 1000;
@@ -79,6 +83,8 @@ export interface NotificationDeriveInput {
   rewardState: RewardState | null;
   decision: DecisionResult | null;
   walletBound?: boolean;
+  /** V28 §11 — account verification state; reminders stop as soon as it is true. */
+  emailVerified?: boolean;
 }
 
 function make(
@@ -234,6 +240,32 @@ export function deriveNotifications(input: NotificationDeriveInput): AppNotifica
         );
       }
     }
+  }
+
+  /**
+   * V28 §11 — a single calm reminder while the account is incomplete. It says
+   * what completing unlocks and stops immediately once it is complete.
+   */
+  const walletBound =
+    input.walletBound ?? (rs?.requirements.find((r) => /wallet/i.test(r.label))?.met ?? false);
+  if (input.emailVerified === false || (input.emailVerified === true && !walletBound)) {
+    const emailStep = input.emailVerified === false;
+    out.push(
+      make(
+        "ACCOUNT_SETUP_INCOMPLETE",
+        {
+          title: emailStep ? "Finish verifying your email" : "Choose your bound wallet",
+          body: emailStep
+            ? "Verifying your email lets FlowBridge link your activity to the right account, so eligible rewards and campaigns are shown accurately. Swapping and bridging keep working either way."
+            : "Binding a wallet tells FlowBridge which wallet your account rewards and verified progress belong to. It never moves funds.",
+          href: emailStep ? "/home" : "/rewards#bind",
+          ctaLabel: emailStep ? "Verify email" : "Bind wallet",
+          status: "WAITING_FOR_USER",
+          weight: 50,
+        },
+        emailStep ? "email" : "wallet",
+      ),
+    );
   }
 
   if (
