@@ -20,6 +20,10 @@ import {
 import { BottomNav } from "@/components/nav/BottomNav";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { MetricStrip, StatusPill } from "@/components/ui-kit/primitives";
+import { ParticipationProfileCard } from "@/components/identity/ParticipationProfileCard";
+import { AchievementsPanel } from "@/components/identity/AchievementsPanel";
+import { ShareProfileCard } from "@/components/identity/ShareProfileCard";
+import { useParticipationProfile } from "@/lib/identity/useParticipationProfile";
 import { getPage, pageLabel, useAppConfig } from "@/lib/config/appConfig";
 
 import { SignInButton } from "@/components/auth/SignInButton";
@@ -62,6 +66,7 @@ const LANGUAGES = [
 
 function AccountPage() {
   const { user, authReady, incentives, transactions } = useAccountData();
+  const participation = useParticipationProfile();
   const [theme, setTheme] = useTheme();
   const [prefs, savePrefs] = usePrefs();
   const [open, setOpen] = useState<string | null>(null);
@@ -188,6 +193,21 @@ function AccountPage() {
             { label: L("play", "Play points"), value: play.toLocaleString("en-US") },
           ]}
         />
+
+        {/*
+         * V29 §2/§3/§7 — identity, reputation and ecosystem participation. All
+         * three surfaces are read-only presentation over verified records: no
+         * score, no rank, no reward and no transaction is created here.
+         */}
+        <ParticipationProfileCard view={participation.view} loading={participation.loading} />
+        <AchievementsPanel achievements={participation.achievements} />
+        <ShareProfileCard
+          facts={participation.facts}
+          achievements={participation.achievements}
+          displayName={participation.displayName ?? displayName}
+        />
+
+
 
         {/*
          * V10.1 — Profile is identity, progression and account-owned utilities.
