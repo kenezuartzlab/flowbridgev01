@@ -61,19 +61,27 @@ export function useParticipationProfile(): UseParticipationProfile {
     return () => unsubscribe();
   }, []);
 
+  const userId = user?.id ?? null;
+
   const refresh = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setFacts(null);
       setLoading(false);
       return;
     }
-    setLoading(true);
+    // Keep previously resolved facts on screen while re-reading, so repeated
+    // auth emissions never flip a populated profile back to a skeleton.
+    setFacts((prev) => {
+      if (!prev) setLoading(true);
+      return prev;
+    });
     try {
-      setFacts(await fetchParticipationFacts());
+      const next = await fetchParticipationFacts();
+      if (next) setFacts(next);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
     if (!authReady) return;
