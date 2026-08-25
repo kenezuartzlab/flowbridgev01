@@ -79,6 +79,7 @@ import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
+import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -449,6 +450,12 @@ const ApiAdminPartnerGovernanceRoute =
     path: '/api/admin/partner-governance',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminMainnetPreflightRoute =
+  ApiAdminMainnetPreflightRouteImport.update({
+    id: '/api/admin/mainnet-preflight',
+    path: '/api/admin/mainnet-preflight',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
   id: '/api/admin/banner-upload',
   path: '/api/admin/banner-upload',
@@ -573,6 +580,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -660,6 +668,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -748,6 +757,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -837,6 +847,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/mainnet-preflight'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -924,6 +935,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/mainnet-preflight'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1011,6 +1023,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/mainnet-preflight'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1099,6 +1112,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
+  ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
   ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
@@ -1624,6 +1638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminPartnerGovernanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/mainnet-preflight': {
+      id: '/api/admin/mainnet-preflight'
+      path: '/api/admin/mainnet-preflight'
+      fullPath: '/api/admin/mainnet-preflight'
+      preLoaderRoute: typeof ApiAdminMainnetPreflightRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/banner-upload': {
       id: '/api/admin/banner-upload'
       path: '/api/admin/banner-upload'
@@ -1856,6 +1877,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
+  ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,
   ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
