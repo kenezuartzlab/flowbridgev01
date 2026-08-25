@@ -34,9 +34,9 @@ export function NotificationCenter() {
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || unread === 0) return;
     markSeen(items.map((n) => n.id));
-  }, [open, items, markSeen]);
+  }, [open, items, markSeen, unread]);
 
   return (
     <div className="relative" ref={boxRef}>

@@ -65,12 +65,8 @@ export function snoozeNotification(id: string, ms = NOTIFICATION_SNOOZE_MS): Not
 
 export function markNotificationsSeen(ids: readonly string[]): NotificationPresentation {
   const s = readNotificationState();
-  const lastShownAt = { ...s.lastShownAt };
-  const now = Date.now();
-  for (const id of ids) lastShownAt[id] = now;
   return write({
     ...s,
-    lastShownAt,
     readIds: Array.from(new Set([...s.readIds, ...ids])),
   });
 }
