@@ -9,7 +9,8 @@ const EXPLORERS: Record<number, string> = {
   56: "https://bscscan.com",
   97: "https://testnet.bscscan.com",
   137: "https://polygonscan.com",
-  1024: "https://scan.botchain.ai",
+  677: "https://scan.botchain.ai",
+  968: "https://testnet.botchain.ai",
 };
 
 export function txExplorerUrl(chainId: number, hash: string): string | null {

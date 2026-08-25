@@ -282,7 +282,7 @@ export const STUDIO_CHAIN_OPTIONS = [
   { id: OFFICIAL_CHAIN_IDS.bnbTestnet, label: 'BNB Testnet (97)' },
   { id: OFFICIAL_CHAIN_IDS.botTestnet, label: 'BOT Testnet (968)' },
   { id: OFFICIAL_CHAIN_IDS.bnbMainnet, label: 'BNB Chain (56)' },
-  { id: OFFICIAL_CHAIN_IDS.botMainnet, label: 'BOT Chain (1024)' },
+  { id: OFFICIAL_CHAIN_IDS.botMainnet, label: 'BOT Chain (677)' },
 ];
 
 export const STUDIO_TOKEN_OPTIONS = [
