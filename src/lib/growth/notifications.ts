@@ -9,7 +9,7 @@
  * Anti-pressure rules encoded here:
  *  - No fear, no fake scarcity, no hidden countdown, no repeated nagging.
  *  - Stable ids so a refresh or remount can never duplicate a notice.
- *  - Per-notice cooldowns, plus user dismiss and snooze.
+ *  - User dismiss and snooze, while read state only clears the badge.
  *  - ACCOUNT notices (security/state) are separated from GROWTH notices.
  */
 import type { DecisionResult } from "@/lib/ai/decision/decisionTypes";
@@ -314,8 +314,9 @@ export const EMPTY_NOTIFICATION_PRESENTATION: NotificationPresentation = {
 };
 
 /**
- * Applies user preferences, dismissals, snoozes and per-kind cooldowns.
- * Pure — the caller decides when to persist `lastShownAt`.
+ * Applies user preferences, dismissals and snoozes.
+ * Pure — read state affects the badge only, not whether an active notice is
+ * available inside the notification centre.
  */
 export function visibleNotifications(
   candidates: readonly AppNotification[],
@@ -327,11 +328,6 @@ export function visibleNotifications(
     const snoozed = state.snoozedUntil[n.id];
     if (typeof snoozed === "number" && snoozed > now) return false;
     if (n.category === "GROWTH" && !state.growthEnabled) return false;
-    const last = state.lastShownAt[n.id];
-    if (typeof last === "number" && now - last < NOTIFICATION_COOLDOWN_MS[n.kind]) {
-      // Already shown recently AND already read → stay quiet (no nagging).
-      if (state.readIds.includes(n.id)) return false;
-    }
     return true;
   });
 }

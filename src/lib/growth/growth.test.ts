@@ -18,6 +18,7 @@ import {
   EMPTY_NOTIFICATION_PRESENTATION,
   NOTIFICATION_AUTHORITY,
   deriveNotifications,
+  unreadCount,
   visibleNotifications,
   type NotificationPresentation,
 } from "./notifications";
@@ -210,7 +211,7 @@ describe("V27 notifications", () => {
     expect(new Set(a).size).toBe(a.length);
   });
 
-  it("respects dismiss, snooze, cooldown and the growth preference", () => {
+  it("respects dismiss, snooze and the growth preference", () => {
     const items = deriveNotifications({
       signedIn: true,
       rewardState: rewardState({ nextEconomicStep: "CLAIM_FLOW", claimableFlow: 5 }),
@@ -233,7 +234,9 @@ describe("V27 notifications", () => {
       readIds: [id],
       lastShownAt: { [id]: now - 1000 },
     };
-    expect(visibleNotifications(items, readAndShown, now)).toEqual([]);
+    const visibleAfterOpen = visibleNotifications(items, readAndShown, now);
+    expect(visibleAfterOpen.map((n) => n.id)).toEqual([id]);
+    expect(unreadCount(visibleAfterOpen, readAndShown)).toBe(0);
 
     expect(NOTIFICATION_AUTHORITY.signsTransaction).toBe(false);
     expect(NOTIFICATION_AUTHORITY.createsActionIntent).toBe(false);
