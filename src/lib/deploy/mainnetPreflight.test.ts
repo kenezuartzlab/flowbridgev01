@@ -76,9 +76,7 @@ describe('V30.1A mainnet preflight — fail closed', () => {
     expect(
       check(baseInput({ constructorArgs: { totalSupply: null } }), 'CONSTRUCTOR_ARGS_COMPLETE').ok,
     ).toBe(false);
-    expect(check(baseInput({ productionOwner: null }), 'PROduction_OWNER_SET'.toUpperCase() as string).ok).toBe(
-      false,
-    );
+    expect(check(baseInput({ productionOwner: null }), 'PRODUCTION_OWNER_SET').ok).toBe(false);
   });
 
   it('never produces a plan while any inventory blocker stands', () => {

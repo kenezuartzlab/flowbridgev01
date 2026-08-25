@@ -10,8 +10,13 @@
 
 export type Hex = `0x${string}`;
 
+/**
+ * V30.1A: BOT network identities are canonical EVM chain ids (mainnet 677,
+ * testnet 968). The legacy 1024 value is unverified configuration and is never
+ * used as a BOT network identity — see src/lib/network/canonicalNetworks.ts.
+ */
 export const OFFICIAL_CHAIN_IDS = {
-  botMainnet: 1024,
+  botMainnet: 677,
   botTestnet: 968,
   bnbMainnet: 56,
   bnbTestnet: 97,

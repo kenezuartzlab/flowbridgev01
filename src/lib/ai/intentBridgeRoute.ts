@@ -10,7 +10,7 @@ import {
 } from "@/lib/bridge/officialBridgeConfig";
 import { BOT_MAINNET_CHAIN_ID, BOT_TESTNET_CHAIN_ID } from "./actionIntent";
 
-/** Mainnet BOT is 677 in the wallet layer and 1024 in the bridge config. */
+/** V30.1A: canonical BOT identities only — mainnet 677, testnet 968. */
 const BOT_CHAIN_ALIASES = new Set<number>([
   BOT_TESTNET_CHAIN_ID,
   BOT_MAINNET_CHAIN_ID,

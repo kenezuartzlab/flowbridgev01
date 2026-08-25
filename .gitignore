@@ -30,3 +30,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Deployment / signing secrets (never commit)
+contracts/.env
+contracts/.env.*
+.env.deploy*
+*.secrets.json
+*.key
+*.mnemonic
