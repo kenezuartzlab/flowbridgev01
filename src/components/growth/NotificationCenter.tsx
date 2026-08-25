@@ -64,7 +64,7 @@ export function NotificationCenter() {
           role="dialog"
           aria-label="Notifications"
           data-testid="notification-panel"
-          className="absolute right-0 z-[60] mt-2 w-[min(20rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-hairline bg-card/97 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+          className="fixed left-3 right-3 top-[calc(env(safe-area-inset-top)+4.75rem)] z-[60] overflow-hidden rounded-2xl border border-hairline bg-card/97 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[min(20rem,calc(100vw-1.5rem))]"
         >
           <div className="flex items-center justify-between gap-2 border-b border-hairline px-3.5 py-2.5">
             <p className="fb-eyebrow">Notifications</p>
