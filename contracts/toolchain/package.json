@@ -1,0 +1,24 @@
+{
+  "name": "flowbridge-router-v4-vscode",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compile": "hardhat compile",
+    "clean": "hardhat clean",
+    "size": "node scripts/check-size.js",
+    "deploy:testnet": "node scripts/deploy.js testnet",
+    "deploy:mainnet": "node scripts/deploy.js mainnet"
+  },
+  "devDependencies": {
+    "hardhat": "^3.12.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.6.1",
+    "dotenv": "^17.4.2",
+    "ethers": "^6.17.0"
+  }
+}
