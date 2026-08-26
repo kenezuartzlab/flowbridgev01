@@ -79,6 +79,7 @@ import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
+import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/admin.mainnet-prerequisites'
 import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
@@ -450,6 +451,12 @@ const ApiAdminPartnerGovernanceRoute =
     path: '/api/admin/partner-governance',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminMainnetPrerequisitesRoute =
+  ApiAdminMainnetPrerequisitesRouteImport.update({
+    id: '/api/admin/mainnet-prerequisites',
+    path: '/api/admin/mainnet-prerequisites',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminMainnetPreflightRoute =
   ApiAdminMainnetPreflightRouteImport.update({
     id: '/api/admin/mainnet-preflight',
@@ -581,6 +588,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
+  '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -669,6 +677,7 @@ export interface FileRoutesByTo {
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
+  '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -758,6 +767,7 @@ export interface FileRoutesById {
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
+  '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -848,6 +858,7 @@ export interface FileRouteTypes {
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
+    | '/api/admin/mainnet-prerequisites'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -936,6 +947,7 @@ export interface FileRouteTypes {
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
+    | '/api/admin/mainnet-prerequisites'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1024,6 +1036,7 @@ export interface FileRouteTypes {
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
+    | '/api/admin/mainnet-prerequisites'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1113,6 +1126,7 @@ export interface RootRouteChildren {
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
   ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
+  ApiAdminMainnetPrerequisitesRoute: typeof ApiAdminMainnetPrerequisitesRoute
   ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
@@ -1638,6 +1652,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminPartnerGovernanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/mainnet-prerequisites': {
+      id: '/api/admin/mainnet-prerequisites'
+      path: '/api/admin/mainnet-prerequisites'
+      fullPath: '/api/admin/mainnet-prerequisites'
+      preLoaderRoute: typeof ApiAdminMainnetPrerequisitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/mainnet-preflight': {
       id: '/api/admin/mainnet-preflight'
       path: '/api/admin/mainnet-preflight'
@@ -1878,6 +1899,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
   ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,
+  ApiAdminMainnetPrerequisitesRoute: ApiAdminMainnetPrerequisitesRoute,
   ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
