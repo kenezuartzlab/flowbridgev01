@@ -68,9 +68,12 @@ contract FlowBridgeRouterLens {
     error DuplicatePathToken();
 
     constructor(address flowRouter_) {
-        if (flowRouter_ == address(0)) revert InvalidFlowRouter();
+        // V30.1B hardening: the lens target must be a deployed contract, not an
+        // EOA or an undeployed address that would silently return empty reads.
+        if (flowRouter_ == address(0) || flowRouter_.code.length == 0) revert InvalidFlowRouter();
         flowRouter = IFlowBridgeRouterV4View(flowRouter_);
     }
+
 
     function getActiveRouters()
         external
@@ -245,9 +248,88 @@ contract FlowBridgeRouterLens {
         rtype = RouterType(rawType);
     }
 
+    /**
+     * @notice Explicit no-route signal. `found` is false when no active V2 router
+     *         produced a non-zero quote, removing the ambiguity of `getBestV2Rate`
+     *         returning routerId 0 with amountOut 0.
+     */
+    function findBestV2Rate(uint256 amountIn, address[] calldata path)
+        external
+        view
+        returns (bool found, uint256 bestRouterId, uint256 bestAmountOut)
+    {
+        _validateV2Path(path);
+        uint256 total = flowRouter.routerCount();
+        for (uint256 i; i < total; ++i) {
+            (address routerAddr, uint8 rtype,, bool active,,) = flowRouter.routers(i);
+            if (!active || rtype != uint8(RouterType.V2)) continue;
+            try IFlowBridgeV2QuoteRouter(routerAddr).getAmountsOut(amountIn, path) returns (uint256[] memory amounts) {
+                uint256 out = amounts[amounts.length - 1];
+                if (out > bestAmountOut) {
+                    found = true;
+                    bestAmountOut = out;
+                    bestRouterId = i;
+                }
+            } catch {
+                continue;
+            }
+        }
+    }
+
+    /** @notice Bounded router discovery page: [start, start + count). */
+    function getRoutersPage(uint256 start, uint256 count)
+        external
+        view
+        returns (uint256[] memory ids, address[] memory addrs, bool[] memory actives)
+    {
+        uint256 total = flowRouter.routerCount();
+        if (start >= total || count == 0) return (new uint256[](0), new address[](0), new bool[](0));
+        uint256 end = start + count;
+        if (end > total) end = total;
+        uint256 size = end - start;
+        ids = new uint256[](size);
+        addrs = new address[](size);
+        actives = new bool[](size);
+        for (uint256 i; i < size; ++i) {
+            uint256 id = start + i;
+            (address routerAddr,,, bool active,,) = flowRouter.routers(id);
+            ids[i] = id;
+            addrs[i] = routerAddr;
+            actives[i] = active;
+        }
+    }
+
+    /** @notice Bounded bridge discovery page: [start, start + count). */
+    function getBridgesPage(uint256 start, uint256 count)
+        external
+        view
+        returns (uint256[] memory ids, address[] memory addrs, uint256[] memory destChainIds, bool[] memory actives)
+    {
+        uint256 total = flowRouter.bridgeCount();
+        if (start >= total || count == 0) {
+            return (new uint256[](0), new address[](0), new uint256[](0), new bool[](0));
+        }
+        uint256 end = start + count;
+        if (end > total) end = total;
+        uint256 size = end - start;
+        ids = new uint256[](size);
+        addrs = new address[](size);
+        destChainIds = new uint256[](size);
+        actives = new bool[](size);
+        for (uint256 i; i < size; ++i) {
+            uint256 id = start + i;
+            (address bridgeAddr, bool active,,, uint256 destId) = flowRouter.bridges(id);
+            ids[i] = id;
+            addrs[i] = bridgeAddr;
+            destChainIds[i] = destId;
+            actives[i] = active;
+        }
+    }
+
     function _validateV2Path(address[] calldata path) internal pure {
         if (path.length < 2) revert PathTooShort();
         if (path[0] == address(0) || path[path.length - 1] == address(0)) revert InvalidPathToken();
+
         if (path[0] == path[path.length - 1]) revert IdenticalEndpoints();
 
         for (uint256 i = 1; i < path.length; ++i) {

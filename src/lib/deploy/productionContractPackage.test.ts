@@ -38,12 +38,13 @@ describe('V30.1A.1 production contract package', () => {
     }
   });
 
-  it('still fails the full consolidation gate on Router V4 build identity', () => {
+  it('reproduces every build identity after V30.1B hardening', () => {
     const verdict = evaluateConsolidation();
-    expect(verdict.pass).toBe(false);
     expect(verdict.missingContractIds).toEqual([]);
-    expect(verdict.unprovenBuildIdentityIds).toEqual(['FlowBridgeRouterV4']);
+    expect(verdict.unprovenBuildIdentityIds).toEqual([]);
+    expect(verdict.pass).toBe(true);
   });
+
 
   it('reflects Router V4 consolidation in the inventory without promoting mainnet', () => {
     const router = inventoryEntry('FlowBridgeRouterV4');

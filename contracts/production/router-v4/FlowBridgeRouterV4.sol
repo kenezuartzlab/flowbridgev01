@@ -499,12 +499,32 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         emit RouterStatusChanged(routerId, active);
     }
 
+    /**
+     * @dev V30.1B hardening: any material mutation of an integration re-arms the
+     *      activation delay, so a mutated route cannot be re-activated instantly.
+     *      Delay changes never accelerate an already-scheduled activation because
+     *      activation times are stored as absolute timestamps.
+     */
+    function _rearmRouterActivation(uint256 routerId) internal {
+        uint256 activationTime = block.timestamp + registryActivationDelay;
+        routerActivationTime[routerId] = activationTime;
+        emit IntegrationActivationScheduled(keccak256("ROUTER"), routerId, activationTime);
+    }
+
+    function _rearmBridgeActivation(uint256 bridgeId) internal {
+        uint256 activationTime = block.timestamp + registryActivationDelay;
+        bridgeActivationTime[bridgeId] = activationTime;
+        emit IntegrationActivationScheduled(keccak256("BRIDGE"), bridgeId, activationTime);
+    }
+
     function updateRouterWrappedNative(uint256 routerId, address newWrappedNative) external onlyOwner {
         require(routerId < routerCount, "Router not found");
         require(!routers[routerId].active, "Deactivate first");
         require(newWrappedNative != address(0) && newWrappedNative.code.length > 0, "Invalid address");
         routers[routerId].wrappedNative = newWrappedNative;
+        _rearmRouterActivation(routerId);
     }
+
 
     /**
      * @notice v3-compatible bridge registration. Resource IDs must be configured separately
@@ -597,6 +617,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
             bridgeTokenSupported[bridgeId][token] = true;
             bridges[bridgeId].supportedTokens.push(token);
         }
+        _rearmBridgeActivation(bridgeId);
     }
 
     function setBridgeTokenResource(uint256 bridgeId, address token, bytes32 resourceId) external onlyOwner {
@@ -606,6 +627,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         require(resourceId != bytes32(0), "Resource required");
         bridgeResourceId[bridgeId][token] = resourceId;
         emit BridgeTokenResourceSet(bridgeId, token, resourceId);
+        _rearmBridgeActivation(bridgeId);
     }
 
     function setBridgeSupportsBotGas(uint256 bridgeId, bool supported) external onlyOwner {
@@ -613,6 +635,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         require(!bridges[bridgeId].active, "Deactivate first");
         bridgeSupportsBotGas[bridgeId] = supported;
         emit BridgeBotGasSupportSet(bridgeId, supported);
+        _rearmBridgeActivation(bridgeId);
     }
 
     /**
@@ -625,7 +648,9 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         require(!bridges[bridgeId].active, "Deactivate first");
         bridgeProxyExecutionEnabled[bridgeId] = enabled;
         emit BridgeProxyExecutionSet(bridgeId, enabled);
+        _rearmBridgeActivation(bridgeId);
     }
+
 
     // ---------------------------------------------------------------------
     // V2 token -> token (v3-compatible + fee-bound safe variant)

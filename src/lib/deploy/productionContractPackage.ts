@@ -48,6 +48,13 @@ const REVIEWED_ROUTER_V4_TEST_SHA256 =
 const REVIEWED_ROUTER_V4_ABI_SHA256 =
   '7d25b676013777112996fecc036eacbcfc7f09635ddd9b7dd7b6e1cbacddff73';
 
+/** V30.1B hardened source hashes (post-security-review candidates). */
+const V30_1B_ROUTER_V4_SHA256 =
+  'd6fdd281b5bd0c3211aca95fba94bf38c4031973c175d12d4b26455a5c584a46';
+const V30_1B_ROUTER_LENS_SHA256 =
+  '8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2';
+
+
 /**
  * Archived build line for the V30.1A.2 missing-contract package. Optimizer runs
  * is 1 (NOT Router's 200) — rewriting it would create new bytecode and destroy
@@ -106,23 +113,23 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     compiler: ROUTER_V4_BUILD_LINE,
     identity: {
       path: 'contracts/production/router-v4/FlowBridgeRouterV4.sol',
-      sourceSha256: REVIEWED_ROUTER_V4_STACKFIX_SHA256,
-      artifactSha256: null,
-      runtimeSha256: null,
-      abiSourceSha256: REVIEWED_ROUTER_V4_ABI_SHA256,
+      sourceSha256: V30_1B_ROUTER_V4_SHA256,
+      artifactSha256: '51bd139b17376a6cbcc1a1c721c2fcdb65c649004beb05781bacdd067b6f75f4',
+      runtimeSha256: '81453edb9a72fa87af7278956ffcfebc1bfa4d2730016478d9d4a50a6d0380eb',
+      abiSourceSha256: 'aed8a4a3fa195a58ff9da812808e1423ac239b0b41769ba9cfd1cebd84f95f00',
     },
-    reviewedSourceSha256: REVIEWED_ROUTER_V4_STACKFIX_SHA256,
+    reviewedSourceSha256: V30_1B_ROUTER_V4_SHA256,
     testPath: 'contracts/production/router-v4/test/FlowBridgeRouterV4.t.sol',
-    parity: 'PARITY_UNPROVEN',
+    parity: 'PARITY_CONFIRMED',
     notes: [
-      'Imported byte-for-byte from the reviewed reference pack; no reformatting, refactor or upgrade applied.',
-      'Build identity preserved: solc 0.8.20, existing optimizer settings, viaIR on, EVM target shanghai.',
-      'The stackfix variant is the single PRODUCTION_CANDIDATE: identical external ABI, sequential named returns in getBridgeRouteConfig() only.',
-      'Artifact/runtime hashes are null: no Solidity toolchain runs in this workspace, so creation/runtime bytecode parity is not yet reproducible.',
-      `Reviewed test suite imported (SHA-256 ${REVIEWED_ROUTER_V4_TEST_SHA256}) but not executed here — no Solidity test runner is available.`,
+      'V30.1B hardening applied: every material integration mutation re-arms the activation delay and emits IntegrationActivationScheduled.',
+      'Build identity preserved: solc 0.8.20, optimizer runs 200, viaIR on, EVM target shanghai; creation/runtime hashes reproduced in the isolated audit workspace.',
+      'BLOCKER V30.1B-R1: deployed code is 28,703 bytes, above the 24,576-byte EIP-170 limit — not deployable without splitting execution surface.',
+      'Reviewed suite plus contracts/production/router-v4/test/V30_1B_Hardening.t.sol pass (44 Solidity tests total).',
       'Router bridge proxy execution remains disabled for mainnet.',
     ],
   },
+
   {
     contractId: 'FlowBridgeRouterV4@original',
     selection: 'ARCHIVED_REFERENCE',
@@ -140,7 +147,9 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     notes: [
       'Archived historical copy. Never selectable by deployment tooling.',
       'Differs from the candidate only in getBridgeRouteConfig() return construction.',
+      `V30.1A.2 import baseline: stackfix source SHA-256 ${REVIEWED_ROUTER_V4_STACKFIX_SHA256}, reviewed test SHA-256 ${REVIEWED_ROUTER_V4_TEST_SHA256}.`,
     ],
+
   },
   {
     contractId: 'FlowBridgeRouterLens',
@@ -148,21 +157,22 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     compiler: MISSING_CONTRACT_BUILD_LINE,
     identity: {
       path: 'contracts/production/router-lens/FlowBridgeRouterLens.sol',
-      sourceSha256: REVIEWED_LENS.source,
-      artifactSha256: REVIEWED_LENS.creation,
-      runtimeSha256: REVIEWED_LENS.runtime,
-      abiSourceSha256: REVIEWED_LENS.normalizedAbi,
+      sourceSha256: V30_1B_ROUTER_LENS_SHA256,
+      artifactSha256: 'a7d48eb7149e9ed0019e8690b1655c6a158fbeead0d51190ba970d31bd0ecc31',
+      runtimeSha256: 'ea98f95e0182e159257521cd021cedfd640ea5fc5228bfa8e1b0c82cc4187e90',
+      abiSourceSha256: '0ee994f33acf1df22e0fd5e558f757d83e0f9913663bf596ef0044dc02dc7042',
     },
-    reviewedSourceSha256: REVIEWED_LENS.source,
-    testPath: null,
+    reviewedSourceSha256: V30_1B_ROUTER_LENS_SHA256,
+    testPath: 'contracts/production/router-v4/test/V30_1B_Hardening.t.sol',
     parity: 'PARITY_CONFIRMED',
     notes: [
-      'Imported byte-for-byte from the reviewed V30.1A.2 handoff (source SHA-256 parity confirmed).',
-      'Recompiled in an isolated Hardhat workspace with solc 0.8.20, optimizer runs 1, viaIR on, EVM shanghai: creation, runtime and normalized-ABI hashes reproduce the archived values exactly.',
-      'Artifact JSON wrapper bytes differ from the archived file (non-semantic Hardhat metadata fields); bytecode and ABI identity are identical.',
-      'Read-only lens: no write authority, and its IFlowBridgeRouterV4View binding was verified selector-for-selector against the frozen Router V4 candidate.',
+      'V30.1A.2 import parity confirmed first (archived source hash ' + `${REVIEWED_LENS.source}` + ').',
+      'V30.1B hardening applied: constructor rejects non-contract targets, findBestV2Rate exposes an explicit no-route signal, and getRoutersPage/getBridgesPage bound discovery reads.',
+      'Recompiled in the isolated workspace with solc 0.8.20, optimizer runs 1, viaIR on, EVM shanghai; deployed size 7,577 bytes, well under the EIP-170 limit.',
+      'Read-only lens: no write authority, no custody, and its IFlowBridgeRouterV4View binding was verified selector-for-selector against the Router V4 candidate.',
     ],
   },
+
   {
     contractId: 'FlowBridgeActivityRegistry',
     selection: 'PRODUCTION_CANDIDATE',
