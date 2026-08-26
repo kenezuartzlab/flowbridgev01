@@ -112,7 +112,7 @@ disabled.
 
 ## 8. Application gates
 
-908 tests passing (82 files), typecheck clean, production build OK. No V26–V30
+922 tests passing (82 files), typecheck clean, production build OK. No V26–V30
 regression.
 
 ## 9. Remaining blockers before Safe creation and first deployment
