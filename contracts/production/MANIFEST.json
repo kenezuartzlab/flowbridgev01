@@ -1,0 +1,58 @@
+{
+  "$comment": "FlowBridge V30.1A.1 — canonical production contract package. Source consolidation only. No deployment, no signature, no transaction. Deployment tooling resolves PRODUCTION_CANDIDATE entries only; contracts/archive/** is never selectable. No production address or artifact may be inferred from an archived testnet manifest.",
+  "gate": "V30.1A.1",
+  "verdict": "BLOCKED",
+  "networks": { "botMainnet": 677, "botTestnet": 968, "prohibitedLegacy": 1024 },
+  "buildLines": {
+    "routerV4": {
+      "solc": "0.8.20",
+      "optimizer": { "enabled": true, "runs": 200 },
+      "viaIR": true,
+      "evmVersion": "shanghai"
+    }
+  },
+  "contracts": [
+    {
+      "contractId": "FlowBridgeRouterV4",
+      "selection": "PRODUCTION_CANDIDATE",
+      "source": "contracts/production/router-v4/FlowBridgeRouterV4.sol",
+      "sourceSha256": "eb2069e5d5b2eef8c6c34cc8d9826417d767792d3812dbcebbe318397e46cebd",
+      "abiSource": "contracts/production/router-v4/FlowBridgeRouterV4.abi.ts",
+      "abiSourceSha256": "7d25b676013777112996fecc036eacbcfc7f09635ddd9b7dd7b6e1cbacddff73",
+      "test": "contracts/production/router-v4/test/FlowBridgeRouterV4.t.sol",
+      "testSha256": "629f5fd75d1074b1de3f985d070054120ee65061b1ad59a79248788b3b457a11",
+      "artifactSha256": null,
+      "runtimeSha256": null,
+      "sourceParity": "PARITY_CONFIRMED_AGAINST_REVIEWED_PACK",
+      "buildParity": "UNPROVEN_NO_SOLIDITY_TOOLCHAIN"
+    },
+    {
+      "contractId": "FlowBridgeRouterV4@original",
+      "selection": "ARCHIVED_REFERENCE",
+      "source": "contracts/archive/router-v4/FlowBridgeRouterV4-original.sol",
+      "sourceSha256": "8d5ebab2e9e5506074f9dae4a5b922d63f889d55edcac6477dcbbe16f0833d91"
+    },
+    {
+      "contractId": "FlowBridgeRouterLens",
+      "selection": "ABSENT",
+      "source": null,
+      "sourceSha256": null,
+      "parity": "BLOCKED_SOURCE_ABSENT"
+    },
+    {
+      "contractId": "FlowBridgeActivityRegistry",
+      "selection": "ABSENT",
+      "source": null,
+      "sourceSha256": null,
+      "parity": "BLOCKED_SOURCE_ABSENT"
+    },
+    {
+      "contractId": "FlowBridgeBridgeAdapterV1",
+      "selection": "ABSENT",
+      "source": null,
+      "sourceSha256": null,
+      "parity": "BLOCKED_SOURCE_ABSENT",
+      "mainnetExecution": "DISABLED"
+    }
+  ]
+}
