@@ -169,7 +169,8 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     notes: [
       'V30.1A.2 import parity confirmed first (archived source hash ' + `${REVIEWED_LENS.source}` + ').',
       'V30.1B hardening applied: constructor rejects non-contract targets, findBestV2Rate exposes an explicit no-route signal, and getRoutersPage/getBridgesPage bound discovery reads.',
-      'Recompiled in the isolated workspace with solc 0.8.20, optimizer runs 1, viaIR on, EVM shanghai; deployed size 7,577 bytes, well under the EIP-170 limit.',
+      'Recompiled in the isolated workspace with solc 0.8.20, optimizer runs 1, viaIR on, EVM shanghai; creation 8,069 bytes and deployed/runtime 7,829 bytes, well under the EIP-170 limit.',
+      'V30.1B.1: the Lens is now the sole discovery/quote surface — the Router no longer duplicates getActiveRouters/getActiveBridges/getBestV2Rate/getV2RatesPage/getBridgeRouteConfig.',
       'Read-only lens: no write authority, no custody, and its IFlowBridgeRouterV4View binding was verified selector-for-selector against the Router V4 candidate.',
     ],
   },
