@@ -82,11 +82,11 @@ export const SECURITY_FINDINGS: readonly SecurityFinding[] = [
     id: 'V30.1B-R1',
     contractId: 'FlowBridgeRouterV4',
     severity: 'CRITICAL',
-    title: 'Deployed bytecode exceeds the EIP-170 contract size limit',
+    title: 'Deployed bytecode exceeded the EIP-170 contract size limit',
     detail:
-      'At the frozen build line (solc 0.8.20, optimizer runs 200, viaIR, shanghai) the deployed code is 28,703 bytes, above the 24,576-byte EIP-170 limit. The contract is not deployable on an EIP-170 chain as-is; splitting execution surface out of the router is required and is a material redesign, not a settings change.',
-    status: 'OPEN_BLOCKER',
-    evidence: 'Isolated Hardhat compile size report; measured deployed bytecode length.',
+      'At the frozen build line (solc 0.8.20, optimizer runs 200, viaIR, shanghai) the V30.1B candidate measured 29,074 creation bytes and 28,703 deployed/runtime bytes, above the 24,576-byte EIP-170 limit. Fixed in V30.1B.1 by removing the non fee-bound legacy swap wrappers, the already-disabled bridge proxy execution surface and the read-only discovery/quote helpers (served by the Lens), and by converting revert strings to custom errors: 20,020 creation bytes and 19,720 runtime bytes, 4,856 bytes of headroom, with every execution-safety invariant preserved.',
+    status: 'FIXED_IN_SOURCE',
+    evidence: 'src/lib/deploy/routerSizeGate.ts; contracts/production/router-v4/test/V30_1B1_SizeSafe.t.sol (19 acceptance/adversarial tests).',
   },
   {
     id: 'V30.1B-R2',
