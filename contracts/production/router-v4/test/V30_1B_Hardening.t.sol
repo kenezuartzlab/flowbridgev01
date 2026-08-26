@@ -44,7 +44,7 @@ contract V30_1B_HardeningTest is Test {
 
         router.setBridgeActive(id, false);
         router.setBridgeTokenResource(id, address(usdt), keccak256("RID2"));
-        vm.expectRevert(bytes("Activation delay"));
+        vm.expectRevert(ActivationDelay.selector);
         router.setBridgeActive(id, true);
 
         vm.warp(router.bridgeActivationTime(id));
@@ -58,7 +58,7 @@ contract V30_1B_HardeningTest is Test {
         router.setBridgeActive(id, true);
         router.setBridgeActive(id, false);
         router.setBridgeProxyExecutionEnabled(id, true);
-        vm.expectRevert(bytes("Activation delay"));
+        vm.expectRevert(ActivationDelay.selector);
         router.setBridgeActive(id, true);
     }
 
@@ -72,7 +72,7 @@ contract V30_1B_HardeningTest is Test {
         router.setRouterActive(rid, false);
         MockWrappedNative other = new MockWrappedNative();
         router.updateRouterWrappedNative(rid, address(other));
-        vm.expectRevert(bytes("Activation delay"));
+        vm.expectRevert(ActivationDelay.selector);
         router.setRouterActive(rid, true);
     }
 
@@ -82,7 +82,7 @@ contract V30_1B_HardeningTest is Test {
         uint256 scheduled = router.bridgeActivationTime(id);
         router.setRegistryActivationDelay(0);
         assertEq(router.bridgeActivationTime(id), scheduled);
-        vm.expectRevert(bytes("Activation delay"));
+        vm.expectRevert(ActivationDelay.selector);
         router.setBridgeActive(id, true);
     }
 

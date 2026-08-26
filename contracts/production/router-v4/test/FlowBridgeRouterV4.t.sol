@@ -204,14 +204,14 @@ contract FlowBridgeRouterV4Test is Test {
         assertEq(bridgeBps, 0);
     }
 
-    function test_LegacyV2SwapStillWorks() public {
+    function test_V2SafeSwapWorks() public {
         address[] memory path = new address[](2);
         path[0] = address(tokenIn);
         path[1] = address(tokenOut);
 
         vm.startPrank(user);
         tokenIn.approve(address(router), 100e6);
-        router.swapV2(0, 100e6, 99e6, path, user, block.timestamp + 60);
+        router.swapV2Safe(0, 100e6, 99e6, path, user, block.timestamp + 60, type(uint256).max);
         vm.stopPrank();
 
         assertEq(tokenOut.balanceOf(user), 100e6);
@@ -227,7 +227,7 @@ contract FlowBridgeRouterV4Test is Test {
 
         vm.startPrank(user);
         tokenIn.approve(address(router), 101e6);
-        vm.expectRevert(bytes("Protocol fee changed"));
+        vm.expectRevert(ProtocolFeeChanged.selector);
         router.swapV2Safe(0, 100e6, 99e6, path, user, block.timestamp + 60, 0);
         vm.stopPrank();
     }
@@ -241,43 +241,30 @@ contract FlowBridgeRouterV4Test is Test {
         assertEq(fee, 200_000);
     }
 
-    function test_LegacyBridgeCallsGatewayDeposit() public {
-        vm.startPrank(user);
-        tokenIn.approve(address(router), 100e6);
-        router.bridgeWithFee(0, address(tokenIn), 100e6);
-        vm.stopPrank();
-
-        assertEq(gateway.recipient(), user);
-        assertEq(gateway.amount(), 100e6);
-        assertEq(gateway.destinationChainId(), 677);
-        assertEq(gateway.resourceId(), RESOURCE);
-        assertFalse(gateway.withBotGas());
-        assertEq(tokenIn.balanceOf(address(gateway)), 100e6);
-        assertEq(tokenIn.allowance(address(router), address(gateway)), 0);
+    /**
+     * V30.1B.1: bridge proxy execution (bridgeWithFee / bridgeBot) was removed from
+     * the mainnet Router candidate. Production bridging is direct user wallet ->
+     * official BOT Bridge. Only bridge registry metadata/reads remain.
+     */
+    function test_BridgeProxyExecutionSurfaceRemoved() public view {
+        assertEq(router.bridgeCount(), 1);
+        (address bridgeAddr, bool active,,, uint256 destChainId) = router.bridges(0);
+        assertEq(bridgeAddr, address(gateway));
+        assertTrue(active);
+        assertEq(destChainId, 677);
+        assertTrue(router.bridgeTokenSupported(0, address(tokenIn)));
+        assertEq(router.bridgeResourceId(0, address(tokenIn)), RESOURCE);
+        // No callable execution entrypoint exists for proxy bridging.
+        assertEq(address(router).code.length > 0, true);
     }
 
-    function test_BridgeBotSupportsCustomRecipientAndBotGas() public {
-        uint256 nonce = router.feeConfigNonce();
-
-        vm.startPrank(user);
-        tokenIn.approve(address(router), 50e6);
-        router.bridgeBot(0, address(tokenIn), 50e6, recipient, true, 0, nonce);
-        vm.stopPrank();
-
-        assertEq(gateway.recipient(), recipient);
-        assertEq(gateway.amount(), 50e6);
-        assertTrue(gateway.withBotGas());
-    }
-
-    function test_BridgeFeeNonceProtectsQuote() public {
-        uint256 quotedNonce = router.feeConfigNonce();
-        router.setGlobalFeeBps(5);
-
-        vm.startPrank(user);
-        tokenIn.approve(address(router), 100e6);
-        vm.expectRevert(bytes("Fee config changed"));
-        router.bridgeBot(0, address(tokenIn), 100e6, recipient, false, 1e6, quotedNonce);
-        vm.stopPrank();
+    function test_BridgeMetadataReadsStayAvailable() public view {
+        address[] memory tokens = router.getBridgeSupportedTokens(0);
+        assertEq(tokens.length, 1);
+        assertEq(tokens[0], address(tokenIn));
+        (uint256 bridgeFee, uint256 bridgeBps) = router.computeBridgeFee(0, 100e6, user);
+        assertEq(bridgeFee, 0);
+        assertEq(bridgeBps, 0);
     }
 
     function test_InvalidNativePathReverts() public {
@@ -287,8 +274,10 @@ contract FlowBridgeRouterV4Test is Test {
 
         vm.deal(user, 1 ether);
         vm.prank(user);
-        vm.expectRevert(bytes("Path must start wrapped native"));
-        router.swapNativeToToken{value: 1 ether}(0, address(tokenOut), 0, 0, badPath, user, block.timestamp + 60);
+        vm.expectRevert(PathMustStartWrappedNative.selector);
+        router.swapNativeToTokenSafe{value: 1 ether}(
+            0, 1 ether, address(tokenOut), 0, 0, badPath, user, block.timestamp + 60, type(uint256).max
+        );
     }
 
     function test_RegistryDelayBlocksEarlyActivation() public {
@@ -297,7 +286,7 @@ contract FlowBridgeRouterV4Test is Test {
         uint256 id = router.registerRouter(
             address(another), FlowBridgeRouterV4.RouterType.V2, address(wrapped), "Delayed", "2"
         );
-        vm.expectRevert(bytes("Activation delay"));
+        vm.expectRevert(ActivationDelay.selector);
         router.setRouterActive(id, true);
         vm.warp(block.timestamp + 1 days);
         router.setRouterActive(id, true);
