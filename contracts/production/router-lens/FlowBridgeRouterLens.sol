@@ -68,9 +68,12 @@ contract FlowBridgeRouterLens {
     error DuplicatePathToken();
 
     constructor(address flowRouter_) {
-        if (flowRouter_ == address(0)) revert InvalidFlowRouter();
+        // V30.1B hardening: the lens target must be a deployed contract, not an
+        // EOA or an undeployed address that would silently return empty reads.
+        if (flowRouter_ == address(0) || flowRouter_.code.length == 0) revert InvalidFlowRouter();
         flowRouter = IFlowBridgeRouterV4View(flowRouter_);
     }
+
 
     function getActiveRouters()
         external
