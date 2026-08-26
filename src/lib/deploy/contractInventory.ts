@@ -104,16 +104,19 @@ export const CONTRACT_INVENTORY: readonly ContractInventoryEntry[] = [
   {
     id: 'FlowBridgeRouterV4',
     name: 'FlowBridgeRouterV4',
-    sourcePath: null,
+    sourcePath: 'contracts/production/router-v4/FlowBridgeRouterV4.sol',
     artifactPath: null,
-    readiness: 'BLOCKED',
+    readiness: 'HARDENING_REQUIRED',
     compiler: ROUTER_V4_BUILD_LINE,
     privilegedRoles: ['owner', 'fee configurator', 'integration registry admin', 'pauser'],
-    constructorRequirements: ['unavailable — source not present in this repository'],
+    constructorRequirements: ['unavailable — deployment constructor parameters not frozen'],
     blockers: [
-      'Solidity source and artifact are not present in this workspace, so no source/artifact/runtime hash can be computed and no line-level hardening review is possible here.',
+      'Mainnet governance hardening is outstanding (registry activation-delay reset, owner/timelock, fee safety, final BDEX production configuration) — V30.1D.',
+      'Creation/runtime bytecode identity is not reproducible in this workspace (no Solidity toolchain), so build parity against the reviewed candidate is unproven.',
+      'Bridge proxy execution must remain disabled for mainnet.',
     ],
   },
+
   {
     id: 'FlowBridgeRouterLens',
     name: 'FlowBridgeRouterLens',
