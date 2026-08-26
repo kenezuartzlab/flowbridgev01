@@ -172,11 +172,11 @@ export const SECURITY_FINDINGS: readonly SecurityFinding[] = [
     id: 'V30.1B-X1',
     contractId: 'ALL',
     severity: 'MEDIUM',
-    title: 'Slither/static analyzer unavailable in this environment',
+    title: 'Static analysis executed — three results, all triaged, none actionable',
     detail:
-      'No slither, solc or forge binary is installable in the build sandbox. Compensating evidence: pinned isolated rebuild, 44 passing Solidity tests including new adversarial regressions, EIP-170 size measurement, ABI policy checks and selector-parity verification. An external Slither run remains a required release input.',
-    status: 'OPEN_BLOCKER',
-    evidence: 'Tool probe in the isolated workspace; documented limitation.',
+      'V30.1B.1 ran pinned Slither 0.11.3 with solc 0.8.20 (--optimize --optimize-runs 200 --via-ir) over the size-safe Router candidate: 10 contracts, 63 detectors, 3 results. arbitrary-send-eth (owner-configured feeTreasury) and incorrect-equality (the exact-input / fee-on-transfer rejection invariant) are by design; the reentrancy-no-eth report is a false positive because the flagged write is a local struct copy of routers[routerId] and all swap entry points are nonReentrant.',
+    status: 'ACCEPTED_DOCUMENTED',
+    evidence: 'src/lib/deploy/routerSizeGate.ts SLITHER_RUN / SLITHER_TRIAGE.',
   },
   {
     id: 'V30.1B-G1',
