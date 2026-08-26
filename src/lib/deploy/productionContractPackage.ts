@@ -147,7 +147,9 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     notes: [
       'Archived historical copy. Never selectable by deployment tooling.',
       'Differs from the candidate only in getBridgeRouteConfig() return construction.',
+      `V30.1A.2 import baseline: stackfix source SHA-256 ${REVIEWED_ROUTER_V4_STACKFIX_SHA256}, reviewed test SHA-256 ${REVIEWED_ROUTER_V4_TEST_SHA256}.`,
     ],
+
   },
   {
     contractId: 'FlowBridgeRouterLens',
