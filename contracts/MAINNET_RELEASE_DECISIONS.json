@@ -1,0 +1,293 @@
+{
+  "schema": "flowbridge.mainnet-release-decisions",
+  "decisionVersion": "V30.1D.2",
+  "chainId": 677,
+  "candidateDigest": "fnv1a64:19671fd13a81be19",
+  "contractCandidates": [
+    {
+      "contractId": "FlowBridgeRouterV4",
+      "sourceSha256": "bb43445af143d8c4a36fd144315c2d99f13fe28c73eca63c4f3736709e3ba905",
+      "runtimeSha256": "93a922d67c281bf076d87bcf71de186f0998a8feb9c3dccafe592d097000a0f9"
+    },
+    {
+      "contractId": "FlowBridgeRouterLens",
+      "sourceSha256": "8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2",
+      "runtimeSha256": "05cde1794ef1620af4248deebb92680d1b806e534dd99ee5f5c8b4603dea6ca3"
+    },
+    {
+      "contractId": "FlowBridgeActivityRegistry",
+      "sourceSha256": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e",
+      "runtimeSha256": "5004d356f9d7e459524c9bba8a5dc2dca6cc98ff95d6eafc0b7b9cabb08a84f3"
+    },
+    {
+      "contractId": "FlowBridgeBridgeAdapterV1",
+      "sourceSha256": "adc2eea7c4d9a39a241e312aebd9f71ace75e097cb535227e114a23d1a707700",
+      "runtimeSha256": "8a5dad06a1a8a7e49f134091ad3a574e61c061b2515a4c16800b2659aa0fdaae"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "FLOW_ECONOMICS",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "GOVERNANCE_SAFE_PLAN",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "TREASURY_SAFE_PLAN",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "OPERATIONS_SAFE_PLAN",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "ROOT_PUBLISHER_ASSIGNMENT",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "ACTIVITY_ATTESTER_ASSIGNMENT",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "TIMELOCK_POLICY",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "REWARDS_LAUNCH_PLAN",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "STAKING_LAUNCH_PLAN",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "LIQUIDITY_AND_ORACLE_PLAN",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "GAS_BUDGET_PLAN",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "DEPENDENCY_SNAPSHOT",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    },
+    {
+      "id": "LEGAL_SIGNOFF",
+      "status": "NEEDS_APPROVAL",
+      "value": null,
+      "approvedByEmail": null,
+      "approvedAt": null,
+      "decisionHash": null
+    }
+  ],
+  "dependencySnapshot": {
+    "chainId": 677,
+    "dependencies": [
+      {
+        "id": "botMainnetRpc",
+        "label": "Chain / RPC",
+        "value": "https://rpc.botchain.ai",
+        "kind": "RPC",
+        "state": "VERIFIED",
+        "detail": "eth_chainId returned 677"
+      },
+      {
+        "id": "botMainnetExplorer",
+        "label": "Explorer",
+        "value": "https://scan.botchain.ai",
+        "kind": "EXPLORER",
+        "state": "DOCUMENTED_OFFICIAL",
+        "detail": "documented official value; awaiting a chain 677 observation"
+      },
+      {
+        "id": "wrappedNative",
+        "label": "WBOT",
+        "value": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        "kind": "CONTRACT",
+        "state": "VERIFIED",
+        "detail": "2317 bytes of runtime bytecode observed on chain 677"
+      },
+      {
+        "id": "bdexV2Router02",
+        "label": "BDEX V2 Router02",
+        "value": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+        "kind": "CONTRACT",
+        "state": "VERIFIED",
+        "detail": "21987 bytes of runtime bytecode observed on chain 677"
+      },
+      {
+        "id": "bdexSwapRouter",
+        "label": "BDEX V3 SwapRouter",
+        "value": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+        "kind": "CONTRACT",
+        "state": "VERIFIED",
+        "detail": "10088 bytes of runtime bytecode observed on chain 677"
+      },
+      {
+        "id": "bdexV3Factory",
+        "label": "BDEX V3 Factory",
+        "value": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+        "kind": "CONTRACT",
+        "state": "VERIFIED",
+        "detail": "24535 bytes of runtime bytecode observed on chain 677"
+      },
+      {
+        "id": "bdexUniversalRouter",
+        "label": "BDEX Universal Router",
+        "value": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+        "kind": "CONTRACT",
+        "state": "VERIFIED",
+        "detail": "18242 bytes of runtime bytecode observed on chain 677"
+      },
+      {
+        "id": "directBridgeGateway",
+        "label": "BOT BridgeRouter",
+        "value": "0xef8DC669ECa13E612b67Ff09478352E85bD6CC53",
+        "kind": "CONTRACT",
+        "state": "VERIFIED",
+        "detail": "2227 bytes of runtime bytecode observed on chain 677"
+      },
+      {
+        "id": "botUsdt",
+        "label": "BOT USDT",
+        "value": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+        "kind": "CONTRACT",
+        "state": "VERIFIED",
+        "detail": "6188 bytes of runtime bytecode observed on chain 677"
+      },
+      {
+        "id": "bridgeUsdtResourceId",
+        "label": "Bridge USDT resource ID",
+        "value": "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d",
+        "kind": "RESOURCE_ID",
+        "state": "DOCUMENTED_OFFICIAL",
+        "detail": "resource id recorded; verified only against a live bridge deposit config"
+      }
+    ],
+    "recheckBeforeDeployment": true,
+    "mainnetSlots": "PROMOTION_PENDING"
+  },
+  "activationPlan": [
+    {
+      "stage": 1,
+      "action": "deploy + verify governance, FlowToken, Router/Lens, Activity Registry, Rewards, Staking v2 with product writes disabled",
+      "precondition": "DEPLOYMENT_READY for each contract",
+      "executeInThisGate": false
+    },
+    {
+      "stage": 2,
+      "action": "transfer/administer all final roles; prove no deployer authority remains",
+      "precondition": "DEPLOYED_VERIFIED",
+      "executeInThisGate": false
+    },
+    {
+      "stage": 3,
+      "action": "fund only explicitly approved Rewards/Staking amounts",
+      "precondition": "owner-approved funding figures; reserve ceilings never released automatically",
+      "executeInThisGate": false
+    },
+    {
+      "stage": 4,
+      "action": "configure and seed approved FLOW market liquidity",
+      "precondition": "approved liquidity plan; pool + observation support verified",
+      "executeInThisGate": false
+    },
+    {
+      "stage": 5,
+      "action": "enable Router Safe swaps and the direct official Bridge independently",
+      "precondition": "live canary per path",
+      "executeInThisGate": false
+    },
+    {
+      "stage": 6,
+      "action": "activate Rewards",
+      "precondition": "first finite Merkle epoch reproducible and funded",
+      "executeInThisGate": false
+    },
+    {
+      "stage": 7,
+      "action": "activate staking products to the extent obligations are provably funded",
+      "precondition": "dynamic bonus stays disabled until TWAP warm-up + liquidity gate pass",
+      "executeInThisGate": false
+    }
+  ],
+  "publicWrites": {
+    "safeCreations": 0,
+    "mainnetDeployments": 0,
+    "testnetDeployments": 0,
+    "walletSignatures": 0,
+    "blockchainTransactions": 0,
+    "flowTransfers": 0,
+    "liquidityActions": 0,
+    "rewardsClaims": 0,
+    "stakingActions": 0
+  },
+  "gateVerdict": "BLOCKED",
+  "manifestHash": "fnv1a64:aabfd1737ab49b23",
+  "outstandingOwnerDecisions": [
+    "FLOW_ECONOMICS: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "GOVERNANCE_SAFE_PLAN: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "TREASURY_SAFE_PLAN: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "OPERATIONS_SAFE_PLAN: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "ROOT_PUBLISHER_ASSIGNMENT: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "ACTIVITY_ATTESTER_ASSIGNMENT: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "TIMELOCK_POLICY: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "REWARDS_LAUNCH_PLAN: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "STAKING_LAUNCH_PLAN: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "LIQUIDITY_AND_ORACLE_PLAN: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "GAS_BUDGET_PLAN: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "DEPENDENCY_SNAPSHOT: NEEDS_APPROVAL \u2014 no explicit owner decision recorded",
+    "LEGAL_SIGNOFF: NEEDS_APPROVAL \u2014 no explicit owner decision recorded"
+  ]
+}

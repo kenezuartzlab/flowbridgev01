@@ -816,6 +816,51 @@ export type Database = {
           },
         ]
       }
+      mainnet_release_decisions: {
+        Row: {
+          action: string
+          approved_at: string
+          approved_by_email: string
+          approved_by_user: string | null
+          approved_value: Json | null
+          candidate_digest: string
+          created_at: string
+          decision_hash: string | null
+          decision_id: string
+          decision_version: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          action: string
+          approved_at?: string
+          approved_by_email: string
+          approved_by_user?: string | null
+          approved_value?: Json | null
+          candidate_digest: string
+          created_at?: string
+          decision_hash?: string | null
+          decision_id: string
+          decision_version: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          action?: string
+          approved_at?: string
+          approved_by_email?: string
+          approved_by_user?: string | null
+          approved_value?: Json | null
+          candidate_digest?: string
+          created_at?: string
+          decision_hash?: string | null
+          decision_id?: string
+          decision_version?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
       partner_org_members: {
         Row: {
           created_at: string
