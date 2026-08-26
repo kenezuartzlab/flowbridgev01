@@ -38,3 +38,6 @@ contracts/.env.*
 *.secrets.json
 *.key
 *.mnemonic
+
+# V30.1B.1 isolated Solidity audit workspace (never shipped)
+.audit/
