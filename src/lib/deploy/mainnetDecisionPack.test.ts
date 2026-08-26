@@ -7,6 +7,7 @@ import {
   EMPTY_ORACLE_FEASIBILITY,
   RECORDED_CHAIN_OBSERVATIONS,
   REQUIRED_TWAP_WINDOW_SECONDS,
+  GOVERNANCE_AUTHORITIES,
   canonicalFlowProposal,
   evaluateAuthorities,
   evaluateDecisionPack,
@@ -109,7 +110,6 @@ describe('V30.1D.1 governance consolidation', () => {
   });
 
   it('denies the root publisher any budget or recovery capability', () => {
-    const { GOVERNANCE_AUTHORITIES } = require('./mainnetDecisionPack') as typeof import('./mainnetDecisionPack');
     const pub = GOVERNANCE_AUTHORITIES.find((a) => a.id === 'ROOT_PUBLISHER')!;
     expect(pub.roles).not.toContain('Rewards admin');
     expect(pub.roles).not.toContain('Rewards campaignManager');
@@ -285,7 +285,10 @@ describe('V30.1D.1 staged readiness', () => {
   it('is READY once every derivable value is populated, blocked when a dependency is rejected', () => {
     expect(pack().verdict).toBe('READY');
     const bad = pack({
-      dependencyObservations: [...RECORDED_CHAIN_OBSERVATIONS, { id: 'bdexSwapRouter', chainId: 968, codeBytes: 10, observedAt: AT }],
+      dependencyObservations: [
+        { id: 'bdexSwapRouter', chainId: 968, codeBytes: 10, observedAt: AT },
+        ...RECORDED_CHAIN_OBSERVATIONS,
+      ],
     });
     expect(bad.verdict).toBe('BLOCKED');
   });
