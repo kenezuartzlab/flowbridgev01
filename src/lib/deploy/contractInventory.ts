@@ -61,6 +61,18 @@ export const ROUTER_V4_BUILD_LINE: CompilerProfile = {
   evmVersion: 'shanghai',
 };
 
+/**
+ * Archived build line for the V30.1A.2 missing-contract package (Lens, Activity
+ * Registry, BridgeAdapter). Optimizer runs is 1 — deliberately different from
+ * Router V4; changing it would produce new bytecode and break parity.
+ */
+export const MISSING_CONTRACT_LINE: CompilerProfile = {
+  version: '0.8.20',
+  optimizer: { enabled: true, runs: 1 },
+  viaIR: true,
+  evmVersion: 'shanghai',
+};
+
 export const CONTRACT_INVENTORY: readonly ContractInventoryEntry[] = [
   {
     id: 'FlowToken',
