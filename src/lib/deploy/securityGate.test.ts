@@ -24,7 +24,6 @@ describe('V30.1B security gate', () => {
     const m = DEPLOYED_SIZE_MEASUREMENTS.find((x) => x.contractId === 'FlowRewardsMerkleDistributor');
     expect(m?.deployedBytes).toBe(5_861);
   });
-  });
 
   it('V30.1B.1: every candidate is now within the EIP-170 limit', () => {
     expect(exceedsEip170('FlowBridgeRouterV4')).toBe(false);
