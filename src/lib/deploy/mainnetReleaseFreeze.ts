@@ -574,7 +574,7 @@ export interface ReleaseManifest {
   decisionVersion: string;
   chainId: number;
   candidateDigest: string;
-  contractCandidates: readonly { contractId: string; sourceSha256: string; runtimeSha256: string | null }[];
+  contractCandidates: readonly { contractId: string; sourceSha256: string | null; runtimeSha256: string | null }[];
   decisions: readonly {
     id: ReleaseDecisionId;
     status: DecisionStatus;

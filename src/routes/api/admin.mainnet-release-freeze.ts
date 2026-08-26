@@ -93,7 +93,7 @@ export const Route = createFileRoute('/api/admin/mainnet-release-freeze')({
             action,
             decision_version: RELEASE_DECISION_VERSION,
             candidate_digest: candidateDigest,
-            approved_value: value,
+            approved_value: value as never,
             approved_by_user: gate.admin.userId,
             approved_by_email: gate.admin.email,
             note: typeof body['note'] === 'string' ? body['note'].slice(0, 2000) : null,
