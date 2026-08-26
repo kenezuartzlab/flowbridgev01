@@ -272,3 +272,46 @@ export function evaluateConsolidation(): ConsolidationVerdict {
     reasons,
   };
 }
+
+/** Contract ids supplied by the V30.1A.2 missing-source handoff. */
+export const V30_1A2_MISSING_CONTRACT_IDS = [
+  'FlowBridgeRouterLens',
+  'FlowBridgeActivityRegistry',
+  'FlowBridgeBridgeAdapterV1',
+] as const;
+
+/**
+ * V30.1A.2 gate: every previously absent contract must now be present as a
+ * single PRODUCTION_CANDIDATE with confirmed source parity AND a reproduced
+ * creation/runtime build identity. Fails closed.
+ */
+export function evaluateMissingSourceParity(): ConsolidationVerdict {
+  const missing: string[] = [];
+  const unproven: string[] = [];
+  const reasons: string[] = [];
+
+  for (const id of V30_1A2_MISSING_CONTRACT_IDS) {
+    const entry = productionCandidate(id);
+    if (!entry || !isSourceParityConfirmed(entry)) {
+      missing.push(id);
+      reasons.push(`${id}: no single PRODUCTION_CANDIDATE with confirmed source parity.`);
+      continue;
+    }
+    if (!entry.identity.artifactSha256 || !entry.identity.runtimeSha256) {
+      unproven.push(id);
+      reasons.push(`${id}: creation/runtime bytecode identity was not reproduced.`);
+      continue;
+    }
+    if (entry.compiler?.optimizer.runs !== 1) {
+      unproven.push(id);
+      reasons.push(`${id}: archived optimizer runs must stay 1 to preserve bytecode parity.`);
+    }
+  }
+
+  return {
+    pass: missing.length === 0 && unproven.length === 0,
+    missingContractIds: missing,
+    unprovenBuildIdentityIds: unproven,
+    reasons,
+  };
+}
