@@ -31,7 +31,9 @@ describe('V30.1B security gate', () => {
 
   it('reports the hardening fixes as fixed in source', () => {
     const verdict = evaluateSecurityGate();
-    expect(verdict.fixedIds).toEqual(expect.arrayContaining(['V30.1B-R2', 'V30.1B-L1']));
+    expect(verdict.fixedIds).toEqual(
+      expect.arrayContaining(['V30.1B-R1', 'V30.1B-R2', 'V30.1B-L1']),
+    );
   });
 
   it('keeps every measurement hash populated', () => {
