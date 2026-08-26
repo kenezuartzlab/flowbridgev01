@@ -79,6 +79,7 @@ import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
+import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/admin.mainnet-release-freeze'
 import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/admin.mainnet-prerequisites'
 import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
@@ -451,6 +452,12 @@ const ApiAdminPartnerGovernanceRoute =
     path: '/api/admin/partner-governance',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminMainnetReleaseFreezeRoute =
+  ApiAdminMainnetReleaseFreezeRouteImport.update({
+    id: '/api/admin/mainnet-release-freeze',
+    path: '/api/admin/mainnet-release-freeze',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminMainnetPrerequisitesRoute =
   ApiAdminMainnetPrerequisitesRouteImport.update({
     id: '/api/admin/mainnet-prerequisites',
@@ -589,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
+  '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -678,6 +686,7 @@ export interface FileRoutesByTo {
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
+  '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -768,6 +777,7 @@ export interface FileRoutesById {
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
+  '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -859,6 +869,7 @@ export interface FileRouteTypes {
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
+    | '/api/admin/mainnet-release-freeze'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -948,6 +959,7 @@ export interface FileRouteTypes {
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
+    | '/api/admin/mainnet-release-freeze'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1037,6 +1049,7 @@ export interface FileRouteTypes {
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
+    | '/api/admin/mainnet-release-freeze'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1127,6 +1140,7 @@ export interface RootRouteChildren {
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
   ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
   ApiAdminMainnetPrerequisitesRoute: typeof ApiAdminMainnetPrerequisitesRoute
+  ApiAdminMainnetReleaseFreezeRoute: typeof ApiAdminMainnetReleaseFreezeRoute
   ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
@@ -1652,6 +1666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminPartnerGovernanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/mainnet-release-freeze': {
+      id: '/api/admin/mainnet-release-freeze'
+      path: '/api/admin/mainnet-release-freeze'
+      fullPath: '/api/admin/mainnet-release-freeze'
+      preLoaderRoute: typeof ApiAdminMainnetReleaseFreezeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/mainnet-prerequisites': {
       id: '/api/admin/mainnet-prerequisites'
       path: '/api/admin/mainnet-prerequisites'
@@ -1900,6 +1921,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
   ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,
   ApiAdminMainnetPrerequisitesRoute: ApiAdminMainnetPrerequisitesRoute,
+  ApiAdminMainnetReleaseFreezeRoute: ApiAdminMainnetReleaseFreezeRoute,
   ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
