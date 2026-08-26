@@ -36,17 +36,18 @@ export interface DeployedSizeMeasurement {
  */
 export const DEPLOYED_SIZE_MEASUREMENTS: readonly DeployedSizeMeasurement[] = [
   {
+    // V30.1B.1 size-safe candidate (runtime code is the EIP-170 subject).
     contractId: 'FlowBridgeRouterV4',
-    deployedBytes: 28_703,
-    creationSha256: '51bd139b17376a6cbcc1a1c721c2fcdb65c649004beb05781bacdd067b6f75f4',
-    runtimeSha256: '81453edb9a72fa87af7278956ffcfebc1bfa4d2730016478d9d4a50a6d0380eb',
-    normalizedAbiSha256: 'aed8a4a3fa195a58ff9da812808e1423ac239b0b41769ba9cfd1cebd84f95f00',
+    deployedBytes: 19_720,
+    creationSha256: '7dc0c1869a3eab59afae396294256b3d968a00de33e0554be9c6b63c30ff1195',
+    runtimeSha256: '93a922d67c281bf076d87bcf71de186f0998a8feb9c3dccafe592d097000a0f9',
+    normalizedAbiSha256: '913ace626b49a5e32b24457bf0fc6982ecca2fbfdcafff6d616ab67fc095d6df',
   },
   {
     contractId: 'FlowBridgeRouterLens',
-    deployedBytes: 7_577,
-    creationSha256: 'a7d48eb7149e9ed0019e8690b1655c6a158fbeead0d51190ba970d31bd0ecc31',
-    runtimeSha256: 'ea98f95e0182e159257521cd021cedfd640ea5fc5228bfa8e1b0c82cc4187e90',
+    deployedBytes: 7_829,
+    creationSha256: 'c075879e896baaf0ce61f3c15f11313753d75b77d9dfc4a9795e0c28aaea319b',
+    runtimeSha256: '05cde1794ef1620af4248deebb92680d1b806e534dd99ee5f5c8b4603dea6ca3',
     normalizedAbiSha256: '0ee994f33acf1df22e0fd5e558f757d83e0f9913663bf596ef0044dc02dc7042',
   },
   {
