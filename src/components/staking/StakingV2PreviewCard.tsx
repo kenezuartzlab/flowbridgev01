@@ -29,7 +29,7 @@ const fmt = (n: number, maxFrac = 2): string =>
 
 const pct = (bps: number): string => `${fmt(bps / 100, 1)}%`;
 
-const AVAILABILITY_COPY: Record<StakingV2Availability, { label: string; tone: "ok" | "warn" | "muted"; note: string }> = {
+const AVAILABILITY_COPY: Record<StakingV2Availability, { label: string; tone: "ok" | "warn"; note: string }> = {
   preview: {
     label: "Preview",
     tone: "warn",
