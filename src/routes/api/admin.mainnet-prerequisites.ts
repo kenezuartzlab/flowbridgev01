@@ -14,6 +14,12 @@ import {
   launchFeatureMatrix,
 } from '@/lib/deploy/mainnetPrerequisites';
 import { mainnetReadinessMatrix } from '@/lib/deploy/mainnetPreflight';
+import {
+  ACTIVATION_PLAN,
+  CURRENT_DECISION_PACK_INPUT,
+  RECOMMENDED_GOVERNANCE_DEFAULTS,
+  evaluateDecisionPack,
+} from '@/lib/deploy/mainnetDecisionPack';
 
 export const Route = createFileRoute('/api/admin/mainnet-prerequisites')({
   server: {
