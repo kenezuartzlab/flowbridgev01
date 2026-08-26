@@ -159,8 +159,8 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     identity: {
       path: 'contracts/production/router-lens/FlowBridgeRouterLens.sol',
       sourceSha256: V30_1B_ROUTER_LENS_SHA256,
-      artifactSha256: 'a7d48eb7149e9ed0019e8690b1655c6a158fbeead0d51190ba970d31bd0ecc31',
-      runtimeSha256: 'ea98f95e0182e159257521cd021cedfd640ea5fc5228bfa8e1b0c82cc4187e90',
+      artifactSha256: 'c075879e896baaf0ce61f3c15f11313753d75b77d9dfc4a9795e0c28aaea319b',
+      runtimeSha256: '05cde1794ef1620af4248deebb92680d1b806e534dd99ee5f5c8b4603dea6ca3',
       abiSourceSha256: '0ee994f33acf1df22e0fd5e558f757d83e0f9913663bf596ef0044dc02dc7042',
     },
     reviewedSourceSha256: V30_1B_ROUTER_LENS_SHA256,
