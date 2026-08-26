@@ -71,9 +71,9 @@ export function exceedsEip170(contractId: string): boolean {
   return m ? m.deployedBytes > EIP170_LIMIT_BYTES : true; // unknown fails closed
 }
 
-/** Hardened source hashes after the V30.1B edits. */
+/** Hardened source hashes after the V30.1B / V30.1B.1 edits. */
 export const V30_1B_SOURCE_SHA256: Readonly<Record<string, string>> = {
-  FlowBridgeRouterV4: 'd6fdd281b5bd0c3211aca95fba94bf38c4031973c175d12d4b26455a5c584a46',
+  FlowBridgeRouterV4: 'bb43445af143d8c4a36fd144315c2d99f13fe28c73eca63c4f3736709e3ba905',
   FlowBridgeRouterLens: '8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2',
 };
 
