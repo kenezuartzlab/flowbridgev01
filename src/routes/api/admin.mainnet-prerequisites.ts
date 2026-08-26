@@ -14,6 +14,12 @@ import {
   launchFeatureMatrix,
 } from '@/lib/deploy/mainnetPrerequisites';
 import { mainnetReadinessMatrix } from '@/lib/deploy/mainnetPreflight';
+import {
+  ACTIVATION_PLAN,
+  CURRENT_DECISION_PACK_INPUT,
+  RECOMMENDED_GOVERNANCE_DEFAULTS,
+  evaluateDecisionPack,
+} from '@/lib/deploy/mainnetDecisionPack';
 
 export const Route = createFileRoute('/api/admin/mainnet-prerequisites')({
   server: {
@@ -26,8 +32,26 @@ export const Route = createFileRoute('/api/admin/mainnet-prerequisites')({
         // be approved through this endpoint.
         const result = evaluateMainnetPrerequisites(UNAPPROVED_PREREQUISITE_INPUTS);
 
+        // V30.1D.1 — staged decision pack: canonical proposals pre-filled, all
+        // owner approvals still outstanding. Nothing is approved here either.
+        const pack = evaluateDecisionPack(CURRENT_DECISION_PACK_INPUT);
+
         return jsonResponse({
-          phase: 'V30.1D',
+          phase: 'V30.1D.1',
+          decisionPack: {
+            verdict: pack.verdict,
+            flow: pack.flow,
+            dependencies: pack.dependencies,
+            authorities: pack.authorities,
+            governanceDefaults: RECOMMENDED_GOVERNANCE_DEFAULTS,
+            oracle: pack.oracle,
+            contracts: pack.contracts,
+            features: pack.features,
+            ownerDecisionSheet: pack.ownerDecisionSheet,
+            missingOwnerInputs: pack.missingOwnerInputs,
+            activationPlan: ACTIVATION_PLAN,
+            publicWrites: pack.publicWrites,
+          },
           secretScan: 'CLEAR',
           verdict: result.verdict,
           dashboard: result.prerequisites.map((p) => ({
