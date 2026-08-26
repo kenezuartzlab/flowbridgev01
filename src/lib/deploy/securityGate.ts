@@ -58,6 +58,15 @@ export const DEPLOYED_SIZE_MEASUREMENTS: readonly DeployedSizeMeasurement[] = [
     normalizedAbiSha256: 'e021c7402ce241fe89624df8c395b30347b82bdac888758530e4bfe597a8978d',
   },
   {
+    // V30.1B.2 canonical mainnet rewards distributor (solc 0.8.24, runs 200,
+    // viaIR, cancun, OpenZeppelin 5.6.1).
+    contractId: 'FlowRewardsMerkleDistributor',
+    deployedBytes: 5_861,
+    creationSha256: 'b7eb1e3033512f1598c53094ddf47cd207d7952468efe613a97ce13257c9ba3a',
+    runtimeSha256: '180611b009e3472d50c4691d742438372bdb1d73ffd8222bb5c506635008d3d1',
+    normalizedAbiSha256: '821333ca4a60c6c2ce6354835a95066b3f94c74acf2a657712646ea4e783fa79',
+  },
+  {
     contractId: 'FlowBridgeBridgeAdapterV1',
     deployedBytes: 12_660,
     creationSha256: 'c27d23ab320cfe1b1d9d08b80997e1ad9e29cf969720bf59da56d9f5560c6c26',
@@ -75,6 +84,7 @@ export function exceedsEip170(contractId: string): boolean {
 export const V30_1B_SOURCE_SHA256: Readonly<Record<string, string>> = {
   FlowBridgeRouterV4: 'bb43445af143d8c4a36fd144315c2d99f13fe28c73eca63c4f3736709e3ba905',
   FlowBridgeRouterLens: '8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2',
+  FlowRewardsMerkleDistributor: 'cbf90ce714c2c6ca6df9b55637a2a671e820da6a2a0404d7813590450bec0d43',
 };
 
 export const SECURITY_FINDINGS: readonly SecurityFinding[] = [
@@ -132,11 +142,11 @@ export const SECURITY_FINDINGS: readonly SecurityFinding[] = [
     id: 'V30.1B-D1',
     contractId: 'FlowRewardsDistributor',
     severity: 'CRITICAL',
-    title: 'Cumulative EIP-712 entitlements have no enforceable solvency reservation',
+    title: 'Cumulative EIP-712 entitlements had no enforceable solvency reservation',
     detail:
-      'Authorizations are signed off-chain against cumulative amounts; the contract has no on-chain budget, reservation or epoch root, so outstanding obligations can exceed funded balance and withdrawFunding cannot distinguish reserved from unallocated FLOW. Requires one canonical design decision (enforceable reservations, or a budgeted Merkle/epoch design) plus approved economics before mainnet.',
-    status: 'OPEN_BLOCKER',
-    evidence: 'Source review of claim/withdrawFunding paths; no reservation state exists.',
+      'Authorizations were signed off-chain against cumulative amounts; the contract had no on-chain budget, reservation or epoch root, so outstanding obligations could exceed funded balance and withdrawFunding could not distinguish reserved from unallocated FLOW. Fixed in V30.1B.2 by selecting one canonical mainnet model: FlowRewardsMerkleDistributor, a budgeted Merkle/epoch distributor where publishEpoch reserves the full allocation and reverts unless balance >= totalReserved + allocation and totalClaimed + totalReserved + allocation <= campaignBudget, and where privileged recovery is bounded by freeBalance = balance - totalReserved. The cumulative EIP-712 distributor stays historical BOT Testnet infrastructure and is no longer selectable for signed claims outside that chain.',
+    status: 'FIXED_IN_SOURCE',
+    evidence: 'src/lib/deploy/rewardsSolvencyGate.ts; contracts/production/rewards-distributor/test/V30_1B2_RewardsSolvency.t.sol (24 tests incl. 512 fuzz runs).'
   },
   {
     id: 'V30.1B-S1',
@@ -226,6 +236,13 @@ export const AUTHORITY_MATRIX: readonly AuthorityMatrixRow[] = [
     holder: 'APPROVED_MULTISIG_REQUIRED',
     capabilities: ['rotate signer', 'pause claims', 'withdraw unallocated funding'],
     cannot: ['mint FLOW', 'reduce an already claimed amount', 'forge a user signature'],
+  },
+  {
+    contractId: 'FlowRewardsMerkleDistributor',
+    role: 'DEFAULT_ADMIN / BUDGET_MANAGER / PUBLISHER / PAUSER',
+    holder: 'APPROVED_MULTISIG_REQUIRED',
+    capabilities: ['approve the campaign budget', 'publish funded epoch roots', 'pause claims', 'recover free (unreserved) balance'],
+    cannot: ['mint FLOW', 'spend FLOW reserved for live claims', 'exceed the approved campaign budget', 'redirect a user claim to another address', 'invalidate a published live obligation by rotating roles'],
   },
   {
     contractId: 'FLOW_REWARD_SIGNER_PRIVATE_KEY',
