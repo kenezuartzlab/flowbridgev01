@@ -5,6 +5,7 @@ import { ArrowLeft, Coins, ShieldCheck } from "lucide-react";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SafeAreaPage, SectionHeader, Surface } from "@/components/ui-kit/primitives";
 import { FlowStakingPreviewCard } from "@/components/staking/FlowStakingPreviewCard";
+import { StakingV2PreviewCard } from "@/components/staking/StakingV2PreviewCard";
 import { resolveStakeHandoffFromServer } from "@/lib/ai/mission/missionClient";
 import {
   parseStakeHandoff,
@@ -127,6 +128,8 @@ function StakePage() {
           missionHandoffFailure={failure}
           missionNote={failureCopy ?? handoff?.note ?? null}
         />
+
+        <StakingV2PreviewCard />
 
 
 

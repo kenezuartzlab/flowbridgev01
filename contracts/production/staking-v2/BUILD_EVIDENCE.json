@@ -1,0 +1,43 @@
+{
+  "compiler": {
+    "solc": "0.8.24",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": true,
+    "evmVersion": "cancun"
+  },
+  "toolchain": {
+    "hardhat": "3.14.0",
+    "openzeppelin": "5.6.1",
+    "forgeStd": "v1.9.7",
+    "slither": "0.11.3"
+  },
+  "contracts": {
+    "FlowStakingVaultV2": {
+      "sourceSha256": "4a82e4f0f9c07e2a24bc7150d80675c6c3d1b8359ce11589aac55fb7c75b2531",
+      "creationBytes": 11254,
+      "runtimeBytes": 10366,
+      "creationSha256": "534a37b909c6a56aae7ba1db405b5aab733e1100b59d4b5799a90286cafafa70",
+      "runtimeSha256": "b56e60e72405ad938a5ae3fdc5f131b0ad4529f63cb6c089c32f637690ec7a22",
+      "abiSha256": "a22dacc20032a9a188034b1fd1ea4c66eaa8ae3827259ac790a6897fd52369e0"
+    },
+    "FlowStakingController": {
+      "sourceSha256": "b2a58b1128c0a9d42630b0026ce69cc377abbce6c9ea3ec42721c73d40afc0d4",
+      "creationBytes": 8876,
+      "runtimeBytes": 7108,
+      "creationSha256": "cabbeac1573ca33608fdec76a8e77b4eda75d2462bab640caad4a474886924d6",
+      "runtimeSha256": "7a046c4c7a0fda0a72908eec3cee97e1c168472ef6ee01151ea3d0c0a84f980e",
+      "abiSha256": "b61bcac1780e51fda835b9e57318a7198c09d4d6e7542a3dabb7640c3fe0e88f"
+    },
+    "FlowStakingRewardTreasury": {
+      "sourceSha256": "963ce367246ebc673e1d915202759a5159604dd0a794484b68500f921155d8a8",
+      "creationBytes": 4604,
+      "runtimeBytes": 4137,
+      "creationSha256": "8269e0ca41cba9f1bea801249b7582cb5cde181eff06392c5d6200a1d3843c57",
+      "runtimeSha256": "c66bd5cea23076b7f1d2e23d291e1a5a52403acf64759ac56f164ff93d9bdd35",
+      "abiSha256": "3cfeefcdd459ca697e3f6f1891e3ffe9a325896f544d9b32a7358fabb115065a"
+    }
+  }
+}
