@@ -1,0 +1,30 @@
+--- FlowBridgeRouterV4.sol	2026-08-19 11:59:47.512956234 +0000
++++ FlowBridgeRouterV4-stackfix.sol	2026-08-19 11:59:47.512956234 +0000
+@@ -1299,15 +1299,18 @@
+     {
+         require(bridgeId < bridgeCount, "Bridge not found");
+         BridgeEntry storage b = bridges[bridgeId];
+-        return (
+-            b.bridge,
+-            b.destChainId,
+-            bridgeResourceId[bridgeId][token],
+-            bridgeTokenSupported[bridgeId][token],
+-            bridgeSupportsBotGas[bridgeId],
+-            bridgeProxyExecutionEnabled[bridgeId],
+-            b.active
+-        );
++
++        // Assign named return values sequentially instead of constructing a
++        // seven-value return tuple in one expression. This keeps the legacy
++        // compiler pipeline from exhausting stack slots ("stack too deep")
++        // while preserving the exact external ABI.
++        gateway = b.bridge;
++        destinationChainId = b.destChainId;
++        resourceId = bridgeResourceId[bridgeId][token];
++        tokenSupported = bridgeTokenSupported[bridgeId][token];
++        botGasSupported = bridgeSupportsBotGas[bridgeId];
++        proxyExecutionEnabled = bridgeProxyExecutionEnabled[bridgeId];
++        active = b.active;
+     }
+ 
+     function getBestV2Rate(uint256 amountIn, address[] calldata path)
