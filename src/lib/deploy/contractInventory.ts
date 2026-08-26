@@ -92,7 +92,7 @@ export const CONTRACT_INVENTORY: readonly ContractInventoryEntry[] = [
     name: 'FlowRewardsMerkleDistributor (canonical mainnet rewards authority, V30.1B.2)',
     sourcePath: 'contracts/production/rewards-distributor/FlowRewardsMerkleDistributor.sol',
     artifactPath: null,
-    readiness: 'PROMOTION_PENDING',
+    readiness: 'HARDENING_REQUIRED',
     compiler: SOLC_0_8_24_PARIS,
     privilegedRoles: [
       'DEFAULT_ADMIN_ROLE (approved multisig/timelock required)',
