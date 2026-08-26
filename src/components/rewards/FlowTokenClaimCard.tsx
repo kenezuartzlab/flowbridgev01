@@ -273,8 +273,16 @@ export function FlowTokenClaimCard({
 
         <p className="text-[11px] leading-relaxed text-muted-soft">
           On BOT Testnet, 1 eligible FLOW Point converts to 1 FLOW. This is a testnet validation
-          policy only and is not approved mainnet economics. Campaign PTS are shown separately and
-          never convert. Mainnet claims remain disabled pending promotion.
+          policy only and is not approved mainnet economics. FLOW Points are an off-chain score;
+          they are not FLOW in your wallet until a claim settles on chain. Campaign PTS are shown
+          separately and never convert.
+        </p>
+        <p className="text-[11px] leading-relaxed text-muted-soft">
+          Rewards are paid from a finite, pre-funded FLOW allocation — nothing is ever minted, and a
+          claim can only pay FLOW the distributor already holds. On BOT Mainnet, rewards will be
+          distributed by the budgeted epoch distributor, where each reward epoch must be funded and
+          reserved on chain before anyone can claim it. Mainnet claims stay disabled until that
+          distributor is deployed under approved governance.
         </p>
       </div>
     </Surface>
