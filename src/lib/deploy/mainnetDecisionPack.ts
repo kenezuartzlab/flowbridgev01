@@ -260,6 +260,8 @@ export interface DependencyVerification {
   id: string;
   label: string;
   value: string;
+  kind: OfficialDependency['kind'];
+  requiresBytecode: boolean;
   state: DependencyState;
   usedByCurrentDesign: boolean;
   detail: string;

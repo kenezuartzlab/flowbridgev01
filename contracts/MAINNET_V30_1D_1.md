@@ -98,7 +98,7 @@ obligations are provably funded; dynamic bonus last.
 
 ## 9. Application gates
 
-893 tests passing (72 files), typecheck clean, build OK.
+893 tests passing (81 files), typecheck clean, build OK.
 
 ## 10. Zero-write confirmation
 
