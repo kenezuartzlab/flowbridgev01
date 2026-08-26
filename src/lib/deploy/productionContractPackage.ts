@@ -48,9 +48,9 @@ const REVIEWED_ROUTER_V4_TEST_SHA256 =
 const REVIEWED_ROUTER_V4_ABI_SHA256 =
   '7d25b676013777112996fecc036eacbcfc7f09635ddd9b7dd7b6e1cbacddff73';
 
-/** V30.1B hardened source hashes (post-security-review candidates). */
+/** V30.1B / V30.1B.1 hardened source hashes (post-security-review candidates). */
 const V30_1B_ROUTER_V4_SHA256 =
-  'd6fdd281b5bd0c3211aca95fba94bf38c4031973c175d12d4b26455a5c584a46';
+  'bb43445af143d8c4a36fd144315c2d99f13fe28c73eca63c4f3736709e3ba905';
 const V30_1B_ROUTER_LENS_SHA256 =
   '8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2';
 
