@@ -13,9 +13,16 @@ describe('V30.1B security gate', () => {
     const verdict = evaluateSecurityGate();
     expect(verdict.pass).toBe(false);
     expect(verdict.openBlockerIds).not.toContain('V30.1B-R1');
-    expect(verdict.openBlockerIds).toContain('V30.1B-D1');
+    // V30.1B.2 closed the rewards solvency blocker in source.
+    expect(verdict.openBlockerIds).not.toContain('V30.1B-D1');
     expect(verdict.openBlockerIds).toContain('V30.1B-G1');
     expect(verdict.reasons.some((r) => r.includes('EIP-170'))).toBe(false);
+  });
+
+  it('V30.1B.2: records the canonical Merkle distributor within EIP-170', () => {
+    expect(exceedsEip170('FlowRewardsMerkleDistributor')).toBe(false);
+    const m = DEPLOYED_SIZE_MEASUREMENTS.find((x) => x.contractId === 'FlowRewardsMerkleDistributor');
+    expect(m?.deployedBytes).toBe(5_861);
   });
 
   it('V30.1B.1: every candidate is now within the EIP-170 limit', () => {

@@ -23,6 +23,7 @@ import {
 } from "./flowConversionPolicy";
 import { APPROVED_BOT_TESTNET } from "./flowApprovedTestnetPolicy";
 import { buildFlowClaimTypedData } from "./flowClaimTypedData";
+import { allowsSignerAuthorizedClaims } from "./flowRewardsModel";
 
 /**
  * Signature validity window — owner-approved at 900 seconds for BOT Testnet
@@ -44,6 +45,7 @@ export type FlowClaimBlockedExtra =
   | "notAuthenticated"
   | "emailNotVerified"
   | "walletNotBound"
+  | "signerModelNotCanonical"
   | "signerNotConfigured"
   | "chainStateUnavailable"
   | "nothingToClaim"
@@ -148,6 +150,20 @@ export async function authorizeFlowTokenClaim(args: AuthorizeArgs): Promise<Flow
   const readiness = resolveFlowClaimReadiness(args.chainId, policyApproved);
   if (!readiness.ready) {
     return blocked(readiness.reason, FLOW_CLAIM_BLOCKED_COPY[readiness.reason], args.chainId ?? null, display);
+  }
+
+  /**
+   * V30.1B.2 — the cumulative EIP-712 signer model is historical testnet
+   * infrastructure. BOT Mainnet 677 uses the budgeted Merkle/epoch distributor,
+   * so this path must never issue a signature there (or on any other chain).
+   */
+  if (!allowsSignerAuthorizedClaims(readiness.config.chainId)) {
+    return blocked(
+      "signerModelNotCanonical",
+      "FLOW claims on this network use the epoch reward distributor, not signed authorizations.",
+      readiness.config.chainId,
+      display,
+    );
   }
 
   if (!args.emailVerified) {
