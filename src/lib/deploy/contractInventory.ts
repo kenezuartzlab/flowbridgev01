@@ -123,9 +123,9 @@ export const CONTRACT_INVENTORY: readonly ContractInventoryEntry[] = [
     privilegedRoles: ['owner', 'fee configurator', 'integration registry admin', 'pauser'],
     constructorRequirements: ['unavailable — deployment constructor parameters not frozen'],
     blockers: [
-      'Mainnet governance hardening is outstanding (registry activation-delay reset, owner/timelock, fee safety, final BDEX production configuration) — V30.1D.',
-      'Creation/runtime bytecode identity is not reproducible in this workspace (no Solidity toolchain), so build parity against the reviewed candidate is unproven.',
-      'Bridge proxy execution must remain disabled for mainnet.',
+      'Mainnet governance hardening is outstanding (approved multisig/timelock owner, registry activation-delay value, fee treasury, final BDEX production configuration) — V30.1D.',
+      'V30.1B.1 closed the EIP-170 blocker: creation 20,020 bytes and deployed/runtime 19,720 bytes were reproduced in the isolated pinned workspace.',
+      'Bridge proxy execution is removed from the mainnet candidate; bridging stays the direct official BOT Bridge architecture.',
     ],
   },
 

@@ -36,17 +36,18 @@ export interface DeployedSizeMeasurement {
  */
 export const DEPLOYED_SIZE_MEASUREMENTS: readonly DeployedSizeMeasurement[] = [
   {
+    // V30.1B.1 size-safe candidate (runtime code is the EIP-170 subject).
     contractId: 'FlowBridgeRouterV4',
-    deployedBytes: 28_703,
-    creationSha256: '51bd139b17376a6cbcc1a1c721c2fcdb65c649004beb05781bacdd067b6f75f4',
-    runtimeSha256: '81453edb9a72fa87af7278956ffcfebc1bfa4d2730016478d9d4a50a6d0380eb',
-    normalizedAbiSha256: 'aed8a4a3fa195a58ff9da812808e1423ac239b0b41769ba9cfd1cebd84f95f00',
+    deployedBytes: 19_720,
+    creationSha256: '7dc0c1869a3eab59afae396294256b3d968a00de33e0554be9c6b63c30ff1195',
+    runtimeSha256: '93a922d67c281bf076d87bcf71de186f0998a8feb9c3dccafe592d097000a0f9',
+    normalizedAbiSha256: '913ace626b49a5e32b24457bf0fc6982ecca2fbfdcafff6d616ab67fc095d6df',
   },
   {
     contractId: 'FlowBridgeRouterLens',
-    deployedBytes: 7_577,
-    creationSha256: 'a7d48eb7149e9ed0019e8690b1655c6a158fbeead0d51190ba970d31bd0ecc31',
-    runtimeSha256: 'ea98f95e0182e159257521cd021cedfd640ea5fc5228bfa8e1b0c82cc4187e90',
+    deployedBytes: 7_829,
+    creationSha256: 'c075879e896baaf0ce61f3c15f11313753d75b77d9dfc4a9795e0c28aaea319b',
+    runtimeSha256: '05cde1794ef1620af4248deebb92680d1b806e534dd99ee5f5c8b4603dea6ca3',
     normalizedAbiSha256: '0ee994f33acf1df22e0fd5e558f757d83e0f9913663bf596ef0044dc02dc7042',
   },
   {
@@ -70,9 +71,9 @@ export function exceedsEip170(contractId: string): boolean {
   return m ? m.deployedBytes > EIP170_LIMIT_BYTES : true; // unknown fails closed
 }
 
-/** Hardened source hashes after the V30.1B edits. */
+/** Hardened source hashes after the V30.1B / V30.1B.1 edits. */
 export const V30_1B_SOURCE_SHA256: Readonly<Record<string, string>> = {
-  FlowBridgeRouterV4: 'd6fdd281b5bd0c3211aca95fba94bf38c4031973c175d12d4b26455a5c584a46',
+  FlowBridgeRouterV4: 'bb43445af143d8c4a36fd144315c2d99f13fe28c73eca63c4f3736709e3ba905',
   FlowBridgeRouterLens: '8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2',
 };
 
@@ -81,11 +82,11 @@ export const SECURITY_FINDINGS: readonly SecurityFinding[] = [
     id: 'V30.1B-R1',
     contractId: 'FlowBridgeRouterV4',
     severity: 'CRITICAL',
-    title: 'Deployed bytecode exceeds the EIP-170 contract size limit',
+    title: 'Deployed bytecode exceeded the EIP-170 contract size limit',
     detail:
-      'At the frozen build line (solc 0.8.20, optimizer runs 200, viaIR, shanghai) the deployed code is 28,703 bytes, above the 24,576-byte EIP-170 limit. The contract is not deployable on an EIP-170 chain as-is; splitting execution surface out of the router is required and is a material redesign, not a settings change.',
-    status: 'OPEN_BLOCKER',
-    evidence: 'Isolated Hardhat compile size report; measured deployed bytecode length.',
+      'At the frozen build line (solc 0.8.20, optimizer runs 200, viaIR, shanghai) the V30.1B candidate measured 29,074 creation bytes and 28,703 deployed/runtime bytes, above the 24,576-byte EIP-170 limit. Fixed in V30.1B.1 by removing the non fee-bound legacy swap wrappers, the already-disabled bridge proxy execution surface and the read-only discovery/quote helpers (served by the Lens), and by converting revert strings to custom errors: 20,020 creation bytes and 19,720 runtime bytes, 4,856 bytes of headroom, with every execution-safety invariant preserved.',
+    status: 'FIXED_IN_SOURCE',
+    evidence: 'src/lib/deploy/routerSizeGate.ts; contracts/production/router-v4/test/V30_1B1_SizeSafe.t.sol (19 acceptance/adversarial tests).',
   },
   {
     id: 'V30.1B-R2',
@@ -171,11 +172,11 @@ export const SECURITY_FINDINGS: readonly SecurityFinding[] = [
     id: 'V30.1B-X1',
     contractId: 'ALL',
     severity: 'MEDIUM',
-    title: 'Slither/static analyzer unavailable in this environment',
+    title: 'Static analysis executed — three results, all triaged, none actionable',
     detail:
-      'No slither, solc or forge binary is installable in the build sandbox. Compensating evidence: pinned isolated rebuild, 44 passing Solidity tests including new adversarial regressions, EIP-170 size measurement, ABI policy checks and selector-parity verification. An external Slither run remains a required release input.',
-    status: 'OPEN_BLOCKER',
-    evidence: 'Tool probe in the isolated workspace; documented limitation.',
+      'V30.1B.1 ran pinned Slither 0.11.3 with solc 0.8.20 (--optimize --optimize-runs 200 --via-ir) over the size-safe Router candidate: 10 contracts, 63 detectors, 3 results. arbitrary-send-eth (owner-configured feeTreasury) and incorrect-equality (the exact-input / fee-on-transfer rejection invariant) are by design; the reentrancy-no-eth report is a false positive because the flagged write is a local struct copy of routers[routerId] and all swap entry points are nonReentrant.',
+    status: 'ACCEPTED_DOCUMENTED',
+    evidence: 'src/lib/deploy/routerSizeGate.ts SLITHER_RUN / SLITHER_TRIAGE.',
   },
   {
     id: 'V30.1B-G1',

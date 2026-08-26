@@ -48,9 +48,9 @@ const REVIEWED_ROUTER_V4_TEST_SHA256 =
 const REVIEWED_ROUTER_V4_ABI_SHA256 =
   '7d25b676013777112996fecc036eacbcfc7f09635ddd9b7dd7b6e1cbacddff73';
 
-/** V30.1B hardened source hashes (post-security-review candidates). */
+/** V30.1B / V30.1B.1 hardened source hashes (post-security-review candidates). */
 const V30_1B_ROUTER_V4_SHA256 =
-  'd6fdd281b5bd0c3211aca95fba94bf38c4031973c175d12d4b26455a5c584a46';
+  'bb43445af143d8c4a36fd144315c2d99f13fe28c73eca63c4f3736709e3ba905';
 const V30_1B_ROUTER_LENS_SHA256 =
   '8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2';
 
@@ -114,19 +114,20 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     identity: {
       path: 'contracts/production/router-v4/FlowBridgeRouterV4.sol',
       sourceSha256: V30_1B_ROUTER_V4_SHA256,
-      artifactSha256: '51bd139b17376a6cbcc1a1c721c2fcdb65c649004beb05781bacdd067b6f75f4',
-      runtimeSha256: '81453edb9a72fa87af7278956ffcfebc1bfa4d2730016478d9d4a50a6d0380eb',
-      abiSourceSha256: 'aed8a4a3fa195a58ff9da812808e1423ac239b0b41769ba9cfd1cebd84f95f00',
+      artifactSha256: '7dc0c1869a3eab59afae396294256b3d968a00de33e0554be9c6b63c30ff1195',
+      runtimeSha256: '93a922d67c281bf076d87bcf71de186f0998a8feb9c3dccafe592d097000a0f9',
+      abiSourceSha256: '913ace626b49a5e32b24457bf0fc6982ecca2fbfdcafff6d616ab67fc095d6df',
     },
     reviewedSourceSha256: V30_1B_ROUTER_V4_SHA256,
     testPath: 'contracts/production/router-v4/test/FlowBridgeRouterV4.t.sol',
     parity: 'PARITY_CONFIRMED',
     notes: [
       'V30.1B hardening applied: every material integration mutation re-arms the activation delay and emits IntegrationActivationScheduled.',
-      'Build identity preserved: solc 0.8.20, optimizer runs 200, viaIR on, EVM target shanghai; creation/runtime hashes reproduced in the isolated audit workspace.',
-      'BLOCKER V30.1B-R1: deployed code is 28,703 bytes, above the 24,576-byte EIP-170 limit — not deployable without splitting execution surface.',
-      'Reviewed suite plus contracts/production/router-v4/test/V30_1B_Hardening.t.sol pass (44 Solidity tests total).',
-      'Router bridge proxy execution remains disabled for mainnet.',
+      'V30.1B.1 size reduction: legacy non fee-bound swap wrappers, the disabled bridge proxy execution surface and the read-only discovery/quote helpers were removed, and revert strings became 58 custom errors.',
+      'V30.1B-R1 CLOSED: creation 20,020 bytes, deployed/runtime 19,720 bytes — strictly below the 24,576-byte EIP-170 limit with 4,856 bytes of headroom.',
+      'Build line preserved: solc 0.8.20, optimizer runs 200, viaIR on, EVM target shanghai; hashes reproduce with sources at src/<Name>.sol (solc embeds the source path in metadata).',
+      'Solidity suites pass in the isolated workspace: 35 tests (Router + Lens hardening + the V30.1B.1 acceptance/adversarial matrix).',
+      'Router bridge proxy execution is gone from the mainnet candidate; bridging stays the direct official BOT Bridge architecture.',
     ],
   },
 
@@ -158,8 +159,8 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     identity: {
       path: 'contracts/production/router-lens/FlowBridgeRouterLens.sol',
       sourceSha256: V30_1B_ROUTER_LENS_SHA256,
-      artifactSha256: 'a7d48eb7149e9ed0019e8690b1655c6a158fbeead0d51190ba970d31bd0ecc31',
-      runtimeSha256: 'ea98f95e0182e159257521cd021cedfd640ea5fc5228bfa8e1b0c82cc4187e90',
+      artifactSha256: 'c075879e896baaf0ce61f3c15f11313753d75b77d9dfc4a9795e0c28aaea319b',
+      runtimeSha256: '05cde1794ef1620af4248deebb92680d1b806e534dd99ee5f5c8b4603dea6ca3',
       abiSourceSha256: '0ee994f33acf1df22e0fd5e558f757d83e0f9913663bf596ef0044dc02dc7042',
     },
     reviewedSourceSha256: V30_1B_ROUTER_LENS_SHA256,
@@ -168,7 +169,8 @@ export const PRODUCTION_CONTRACT_PACKAGE: readonly ProductionPackageEntry[] = [
     notes: [
       'V30.1A.2 import parity confirmed first (archived source hash ' + `${REVIEWED_LENS.source}` + ').',
       'V30.1B hardening applied: constructor rejects non-contract targets, findBestV2Rate exposes an explicit no-route signal, and getRoutersPage/getBridgesPage bound discovery reads.',
-      'Recompiled in the isolated workspace with solc 0.8.20, optimizer runs 1, viaIR on, EVM shanghai; deployed size 7,577 bytes, well under the EIP-170 limit.',
+      'Recompiled in the isolated workspace with solc 0.8.20, optimizer runs 1, viaIR on, EVM shanghai; creation 8,069 bytes and deployed/runtime 7,829 bytes, well under the EIP-170 limit.',
+      'V30.1B.1: the Lens is now the sole discovery/quote surface — the Router no longer duplicates getActiveRouters/getActiveBridges/getBestV2Rate/getV2RatesPage/getBridgeRouteConfig.',
       'Read-only lens: no write authority, no custody, and its IFlowBridgeRouterV4View binding was verified selector-for-selector against the Router V4 candidate.',
     ],
   },

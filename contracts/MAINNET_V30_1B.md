@@ -54,8 +54,8 @@ no concrete audit finding required one.
 
 ## Open blockers (all must be closed externally)
 
-1. **V30.1B-R1** Router V4 exceeds EIP-170 (28,703 bytes) — requires splitting
-   execution surface; a settings change cannot fix it.
+1. ~~**V30.1B-R1** Router V4 exceeds EIP-170 (28,703 runtime bytes).~~ CLOSED in
+   V30.1B.1 — see `contracts/MAINNET_V30_1B_1.md` (runtime 19,720 bytes).
 2. **V30.1B-D1** Rewards Distributor has no enforceable solvency reservation;
    one canonical design (reservations, or budgeted Merkle/epoch) must be chosen
    with approved economics.
@@ -63,8 +63,8 @@ no concrete audit finding required one.
    stays excluded, staking v2 is a separate gate.
 4. **V30.1B-B1** Official refund → Adapter → user recovery rehearsal not
    performed; mainnet adapter execution stays disabled.
-5. **V30.1B-X1** Slither/static analyzer unavailable in this sandbox; an
-   external run is a required release input.
+5. ~~**V30.1B-X1** Slither/static analyzer unavailable in this sandbox.~~ CLOSED
+   in V30.1B.1 — pinned Slither 0.11.3 executed, 3 results, all triaged.
 6. **V30.1B-G1** No approved production multisig/timelock governance owner.
 
 ## Zero-write attestation

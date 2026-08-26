@@ -115,6 +115,65 @@ interface IBotBridgeGateway {
     ) external payable;
 }
 
+error ActivationDelay();
+error BelowGlobalFee();
+error BridgeInactive();
+error BridgeNotFound();
+error ContractPaused();
+error DeactivateFirst();
+error DeadlinePassed();
+error DelayTooLong();
+error DestinationRequired();
+error DuplicatePathToken();
+error DuplicateToken();
+error ExceedsAbsoluteMax10();
+error ExceedsMaxfeebps();
+error HopTokenMismatch();
+error Hops210();
+error IdenticalEndpoints();
+error IdenticalTokens();
+error IncorrectMsgValue();
+error InvalidAddress();
+error InvalidBridge();
+error InvalidPathToken();
+error InvalidRecipient();
+error InvalidRouter();
+error InvalidToken();
+error InvalidTokenin();
+error InvalidTokenout();
+error InvalidTreasury();
+error InvalidWrappednative();
+error LengthMismatch();
+error MalformedV3Path();
+error MultiHopV2Only();
+error NameRequired();
+error NativeDeliveryFailed();
+error NativeFeeFailed();
+error NotV2();
+error NotV3();
+error OwnerNotOwner();
+error OwnerNotPending();
+error OwnerZero();
+error PathInputMismatch();
+error PathMustEndWrappedNative();
+error PathMustStartWrappedNative();
+error PathOutputMismatch();
+error PathTooShort();
+error ProtocolFeeChanged();
+error Reentrant();
+error RescueFailed();
+error ResourceRequired();
+error RouterInactive();
+error RouterNotFound();
+error TokenNotSupported();
+error TokensRequired();
+error UnsupportedTransferToken();
+error V3InputMismatch();
+error V3OutputMismatch();
+error V3PathTooShort();
+error ZeroAddress();
+error ZeroAmount();
+
 library SafeToken {
     error TokenNotContract(address token);
     error TokenCallFailed(address token);
@@ -152,7 +211,7 @@ abstract contract ReentrancyGuard {
     uint256 private _status = _NOT_ENTERED;
 
     modifier nonReentrant() {
-        require(_status != _ENTERED, "Reentrant");
+        if (!(_status != _ENTERED)) revert Reentrant();
         _status = _ENTERED;
         _;
         _status = _NOT_ENTERED;
@@ -167,13 +226,13 @@ abstract contract Ownable2Step {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     constructor(address initialOwner) {
-        require(initialOwner != address(0), "Owner: zero");
+        if (!(initialOwner != address(0))) revert OwnerZero();
         _owner = initialOwner;
         emit OwnershipTransferred(address(0), initialOwner);
     }
 
     modifier onlyOwner() {
-        require(msg.sender == _owner, "Owner: not owner");
+        if (!(msg.sender == _owner)) revert OwnerNotOwner();
         _;
     }
 
@@ -186,13 +245,13 @@ abstract contract Ownable2Step {
     }
 
     function transferOwnership(address newOwner) external onlyOwner {
-        require(newOwner != address(0), "Owner: zero");
+        if (!(newOwner != address(0))) revert OwnerZero();
         _pendingOwner = newOwner;
         emit OwnershipTransferStarted(_owner, newOwner);
     }
 
     function acceptOwnership() external {
-        require(msg.sender == _pendingOwner, "Owner: not pending");
+        if (!(msg.sender == _pendingOwner)) revert OwnerNotPending();
         address oldOwner = _owner;
         _owner = _pendingOwner;
         _pendingOwner = address(0);
@@ -209,7 +268,7 @@ abstract contract Pausable is Ownable2Step {
     constructor(address initialOwner) Ownable2Step(initialOwner) {}
 
     modifier whenNotPaused() {
-        require(!_paused, "Paused");
+        if (!(!_paused)) revert ContractPaused();
         _;
     }
 
@@ -367,7 +426,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     event IntegrationActivationScheduled(bytes32 indexed kind, uint256 indexed id, uint256 activationTime);
 
     constructor(address initialOwner, address initialFeeTreasury) Pausable(initialOwner) {
-        require(initialFeeTreasury != address(0), "Invalid treasury");
+        if (!(initialFeeTreasury != address(0))) revert InvalidTreasury();
         feeTreasury = initialFeeTreasury;
     }
 
@@ -376,7 +435,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // ---------------------------------------------------------------------
 
     function setGlobalFeeBps(uint256 bps) external onlyOwner {
-        require(bps <= maxFeeBps, "Exceeds maxFeeBps");
+        if (!(bps <= maxFeeBps)) revert ExceedsMaxfeebps();
         uint256 old = globalFeeBps;
         globalFeeBps = bps;
         unchecked { ++feeConfigNonce; }
@@ -384,8 +443,8 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     }
 
     function setMaxFeeBps(uint256 newMax) external onlyOwner {
-        require(newMax <= ABS_MAX_FEE_BPS, "Exceeds absolute max (10%)");
-        require(newMax >= globalFeeBps, "Below global fee");
+        if (!(newMax <= ABS_MAX_FEE_BPS)) revert ExceedsAbsoluteMax10();
+        if (!(newMax >= globalFeeBps)) revert BelowGlobalFee();
         uint256 old = maxFeeBps;
         maxFeeBps = newMax;
         unchecked { ++feeConfigNonce; }
@@ -393,30 +452,30 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     }
 
     function setRouterFeeBps(uint256 routerId, uint256 bps) external onlyOwner {
-        require(routerId < routerCount, "Router not found");
-        require(bps == OVERRIDE_ZERO || bps <= maxFeeBps, "Exceeds maxFeeBps");
+        if (!(routerId < routerCount)) revert RouterNotFound();
+        if (!(bps == OVERRIDE_ZERO || bps <= maxFeeBps)) revert ExceedsMaxfeebps();
         routerFeeBps[routerId] = bps;
         unchecked { ++feeConfigNonce; }
         emit RouterFeeBpsSet(routerId, bps);
     }
 
     function setBridgeFeeBps(uint256 bridgeId, uint256 bps) external onlyOwner {
-        require(bridgeId < bridgeCount, "Bridge not found");
-        require(bps == OVERRIDE_ZERO || bps <= maxFeeBps, "Exceeds maxFeeBps");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
+        if (!(bps == OVERRIDE_ZERO || bps <= maxFeeBps)) revert ExceedsMaxfeebps();
         bridgeFeeBps[bridgeId] = bps;
         unchecked { ++feeConfigNonce; }
         emit BridgeFeeBpsSet(bridgeId, bps);
     }
 
     function setFeeExempt(address account, bool exempt) external onlyOwner {
-        require(account != address(0), "Zero address");
+        if (!(account != address(0))) revert ZeroAddress();
         feeExempt[account] = exempt;
         unchecked { ++feeConfigNonce; }
         emit FeeExemptSet(account, exempt);
     }
 
     function setFeeTreasury(address newTreasury) external onlyOwner {
-        require(newTreasury != address(0), "Zero address");
+        if (!(newTreasury != address(0))) revert ZeroAddress();
         address old = feeTreasury;
         feeTreasury = newTreasury;
         unchecked { ++feeConfigNonce; }
@@ -428,7 +487,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         view
         returns (uint256 fee, uint256 effectiveBps)
     {
-        require(routerId < routerCount, "Router not found");
+        if (!(routerId < routerCount)) revert RouterNotFound();
         if (feeExempt[user]) return (0, 0);
         uint256 override_ = routerFeeBps[routerId];
         if (override_ == OVERRIDE_ZERO) return (0, 0);
@@ -442,7 +501,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         view
         returns (uint256 fee, uint256 effectiveBps)
     {
-        require(bridgeId < bridgeCount, "Bridge not found");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
         if (feeExempt[user]) return (0, 0);
         uint256 override_ = bridgeFeeBps[bridgeId];
         if (override_ == OVERRIDE_ZERO) return (0, 0);
@@ -464,7 +523,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // ---------------------------------------------------------------------
 
     function setRegistryActivationDelay(uint256 newDelay) external onlyOwner {
-        require(newDelay <= MAX_REGISTRY_ACTIVATION_DELAY, "Delay too long");
+        if (!(newDelay <= MAX_REGISTRY_ACTIVATION_DELAY)) revert DelayTooLong();
         uint256 old = registryActivationDelay;
         registryActivationDelay = newDelay;
         emit RegistryActivationDelaySet(old, newDelay);
@@ -477,9 +536,9 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         string calldata name,
         string calldata version
     ) external onlyOwner returns (uint256 routerId) {
-        require(router != address(0) && router.code.length > 0, "Invalid router");
-        require(wrappedNative != address(0) && wrappedNative.code.length > 0, "Invalid wrappedNative");
-        require(bytes(name).length > 0, "Name required");
+        if (!(router != address(0) && router.code.length > 0)) revert InvalidRouter();
+        if (!(wrappedNative != address(0) && wrappedNative.code.length > 0)) revert InvalidWrappednative();
+        if (!(bytes(name).length > 0)) revert NameRequired();
 
         routerId = routerCount++;
         bool activateNow = registryActivationDelay == 0;
@@ -493,8 +552,8 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     }
 
     function setRouterActive(uint256 routerId, bool active) external onlyOwner {
-        require(routerId < routerCount, "Router not found");
-        if (active) require(block.timestamp >= routerActivationTime[routerId], "Activation delay");
+        if (!(routerId < routerCount)) revert RouterNotFound();
+        if (active) if (!(block.timestamp >= routerActivationTime[routerId])) revert ActivationDelay();
         routers[routerId].active = active;
         emit RouterStatusChanged(routerId, active);
     }
@@ -518,9 +577,9 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     }
 
     function updateRouterWrappedNative(uint256 routerId, address newWrappedNative) external onlyOwner {
-        require(routerId < routerCount, "Router not found");
-        require(!routers[routerId].active, "Deactivate first");
-        require(newWrappedNative != address(0) && newWrappedNative.code.length > 0, "Invalid address");
+        if (!(routerId < routerCount)) revert RouterNotFound();
+        if (!(!routers[routerId].active)) revert DeactivateFirst();
+        if (!(newWrappedNative != address(0) && newWrappedNative.code.length > 0)) revert InvalidAddress();
         routers[routerId].wrappedNative = newWrappedNative;
         _rearmRouterActivation(routerId);
     }
@@ -550,10 +609,10 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         bytes32[] calldata resourceIds,
         bool supportsBotGas
     ) external onlyOwner returns (uint256 bridgeId) {
-        require(supportedTokens.length == resourceIds.length, "Length mismatch");
+        if (!(supportedTokens.length == resourceIds.length)) revert LengthMismatch();
         bridgeId = _registerBridge(bridge, name, destChainName, destChainId, supportedTokens, supportsBotGas);
         for (uint256 i = 0; i < supportedTokens.length; ++i) {
-            require(resourceIds[i] != bytes32(0), "Resource required");
+            if (!(resourceIds[i] != bytes32(0))) revert ResourceRequired();
             bridgeResourceId[bridgeId][supportedTokens[i]] = resourceIds[i];
             emit BridgeTokenResourceSet(bridgeId, supportedTokens[i], resourceIds[i]);
         }
@@ -567,10 +626,10 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         address[] calldata supportedTokens,
         bool supportsBotGas
     ) internal returns (uint256 bridgeId) {
-        require(bridge != address(0) && bridge.code.length > 0, "Invalid bridge");
-        require(bytes(name).length > 0, "Name required");
-        require(destChainId != 0, "Destination required");
-        require(supportedTokens.length > 0, "Tokens required");
+        if (!(bridge != address(0) && bridge.code.length > 0)) revert InvalidBridge();
+        if (!(bytes(name).length > 0)) revert NameRequired();
+        if (!(destChainId != 0)) revert DestinationRequired();
+        if (!(supportedTokens.length > 0)) revert TokensRequired();
 
         bridgeId = bridgeCount++;
         bool activateNow = registryActivationDelay == 0;
@@ -580,8 +639,8 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
 
         for (uint256 i = 0; i < supportedTokens.length; ++i) {
             address token = supportedTokens[i];
-            require(token != address(0) && token.code.length > 0, "Invalid token");
-            require(!bridgeTokenSupported[bridgeId][token], "Duplicate token");
+            if (!(token != address(0) && token.code.length > 0)) revert InvalidToken();
+            if (!(!bridgeTokenSupported[bridgeId][token])) revert DuplicateToken();
             bridgeTokenSupported[bridgeId][token] = true;
         }
 
@@ -592,16 +651,16 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     }
 
     function setBridgeActive(uint256 bridgeId, bool active) external onlyOwner {
-        require(bridgeId < bridgeCount, "Bridge not found");
-        if (active) require(block.timestamp >= bridgeActivationTime[bridgeId], "Activation delay");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
+        if (active) if (!(block.timestamp >= bridgeActivationTime[bridgeId])) revert ActivationDelay();
         bridges[bridgeId].active = active;
         emit BridgeStatusChanged(bridgeId, active);
     }
 
     function updateBridgeSupportedTokens(uint256 bridgeId, address[] calldata tokens) external onlyOwner {
-        require(bridgeId < bridgeCount, "Bridge not found");
-        require(!bridges[bridgeId].active, "Deactivate first");
-        require(tokens.length > 0, "Tokens required");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
+        if (!(!bridges[bridgeId].active)) revert DeactivateFirst();
+        if (!(tokens.length > 0)) revert TokensRequired();
 
         address[] storage oldTokens = bridges[bridgeId].supportedTokens;
         for (uint256 i = 0; i < oldTokens.length; ++i) {
@@ -612,8 +671,8 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
 
         for (uint256 i = 0; i < tokens.length; ++i) {
             address token = tokens[i];
-            require(token != address(0) && token.code.length > 0, "Invalid token");
-            require(!bridgeTokenSupported[bridgeId][token], "Duplicate token");
+            if (!(token != address(0) && token.code.length > 0)) revert InvalidToken();
+            if (!(!bridgeTokenSupported[bridgeId][token])) revert DuplicateToken();
             bridgeTokenSupported[bridgeId][token] = true;
             bridges[bridgeId].supportedTokens.push(token);
         }
@@ -621,18 +680,18 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     }
 
     function setBridgeTokenResource(uint256 bridgeId, address token, bytes32 resourceId) external onlyOwner {
-        require(bridgeId < bridgeCount, "Bridge not found");
-        require(!bridges[bridgeId].active, "Deactivate first");
-        require(bridgeTokenSupported[bridgeId][token], "Token not supported");
-        require(resourceId != bytes32(0), "Resource required");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
+        if (!(!bridges[bridgeId].active)) revert DeactivateFirst();
+        if (!(bridgeTokenSupported[bridgeId][token])) revert TokenNotSupported();
+        if (!(resourceId != bytes32(0))) revert ResourceRequired();
         bridgeResourceId[bridgeId][token] = resourceId;
         emit BridgeTokenResourceSet(bridgeId, token, resourceId);
         _rearmBridgeActivation(bridgeId);
     }
 
     function setBridgeSupportsBotGas(uint256 bridgeId, bool supported) external onlyOwner {
-        require(bridgeId < bridgeCount, "Bridge not found");
-        require(!bridges[bridgeId].active, "Deactivate first");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
+        if (!(!bridges[bridgeId].active)) revert DeactivateFirst();
         bridgeSupportsBotGas[bridgeId] = supported;
         emit BridgeBotGasSupportSet(bridgeId, supported);
         _rearmBridgeActivation(bridgeId);
@@ -644,8 +703,8 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
      *      semantics are safe when msg.sender is this router rather than the end-user wallet.
      */
     function setBridgeProxyExecutionEnabled(uint256 bridgeId, bool enabled) external onlyOwner {
-        require(bridgeId < bridgeCount, "Bridge not found");
-        require(!bridges[bridgeId].active, "Deactivate first");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
+        if (!(!bridges[bridgeId].active)) revert DeactivateFirst();
         bridgeProxyExecutionEnabled[bridgeId] = enabled;
         emit BridgeProxyExecutionSet(bridgeId, enabled);
         _rearmBridgeActivation(bridgeId);
@@ -655,17 +714,6 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // ---------------------------------------------------------------------
     // V2 token -> token (v3-compatible + fee-bound safe variant)
     // ---------------------------------------------------------------------
-
-    function swapV2(
-        uint256 routerId,
-        uint256 swapAmount,
-        uint256 amountOutMin,
-        address[] calldata path,
-        address to,
-        uint256 deadline
-    ) external nonReentrant whenNotPaused returns (uint256[] memory amounts) {
-        return _swapV2(routerId, swapAmount, amountOutMin, path, to, deadline, type(uint256).max);
-    }
 
     function swapV2Safe(
         uint256 routerId,
@@ -688,16 +736,16 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         uint256 deadline,
         uint256 maxProtocolFee
     ) internal returns (uint256[] memory amounts) {
-        require(swapAmount > 0, "Zero amount");
-        require(to != address(0), "Invalid recipient");
+        if (!(swapAmount > 0)) revert ZeroAmount();
+        if (!(to != address(0))) revert InvalidRecipient();
         _validateDeadline(deadline);
         _validateV2Path(path);
 
         RouterEntry storage r = _requireRouter(routerId);
-        require(r.rtype == RouterType.V2, "Not V2");
+        if (!(r.rtype == RouterType.V2)) revert NotV2();
 
         (uint256 fee,) = computeRouterFee(routerId, swapAmount, msg.sender);
-        require(fee <= maxProtocolFee, "Protocol fee changed");
+        if (!(fee <= maxProtocolFee)) revert ProtocolFeeChanged();
         _collectExactTokenInput(path[0], msg.sender, swapAmount + fee);
         _takeFee(path[0], fee);
 
@@ -718,21 +766,6 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // ---------------------------------------------------------------------
     // V3 token -> token single hop
     // ---------------------------------------------------------------------
-
-    function swapV3Single(
-        uint256 routerId,
-        address tokenIn,
-        address tokenOut,
-        uint24 feePool,
-        uint256 swapAmount,
-        uint256 amountOutMinimum,
-        address to,
-        uint256 deadline
-    ) external nonReentrant whenNotPaused returns (uint256 amountOut) {
-        return _swapV3Single(
-            routerId, tokenIn, tokenOut, feePool, swapAmount, amountOutMinimum, to, deadline, type(uint256).max
-        );
-    }
 
     function swapV3SingleSafe(
         uint256 routerId,
@@ -761,17 +794,17 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         uint256 deadline,
         uint256 maxProtocolFee
     ) internal returns (uint256 amountOut) {
-        require(swapAmount > 0, "Zero amount");
-        require(tokenIn != address(0) && tokenOut != address(0), "Invalid token");
-        require(tokenIn != tokenOut, "Identical tokens");
-        require(to != address(0), "Invalid recipient");
+        if (!(swapAmount > 0)) revert ZeroAmount();
+        if (!(tokenIn != address(0) && tokenOut != address(0))) revert InvalidToken();
+        if (!(tokenIn != tokenOut)) revert IdenticalTokens();
+        if (!(to != address(0))) revert InvalidRecipient();
         _validateDeadline(deadline);
 
         RouterEntry storage r = _requireRouter(routerId);
-        require(r.rtype == RouterType.V3, "Not V3");
+        if (!(r.rtype == RouterType.V3)) revert NotV3();
 
         (uint256 fee,) = computeRouterFee(routerId, swapAmount, msg.sender);
-        require(fee <= maxProtocolFee, "Protocol fee changed");
+        if (!(fee <= maxProtocolFee)) revert ProtocolFeeChanged();
         _collectExactTokenInput(tokenIn, msg.sender, swapAmount + fee);
         _takeFee(tokenIn, fee);
 
@@ -796,21 +829,6 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // ---------------------------------------------------------------------
     // V3 token -> token encoded multi-hop
     // ---------------------------------------------------------------------
-
-    function swapV3Multi(
-        uint256 routerId,
-        address tokenIn,
-        address tokenOut,
-        bytes calldata encodedPath,
-        uint256 swapAmount,
-        uint256 amountOutMinimum,
-        address to,
-        uint256 deadline
-    ) external nonReentrant whenNotPaused returns (uint256 amountOut) {
-        return _swapV3Multi(
-            routerId, tokenIn, tokenOut, encodedPath, swapAmount, amountOutMinimum, to, deadline, type(uint256).max
-        );
-    }
 
     function swapV3MultiSafe(
         uint256 routerId,
@@ -839,18 +857,18 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         uint256 deadline,
         uint256 maxProtocolFee
     ) internal returns (uint256 amountOut) {
-        require(swapAmount > 0, "Zero amount");
-        require(tokenIn != address(0) && tokenOut != address(0), "Invalid token");
-        require(tokenIn != tokenOut, "Identical tokens");
-        require(to != address(0), "Invalid recipient");
+        if (!(swapAmount > 0)) revert ZeroAmount();
+        if (!(tokenIn != address(0) && tokenOut != address(0))) revert InvalidToken();
+        if (!(tokenIn != tokenOut)) revert IdenticalTokens();
+        if (!(to != address(0))) revert InvalidRecipient();
         _validateDeadline(deadline);
         _validateV3Path(encodedPath, tokenIn, tokenOut);
 
         RouterEntry storage r = _requireRouter(routerId);
-        require(r.rtype == RouterType.V3, "Not V3");
+        if (!(r.rtype == RouterType.V3)) revert NotV3();
 
         (uint256 fee,) = computeRouterFee(routerId, swapAmount, msg.sender);
-        require(fee <= maxProtocolFee, "Protocol fee changed");
+        if (!(fee <= maxProtocolFee)) revert ProtocolFeeChanged();
         _collectExactTokenInput(tokenIn, msg.sender, swapAmount + fee);
         _takeFee(tokenIn, fee);
 
@@ -873,33 +891,6 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // Native -> token
     // ---------------------------------------------------------------------
 
-    /**
-     * @notice v3-compatible native swap. msg.value is interpreted as swap amount + protocol fee.
-     * Prefer swapNativeToTokenSafe in new frontend integrations.
-     */
-    function swapNativeToToken(
-        uint256 routerId,
-        address tokenOut,
-        uint24 feePool,
-        uint256 amountOutMin,
-        address[] calldata path,
-        address to,
-        uint256 deadline
-    ) external payable nonReentrant whenNotPaused returns (uint256 amountOut) {
-        require(msg.value > 0, "Zero value");
-        require(tokenOut != address(0), "Invalid tokenOut");
-        require(to != address(0), "Invalid recipient");
-        _validateDeadline(deadline);
-
-        RouterEntry storage r = _requireRouter(routerId);
-        uint256 effectiveBps = _routerEffectiveBps(routerId, msg.sender);
-        uint256 fee = (msg.value * effectiveBps) / (BPS_DENOMINATOR + effectiveBps);
-        uint256 swapAmount = msg.value - fee;
-
-        amountOut = _executeNativeToToken(r, tokenOut, feePool, amountOutMin, path, to, deadline, swapAmount, fee);
-        _emitSwap(routerId, address(0), tokenOut, msg.sender, to, swapAmount, amountOut, fee);
-    }
-
     function swapNativeToTokenSafe(
         uint256 routerId,
         uint256 swapAmount,
@@ -911,15 +902,15 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         uint256 deadline,
         uint256 maxProtocolFee
     ) external payable nonReentrant whenNotPaused returns (uint256 amountOut) {
-        require(swapAmount > 0, "Zero amount");
-        require(tokenOut != address(0), "Invalid tokenOut");
-        require(to != address(0), "Invalid recipient");
+        if (!(swapAmount > 0)) revert ZeroAmount();
+        if (!(tokenOut != address(0))) revert InvalidTokenout();
+        if (!(to != address(0))) revert InvalidRecipient();
         _validateDeadline(deadline);
 
         RouterEntry storage r = _requireRouter(routerId);
         (uint256 fee,) = computeRouterFee(routerId, swapAmount, msg.sender);
-        require(fee <= maxProtocolFee, "Protocol fee changed");
-        require(msg.value == swapAmount + fee, "Incorrect msg.value");
+        if (!(fee <= maxProtocolFee)) revert ProtocolFeeChanged();
+        if (!(msg.value == swapAmount + fee)) revert IncorrectMsgValue();
 
         amountOut = _executeNativeToToken(r, tokenOut, feePool, amountOutMin, path, to, deadline, swapAmount, fee);
         _emitSwap(routerId, address(0), tokenOut, msg.sender, to, swapAmount, amountOut, fee);
@@ -967,21 +958,6 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // Token -> native
     // ---------------------------------------------------------------------
 
-    function swapTokenToNative(
-        uint256 routerId,
-        address tokenIn,
-        uint24 feePool,
-        uint256 swapAmount,
-        uint256 amountOutMin,
-        address[] calldata path,
-        address payable to,
-        uint256 deadline
-    ) external nonReentrant whenNotPaused returns (uint256 amountOut) {
-        return _swapTokenToNative(
-            routerId, tokenIn, feePool, swapAmount, amountOutMin, path, to, deadline, type(uint256).max
-        );
-    }
-
     function swapTokenToNativeSafe(
         uint256 routerId,
         address tokenIn,
@@ -1009,14 +985,14 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         uint256 deadline,
         uint256 maxProtocolFee
     ) internal returns (uint256 amountOut) {
-        require(swapAmount > 0, "Zero amount");
-        require(tokenIn != address(0), "Invalid tokenIn");
-        require(to != address(0), "Invalid recipient");
+        if (!(swapAmount > 0)) revert ZeroAmount();
+        if (!(tokenIn != address(0))) revert InvalidTokenin();
+        if (!(to != address(0))) revert InvalidRecipient();
         _validateDeadline(deadline);
 
         RouterEntry storage r = _requireRouter(routerId);
         (uint256 fee,) = computeRouterFee(routerId, swapAmount, msg.sender);
-        require(fee <= maxProtocolFee, "Protocol fee changed");
+        if (!(fee <= maxProtocolFee)) revert ProtocolFeeChanged();
         _collectExactTokenInput(tokenIn, msg.sender, swapAmount + fee);
         _takeFee(tokenIn, fee);
 
@@ -1046,7 +1022,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
             );
             IWrappedNative(r.wrappedNative).withdraw(amountOut);
             (bool ok,) = to.call{value: amountOut}("");
-            require(ok, "Native delivery failed");
+            if (!(ok)) revert NativeDeliveryFailed();
         }
         _clearAllowance(tokenIn, r.router);
 
@@ -1056,15 +1032,6 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // ---------------------------------------------------------------------
     // Cross-router V2 multi-hop
     // ---------------------------------------------------------------------
-
-    function swapMultiHop(
-        HopParams[] calldata hops,
-        uint256 swapAmount,
-        address to,
-        uint256 deadline
-    ) external nonReentrant whenNotPaused returns (uint256 finalAmountOut) {
-        return _swapMultiHop(hops, swapAmount, to, deadline, type(uint256).max);
-    }
 
     function swapMultiHopSafe(
         HopParams[] calldata hops,
@@ -1083,15 +1050,15 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         uint256 deadline,
         uint256 maxProtocolFee
     ) internal returns (uint256 finalAmountOut) {
-        require(hops.length >= 2 && hops.length <= 10, "Hops: 2-10");
-        require(swapAmount > 0, "Zero amount");
-        require(to != address(0), "Invalid recipient");
+        if (!(hops.length >= 2 && hops.length <= 10)) revert Hops210();
+        if (!(swapAmount > 0)) revert ZeroAmount();
+        if (!(to != address(0))) revert InvalidRecipient();
         _validateDeadline(deadline);
         _validateV2Path(hops[0].path);
 
         address tokenIn = hops[0].path[0];
         (uint256 fee,) = computeRouterFee(hops[0].routerId, swapAmount, msg.sender);
-        require(fee <= maxProtocolFee, "Protocol fee changed");
+        if (!(fee <= maxProtocolFee)) revert ProtocolFeeChanged();
         _collectExactTokenInput(tokenIn, msg.sender, swapAmount + fee);
         _takeFee(tokenIn, fee);
 
@@ -1101,10 +1068,10 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         for (uint256 i = 0; i < hops.length; ++i) {
             HopParams calldata hop = hops[i];
             _validateV2Path(hop.path);
-            require(hop.path[0] == lastToken, "Hop token mismatch");
+            if (!(hop.path[0] == lastToken)) revert HopTokenMismatch();
 
             RouterEntry storage r = _requireRouter(hop.routerId);
-            require(r.rtype == RouterType.V2, "Multi-hop V2 only");
+            if (!(r.rtype == RouterType.V2)) revert MultiHopV2Only();
 
             address hopRecipient = i == hops.length - 1 ? to : address(this);
             IERC20(lastToken).forceApprove(r.router, currentAmount);
@@ -1130,264 +1097,13 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // BOT Bridge routing
     // ---------------------------------------------------------------------
 
-    /**
-     * @notice v3-compatible bridge entry point.
-     * Uses the registered destination/resource route, sends to msg.sender, and does not request BOT gas.
-     */
-    function bridgeWithFee(uint256 bridgeId, address token, uint256 bridgeAmount)
-        external
-        nonReentrant
-        whenNotPaused
-        returns (bool)
-    {
-        _bridgeBot(bridgeId, token, bridgeAmount, msg.sender, false, type(uint256).max, type(uint256).max);
-        return true;
-    }
-
-    /**
-     * @notice Preferred BOT Bridge entry point for the new frontend.
-     * @param maxProtocolFee Maximum FlowBridge fee (token units) the user accepts.
-     * @param expectedFeeConfigNonce Optional exact fee-config version. Set to type(uint256).max to ignore.
-     * @dev FlowBridge does not forward native value; BOT gas top-up is handled by the official bridge from USDT.
-     */
-    function bridgeBot(
-        uint256 bridgeId,
-        address token,
-        uint256 bridgeAmount,
-        address recipient,
-        bool withBotGas,
-        uint256 maxProtocolFee,
-        uint256 expectedFeeConfigNonce
-    ) external nonReentrant whenNotPaused returns (bool) {
-        _bridgeBot(
-            bridgeId,
-            token,
-            bridgeAmount,
-            recipient,
-            withBotGas,
-            maxProtocolFee,
-            expectedFeeConfigNonce
-        );
-        return true;
-    }
-
-    function _bridgeBot(
-        uint256 bridgeId,
-        address token,
-        uint256 bridgeAmount,
-        address recipient,
-        bool withBotGas,
-        uint256 maxProtocolFee,
-        uint256 expectedFeeConfigNonce
-    ) internal {
-        require(bridgeAmount > 0, "Zero amount");
-        require(token != address(0) && token.code.length > 0, "Invalid token");
-        require(recipient != address(0), "Invalid recipient");
-        if (expectedFeeConfigNonce != type(uint256).max) {
-            require(expectedFeeConfigNonce == feeConfigNonce, "Fee config changed");
-        }
-
-        BridgeEntry storage b = _requireBridge(bridgeId);
-        require(bridgeProxyExecutionEnabled[bridgeId], "Bridge proxy execution disabled");
-        require(bridgeTokenSupported[bridgeId][token], "Token not supported");
-        bytes32 resourceId = bridgeResourceId[bridgeId][token];
-        require(resourceId != bytes32(0), "Bridge resource not configured");
-        if (withBotGas) require(bridgeSupportsBotGas[bridgeId], "BOT gas mode unsupported");
-
-        (uint256 fee,) = computeBridgeFee(bridgeId, bridgeAmount, msg.sender);
-        require(fee <= maxProtocolFee, "Protocol fee changed");
-
-        _collectExactTokenInput(token, msg.sender, bridgeAmount + fee);
-        _takeFee(token, fee);
-
-        IERC20(token).forceApprove(b.bridge, bridgeAmount);
-        if (withBotGas) {
-            IBotBridgeGateway(b.bridge).depositWithBotGas(
-                b.destChainId,
-                resourceId,
-                recipient,
-                bridgeAmount
-            );
-        } else {
-            IBotBridgeGateway(b.bridge).deposit(
-                b.destChainId,
-                resourceId,
-                recipient,
-                bridgeAmount
-            );
-        }
-        _clearAllowance(token, b.bridge);
-
-        emit BridgeSubmitted(bridgeId, token, msg.sender, bridgeAmount, fee, b.destChainId);
-        emit BridgeActivity(
-            msg.sender,
-            recipient,
-            bridgeId,
-            token,
-            resourceId,
-            b.destChainId,
-            bridgeAmount,
-            fee,
-            withBotGas
-        );
-    }
-
     // ---------------------------------------------------------------------
     // Frontend view helpers
     // ---------------------------------------------------------------------
 
-    function getActiveRouters()
-        external
-        view
-        returns (
-            uint256[] memory ids,
-            string[] memory names,
-            string[] memory versions,
-            RouterType[] memory types_,
-            address[] memory addrs
-        )
-    {
-        uint256 count;
-        for (uint256 i = 0; i < routerCount; ++i) if (routers[i].active) ++count;
-
-        ids = new uint256[](count);
-        names = new string[](count);
-        versions = new string[](count);
-        types_ = new RouterType[](count);
-        addrs = new address[](count);
-
-        uint256 index;
-        for (uint256 i = 0; i < routerCount; ++i) {
-            RouterEntry storage r = routers[i];
-            if (r.active) {
-                ids[index] = i;
-                names[index] = r.name;
-                versions[index] = r.version;
-                types_[index] = r.rtype;
-                addrs[index] = r.router;
-                ++index;
-            }
-        }
-    }
-
-    function getActiveBridges()
-        external
-        view
-        returns (
-            uint256[] memory ids,
-            string[] memory names,
-            string[] memory destChainNames,
-            uint256[] memory destChainIds,
-            address[] memory addrs
-        )
-    {
-        uint256 count;
-        for (uint256 i = 0; i < bridgeCount; ++i) if (bridges[i].active) ++count;
-
-        ids = new uint256[](count);
-        names = new string[](count);
-        destChainNames = new string[](count);
-        destChainIds = new uint256[](count);
-        addrs = new address[](count);
-
-        uint256 index;
-        for (uint256 i = 0; i < bridgeCount; ++i) {
-            BridgeEntry storage b = bridges[i];
-            if (b.active) {
-                ids[index] = i;
-                names[index] = b.name;
-                destChainNames[index] = b.destChainName;
-                destChainIds[index] = b.destChainId;
-                addrs[index] = b.bridge;
-                ++index;
-            }
-        }
-    }
-
     function getBridgeSupportedTokens(uint256 bridgeId) external view returns (address[] memory) {
-        require(bridgeId < bridgeCount, "Bridge not found");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
         return bridges[bridgeId].supportedTokens;
-    }
-
-    function getBridgeRouteConfig(uint256 bridgeId, address token)
-        external
-        view
-        returns (
-            address gateway,
-            uint256 destinationChainId,
-            bytes32 resourceId,
-            bool tokenSupported,
-            bool botGasSupported,
-            bool proxyExecutionEnabled,
-            bool active
-        )
-    {
-        require(bridgeId < bridgeCount, "Bridge not found");
-        BridgeEntry storage b = bridges[bridgeId];
-
-        // Assign named return values sequentially instead of constructing a
-        // seven-value return tuple in one expression. This keeps the legacy
-        // compiler pipeline from exhausting stack slots ("stack too deep")
-        // while preserving the exact external ABI.
-        gateway = b.bridge;
-        destinationChainId = b.destChainId;
-        resourceId = bridgeResourceId[bridgeId][token];
-        tokenSupported = bridgeTokenSupported[bridgeId][token];
-        botGasSupported = bridgeSupportsBotGas[bridgeId];
-        proxyExecutionEnabled = bridgeProxyExecutionEnabled[bridgeId];
-        active = b.active;
-    }
-
-    function getBestV2Rate(uint256 amountIn, address[] calldata path)
-        external
-        view
-        returns (uint256 bestRouterId, uint256 bestAmountOut, uint256[] memory allAmountsOut)
-    {
-        _validateV2Path(path);
-        allAmountsOut = new uint256[](routerCount);
-        for (uint256 i = 0; i < routerCount; ++i) {
-            RouterEntry storage r = routers[i];
-            if (!r.active || r.rtype != RouterType.V2) continue;
-            try IUniswapV2Router(r.router).getAmountsOut(amountIn, path) returns (uint256[] memory amounts) {
-                uint256 out = amounts[amounts.length - 1];
-                allAmountsOut[i] = out;
-                if (out > bestAmountOut) {
-                    bestAmountOut = out;
-                    bestRouterId = i;
-                }
-            } catch {
-                allAmountsOut[i] = 0;
-            }
-        }
-    }
-
-    /** @notice Paginated V2 quote helper for larger future registries. */
-    function getV2RatesPage(
-        uint256 amountIn,
-        address[] calldata path,
-        uint256 start,
-        uint256 count
-    ) external view returns (uint256[] memory ids, uint256[] memory amountsOut) {
-        _validateV2Path(path);
-        if (start >= routerCount || count == 0) return (new uint256[](0), new uint256[](0));
-        uint256 end = start + count;
-        if (end > routerCount) end = routerCount;
-
-        ids = new uint256[](end - start);
-        amountsOut = new uint256[](end - start);
-        uint256 index;
-        for (uint256 i = start; i < end; ++i) {
-            ids[index] = i;
-            RouterEntry storage r = routers[i];
-            if (r.active && r.rtype == RouterType.V2) {
-                try IUniswapV2Router(r.router).getAmountsOut(amountIn, path) returns (uint256[] memory amounts) {
-                    amountsOut[index] = amounts[amounts.length - 1];
-                } catch {
-                    amountsOut[index] = 0;
-                }
-            }
-            ++index;
-        }
     }
 
     // ---------------------------------------------------------------------
@@ -1395,14 +1111,14 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // ---------------------------------------------------------------------
 
     function rescueERC20(address token, address to, uint256 amount) external onlyOwner {
-        require(to != address(0), "Invalid recipient");
+        if (!(to != address(0))) revert InvalidRecipient();
         IERC20(token).safeTransfer(to, amount);
     }
 
     function rescueNative(address payable to, uint256 amount) external onlyOwner {
-        require(to != address(0), "Invalid recipient");
+        if (!(to != address(0))) revert InvalidRecipient();
         (bool ok,) = to.call{value: amount}("");
-        require(ok, "Rescue failed");
+        if (!(ok)) revert RescueFailed();
     }
 
     // ---------------------------------------------------------------------
@@ -1410,19 +1126,19 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     // ---------------------------------------------------------------------
 
     function _requireRouter(uint256 routerId) internal view returns (RouterEntry storage r) {
-        require(routerId < routerCount, "Router not found");
+        if (!(routerId < routerCount)) revert RouterNotFound();
         r = routers[routerId];
-        require(r.active, "Router inactive");
+        if (!(r.active)) revert RouterInactive();
     }
 
     function _requireBridge(uint256 bridgeId) internal view returns (BridgeEntry storage b) {
-        require(bridgeId < bridgeCount, "Bridge not found");
+        if (!(bridgeId < bridgeCount)) revert BridgeNotFound();
         b = bridges[bridgeId];
-        require(b.active, "Bridge inactive");
+        if (!(b.active)) revert BridgeInactive();
     }
 
     function _routerEffectiveBps(uint256 routerId, address user) internal view returns (uint256) {
-        require(routerId < routerCount, "Router not found");
+        if (!(routerId < routerCount)) revert RouterNotFound();
         if (feeExempt[user]) return 0;
         uint256 override_ = routerFeeBps[routerId];
         if (override_ == OVERRIDE_ZERO) return 0;
@@ -1439,7 +1155,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     function _takeNativeFee(uint256 fee) internal {
         if (fee == 0) return;
         (bool ok,) = feeTreasury.call{value: fee}("");
-        require(ok, "Native fee failed");
+        if (!(ok)) revert NativeFeeFailed();
         emit FeeCollected(address(0), feeTreasury, fee);
     }
 
@@ -1448,7 +1164,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         uint256 beforeBalance = IERC20(token).balanceOf(address(this));
         IERC20(token).safeTransferFrom(from, address(this), amount);
         uint256 afterBalance = IERC20(token).balanceOf(address(this));
-        require(afterBalance >= beforeBalance && afterBalance - beforeBalance == amount, "Unsupported transfer token");
+        if (!(afterBalance >= beforeBalance && afterBalance - beforeBalance == amount)) revert UnsupportedTransferToken();
     }
 
     function _clearAllowance(address token, address spender) internal {
@@ -1458,16 +1174,16 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
     }
 
     function _validateDeadline(uint256 deadline) internal view {
-        require(deadline >= block.timestamp, "Deadline passed");
+        if (!(deadline >= block.timestamp)) revert DeadlinePassed();
     }
 
     function _validateV2Path(address[] calldata path) internal pure {
-        require(path.length >= 2, "Path too short");
-        require(path[0] != address(0) && path[path.length - 1] != address(0), "Invalid path token");
-        require(path[0] != path[path.length - 1], "Identical endpoints");
+        if (!(path.length >= 2)) revert PathTooShort();
+        if (!(path[0] != address(0) && path[path.length - 1] != address(0))) revert InvalidPathToken();
+        if (!(path[0] != path[path.length - 1])) revert IdenticalEndpoints();
         for (uint256 i = 1; i < path.length; ++i) {
-            require(path[i] != address(0), "Invalid path token");
-            require(path[i] != path[i - 1], "Duplicate path token");
+            if (!(path[i] != address(0))) revert InvalidPathToken();
+            if (!(path[i] != path[i - 1])) revert DuplicatePathToken();
         }
     }
 
@@ -1476,8 +1192,8 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         pure
     {
         _validateV2Path(path);
-        require(path[0] == wrappedNative, "Path must start wrapped native");
-        require(path[path.length - 1] == tokenOut, "Path output mismatch");
+        if (!(path[0] == wrappedNative)) revert PathMustStartWrappedNative();
+        if (!(path[path.length - 1] == tokenOut)) revert PathOutputMismatch();
     }
 
     function _validateV2TokenToNativePath(address[] calldata path, address tokenIn, address wrappedNative)
@@ -1485,15 +1201,15 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         pure
     {
         _validateV2Path(path);
-        require(path[0] == tokenIn, "Path input mismatch");
-        require(path[path.length - 1] == wrappedNative, "Path must end wrapped native");
+        if (!(path[0] == tokenIn)) revert PathInputMismatch();
+        if (!(path[path.length - 1] == wrappedNative)) revert PathMustEndWrappedNative();
     }
 
     function _validateV3Path(bytes calldata path, address tokenIn, address tokenOut) internal pure {
-        require(path.length >= 43, "V3 path too short");
-        require((path.length - 20) % 23 == 0, "Malformed V3 path");
-        require(_firstPathAddress(path) == tokenIn, "V3 input mismatch");
-        require(_lastPathAddress(path) == tokenOut, "V3 output mismatch");
+        if (!(path.length >= 43)) revert V3PathTooShort();
+        if (!((path.length - 20) % 23 == 0)) revert MalformedV3Path();
+        if (!(_firstPathAddress(path) == tokenIn)) revert V3InputMismatch();
+        if (!(_lastPathAddress(path) == tokenOut)) revert V3OutputMismatch();
     }
 
     function _firstPathAddress(bytes calldata path) internal pure returns (address result) {

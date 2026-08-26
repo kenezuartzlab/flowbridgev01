@@ -12,6 +12,7 @@
  * explicitly resolved V4 route.
  */
 import type { FlowBridgeExecutionTarget } from './executionRegistry';
+import { BOT_MAINNET_CHAIN_ID } from '@/lib/network/canonicalNetworks';
 
 export type SwapMethodMode =
   | { mode: 'safe' }
@@ -49,6 +50,14 @@ export function resolveSwapMethodMode(args: {
       };
     }
     return { mode: 'safe' };
+  }
+  // V30.1B.1: the size-safe mainnet Router candidate has no legacy swap
+  // wrappers at all, so a legacy call on BOT Mainnet can never succeed.
+  if (target.chainId === BOT_MAINNET_CHAIN_ID) {
+    return {
+      mode: 'fail-closed',
+      reason: `legacy swap calls do not exist on the BOT Mainnet Router candidate (chain ${target.chainId})`,
+    };
   }
   // Explicitly legacy target: legacy-compatible calls are intentionally supported.
   return { mode: 'legacy' };

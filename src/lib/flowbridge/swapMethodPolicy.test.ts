@@ -33,11 +33,20 @@ describe('FlowBridge swap method policy', () => {
     }
   });
 
-  it('allows legacy calls only on an explicitly legacy execution target', () => {
-    expect(resolveSwapMethodMode({ target: mainnetLegacy(), feeKnown: false })).toEqual({
+  it('V30.1B.1: never allows a legacy call on BOT Mainnet 677 — the selectors do not exist', () => {
+    expect(resolveSwapMethodMode({ target: mainnetLegacy(), feeKnown: false }).mode).toBe(
+      'fail-closed',
+    );
+    expect(() => requireSafeSwapDecision({ target: mainnetLegacy(), feeKnown: true })).toThrow(
+      FlowBridgeFeeReadUnavailableError,
+    );
+  });
+
+  it('allows legacy calls only on a non-mainnet, explicitly legacy execution target', () => {
+    const legacyOther = { chainId: 1024, routerVersion: 'v3-legacy' as const, supportsSafeSwaps: false };
+    expect(resolveSwapMethodMode({ target: legacyOther, feeKnown: false })).toEqual({
       mode: 'legacy',
     });
-    expect(requireSafeSwapDecision({ target: mainnetLegacy(), feeKnown: true })).toBe(false);
   });
 
   it('fails closed when a V4 target somehow lacks safe entry points', () => {

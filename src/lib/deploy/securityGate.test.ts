@@ -12,14 +12,14 @@ describe('V30.1B security gate', () => {
   it('fails closed while blockers remain open', () => {
     const verdict = evaluateSecurityGate();
     expect(verdict.pass).toBe(false);
-    expect(verdict.openBlockerIds).toContain('V30.1B-R1');
+    expect(verdict.openBlockerIds).not.toContain('V30.1B-R1');
     expect(verdict.openBlockerIds).toContain('V30.1B-D1');
     expect(verdict.openBlockerIds).toContain('V30.1B-G1');
-    expect(verdict.reasons.some((r) => r.includes('EIP-170'))).toBe(true);
+    expect(verdict.reasons.some((r) => r.includes('EIP-170'))).toBe(false);
   });
 
-  it('records the Router EIP-170 overflow and keeps other candidates within limit', () => {
-    expect(exceedsEip170('FlowBridgeRouterV4')).toBe(true);
+  it('V30.1B.1: every candidate is now within the EIP-170 limit', () => {
+    expect(exceedsEip170('FlowBridgeRouterV4')).toBe(false);
     expect(exceedsEip170('FlowBridgeRouterLens')).toBe(false);
     expect(exceedsEip170('FlowBridgeActivityRegistry')).toBe(false);
     expect(exceedsEip170('FlowBridgeBridgeAdapterV1')).toBe(false);
@@ -31,7 +31,9 @@ describe('V30.1B security gate', () => {
 
   it('reports the hardening fixes as fixed in source', () => {
     const verdict = evaluateSecurityGate();
-    expect(verdict.fixedIds).toEqual(expect.arrayContaining(['V30.1B-R2', 'V30.1B-L1']));
+    expect(verdict.fixedIds).toEqual(
+      expect.arrayContaining(['V30.1B-R1', 'V30.1B-R2', 'V30.1B-L1']),
+    );
   });
 
   it('keeps every measurement hash populated', () => {

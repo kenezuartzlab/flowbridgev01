@@ -71,4 +71,70 @@ export const FLOW_BRIDGE_ROUTER_LENS_ABI = parseAbi([
   'function getActiveBridges() view returns (uint256[] ids, string[] names, string[] destChainNames, uint256[] destChainIds, address[] addrs)',
   'function getBestV2Rate(uint256 amountIn, address[] path) view returns (uint256 bestRouterId, uint256 bestAmountOut, uint256[] allAmountsOut)',
   'function getV2RatesPage(uint256 amountIn, address[] path, uint256 start, uint256 count) view returns (uint256[] ids, uint256[] amountsOut)',
+  // V30.1B hardened lens reads (explicit no-route signal + bounded discovery).
+  'function findBestV2Rate(uint256 amountIn, address[] path) view returns (bool found, uint256 bestRouterId, uint256 bestAmountOut, uint256[] allAmountsOut)',
+  'function getRoutersPage(uint256 start, uint256 count) view returns (uint256[] ids, string[] names, string[] versions, uint8[] types, address[] addrs, bool[] active)',
+  'function getBridgesPage(uint256 start, uint256 count) view returns (uint256[] ids, string[] names, string[] destChainNames, uint256[] destChainIds, address[] addrs, bool[] active)',
 ]);
+
+/**
+ * V30.1B.1 — Router V4 selectors REMOVED from the size-safe mainnet candidate
+ * so the deployed code fits under EIP-170. Legacy (non fee-bound) swap
+ * wrappers, the disabled bridge proxy execution surface and the read-only
+ * discovery/quote helpers are gone; discovery and quoting are served by
+ * FlowBridgeRouterLens, which already exposes the same signatures.
+ */
+export const V30_1B1_REMOVED_ROUTER_FUNCTIONS = [
+  'swapV2',
+  'swapV3Single',
+  'swapV3Multi',
+  'swapNativeToToken',
+  'swapTokenToNative',
+  'swapMultiHop',
+  'bridgeWithFee',
+  'bridgeBot',
+  'getActiveRouters',
+  'getActiveBridges',
+  'getBridgeRouteConfig',
+  'getBestV2Rate',
+  'getV2RatesPage',
+] as const;
+
+export type RemovedRouterFunction = (typeof V30_1B1_REMOVED_ROUTER_FUNCTIONS)[number];
+
+/**
+ * Router V4 mainnet (size-safe) execution + administration ABI. This is the
+ * ONLY surface a BOT Mainnet 677 deployment exposes: fee-bound `*Safe` swaps,
+ * fee views, registry metadata and governance. Discovery/quote reads must be
+ * addressed to the Lens.
+ */
+export const FLOW_BRIDGE_ROUTER_V4_MAINNET_ABI = parseAbi([
+  'function owner() view returns (address)',
+  'function pendingOwner() view returns (address)',
+  'function paused() view returns (bool)',
+
+  'function computeRouterFee(uint256 routerId, uint256 swapAmount, address user) view returns (uint256 fee, uint256 effectiveBps)',
+  'function computeBridgeFee(uint256 bridgeId, uint256 bridgeAmount, address user) view returns (uint256 fee, uint256 effectiveBps)',
+  'function getFeeConfig() view returns (uint256 globalFeeBps, uint256 maxFeeBps, address feeTreasury)',
+  'function feeConfigNonce() view returns (uint256)',
+
+  'function getBridgeSupportedTokens(uint256 bridgeId) view returns (address[])',
+  'function bridgeProxyExecutionEnabled(uint256 bridgeId) view returns (bool)',
+  'function bridgeResourceId(uint256 bridgeId, address token) view returns (bytes32)',
+  'function bridgeTokenSupported(uint256 bridgeId, address token) view returns (bool)',
+  'function bridgeSupportsBotGas(uint256 bridgeId) view returns (bool)',
+
+  'function swapV2Safe(uint256 routerId, uint256 swapAmount, uint256 amountOutMin, address[] path, address to, uint256 deadline, uint256 maxProtocolFee) returns (uint256[] amounts)',
+  'function swapV3SingleSafe(uint256 routerId, address tokenIn, address tokenOut, uint24 feePool, uint256 swapAmount, uint256 amountOutMinimum, address to, uint256 deadline, uint256 maxProtocolFee) returns (uint256 amountOut)',
+  'function swapV3MultiSafe(uint256 routerId, address tokenIn, address tokenOut, bytes encodedPath, uint256 swapAmount, uint256 amountOutMinimum, address to, uint256 deadline, uint256 maxProtocolFee) returns (uint256 amountOut)',
+  'function swapNativeToTokenSafe(uint256 routerId, uint256 swapAmount, address tokenOut, uint24 feePool, uint256 amountOutMin, address[] path, address to, uint256 deadline, uint256 maxProtocolFee) payable returns (uint256 amountOut)',
+  'function swapTokenToNativeSafe(uint256 routerId, address tokenIn, uint24 feePool, uint256 swapAmount, uint256 amountOutMin, address[] path, address to, uint256 deadline, uint256 maxProtocolFee) returns (uint256 amountOut)',
+  'function swapMultiHopSafe((uint256 routerId,address[] path,uint256 amountOutMin)[] hops, uint256 swapAmount, address to, uint256 deadline, uint256 maxProtocolFee) returns (uint256 finalAmountOut)',
+
+  'event SwapActivity(address indexed sender, address indexed recipient, uint256 indexed routerId, address tokenIn, address tokenOut, uint256 amountIn, uint256 amountOut, uint256 protocolFee)',
+]);
+
+/** True when `name` no longer exists on the size-safe mainnet Router candidate. */
+export function isRemovedOnMainnetRouter(name: string): boolean {
+  return (V30_1B1_REMOVED_ROUTER_FUNCTIONS as readonly string[]).includes(name);
+}
