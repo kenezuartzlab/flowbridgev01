@@ -1,0 +1,52 @@
+{
+  "purpose": "V30.1A.2 handoff of missing reviewed source packages into Lovable; no deployment authority",
+  "canonical_networks": {
+    "BOT_MAINNET_EVM_CHAIN_ID": 677,
+    "BOT_TESTNET_EVM_CHAIN_ID": 968,
+    "1024": "UNVERIFIED_LEGACY_FOR_NETWORK_USE"
+  },
+  "source_provenance": {
+    "FlowBridgeRouterLens.sol": "FlowBridgeRouterV4-A3A.zip / contracts / 2026-08-14 snapshot",
+    "FlowBridgeActivityRegistry.sol": "FlowBridgeRouterV4-A3A.zip; byte-identical to FlowBridgeRouterV4-VSCode.zip",
+    "FlowBridgeBridgeAdapterV1.sol": "FlowBridgeRouterV4-VSCode.zip / contracts / 2026-08-12 snapshot"
+  },
+  "archived_build_settings": {
+    "solc": "0.8.20+commit.a1b79de6",
+    "optimizer_enabled": true,
+    "optimizer_runs": 1,
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "note": "These values are read from supplied build-info JSON. Do not rewrite optimizer runs to 200 without intentionally creating new bytecode and re-reviewing."
+  },
+  "contracts": [
+    {
+      "contract": "FlowBridgeRouterLens",
+      "source_sha256": "db509056340629b8f611c4cba53432bde14055d7c280a8122e6933b681708a36",
+      "artifact_file_sha256": "15c858fccbfd2b6af42f0788041b53899dded43605c789ea56a23133bb9f7158",
+      "normalized_abi_sha256": "28623a81eecb7436e71eaabf0a3a60365fe74af7c2b906def4604945a4d0c923",
+      "creation_bytecode_sha256": "9dcb8ab8f8e16730231b118a926da33a4560ee1ddf57cbfd1db2754617b10acc",
+      "runtime_bytecode_sha256": "d45482e2079fe9e06ff336c0db50e1acfdb82e5785f27f33c4da8272da1e17fd"
+    },
+    {
+      "contract": "FlowBridgeActivityRegistry",
+      "source_sha256": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e",
+      "artifact_file_sha256": "b7560ba7002864a062f29b6bb74392e621a466afa67447a82401deedc25c2310",
+      "normalized_abi_sha256": "e021c7402ce241fe89624df8c395b30347b82bdac888758530e4bfe597a8978d",
+      "creation_bytecode_sha256": "89d143d35f07f64f27fd71e3bc84c63dd4d6490c3fd1e3ddc2d102567322afec",
+      "runtime_bytecode_sha256": "5004d356f9d7e459524c9bba8a5dc2dca6cc98ff95d6eafc0b7b9cabb08a84f3"
+    },
+    {
+      "contract": "FlowBridgeBridgeAdapterV1",
+      "source_sha256": "adc2eea7c4d9a39a241e312aebd9f71ace75e097cb535227e114a23d1a707700",
+      "artifact_file_sha256": "f88039357139bf47c295b375f7e72f52e25fbad4196cac9991dda16f8e623390",
+      "normalized_abi_sha256": "c3a9d345a8c471e9db8a2d63480772707636476e6b45fb7453894a138170cc30",
+      "creation_bytecode_sha256": "c27d23ab320cfe1b1d9d08b80997e1ad9e29cf969720bf59da56d9f5560c6c26",
+      "runtime_bytecode_sha256": "8a5dad06a1a8a7e49f134091ad3a574e61c061b2515a4c16800b2659aa0fdaae"
+    }
+  ],
+  "mainnet_execution_policy": {
+    "BridgeAdapterV1": "DISABLED",
+    "RouterBridgeProxy": "DISABLED",
+    "DirectOfficialBridge": "UNCHANGED"
+  }
+}

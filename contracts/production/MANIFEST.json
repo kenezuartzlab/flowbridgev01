@@ -1,7 +1,7 @@
 {
-  "$comment": "FlowBridge V30.1A.1 — canonical production contract package. Source consolidation only. No deployment, no signature, no transaction. Deployment tooling resolves PRODUCTION_CANDIDATE entries only; contracts/archive/** is never selectable. No production address or artifact may be inferred from an archived testnet manifest.",
-  "gate": "V30.1A.1",
-  "verdict": "BLOCKED",
+  "$comment": "FlowBridge V30.1A.2 — canonical production contract package. Source consolidation and build-parity evidence only. No deployment, no signature, no transaction. Deployment tooling resolves PRODUCTION_CANDIDATE entries only; contracts/archive/** is never selectable. No production address or artifact may be inferred from an archived testnet manifest.",
+  "gate": "V30.1A.2",
+  "verdict": "MISSING_CONTRACT_SOURCE_TOOLCHAIN_PARITY_PASS",
   "networks": { "botMainnet": 677, "botTestnet": 968, "prohibitedLegacy": 1024 },
   "buildLines": {
     "routerV4": {
@@ -9,22 +9,34 @@
       "optimizer": { "enabled": true, "runs": 200 },
       "viaIR": true,
       "evmVersion": "shanghai"
+    },
+    "missingContractPackage": {
+      "solc": "0.8.20+commit.a1b79de6",
+      "optimizer": { "enabled": true, "runs": 1 },
+      "viaIR": true,
+      "evmVersion": "shanghai",
+      "note": "Optimizer runs is 1 by design. Rewriting it to 200 creates new bytecode and destroys parity with the reviewed artifacts."
     }
+  },
+  "hashConventions": {
+    "bytecode": "sha256 over decoded bytes (0x stripped, hex decoded)",
+    "normalizedAbi": "sha256(JSON.stringify(artifact.abi))"
   },
   "contracts": [
     {
       "contractId": "FlowBridgeRouterV4",
       "selection": "PRODUCTION_CANDIDATE",
+      "buildLine": "routerV4",
       "source": "contracts/production/router-v4/FlowBridgeRouterV4.sol",
       "sourceSha256": "eb2069e5d5b2eef8c6c34cc8d9826417d767792d3812dbcebbe318397e46cebd",
       "abiSource": "contracts/production/router-v4/FlowBridgeRouterV4.abi.ts",
       "abiSourceSha256": "7d25b676013777112996fecc036eacbcfc7f09635ddd9b7dd7b6e1cbacddff73",
       "test": "contracts/production/router-v4/test/FlowBridgeRouterV4.t.sol",
       "testSha256": "629f5fd75d1074b1de3f985d070054120ee65061b1ad59a79248788b3b457a11",
-      "artifactSha256": null,
+      "creationSha256": null,
       "runtimeSha256": null,
       "sourceParity": "PARITY_CONFIRMED_AGAINST_REVIEWED_PACK",
-      "buildParity": "UNPROVEN_NO_SOLIDITY_TOOLCHAIN"
+      "buildParity": "UNPROVEN_NO_REVIEWED_BYTECODE_REFERENCE"
     },
     {
       "contractId": "FlowBridgeRouterV4@original",
@@ -34,24 +46,51 @@
     },
     {
       "contractId": "FlowBridgeRouterLens",
-      "selection": "ABSENT",
-      "source": null,
-      "sourceSha256": null,
-      "parity": "BLOCKED_SOURCE_ABSENT"
+      "selection": "PRODUCTION_CANDIDATE",
+      "buildLine": "missingContractPackage",
+      "source": "contracts/production/router-lens/FlowBridgeRouterLens.sol",
+      "sourceSha256": "db509056340629b8f611c4cba53432bde14055d7c280a8122e6933b681708a36",
+      "normalizedAbiSha256": "28623a81eecb7436e71eaabf0a3a60365fe74af7c2b906def4604945a4d0c923",
+      "creationSha256": "9dcb8ab8f8e16730231b118a926da33a4560ee1ddf57cbfd1db2754617b10acc",
+      "runtimeSha256": "d45482e2079fe9e06ff336c0db50e1acfdb82e5785f27f33c4da8272da1e17fd",
+      "archivedArtifactFileSha256": "15c858fccbfd2b6af42f0788041b53899dded43605c789ea56a23133bb9f7158",
+      "sourceParity": "BYTE_IDENTICAL",
+      "buildParity": "REPRODUCED_CREATION_RUNTIME_ABI_MATCH",
+      "writeAuthority": "NONE_READ_ONLY",
+      "routerBinding": "SELECTOR_COMPATIBLE_WITH_ROUTER_V4_CANDIDATE"
     },
     {
       "contractId": "FlowBridgeActivityRegistry",
-      "selection": "ABSENT",
-      "source": null,
-      "sourceSha256": null,
-      "parity": "BLOCKED_SOURCE_ABSENT"
+      "selection": "PRODUCTION_CANDIDATE",
+      "buildLine": "missingContractPackage",
+      "source": "contracts/production/activity-registry/FlowBridgeActivityRegistry.sol",
+      "sourceSha256": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e",
+      "normalizedAbiSha256": "e021c7402ce241fe89624df8c395b30347b82bdac888758530e4bfe597a8978d",
+      "creationSha256": "89d143d35f07f64f27fd71e3bc84c63dd4d6490c3fd1e3ddc2d102567322afec",
+      "runtimeSha256": "5004d356f9d7e459524c9bba8a5dc2dca6cc98ff95d6eafc0b7b9cabb08a84f3",
+      "archivedArtifactFileSha256": "b7560ba7002864a062f29b6bb74392e621a466afa67447a82401deedc25c2310",
+      "test": "contracts/production/activity-registry/test/FlowBridgeActivityRegistry.t.sol",
+      "testSha256": "3db24f7a4d1582fe4694f1c81a5c5020e5ddcc386e9c1234ae0402673118a632",
+      "sourceParity": "BYTE_IDENTICAL",
+      "buildParity": "REPRODUCED_CREATION_RUNTIME_ABI_MATCH",
+      "acceptance": "27_SOLIDITY_TESTS_PASSING",
+      "sourceLogIndexType": "uint256"
     },
     {
       "contractId": "FlowBridgeBridgeAdapterV1",
-      "selection": "ABSENT",
-      "source": null,
-      "sourceSha256": null,
-      "parity": "BLOCKED_SOURCE_ABSENT",
+      "selection": "PRODUCTION_CANDIDATE",
+      "buildLine": "missingContractPackage",
+      "source": "contracts/production/bridge-adapter-v1/FlowBridgeBridgeAdapterV1.sol",
+      "sourceSha256": "adc2eea7c4d9a39a241e312aebd9f71ace75e097cb535227e114a23d1a707700",
+      "normalizedAbiSha256": "c3a9d345a8c471e9db8a2d63480772707636476e6b45fb7453894a138170cc30",
+      "creationSha256": "c27d23ab320cfe1b1d9d08b80997e1ad9e29cf969720bf59da56d9f5560c6c26",
+      "runtimeSha256": "8a5dad06a1a8a7e49f134091ad3a574e61c061b2515a4c16800b2659aa0fdaae",
+      "archivedArtifactFileSha256": "f88039357139bf47c295b375f7e72f52e25fbad4196cac9991dda16f8e623390",
+      "mocks": "contracts/production/bridge-adapter-v1/test/FlowBridgeBridgeAdapterMocks.sol",
+      "mocksSha256": "ce1a13189253540330ac604c2c675b8d6716f2fd60636fe77eb619c466f9efcc",
+      "sourceParity": "BYTE_IDENTICAL",
+      "buildParity": "REPRODUCED_CREATION_RUNTIME_ABI_MATCH",
+      "acceptance": "LOCAL_SMOKE_ADVERSARIAL_RANDOMIZED_REENTRANCY_ALL_PASS",
       "mainnetExecution": "DISABLED"
     }
   ]
