@@ -48,6 +48,13 @@ const REVIEWED_ROUTER_V4_TEST_SHA256 =
 const REVIEWED_ROUTER_V4_ABI_SHA256 =
   '7d25b676013777112996fecc036eacbcfc7f09635ddd9b7dd7b6e1cbacddff73';
 
+/** V30.1B hardened source hashes (post-security-review candidates). */
+const V30_1B_ROUTER_V4_SHA256 =
+  'd6fdd281b5bd0c3211aca95fba94bf38c4031973c175d12d4b26455a5c584a46';
+const V30_1B_ROUTER_LENS_SHA256 =
+  '8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2';
+
+
 /**
  * Archived build line for the V30.1A.2 missing-contract package. Optimizer runs
  * is 1 (NOT Router's 200) — rewriting it would create new bytecode and destroy
