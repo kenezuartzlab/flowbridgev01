@@ -617,6 +617,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
             bridgeTokenSupported[bridgeId][token] = true;
             bridges[bridgeId].supportedTokens.push(token);
         }
+        _rearmBridgeActivation(bridgeId);
     }
 
     function setBridgeTokenResource(uint256 bridgeId, address token, bytes32 resourceId) external onlyOwner {
@@ -626,6 +627,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         require(resourceId != bytes32(0), "Resource required");
         bridgeResourceId[bridgeId][token] = resourceId;
         emit BridgeTokenResourceSet(bridgeId, token, resourceId);
+        _rearmBridgeActivation(bridgeId);
     }
 
     function setBridgeSupportsBotGas(uint256 bridgeId, bool supported) external onlyOwner {
@@ -633,6 +635,7 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         require(!bridges[bridgeId].active, "Deactivate first");
         bridgeSupportsBotGas[bridgeId] = supported;
         emit BridgeBotGasSupportSet(bridgeId, supported);
+        _rearmBridgeActivation(bridgeId);
     }
 
     /**
@@ -645,7 +648,9 @@ contract FlowBridgeRouterV4 is Pausable, ReentrancyGuard {
         require(!bridges[bridgeId].active, "Deactivate first");
         bridgeProxyExecutionEnabled[bridgeId] = enabled;
         emit BridgeProxyExecutionSet(bridgeId, enabled);
+        _rearmBridgeActivation(bridgeId);
     }
+
 
     // ---------------------------------------------------------------------
     // V2 token -> token (v3-compatible + fee-bound safe variant)
