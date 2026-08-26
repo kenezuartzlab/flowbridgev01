@@ -73,6 +73,17 @@ export const MISSING_CONTRACT_LINE: CompilerProfile = {
   evmVersion: 'shanghai',
 };
 
+/**
+ * V30.1C Staking v2 build line, frozen by contracts/production/staking-v2/BUILD_EVIDENCE.json.
+ * Changing any field would produce new bytecode and break parity with the audited hashes.
+ */
+export const STAKING_V2_BUILD_LINE: CompilerProfile = {
+  version: '0.8.24',
+  optimizer: { enabled: true, runs: 200 },
+  viaIR: true,
+  evmVersion: 'cancun',
+};
+
 export const CONTRACT_INVENTORY: readonly ContractInventoryEntry[] = [
   {
     id: 'FlowToken',
@@ -134,6 +145,50 @@ export const CONTRACT_INVENTORY: readonly ContractInventoryEntry[] = [
     constructorRequirements: ['token', 'owner'],
     blockers: [
       'No fixed-duration 30D/90D/180D/365D position support in source; unearned scheduled reward inventory after epoch expiry is not reconcilable (Staking v2 required — V30.1C).',
+      'V30.1C disposition: HISTORICAL / BOT Testnet 968 only. Stranded-emission limitation is permanent by design; never reclassify as production-ready and never count its reward inventory as v2 mainnet funding.',
+    ],
+  },
+  {
+    id: 'FlowStakingVaultV2',
+    name: 'FlowStakingVaultV2 (Staking v2 principal custody, PRODUCTION_CANDIDATE v30.1c)',
+    sourcePath: 'contracts/production/staking-v2/FlowStakingVaultV2.sol',
+    artifactPath: null,
+    readiness: 'HARDENING_REQUIRED',
+    compiler: STAKING_V2_BUILD_LINE,
+    privilegedRoles: ['DEFAULT_ADMIN_ROLE (unpause)', 'PAUSER_ROLE'],
+    constructorRequirements: ['token', 'controller', 'rewardTreasury', 'admin'],
+    blockers: [
+      'Production FLOW token address on BOT Mainnet 677 does not exist (FlowToken is BLOCKED), so constructor token cannot be frozen.',
+      'Approved multisig/timelock for admin/pauser is not assigned.',
+      'Runtime 10,366 bytes (EIP-170 headroom 14,210); hashes frozen in staking-v2/BUILD_EVIDENCE.json. 27/27 Foundry tests + 2x256 fuzz runs pass; Slither 0.11.3 triaged, no High, Mediums fixed or justified.',
+    ],
+  },
+  {
+    id: 'FlowStakingController',
+    name: 'FlowStakingController (Staking v2 bounded economic authority, PRODUCTION_CANDIDATE v30.1c)',
+    sourcePath: 'contracts/production/staking-v2/FlowStakingController.sol',
+    artifactPath: null,
+    readiness: 'HARDENING_REQUIRED',
+    compiler: STAKING_V2_BUILD_LINE,
+    privilegedRoles: ['DEFAULT_ADMIN_ROLE', 'GOVERNOR_ROLE (products, budgets, oracle, emergency mode)', 'PUBLISHER_ROLE (weekly epochs)'],
+    constructorRequirements: ['admin', 'governor', 'publisher'],
+    blockers: [
+      'No production FLOW/USD TWAP/reference oracle exists on BOT Mainnet 677; the dynamic-rate path is fail-closed by construction until one is configured and healthy.',
+      'Governor/publisher key custody not assigned to approved multisig/timelock; weekly USD budget and maxFlowPerEpoch economics not signed off.',
+    ],
+  },
+  {
+    id: 'FlowStakingRewardTreasury',
+    name: 'FlowStakingRewardTreasury (Staking v2 segregated reward reserve, PRODUCTION_CANDIDATE v30.1c)',
+    sourcePath: 'contracts/production/staking-v2/FlowStakingRewardTreasury.sol',
+    artifactPath: null,
+    readiness: 'HARDENING_REQUIRED',
+    compiler: STAKING_V2_BUILD_LINE,
+    privilegedRoles: ['DEFAULT_ADMIN_ROLE (bounded free-balance recovery)', 'VAULT_ROLE (vault only)', 'CONTROLLER_ROLE (vault only)'],
+    constructorRequirements: ['token', 'admin', 'recoveryRecipient'],
+    blockers: [
+      'Year-1 reward funding (3M FLOW ceiling: 1M Genesis + 2M standard) is not provisioned; the reserve must be fully pre-funded before any position opens.',
+      'Recovery recipient must be an approved multisig/timelock; not assigned.',
     ],
   },
   {
