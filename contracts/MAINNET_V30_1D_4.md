@@ -66,9 +66,8 @@ execution stays disabled.
 
 ## 5. Closure requirement
 
-Supply the Treasury Safe owner set that matches chain state exactly (replace
-`0x2eA5…a1F0` with the live `0x2c9f…19cc`, or change the live Safe), then record
-the three Safe decisions plus the remaining deployment decisions against
+Safe verification is closed. Remaining closure step: record the three Safe
+decisions plus the remaining deployment decisions as `super_admin` against
 candidate digest `fnv1a64:19671fd13a81be19`.
 
 ## 6. Application gates
