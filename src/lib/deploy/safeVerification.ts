@@ -35,7 +35,7 @@ export const APPROVED_PRODUCTION_SAFES: readonly ApprovedSafeConfig[] = [
   {
     authority: 'TREASURY',
     label: 'Treasury Safe',
-    address: '0xF03752926fF468D71e4AA9053e29216b9e216239',
+    address: '0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4',
     threshold: 2,
     owners: [
       '0xF951c408f2412304ea08ADE94d53D7Df1EBdb25e',
