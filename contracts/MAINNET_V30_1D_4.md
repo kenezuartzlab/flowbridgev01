@@ -2,13 +2,14 @@
 
 ## Verdict: FLOWBRIDGE V30.1D.4 DEPLOYMENT READINESS FREEZE BLOCKED
 
-Blocked by exactly one technical fact: the Treasury Safe owner set recorded in the
-owner-supplied configuration does not match the live BOT Mainnet 677 Safe. Every
-other authority verifies. Non-technical compliance and feature-only liquidity
-decisions no longer block technical readiness. Public writes performed: **zero**.
+All three production Safes now VERIFY against live BOT Mainnet 677 chain state
+(exact 3-owner membership, threshold 2). The only remaining blocker is procedural:
+no owner decision is recorded in the append-only store for this decision version.
+Non-technical compliance and feature-only liquidity decisions no longer block
+technical readiness. Public writes performed: **zero**.
 
 Decision version `V30.1D.4` · candidate digest `fnv1a64:19671fd13a81be19` ·
-manifest hash `fnv1a64:f906897763e722ac` (zero owner decisions recorded).
+manifest hash `fnv1a64:8d8e875bd65595b1` (zero owner decisions recorded).
 
 ## 1. Read-only Safe verification (chain 677, `https://rpc.botchain.ai`)
 
@@ -21,16 +22,12 @@ All three addresses carry 171 bytes of proxy code with code hash
 | --- | --- | --- | --- | --- |
 | Governance | `0x88A4…9507` | 3 | 2 | VERIFIED |
 | Operations | `0x1Ce0…59eF` | 3 | 2 | VERIFIED |
-| Treasury | `0xF037…6239` | 3 | 2 | **BLOCKED** |
+| Treasury | `0xeFc1…9Ea4` | 3 | 2 | VERIFIED |
 
-Treasury mismatch:
-
-- approved owner `0x2eA57676b4086300c949a7EEba8697Ae2fC1a1F0` is absent on chain;
-- live owner `0x2c9f04C9091b2dcA91F35fE6E6492e296A7519cc` is not in the approved set.
-
-Owner count (3) and threshold (2) are exact on all three Safes. The Treasury
-finding blocks only the Treasury authority — and through it `DEPLOYMENT_READY`
-for FlowToken — never the Governance or Operations decisions.
+Treasury Safe `0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4` returns exactly the
+approved owner set — `0xF951…b25e`, `0xAbe9…75E1`, `0x2eA5…a1F0` — with
+threshold 2. Owner count (3) and threshold (2) are exact on all three Safes and
+no mismatch remains.
 
 ## 2. Staking semantics correction
 
@@ -69,9 +66,8 @@ execution stays disabled.
 
 ## 5. Closure requirement
 
-Supply the Treasury Safe owner set that matches chain state exactly (replace
-`0x2eA5…a1F0` with the live `0x2c9f…19cc`, or change the live Safe), then record
-the three Safe decisions plus the remaining deployment decisions against
+Safe verification is closed. Remaining closure step: record the three Safe
+decisions plus the remaining deployment decisions as `super_admin` against
 candidate digest `fnv1a64:19671fd13a81be19`.
 
 ## 6. Application gates
