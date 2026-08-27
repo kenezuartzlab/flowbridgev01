@@ -1,499 +1,330 @@
 {
-  "schema": "flowbridge.mainnet-release-decisions",
-  "decisionVersion": "V30.1D.2",
-  "chainId": 677,
-  "candidateDigest": "fnv1a64:19671fd13a81be19",
-  "contractCandidates": [
-    {
-      "contractId": "FlowBridgeRouterV4",
-      "sourceSha256": "bb43445af143d8c4a36fd144315c2d99f13fe28c73eca63c4f3736709e3ba905",
-      "runtimeSha256": "93a922d67c281bf076d87bcf71de186f0998a8feb9c3dccafe592d097000a0f9"
-    },
-    {
-      "contractId": "FlowBridgeRouterLens",
-      "sourceSha256": "8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2",
-      "runtimeSha256": "05cde1794ef1620af4248deebb92680d1b806e534dd99ee5f5c8b4603dea6ca3"
-    },
-    {
-      "contractId": "FlowBridgeActivityRegistry",
-      "sourceSha256": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e",
-      "runtimeSha256": "5004d356f9d7e459524c9bba8a5dc2dca6cc98ff95d6eafc0b7b9cabb08a84f3"
-    },
-    {
-      "contractId": "FlowBridgeBridgeAdapterV1",
-      "sourceSha256": "adc2eea7c4d9a39a241e312aebd9f71ace75e097cb535227e114a23d1a707700",
-      "runtimeSha256": "8a5dad06a1a8a7e49f134091ad3a574e61c061b2515a4c16800b2659aa0fdaae"
-    }
-  ],
-  "decisions": [
-    {
-      "id": "FLOW_ECONOMICS",
-      "status": "APPROVED",
-      "value": {
-        "supplyFlow": 1000000000,
-        "decimals": 18,
-        "standard": "ERC-20 + ERC-2612 Permit",
-        "postDeploymentMintAuthority": false,
-        "allocation": [
-          {
-            "bucket": "Community & Ecosystem",
-            "percent": 50,
-            "flow": 500000000
-          },
-          {
-            "bucket": "Team & Core Contributors",
-            "percent": 15,
-            "flow": 150000000
-          },
-          {
-            "bucket": "Protocol Treasury",
-            "percent": 15,
-            "flow": 150000000
-          },
-          {
-            "bucket": "Liquidity & Market Infrastructure",
-            "percent": 10,
-            "flow": 100000000
-          },
-          {
-            "bucket": "Strategic Ecosystem Partners",
-            "percent": 5,
-            "flow": 50000000
-          },
-          {
-            "bucket": "Security & Contingency Reserve",
-            "percent": 5,
-            "flow": 50000000
-          }
-        ],
-        "communityReserves": [
-          {
-            "bucket": "User rewards",
-            "flow": 200000000
-          },
-          {
-            "bucket": "Partner campaign matching",
-            "flow": 100000000
-          },
-          {
-            "bucket": "Staking / long-term alignment",
-            "flow": 75000000
-          },
-          {
-            "bucket": "Referral / community / developer",
-            "flow": 50000000
-          },
-          {
-            "bucket": "Genesis / legacy recognition",
-            "flow": 30000000
-          },
-          {
-            "bucket": "Future ecosystem reserve",
-            "flow": 45000000
-          }
-        ],
-        "year1CommunityCeilingFlow": 20000000,
-        "year1StakingComponentMaxFlow": 3000000,
-        "oneTimeGenesisLegacyCeilingFlow": 10000000,
-        "vesting": {
-          "team": {
-            "tgePercent": 0,
-            "cliffMonths": 12,
-            "linearMonths": 36
-          },
-          "strategicPartners": {
-            "tgePercent": 0,
-            "cliffMonths": 12,
-            "linearMonths": 24
-          }
-        }
-      },
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:00.666616+00:00",
-      "decisionHash": "fnv1a64:e2828c0941f50ddd"
-    },
-    {
-      "id": "GOVERNANCE_SAFE_PLAN",
-      "status": "BLOCKED",
-      "value": null,
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:03.475878+00:00",
-      "decisionHash": null
-    },
-    {
-      "id": "TREASURY_SAFE_PLAN",
-      "status": "BLOCKED",
-      "value": null,
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:05.108323+00:00",
-      "decisionHash": null
-    },
-    {
-      "id": "OPERATIONS_SAFE_PLAN",
-      "status": "BLOCKED",
-      "value": null,
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:07.278628+00:00",
-      "decisionHash": null
-    },
-    {
-      "id": "ROOT_PUBLISHER_ASSIGNMENT",
-      "status": "REPLACED",
-      "value": {
-        "address": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
-        "mustDifferFrom": [
-          "GOVERNANCE_SAFE_PLAN",
-          "TREASURY_SAFE_PLAN"
-        ]
-      },
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:08.859949+00:00",
-      "decisionHash": "fnv1a64:25bb8648e4bae978"
-    },
-    {
-      "id": "ACTIVITY_ATTESTER_ASSIGNMENT",
-      "status": "REPLACED",
-      "value": {
-        "address": "0xFA3DE5CFa1DE8EcC36197dCC0FC34fef5c1C7e47",
-        "mustDifferFrom": [
-          "GOVERNANCE_SAFE_PLAN",
-          "TREASURY_SAFE_PLAN",
-          "OPERATIONS_SAFE_PLAN"
-        ]
-      },
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:10.452177+00:00",
-      "decisionHash": "fnv1a64:862862283eaa22d8"
-    },
-    {
-      "id": "TIMELOCK_POLICY",
-      "status": "APPROVED",
-      "value": {
-        "delaySeconds": 86400,
-        "delayedActions": [
-          "Router registry changes",
-          "fee and governance changes",
-          "staking economic configuration",
-          "oracle configuration changes"
-        ],
-        "emergencyPause": "immediate pause through a narrowly scoped pauser; unpause/config governed",
-        "emergencyPauseCanMoveTreasury": false,
-        "emergencyPauseCanRewriteObligations": false,
-        "rationale": null
-      },
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:12.072002+00:00",
-      "decisionHash": "fnv1a64:5394a5c50ae0fd5f"
-    },
-    {
-      "id": "REWARDS_LAUNCH_PLAN",
-      "status": "REPLACED",
-      "value": {
-        "initialFundingFlow": 1000000,
-        "launchCampaignBudgetFlow": 1,
-        "rootPublishDelaySeconds": 86400,
-        "supportedDelayRangeSeconds": [
-          3600,
-          604800
-        ],
-        "roles": {
-          "admin": "GOVERNANCE_SAFE_PLAN",
-          "campaignManager": "OPERATIONS_SAFE_PLAN",
-          "pauser": "OPERATIONS_SAFE_PLAN",
-          "rootPublisher": "ROOT_PUBLISHER_ASSIGNMENT"
-        },
-        "pauserAddress": "0xA7d016C50e2B54B0942e8bEF0b4E5a82362330a2",
-        "campaignManagerAddress": "0xa42ed0485A01dBC80BFcd0976E79F5B6489DD03F"
-      },
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:13.82306+00:00",
-      "decisionHash": "fnv1a64:2a320b08c856fb84"
-    },
-    {
-      "id": "STAKING_LAUNCH_PLAN",
-      "status": "BLOCKED",
-      "value": null,
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:15.454245+00:00",
-      "decisionHash": null
-    },
-    {
-      "id": "LIQUIDITY_AND_ORACLE_PLAN",
-      "status": "NEEDS_APPROVAL",
-      "value": null,
-      "approvedByEmail": null,
-      "approvedAt": null,
-      "decisionHash": null
-    },
-    {
-      "id": "GAS_BUDGET_PLAN",
-      "status": "APPROVED",
-      "value": {
-        "estimatedGasUnits": 21500000,
-        "safetyBufferPercent": 30,
-        "hardcodedBotAmount": null,
-        "computeAtPreflight": true
-      },
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:17.028772+00:00",
-      "decisionHash": "fnv1a64:f481d51174c8764d"
-    },
-    {
-      "id": "DEPENDENCY_SNAPSHOT",
-      "status": "APPROVED",
-      "value": {
-        "chainId": 677,
-        "dependencies": [
-          {
-            "id": "botMainnetRpc",
-            "label": "Chain / RPC",
-            "value": "https://rpc.botchain.ai",
-            "kind": "RPC",
-            "state": "VERIFIED",
-            "detail": "eth_chainId returned 677"
-          },
-          {
-            "id": "botMainnetExplorer",
-            "label": "Explorer",
-            "value": "https://scan.botchain.ai",
-            "kind": "EXPLORER",
-            "state": "DOCUMENTED_OFFICIAL",
-            "detail": "documented official value; awaiting a chain 677 observation"
-          },
-          {
-            "id": "wrappedNative",
-            "label": "WBOT",
-            "value": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
-            "kind": "CONTRACT",
-            "state": "VERIFIED",
-            "detail": "2317 bytes of runtime bytecode observed on chain 677"
-          },
-          {
-            "id": "bdexV2Router02",
-            "label": "BDEX V2 Router02",
-            "value": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
-            "kind": "CONTRACT",
-            "state": "VERIFIED",
-            "detail": "21987 bytes of runtime bytecode observed on chain 677"
-          },
-          {
-            "id": "bdexSwapRouter",
-            "label": "BDEX V3 SwapRouter",
-            "value": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
-            "kind": "CONTRACT",
-            "state": "VERIFIED",
-            "detail": "10088 bytes of runtime bytecode observed on chain 677"
-          },
-          {
-            "id": "bdexV3Factory",
-            "label": "BDEX V3 Factory",
-            "value": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
-            "kind": "CONTRACT",
-            "state": "VERIFIED",
-            "detail": "24535 bytes of runtime bytecode observed on chain 677"
-          },
-          {
-            "id": "bdexUniversalRouter",
-            "label": "BDEX Universal Router",
-            "value": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
-            "kind": "CONTRACT",
-            "state": "VERIFIED",
-            "detail": "18242 bytes of runtime bytecode observed on chain 677"
-          },
-          {
-            "id": "directBridgeGateway",
-            "label": "BOT BridgeRouter",
-            "value": "0xef8DC669ECa13E612b67Ff09478352E85bD6CC53",
-            "kind": "CONTRACT",
-            "state": "VERIFIED",
-            "detail": "2227 bytes of runtime bytecode observed on chain 677"
-          },
-          {
-            "id": "botUsdt",
-            "label": "BOT USDT",
-            "value": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
-            "kind": "CONTRACT",
-            "state": "VERIFIED",
-            "detail": "6188 bytes of runtime bytecode observed on chain 677"
-          },
-          {
-            "id": "bridgeUsdtResourceId",
-            "label": "Bridge USDT resource ID",
-            "value": "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d",
-            "kind": "RESOURCE_ID",
-            "state": "DOCUMENTED_OFFICIAL",
-            "detail": "resource id recorded; verified only against a live bridge deposit config"
-          }
-        ],
-        "recheckBeforeDeployment": true,
-        "mainnetSlots": "PROMOTION_PENDING"
-      },
-      "approvedByEmail": "kenezuartzlab@gmail.com",
-      "approvedAt": "2026-08-27T05:40:18.599061+00:00",
-      "decisionHash": "fnv1a64:67970b4054d02dfa"
-    },
-    {
-      "id": "LEGAL_SIGNOFF",
-      "status": "NEEDS_APPROVAL",
-      "value": null,
-      "approvedByEmail": null,
-      "approvedAt": null,
-      "decisionHash": null
-    }
-  ],
-  "dependencySnapshot": {
+  "manifestHash": "fnv1a64:f906897763e722ac",
+  "manifest": {
+    "schema": "flowbridge.mainnet-release-decisions",
+    "decisionVersion": "V30.1D.4",
     "chainId": 677,
-    "dependencies": [
+    "candidateDigest": "fnv1a64:19671fd13a81be19",
+    "contractCandidates": [
       {
-        "id": "botMainnetRpc",
-        "label": "Chain / RPC",
-        "value": "https://rpc.botchain.ai",
-        "kind": "RPC",
-        "state": "VERIFIED",
-        "detail": "eth_chainId returned 677"
+        "contractId": "FlowBridgeRouterV4",
+        "sourceSha256": "bb43445af143d8c4a36fd144315c2d99f13fe28c73eca63c4f3736709e3ba905",
+        "runtimeSha256": "93a922d67c281bf076d87bcf71de186f0998a8feb9c3dccafe592d097000a0f9"
       },
       {
-        "id": "botMainnetExplorer",
-        "label": "Explorer",
-        "value": "https://scan.botchain.ai",
-        "kind": "EXPLORER",
-        "state": "DOCUMENTED_OFFICIAL",
-        "detail": "documented official value; awaiting a chain 677 observation"
+        "contractId": "FlowBridgeRouterLens",
+        "sourceSha256": "8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2",
+        "runtimeSha256": "05cde1794ef1620af4248deebb92680d1b806e534dd99ee5f5c8b4603dea6ca3"
       },
       {
-        "id": "wrappedNative",
-        "label": "WBOT",
-        "value": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
-        "kind": "CONTRACT",
-        "state": "VERIFIED",
-        "detail": "2317 bytes of runtime bytecode observed on chain 677"
+        "contractId": "FlowBridgeActivityRegistry",
+        "sourceSha256": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e",
+        "runtimeSha256": "5004d356f9d7e459524c9bba8a5dc2dca6cc98ff95d6eafc0b7b9cabb08a84f3"
       },
       {
-        "id": "bdexV2Router02",
-        "label": "BDEX V2 Router02",
-        "value": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
-        "kind": "CONTRACT",
-        "state": "VERIFIED",
-        "detail": "21987 bytes of runtime bytecode observed on chain 677"
-      },
-      {
-        "id": "bdexSwapRouter",
-        "label": "BDEX V3 SwapRouter",
-        "value": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
-        "kind": "CONTRACT",
-        "state": "VERIFIED",
-        "detail": "10088 bytes of runtime bytecode observed on chain 677"
-      },
-      {
-        "id": "bdexV3Factory",
-        "label": "BDEX V3 Factory",
-        "value": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
-        "kind": "CONTRACT",
-        "state": "VERIFIED",
-        "detail": "24535 bytes of runtime bytecode observed on chain 677"
-      },
-      {
-        "id": "bdexUniversalRouter",
-        "label": "BDEX Universal Router",
-        "value": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
-        "kind": "CONTRACT",
-        "state": "VERIFIED",
-        "detail": "18242 bytes of runtime bytecode observed on chain 677"
-      },
-      {
-        "id": "directBridgeGateway",
-        "label": "BOT BridgeRouter",
-        "value": "0xef8DC669ECa13E612b67Ff09478352E85bD6CC53",
-        "kind": "CONTRACT",
-        "state": "VERIFIED",
-        "detail": "2227 bytes of runtime bytecode observed on chain 677"
-      },
-      {
-        "id": "botUsdt",
-        "label": "BOT USDT",
-        "value": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
-        "kind": "CONTRACT",
-        "state": "VERIFIED",
-        "detail": "6188 bytes of runtime bytecode observed on chain 677"
-      },
-      {
-        "id": "bridgeUsdtResourceId",
-        "label": "Bridge USDT resource ID",
-        "value": "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d",
-        "kind": "RESOURCE_ID",
-        "state": "DOCUMENTED_OFFICIAL",
-        "detail": "resource id recorded; verified only against a live bridge deposit config"
+        "contractId": "FlowBridgeBridgeAdapterV1",
+        "sourceSha256": "adc2eea7c4d9a39a241e312aebd9f71ace75e097cb535227e114a23d1a707700",
+        "runtimeSha256": "8a5dad06a1a8a7e49f134091ad3a574e61c061b2515a4c16800b2659aa0fdaae"
       }
     ],
-    "recheckBeforeDeployment": true,
-    "mainnetSlots": "PROMOTION_PENDING"
-  },
-  "activationPlan": [
-    {
-      "stage": 1,
-      "action": "deploy + verify governance, FlowToken, Router/Lens, Activity Registry, Rewards, Staking v2 with product writes disabled",
-      "precondition": "DEPLOYMENT_READY for each contract",
-      "executeInThisGate": false
+    "decisions": [
+      {
+        "id": "FLOW_ECONOMICS",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "GOVERNANCE_SAFE_PLAN",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "TREASURY_SAFE_PLAN",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "OPERATIONS_SAFE_PLAN",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "ROOT_PUBLISHER_ASSIGNMENT",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "ACTIVITY_ATTESTER_ASSIGNMENT",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "TIMELOCK_POLICY",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "REWARDS_LAUNCH_PLAN",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "STAKING_LAUNCH_PLAN",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "LIQUIDITY_AND_ORACLE_PLAN",
+        "status": "NEEDS_APPROVAL",
+        "gating": "FEATURE_ONLY",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "GAS_BUDGET_PLAN",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "DEPENDENCY_SNAPSHOT",
+        "status": "NEEDS_APPROVAL",
+        "gating": "DEPLOYMENT",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      },
+      {
+        "id": "LEGAL_SIGNOFF",
+        "status": "NEEDS_APPROVAL",
+        "gating": "NON_TECHNICAL",
+        "value": null,
+        "approvedByEmail": null,
+        "approvedAt": null,
+        "decisionHash": null
+      }
+    ],
+    "safeAuthorities": [
+      {
+        "authority": "TREASURY",
+        "address": "0xF03752926fF468D71e4AA9053e29216b9e216239",
+        "state": "BLOCKED",
+        "liveThreshold": 2,
+        "liveOwners": [
+          "0xf951c408f2412304ea08ade94d53d7df1ebdb25e",
+          "0xabe9ac1bc4b9e99b89c27f97c580b5a0b8fa75e1",
+          "0x2c9f04c9091b2dca91f35fe6e6492e296a7519cc"
+        ],
+        "codeHash": "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c"
+      },
+      {
+        "authority": "GOVERNANCE",
+        "address": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+        "state": "VERIFIED",
+        "liveThreshold": 2,
+        "liveOwners": [
+          "0x524db06954de917025180057bcbeb36ec96a98c5",
+          "0x145e201c658706d3d2b9f35e0c51270474453b2b",
+          "0x0edff26415660c9d2d12320678192f1b97bebb85"
+        ],
+        "codeHash": "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c"
+      },
+      {
+        "authority": "OPERATIONS",
+        "address": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+        "state": "VERIFIED",
+        "liveThreshold": 2,
+        "liveOwners": [
+          "0x62b1902f23483e0af44564681865e993aaa47368",
+          "0xd5966a3e829a4c366b8f762195beaf38d63d6abe",
+          "0x2c9f04c9091b2dca91f35fe6e6492e296a7519cc"
+        ],
+        "codeHash": "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c"
+      }
+    ],
+    "dependencySnapshot": {
+      "chainId": 677,
+      "dependencies": [
+        {
+          "id": "botMainnetRpc",
+          "label": "Chain / RPC",
+          "value": "https://rpc.botchain.ai",
+          "kind": "RPC",
+          "state": "VERIFIED",
+          "detail": "eth_chainId returned 677"
+        },
+        {
+          "id": "botMainnetExplorer",
+          "label": "Explorer",
+          "value": "https://scan.botchain.ai",
+          "kind": "EXPLORER",
+          "state": "DOCUMENTED_OFFICIAL",
+          "detail": "documented official value; awaiting a chain 677 observation"
+        },
+        {
+          "id": "wrappedNative",
+          "label": "WBOT",
+          "value": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "kind": "CONTRACT",
+          "state": "VERIFIED",
+          "detail": "2317 bytes of runtime bytecode observed on chain 677"
+        },
+        {
+          "id": "bdexV2Router02",
+          "label": "BDEX V2 Router02",
+          "value": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+          "kind": "CONTRACT",
+          "state": "VERIFIED",
+          "detail": "21987 bytes of runtime bytecode observed on chain 677"
+        },
+        {
+          "id": "bdexSwapRouter",
+          "label": "BDEX V3 SwapRouter",
+          "value": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+          "kind": "CONTRACT",
+          "state": "VERIFIED",
+          "detail": "10088 bytes of runtime bytecode observed on chain 677"
+        },
+        {
+          "id": "bdexV3Factory",
+          "label": "BDEX V3 Factory",
+          "value": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+          "kind": "CONTRACT",
+          "state": "VERIFIED",
+          "detail": "24535 bytes of runtime bytecode observed on chain 677"
+        },
+        {
+          "id": "bdexUniversalRouter",
+          "label": "BDEX Universal Router",
+          "value": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+          "kind": "CONTRACT",
+          "state": "VERIFIED",
+          "detail": "18242 bytes of runtime bytecode observed on chain 677"
+        },
+        {
+          "id": "directBridgeGateway",
+          "label": "BOT BridgeRouter",
+          "value": "0xef8DC669ECa13E612b67Ff09478352E85bD6CC53",
+          "kind": "CONTRACT",
+          "state": "VERIFIED",
+          "detail": "2227 bytes of runtime bytecode observed on chain 677"
+        },
+        {
+          "id": "botUsdt",
+          "label": "BOT USDT",
+          "value": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "kind": "CONTRACT",
+          "state": "VERIFIED",
+          "detail": "6188 bytes of runtime bytecode observed on chain 677"
+        },
+        {
+          "id": "bridgeUsdtResourceId",
+          "label": "Bridge USDT resource ID",
+          "value": "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d",
+          "kind": "RESOURCE_ID",
+          "state": "DOCUMENTED_OFFICIAL",
+          "detail": "resource id recorded; verified only against a live bridge deposit config"
+        }
+      ],
+      "recheckBeforeDeployment": true,
+      "mainnetSlots": "PROMOTION_PENDING"
     },
-    {
-      "stage": 2,
-      "action": "transfer/administer all final roles; prove no deployer authority remains",
-      "precondition": "DEPLOYED_VERIFIED",
-      "executeInThisGate": false
-    },
-    {
-      "stage": 3,
-      "action": "fund only explicitly approved Rewards/Staking amounts",
-      "precondition": "owner-approved funding figures; reserve ceilings never released automatically",
-      "executeInThisGate": false
-    },
-    {
-      "stage": 4,
-      "action": "configure and seed approved FLOW market liquidity",
-      "precondition": "approved liquidity plan; pool + observation support verified",
-      "executeInThisGate": false
-    },
-    {
-      "stage": 5,
-      "action": "enable Router Safe swaps and the direct official Bridge independently",
-      "precondition": "live canary per path",
-      "executeInThisGate": false
-    },
-    {
-      "stage": 6,
-      "action": "activate Rewards",
-      "precondition": "first finite Merkle epoch reproducible and funded",
-      "executeInThisGate": false
-    },
-    {
-      "stage": 7,
-      "action": "activate staking products to the extent obligations are provably funded",
-      "precondition": "dynamic bonus stays disabled until TWAP warm-up + liquidity gate pass",
-      "executeInThisGate": false
+    "activationPlan": [
+      {
+        "stage": 1,
+        "action": "deploy + verify governance, FlowToken, Router/Lens, Activity Registry, Rewards, Staking v2 with product writes disabled",
+        "precondition": "DEPLOYMENT_READY for each contract",
+        "executeInThisGate": false
+      },
+      {
+        "stage": 2,
+        "action": "transfer/administer all final roles; prove no deployer authority remains",
+        "precondition": "DEPLOYED_VERIFIED",
+        "executeInThisGate": false
+      },
+      {
+        "stage": 3,
+        "action": "fund only explicitly approved Rewards/Staking amounts",
+        "precondition": "owner-approved funding figures; reserve ceilings never released automatically",
+        "executeInThisGate": false
+      },
+      {
+        "stage": 4,
+        "action": "configure and seed approved FLOW market liquidity",
+        "precondition": "approved liquidity plan; pool + observation support verified",
+        "executeInThisGate": false
+      },
+      {
+        "stage": 5,
+        "action": "enable Router Safe swaps and the direct official Bridge independently",
+        "precondition": "live canary per path",
+        "executeInThisGate": false
+      },
+      {
+        "stage": 6,
+        "action": "activate Rewards",
+        "precondition": "first finite Merkle epoch reproducible and funded",
+        "executeInThisGate": false
+      },
+      {
+        "stage": 7,
+        "action": "activate staking products to the extent obligations are provably funded",
+        "precondition": "dynamic bonus stays disabled until TWAP warm-up + liquidity gate pass",
+        "executeInThisGate": false
+      }
+    ],
+    "publicWrites": {
+      "safeCreations": 0,
+      "mainnetDeployments": 0,
+      "testnetDeployments": 0,
+      "walletSignatures": 0,
+      "blockchainTransactions": 0,
+      "flowTransfers": 0,
+      "liquidityActions": 0,
+      "rewardsClaims": 0,
+      "stakingActions": 0
     }
-  ],
-  "publicWrites": {
-    "safeCreations": 0,
-    "mainnetDeployments": 0,
-    "testnetDeployments": 0,
-    "walletSignatures": 0,
-    "blockchainTransactions": 0,
-    "flowTransfers": 0,
-    "liquidityActions": 0,
-    "rewardsClaims": 0,
-    "stakingActions": 0
-  },
-  "gateVerdict": "BLOCKED",
-  "manifestHash": "fnv1a64:00afcfd1deed33b5",
-  "failClosedFindings": [
-    "FLOW genesis treasury recipient is not an approved multisig plan"
-  ],
-  "outstandingOwnerDecisions": [
-    "GOVERNANCE_SAFE_PLAN: BLOCKED — Governance Safe: at least 3 distinct owners are required",
-    "TREASURY_SAFE_PLAN: BLOCKED — Treasury Safe: at least 3 distinct owners are required",
-    "OPERATIONS_SAFE_PLAN: BLOCKED — Operations Safe: at least 3 distinct owners are required",
-    "STAKING_LAUNCH_PLAN: BLOCKED — staking funding exceeds the 3,000,000 FLOW Year-1 total ceiling",
-    "LIQUIDITY_AND_ORACLE_PLAN: NEEDS_APPROVAL — no explicit owner decision recorded",
-    "LEGAL_SIGNOFF: NEEDS_APPROVAL — no explicit owner decision recorded"
-  ]
+  }
 }

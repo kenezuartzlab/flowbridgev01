@@ -33,8 +33,16 @@ import {
   verifyOfficialDependencies,
 } from '@/lib/deploy/mainnetDecisionPack';
 import { BOT_TESTNET_CHAIN_ID, FLOW_REWARDS_CHAINS } from '@/lib/rewards/flowRewardsRegistry';
+import {
+  APPROVED_PRODUCTION_SAFES,
+  RECORDED_SAFE_OBSERVATIONS,
+  verifySafes,
+  type SafeAuthorityId,
+  type SafeChainObservation,
+  type SafeVerificationResult,
+} from '@/lib/deploy/safeVerification';
 
-export const RELEASE_DECISION_VERSION = 'V30.1D.2' as const;
+export const RELEASE_DECISION_VERSION = 'V30.1D.4' as const;
 
 /* -------------------------------------------------------------------------- */
 /* Deterministic public-value hashing                                          */
@@ -118,10 +126,46 @@ export const REWARDS_ROOT_DELAY_CEILING_SECONDS = 7 * 86_400;
 export const STAKING_EPOCHS_PER_YEAR = 52;
 export const ESTIMATED_DEPLOYMENT_GAS_UNITS = 21_500_000;
 
+/**
+ * V30.1D.4 §5 — reward-treasury INVENTORY and Year-1 DISTRIBUTION authority are
+ * separate. Funded inventory may exceed the annual release ceiling; it is
+ * reserve inventory only and cannot raise APR or bypass any cap.
+ */
+export const APPROVED_STAKING_TREASURY_INVENTORY_FLOW = 10_000_000;
+export const APPROVED_MAX_WEEKLY_REWARD_BUDGET_FLOW = 50_000;
+
 export const STAKING_PRODUCT_KEYS = ['flexible', 'lock30', 'lock90', 'lock180', 'lock365'] as const;
 export type StakingProductKey = (typeof STAKING_PRODUCT_KEYS)[number];
 
 export const DEPENDENCY_SNAPSHOT = verifyOfficialDependencies(RECORDED_CHAIN_OBSERVATIONS);
+
+/**
+ * V30.1D.4 §7/§8 — which staged gate a decision may block.
+ *  DEPLOYMENT      — required for DEPLOYMENT_READY.
+ *  FEATURE_ONLY    — required only for feature activation (liquidity/oracle).
+ *  NON_TECHNICAL   — informational; never blocks any engineering state.
+ */
+export type DecisionGating = 'DEPLOYMENT' | 'FEATURE_ONLY' | 'NON_TECHNICAL';
+
+export const DECISION_GATING: Record<ReleaseDecisionId, DecisionGating> = {
+  FLOW_ECONOMICS: 'DEPLOYMENT',
+  GOVERNANCE_SAFE_PLAN: 'DEPLOYMENT',
+  TREASURY_SAFE_PLAN: 'DEPLOYMENT',
+  OPERATIONS_SAFE_PLAN: 'DEPLOYMENT',
+  ROOT_PUBLISHER_ASSIGNMENT: 'DEPLOYMENT',
+  ACTIVITY_ATTESTER_ASSIGNMENT: 'DEPLOYMENT',
+  TIMELOCK_POLICY: 'DEPLOYMENT',
+  REWARDS_LAUNCH_PLAN: 'DEPLOYMENT',
+  STAKING_LAUNCH_PLAN: 'DEPLOYMENT',
+  LIQUIDITY_AND_ORACLE_PLAN: 'FEATURE_ONLY',
+  GAS_BUDGET_PLAN: 'DEPLOYMENT',
+  DEPENDENCY_SNAPSHOT: 'DEPLOYMENT',
+  LEGAL_SIGNOFF: 'NON_TECHNICAL',
+};
+
+export function decisionGating(id: ReleaseDecisionId): DecisionGating {
+  return DECISION_GATING[id];
+}
 
 export const RELEASE_DECISION_SHEET: readonly ReleaseDecisionDefinition[] = [
   {
@@ -257,13 +301,21 @@ export const RELEASE_DECISION_SHEET: readonly ReleaseDecisionDefinition[] = [
   {
     id: 'STAKING_LAUNCH_PLAN',
     section: '7. Staking launch',
-    ask: 'Approve staking reserve funding, maxFlowPerEpoch and the day-one product set.',
-    reason: 'Deployment and feature activation are separate; obligations must be provably funded.',
-    impact: 'Dynamic standard bonus stays 0 while the FLOW/USDT TWAP source is PENDING_POOL.',
+    ask: 'Approve the Reward Treasury funding inventory, the Year-1 maximum distribution, the maximum weekly reward budget and the day-one product set.',
+    reason:
+      'Treasury inventory and annual distribution authority are separate: funded inventory may exceed the Year-1 release ceiling, which stays capped independently.',
+    impact:
+      'Deployment readiness never implies activation. Dynamic standard bonus stays 0 while the FLOW/USDT TWAP source is PENDING_POOL.',
     editable: true,
     proposal: {
+      /** Reward Treasury funding (inventory). Not capped by the Year-1 ceiling. */
       initialTreasuryFundingFlow: 0,
-      maxFlowPerEpoch: 0,
+      /** Year-1 maximum distribution — hard capped. */
+      year1TotalReleaseCeilingFlow: STAKING_V2_CONSTANTS.TOTAL_YEAR1_CAP_FLOW,
+      genesisYear1ReleaseCeilingFlow: STAKING_V2_CONSTANTS.GENESIS_YEAR1_CAP_FLOW,
+      standardYear1ReleaseCeilingFlow: STAKING_V2_CONSTANTS.STANDARD_YEAR1_CAP_FLOW,
+      /** Maximum weekly reward budget (per 7-day epoch). */
+      maxWeeklyRewardBudgetFlow: 0,
       enabledProducts: [] as StakingProductKey[],
       genesisYear1CapFlow: STAKING_V2_CONSTANTS.GENESIS_YEAR1_CAP_FLOW,
       standardYear1CapFlow: STAKING_V2_CONSTANTS.STANDARD_YEAR1_CAP_FLOW,
@@ -277,7 +329,8 @@ export const RELEASE_DECISION_SHEET: readonly ReleaseDecisionDefinition[] = [
     section: '8. Liquidity + oracle activation',
     ask: 'Approve the launch liquidity venue/pair plan and the oracle acceptance thresholds.',
     reason: 'The FLOW/USDT BDEX V3 TWAP candidate cannot exist before FLOW and a real pool exist.',
-    impact: 'Unapproved thresholds keep dynamic staking blocked; the 100M reserve is a ceiling only.',
+    impact:
+      'Feature-only (V30.1D.4 §7): unapproved thresholds keep dynamic staking inactive but never block deployment readiness. The 100M reserve is a ceiling only.',
     editable: true,
     proposal: {
       venues: ['BDEX V3 (BOT Mainnet 677)'],
@@ -330,12 +383,13 @@ export const RELEASE_DECISION_SHEET: readonly ReleaseDecisionDefinition[] = [
   },
   {
     id: 'LEGAL_SIGNOFF',
-    section: '15. Release record',
-    ask: 'Record external legal/compliance launch sign-off.',
-    reason: 'Code never self-certifies compliance.',
-    impact: 'Release freeze stays BLOCKED without an explicit external sign-off record.',
+    section: '15. Release record (DEFERRED_NON_TECHNICAL)',
+    ask: 'Optionally record an external legal/compliance launch reference.',
+    reason: 'Code never self-certifies compliance, and it never determines external legal obligations either.',
+    impact:
+      'Informational only (V30.1D.4 §8): it does not gate DEPLOYMENT_READY, DEPLOYED_VERIFIED, FUNDED_READY or FEATURE_ACTIVE.',
     editable: true,
-    proposal: { signedOff: false, reference: null },
+    proposal: { signedOff: false, reference: null, classification: 'DEFERRED_NON_TECHNICAL' },
   },
 ];
 
@@ -500,19 +554,40 @@ export function decisionBlockers(id: ReleaseDecisionId, value: Record<string, un
       break;
     }
     case 'STAKING_LAUNCH_PLAN': {
+      // V30.1D.4 §5 — inventory is NOT capped by the Year-1 release ceiling.
       const funding = num(value['initialTreasuryFundingFlow']);
-      const perEpoch = num(value['maxFlowPerEpoch']);
+      const weekly =
+        num(value['maxWeeklyRewardBudgetFlow']) ?? num(value['maxFlowPerEpoch']);
+      const year1 =
+        num(value['year1TotalReleaseCeilingFlow']) ?? STAKING_V2_CONSTANTS.TOTAL_YEAR1_CAP_FLOW;
+      const genesis =
+        num(value['genesisYear1ReleaseCeilingFlow']) ?? STAKING_V2_CONSTANTS.GENESIS_YEAR1_CAP_FLOW;
+      const standard =
+        num(value['standardYear1ReleaseCeilingFlow']) ?? STAKING_V2_CONSTANTS.STANDARD_YEAR1_CAP_FLOW;
       const products = Array.isArray(value['enabledProducts']) ? (value['enabledProducts'] as unknown[]) : [];
-      if (funding === null || funding < 0) blockers.push('staking funding must be 0 or a positive amount');
-      if (funding !== null && funding > STAKING_V2_CONSTANTS.TOTAL_YEAR1_CAP_FLOW)
-        blockers.push('staking funding exceeds the 3,000,000 FLOW Year-1 total ceiling');
-      if (perEpoch === null || perEpoch < 0) blockers.push('maxFlowPerEpoch must be 0 or a positive amount');
-      if (perEpoch !== null && perEpoch * STAKING_EPOCHS_PER_YEAR > STAKING_V2_CONSTANTS.TOTAL_YEAR1_CAP_FLOW)
-        blockers.push('maxFlowPerEpoch annualises above the 3,000,000 FLOW Year-1 total ceiling');
+
+      if (funding === null || funding < 0)
+        blockers.push('Reward Treasury funding must be 0 or a positive amount');
+      if (year1 > STAKING_V2_CONSTANTS.TOTAL_YEAR1_CAP_FLOW)
+        blockers.push('Year-1 maximum distribution exceeds the 3,000,000 FLOW Year-1 ceiling');
+      if (genesis > STAKING_V2_CONSTANTS.GENESIS_YEAR1_CAP_FLOW)
+        blockers.push('Genesis Year-1 release exceeds the 1,000,000 FLOW Genesis ceiling');
+      if (standard > STAKING_V2_CONSTANTS.STANDARD_YEAR1_CAP_FLOW)
+        blockers.push('Standard Year-1 release exceeds the 2,000,000 FLOW standard ceiling');
+      if (genesis + standard > year1)
+        blockers.push('Genesis + standard Year-1 releases exceed the approved Year-1 maximum distribution');
+      if (weekly === null || weekly < 0)
+        blockers.push('maximum weekly reward budget must be 0 or a positive amount');
+      if (weekly !== null && weekly > APPROVED_MAX_WEEKLY_REWARD_BUDGET_FLOW)
+        blockers.push('maximum weekly reward budget exceeds the approved 50,000 FLOW per 7-day epoch bound');
+      if (weekly !== null && weekly * STAKING_EPOCHS_PER_YEAR > year1)
+        blockers.push('weekly reward budget annualises above the approved Year-1 maximum distribution');
       if (!products.every((p) => STAKING_PRODUCT_KEYS.includes(p as StakingProductKey)))
         blockers.push('enabled product set contains an unknown staking product');
       if (products.length > 0 && (funding ?? 0) <= 0)
         blockers.push('products cannot be enabled at launch without approved reserve funding');
+      if (products.length > 0 && value['productSetApprovedByOwner'] !== true)
+        blockers.push('a launch product set requires an explicit owner activation approval');
       break;
     }
     case 'LIQUIDITY_AND_ORACLE_PLAN': {
@@ -549,8 +624,9 @@ export function decisionBlockers(id: ReleaseDecisionId, value: Record<string, un
       break;
     }
     case 'LEGAL_SIGNOFF':
-      if (value['signedOff'] !== true) blockers.push('external legal/compliance sign-off not recorded');
-      if (!value['reference']) blockers.push('legal sign-off requires an external reference');
+      // V30.1D.4 §8 — DEFERRED_NON_TECHNICAL. No engineering blocker is raised
+      // here: the software never determines external legal obligations and a
+      // sign-off reference is never fabricated to make a gate green.
       break;
   }
   blockers.push(...contaminationFindings(value, id));
@@ -567,6 +643,8 @@ export interface ReleaseFreezeInput {
   candidateDigest: string;
   /** Oracle status observed for the FLOW/USDT TWAP candidate. */
   oracleStatus: 'PENDING_POOL' | 'WARMING_UP' | 'READY';
+  /** V30.1D.4 §3 — recorded READ-ONLY Safe observations on BOT Mainnet 677. */
+  safeObservations?: readonly SafeChainObservation[];
 }
 
 export interface ReleaseManifest {
@@ -578,10 +656,20 @@ export interface ReleaseManifest {
   decisions: readonly {
     id: ReleaseDecisionId;
     status: DecisionStatus;
+    gating: DecisionGating;
     value: Record<string, unknown> | null;
     approvedByEmail: string | null;
     approvedAt: string | null;
     decisionHash: string | null;
+  }[];
+  /** Read-only live Safe evidence (public values only). */
+  safeAuthorities: readonly {
+    authority: SafeAuthorityId;
+    address: string;
+    state: 'VERIFIED' | 'BLOCKED';
+    liveThreshold: number | null;
+    liveOwners: readonly string[];
+    codeHash: string | null;
   }[];
   dependencySnapshot: Record<string, unknown>;
   activationPlan: typeof ACTIVATION_PLAN;
@@ -612,6 +700,19 @@ export const ZERO_PUBLIC_WRITES: PublicWriteLedger = {
   stakingActions: 0,
 };
 
+export type StagedReadinessState =
+  | 'SOURCE_READY'
+  | 'DEPLOYMENT_READY'
+  | 'DEPLOYED_VERIFIED'
+  | 'FUNDED_READY'
+  | 'FEATURE_ACTIVE';
+
+export interface StagedFeatureReadiness {
+  feature: string;
+  state: 'INACTIVE' | 'PENDING_FUNDING' | 'PENDING_ORACLE' | 'PENDING_OWNER_ACTIVATION';
+  detail: string;
+}
+
 export interface ReleaseFreezeEvaluation {
   decisionVersion: string;
   chainId: number;
@@ -619,6 +720,13 @@ export interface ReleaseFreezeEvaluation {
   decisions: readonly ResolvedDecision[];
   failClosedFindings: readonly string[];
   outstanding: readonly string[];
+  /** Feature-activation-only outstanding items; never deployment blockers. */
+  featureOutstanding: readonly string[];
+  /** Informational, non-technical items (legal/compliance). */
+  deferredNonTechnical: readonly string[];
+  safeVerification: readonly SafeVerificationResult[];
+  stagedReadiness: StagedReadinessState;
+  featureReadiness: readonly StagedFeatureReadiness[];
   verdict: 'PASS' | 'BLOCKED';
   manifest: ReleaseManifest;
   manifestHash: string;
@@ -795,12 +903,14 @@ export function evaluateReleaseFreeze(input: ReleaseFreezeInput): ReleaseFreezeE
       findings.push('rewards launch budget exceeds the approved Year-1 community ceiling');
   }
 
-  // Staking ceilings vs the approved FLOW economics staking component.
+  // V30.1D.4 §5 — compare the Year-1 RELEASE authority, never funded inventory.
   const staking = valueOf('STAKING_LAUNCH_PLAN');
   if (staking && flow) {
     const component = (flow['year1StakingComponentMaxFlow'] as number) ?? YEAR1_STAKING_COMPONENT_MAX_FLOW;
-    if (((staking['initialTreasuryFundingFlow'] as number) ?? 0) > component)
-      findings.push('staking funding exceeds the approved Year-1 staking component ceiling');
+    const year1Release =
+      (staking['year1TotalReleaseCeilingFlow'] as number) ?? STAKING_V2_CONSTANTS.TOTAL_YEAR1_CAP_FLOW;
+    if (year1Release > component)
+      findings.push('Year-1 staking release exceeds the approved Year-1 staking component ceiling');
   }
 
   // Dynamic staking may never be requested while the TWAP source is not READY.
@@ -815,13 +925,81 @@ export function evaluateReleaseFreeze(input: ReleaseFreezeInput): ReleaseFreezeE
   if (input.candidateDigest !== currentCandidateDigest())
     findings.push('production source/artifact hashes differ from the frozen candidates');
 
-  const outstanding = decisions
-    .filter((d) => d.status !== 'APPROVED' && d.status !== 'REPLACED')
+  // §3 — read-only live Safe verification against recorded chain evidence.
+  // Runs only when observations are supplied; a mismatch blocks ONLY that
+  // authority (and, through it, DEPLOYMENT_READY).
+  const observations = input.safeObservations ?? [];
+  const safeVerification: readonly SafeVerificationResult[] =
+    observations.length > 0 ? verifySafes(observations) : [];
+  const safeDecisionOf: Record<SafeAuthorityId, ReleaseDecisionId> = {
+    GOVERNANCE: 'GOVERNANCE_SAFE_PLAN',
+    TREASURY: 'TREASURY_SAFE_PLAN',
+    OPERATIONS: 'OPERATIONS_SAFE_PLAN',
+  };
+  for (const result of safeVerification) {
+    const decision = byId(safeDecisionOf[result.authority]);
+    const approvedAddr = ((decision.value?.['address'] as string | undefined) ?? '').toLowerCase();
+    if (approvedAddr && approvedAddr !== result.address.toLowerCase()) {
+      findings.push(
+        `${result.label}: approved decision address ${approvedAddr} differs from the frozen production Safe`,
+      );
+    }
+    if (result.state === 'BLOCKED') {
+      findings.push(`${result.label}: live verification BLOCKED — ${result.mismatches[0]}`);
+    }
+  }
+
+  const gatingOf = (id: ReleaseDecisionId) => decisionGating(id);
+  const unresolved = decisions.filter((d) => d.status !== 'APPROVED' && d.status !== 'REPLACED');
+  const outstanding = unresolved
+    .filter((d) => gatingOf(d.id) === 'DEPLOYMENT')
     .map((d) => `${d.id}: ${d.status} — ${d.blockers[0] ?? 'owner decision required'}`);
+  const featureOutstanding = unresolved
+    .filter((d) => gatingOf(d.id) === 'FEATURE_ONLY')
+    .map((d) => `${d.id}: ${d.status} — feature activation only (no deployment impact)`);
+  const deferredNonTechnical = decisions
+    .filter((d) => gatingOf(d.id) === 'NON_TECHNICAL')
+    .map((d) => `${d.id}: DEFERRED_NON_TECHNICAL — informational, never a technical gate`);
 
   const hardFindings = findings.filter((f) => !f.startsWith('FLAGGED'));
   const verdict: 'PASS' | 'BLOCKED' =
     outstanding.length === 0 && hardFindings.length === 0 ? 'PASS' : 'BLOCKED';
+
+  const stagedReadiness: StagedReadinessState = verdict === 'PASS' ? 'DEPLOYMENT_READY' : 'SOURCE_READY';
+
+  const enabledProducts = Array.isArray(staking?.['enabledProducts'])
+    ? (staking!['enabledProducts'] as unknown[])
+    : [];
+  const featureReadiness: readonly StagedFeatureReadiness[] = [
+    {
+      feature: 'Rewards claims',
+      state: 'PENDING_FUNDING',
+      detail: 'Requires observed on-chain Distributor funding after deployment.',
+    },
+    {
+      feature: 'Staking products',
+      state: enabledProducts.length === 0 ? 'PENDING_OWNER_ACTIVATION' : 'PENDING_FUNDING',
+      detail:
+        enabledProducts.length === 0
+          ? 'No launch product set approved — enablement stays None; deployment readiness is unaffected.'
+          : 'Approved product set requires observed reserve funding before activation.',
+    },
+    {
+      feature: 'Genesis and floor bonuses',
+      state: 'PENDING_OWNER_ACTIVATION',
+      detail: 'Requires funded-capacity plus explicit owner activation; never inferred from treasury inventory.',
+    },
+    {
+      feature: 'Dynamic standard staking bonus',
+      state: 'PENDING_ORACLE',
+      detail: `FLOW/USDT TWAP source is ${input.oracleStatus}; production price reference required.`,
+    },
+    {
+      feature: 'BridgeAdapter mainnet execution',
+      state: 'PENDING_OWNER_ACTIVATION',
+      detail: 'Stays disabled until a separately authorized activation gate.',
+    },
+  ];
 
   const manifest: ReleaseManifest = {
     schema: 'flowbridge.mainnet-release-decisions',
@@ -838,10 +1016,19 @@ export function evaluateReleaseFreeze(input: ReleaseFreezeInput): ReleaseFreezeE
     decisions: decisions.map((d) => ({
       id: d.id,
       status: d.status,
+      gating: decisionGating(d.id),
       value: d.value,
       approvedByEmail: d.approvedByEmail,
       approvedAt: d.approvedAt,
       decisionHash: d.decisionHash,
+    })),
+    safeAuthorities: safeVerification.map((s) => ({
+      authority: s.authority,
+      address: s.address,
+      state: s.state,
+      liveThreshold: s.liveThreshold,
+      liveOwners: s.liveOwners,
+      codeHash: s.codeHash,
     })),
     dependencySnapshot: releaseDecision('DEPENDENCY_SNAPSHOT')!.proposal,
     activationPlan: ACTIVATION_PLAN,
@@ -855,6 +1042,11 @@ export function evaluateReleaseFreeze(input: ReleaseFreezeInput): ReleaseFreezeE
     decisions,
     failClosedFindings: findings,
     outstanding,
+    featureOutstanding,
+    deferredNonTechnical,
+    safeVerification,
+    stagedReadiness,
+    featureReadiness,
     verdict,
     manifest,
     manifestHash: digestOf(manifest),
@@ -862,9 +1054,37 @@ export function evaluateReleaseFreeze(input: ReleaseFreezeInput): ReleaseFreezeE
   };
 }
 
-/** Honest current state: no owner decision has been recorded in this gate. */
+/**
+ * Baseline input: submissions still come from the append-only decision store,
+ * while the recorded read-only Safe observations are frozen evidence.
+ */
 export const CURRENT_RELEASE_FREEZE_INPUT: ReleaseFreezeInput = {
   submissions: [],
   candidateDigest: currentCandidateDigest(),
   oracleStatus: 'PENDING_POOL',
+  safeObservations: RECORDED_SAFE_OBSERVATIONS,
 };
+
+/**
+ * The frozen production Safe values in decision-record shape, so an owner
+ * submission and the live verification always describe the same configuration.
+ */
+export const APPROVED_SAFE_DECISION_VALUES: Record<
+  'GOVERNANCE_SAFE_PLAN' | 'TREASURY_SAFE_PLAN' | 'OPERATIONS_SAFE_PLAN',
+  Record<string, unknown>
+> = {
+  GOVERNANCE_SAFE_PLAN: safeDecisionValue('GOVERNANCE'),
+  TREASURY_SAFE_PLAN: safeDecisionValue('TREASURY'),
+  OPERATIONS_SAFE_PLAN: safeDecisionValue('OPERATIONS'),
+};
+
+function safeDecisionValue(authority: SafeAuthorityId): Record<string, unknown> {
+  const safe = APPROVED_PRODUCTION_SAFES.find((s) => s.authority === authority)!;
+  return {
+    address: safe.address,
+    owners: [...safe.owners],
+    threshold: safe.threshold,
+    capabilities: [...safe.capabilities],
+  };
+}
+
