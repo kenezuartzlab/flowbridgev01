@@ -2,13 +2,14 @@
 
 ## Verdict: FLOWBRIDGE V30.1D.4 DEPLOYMENT READINESS FREEZE BLOCKED
 
-Blocked by exactly one technical fact: the Treasury Safe owner set recorded in the
-owner-supplied configuration does not match the live BOT Mainnet 677 Safe. Every
-other authority verifies. Non-technical compliance and feature-only liquidity
-decisions no longer block technical readiness. Public writes performed: **zero**.
+All three production Safes now VERIFY against live BOT Mainnet 677 chain state
+(exact 3-owner membership, threshold 2). The only remaining blocker is procedural:
+no owner decision is recorded in the append-only store for this decision version.
+Non-technical compliance and feature-only liquidity decisions no longer block
+technical readiness. Public writes performed: **zero**.
 
 Decision version `V30.1D.4` · candidate digest `fnv1a64:19671fd13a81be19` ·
-manifest hash `fnv1a64:f906897763e722ac` (zero owner decisions recorded).
+manifest hash `fnv1a64:8d8e875bd65595b1` (zero owner decisions recorded).
 
 ## 1. Read-only Safe verification (chain 677, `https://rpc.botchain.ai`)
 
