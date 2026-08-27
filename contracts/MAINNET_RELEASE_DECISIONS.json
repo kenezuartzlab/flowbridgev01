@@ -1,5 +1,5 @@
 {
-  "manifestHash": "fnv1a64:f906897763e722ac",
+  "manifestHash": "fnv1a64:9972234982dbe76f",
   "manifest": {
     "schema": "flowbridge.mainnet-release-decisions",
     "decisionVersion": "V30.1D.4",
@@ -30,84 +30,272 @@
     "decisions": [
       {
         "id": "FLOW_ECONOMICS",
-        "status": "NEEDS_APPROVAL",
+        "status": "APPROVED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "supplyFlow": 1000000000,
+          "decimals": 18,
+          "standard": "ERC-20 + ERC-2612 Permit",
+          "postDeploymentMintAuthority": false,
+          "allocation": [
+            {
+              "bucket": "Community & Ecosystem",
+              "percent": 50,
+              "flow": 500000000
+            },
+            {
+              "bucket": "Team & Core Contributors",
+              "percent": 15,
+              "flow": 150000000
+            },
+            {
+              "bucket": "Protocol Treasury",
+              "percent": 15,
+              "flow": 150000000
+            },
+            {
+              "bucket": "Liquidity & Market Infrastructure",
+              "percent": 10,
+              "flow": 100000000
+            },
+            {
+              "bucket": "Strategic Ecosystem Partners",
+              "percent": 5,
+              "flow": 50000000
+            },
+            {
+              "bucket": "Security & Contingency Reserve",
+              "percent": 5,
+              "flow": 50000000
+            }
+          ],
+          "communityReserves": [
+            {
+              "bucket": "User rewards",
+              "flow": 200000000
+            },
+            {
+              "bucket": "Partner campaign matching",
+              "flow": 100000000
+            },
+            {
+              "bucket": "Staking / long-term alignment",
+              "flow": 75000000
+            },
+            {
+              "bucket": "Referral / community / developer",
+              "flow": 50000000
+            },
+            {
+              "bucket": "Genesis / legacy recognition",
+              "flow": 30000000
+            },
+            {
+              "bucket": "Future ecosystem reserve",
+              "flow": 45000000
+            }
+          ],
+          "year1CommunityCeilingFlow": 20000000,
+          "year1StakingComponentMaxFlow": 3000000,
+          "oneTimeGenesisLegacyCeilingFlow": 10000000,
+          "vesting": {
+            "team": {
+              "tgePercent": 0,
+              "cliffMonths": 12,
+              "linearMonths": 36
+            },
+            "strategicPartners": {
+              "tgePercent": 0,
+              "cliffMonths": 12,
+              "linearMonths": 24
+            }
+          }
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:d12236093819e30b"
       },
       {
         "id": "GOVERNANCE_SAFE_PLAN",
-        "status": "NEEDS_APPROVAL",
+        "status": "REPLACED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "platform": "Safe (Smart Account) on BOT Chain Mainnet 677",
+          "minOwners": 3,
+          "recommendedThreshold": 2,
+          "preferred": "3-of-5",
+          "owners": [
+            "0x524Db06954de917025180057BCBeB36eC96A98c5",
+            "0x145E201c658706D3D2b9f35E0c51270474453B2B",
+            "0x0EdFf26415660c9d2d12320678192f1B97BEBb85"
+          ],
+          "threshold": 2,
+          "address": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+          "capabilities": [
+            "protocol ownership",
+            "delayed economic and configuration changes",
+            "Router ownership",
+            "staking governance",
+            "high-impact role administration"
+          ]
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:31d51b1ed4c273bb"
       },
       {
         "id": "TREASURY_SAFE_PLAN",
-        "status": "NEEDS_APPROVAL",
+        "status": "REPLACED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "platform": "Safe (Smart Account) on BOT Chain Mainnet 677",
+          "minOwners": 3,
+          "recommendedThreshold": 2,
+          "owners": [
+            "0xF951c408f2412304ea08ADE94d53D7Df1EBdb25e",
+            "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+            "0x2eA57676b4086300C949A7eeba8697AE2fc1A1F0"
+          ],
+          "threshold": 2,
+          "address": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+          "concentrationApproved": false,
+          "capabilities": [
+            "FLOW reserve custody",
+            "rewards and staking funding",
+            "treasury asset movement"
+          ]
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:049375682cb9e5d9"
       },
       {
         "id": "OPERATIONS_SAFE_PLAN",
-        "status": "NEEDS_APPROVAL",
+        "status": "REPLACED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "platform": "Safe (Smart Account) on BOT Chain Mainnet 677",
+          "minOwners": 3,
+          "recommendedThreshold": 2,
+          "owners": [
+            "0x62b1902F23483e0AF44564681865E993AAA47368",
+            "0xD5966A3E829A4c366b8F762195beaf38d63D6ABe",
+            "0x2c9f04c9091b2dCa91f35fE6e6492E296A7519Cc"
+          ],
+          "threshold": 2,
+          "address": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+          "capabilityLimits": [
+            "pause only",
+            "campaign management only",
+            "no treasury custody",
+            "no unrestricted ownership"
+          ],
+          "capabilities": [
+            "bounded pause duty",
+            "campaign management",
+            "no treasury custody",
+            "no unrestricted protocol ownership"
+          ]
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:e532fd91ba299f40"
       },
       {
         "id": "ROOT_PUBLISHER_ASSIGNMENT",
-        "status": "NEEDS_APPROVAL",
+        "status": "REPLACED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "address": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
+          "mustDifferFrom": [
+            "GOVERNANCE_SAFE_PLAN",
+            "TREASURY_SAFE_PLAN"
+          ]
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:22:39.742716+00:00",
+        "decisionHash": "fnv1a64:f28e9448c7f83caa"
       },
       {
         "id": "ACTIVITY_ATTESTER_ASSIGNMENT",
-        "status": "NEEDS_APPROVAL",
+        "status": "REPLACED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "address": "0xFA3DE5CFa1DE8EcC36197dCC0FC34fef5c1C7e47",
+          "mustDifferFrom": [
+            "GOVERNANCE_SAFE_PLAN",
+            "TREASURY_SAFE_PLAN",
+            "OPERATIONS_SAFE_PLAN"
+          ]
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:22:39.742716+00:00",
+        "decisionHash": "fnv1a64:514870282075e18a"
       },
       {
         "id": "TIMELOCK_POLICY",
-        "status": "NEEDS_APPROVAL",
+        "status": "APPROVED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "delaySeconds": 86400,
+          "delayedActions": [
+            "Router registry changes",
+            "fee and governance changes",
+            "staking economic configuration",
+            "oracle configuration changes"
+          ],
+          "emergencyPause": "immediate pause through a narrowly scoped pauser; unpause/config governed",
+          "emergencyPauseCanMoveTreasury": false,
+          "emergencyPauseCanRewriteObligations": false,
+          "rationale": null
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:1fa9b3c4ed7d2789"
       },
       {
         "id": "REWARDS_LAUNCH_PLAN",
-        "status": "NEEDS_APPROVAL",
+        "status": "APPROVED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "initialFundingFlow": 0,
+          "launchCampaignBudgetFlow": 0,
+          "rootPublishDelaySeconds": 86400,
+          "supportedDelayRangeSeconds": [
+            3600,
+            604800
+          ],
+          "roles": {
+            "admin": "GOVERNANCE_SAFE_PLAN",
+            "campaignManager": "OPERATIONS_SAFE_PLAN",
+            "pauser": "OPERATIONS_SAFE_PLAN",
+            "rootPublisher": "ROOT_PUBLISHER_ASSIGNMENT"
+          }
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:70884004bf65c60f"
       },
       {
         "id": "STAKING_LAUNCH_PLAN",
-        "status": "NEEDS_APPROVAL",
+        "status": "REPLACED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "initialTreasuryFundingFlow": 10000000,
+          "year1TotalReleaseCeilingFlow": 3000000,
+          "genesisYear1ReleaseCeilingFlow": 1000000,
+          "standardYear1ReleaseCeilingFlow": 2000000,
+          "maxWeeklyRewardBudgetFlow": 50000,
+          "enabledProducts": [],
+          "genesisYear1CapFlow": 1000000,
+          "standardYear1CapFlow": 2000000,
+          "totalYear1CapFlow": 3000000,
+          "activateDynamicBonus": false,
+          "activateGenesisAndFloors": false
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:4935f3d663764a6a"
       },
       {
         "id": "LIQUIDITY_AND_ORACLE_PLAN",
@@ -120,21 +308,112 @@
       },
       {
         "id": "GAS_BUDGET_PLAN",
-        "status": "NEEDS_APPROVAL",
+        "status": "APPROVED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "estimatedGasUnits": 21500000,
+          "safetyBufferPercent": 30,
+          "hardcodedBotAmount": null,
+          "computeAtPreflight": true
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:e2477f116a33a7bb"
       },
       {
         "id": "DEPENDENCY_SNAPSHOT",
-        "status": "NEEDS_APPROVAL",
+        "status": "APPROVED",
         "gating": "DEPLOYMENT",
-        "value": null,
-        "approvedByEmail": null,
-        "approvedAt": null,
-        "decisionHash": null
+        "value": {
+          "chainId": 677,
+          "dependencies": [
+            {
+              "id": "botMainnetRpc",
+              "label": "Chain / RPC",
+              "value": "https://rpc.botchain.ai",
+              "kind": "RPC",
+              "state": "VERIFIED",
+              "detail": "eth_chainId returned 677"
+            },
+            {
+              "id": "botMainnetExplorer",
+              "label": "Explorer",
+              "value": "https://scan.botchain.ai",
+              "kind": "EXPLORER",
+              "state": "DOCUMENTED_OFFICIAL",
+              "detail": "documented official value; awaiting a chain 677 observation"
+            },
+            {
+              "id": "wrappedNative",
+              "label": "WBOT",
+              "value": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+              "kind": "CONTRACT",
+              "state": "VERIFIED",
+              "detail": "2317 bytes of runtime bytecode observed on chain 677"
+            },
+            {
+              "id": "bdexV2Router02",
+              "label": "BDEX V2 Router02",
+              "value": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+              "kind": "CONTRACT",
+              "state": "VERIFIED",
+              "detail": "21987 bytes of runtime bytecode observed on chain 677"
+            },
+            {
+              "id": "bdexSwapRouter",
+              "label": "BDEX V3 SwapRouter",
+              "value": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+              "kind": "CONTRACT",
+              "state": "VERIFIED",
+              "detail": "10088 bytes of runtime bytecode observed on chain 677"
+            },
+            {
+              "id": "bdexV3Factory",
+              "label": "BDEX V3 Factory",
+              "value": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+              "kind": "CONTRACT",
+              "state": "VERIFIED",
+              "detail": "24535 bytes of runtime bytecode observed on chain 677"
+            },
+            {
+              "id": "bdexUniversalRouter",
+              "label": "BDEX Universal Router",
+              "value": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+              "kind": "CONTRACT",
+              "state": "VERIFIED",
+              "detail": "18242 bytes of runtime bytecode observed on chain 677"
+            },
+            {
+              "id": "directBridgeGateway",
+              "label": "BOT BridgeRouter",
+              "value": "0xef8DC669ECa13E612b67Ff09478352E85bD6CC53",
+              "kind": "CONTRACT",
+              "state": "VERIFIED",
+              "detail": "2227 bytes of runtime bytecode observed on chain 677"
+            },
+            {
+              "id": "botUsdt",
+              "label": "BOT USDT",
+              "value": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+              "kind": "CONTRACT",
+              "state": "VERIFIED",
+              "detail": "6188 bytes of runtime bytecode observed on chain 677"
+            },
+            {
+              "id": "bridgeUsdtResourceId",
+              "label": "Bridge USDT resource ID",
+              "value": "0xac589789ed8c9d2c61f17b13369864b5f181e58eba230a6ee4ec4c3e7750cd1d",
+              "kind": "RESOURCE_ID",
+              "state": "DOCUMENTED_OFFICIAL",
+              "detail": "resource id recorded; verified only against a live bridge deposit config"
+            }
+          ],
+          "recheckBeforeDeployment": true,
+          "mainnetSlots": "PROMOTION_PENDING"
+        },
+        "approvedByEmail": "kenezuartzlab@gmail.com",
+        "approvedAt": "2026-08-27T15:20:11.512404+00:00",
+        "decisionHash": "fnv1a64:9b9dfd40724c7e88"
       },
       {
         "id": "LEGAL_SIGNOFF",
@@ -149,13 +428,13 @@
     "safeAuthorities": [
       {
         "authority": "TREASURY",
-        "address": "0xF03752926fF468D71e4AA9053e29216b9e216239",
-        "state": "BLOCKED",
+        "address": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+        "state": "VERIFIED",
         "liveThreshold": 2,
         "liveOwners": [
           "0xf951c408f2412304ea08ade94d53d7df1ebdb25e",
           "0xabe9ac1bc4b9e99b89c27f97c580b5a0b8fa75e1",
-          "0x2c9f04c9091b2dca91f35fe6e6492e296a7519cc"
+          "0x2ea57676b4086300c949a7eeba8697ae2fc1a1f0"
         ],
         "codeHash": "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c"
       },
