@@ -237,18 +237,18 @@ export const RECORDED_SAFE_OBSERVATIONS: readonly SafeChainObservation[] = [
   {
     authority: 'TREASURY',
     chainId: BOT_MAINNET_CHAIN_ID,
-    address: '0xF03752926fF468D71e4AA9053e29216b9e216239',
+    address: '0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4',
     hasCode: true,
     codeSizeBytes: 171,
     codeHash: '0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c',
     liveOwners: [
       '0xf951c408f2412304ea08ade94d53d7df1ebdb25e',
       '0xabe9ac1bc4b9e99b89c27f97c580b5a0b8fa75e1',
-      '0x2c9f04c9091b2dca91f35fe6e6492e296a7519cc',
+      '0x2ea57676b4086300c949a7eeba8697ae2fc1a1f0',
     ],
     liveThreshold: 2,
     readMethods: ['eth_chainId', 'eth_getCode', 'getOwners()', 'getThreshold()'],
-    observedAt: '2026-08-27T14:05:00.000Z',
+    observedAt: '2026-08-27T15:06:00.000Z',
   },
   {
     authority: 'GOVERNANCE',
