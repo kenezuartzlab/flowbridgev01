@@ -12,7 +12,6 @@
  * explicitly resolved V4 route.
  */
 import type { FlowBridgeExecutionTarget } from './executionRegistry';
-import { BOT_MAINNET_CHAIN_ID } from '@/lib/network/canonicalNetworks';
 
 export type SwapMethodMode =
   | { mode: 'safe' }
