@@ -123,14 +123,19 @@ export const Route = createFileRoute('/api/admin/mainnet-release-freeze')({
         });
 
         return jsonResponse({
-          phase: 'V30.1D.2',
+          phase: 'V30.1D.4',
           secretScan: 'CLEAR',
           verdict: result.verdict,
           decisionVersion: result.decisionVersion,
           candidateDigest: result.candidateDigest,
           decisions: result.decisions,
+          safeVerification: result.safeVerification,
+          stagedReadiness: result.stagedReadiness,
+          featureReadiness: result.featureReadiness,
           failClosedFindings: result.failClosedFindings,
           outstanding: result.outstanding,
+          featureOutstanding: result.featureOutstanding,
+          deferredNonTechnical: result.deferredNonTechnical,
           manifest: result.manifest,
           manifestHash: result.manifestHash,
           publicWrites: result.publicWrites,

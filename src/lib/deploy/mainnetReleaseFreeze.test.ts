@@ -5,12 +5,15 @@ import {
   contaminationFindings,
   currentCandidateDigest,
   decisionBlockers,
+  decisionGating,
   digestOf,
   evaluateReleaseFreeze,
   stableStringify,
   type DecisionSubmission,
   type ReleaseDecisionId,
+  APPROVED_SAFE_DECISION_VALUES,
 } from './mainnetReleaseFreeze';
+import { APPROVED_PRODUCTION_SAFES, RECORDED_SAFE_OBSERVATIONS, verifySafe } from './safeVerification';
 
 const OWNERS_A = [
   '0x1111111111111111111111111111111111111111',
@@ -75,9 +78,10 @@ function approvedSubmissions(): DecisionSubmission[] {
       rootPublishDelaySeconds: 86_400,
     }),
     sub('STAKING_LAUNCH_PLAN', {
-      initialTreasuryFundingFlow: 1_000_000,
-      maxFlowPerEpoch: 20_000,
+      initialTreasuryFundingFlow: 10_000_000,
+      maxWeeklyRewardBudgetFlow: 50_000,
       enabledProducts: ['flexible', 'lock30', 'lock90'],
+      productSetApprovedByOwner: true,
       activateGenesisAndFloors: true,
     }),
     sub('LIQUIDITY_AND_ORACLE_PLAN', {
@@ -105,7 +109,9 @@ describe('V30.1D.2 — baseline: no hidden defaults', () => {
     expect(r.decisions).toHaveLength(RELEASE_DECISION_SHEET.length);
     expect(r.decisions.every((d) => d.status === 'NEEDS_APPROVAL')).toBe(true);
     expect(r.decisions.every((d) => d.value === null && d.decisionHash === null)).toBe(true);
-    expect(r.outstanding).toHaveLength(RELEASE_DECISION_SHEET.length);
+    expect(r.outstanding).toHaveLength(
+      RELEASE_DECISION_SHEET.filter((d) => decisionGating(d.id) === 'DEPLOYMENT').length,
+    );
   });
 
   it('pins the mainnet chain and reports zero public writes', () => {
@@ -283,22 +289,68 @@ describe('V30.1D.2 — fail-closed conditions', () => {
     ).toMatch(/publish delay is outside/);
   });
 
-  it('blocks staking funding and maxFlowPerEpoch above the Year-1 ceilings', () => {
+  it('accepts 10M reward-treasury inventory while capping the Year-1 release at 3M', () => {
     expect(
       decisionBlockers('STAKING_LAUNCH_PLAN', {
-        initialTreasuryFundingFlow: 4_000_000,
-        maxFlowPerEpoch: 1_000,
+        initialTreasuryFundingFlow: 10_000_000,
+        year1TotalReleaseCeilingFlow: 3_000_000,
+        genesisYear1ReleaseCeilingFlow: 1_000_000,
+        standardYear1ReleaseCeilingFlow: 2_000_000,
+        maxWeeklyRewardBudgetFlow: 50_000,
+        enabledProducts: [],
+      }),
+    ).toEqual([]);
+    expect(
+      decisionBlockers('STAKING_LAUNCH_PLAN', {
+        initialTreasuryFundingFlow: 10_000_000,
+        year1TotalReleaseCeilingFlow: 4_000_000,
         enabledProducts: [],
       }).join(' '),
-    ).toMatch(/3,000,000 FLOW Year-1 total ceiling/);
+    ).toMatch(/Year-1 maximum distribution exceeds/);
     expect(
       decisionBlockers('STAKING_LAUNCH_PLAN', {
-        initialTreasuryFundingFlow: 1_000_000,
-        maxFlowPerEpoch: 100_000,
+        genesisYear1ReleaseCeilingFlow: 1_500_000,
+        enabledProducts: [],
+      }).join(' '),
+    ).toMatch(/Genesis Year-1 release exceeds/);
+    expect(
+      decisionBlockers('STAKING_LAUNCH_PLAN', {
+        standardYear1ReleaseCeilingFlow: 2_500_000,
+        enabledProducts: [],
+      }).join(' '),
+    ).toMatch(/Standard Year-1 release exceeds/);
+  });
+
+  it('blocks a weekly reward budget above the approved bound or the annual cap', () => {
+    expect(
+      decisionBlockers('STAKING_LAUNCH_PLAN', {
+        initialTreasuryFundingFlow: 10_000_000,
+        maxWeeklyRewardBudgetFlow: 60_000,
+        enabledProducts: [],
+      }).join(' '),
+    ).toMatch(/exceeds the approved 50,000 FLOW/);
+    expect(
+      decisionBlockers('STAKING_LAUNCH_PLAN', {
+        initialTreasuryFundingFlow: 10_000_000,
+        year1TotalReleaseCeilingFlow: 1_000_000,
+        genesisYear1ReleaseCeilingFlow: 500_000,
+        standardYear1ReleaseCeilingFlow: 500_000,
+        maxWeeklyRewardBudgetFlow: 50_000,
         enabledProducts: [],
       }).join(' '),
     ).toMatch(/annualises above/);
   });
+
+  it('never activates a staking product without explicit owner activation', () => {
+    expect(
+      decisionBlockers('STAKING_LAUNCH_PLAN', {
+        initialTreasuryFundingFlow: 10_000_000,
+        maxWeeklyRewardBudgetFlow: 50_000,
+        enabledProducts: ['flexible'],
+      }).join(' '),
+    ).toMatch(/explicit owner activation approval/);
+  });
+
 
   it('allows a deployment-only staking launch with zero funding and no products', () => {
     expect(
@@ -314,9 +366,10 @@ describe('V30.1D.2 — fail-closed conditions', () => {
     const r = evalWith([
       ...approvedSubmissions().filter((s) => s.decisionId !== 'STAKING_LAUNCH_PLAN'),
       sub('STAKING_LAUNCH_PLAN', {
-        initialTreasuryFundingFlow: 1_000_000,
-        maxFlowPerEpoch: 20_000,
+        initialTreasuryFundingFlow: 10_000_000,
+        maxWeeklyRewardBudgetFlow: 20_000,
         enabledProducts: ['flexible'],
+        productSetApprovedByOwner: true,
         activateDynamicBonus: true,
       }),
     ]);
@@ -371,7 +424,7 @@ describe('V30.1D.2 — manifest freeze', () => {
     const b = evalWith(approvedSubmissions());
     expect(a.manifestHash).toBe(b.manifestHash);
     expect(a.manifest.chainId).toBe(677);
-    expect(a.manifest.decisionVersion).toBe('V30.1D.2');
+    expect(a.manifest.decisionVersion).toBe('V30.1D.4');
     expect(a.manifest.contractCandidates.length).toBeGreaterThan(0);
     expect(Object.values(a.manifest.publicWrites).every((v) => v === 0)).toBe(true);
     expect(stableStringify(a.manifest)).not.toMatch(/privateKey|mnemonic|seed phrase|secret/i);
@@ -388,5 +441,68 @@ describe('V30.1D.2 — manifest freeze', () => {
 
   it('hashes stably regardless of key order', () => {
     expect(digestOf({ a: 1, b: 2 })).toBe(digestOf({ b: 2, a: 1 }));
+  });
+});
+
+describe('V30.1D.4 — staged gating, Safes and staking semantics', () => {
+  it('classifies liquidity/oracle as feature-only and legal as non-technical', () => {
+    expect(decisionGating('LIQUIDITY_AND_ORACLE_PLAN')).toBe('FEATURE_ONLY');
+    expect(decisionGating('LEGAL_SIGNOFF')).toBe('NON_TECHNICAL');
+    expect(decisionGating('TREASURY_SAFE_PLAN')).toBe('DEPLOYMENT');
+  });
+
+  it('never blocks deployment readiness on liquidity/oracle or legal sign-off', () => {
+    const r = evalWith(
+      approvedSubmissions().filter(
+        (s) => s.decisionId !== 'LIQUIDITY_AND_ORACLE_PLAN' && s.decisionId !== 'LEGAL_SIGNOFF',
+      ),
+    );
+    expect(r.outstanding).toEqual([]);
+    expect(r.verdict).toBe('PASS');
+    expect(r.featureOutstanding.join(' ')).toMatch(/LIQUIDITY_AND_ORACLE_PLAN/);
+    expect(r.deferredNonTechnical.join(' ')).toMatch(/LEGAL_SIGNOFF/);
+  });
+
+  it('verifies a Safe only against read-only chain evidence', () => {
+    const ok = verifySafe(APPROVED_PRODUCTION_SAFES[0]!, {
+      authority: APPROVED_PRODUCTION_SAFES[0]!.authority,
+      address: APPROVED_PRODUCTION_SAFES[0]!.address,
+      chainId: 677,
+      hasCode: true,
+      codeSizeBytes: 171,
+      codeHash: '0xabc',
+      liveOwners: APPROVED_PRODUCTION_SAFES[0]!.owners,
+      liveThreshold: 2,
+      readMethods: ['getOwners()', 'getThreshold()'],
+      observedAt: '2026-08-27T00:00:00.000Z',
+    });
+    expect(ok.state).toBe('VERIFIED');
+    expect(verifySafe(APPROVED_PRODUCTION_SAFES[0]!, undefined).state).toBe('BLOCKED');
+  });
+
+  it('blocks only the mismatched authority and reports live evidence in the manifest', () => {
+    const r = evaluateReleaseFreeze({
+      submissions: approvedSubmissions().filter(
+        (s) =>
+          s.decisionId !== 'GOVERNANCE_SAFE_PLAN' &&
+          s.decisionId !== 'TREASURY_SAFE_PLAN' &&
+          s.decisionId !== 'OPERATIONS_SAFE_PLAN',
+      ),
+      candidateDigest: digest,
+      oracleStatus: 'PENDING_POOL',
+      safeObservations: RECORDED_SAFE_OBSERVATIONS,
+    });
+    expect(r.safeVerification).toHaveLength(3);
+    expect(r.safeVerification.filter((s) => s.state === 'VERIFIED').length).toBeGreaterThanOrEqual(2);
+    expect(r.manifest.safeAuthorities.every((s) => typeof s.address === 'string')).toBe(true);
+    expect(stableStringify(r.manifest)).not.toMatch(/privateKey|mnemonic|secret/i);
+    expect(Object.values(r.publicWrites).every((v) => v === 0)).toBe(true);
+  });
+
+  it('exposes the frozen Safe values in decision-record shape', () => {
+    for (const value of Object.values(APPROVED_SAFE_DECISION_VALUES)) {
+      expect((value['owners'] as string[]).length).toBe(3);
+      expect(value['threshold']).toBe(2);
+    }
   });
 });
