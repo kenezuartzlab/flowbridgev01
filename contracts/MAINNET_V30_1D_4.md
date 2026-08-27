@@ -22,16 +22,12 @@ All three addresses carry 171 bytes of proxy code with code hash
 | --- | --- | --- | --- | --- |
 | Governance | `0x88A4…9507` | 3 | 2 | VERIFIED |
 | Operations | `0x1Ce0…59eF` | 3 | 2 | VERIFIED |
-| Treasury | `0xF037…6239` | 3 | 2 | **BLOCKED** |
+| Treasury | `0xeFc1…9Ea4` | 3 | 2 | VERIFIED |
 
-Treasury mismatch:
-
-- approved owner `0x2eA57676b4086300c949a7EEba8697Ae2fC1a1F0` is absent on chain;
-- live owner `0x2c9f04C9091b2dcA91F35fE6E6492e296A7519cc` is not in the approved set.
-
-Owner count (3) and threshold (2) are exact on all three Safes. The Treasury
-finding blocks only the Treasury authority — and through it `DEPLOYMENT_READY`
-for FlowToken — never the Governance or Operations decisions.
+Treasury Safe `0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4` returns exactly the
+approved owner set — `0xF951…b25e`, `0xAbe9…75E1`, `0x2eA5…a1F0` — with
+threshold 2. Owner count (3) and threshold (2) are exact on all three Safes and
+no mismatch remains.
 
 ## 2. Staking semantics correction
 
