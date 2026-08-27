@@ -51,16 +51,15 @@ export function resolveSwapMethodMode(args: {
     }
     return { mode: 'safe' };
   }
-  // V30.1B.1: the size-safe mainnet Router candidate has no legacy swap
-  // wrappers at all, so a legacy call on BOT Mainnet can never succeed.
-  if (target.chainId === BOT_MAINNET_CHAIN_ID) {
-    return {
-      mode: 'fail-closed',
-      reason: `legacy swap calls do not exist on the BOT Mainnet Router candidate (chain ${target.chainId})`,
-    };
-  }
-  // Explicitly legacy target: legacy-compatible calls are intentionally supported.
-  return { mode: 'legacy' };
+  // Explicitly legacy target: legacy-compatible calls are intentionally
+  // supported, including the currently authoritative BOT Mainnet v3 router.
+  // (The V30.1B.1 size-safe V4 mainnet candidate is not deployed, so it can
+  // never resolve here; only an explicit `v3-legacy` target reaches this line.)
+  if (target.routerVersion === 'v3-legacy') return { mode: 'legacy' };
+  return {
+    mode: 'fail-closed',
+    reason: `unknown router version on chain ${target.chainId}`,
+  };
 }
 
 /** Throws on fail-closed; returns true when the hardened `*Safe` calls must be used. */
