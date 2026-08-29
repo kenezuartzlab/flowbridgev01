@@ -1,0 +1,123 @@
+{
+  "gate": "V30.1G Funding Readiness + Source Verification Closure",
+  "chainId": 677,
+  "observedAtBlock": 21389568,
+  "postWiringSnapshot": {
+    "f2bSettled": true,
+    "f3Settled": true,
+    "f4Settled": true,
+    "controllerVault": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+    "rewardTreasuryVaultRole": true,
+    "rewardTreasuryControllerRole": true,
+    "operationsSafePauser": true,
+    "governanceSafePauser": true,
+    "governanceSafeDefaultAdmin": true,
+    "maxFlowPerEpoch": "50000000000000000000000",
+    "weeklyUsdBudget8": "0",
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "rewardTreasuryFlowBalance": "0",
+    "rewardTreasuryTotalObligations": "0",
+    "vaultTotalPrincipal": "0",
+    "vaultNextPositionId": "0",
+    "vaultPaused": false,
+    "distributorFlowBalance": "0",
+    "distributorTotalReserved": "0",
+    "distributorEpochCount": "0",
+    "routerV4RegistryActivationDelay": "0",
+    "routerV4RouterCount": "0",
+    "routerV4BridgeCount": "0",
+    "v3RemainsLive": true
+  },
+  "sourceVerification": {
+    "FlowToken": "SOURCE_PENDING",
+    "FlowRewardsMerkleDistributor": "SOURCE_PENDING",
+    "FlowStakingVaultV2": "SOURCE_PENDING",
+    "FlowBridgeActivityRegistry": "SOURCE_PENDING",
+    "FlowStakingRewardTreasury": "PUBLICLY_VERIFIED",
+    "FlowStakingController": "PUBLICLY_VERIFIED",
+    "FlowBridgeRouterV4": "PUBLICLY_VERIFIED",
+    "FlowBridgeRouterLens": "PUBLICLY_VERIFIED"
+  },
+  "verificationRetries": [
+    {
+      "contract": "FlowToken",
+      "bundleBytes": 183110,
+      "result": "EDGE_BLOCKED_HTTP_403_CLOUDFLARE",
+      "artifactChanged": false
+    },
+    {
+      "contract": "FlowRewardsMerkleDistributor",
+      "bundleBytes": 88281,
+      "result": "EDGE_BLOCKED_HTTP_403_CLOUDFLARE",
+      "artifactChanged": false
+    },
+    {
+      "contract": "FlowStakingVaultV2",
+      "bundleBytes": 67001,
+      "result": "EDGE_BLOCKED_HTTP_403_CLOUDFLARE (gzip body passed the edge, explorer returned 400)",
+      "artifactChanged": false
+    },
+    {
+      "contract": "FlowBridgeActivityRegistry",
+      "bundleBytes": 22866,
+      "result": "SUBMISSION_ACCEPTED_EXPLORER_REPORTED_FAIL_UNABLE_TO_VERIFY",
+      "guids": [
+        "a80d8740f378989f649ca14c54e4b4a42e68753c6a931d98",
+        "a80d8740f378989f649ca14c54e4b4a42e68753c6a931def"
+      ],
+      "artifactChanged": false
+    }
+  ],
+  "fundingPayloads": [
+    {
+      "id": "REWARDS_1M",
+      "safe": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+      "target": "0x535ddda826142ac42ce288154e9595f080940ae9",
+      "destination": "0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB",
+      "amount": "1000000000000000000000000",
+      "calldata": "0xa9059cbb0000000000000000000000003824681c3560a63e1c9cedabbfcab2691c5673fb00000000000000000000000000000000000000000000d3c21bcecceda1000000",
+      "calldataHash": "0xdfb6499dc319e219dd9e8cc847170a8babf6964c2f80539a59cf9abfb3ff2c7d",
+      "value": "0",
+      "simulatedFromSafe": "OK",
+      "simulatedGas": "51714",
+      "revertsFromDeployerEoa": true,
+      "readiness": "BLOCKED_BY_SOURCE",
+      "missingVerification": ["FlowToken", "FlowRewardsMerkleDistributor"]
+    },
+    {
+      "id": "STAKING_10M",
+      "safe": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+      "target": "0x535ddda826142ac42ce288154e9595f080940ae9",
+      "destination": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+      "amount": "10000000000000000000000000",
+      "calldata": "0xa9059cbb000000000000000000000000a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e000000000000000000000000000000000000000000084595161401484a000000",
+      "calldataHash": "0x875f551af0ac0bfa831823917036181e1a72b59398915354c7d45f2a634fde9d",
+      "value": "0",
+      "simulatedFromSafe": "OK",
+      "simulatedGas": "51726",
+      "revertsFromDeployerEoa": true,
+      "readiness": "BLOCKED_BY_SOURCE",
+      "missingVerification": ["FlowToken", "FlowStakingVaultV2"]
+    }
+  ],
+  "treasurySafe": {
+    "address": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "threshold": 2,
+    "owners": [
+      "0xF951c408f2412304ea08ADE94d53D7Df1EBdb25e",
+      "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+      "0x2eA57676b4086300C949A7eeba8697AE2fc1A1F0"
+    ],
+    "flowBalance": "1000000000000000000000000000",
+    "sufficientForBothTransfers": true
+  },
+  "broadcastLedger": {
+    "transactionsSigned": 0,
+    "transactionsBroadcast": 0,
+    "flowTransferred": "0",
+    "roleChanges": 0,
+    "configurationWrites": 0,
+    "registryEntriesAdded": 0
+  },
+  "verdict": "FLOWBRIDGE V30.1G FUNDING READINESS SOURCE VERIFICATION CLOSURE PASS - PREPARED, NOT FUNDED"
+}
