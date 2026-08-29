@@ -25,3 +25,14 @@ Reproduction check (informational):
 - creation bytecode sha256 `200a6a559c6e43a357f7b7fb677a1d7a4e1d89344fd78bcc34398265fa2107a2`
 - runtime bytecode sha256 `f7be82e4d98df2b7ab421ae8ec4b1d2ea1b0fd124b7865aaaad5e77656226edf`
 - on-chain runtime differs only in the 131 bytes occupied by the EIP-712 immutables
+
+## V30.1E.10 retry (2026-08-29)
+
+Resubmitted unchanged through the Blockscout v2 `standard-json-input` route that
+successfully verified Router V4 and the Router Lens. Still HTTP 403 (Cloudflare
+HTML) on curl HTTP/2 and HTTP/1.1, on a real Chromium session with `__cf_bm`
+cookies posting from the explorer origin, and on the legacy v1
+`verifysourcecode` form. Bundles are accepted at ~16.7 KB and rejected at
+~23 KB, while each source alone is accepted — an edge content-scoring rule, not
+an artifact mismatch. Status unchanged:
+`DEPLOYED_ONCHAIN_VERIFIED_SOURCE_PENDING`.
