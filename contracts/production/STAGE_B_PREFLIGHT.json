@@ -1,0 +1,85 @@
+{
+  "gate": "V30.1E.6",
+  "stage": "B_REWARDS_DISTRIBUTOR",
+  "status": "STAGE_B_PREFLIGHT_PASS_APPROVED_NOT_BROADCAST",
+  "observedAtUtc": "2026-08-29T02:50:00Z",
+  "chainId": 677,
+  "rpcUrl": "https://rpc.botchain.ai",
+  "blockNumber": 21317120,
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "flowTokenReleaseStatus": "DEPLOYED_ONCHAIN_VERIFIED_SOURCE_PENDING",
+  "explorerClassification": "EXPLORER_TRANSPORT_BLOCKED",
+  "artifact": {
+    "contractId": "FlowRewardsMerkleDistributor",
+    "source": "contracts/production/rewards-distributor/FlowRewardsMerkleDistributor.sol",
+    "sourceSha256": "cbf90ce714c2c6ca6df9b55637a2a671e820da6a2a0404d7813590450bec0d43",
+    "compiler": {
+      "version": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+      "optimizer": { "enabled": true, "runs": 200 },
+      "viaIR": true,
+      "evmVersion": "cancun",
+      "openzeppelin": "5.6.1"
+    },
+    "creationSha256": "21c96796f0e7fbc32ed114edf6194147ddb3949c88a9907d8cc28c9ed5157581",
+    "runtimeSha256": "a708b596b82367893813a4ed39650bcf26f95a23fad678955a4b938fca40d367",
+    "normalizedAbiSha256": "821333ca4a60c6c2ce6354835a95066b3f94c74acf2a657712646ea4e783fa79",
+    "creationBytes": 7181,
+    "runtimeBytes": 5861,
+    "doubleBuild": "REPRODUCIBLE",
+    "matchesFrozenEvidence": true
+  },
+  "constructorArgs": {
+    "token_": "0x535ddda826142ac42ce288154e9595f080940ae9",
+    "admin_": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "budgetManager_": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "publisher_": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
+    "pauser_": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+    "recoveryRecipient_": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "minPublishDelay_": 86400
+  },
+  "constructorArgsAbiEncoded": "0x000000000000000000000000535ddda826142ac42ce288154e9595f080940ae900000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce950700000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507000000000000000000000000971e7790fe6c8f77dc666bb05d4aeda362653f940000000000000000000000001ce0b1df5d2055f6e92122d8cb7669609c2359ef000000000000000000000000efc13d1a1dc30ba2da0bb005ba5a783c6b229ea40000000000000000000000000000000000000000000000000000000000015180",
+  "unsignedTransaction": {
+    "chainId": 677,
+    "from": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "to": null,
+    "value": "0",
+    "nonce": 1,
+    "type": "legacy",
+    "gasPriceWei": "20000000000",
+    "gasEstimate": 1522268,
+    "gasLimit": 1978948,
+    "dataBytes": 7405,
+    "dataKeccak256": "0xddf141657b99ecdcbe0f21744d64df213efd2d81ba070453422e2ef4facc3e01",
+    "dataSha256": "0x1187777125e430ed65ad3fc66ab9c8810d52bcee5e96c36672ed3da55548344e",
+    "estimatedFeeWei": "30445360000000000",
+    "bufferedFeeWei": "39578968000000000"
+  },
+  "liveChainReads": {
+    "chainIdIs677": true,
+    "deployerIsEoa": true,
+    "nonce": 1,
+    "balanceWei": "2481145100000000000",
+    "gasPriceWei": "20000000000",
+    "flowTokenCodeBytes": 3539,
+    "flowTotalSupplyWei": "1000000000000000000000000000",
+    "treasuryFlowBalanceWei": "1000000000000000000000000000",
+    "safesVerified": true,
+    "candidateDigest": "fnv1a64:19671fd13a81be19",
+    "decisionManifestHash": "fnv1a64:9972234982dbe76f"
+  },
+  "initialState": {
+    "campaignBudget": "0",
+    "totalReserved": "0",
+    "totalClaimed": "0",
+    "funding": "0",
+    "publishedRoots": 0
+  },
+  "approval": {
+    "stage": "B_REWARDS_DISTRIBUTOR",
+    "scope": "ONE_TIME_SINGLE_DEPLOYMENT",
+    "boundTo": "artifact creation hash + constructor args hash + deployer + chain 677",
+    "ownerApproval": "NOT_RECORDED",
+    "broadcast": "NOT_BROADCAST"
+  },
+  "verdict": "FLOWBRIDGE V30.1E STAGE B PREFLIGHT PASS — APPROVED, NOT BROADCAST"
+}
