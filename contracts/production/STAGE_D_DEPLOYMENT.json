@@ -1,0 +1,105 @@
+{
+  "$comment": "FlowBridge V30.1E Stage D — FlowBridgeActivityRegistry mainnet settlement evidence. One transaction only. No attestation, no funding, no Router registry change, no v3 migration, no Safe transaction.",
+  "gate": "V30.1E_STAGE_D",
+  "verdict": "STAGE_D_SETTLED_ONCHAIN_VERIFIED_SOURCE_PENDING",
+  "chainId": 677,
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "preSignRevalidation": {
+    "observedBlock": 21353819,
+    "chainId": 677,
+    "signerIsApprovedDeployer": true,
+    "nonce": 4,
+    "balanceBOT": "2.32765498",
+    "gasPriceGwei": "20.0",
+    "candidateDigest": "fnv1a64:19671fd13a81be19",
+    "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+    "creationSha256Match": true,
+    "constructorArgsMatch": true,
+    "unsignedDataKeccak256Match": true,
+    "expectedAddressMatch": true,
+    "expectedAddressHadNoCode": true
+  },
+  "buildMatrix": {
+    "buildLine": "missingContractPackage",
+    "buildLineMeaning": "Frozen build-line identifier only. All compiler dependencies resolved: solc 0.8.20 and OpenZeppelin 5.6.1 present, double build reproducible, hashes exact.",
+    "solc": "0.8.20+commit.a1b79de6.Emscripten.clang",
+    "optimizer": { "enabled": true, "runs": 1 },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "openzeppelin": "5.6.1"
+  },
+  "artifact": {
+    "sourceSha256": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e",
+    "creationSha256": "25ec99e2bc31648d9e0cb2376c00063c404d2b535afe887f1b9cb37ebfc2cc6d",
+    "runtimeSha256": "53a83eea932da41016a7021926113e4ed50612525768bb6ba0eb1ec876b3e03b",
+    "normalizedAbiSha256": "e021c7402ce241fe89624df8c395b30347b82bdac888758530e4bfe597a8978d",
+    "creationBytes": 3490,
+    "runtimeBytes": 2713,
+    "doubleBuild": "REPRODUCIBLE",
+    "manifestParity": "EXACT_MATCH_PRODUCTION_BYTECODE_JSON"
+  },
+  "transaction": {
+    "hash": "0xd636a12677f0f68a47595501a792861ceb83b18fd1c3fc8d0b6d76e226bf3b76",
+    "blockNumber": 21353823,
+    "status": 1,
+    "nonce": 4,
+    "valueBOT": "0",
+    "gasEstimate": "733319",
+    "gasLimit": "953314",
+    "gasUsed": "726387",
+    "effectiveGasPriceWei": "20000000000",
+    "feeBOT": "0.01452774",
+    "unsignedDataKeccak256": "0xb802153f8ac61914fb7bf2fc78d45972e5f545051d7b180c8df75ada13fed443",
+    "contractAddress": "0xa80d8740f378989F649ca14C54e4B4a42E68753c",
+    "expectedAddressMatched": true
+  },
+  "runtimeParity": {
+    "onchainRuntimeSha256": "53a83eea932da41016a7021926113e4ed50612525768bb6ba0eb1ec876b3e03b",
+    "onchainRuntimeBytes": 2713,
+    "verdict": "EXACT_MATCH"
+  },
+  "roles": {
+    "DEFAULT_ADMIN_ROLE": "0x88a4cc1f5771523baeb83daeea07d323a3ce9507",
+    "ATTESTER_ROLE": "0xfa3de5cfa1de8ecc36197dcc0fc34fef5c1c7e47",
+    "PAUSER_ROLE": "0x1ce0b1df5d2055f6e92122d8cb7669609c2359ef",
+    "attesterRoleHash": "0xca77cd8f9856ef5fcd36f6b15bf469fe216c2f9114f60dd031f0a2b97b67aaa9",
+    "pauserRoleHash": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+    "adminEqualsAttester": false,
+    "deployerHoldsAnyRole": false
+  },
+  "genesisState": {
+    "recordedActivities": 0,
+    "activityRecordedEvents": 0,
+    "paused": false,
+    "attestationsPausable": true,
+    "activityIdDeterministic": true,
+    "activityIdMatchesCanonicalUint256Encoding": true,
+    "sourceLogIndexAffectsIdentity": true,
+    "duplicateProtection": "DuplicateActivity revert on repeated activityId",
+    "payableFunctions": [],
+    "hasReceiveOrFallback": false,
+    "tokenOrRewardCustody": "NONE",
+    "economicExecutionAuthority": "NONE"
+  },
+  "sourceVerification": {
+    "explorer": "https://scan.botchain.ai",
+    "route": "BLOCKSCOUT_V2_STANDARD_JSON",
+    "submissionAccepted": true,
+    "isVerified": false,
+    "status": "EXPLORER_TRANSPORT_BLOCKED",
+    "bundle": "contracts/production/stage-d-verification/standard-input.json",
+    "note": "Deployed runtime is byte-identical to the frozen artifact. Explicit multi-source standard-JSON recompilation of the identical sources/settings produces the same length, metadata hash and source hashes but a different viaIR block layout, so the explorer verifier cannot reproduce the deployed bytes. Same class as Stage A/B; Router V4 and Lens verified because they have no imports."
+  },
+  "prohibitedActionsObserved": {
+    "attestationSubmission": false,
+    "historicalActivityFabrication": false,
+    "assetTransfer": false,
+    "unrelatedRoleGrant": false,
+    "funding": false,
+    "routerRegistryModification": false,
+    "routerV3TrafficMigration": false,
+    "safeTransaction": false
+  },
+  "routerTrafficPolicy": "ROUTER_V3_REMAINS_LIVE_PRODUCTION",
+  "stageE": "UNAUTHORIZED"
+}
