@@ -114,6 +114,7 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
   const [error, setError] = useState<string | null>(null);
 
   const [openEvidence, setOpenEvidence] = useState<number | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   /**
