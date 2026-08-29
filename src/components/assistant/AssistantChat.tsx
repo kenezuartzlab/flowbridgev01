@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Bot, ChevronDown, RotateCcw, ShieldCheck, Sparkles, User, X } from "lucide-react";
+import { ArrowUp, Bot, Check, ChevronDown, Copy, RotateCcw, ShieldCheck, Sparkles, User, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { assistantFetch } from "@/lib/ai/assistantClient";
 import { useJourney } from "@/lib/ai/journey/useJourney";
@@ -114,6 +114,7 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
   const [error, setError] = useState<string | null>(null);
 
   const [openEvidence, setOpenEvidence] = useState<number | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   /**
@@ -279,6 +280,16 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
     }
   }
 
+  async function copyMessage(text: string, index: number) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      window.setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800);
+    } catch {
+      /* copying is optional */
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <section className="fb-surface flex min-h-[52vh] flex-col overflow-hidden">
@@ -411,6 +422,20 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
                             preparation
                           </span>
                         ) : null}
+                        <button
+                          type="button"
+                          onClick={() => void copyMessage(m.content, i)}
+                          aria-label={copiedIndex === i ? "Copied" : "Copy message"}
+                          title={copiedIndex === i ? "Copied" : "Copy message"}
+                          className="inline-flex items-center gap-1 rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted transition-colors hover:text-foreground"
+                        >
+                          {copiedIndex === i ? (
+                            <Check className="h-2.5 w-2.5" aria-hidden />
+                          ) : (
+                            <Copy className="h-2.5 w-2.5" aria-hidden />
+                          )}
+                          {copiedIndex === i ? "Copied" : "Copy"}
+                        </button>
                       </div>
 
                       {m.evidence && m.evidence.length > 0 ? (
