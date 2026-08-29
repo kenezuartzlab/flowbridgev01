@@ -1,0 +1,31 @@
+{
+  "step": "F.3",
+  "chainId": 677,
+  "safe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+  "target": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+  "call": "grantRole(PAUSER_ROLE, 0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF)",
+  "executionTxHash": "0xd7e69b7ae038d8778276b63634c7ce4881fc324e8feb5ec59e83f3ebd40259fd",
+  "blockNumber": 21385719,
+  "receiptStatus": "0x1",
+  "gasUsed": "94739",
+  "feeBOT": "0.00189478",
+  "postState": {
+    "operationsHasPauser": true,
+    "governanceHasPauser": true,
+    "vaultPaused": false,
+    "totalPrincipal": "0",
+    "nextPositionId": "0",
+    "vaultFlowBalance": "0"
+  },
+  "f4Precheck": {
+    "observedAtBlock": 21386144,
+    "maxFlowPerEpoch": "0",
+    "weeklyUsdBudget8": "0",
+    "oracleUnset": true,
+    "treasuryFlowBalance": "0",
+    "approvedCalldataHash": "0x9410508219448179db1408fa9683ada69b8811f84238d609ffd3fc06b2ad8da5",
+    "simulatedGas": "50139",
+    "executionBlocker": "GOVERNANCE_SAFE_SIGNERS_UNAVAILABLE"
+  },
+  "verdict": "FLOWBRIDGE V30.1F F.3 SETTLED - F.4 REVALIDATED, APPROVED, NOT BROADCAST"
+}
