@@ -280,6 +280,16 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
     }
   }
 
+  async function copyMessage(text: string, index: number) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      window.setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800);
+    } catch {
+      /* copying is optional */
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <section className="fb-surface flex min-h-[52vh] flex-col overflow-hidden">
