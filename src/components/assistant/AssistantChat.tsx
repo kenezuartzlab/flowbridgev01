@@ -422,6 +422,20 @@ export function AssistantChat({ onHide }: { onHide?: () => void } = {}) {
                             preparation
                           </span>
                         ) : null}
+                        <button
+                          type="button"
+                          onClick={() => void copyMessage(m.content, i)}
+                          aria-label={copiedIndex === i ? "Copied" : "Copy message"}
+                          title={copiedIndex === i ? "Copied" : "Copy message"}
+                          className="inline-flex items-center gap-1 rounded-md bg-foreground/6 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.06em] text-muted transition-colors hover:text-foreground"
+                        >
+                          {copiedIndex === i ? (
+                            <Check className="h-2.5 w-2.5" aria-hidden />
+                          ) : (
+                            <Copy className="h-2.5 w-2.5" aria-hidden />
+                          )}
+                          {copiedIndex === i ? "Copied" : "Copy"}
+                        </button>
                       </div>
 
                       {m.evidence && m.evidence.length > 0 ? (
