@@ -1,0 +1,97 @@
+{
+  "$comment": "FlowBridge V30.1E Stage D — FlowBridgeActivityRegistry read-only preflight and unsigned deployment review. Nothing signed, nothing broadcast, no attestation, no funding, no Router registry change, no v3 migration.",
+  "gate": "V30.1E_STAGE_D",
+  "verdict": "STAGE_D_PREFLIGHT_PASS_APPROVED_NOT_BROADCAST",
+  "chainId": 677,
+  "observedBlock": 21349018,
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "deployerCode": "0x",
+  "nonce": 4,
+  "balanceBOT": "2.32765498",
+  "candidateDigest": "fnv1a64:19671fd13a81be19",
+  "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+  "buildMatrix": {
+    "buildLine": "missingContractPackage",
+    "solc": "0.8.20+commit.a1b79de6.Emscripten.clang",
+    "optimizer": { "enabled": true, "runs": 1 },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "openzeppelin": "5.6.1",
+    "note": "Registry's own frozen build line. Router (runs 200) and Staking (0.8.24 / cancun) settings are never inherited."
+  },
+  "artifact": {
+    "source": "contracts/production/activity-registry/FlowBridgeActivityRegistry.sol",
+    "sourceSha256": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e",
+    "creationSha256": "25ec99e2bc31648d9e0cb2376c00063c404d2b535afe887f1b9cb37ebfc2cc6d",
+    "runtimeSha256": "53a83eea932da41016a7021926113e4ed50612525768bb6ba0eb1ec876b3e03b",
+    "normalizedAbiSha256": "e021c7402ce241fe89624df8c395b30347b82bdac888758530e4bfe597a8978d",
+    "creationBytes": 3490,
+    "runtimeBytes": 2713,
+    "eip170": "WITHIN_LIMIT",
+    "doubleBuild": "REPRODUCIBLE",
+    "manifestParity": "EXACT_MATCH_PRODUCTION_BYTECODE_JSON"
+  },
+  "constructorArgs": {
+    "admin": "0x88a4cc1f5771523baeb83daeea07d323a3ce9507",
+    "attester": "0xfa3de5cfa1de8ecc36197dcc0fc34fef5c1c7e47",
+    "pauser": "0x1ce0b1df5d2055f6e92122d8cb7669609c2359ef",
+    "abiEncoded": "0x00000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507000000000000000000000000fa3de5cfa1de8ecc36197dcc0fc34fef5c1c7e470000000000000000000000001ce0b1df5d2055f6e92122d8cb7669609c2359ef"
+  },
+  "roleMatrix": {
+    "DEFAULT_ADMIN_ROLE": "GOVERNANCE_SAFE 0x88a4cc1f5771523baeb83daeea07d323a3ce9507",
+    "ATTESTER_ROLE": "ACTIVITY_ATTESTER 0xfa3de5cfa1de8ecc36197dcc0fc34fef5c1c7e47",
+    "PAUSER_ROLE": "OPERATIONS_SAFE 0x1ce0b1df5d2055f6e92122d8cb7669609c2359ef",
+    "adminEqualsAttester": false,
+    "deployerHoldsAnyRole": false,
+    "unpauseAuthority": "DEFAULT_ADMIN_ROLE"
+  },
+  "safes": {
+    "governance": { "owners": 3, "threshold": 2, "verified": true },
+    "operations": { "owners": 3, "threshold": 2, "verified": true },
+    "treasury": { "owners": 3, "threshold": 2, "verified": true }
+  },
+  "unsignedTransaction": {
+    "to": null,
+    "value": "0",
+    "nonce": 4,
+    "gasPriceWei": "20000000000",
+    "gasEstimate": "733319",
+    "gasLimit": "953314",
+    "dataBytes": 3586,
+    "dataKeccak256": "0xb802153f8ac61914fb7bf2fc78d45972e5f545051d7b180c8df75ada13fed443",
+    "expectedAddress": "0xa80d8740f378989F649ca14C54e4B4a42E68753c",
+    "expectedAddressHasCode": false,
+    "feeEstimateBOT": "0.01466638",
+    "bufferedFeeBOT": "0.01906628"
+  },
+  "predictedGenesis": {
+    "recordedActivities": 0,
+    "paused": false,
+    "attestationsPausable": true,
+    "sourceLogIndexType": "uint256",
+    "activityIdFormula": "keccak256(abi.encode(uint256 sourceChainId, bytes32 sourceTxHash, uint256 sourceLogIndex, bytes32 actionType))",
+    "duplicateProtection": "DuplicateActivity revert on repeated activityId",
+    "flowCustody": "NONE",
+    "rewardAuthority": "NONE",
+    "economicExecutionAuthority": "NONE"
+  },
+  "verificationPackage": {
+    "route": "BLOCKSCOUT_V2_STANDARD_JSON",
+    "precedent": "Router V4 and Router Lens verified publicly through this exact route",
+    "license": "MIT",
+    "ready": true,
+    "transportFallback": "EXPLORER_TRANSPORT_BLOCKED (package preserved verbatim)",
+    "hardStop": "SOURCE_RUNTIME_COMPILER_MISMATCH"
+  },
+  "prohibitedInStageD": [
+    "ATTESTATION_SUBMISSION",
+    "HISTORICAL_ACTIVITY_FABRICATION",
+    "ASSET_TRANSFER",
+    "UNRELATED_ROLE_GRANT",
+    "FUNDING",
+    "ROUTER_REGISTRY_MODIFICATION",
+    "ROUTER_V3_TRAFFIC_MIGRATION"
+  ],
+  "routerTrafficPolicy": "ROUTER_V3_REMAINS_LIVE_PRODUCTION",
+  "broadcast": "NOT_BROADCAST"
+}
