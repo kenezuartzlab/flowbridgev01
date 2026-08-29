@@ -82,6 +82,17 @@ export const STAGE_D_PREDICTED_GENESIS = {
   economicExecutionAuthority: 'NONE',
 } as const;
 
+export interface StageDBuiltArtifact {
+  source: string;
+  sourceSha256: string;
+  creationSha256: string;
+  runtimeSha256: string;
+  normalizedAbiSha256: string;
+  creationBytes: number;
+  runtimeBytes: number;
+  doubleBuildReproducible: boolean;
+}
+
 export interface StageDObservation {
   chainId: number;
   blockNumber: number;
@@ -99,7 +110,7 @@ export interface StageDObservation {
   expectedAddressHasCode: boolean;
   unsignedDataBytes: number;
   unsignedDataKeccak256: string;
-  built: typeof STAGE_D_ARTIFACT;
+  built: StageDBuiltArtifact;
 }
 
 /** Recorded live observation — BOT Mainnet 677, read-only JSON-RPC. */
