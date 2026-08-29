@@ -1,0 +1,39 @@
+{
+  "gate": "FLOWBRIDGE_V30_1F_F1_CONTROLLER_VAULT_BINDING_SETTLEMENT",
+  "chainId": 677,
+  "safe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+  "safeTxHash": "0x140ec170d1f7c2d8e1effa34feb8341413a66f2c532c094f156c1d1eae3b1490",
+  "executionTxHash": "0xe8ea7f4e013b613e64a46761e80ad7ad7232ab7d6f6ce7d7b081da2a671ad259",
+  "blockNumber": 21376826,
+  "receiptStatus": "0x1",
+  "gasUsed": 106704,
+  "effectiveGasPriceWei": "20000000000",
+  "feeBOT": "0.00213408",
+  "innerCall": {
+    "target": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+    "selector": "0x6817031b",
+    "decoded": "setVault(0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8)",
+    "calldataHash": "0xa64fc6b587ec4d9239cfafdfbe8f8a339ff5147fad999010ef04158fd0fcb453",
+    "matchesApprovedPreflight": true,
+    "safeExecutionSuccess": true
+  },
+  "postState": {
+    "observedAtBlock": 21377652,
+    "controllerVault": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+    "maxFlowPerEpoch": "0",
+    "weeklyUsdBudget8": "0",
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "emergencyMode": false,
+    "vaultTotalPrincipal": "0",
+    "vaultPositions": "0",
+    "vaultPaused": false,
+    "vaultFlowBalance": "0",
+    "rewardTreasuryFlowBalance": "0",
+    "treasuryVaultRoleGranted": false,
+    "treasuryControllerRoleGranted": false,
+    "operationsIsVaultPauser": false
+  },
+  "remainingApprovedSteps": ["F.2a", "F.2b", "F.3", "F.4"],
+  "routerDelay": "ROUTER_DELAY_DECISION_REQUIRED (not executed)",
+  "verdict": "FLOWBRIDGE V30.1F F.1 CONTROLLER VAULT BINDING SETTLED - VERIFIED, NO FURTHER EXECUTION"
+}
