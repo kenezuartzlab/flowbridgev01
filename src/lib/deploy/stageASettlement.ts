@@ -45,6 +45,6 @@ export function stageASettlementValid(): boolean {
     s.totalSupplyWei === 1_000_000_000n * 10n ** 18n &&
     s.treasuryBalanceWei === s.totalSupplyWei &&
     s.runtimeParity === 'PROVEN_MODULO_IMMUTABLES' &&
-    STAGE_A_ARTIFACT.runtimeSha256 !== s.onChainRuntimeSha256
+    (STAGE_A_ARTIFACT.runtimeSha256 as string) !== (s.onChainRuntimeSha256 as string)
   );
 }
