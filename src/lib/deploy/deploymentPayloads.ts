@@ -104,9 +104,15 @@ const DEFINITIONS: readonly PayloadDefinition[] = [
   {
     stage: 'C_ROUTER_V4_AND_LENS',
     contractId: 'FlowBridgeRouterV4',
-    args: [arg('initialOwner', 'address', APPROVED_AUTHORITIES.governanceSafe)],
+    // V30.1E Stage C correction: FlowBridgeRouterV4's constructor is
+    // (address initialOwner, address initialFeeTreasury). The second argument was
+    // missing here, which would have produced an unsigned payload that reverts.
+    args: [
+      arg('initialOwner', 'address', APPROVED_AUTHORITIES.governanceSafe),
+      arg('initialFeeTreasury', 'address', APPROVED_AUTHORITIES.treasurySafe),
+    ],
     expectedEffect:
-      'Deploys Router V4 owned by the Governance Safe with bridge proxy execution OFF. Existing Router v3 stays untouched and keeps production traffic until an explicit migration decision.',
+      'Deploys Router V4 owned by the Governance Safe with the Treasury Safe as fee treasury, globalFeeBps 0, maxFeeBps 500 and bridge proxy execution OFF. Existing Router v3 stays untouched and keeps production traffic until an explicit migration decision.',
   },
   {
     stage: 'C_ROUTER_V4_AND_LENS',
