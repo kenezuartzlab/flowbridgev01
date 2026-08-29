@@ -30,6 +30,34 @@ export const STAGE_A_SETTLEMENT = {
   treasurySafe: '0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4',
   treasuryBalanceWei: 1_000_000_000_000_000_000_000_000_000n,
   sourceVerification: 'SUBMISSION_BLOCKED_BY_EXPLORER_EDGE',
+  /** V30.1E.5 — Hardhat verification attempt against the BOT Chain custom explorer. */
+  hardhatVerification: {
+    gate: 'V30.1E.5',
+    attemptedAtUtc: '2026-08-29T02:05:00Z',
+    tool: 'hardhat@2.26.1 + @nomicfoundation/hardhat-verify@2.0.14',
+    network: { name: 'botmainnet', chainId: 677, apiUrl: 'https://scan.botchain.ai/api' },
+    compiler: 'v0.8.24+commit.e11b9ed9',
+    settings: { optimizerEnabled: true, optimizerRuns: 200, viaIR: true, evmVersion: 'cancun' },
+    sourceName: 'FlowToken.sol',
+    constructorArgs: [
+      'FlowBridge',
+      'FLOW',
+      '0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4',
+      '1000000000000000000000000000',
+    ],
+    rebuildCreationSha256: '200a6a559c6e43a357f7b7fb677a1d7a4e1d89344fd78bcc34398265fa2107a2',
+    rebuildRuntimeSha256: 'f7be82e4d98df2b7ab421ae8ec4b1d2ea1b0fd124b7865aaaad5e77656226edf',
+    rebuildMatchesFrozenEvidence: true,
+    redeployed: false,
+    compilerSettingsAltered: false,
+    result: 'VERIFIER_UNREACHABLE_EXPLORER_EDGE_403',
+    verifierResponse:
+      "hardhat-verify: Etherscan: A network request failed. This is an error from the block explorer, not Hardhat. Error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON (HTTP 403 Cloudflare 'Attention Required!' on POST /api verifysourcecode, 221034-byte body, and on POST /api/v2/smart-contracts/.../verification/via/standard-input)",
+    explorerReadsSourcePublicly: false,
+    payloadBytes: 221_034,
+    measuredEdgeBodyLimitBytes: 40_000,
+  },
+  sourceStatus: 'DEPLOYED_SOURCE_PENDING',
   stageB: 'NOT_STARTED',
 } as const;
 
