@@ -1,0 +1,33 @@
+{
+  "step": "F.2b",
+  "chainId": 677,
+  "safe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+  "target": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+  "call": "grantRole(CONTROLLER_ROLE, 0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf)",
+  "executionTxHash": "0x73ba131f8c9604ec121d9637a1bc5b6bd5558dc3cf4cd1f37c9769a3e61eecb0",
+  "blockNumber": 21383715,
+  "receiptStatus": "0x1",
+  "gasUsed": "94689",
+  "feeBOT": "0.00189378",
+  "value": "0",
+  "postState": {
+    "controllerHasControllerRole": true,
+    "vaultHasVaultRole": true,
+    "treasuryFreeBalance": "0"
+  },
+  "f3Precheck": {
+    "observedAtBlock": 21384017,
+    "operationsHasPauser": false,
+    "governanceHasPauser": true,
+    "governanceHasDefaultAdmin": true,
+    "vaultPaused": false,
+    "totalPrincipal": "0",
+    "nextPositionId": "0",
+    "vaultFlowBalance": "0",
+    "simulatedGas": "51686",
+    "approvedCalldataHash": "0xa65a9a60b7e05f98a6d6126c58042a2708ef0e245c2beebe07e9dbd476bf494e",
+    "revokeGovernancePauser": false,
+    "executionBlocker": "GOVERNANCE_SAFE_SIGNERS_UNAVAILABLE"
+  },
+  "verdict": "FLOWBRIDGE V30.1F F.2b SETTLED - F.3 REVALIDATED, AWAITING GOVERNANCE SAFE EXECUTION"
+}
