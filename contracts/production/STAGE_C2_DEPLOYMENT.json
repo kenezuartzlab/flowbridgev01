@@ -1,0 +1,133 @@
+{
+  "gate": "V30.1E.10",
+  "stage": "C2_ROUTER_LENS",
+  "status": "STAGE_C2_SETTLED_VERIFIED",
+  "chainId": 677,
+  "rpcUrl": "https://rpc.botchain.ai",
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "signingModel": "PROTECTED_SERVER_SIDE_DEPLOYER_SECRET",
+  "revalidationBeforeSigning": {
+    "atBlock": 21331936,
+    "chainIdIs677": true,
+    "signerMatchesApprovedDeployer": true,
+    "nonceIsThree": true,
+    "balanceBOT": "2.36264266",
+    "gasPriceWei": "20000000000",
+    "targetRouterCodeBytes": 19720,
+    "creationSha256": "41a872fc048e1c8071bc8dfd8764c3669a229240e94cd5c080a80304feffbd1e",
+    "unsignedDataBytes": 8101,
+    "unsignedDataKeccak256": "0x44efb54034d8c07c7437bd73c094ce2bfcff9f08bb463394623430327100b8a9",
+    "constructorArgsAbiEncoded": "0x0000000000000000000000003c6fdaf93f39c72be931ab80196292962ebe6b06",
+    "expectedAddress": "0x48338d23640b09acDf0e7246844a9d867DC8205c",
+    "verdict": "PREFLIGHT_PASS"
+  },
+  "rebuild": {
+    "compiler": "0.8.20+commit.a1b79de6.Emscripten.clang",
+    "optimizer": { "enabled": true, "runs": 1 },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "sourceSha256": "8a5e1c842d6177b380c93b6670eb8e47ef58f00eb5e10bcc4508a3b16ff71aa2",
+    "creationSha256": "41a872fc048e1c8071bc8dfd8764c3669a229240e94cd5c080a80304feffbd1e",
+    "runtimeSha256": "629755614256eccd980c134e427292aa064cf620d828f79696d93385a424bffd",
+    "normalizedAbiSha256": "0ee994f33acf1df22e0fd5e558f757d83e0f9913663bf596ef0044dc02dc7042",
+    "creationBytes": 8069,
+    "runtimeBytes": 7829,
+    "doubleBuild": "REPRODUCIBLE",
+    "manifestParity": "EXACT_MATCH"
+  },
+  "transaction": {
+    "hash": "0x421b2da4e1ce3738d0367d8a59c82f0b43ef1fcf099aa54befc699e5792859f6",
+    "blockNumber": 21331972,
+    "status": "success",
+    "nonce": 3,
+    "type": "legacy",
+    "valueWei": "0",
+    "gasLimit": 2293765,
+    "gasUsed": 1749384,
+    "effectiveGasPriceWei": "20000000000",
+    "feeBOT": "0.03498768",
+    "balanceAfterBOT": "2.32765498",
+    "nonceAfter": 4
+  },
+  "contract": {
+    "id": "FlowBridgeRouterLens",
+    "address": "0x48338d23640b09acDf0e7246844a9d867DC8205c",
+    "addressMatchesExpected": true,
+    "runtimeBytes": 7829,
+    "onChainRuntimeSha256": "86206e7b75193e5ebfd0581af7a74c1cf2a4fe1ac7601892b9caaff9d22e33be",
+    "frozenRuntimeSha256": "629755614256eccd980c134e427292aa064cf620d828f79696d93385a424bffd",
+    "runtimeParity": "PROVEN_MODULO_IMMUTABLES",
+    "runtimeParityEvidence": {
+      "sizesEqual": true,
+      "differingBytes": 200,
+      "differingRanges": 10,
+      "everyDifferenceIsTheImmutableRouterAddress": true,
+      "immutableSlotStarts": [179, 1047, 1477, 2282, 2864, 3368, 3454, 5813, 6474, 6961],
+      "note": "Each differing 20-byte window holds exactly 0x3c6fdaf93f39c72be931ab80196292962ebe6b06 on chain and zero placeholder bytes locally — the immutable flowRouter binding written by the constructor."
+    }
+  },
+  "observedReads": {
+    "flowRouter": "0x3c6fdaf93F39c72be931AB80196292962ebe6B06",
+    "getActiveRouters": 0,
+    "getActiveBridges": 0,
+    "getRoutersPage(0,10)": "empty",
+    "getBridgesPage(0,10)": "empty",
+    "getRouter(0)": "reverts RouterIdOutOfRange",
+    "getBridgeRouteConfig(0, token)": "reverts BridgeIdOutOfRange",
+    "findBestV2Rate": { "found": false, "bestRouterId": "0", "bestAmountOut": "0" }
+  },
+  "mutationSurface": {
+    "nonViewFunctions": [],
+    "payableEntries": [],
+    "receiveOrFallback": false,
+    "canMutateRouterState": false
+  },
+  "sourceVerification": {
+    "explorer": "https://scan.botchain.ai",
+    "method": "blockscout-v2-standard-json-input",
+    "compilerVersion": "v0.8.20+commit.a1b79de6",
+    "optimizer": { "enabled": true, "runs": 1 },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "license": "MIT",
+    "isVerified": true,
+    "reportedName": "FlowBridgeRouterLens",
+    "status": "PUBLICLY_VERIFIED"
+  },
+  "sideEffects": {
+    "registryRegistrations": 0,
+    "registryActivations": 0,
+    "fundingActions": 0,
+    "roleGrants": 0,
+    "v3TrafficMigration": false,
+    "liveProductionRouter": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445",
+    "v4Promotion": "NOT_APPROVED"
+  },
+  "stageAVerificationRetry": {
+    "address": "0x535ddda826142ac42ce288154e9595f080940ae9",
+    "bundleBytes": 183563,
+    "httpStatus": 403,
+    "status": "DEPLOYED_ONCHAIN_VERIFIED_SOURCE_PENDING",
+    "blocker": "EXPLORER_EDGE_BODY_SIZE_403"
+  },
+  "stageBVerificationRetry": {
+    "address": "0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB",
+    "bundleBytes": 88005,
+    "httpStatus": 403,
+    "status": "DEPLOYED_ONCHAIN_VERIFIED_SOURCE_PENDING",
+    "blocker": "EXPLORER_EDGE_BODY_SIZE_403"
+  },
+  "explorerEdgeEvidence": {
+    "route": "blockscout-v2-standard-json-input",
+    "acceptedBodyBytes": 16763,
+    "rejectedBodyBytes": 22971,
+    "eachSourceAloneAccepted": true,
+    "transportsTried": [
+      "curl multipart HTTP/2",
+      "curl multipart HTTP/1.1 (and chunked)",
+      "Chromium session fetch with cf cookies from scan.botchain.ai origin",
+      "Blockscout v1 verifysourcecode urlencoded"
+    ],
+    "note": "Non-Solidity padding bodies up to 150 KB are accepted, so the rejection is a content-scoring rule at the edge, not an application limit. No source, compiler setting or artifact was altered during the retries."
+  }
+}

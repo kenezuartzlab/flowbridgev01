@@ -30,3 +30,14 @@ Reproduction check (informational):
 - creation bytecode sha256 `21c96796f0e7fbc32ed114edf6194147ddb3949c88a9907d8cc28c9ed5157581`
 - runtime bytecode sha256 `a708b596b82367893813a4ed39650bcf26f95a23fad678955a4b938fca40d367`
 - on-chain runtime differs only in the 100 bytes of the five `token` immutable slots
+
+## V30.1E.10 retry (2026-08-29)
+
+Resubmitted unchanged through the Blockscout v2 `standard-json-input` route that
+successfully verified Router V4 and the Router Lens. Still HTTP 403 (Cloudflare
+HTML) on curl HTTP/2 and HTTP/1.1, on a real Chromium session with `__cf_bm`
+cookies posting from the explorer origin, and on the legacy v1
+`verifysourcecode` form. Cumulative-bundle probes were accepted at 16,763 bytes
+and rejected at 22,971 bytes, while every individual source is accepted on its
+own — an edge content-scoring rule, not an artifact mismatch. Status unchanged:
+`DEPLOYED_ONCHAIN_VERIFIED_SOURCE_PENDING`.
