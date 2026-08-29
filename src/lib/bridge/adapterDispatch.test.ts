@@ -131,13 +131,16 @@ describe('adapterExecution defense in depth', () => {
 });
 
 describe('route session compatibility', () => {
-  // node env has no localStorage; stub a minimal in-memory one
+  // node env has no window/localStorage; stub a minimal in-memory one
   const store = new Map<string, string>();
-  (globalThis as any).localStorage = {
+  const localStorageStub = {
     getItem: (k: string) => store.get(k) ?? null,
     setItem: (k: string, v: string) => void store.set(k, v),
     removeItem: (k: string) => void store.delete(k),
   };
+  (globalThis as any).localStorage = localStorageStub;
+  (globalThis as any).window = { localStorage: localStorageStub };
+
 
   it('stores the adapter source receipt as pending, never SUCCESS', () => {
     const session: RouteSession = {
