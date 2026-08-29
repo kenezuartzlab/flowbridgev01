@@ -1,0 +1,137 @@
+{
+  "gate": "V30.1E.7",
+  "stage": "B_REWARDS_DISTRIBUTOR",
+  "status": "STAGE_B_SETTLED",
+  "broadcastAtUtc": "2026-08-29T03:00:00Z",
+  "signingModel": "PROTECTED_SERVER_SIDE_DEPLOYER_SECRET",
+  "chainId": 677,
+  "rpcUrl": "https://rpc.botchain.ai",
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "revalidationBeforeSigning": {
+    "atBlock": 21317984,
+    "chainIdIs677": true,
+    "signerMatchesApprovedDeployer": true,
+    "deployerIsEoa": true,
+    "nonceIsOne": true,
+    "balanceWei": "2481145100000000000",
+    "gasPriceWei": "20000000000",
+    "gasEstimate": 1522268,
+    "candidateDigest": "fnv1a64:19671fd13a81be19",
+    "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+    "doubleBuild": "REPRODUCIBLE",
+    "creationSha256": "21c96796f0e7fbc32ed114edf6194147ddb3949c88a9907d8cc28c9ed5157581",
+    "constructorArgsHash": "6fb84b64d49e59f14266c8ce88c20b0fe40fd24a9fcff20aa5080884c936f65d",
+    "unsignedDataBytes": 7405,
+    "unsignedDataKeccak256": "0xddf141657b99ecdcbe0f21744d64df213efd2d81ba070453422e2ef4facc3e01",
+    "unsignedDataSha256": "0x1187777125e430ed65ad3fc66ab9c8810d52bcee5e96c36672ed3da55548344e",
+    "flowTokenCodeBytes": 3539,
+    "verdict": "PREFLIGHT_PASS"
+  },
+  "transaction": {
+    "hash": "0x289727efd8830a6b767a2be05cdd1dec6f70900ac98877f336c5242b775ad4da",
+    "nonce": 1,
+    "type": "legacy",
+    "to": null,
+    "valueWei": "0",
+    "gasPriceWei": "20000000000",
+    "gasLimit": 1978948,
+    "gasUsed": 1509124,
+    "effectiveGasPriceWei": "20000000000",
+    "feeWei": "30182480000000000",
+    "blockNumber": 21317987,
+    "status": "success",
+    "logs": 6
+  },
+  "contract": {
+    "id": "FlowRewardsMerkleDistributor",
+    "address": "0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB",
+    "runtimeBytes": 5861,
+    "onChainRuntimeSha256": "419095319aa817e2f0e94327ab9aaddbfedd71017c90af41066e5849cc40ce9f",
+    "frozenRuntimeSha256": "a708b596b82367893813a4ed39650bcf26f95a23fad678955a4b938fca40d367",
+    "runtimeParity": "PROVEN_MODULO_IMMUTABLES",
+    "runtimeParityEvidence": {
+      "differingBytes": 100,
+      "allDifferencesInsideImmutableSlots": true,
+      "immutableSlots": [
+        [436, 468],
+        [1025, 1057],
+        [2908, 2940],
+        [3690, 3722],
+        [4799, 4831]
+      ],
+      "note": "The only byte differences are the five immutableReferences slots solc reports for `IERC20 public immutable token`, which the constructor writes at deploy time. The frozen creation bytecode sha256 21c96796… and runtime sha256 a708b596… reproduce byte-identically from the committed standard JSON input (solc 0.8.24+commit.e11b9ed9, optimizer runs 200, viaIR, evmVersion cancun, OpenZeppelin 5.6.1)."
+    }
+  },
+  "invariants": {
+    "token": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+    "tokenMatchesStageA": true,
+    "adminIsGovernanceSafe": true,
+    "adminIsDeployer": false,
+    "budgetManagerIsGovernanceSafe": true,
+    "publisherIsRootPublisher": true,
+    "publisherIsDeployer": false,
+    "pauserIsOperationsSafe": true,
+    "recoveryRecipient": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "minPublishDelay": 86400,
+    "campaignBudget": "0",
+    "totalReserved": "0",
+    "totalClaimed": "0",
+    "epochCount": 0,
+    "freeBalance": "0",
+    "distributorFlowBalance": "0",
+    "paused": false,
+    "flowTotalSupplyWei": "1000000000000000000000000000",
+    "treasuryFlowBalanceWei": "1000000000000000000000000000",
+    "rootsPublished": 0
+  },
+  "postBroadcastAccounting": {
+    "deployerNonceAfter": 2,
+    "deployerBalanceWeiAfter": "2450962620000000000",
+    "transactionsBroadcastThisGate": 1,
+    "fundingTransactions": 0,
+    "roleGrantTransactions": 0,
+    "approvalTransactions": 0,
+    "safeTransactions": 0,
+    "flowTransfers": 0
+  },
+  "sourceVerification": {
+    "explorer": "https://scan.botchain.ai",
+    "status": "EXPLORER_TRANSPORT_BLOCKED",
+    "primaryAttempt": {
+      "tool": "hardhat-verify 2.0.12 (Blockscout custom chain 677, apiURL https://scan.botchain.ai/api)",
+      "command": "npx hardhat verify --network bot --contract contracts/FlowRewardsMerkleDistributor.sol:FlowRewardsMerkleDistributor 0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB <7 constructor args>",
+      "compileResult": "Compiled 16 Solidity files successfully (evm target: cancun)",
+      "exactResponse": "hardhat-verify found one or more errors during the verification process: Etherscan: A network request failed. This is an error from the block explorer, not Hardhat. Error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "interpretation": "Cloudflare HTML challenge returned instead of JSON — transport rejection, not a bytecode/constructor/compiler mismatch"
+    },
+    "secondaryAttempts": [
+      {
+        "endpoint": "POST /api/v2/smart-contracts/{address}/verification/via/standard-input",
+        "body": "complete 16-source standard JSON input (88,002 bytes)",
+        "response": "HTML Cloudflare challenge page (body-size rejection)"
+      },
+      {
+        "endpoint": "POST /api?module=contract&action=verifysourcecode",
+        "response": "{\"message\":\"OK\",\"status\":\"1\",\"result\":\"3824681c3560a63e1c9cedabbfcab2691c5673fb6a924b36\"} then checkverifystatus → \"Fail - Unable to verify\" (single-file body accepted, but it cannot carry the 15 imported OpenZeppelin sources)"
+      }
+    ],
+    "explorerPublicState": { "is_verified": false },
+    "preservedBundle": {
+      "standardJsonInput": "contracts/production/stage-b-verification/FlowRewardsMerkleDistributor.standard-input.json",
+      "sourceFiles": 16,
+      "contractName": "FlowRewardsMerkleDistributor.sol:FlowRewardsMerkleDistributor",
+      "compilerVersion": "v0.8.24+commit.e11b9ed9",
+      "optimizer": { "enabled": true, "runs": 200 },
+      "viaIR": true,
+      "evmVersion": "cancun",
+      "license": "MIT",
+      "constructorArgsAbiEncoded": "0x000000000000000000000000535ddda826142ac42ce288154e9595f080940ae900000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce950700000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507000000000000000000000000971e7790fe6c8f77dc666bb05d4aeda362653f940000000000000000000000001ce0b1df5d2055f6e92122d8cb7669609c2359ef000000000000000000000000efc13d1a1dc30ba2da0bb005ba5a783c6b229ea40000000000000000000000000000000000000000000000000000000000015180",
+      "reproducesFrozenCreationSha256": true,
+      "reproducesFrozenRuntimeSha256": true
+    }
+  },
+  "releaseStatus": "DEPLOYED_ONCHAIN_VERIFIED_SOURCE_PENDING",
+  "funding": "NOT_FUNDED — 0 FLOW, deliberately withheld",
+  "stageC": "NOT_STARTED — separately authorized",
+  "verdict": "FLOWBRIDGE V30.1E STAGE B SETTLED — SOURCE PENDING (EXPLORER_TRANSPORT_BLOCKED)"
+}
