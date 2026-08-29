@@ -1,0 +1,105 @@
+{
+  "gate": "FLOWBRIDGE_V30_1F_POST_DEPLOYMENT_WIRING_GUARDRAILS_PREFLIGHT",
+  "mode": "READ_ONLY_PREFLIGHT",
+  "chainId": 677,
+  "observedAtBlock": 21371606,
+  "gasPriceWei": "20000000000",
+  "deployerNonce": 8,
+  "candidateDigest": "fnv1a64:19671fd13a81be19",
+  "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+  "preparedTransactions": [
+    {
+      "step": "F.1",
+      "target": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+      "call": "setVault(0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8)",
+      "selector": "0x6817031b",
+      "calldataHash": "0xa64fc6b587ec4d9239cfafdfbe8f8a339ff5147fad999010ef04158fd0fcb453",
+      "simulation": "OK",
+      "gasEstimate": "46823",
+      "approved": true
+    },
+    {
+      "step": "F.2a",
+      "target": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+      "call": "grantRole(VAULT_ROLE, StakingVaultV2)",
+      "roleId": "0x31e0210044b4f6757ce6aa31f9c6e8d4896d24a755014887391a926c5224d959",
+      "selector": "0x2f2ff15d",
+      "calldataHash": "0x654e20c094b56d28f011a2d26fec00e2de4c865a2d9f614eb94bf5aeb1f4f8ce",
+      "simulation": "OK",
+      "gasEstimate": "51624",
+      "approved": true
+    },
+    {
+      "step": "F.2b",
+      "target": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+      "call": "grantRole(CONTROLLER_ROLE, StakingController)",
+      "roleId": "0x7b765e0e932d348852a6f810bfa1ab891e259123f02db8cdcde614c570223357",
+      "selector": "0x2f2ff15d",
+      "calldataHash": "0x8d12af939d82a4a461b73add4e847e0092ee811c20619e855ef6845e25b84a1c",
+      "simulation": "OK",
+      "gasEstimate": "51636",
+      "approved": true
+    },
+    {
+      "step": "F.3",
+      "target": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+      "call": "grantRole(PAUSER_ROLE, OperationsSafe)",
+      "roleId": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+      "selector": "0x2f2ff15d",
+      "calldataHash": "0xa65a9a60b7e05f98a6d6126c58042a2708ef0e245c2beebe07e9dbd476bf494e",
+      "simulation": "OK",
+      "gasEstimate": "51686",
+      "governancePauserRetained": true,
+      "approved": true
+    },
+    {
+      "step": "F.4",
+      "target": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+      "call": "setBudgets(0, 50000000000000000000000)",
+      "selector": "0x5181ecd3",
+      "calldataHash": "0x9410508219448179db1408fa9683ada69b8811f84238d609ffd3fc06b2ad8da5",
+      "simulation": "OK",
+      "gasEstimate": "50139",
+      "approved": true
+    },
+    {
+      "step": "F.5",
+      "target": "0x3c6fdaf93f39c72be931ab80196292962ebe6b06",
+      "call": "setRegistryActivationDelay(86400)",
+      "selector": "0x7e64facf",
+      "calldataHash": "0x7b9a7daed26110c3db6932d9e1624d6774893600f573bd767677e87d605f18eb",
+      "simulation": "OK",
+      "gasEstimate": "47937",
+      "approved": false,
+      "status": "ROUTER_DELAY_DECISION_REQUIRED"
+    }
+  ],
+  "unchangedStateProof": {
+    "rewardTreasuryFlow": "0",
+    "vaultFlow": "0",
+    "vaultPositions": 0,
+    "distributorFlow": "0",
+    "distributorEpochCount": "0",
+    "distributorMinPublishDelay": "86400",
+    "activityRegistryEmpty": true,
+    "routerV4RegistryEmpty": true,
+    "routerV4GlobalFeeBps": "0",
+    "routerV3StillLive": true,
+    "flowSupplyEntirelyInTreasurySafe": true
+  },
+  "sourceVerification": {
+    "verified": ["FlowBridgeRouterV4", "FlowBridgeRouterLens", "FlowStakingRewardTreasury", "FlowStakingController"],
+    "pending": ["FlowToken", "FlowRewardsMerkleDistributor", "FlowBridgeActivityRegistry", "FlowStakingVaultV2"],
+    "pendingReason": "EXPLORER_TRANSPORT_BLOCKED",
+    "bundlesPreservedUnchanged": true
+  },
+  "prohibitedActionsTaken": {
+    "transactionsBroadcast": 0,
+    "flowFundedWei": "0",
+    "stakesCreated": 0,
+    "rootsOrEpochsPublished": 0,
+    "routerOrBridgeRegistrations": 0,
+    "activityAttestations": 0
+  },
+  "verdict": "FLOWBRIDGE V30.1F POST-DEPLOYMENT WIRING GUARDRAILS PREFLIGHT PASS - APPROVED, NOT BROADCAST"
+}
