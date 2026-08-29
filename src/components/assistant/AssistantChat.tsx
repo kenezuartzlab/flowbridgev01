@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Bot, ChevronDown, RotateCcw, ShieldCheck, Sparkles, User, X } from "lucide-react";
+import { ArrowUp, Bot, Check, ChevronDown, Copy, RotateCcw, ShieldCheck, Sparkles, User, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { assistantFetch } from "@/lib/ai/assistantClient";
 import { useJourney } from "@/lib/ai/journey/useJourney";
