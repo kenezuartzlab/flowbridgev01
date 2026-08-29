@@ -1,0 +1,409 @@
+{
+  "$comment": "FlowBridge V30.1E.13 \u2014 Stage E staking-v2 preflight evidence. Read-only: zero signatures, zero broadcasts, zero funding, zero activation.",
+  "gate": "V30.1E.13",
+  "verdict": "STAGE_E_PREFLIGHT_PASS_APPROVED_NOT_BROADCAST",
+  "chainId": 677,
+  "observedAtBlock": 21357833,
+  "candidateDigest": "fnv1a64:19671fd13a81be19",
+  "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+  "deployer": {
+    "address": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "liveNonce": 5,
+    "balanceBOT": "2.31312724",
+    "gasPriceWei": "20000000000"
+  },
+  "safes": {
+    "governance": {
+      "address": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+      "hasCode": true,
+      "codeBytes": 171,
+      "owners": [
+        "0x524Db06954de917025180057BCBeB36eC96A98c5",
+        "0x145E201c658706D3D2b9f35E0c51270474453B2B",
+        "0x0EdFf26415660c9d2d12320678192f1B97BEBb85"
+      ],
+      "threshold": "2"
+    },
+    "treasury": {
+      "address": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+      "hasCode": true,
+      "codeBytes": 171,
+      "owners": [
+        "0xF951c408f2412304ea08ADE94d53D7Df1EBdb25e",
+        "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+        "0x2eA57676b4086300C949A7eeba8697AE2fc1A1F0"
+      ],
+      "threshold": "2"
+    },
+    "operations": {
+      "address": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+      "hasCode": true,
+      "codeBytes": 171,
+      "owners": [
+        "0x62b1902F23483e0AF44564681865E993AAA47368",
+        "0xD5966A3E829A4c366b8F762195beaf38d63D6ABe",
+        "0x2c9f04c9091b2dCa91f35fE6e6492E296A7519Cc"
+      ],
+      "threshold": "2"
+    }
+  },
+  "flowToken": {
+    "address": "0x535ddda826142ac42ce288154e9595f080940ae9",
+    "symbol": "FLOW",
+    "totalSupplyWei": "1000000000000000000000000000",
+    "treasurySafeBalanceWei": "1000000000000000000000000000",
+    "supplyCheck": "EXACTLY_1B_FLOW_IN_TREASURY_SAFE"
+  },
+  "compilerInputPreservation": {
+    "policy": "Each staking artifact retains the exact Standard-JSON compiler input (all resolved source unit names + contents + settings) that reproduces its frozen bytecode byte-for-byte.",
+    "recompileCleanProcess": "BYTE_IDENTICAL",
+    "stageDLessonApplied": "Verification payloads are generated from the preserved compiler input, with source unit names exactly as resolved by the frozen import callback; reconstructing an approximate source tree is prohibited."
+  },
+  "builds": {
+    "FlowStakingRewardTreasury": {
+      "source": "contracts/production/staking-v2/FlowStakingRewardTreasury.sol",
+      "sourceSha256": "963ce367246ebc673e1d915202759a5159604dd0a794484b68500f921155d8a8",
+      "compiler": {
+        "version": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "openzeppelin": "5.6.1",
+        "buildLine": "stakingV2"
+      },
+      "creationSha256": "d090c6ba3afb751a7251bf8585e1ed013e4ad7b8298dcb836945e1382deaa28f",
+      "runtimeSha256": "9dabd23c2e1330b450d0d5344d7a6ad65791ff3a5e9695f447618fb9e9a0cf3c",
+      "normalizedAbiSha256": "3cfeefcdd459ca697e3f6f1891e3ffe9a325896f544d9b32a7358fabb115065a",
+      "creationBytes": 4604,
+      "runtimeBytes": 4137,
+      "doubleBuild": "REPRODUCIBLE",
+      "manifestParity": "EXACT_MATCH",
+      "standardJsonInput": {
+        "path": "contracts/production/stage-e-verification/standard-input-FlowStakingRewardTreasury.json",
+        "sha256": "9d5417ab7722455497ccf8147aa9246829daf824e062752a1174554e38ba5ed8",
+        "bytes": 43356,
+        "sourceUnitCount": 11,
+        "sourceUnits": [
+          "FlowStakingRewardTreasury.sol",
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+          "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+          "@openzeppelin/contracts/access/AccessControl.sol",
+          "@openzeppelin/contracts/access/IAccessControl.sol",
+          "@openzeppelin/contracts/utils/Context.sol",
+          "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+          "@openzeppelin/contracts/interfaces/IERC1363.sol",
+          "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+          "@openzeppelin/contracts/interfaces/IERC20.sol",
+          "@openzeppelin/contracts/interfaces/IERC165.sol"
+        ],
+        "reproducesFrozenArtifact": true
+      }
+    },
+    "FlowStakingController": {
+      "source": "contracts/production/staking-v2/FlowStakingController.sol",
+      "sourceSha256": "b2a58b1128c0a9d42630b0026ce69cc377abbce6c9ea3ec42721c73d40afc0d4",
+      "compiler": {
+        "version": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "openzeppelin": "5.6.1",
+        "buildLine": "stakingV2"
+      },
+      "creationSha256": "c54baac0837b46791e6af688c3cf1cb13085ccf174597341ef57abf774777ef8",
+      "runtimeSha256": "e534f7b8a606b4e12ef80aa77df2372c742cf085ca38a7d15e2d697c031f459b",
+      "normalizedAbiSha256": "b61bcac1780e51fda835b9e57318a7198c09d4d6e7542a3dabb7640c3fe0e88f",
+      "creationBytes": 8876,
+      "runtimeBytes": 7108,
+      "doubleBuild": "REPRODUCIBLE",
+      "manifestParity": "EXACT_MATCH",
+      "standardJsonInput": {
+        "path": "contracts/production/stage-e-verification/standard-input-FlowStakingController.json",
+        "sha256": "eb28fb7cc46f74324c15210665d36d4485aa1a13392aa4e12fe8d89e930209ca",
+        "bytes": 31295,
+        "sourceUnitCount": 6,
+        "sourceUnits": [
+          "FlowStakingController.sol",
+          "@openzeppelin/contracts/access/AccessControl.sol",
+          "@openzeppelin/contracts/access/IAccessControl.sol",
+          "@openzeppelin/contracts/utils/Context.sol",
+          "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+          "@openzeppelin/contracts/utils/introspection/IERC165.sol"
+        ],
+        "reproducesFrozenArtifact": true
+      }
+    },
+    "FlowStakingVaultV2": {
+      "source": "contracts/production/staking-v2/FlowStakingVaultV2.sol",
+      "sourceSha256": "4a82e4f0f9c07e2a24bc7150d80675c6c3d1b8359ce11589aac55fb7c75b2531",
+      "compiler": {
+        "version": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "openzeppelin": "5.6.1",
+        "buildLine": "stakingV2"
+      },
+      "creationSha256": "159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6",
+      "runtimeSha256": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
+      "normalizedAbiSha256": "a22dacc20032a9a188034b1fd1ea4c66eaa8ae3827259ac790a6897fd52369e0",
+      "creationBytes": 11254,
+      "runtimeBytes": 10366,
+      "doubleBuild": "REPRODUCIBLE",
+      "manifestParity": "EXACT_MATCH",
+      "standardJsonInput": {
+        "path": "contracts/production/stage-e-verification/standard-input-FlowStakingVaultV2.json",
+        "sha256": "cea8ef2f131aee8fc7b05f918fa97daa41240c3ee88f08ca991a3acfb4af9636",
+        "bytes": 67001,
+        "sourceUnitCount": 14,
+        "sourceUnits": [
+          "FlowStakingVaultV2.sol",
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+          "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+          "@openzeppelin/contracts/access/AccessControl.sol",
+          "@openzeppelin/contracts/utils/Pausable.sol",
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+          "@openzeppelin/contracts/access/IAccessControl.sol",
+          "@openzeppelin/contracts/utils/Context.sol",
+          "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+          "@openzeppelin/contracts/interfaces/IERC1363.sol",
+          "@openzeppelin/contracts/utils/StorageSlot.sol",
+          "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+          "@openzeppelin/contracts/interfaces/IERC20.sol",
+          "@openzeppelin/contracts/interfaces/IERC165.sol"
+        ],
+        "reproducesFrozenArtifact": true
+      }
+    }
+  },
+  "dependencyGraph": {
+    "derivedFrom": "frozen constructor signatures in contracts/production/staking-v2/*.sol",
+    "cycles": "NONE",
+    "order": [
+      "FlowStakingRewardTreasury(token_,admin,recoveryRecipient_)",
+      "FlowStakingController(admin,governor,publisher)",
+      "FlowStakingVaultV2(token_,controller_,treasury_,admin)"
+    ],
+    "note": "Vault V2 must be last: it consumes the Controller and Reward Treasury addresses. Treasury and Controller have no cross dependency."
+  },
+  "transactions": [
+    {
+      "contract": "FlowStakingRewardTreasury",
+      "nonce": 5,
+      "expectedAddress": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+      "codeAtExpected": false,
+      "constructorArgs": [
+        "token_=FlowToken",
+        "admin=GovernanceSafe",
+        "recoveryRecipient_=TreasurySafe"
+      ],
+      "constructorArgsHex": "0x000000000000000000000000535ddda826142ac42ce288154e9595f080940ae900000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507000000000000000000000000efc13d1a1dc30ba2da0bb005ba5a783c6b229ea4",
+      "constructorArgsKeccak": "0x963745f5c44c7a582b20e7ec760c15381c1e5f9e813ff886ead442d22b7e4097",
+      "creationSha256": "d090c6ba3afb751a7251bf8585e1ed013e4ad7b8298dcb836945e1382deaa28f",
+      "runtimeSha256": "9dabd23c2e1330b450d0d5344d7a6ad65791ff3a5e9695f447618fb9e9a0cf3c",
+      "dataBytes": 4700,
+      "unsignedDataKeccak": "0x967f90fbf5e2d32762cc7b073245b59f38092e77c727e22c5b4bfaff115fdd7b",
+      "gasEstimate": "1010122",
+      "gasLimitBuffered30": 1313159,
+      "expectedFeeBOT": "0.02626318"
+    },
+    {
+      "contract": "FlowStakingController",
+      "nonce": 6,
+      "expectedAddress": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+      "codeAtExpected": false,
+      "constructorArgs": [
+        "admin=GovernanceSafe",
+        "governor=GovernanceSafe",
+        "publisher=address(0) (no genesis publisher)"
+      ],
+      "constructorArgsHex": "0x00000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce950700000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce95070000000000000000000000000000000000000000000000000000000000000000",
+      "constructorArgsKeccak": "0xf03d5b653f96d9a93b75aceb736e3596e106e4db698b3d0667234dd76f24c856",
+      "creationSha256": "c54baac0837b46791e6af688c3cf1cb13085ccf174597341ef57abf774777ef8",
+      "runtimeSha256": "e534f7b8a606b4e12ef80aa77df2372c742cf085ca38a7d15e2d697c031f459b",
+      "dataBytes": 8972,
+      "unsignedDataKeccak": "0xb3bdd9c923df5210b67be451b36a079edaafda2f682717d659e1901f6d844893",
+      "gasEstimate": "1965793",
+      "gasLimitBuffered30": 2555531,
+      "expectedFeeBOT": "0.05111062"
+    },
+    {
+      "contract": "FlowStakingVaultV2",
+      "nonce": 7,
+      "expectedAddress": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+      "codeAtExpected": false,
+      "constructorArgs": [
+        "token_=FlowToken",
+        "controller_=predicted Controller CREATE",
+        "treasury_=predicted RewardTreasury CREATE",
+        "admin=GovernanceSafe"
+      ],
+      "constructorArgsHex": "0x000000000000000000000000535ddda826142ac42ce288154e9595f080940ae90000000000000000000000005095ecc7226ad6decee99846bc83363ca41b52bf000000000000000000000000a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e00000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507",
+      "constructorArgsKeccak": "0xc19ac2409811e9b37f32175a7869863cc7673216514e19ee5db98241e39b3c54",
+      "creationSha256": "159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6",
+      "runtimeSha256": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
+      "dataBytes": 11382,
+      "unsignedDataKeccak": "0x654e7597031841556f69bdfdaa6522d708a0a1d78b31de05e31ff6ae9c613440",
+      "gasEstimate": "2390840",
+      "gasLimitBuffered30": 3108092,
+      "expectedFeeBOT": "0.06216184"
+    }
+  ],
+  "totalBufferedFeeBOT": "0.13953564",
+  "genesisExpectations": {
+    "rewardTreasury": {
+      "flowBalance": 0,
+      "fundedInventory": 0,
+      "accruedLiabilities": 0,
+      "vaultRoleGranted": false,
+      "controllerRoleGranted": false,
+      "recoveryRecipient": "TreasurySafe",
+      "defaultAdmin": "GovernanceSafe"
+    },
+    "controller": {
+      "products": 5,
+      "genesisAprBps": [
+        1800,
+        2700,
+        3600,
+        4800,
+        6000
+      ],
+      "floorBps": [
+        0,
+        800,
+        1000,
+        1200,
+        1500
+      ],
+      "targetBps": [
+        1000,
+        1400,
+        1800,
+        2400,
+        3000
+      ],
+      "hardCapBps": [
+        1200,
+        1800,
+        2400,
+        3200,
+        4000
+      ],
+      "lockSeconds": [
+        0,
+        2592000,
+        7776000,
+        15552000,
+        31536000
+      ],
+      "GENESIS_YEAR1_CAP": "1000000 ether",
+      "STANDARD_YEAR1_CAP": "2000000 ether",
+      "TOTAL_YEAR1_CAP": "3000000 ether",
+      "EPOCH": "7 days",
+      "GENESIS_MAX_SECONDS": "90 days",
+      "maxWeeklyRewardBudgetFlowPolicy": 50000,
+      "weeklyUsdBudget8AtGenesis": 0,
+      "maxFlowPerEpochAtGenesis": 0,
+      "oracle": "address(0) \u2192 PENDING_POOL",
+      "dynamicBonus": "UNAVAILABLE_FAIL_CLOSED (oracleHealthy() returns (false,1) while unconfigured)",
+      "vault": "unset (address(0)) until governor calls setVault",
+      "publisherRole": "UNGRANTED (publisher=address(0))"
+    },
+    "vaultV2": {
+      "positions": 0,
+      "principalCustody": 0,
+      "rewardLiability": 0,
+      "paused": false,
+      "defaultAdmin": "GovernanceSafe",
+      "pauser": "GovernanceSafe (frozen constructor grants PAUSER_ROLE to admin; Operations Safe pauser delegation is a later governance action, not a deployment change)"
+    },
+    "publicEnablement": "NONE \u2014 deployment alone enables no product, no auto-stake, no auto-claim and no FLOW movement."
+  },
+  "approvals": [
+    {
+      "approvalId": "STAGE_E_1_FlowStakingRewardTreasury",
+      "authorizes": "deployment of FlowStakingRewardTreasury only",
+      "chainId": 677,
+      "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+      "nonce": 5,
+      "valueBOT": 0,
+      "candidateDigest": "fnv1a64:19671fd13a81be19",
+      "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+      "creationSha256": "d090c6ba3afb751a7251bf8585e1ed013e4ad7b8298dcb836945e1382deaa28f",
+      "constructorArgsKeccak": "0x963745f5c44c7a582b20e7ec760c15381c1e5f9e813ff886ead442d22b7e4097",
+      "unsignedDataKeccak": "0x967f90fbf5e2d32762cc7b073245b59f38092e77c727e22c5b4bfaff115fdd7b",
+      "gasLimit": 1313159,
+      "excludes": [
+        "10,000,000 FLOW reward-treasury funding",
+        "product activation / public enablement",
+        "oracle configuration",
+        "role grants (VAULT_ROLE, CONTROLLER_ROLE, PUBLISHER_ROLE, setVault)",
+        "any Safe transaction"
+      ],
+      "invalidationRule": "If any earlier CREATE address or nonce differs at signing time, this approval and every later Stage E approval are void and must be regenerated."
+    },
+    {
+      "approvalId": "STAGE_E_2_FlowStakingController",
+      "authorizes": "deployment of FlowStakingController only",
+      "chainId": 677,
+      "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+      "nonce": 6,
+      "valueBOT": 0,
+      "candidateDigest": "fnv1a64:19671fd13a81be19",
+      "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+      "creationSha256": "c54baac0837b46791e6af688c3cf1cb13085ccf174597341ef57abf774777ef8",
+      "constructorArgsKeccak": "0xf03d5b653f96d9a93b75aceb736e3596e106e4db698b3d0667234dd76f24c856",
+      "unsignedDataKeccak": "0xb3bdd9c923df5210b67be451b36a079edaafda2f682717d659e1901f6d844893",
+      "gasLimit": 2555531,
+      "excludes": [
+        "10,000,000 FLOW reward-treasury funding",
+        "product activation / public enablement",
+        "oracle configuration",
+        "role grants (VAULT_ROLE, CONTROLLER_ROLE, PUBLISHER_ROLE, setVault)",
+        "any Safe transaction"
+      ],
+      "invalidationRule": "If any earlier CREATE address or nonce differs at signing time, this approval and every later Stage E approval are void and must be regenerated."
+    },
+    {
+      "approvalId": "STAGE_E_3_FlowStakingVaultV2",
+      "authorizes": "deployment of FlowStakingVaultV2 only",
+      "chainId": 677,
+      "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+      "nonce": 7,
+      "valueBOT": 0,
+      "candidateDigest": "fnv1a64:19671fd13a81be19",
+      "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+      "creationSha256": "159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6",
+      "constructorArgsKeccak": "0xc19ac2409811e9b37f32175a7869863cc7673216514e19ee5db98241e39b3c54",
+      "unsignedDataKeccak": "0x654e7597031841556f69bdfdaa6522d708a0a1d78b31de05e31ff6ae9c613440",
+      "gasLimit": 3108092,
+      "excludes": [
+        "10,000,000 FLOW reward-treasury funding",
+        "product activation / public enablement",
+        "oracle configuration",
+        "role grants (VAULT_ROLE, CONTROLLER_ROLE, PUBLISHER_ROLE, setVault)",
+        "any Safe transaction"
+      ],
+      "invalidationRule": "If any earlier CREATE address or nonce differs at signing time, this approval and every later Stage E approval are void and must be regenerated."
+    }
+  ],
+  "prohibitions": {
+    "signed": 0,
+    "broadcast": 0,
+    "fundingFlow": 0,
+    "activation": "NONE",
+    "oracleConfigured": false,
+    "safeTransactions": 0
+  },
+  "stageFLock": "No staking transaction may be broadcast until this report is reviewed and the first staking deployment receives explicit per-transaction authorization."
+}
