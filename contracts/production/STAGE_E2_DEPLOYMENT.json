@@ -1,0 +1,177 @@
+{
+ "$comment": "FlowBridge V30.1E.15 \u2014 Stage E.2 FlowStakingController settlement evidence (BOT Mainnet 677). One transaction only; no funding, activation, oracle, role grants or setVault.",
+ "gate": "V30.1E.15",
+ "verdict": "STAGE_E2_SETTLED_ONCHAIN_AND_SOURCE_VERIFIED",
+ "chainId": 677,
+ "candidateDigest": "fnv1a64:19671fd13a81be19",
+ "decisionManifestHash": "fnv1a64:9972234982dbe76f",
+ "presignRevalidation": {
+  "block": 21363599,
+  "chainId": 677,
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "nonce": 6,
+  "balanceBOT": "2.29310704",
+  "gasPriceWei": "20000000000",
+  "creationSha256": "c54baac0837b46791e6af688c3cf1cb13085ccf174597341ef57abf774777ef8",
+  "constructorArgsHex": "0x00000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce950700000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce95070000000000000000000000000000000000000000000000000000000000000000",
+  "constructorArgsKeccak": "0xf03d5b653f96d9a93b75aceb736e3596e106e4db698b3d0667234dd76f24c856",
+  "unsignedDataKeccak": "0xb3bdd9c923df5210b67be451b36a079edaafda2f682717d659e1901f6d844893",
+  "dataBytes": 8972,
+  "predicted": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+  "codeAtPredicted": "0x",
+  "gasEstimate": "1965793"
+ },
+ "transaction": {
+  "txHash": "0x70e7cbfc298c2f6ea33483f1531b29538bf4fba7a64d6b3ce6c4ce241b3a8f49",
+  "blockNumber": 21363621,
+  "status": 1,
+  "contractAddress": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+  "gasUsed": "1949156",
+  "effectiveGasPriceWei": "20000000000",
+  "feeBOT": "0.03898312"
+ },
+ "runtimeParity": {
+  "classification": "EXACT_IMMUTABLE_AWARE_MATCH",
+  "onchainRuntimeSha256": "b11897045c5fe2f5350b27c50c5d624294efa256851774c4359b0ecbcb3c972e",
+  "frozenRuntimeSha256": "e534f7b8a606b4e12ef80aa77df2372c742cf085ca38a7d15e2d697c031f459b",
+  "onchainRuntimeBytes": 7108,
+  "immutableDiff": {
+   "immutableReferences": {},
+   "ranges": [
+    [
+     4063,
+     4066,
+     "6a92d0b4",
+     "00000000"
+    ]
+   ],
+   "blockTimestamp": 1788006580
+  }
+ },
+ "postSettlementState": {
+  "onchainRuntimeBytes": 7108,
+  "onchainRuntimeSha256": "b11897045c5fe2f5350b27c50c5d624294efa256851774c4359b0ecbcb3c972e",
+  "roles": {
+   "governanceIsAdmin": true,
+   "governanceIsGovernor": true,
+   "governanceHasPublisher": false,
+   "deployerAdmin": false,
+   "deployerGovernor": false,
+   "deployerPublisher": false,
+   "zeroAddressPublisher": false
+  },
+  "caps": {
+   "genesis": "1000000.0",
+   "standard": "2000000.0",
+   "total": "3000000.0"
+  },
+  "budget": {
+   "weeklyUsdBudget8": "0",
+   "maxFlowPerEpoch": "0"
+  },
+  "oracle": "0x0000000000000000000000000000000000000000",
+  "vault": "0x0000000000000000000000000000000000000000",
+  "epoch": {
+   "epochEnd": "0",
+   "epochCommitted": "0",
+   "prevImpliedVarBps": "0",
+   "emergencyMode": false
+  },
+  "year1Used": {
+   "genesis": "0",
+   "standard": "0"
+  },
+  "oraclePolicy": [
+   "7200",
+   "0",
+   "500"
+  ],
+  "products": [
+   {
+    "id": 0,
+    "active": true,
+    "lockSeconds": 0,
+    "genesisAprBps": 1800,
+    "floorBps": 0,
+    "targetBps": 1000,
+    "hardCapBps": 1200,
+    "minPrincipal": "1.0"
+   },
+   {
+    "id": 1,
+    "active": true,
+    "lockSeconds": 2592000,
+    "genesisAprBps": 2700,
+    "floorBps": 800,
+    "targetBps": 1400,
+    "hardCapBps": 1800,
+    "minPrincipal": "1.0"
+   },
+   {
+    "id": 2,
+    "active": true,
+    "lockSeconds": 7776000,
+    "genesisAprBps": 3600,
+    "floorBps": 1000,
+    "targetBps": 1800,
+    "hardCapBps": 2400,
+    "minPrincipal": "1.0"
+   },
+   {
+    "id": 3,
+    "active": true,
+    "lockSeconds": 15552000,
+    "genesisAprBps": 4800,
+    "floorBps": 1200,
+    "targetBps": 2400,
+    "hardCapBps": 3200,
+    "minPrincipal": "1.0"
+   },
+   {
+    "id": 4,
+    "active": true,
+    "lockSeconds": 31536000,
+    "genesisAprBps": 6000,
+    "floorBps": 1500,
+    "targetBps": 3000,
+    "hardCapBps": 4000,
+    "minPrincipal": "1.0"
+   }
+  ],
+  "referenceHealthy": {
+   "ok": false,
+   "reasonCode": 1
+  },
+  "quoteEpochBudget": "REVERT_FAIL_CLOSED:OracleNotConfigured"
+ },
+ "sourceVerification": {
+  "explorer": "https://scan.botchain.ai",
+  "method": "BLOCKSCOUT_V2_STANDARD_JSON_INPUT",
+  "is_verified": true,
+  "contractName": "FlowStakingController",
+  "compilerVersion": "v0.8.24+commit.e11b9ed9",
+  "input": "contracts/production/stage-e-verification/standard-input-FlowStakingController.json"
+ },
+ "prohibitedActionsTaken": {
+  "flowFunded": 0,
+  "productsActivatedOrReconfigured": 0,
+  "oracleConfigured": false,
+  "roleGrants": 0,
+  "setVaultCalls": 0,
+  "epochsPublished": 0,
+  "maxFlowPerEpochChanges": 0,
+  "safeTransactions": 0,
+  "routerMigrations": 0,
+  "unrelatedWrites": 0
+ },
+ "notes": {
+  "productActiveFlag": "The frozen constructor writes all five products with active=true as a rate-matrix presence flag. Staking is unreachable: vault unset, maxFlowPerEpoch=0, oracle unset, Vault contract not deployed.",
+  "weeklyCeiling": "50,000 FLOW/week intentionally NOT configured in Stage E.2."
+ },
+ "stageLocks": {
+  "stageE3VaultAuthorized": false,
+  "activationStageAuthorized": false,
+  "routerV3StillLive": true,
+  "routerV4PromotionAuthorized": false
+ }
+}
