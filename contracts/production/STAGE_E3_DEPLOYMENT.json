@@ -1,0 +1,426 @@
+{
+  "stage": "V30.1E Stage E.3 \u2014 FlowStakingVaultV2",
+  "chainId": 677,
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "transaction": {
+    "txHash": "0xe3d000d3243a0b85862e64fff63e340ccabb2e73831b2293cd87ec1f1b43f6c9",
+    "blockNumber": 21366262,
+    "status": 1,
+    "contractAddress": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+    "gasUsed": 2370856,
+    "gasLimit": 3108092,
+    "effectiveGasPriceWei": "20000000000",
+    "feeBOT": "0.04741712",
+    "addressMatches": true,
+    "blockTimestamp": 1788008561,
+    "nonce": 7,
+    "broadcastCount": 1
+  },
+  "artifact": {
+    "creationSha256": "159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6",
+    "runtimeSha256": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
+    "creationBytes": 11254,
+    "runtimeBytes": 10366,
+    "doubleBuildIdentical": true,
+    "compiler": "0.8.24+commit.e11b9ed9 / optimizer 200 / viaIR / cancun / OZ 5.6.1",
+    "standardJsonInput": "contracts/production/stage-e-verification/standard-input-FlowStakingVaultV2.json",
+    "standardJsonInputSha256": "cea8ef2f131aee8fc7b05f918fa97daa41240c3ee88f08ca991a3acfb4af9636"
+  },
+  "presignRevalidation": {
+    "observedAtBlock": 21366225,
+    "nonce": 7,
+    "balanceBOT": "2.25412392",
+    "gasPriceWei": "20000000000",
+    "constructorArgsKeccak": "0xc19ac2409811e9b37f32175a7869863cc7673216514e19ee5db98241e39b3c54",
+    "unsignedDataKeccak": "0x654e7597031841556f69bdfdaa6522d708a0a1d78b31de05e31ff6ae9c613440",
+    "dataBytes": 11382,
+    "gasEstimate": 2390840,
+    "gasLimit": 3108092,
+    "predictedAddress": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+    "predictedAddressCodeless": true
+  },
+  "settlement": {
+    "address": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+    "runtime": {
+      "onchainBytes": 10366,
+      "compiledBytes": 10366,
+      "rawOnchainRuntimeSha256": "78ae940e72f35a2e85bcd24e8fbbe0ab88e44ab80e9640ded95f2c8f67bf2fb3",
+      "frozenRuntimeSha256": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
+      "exactRawMatch": false,
+      "differingRanges": [
+        {
+          "start": 503,
+          "end": 522,
+          "len": 20,
+          "onchainHex": "535ddda826142ac42ce288154e9595f080940ae9",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 575,
+          "end": 594,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 1929,
+          "end": 1948,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 2388,
+          "end": 2407,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 2994,
+          "end": 3013,
+          "len": 20,
+          "onchainHex": "535ddda826142ac42ce288154e9595f080940ae9",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 3209,
+          "end": 3228,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 3297,
+          "end": 3316,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 3459,
+          "end": 3478,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 3547,
+          "end": 3566,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 3924,
+          "end": 3943,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 4175,
+          "end": 4194,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 4504,
+          "end": 4523,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 4624,
+          "end": 4643,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 5356,
+          "end": 5375,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 5529,
+          "end": 5548,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 5604,
+          "end": 5623,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 5663,
+          "end": 5682,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 5738,
+          "end": 5757,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 6200,
+          "end": 6219,
+          "len": 20,
+          "onchainHex": "535ddda826142ac42ce288154e9595f080940ae9",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 6418,
+          "end": 6437,
+          "len": 20,
+          "onchainHex": "535ddda826142ac42ce288154e9595f080940ae9",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 6480,
+          "end": 6499,
+          "len": 20,
+          "onchainHex": "535ddda826142ac42ce288154e9595f080940ae9",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 6718,
+          "end": 6737,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 6986,
+          "end": 7005,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 7050,
+          "end": 7069,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 8444,
+          "end": 8463,
+          "len": 20,
+          "onchainHex": "5095ecc7226ad6decee99846bc83363ca41b52bf",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 9061,
+          "end": 9080,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 9211,
+          "end": 9230,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        },
+        {
+          "start": 9354,
+          "end": 9373,
+          "len": 20,
+          "onchainHex": "a861152ca3676bccf7b5fdafb9eb6a57b9d32d0e",
+          "compiledHex": "0000000000000000000000000000000000000000"
+        }
+      ]
+    },
+    "bindings": {
+      "token": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+      "controller": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+      "treasury": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+      "tokenMatches": true,
+      "controllerMatches": true,
+      "treasuryMatches": true
+    },
+    "authority": {
+      "govIsAdmin": true,
+      "govIsPauser": true,
+      "deployerIsAdmin": false,
+      "deployerIsPauser": false,
+      "deployerIsEpoch": false,
+      "controllerIsEpochRoleHolder": false,
+      "epochRoleNote": "settleVariableEpoch is gated by msg.sender == controller, not by role grants"
+    },
+    "genesisState": {
+      "totalPrincipal": "0",
+      "nextPositionId": "0",
+      "currentEpochCommitted": "0",
+      "currentEpochMoved": "0",
+      "currentEpochEnd": "0",
+      "lastVarUpdate": "0",
+      "paused": false,
+      "flowBalance": "0",
+      "varPerTokenStored": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "currentFlowPerSecond": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "totalStakedByProduct": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    "controllerLinkage": {
+      "controllerVault": "0x0000000000000000000000000000000000000000",
+      "controllerVaultIsUnset": true,
+      "maxFlowPerEpoch": "0",
+      "products": [
+        {
+          "id": 0,
+          "active": true,
+          "lockSeconds": 0,
+          "genesisAprBps": 1800,
+          "floorBps": 0,
+          "targetBps": 1000,
+          "hardCapBps": 1200,
+          "minPrincipal": "1000000000000000000"
+        },
+        {
+          "id": 1,
+          "active": true,
+          "lockSeconds": 2592000,
+          "genesisAprBps": 2700,
+          "floorBps": 800,
+          "targetBps": 1400,
+          "hardCapBps": 1800,
+          "minPrincipal": "1000000000000000000"
+        },
+        {
+          "id": 2,
+          "active": true,
+          "lockSeconds": 7776000,
+          "genesisAprBps": 3600,
+          "floorBps": 1000,
+          "targetBps": 1800,
+          "hardCapBps": 2400,
+          "minPrincipal": "1000000000000000000"
+        },
+        {
+          "id": 3,
+          "active": true,
+          "lockSeconds": 15552000,
+          "genesisAprBps": 4800,
+          "floorBps": 1200,
+          "targetBps": 2400,
+          "hardCapBps": 3200,
+          "minPrincipal": "1000000000000000000"
+        },
+        {
+          "id": 4,
+          "active": true,
+          "lockSeconds": 31536000,
+          "genesisAprBps": 6000,
+          "floorBps": 1500,
+          "targetBps": 3000,
+          "hardCapBps": 4000,
+          "minPrincipal": "1000000000000000000"
+        }
+      ]
+    },
+    "surfaceAudit": {
+      "functions": [
+        "BPS",
+        "DEFAULT_ADMIN_ROLE",
+        "EPOCH_ROLE",
+        "GENESIS_MAX_SECONDS",
+        "MAX_POSITIONS_PER_WALLET",
+        "PAUSER_ROLE",
+        "PRODUCT_COUNT",
+        "YEAR",
+        "claim",
+        "controller",
+        "currentEpochCommitted",
+        "currentEpochEnd",
+        "currentEpochMoved",
+        "currentFlowPerSecond",
+        "genesisQuotaRemainingSeconds",
+        "genesisSecondsConsumed",
+        "getPosition",
+        "getRoleAdmin",
+        "grantRole",
+        "hasRole",
+        "lastVarUpdate",
+        "nextPositionId",
+        "openPosition",
+        "pause",
+        "paused",
+        "positionCountOf",
+        "positionsOf",
+        "previewPending",
+        "quoteOpen",
+        "renounceRole",
+        "revokeRole",
+        "settleVariableEpoch",
+        "supportsInterface",
+        "token",
+        "totalPrincipal",
+        "totalStakedByProduct",
+        "treasury",
+        "unpause",
+        "varPerTokenStored",
+        "withdraw"
+      ],
+      "hasMint": false,
+      "hasSlash": false,
+      "hasEarlyWithdraw": false,
+      "hasWithdraw": true,
+      "payableFunctions": [],
+      "hasReceive": false,
+      "hasFallback": false
+    }
+  },
+  "runtimeParityClassification": "EXACT_IMMUTABLE_AWARE_MATCH",
+  "sourceVerification": {
+    "explorer": "https://scan.botchain.ai",
+    "method": "BLOCKSCOUT_V2_STANDARD_JSON_INPUT",
+    "isVerified": false,
+    "status": "EXPLORER_TRANSPORT_BLOCKED",
+    "observed": "HTTP 403 Cloudflare challenge on verification POST (GET reads succeed)",
+    "attempts": 5
+  },
+  "prohibitedActionsTaken": {
+    "setVault": 0,
+    "treasuryRoleGrants": 0,
+    "pauserDelegation": 0,
+    "weeklyBudget": 0,
+    "oracle": 0,
+    "flowFunded": "0",
+    "stakes": 0,
+    "uiActivation": false
+  },
+  "verdict": "STAGE_E3_SETTLED_ONCHAIN_VERIFIED_SOURCE_PENDING"
+}
