@@ -173,16 +173,19 @@ for (const p of PROJECTS) {
   let ozFiles = 0;
   for (const [key, { content }] of Object.entries(bundle.sources)) {
     if (key.startsWith(OZ_PREFIX)) {
-      write(join(root, "oz", key.slice(OZ_PREFIX.length)), content);
+      write(join(OUT, "vendor", `${p.dir}-oz`, key.slice(OZ_PREFIX.length)), content);
       ozFiles += 1;
     } else {
-      write(join(root, "contracts", key), content);
+      // Source name must stay exactly as compiled at deployment ("Foo.sol"),
+      // because the source path is part of the metadata hash. Hence the entry
+      // file sits at the project root with paths.sources = ".".
+      write(join(root, key), content);
     }
   }
 
   // Local, immutable OpenZeppelin package — pinned by content, not by registry.
   write(
-    join(root, "oz", "package.json"),
+    join(OUT, "vendor", `${p.dir}-oz`, "package.json"),
     JSON.stringify(
       {
         name: "@openzeppelin/contracts",
@@ -209,7 +212,7 @@ for (const p of PROJECTS) {
           verify: "hardhat run scripts/verify.js --network bot",
           hashes: "node scripts/hashes.js",
         },
-        dependencies: { "@openzeppelin/contracts": "file:./oz" },
+        dependencies: { "@openzeppelin/contracts": `file:../vendor/${p.dir}-oz` },
         devDependencies: {
           hardhat: "2.26.1",
           "@nomicfoundation/hardhat-verify": "2.0.12",
@@ -235,6 +238,7 @@ module.exports = {
       evmVersion: "${bundle.settings.evmVersion}",
     },
   },
+  paths: { sources: "." },
   networks: {
     bot: {
       url: process.env.BOT_MAINNET_RPC_URL || "${RPC}",
@@ -273,7 +277,7 @@ async function main() {
   const hre = require("hardhat");
   await hre.run("verify:verify", {
     address: "${p.address}",
-    contract: "contracts/${p.entrySource}:${p.contractName}",
+    contract: "${p.entrySource}:${p.contractName}",
     constructorArguments: args,
   });
 }
@@ -298,7 +302,6 @@ const artifact = JSON.parse(
       __dirname,
       "..",
       "artifacts",
-      "contracts",
       "${p.entrySource}",
       "${p.contractName}.json",
     ),
@@ -337,9 +340,9 @@ Explorer: ${EXPLORER}/address/${p.address}
 | Optimizer | ${bundle.settings.optimizer.enabled ? "enabled" : "disabled"}, ${bundle.settings.optimizer.runs} runs |
 | viaIR | ${bundle.settings.viaIR} |
 | EVM version | \`${bundle.settings.evmVersion}\` |
-| OpenZeppelin | 5.6.1 (vendored in \`oz/\`, ${ozFiles} files, byte-identical to deployment) |
+| OpenZeppelin | 5.6.1 (vendored in \`../vendor/${p.dir}-oz/\`, ${ozFiles} files, byte-identical to deployment) |
 | License | MIT |
-| Contract target | \`contracts/${p.entrySource}:${p.contractName}\` |
+| Contract target | \`${p.entrySource}:${p.contractName}\` |
 | Creation sha256 | \`${p.frozen.creationSha256}\` |
 | Runtime sha256 | \`${p.frozen.runtimeSha256}\` (${p.frozen.runtimeBytes} bytes) |
 | Constructor args | \`constructor-args.js\` (ABI-encoded in that file's header) |
@@ -355,8 +358,10 @@ npm run hashes    # must print MATCH for creation and runtime
 npm run verify    # submits to ${EXPLORER}; no private key needed
 \`\`\`
 
-Do not edit any \`.sol\` file, the compiler settings, or the OpenZeppelin files in
-\`oz/\`. Any change produces different bytecode and verification will fail.
+Do not edit any \`.sol\` file, the compiler settings, or the vendored OpenZeppelin
+files. The Solidity source name (\`${p.entrySource}\`, at the project root) is part
+of the metadata hash — moving it into a subfolder changes the bytecode and
+verification will fail.
 
 ## Browser fallback
 
@@ -438,7 +443,7 @@ Optional: \`export BOT_MAINNET_RPC_URL=${RPC}\` (already the default) and
 
 - Every Solidity file, including OpenZeppelin 5.6.1, is copied byte-for-byte out
   of the Standard-JSON input used at deployment; OpenZeppelin is a local
-  \`file:./oz\` dependency, so registry drift cannot change the bytes.
+  \`file:../vendor/<project>-oz\` dependency, so registry drift cannot change the bytes.
 - Compiler version, optimizer runs, \`viaIR\` and EVM version are the frozen
   deployment settings.
 - No private key, mnemonic or deployer secret is used or needed. Verification is

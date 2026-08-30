@@ -11,9 +11,9 @@ Explorer: https://scan.botchain.ai/address/0x3824681c3560A63e1c9ceDABBfcAB2691c5
 | Optimizer | enabled, 200 runs |
 | viaIR | true |
 | EVM version | `cancun` |
-| OpenZeppelin | 5.6.1 (vendored in `oz/`, 15 files, byte-identical to deployment) |
+| OpenZeppelin | 5.6.1 (vendored in `../vendor/rewards-distributor-oz/`, 15 files, byte-identical to deployment) |
 | License | MIT |
-| Contract target | `contracts/FlowRewardsMerkleDistributor.sol:FlowRewardsMerkleDistributor` |
+| Contract target | `FlowRewardsMerkleDistributor.sol:FlowRewardsMerkleDistributor` |
 | Creation sha256 | `21c96796f0e7fbc32ed114edf6194147ddb3949c88a9907d8cc28c9ed5157581` |
 | Runtime sha256 | `a708b596b82367893813a4ed39650bcf26f95a23fad678955a4b938fca40d367` (5861 bytes) |
 | Constructor args | `constructor-args.js` (ABI-encoded in that file's header) |
@@ -29,8 +29,10 @@ npm run hashes    # must print MATCH for creation and runtime
 npm run verify    # submits to https://scan.botchain.ai; no private key needed
 ```
 
-Do not edit any `.sol` file, the compiler settings, or the OpenZeppelin files in
-`oz/`. Any change produces different bytecode and verification will fail.
+Do not edit any `.sol` file, the compiler settings, or the vendored OpenZeppelin
+files. The Solidity source name (`FlowRewardsMerkleDistributor.sol`, at the project root) is part
+of the metadata hash — moving it into a subfolder changes the bytecode and
+verification will fail.
 
 ## Browser fallback
 

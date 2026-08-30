@@ -11,6 +11,7 @@ module.exports = {
       evmVersion: "cancun",
     },
   },
+  paths: { sources: "." },
   networks: {
     bot: {
       url: process.env.BOT_MAINNET_RPC_URL || "https://rpc.botchain.ai",

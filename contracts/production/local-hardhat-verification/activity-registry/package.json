@@ -9,7 +9,7 @@
     "hashes": "node scripts/hashes.js"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "file:./oz"
+    "@openzeppelin/contracts": "file:../vendor/activity-registry-oz"
   },
   "devDependencies": {
     "hardhat": "2.26.1",

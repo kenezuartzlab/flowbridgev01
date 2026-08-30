@@ -5,7 +5,7 @@ async function main() {
   const hre = require("hardhat");
   await hre.run("verify:verify", {
     address: "0x535ddda826142ac42ce288154e9595f080940ae9",
-    contract: "contracts/FlowToken.sol:FlowToken",
+    contract: "FlowToken.sol:FlowToken",
     constructorArguments: args,
   });
 }

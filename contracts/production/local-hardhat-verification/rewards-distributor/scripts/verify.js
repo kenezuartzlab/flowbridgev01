@@ -5,7 +5,7 @@ async function main() {
   const hre = require("hardhat");
   await hre.run("verify:verify", {
     address: "0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB",
-    contract: "contracts/FlowRewardsMerkleDistributor.sol:FlowRewardsMerkleDistributor",
+    contract: "FlowRewardsMerkleDistributor.sol:FlowRewardsMerkleDistributor",
     constructorArguments: args,
   });
 }

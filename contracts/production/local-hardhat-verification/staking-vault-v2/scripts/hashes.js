@@ -9,7 +9,6 @@ const artifact = JSON.parse(
       __dirname,
       "..",
       "artifacts",
-      "contracts",
       "FlowStakingVaultV2.sol",
       "FlowStakingVaultV2.json",
     ),

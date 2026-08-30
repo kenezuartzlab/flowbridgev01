@@ -30,7 +30,7 @@ Optional: `export BOT_MAINNET_RPC_URL=https://rpc.botchain.ai` (already the defa
 
 - Every Solidity file, including OpenZeppelin 5.6.1, is copied byte-for-byte out
   of the Standard-JSON input used at deployment; OpenZeppelin is a local
-  `file:./oz` dependency, so registry drift cannot change the bytes.
+  `file:../vendor/<project>-oz` dependency, so registry drift cannot change the bytes.
 - Compiler version, optimizer runs, `viaIR` and EVM version are the frozen
   deployment settings.
 - No private key, mnemonic or deployer secret is used or needed. Verification is
