@@ -1,0 +1,92 @@
+{
+  "gate": "V30.2A.R1",
+  "verdict": "FLOWBRIDGE V30.2A R1 NEW FLOWTOKEN SETTLED — ON-CHAIN PASS, PUBLIC SOURCE VERIFICATION PENDING",
+  "settledAtUtc": "2026-08-30T11:20:00Z",
+  "chainId": 677,
+  "network": "BOT Mainnet",
+  "approvedCandidateDigest": "fnv1a64:e0ac31b5bb297880",
+  "preSignRevalidation": {
+    "nonce": 8,
+    "candidateDigestMatched": true,
+    "creationSha256Matched": true,
+    "constructorArgsSha256Matched": true,
+    "unsignedDataKeccakMatched": true,
+    "standardInputSha256Matched": true,
+    "doubleBuildIdentical": true,
+    "expectedAddressCodelessBeforeBroadcast": true,
+    "signerEqualsApprovedDeployer": true,
+    "calldataSource": "STORED_R1_PAYLOAD_REBUILT_FROM_FROZEN_STANDARD_JSON"
+  },
+  "transaction": {
+    "hash": "0xcafe321d1ec270518ab6e69ccd8ed5af209738da183456c392439a0946b5c0c6",
+    "from": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "to": null,
+    "nonce": 8,
+    "value": "0",
+    "gasPrice": "20000000000",
+    "gasLimit": 1293373,
+    "gasUsed": 985911,
+    "status": "success",
+    "blockNumber": 21472677,
+    "dataBytes": 5780,
+    "dataKeccak256": "0xa2f4737d87d3618603dfcc190d6c7c51cdc5c8839d4a1f4eca5b3573d46e423e"
+  },
+  "contract": {
+    "address": "0x123E64D074FD5d66DBd4BD62Dc4e71da7101DB63",
+    "expectedAddress": "0x123E64D074FD5d66DBd4BD62Dc4e71da7101DB63",
+    "addressMatch": true,
+    "runtimeBytesOnChain": 3760,
+    "runtimeSha256OnChain": "267e64ad8557fb7710f3b0d82c85975722dd3c0a6842f83db739d193e06811ef",
+    "compiledRuntimeSha256": "73dcb8db0657a18bd57e4021900c57a646da1c6cb9b6eda3c2e3e725db4130f9",
+    "runtimeParity": "MATCH_MODULO_EIP712_IMMUTABLES",
+    "runtimeParityNote": "131 differing bytes, all inside constructor-populated ERC20Permit/EIP712 immutable slots: cached address 0x123e64..db63, cached chainId 0x02a5 (677), cached domain separator, hashed name/version and the literal name 'FlowBridge'/version '1'. All non-immutable bytes are byte-identical to the approved build."
+  },
+  "tokenState": {
+    "name": "FlowBridge",
+    "symbol": "FLOW",
+    "decimals": 18,
+    "totalSupplyWei": "1000000000000000000000000000",
+    "treasurySafe": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "treasuryBalanceWei": "1000000000000000000000000000",
+    "fullSupplyInTreasury": true
+  },
+  "sourceVerification": {
+    "explorer": "https://scan.botchain.ai",
+    "endpoint": "/api/v2/smart-contracts/{address}/verification/via/standard-input",
+    "method": "SOLIDITY_STANDARD_JSON_INPUT",
+    "viaIR": false,
+    "compilerVersion": "v0.8.24+commit.e11b9ed9",
+    "contractName": "FlowToken.sol:FlowToken",
+    "licenseType": "mit",
+    "standardInputPath": "contracts/production/v30-2a-candidate/standard-inputs/FlowToken.standard-input.json",
+    "standardInputSha256": "d8188e0288c79807f2ff8a209cb099e48cedce51a3ef69086e44c6a448d73590",
+    "constructorArgsAbiHex": "0x000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000efc13d1a1dc30ba2da0bb005ba5a783c6b229ea40000000000000000000000000000000000000000033b2e3c9fd0803ce8000000000000000000000000000000000000000000000000000000000000000000000a466c6f77427269646765000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004464c4f5700000000000000000000000000000000000000000000000000000000",
+    "submissionAttempts": 2,
+    "submissionResult": "BLOCKED_HTTP_403_CLOUDFLARE",
+    "explorerReadStatus": "is_verified: null (not yet verified)",
+    "status": "PENDING_OPERATOR_SUBMISSION"
+  },
+  "oldFlowToken": {
+    "address": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+    "lifecycle": "DEPRECATED_PENDING_REPLACEMENT",
+    "touched": false,
+    "allowanceGranted": false,
+    "transferPrepared": false,
+    "fundingPrepared": false,
+    "burnPrepared": false,
+    "migrationPrepared": false
+  },
+  "routerStack": { "touched": false },
+  "r1PassCriteria": {
+    "receiptSuccess": true,
+    "expectedAddress": true,
+    "runtimeParity": true,
+    "oneBillionFlowInTreasurySafe": true,
+    "publicSourceVerified": false
+  },
+  "policyFrozen": {
+    "id": "V30_2_SETTLED_AND_PUBLICLY_VERIFIED",
+    "statement": "A replacement contract does not unlock its dependent deployment until the replacement contract is both on-chain settled and publicly source verified."
+  },
+  "r2Status": "BLOCKED_UNTIL_R1_PUBLICLY_SOURCE_VERIFIED"
+}
