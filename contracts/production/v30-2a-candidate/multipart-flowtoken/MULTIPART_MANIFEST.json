@@ -1,0 +1,146 @@
+{
+  "gate": "V30.2A.R1",
+  "purpose": "Blockscout Solidity (Multi-part files) verification input for the settled replacement FlowToken",
+  "contractAddress": "0x123E64D074FD5d66DBd4BD62Dc4e71da7101DB63",
+  "chainId": 677,
+  "compiler": "v0.8.24+commit.e11b9ed9",
+  "optimization": true,
+  "optimizationRuns": 200,
+  "evmVersion": "cancun",
+  "viaIR": false,
+  "license": "mit",
+  "libraries": {},
+  "mainContract": "FlowToken.sol:FlowToken",
+  "extractedFrom": "contracts/production/v30-2a-candidate/standard-inputs/FlowToken.standard-input.json",
+  "standardInputSha256": "d8188e0288c79807f2ff8a209cb099e48cedce51a3ef69086e44c6a448d73590",
+  "constructorArgsAbiHex": "0x000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000efc13d1a1dc30ba2da0bb005ba5a783c6b229ea40000000000000000000000000000000000000000033b2e3c9fd0803ce8000000000000000000000000000000000000000000000000000000000000000000000a466c6f77427269646765000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004464c4f5700000000000000000000000000000000000000000000000000000000",
+  "fileCount": 21,
+  "files": [
+    {
+      "sourceName": "FlowToken.sol",
+      "path": "sources/FlowToken.sol",
+      "sha256": "96a757b53494a5cee3268ef289183c660c6c8b6bd22e27a44469b6780c83229e",
+      "bytes": 1455
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC5267.sol",
+      "path": "sources/@openzeppelin/contracts/interfaces/IERC5267.sol",
+      "sha256": "f89772d2d4fafcbef8b73bb10ee9a3373edec2eedb2f1b302320915b351dc3d1",
+      "bytes": 740
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
+      "path": "sources/@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
+      "sha256": "fa7068f56bc180571a6095be6eaef06d51dbe81e30cb128397d993c9599ecc30",
+      "bytes": 6540
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+      "path": "sources/@openzeppelin/contracts/token/ERC20/ERC20.sol",
+      "sha256": "50f34ae16a067a41c2c1091445d11d63788e54c717677cb6d6b0e4cdea2ad21d",
+      "bytes": 10800
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "path": "sources/@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "sha256": "01b6f5c4fa45fd38822b286ecef6daf983d27306dd6362496fa71b3e4600b72c",
+      "bytes": 2781
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol",
+      "path": "sources/@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol",
+      "sha256": "53584e84cd4851447b3149219f8c1b41397f7c753f85da07eda7f17ac6846e47",
+      "bytes": 2721
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+      "path": "sources/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+      "sha256": "0b7132f17d14d1d84b41b0bb429be62dafdff00fd3470f68724d8018eb07f57a",
+      "bytes": 684
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol",
+      "path": "sources/@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol",
+      "sha256": "c302edfbf7f396e1130be81278c5c994543868f0f5bf0c0fb3f557e166d8d3f2",
+      "bytes": 3808
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/Bytes.sol",
+      "path": "sources/@openzeppelin/contracts/utils/Bytes.sol",
+      "sha256": "3ce9120a27934c75a074cb785d3a88868069ef6529dbe4dc6b845af0836f3c70",
+      "bytes": 14737
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+      "path": "sources/@openzeppelin/contracts/utils/Context.sol",
+      "sha256": "847fda5460fee70f56f4200f59b82ae622bb03c79c77e67af010e31b7e2cc5b6",
+      "bytes": 963
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/Nonces.sol",
+      "path": "sources/@openzeppelin/contracts/utils/Nonces.sol",
+      "sha256": "9b4cbb85d1f5053c744e83302538eb643a713ffd14bc37665b224f1c66529339",
+      "bytes": 1490
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/Panic.sol",
+      "path": "sources/@openzeppelin/contracts/utils/Panic.sol",
+      "sha256": "270fc8401c1a13fae6a7a4a2dd6e381b95d658896701e51f0d3e2688acab3dec",
+      "bytes": 1973
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/ShortStrings.sol",
+      "path": "sources/@openzeppelin/contracts/utils/ShortStrings.sol",
+      "sha256": "1cfa08d3c551e9ec0b9cd249b09987f04e7e90f352e1a5e3b0d6a3bc426b3de7",
+      "bytes": 4310
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
+      "path": "sources/@openzeppelin/contracts/utils/StorageSlot.sol",
+      "sha256": "75704538dcb223239280c6726d9a31cf769a7816718517c997fc7d63bdb70778",
+      "bytes": 4182
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
+      "path": "sources/@openzeppelin/contracts/utils/Strings.sol",
+      "sha256": "e318709bbe73a7831d64c1351e8bdc43780b245f25191234e361e6ab9b98c67b",
+      "bytes": 21538
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
+      "path": "sources/@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
+      "sha256": "ba7c2d314fcd61c9783e0b3f0c664d004b76b408fda6a84edc8267d17c5012d6",
+      "bytes": 12152
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/EIP712.sol",
+      "path": "sources/@openzeppelin/contracts/utils/cryptography/EIP712.sol",
+      "sha256": "2845caaaf70757b6cce612ae4ffbec2c382cb3d1cb9765c98fa649c0f5f1c794",
+      "bytes": 6695
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol",
+      "path": "sources/@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol",
+      "sha256": "538a0d7c4f0ec5a8562f58561890f7b49d14580674ecf58bc5f505b45c73df65",
+      "bytes": 8631
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
+      "path": "sources/@openzeppelin/contracts/utils/math/Math.sol",
+      "sha256": "bdfdbe133991c0c78042957ff5cd97167926fcaf6d15664f3835a076cb066457",
+      "bytes": 32664
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
+      "path": "sources/@openzeppelin/contracts/utils/math/SafeCast.sol",
+      "sha256": "5779bc848bde39f1ad7bc02b4f708a0040888e0083b1a33f119cd94639350134",
+      "bytes": 34940
+    },
+    {
+      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
+      "path": "sources/@openzeppelin/contracts/utils/math/SignedMath.sol",
+      "sha256": "1ed50b1056af886752f0fb48a0165d381e69bb4a4b18b893b066dc144a7e08d7",
+      "bytes": 2613
+    }
+  ]
+}
