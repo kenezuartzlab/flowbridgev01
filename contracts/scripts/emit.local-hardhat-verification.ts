@@ -169,7 +169,9 @@ type Bundle = {
   };
 };
 
-rmSync(OUT, { recursive: true, force: true });
+// Regenerate the emitted content only; never delete a local install or lockfile.
+for (const p of PROJECTS) rmSync(join(OUT, p.dir), { recursive: true, force: true });
+rmSync(join(OUT, "vendor"), { recursive: true, force: true });
 
 const index: Record<string, unknown>[] = [];
 
