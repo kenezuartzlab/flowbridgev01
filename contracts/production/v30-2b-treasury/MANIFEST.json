@@ -1,0 +1,134 @@
+{
+  "$comment": "FlowBridge V30.2B R4 — FlowStakingRewardTreasury clean replacement PREFLIGHT. Read-only. Nothing signed, broadcast, funded, or reserved.",
+  "gate": "V30.2B_R4_PREFLIGHT",
+  "verdict": "V30.2B R4 PREFLIGHT PASS — CLEAN REWARD TREASURY CANDIDATE READY, ZERO WRITES",
+  "chainId": 677,
+  "candidateDigest": "fnv1a64:e0ac31b5bb297880",
+  "supersedes": {
+    "contract": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+    "status": "QUARANTINED_NOT_PROMOTED",
+    "reason": "bound to the quarantined old FlowToken 0x535ddda8…40ae9 and built with viaIR: true"
+  },
+  "buildMatrix": {
+    "solc": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+    "solcLong": "v0.8.24+commit.e11b9ed9",
+    "optimizer": { "enabled": true, "runs": 200 },
+    "viaIR": false,
+    "evmVersion": "cancun",
+    "metadata": { "bytecodeHash": "ipfs", "appendCBOR": true },
+    "openzeppelin": "5.6.1 (vendored verbatim)",
+    "sourceUnits": 14,
+    "license": "MIT",
+    "doubleBuild": "TWO_CLEAN_COMPILES_BYTE_IDENTICAL",
+    "solidityWarnings": 0,
+    "viaIRRequired": false,
+    "settingsSource": "contracts/production/V30_2A_REDEPLOY_PREFLIGHT.json replacements[R4] — read from frozen candidate evidence, not inferred"
+  },
+  "artifact": {
+    "sourceSha256": "963ce367246ebc673e1d915202759a5159604dd0a794484b68500f921155d8a8",
+    "creationSha256": "d3b676d3da8cc38247be64b9ab83dc49cc0675cc4e4b41dbd3a638611d518360",
+    "creationBytes": 5377,
+    "runtimeSha256": "747a268c8740d24099594de823af2a10b9472f09d85f61da5a17a597f7a09cea",
+    "runtimeBytes": 4827,
+    "normalizedAbiSha256": "3cfeefcdd459ca697e3f6f1891e3ffe9a325896f544d9b32a7358fabb115065a",
+    "standardInputSha256": "99848d1f1aa7ab20f56acb61ee77447e8608af30b53e1a50fafb130b2656896a",
+    "eip170": { "limit": 24576, "withinLimit": true, "headroomBytes": 19749 },
+    "frozenEvidenceParity": "EXACT_MATCH_V30_2A_REDEPLOY_PREFLIGHT_R4",
+    "abiParityWithQuarantinedTreasury": "IDENTICAL normalizedAbiSha256 3cfeefcd…065a"
+  },
+  "constructor": {
+    "signature": "constructor(address token_, address admin, address recoveryRecipient_)",
+    "token_": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "admin": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "recoveryRecipient_": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "encoded": "0x000000000000000000000000caab50f36252a57529afef651fa6b9f9281917ff00000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507000000000000000000000000efc13d1a1dc30ba2da0bb005ba5a783c6b229ea4",
+    "keccak": "0x3223b853bc48ce8e0125684cdd6a0f5df2708ab38be759cbd4fcaa444ce63957"
+  },
+  "initialRoleMatrix": {
+    "DEFAULT_ADMIN_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507 (Governance Safe)",
+    "VAULT_ROLE": "UNASSIGNED — frozen constructor grants none",
+    "CONTROLLER_ROLE": "UNASSIGNED — frozen constructor grants none",
+    "deployerRoles": "NONE",
+    "grantsInConstructor": 1
+  },
+  "rewardTokenBinding": {
+    "immutable": true,
+    "address": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "name": "FlowBridge",
+    "symbol": "FLOW",
+    "decimals": 18,
+    "totalSupplyWei": "1000000000000000000000000000",
+    "isVerifiedV302bFlow": true,
+    "oldTokenReferenced": false
+  },
+  "safetyInvariants": {
+    "segregatedRewardReserve": "PRESERVED — holds reward inventory only; no user principal path",
+    "buckets": ["reservedGenesis", "reservedFloors", "committedEpoch", "accruedUnclaimed"],
+    "invariantT1": "balanceOf(this) >= reservedGenesis + reservedFloors + committedEpoch + accruedUnclaimed",
+    "invariantT2": "recoverFree moves only freeBalance() and only to recoveryRecipient",
+    "mintAuthority": "NONE",
+    "userPrincipalCustody": "NONE — principal remains in FlowStakingVaultV2",
+    "upgradeableProxy": "NONE — non-upgradeable, no initializer, no delegatecall",
+    "accountingRedesign": "NONE — reviewed source used verbatim",
+    "writeSurface": [
+      "deposit (open, pull-only funding)",
+      "reserve/release genesis + floor (VAULT_ROLE)",
+      "accrue/payout (VAULT_ROLE)",
+      "commitEpoch/reconcileEpoch (CONTROLLER_ROLE)",
+      "setRecoveryRecipient, recoverFree (DEFAULT_ADMIN_ROLE)"
+    ]
+  },
+  "initialState": {
+    "flowBalanceWei": "0",
+    "reservedGenesis": "0",
+    "reservedFloors": "0",
+    "committedEpoch": "0",
+    "accruedUnclaimed": "0",
+    "totalObligations": "0",
+    "freeBalance": "0",
+    "tenMillionFlowTransfer": "NOT_PERFORMED",
+    "vaultOrControllerAuthority": "NONE"
+  },
+  "unsignedPayload": {
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "valueBOT": "0",
+    "deploymentDataBytes": 5473,
+    "deploymentDataKeccak": "0x2de68bf07e8e1296421602ffd6c59063f8fec32eb99df3b41cb7779c3a569fad",
+    "deploymentDataSha256": "263414dd676fdb759d74203909f649c563b5563af80f069e26be1f93cc0e6ed5"
+  },
+  "liveReadOnlyPreflight": {
+    "rpc": "https://rpc.botchain.ai",
+    "chainId": 677,
+    "observedBlock": 21506492,
+    "deployerIsEoa": true,
+    "pendingNonce": 12,
+    "balanceBOT": "2.12641586",
+    "gasPriceGwei": "20",
+    "predictedAddress": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "predictedAddressCodeless": true,
+    "predictedAddressFlowBalanceWei": "0",
+    "gasEstimate": "1161801",
+    "gasLimitBuffered30": "1510341"
+  },
+  "oldStackDependency": {
+    "oldFlowToken": "NOT_REFERENCED",
+    "oldTreasury": "NOT_REFERENCED",
+    "oldControllerOrVault": "NOT_REFERENCED",
+    "checkedIn": ["source", "constructor args", "full deployment payload"]
+  },
+  "writesPerformed": "NONE — no signing, no broadcast, no funding, no reservation, no role grant, no Vault/Controller wiring",
+  "hardStops": {
+    "sourceDrift": false,
+    "tokenMismatch": false,
+    "unexpectedRoleAssignment": false,
+    "nonReproducibleBytecode": false,
+    "viaIRRequired": false,
+    "unsafeRecoveryCapacity": false,
+    "oldTokenOrOldStakingDependency": false
+  },
+  "files": {
+    "verification-standard-input.json": "99848d1f1aa7ab20f56acb61ee77447e8608af30b53e1a50fafb130b2656896a",
+    "abi.json": "3cfeefcdd459ca697e3f6f1891e3ffe9a325896f544d9b32a7358fabb115065a",
+    "sources/FlowStakingRewardTreasury.sol": "963ce367246ebc673e1d915202759a5159604dd0a794484b68500f921155d8a8"
+  }
+}
