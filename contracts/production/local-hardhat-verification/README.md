@@ -20,9 +20,8 @@ Staking Reward Treasury, Staking Controller.
 2. `cd contracts/production/local-hardhat-verification`
 3. `npm ci` once in `contracts/production/local-hardhat-verification/` (first run without a
    committed lockfile: `npm install`, then keep the lockfile)
-4. `cd <project> && npm run compile`
-5. `npm run hashes` — must print `MATCH` for creation and runtime before you verify
-6. `npm run verify`
+4. `cd <project> && npm run rebuild` — must print `MATCH` for creation and runtime
+5. `npm run submit` — sends the preserved Standard-JSON bundle to the explorer
 
 Optional: `export BOT_MAINNET_RPC_URL=https://rpc.botchain.ai` (already the default) and
 `export BOT_EXPLORER_API_KEY=...` if the explorer ever requires a key.
@@ -36,6 +35,12 @@ Optional: `export BOT_MAINNET_RPC_URL=https://rpc.botchain.ai` (already the defa
   deployment settings.
 - No private key, mnemonic or deployer secret is used or needed. Verification is
   read-only against the explorer; these projects contain no deployment script.
-- Each project ships its original `standard-input.json` for the browser fallback.
+- Each project ships its original `standard-input.json`, which is what `submit`
+  sends and what you upload in the browser fallback.
+- `npm run rebuild` compiles that bundle verbatim with the pinned solc and fails
+  loudly unless the frozen creation and runtime hashes match.
+- Hardhat is installed for convenience (`hardhat:compile`, `hardhat:verify`), but it
+  re-orders the compiler input sources; under `viaIR` that yields a different
+  internal jump layout, so prefer `rebuild` + `submit`.
 
 Do not edit sources or settings. `MANIFEST.json` records every frozen hash.

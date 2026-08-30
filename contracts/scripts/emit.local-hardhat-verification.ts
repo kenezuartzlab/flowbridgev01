@@ -7,8 +7,9 @@
  *
  * Nothing is recompiled, no source is rewritten, no chain is touched. Every
  * Solidity file — including each OpenZeppelin dependency — is copied byte-for-byte
- * out of the frozen bundle, so a local `npm ci && npx hardhat compile` reproduces
- * the deployed artifacts exactly. OpenZeppelin is wired as a local `file:./oz`
+ * out of the frozen bundle, and each project rebuilds by compiling that preserved
+ * Standard-JSON input verbatim with the pinned solc, so the deployed artifacts are
+ * reproduced byte-for-byte. OpenZeppelin is wired as a local `file:./oz`
  * dependency so registry drift cannot change the bytes.
  *
  * Usage: bun contracts/scripts/emit.local-hardhat-verification.ts
@@ -427,8 +428,8 @@ verification will fail.
 
 ## Browser fallback
 
-If the explorer edge blocks the automated submission (Cloudflare HTTP 403 has
-happened repeatedly for this contract), upload \`standard-input.json\` on the
+If the explorer edge blocks \`npm run submit\` (Cloudflare HTTP 403 has happened
+repeatedly from CI-like networks), upload \`standard-input.json\` on the
 explorer's *Solidity (Standard JSON input)* form with the table values above and
 the constructor args from \`constructor-args.js\`.
 `,
@@ -517,9 +518,8 @@ Staking Reward Treasury, Staking Controller.
 2. \`cd contracts/production/local-hardhat-verification\`
 3. \`npm ci\` once in \`contracts/production/local-hardhat-verification/\` (first run without a
    committed lockfile: \`npm install\`, then keep the lockfile)
-4. \`cd <project> && npm run compile\`
-5. \`npm run hashes\` — must print \`MATCH\` for creation and runtime before you verify
-6. \`npm run verify\`
+4. \`cd <project> && npm run rebuild\` — must print \`MATCH\` for creation and runtime
+5. \`npm run submit\` — sends the preserved Standard-JSON bundle to the explorer
 
 Optional: \`export BOT_MAINNET_RPC_URL=${RPC}\` (already the default) and
 \`export BOT_EXPLORER_API_KEY=...\` if the explorer ever requires a key.
@@ -533,7 +533,13 @@ Optional: \`export BOT_MAINNET_RPC_URL=${RPC}\` (already the default) and
   deployment settings.
 - No private key, mnemonic or deployer secret is used or needed. Verification is
   read-only against the explorer; these projects contain no deployment script.
-- Each project ships its original \`standard-input.json\` for the browser fallback.
+- Each project ships its original \`standard-input.json\`, which is what \`submit\`
+  sends and what you upload in the browser fallback.
+- \`npm run rebuild\` compiles that bundle verbatim with the pinned solc and fails
+  loudly unless the frozen creation and runtime hashes match.
+- Hardhat is installed for convenience (\`hardhat:compile\`, \`hardhat:verify\`), but it
+  re-orders the compiler input sources; under \`viaIR\` that yields a different
+  internal jump layout, so prefer \`rebuild\` + \`submit\`.
 
 Do not edit sources or settings. \`MANIFEST.json\` records every frozen hash.
 `,
