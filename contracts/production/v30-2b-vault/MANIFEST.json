@@ -1,0 +1,70 @@
+{
+  "$comment": "Frozen V30.2B R6 FlowStakingVaultV2 candidate manifest. Deployment requires explicit owner authorization (viaIR necessity).",
+  "gate": "V30.2B_R6",
+  "contractId": "FlowStakingVaultV2",
+  "chainId": 677,
+  "dependsOn": {
+    "token": "V30.2B R1",
+    "treasury": "V30.2B R4",
+    "controller": "V30.2B R5"
+  },
+  "buildMatrix": {
+    "solc": "0.8.24+commit.e11b9ed9",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": true,
+    "evmVersion": "cancun",
+    "metadata": {
+      "bytecodeHash": "ipfs",
+      "appendCBOR": true
+    },
+    "sourceUnits": 14,
+    "settingsSource": "contracts/production/V30_2A_REDEPLOY_PREFLIGHT.json replacements[R6]"
+  },
+  "artifact": {
+    "creationSha256": "159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6",
+    "runtimeSha256": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
+    "normalizedAbiSha256": "a22dacc20032a9a188034b1fd1ea4c66eaa8ae3827259ac790a6897fd52369e0",
+    "standardInputSha256": "5b35d7eb0ed90baabd8862e28d32a1b27498833aefd1e78a81f9de4e74d6bcef",
+    "creationBytes": 11254,
+    "runtimeBytes": 10366,
+    "eip170": {
+      "limit": 24576,
+      "headroomBytes": 14210
+    }
+  },
+  "constructor": {
+    "signature": "constructor(address token_, address controller_, address treasury_, address admin)",
+    "args": {
+      "token": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+      "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+      "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+      "admin": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507"
+    },
+    "encoded": "0x000000000000000000000000caab50f36252a57529afef651fa6b9f9281917ff00000000000000000000000044b9b880c6188d8b8dbe4f68216ae28a5a1253bf00000000000000000000000096552909998f3dbaf5ff4979dc158508b3442e6500000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507",
+    "argsKeccak": "0x9585cb6f43265bd83999405e04db60f956ddaadb71b638d223293621b7b8749e"
+  },
+  "deployment": {
+    "dataBytes": 11382,
+    "dataKeccak": "0xcdcd8dafa54a0bf2e11c91acb7b96092f8f1c476836952190b25fe81ea29d27d",
+    "dataSha256": "98d9aa00c3a081cc5ff468561edb84ec3ec7b86a07058e1f9222e0e921f4a02a",
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "pendingNonceAtPreflight": 14,
+    "predictedAddress": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "gasEstimate": "2390840",
+    "gasLimitPlus30pct": "3108092"
+  },
+  "roleMatrix": {
+    "DEFAULT_ADMIN_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "PAUSER_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "deployerRoles": "NONE",
+    "vaultRoleOnTreasury": "NOT_GRANTED_IN_THIS_GATE",
+    "vaultBindingOnController": "NOT_SET_IN_THIS_GATE",
+    "note": "Operations pauser delegation and treasury VAULT_ROLE are separate authorized wiring gates."
+  },
+  "deployState": "EMPTY_UNFUNDED_NO_POSITIONS_NO_WIRING",
+  "verificationPackage": "verification-standard-input.json",
+  "verdict": "R6 VIAIR TECHNICAL-NECESSITY PREFLIGHT PASS \u2014 FROZEN CANDIDATE REPRODUCIBLE, ZERO WRITES"
+}
