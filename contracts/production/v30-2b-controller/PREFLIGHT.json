@@ -1,0 +1,175 @@
+{
+  "gate": "V30.2B_R5_PREFLIGHT",
+  "mode": "READ_ONLY_NO_SIGNING_NO_BROADCAST",
+  "chainId": 677,
+  "observedBlock": 21507548,
+  "buildMatrix": {
+    "solc": "0.8.24+commit.e11b9ed9",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": false,
+    "evmVersion": "cancun",
+    "metadata": {
+      "bytecodeHash": "ipfs",
+      "appendCBOR": true
+    },
+    "sourceUnits": 6,
+    "settingsSource": "contracts/production/V30_2A_REDEPLOY_PREFLIGHT.json replacements[R5]"
+  },
+  "artifact": {
+    "sourceSha256": "b2a58b1128c0a9d42630b0026ce69cc377abbce6c9ea3ec42721c73d40afc0d4",
+    "creationSha256": "7734b53078fd6cc2668b9f03534a6c015e8864dfaae7c07d0c12f4b3f022da9d",
+    "creationBytes": 9559,
+    "runtimeSha256": "408ee63a90219cdb873fbff9602dbddfe4875e3c78108ea44c1d7e601c95a250",
+    "runtimeBytes": 7997,
+    "abiSha256": "b61bcac1780e51fda835b9e57318a7198c09d4d6e7542a3dabb7640c3fe0e88f",
+    "standardInputSha256": "2cb8a4247762f6bdfb774d834f2788b4db0644792edbaf6a7a5409298e019e06"
+  },
+  "constructor": {
+    "signature": "constructor(address admin, address governor, address publisher)",
+    "admin": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "governor": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "publisher": "0x0000000000000000000000000000000000000000",
+    "encoded": "0x00000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce950700000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce95070000000000000000000000000000000000000000000000000000000000000000",
+    "keccak": "0xf03d5b653f96d9a93b75aceb736e3596e106e4db698b3d0667234dd76f24c856"
+  },
+  "authorityState": {
+    "DEFAULT_ADMIN_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "GOVERNOR_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "PUBLISHER_ROLE": "UNSET — zero publisher argument, no grant executed",
+    "oracle": "UNSET — no constructor assignment; governor-only setter",
+    "deployerRoles": "NONE"
+  },
+  "rewardTreasuryBinding": {
+    "r4Treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "r4TreasuryHasCode": true,
+    "frozenSourceRequiresConstructorTreasuryArg": true,
+    "note": "Frozen reviewed source takes no treasury constructor argument; treasury/vault wiring is post-deployment governor action, not part of R5."
+  },
+  "economics": {
+    "products": [
+      {
+        "id": 0,
+        "name": "Flexible",
+        "lock": "0",
+        "genesis": 1800,
+        "floor": 0,
+        "target": 1000,
+        "cap": 1200,
+        "genesisAprPct": 18,
+        "floorPct": 0,
+        "targetPct": 10,
+        "hardCapPct": 12,
+        "matchesFrozenSource": true
+      },
+      {
+        "id": 1,
+        "name": "Lock 30D",
+        "lock": "30 days",
+        "genesis": 2700,
+        "floor": 800,
+        "target": 1400,
+        "cap": 1800,
+        "genesisAprPct": 27,
+        "floorPct": 8,
+        "targetPct": 14,
+        "hardCapPct": 18,
+        "matchesFrozenSource": true
+      },
+      {
+        "id": 2,
+        "name": "Lock 90D",
+        "lock": "90 days",
+        "genesis": 3600,
+        "floor": 1000,
+        "target": 1800,
+        "cap": 2400,
+        "genesisAprPct": 36,
+        "floorPct": 10,
+        "targetPct": 18,
+        "hardCapPct": 24,
+        "matchesFrozenSource": true
+      },
+      {
+        "id": 3,
+        "name": "Lock 180D",
+        "lock": "180 days",
+        "genesis": 4800,
+        "floor": 1200,
+        "target": 2400,
+        "cap": 3200,
+        "genesisAprPct": 48,
+        "floorPct": 12,
+        "targetPct": 24,
+        "hardCapPct": 32,
+        "matchesFrozenSource": true
+      },
+      {
+        "id": 4,
+        "name": "Lock 365D",
+        "lock": "365 days",
+        "genesis": 6000,
+        "floor": 1500,
+        "target": 3000,
+        "cap": 4000,
+        "genesisAprPct": 60,
+        "floorPct": 15,
+        "targetPct": 30,
+        "hardCapPct": 40,
+        "matchesFrozenSource": true
+      }
+    ],
+    "caps": {
+      "genesisYear1Cap": true,
+      "standardYear1Cap": true,
+      "totalYear1Cap": true,
+      "enforcedBy": 0
+    },
+    "capEnforcementSites": 3,
+    "oracleFailClosed": {
+      "oracleNotConfiguredRevert": true,
+      "stalenessGate": true,
+      "liquidityGate": true,
+      "deviationGate": true,
+      "maxFlowPerEpochGate": true,
+      "weeklyRateGuard": true
+    },
+    "noMint": {
+      "mintSelectorAbsent": true,
+      "noTokenTransferFrom": true,
+      "noTokenTransfer": true
+    }
+  },
+  "initialInertState": {
+    "vaultDefaultZero": false,
+    "vaultSetOnlyByGovernor": true,
+    "maxFlowPerEpochNotSetInConstructor": true,
+    "weeklyUsdBudget8NotSetInConstructor": true,
+    "oracleNotSetInConstructor": true,
+    "publisherRoleGrantedOnlyIfNonZero": true,
+    "publisherArgIsZero": true,
+    "noEpochPublishedInConstructor": true,
+    "productsConfiguredByConstructor": true
+  },
+  "oldStackContamination": {
+    "inSource": [],
+    "inPayload": [],
+    "clean": true
+  },
+  "live": {
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "deployerIsEoa": true,
+    "pendingNonce": 13,
+    "balanceBOT": "2.10338596",
+    "gasPriceGwei": "20",
+    "predictedAddress": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "predictedAddressCodeless": true,
+    "deploymentDataBytes": 9655,
+    "deploymentDataKeccak": "0xdd7e8637e1dc795ffbf238e2cb376b2ed5cdae14efa94767f30541c24a9e779b",
+    "gasEstimate": "2160779",
+    "gasLimitBuffered30": "2809012"
+  },
+  "writesPerformed": "NONE — no signing, no broadcast, no FLOW movement, no treasury funding, no role grant, no product activation call, no oracle/publisher configuration"
+}
