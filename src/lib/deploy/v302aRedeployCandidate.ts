@@ -18,6 +18,44 @@ import { digestOf } from "./mainnetReleaseFreeze";
 
 export const BOT_MAINNET_CHAIN_ID = 677;
 
+/**
+ * Frozen policy for the remainder of V30.2 (no exceptions):
+ * a replacement contract does not unlock its dependent deployment until it is
+ * BOTH on-chain settled AND publicly source verified.
+ */
+export const V30_2_DEPENDENCY_UNLOCK_POLICY = {
+  id: 'V30_2_SETTLED_AND_PUBLICLY_VERIFIED',
+  frozen: true,
+  statement:
+    'A replacement contract does not unlock its dependent deployment until the replacement contract is both on-chain settled and publicly source verified.',
+  appliesToStages: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6'] as const,
+} as const;
+
+export type ViaIrExceptionStatus = 'NOT_REQUIRED' | 'REQUIRED_PENDING_REVIEW' | 'REQUIRED_APPROVED';
+
+/**
+ * R6 (Staking Vault V2) viaIR exception. Recorded now, explicitly NOT approved;
+ * it is reviewed only when Vault V2 is reached.
+ */
+export const R6_VIA_IR_EXCEPTION = {
+  stage: 'R6' as const,
+  contractId: 'FlowStakingVaultV2',
+  status: 'REQUIRED_PENDING_REVIEW' as ViaIrExceptionStatus,
+  code: 'viaIR REQUIRED — STACK_TOO_DEEP',
+  ownerApproved: false,
+  evidence:
+    'CompilerError: Stack too deep at FlowStakingVaultV2.sol:331 (varPerTokenStored[productId]) without viaIR.',
+} as const;
+
+/** Settled-and-verified is the only state that unlocks a dependent stage. */
+export function dependencyUnlocksDependents(args: {
+  onChainSettled: boolean;
+  publiclySourceVerified: boolean;
+}): boolean {
+  return args.onChainSettled && args.publiclySourceVerified;
+}
+
+
 export type DeploymentLifecycleState =
   | "OLD_DEPLOYMENT_DEPRECATED"
   | "NEW_CANONICAL_PENDING"
