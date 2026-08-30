@@ -1,0 +1,76 @@
+{
+  "candidate": "V30.2B R2 FlowRewardsMerkleDistributor",
+  "status": "PREFLIGHT_PASS \u2014 NOT SIGNED, NOT BROADCAST",
+  "chainId": 677,
+  "compiler": {
+    "solc": "0.8.24+commit.e11b9ed9",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": false,
+    "evmVersion": "cancun",
+    "metadata": {
+      "bytecodeHash": "ipfs",
+      "appendCBOR": true
+    },
+    "openzeppelin": "5.6.1 (vendored, frozen)"
+  },
+  "artifact": {
+    "sourceSha256": "cbf90ce714c2c6ca6df9b55637a2a671e820da6a2a0404d7813590450bec0d43",
+    "creationSha256": "b54e6071d7859265dbf12999f6804f5f5f26af759104aea5a2cb85a8b043f0f5",
+    "creationBytes": 7684,
+    "runtimeSha256": "0d240fe4af5ebb24d16cead6aacd8175dbf6620e516754bd26809be35fa24713",
+    "runtimeBytes": 6629,
+    "abiSha256": "821333ca4a60c6c2ce6354835a95066b3f94c74acf2a657712646ea4e783fa79",
+    "standardInputSha256": "bdfc4f689de0b2ee42d51421e31877e36d99b1e18eb4c44991b6674ec2cec091",
+    "doubleBuildIdentical": true
+  },
+  "constructorArgs": {
+    "token_": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "admin_": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "budgetManager_": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "publisher_": "0x971E7790Fe6c8f77Dc666bB05D4aeDa362653F94",
+    "pauser_": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+    "recoveryRecipient_": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "minPublishDelay_": "86400"
+  },
+  "constructorArgsKeccak256": "0xa4d993b870d7f3ca9be280d13c2c636cf7bffbaebc512962c641392038ed8b31",
+  "deploymentDataBytes": 7908,
+  "deploymentDataKeccak256": "0xdc112416d0f2366133b65ac6ddc52a7c25c1302ba2dd5ea0786338e0f17c1366",
+  "live": {
+    "rpc": "https://rpc.botchain.ai",
+    "blockNumber": 21501867,
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "deployerIsEoa": true,
+    "pendingNonce": 10,
+    "balanceWei": "2175930880000000000",
+    "predictedCreateAddress": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "predictedAddressCodeless": true,
+    "gasEstimate": "1686518",
+    "bufferedGasLimit30pct": "2192473",
+    "gasPriceWei": "20000000000"
+  },
+  "rewardTokenBinding": {
+    "address": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "name": "FlowBridge",
+    "symbol": "FLOW",
+    "decimals": 18,
+    "totalSupplyWei": "1000000000000000000000000000",
+    "runtimeBytes": 1786,
+    "isV302bFlowToken": true
+  },
+  "economics": {
+    "initialFundingFlow": "0",
+    "initialReservedObligations": "0",
+    "epochsPublished": 0,
+    "mintAuthority": "NONE",
+    "cumulativeEip712Path": "ABSENT",
+    "rootActivationDelaySeconds": 86400
+  },
+  "authorization": {
+    "signed": false,
+    "broadcast": false,
+    "note": "Owner authorization required before any signing."
+  }
+}
