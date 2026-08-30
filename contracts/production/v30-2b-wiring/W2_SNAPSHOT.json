@@ -1,0 +1,251 @@
+{
+  "gate": "V30.2B W2 — Post-Wiring Snapshot + Funding Readiness",
+  "mode": "READ-ONLY — no signature, no broadcast, no funding, no root, no epoch, no oracle, no publisher",
+  "generatedAt": "2026-08-30T20:26:04.771Z",
+  "chain": {
+    "chainId": 677,
+    "blockNumber": "21516898",
+    "rpcHost": "rpc.botchain.ai"
+  },
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "distributor": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "registry": "0x86590b7C8A2Ad9a1dAD8183Eaf627AE4B7Ff3814",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "treasurySafe": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "governance": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "operations": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD"
+  },
+  "codeSizes": {
+    "flow": 1786,
+    "distributor": 6629,
+    "registry": 3082,
+    "treasury": 4827,
+    "controller": 7997,
+    "vault": 10366
+  },
+  "publicVerification": {
+    "R1_FlowToken": "PUBLICLY_VERIFIED",
+    "R2_RewardsDistributor": "PUBLICLY_VERIFIED",
+    "R3_ActivityRegistry": "PUBLICLY_VERIFIED",
+    "R4_StakingRewardTreasury": "PUBLICLY_VERIFIED",
+    "R5_StakingController": "PUBLICLY_VERIFIED",
+    "R6_StakingVaultV2": "PUBLICLY_VERIFIED"
+  },
+  "bindings": {
+    "distToken": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treToken": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "vaultToken": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "vaultController": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vaultTreasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controllerVault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "roleHashes": {
+    "treasuryVault": "0x31e0210044b4f6757ce6aa31f9c6e8d4896d24a755014887391a926c5224d959",
+    "treasuryController": "0x7b765e0e932d348852a6f810bfa1ab891e259123f02db8cdcde614c570223357",
+    "treasuryAdmin": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "controllerGovernor": "0x7935bd0ae54bc31f548c14dba4d37c5c64b3f8ca900cb468fb8abd54d5894f55",
+    "controllerPublisher": "0x0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a",
+    "controllerAdmin": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "vaultPauser": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+    "vaultAdmin": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "vaultEpoch": "0xd5a89e8a650061fa538ac2ef45b7e2fa231077c8f19d034f623c35bd12bf68ac",
+    "distPublisher": "0x0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a",
+    "distBudget": "0x4d2b5a50a63f235ec870b20b9b6638d88aa0501011616a5fbf0eeafaccca8535",
+    "distPauser": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+    "distAdmin": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "registryAttester": "0xca77cd8f9856ef5fcd36f6b15bf469fe216c2f9114f60dd031f0a2b97b67aaa9",
+    "registryAdmin": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "roleState": {
+    "treasuryVaultRoleToVault": true,
+    "treasuryControllerRoleToController": true,
+    "treasuryAdminGovernance": true,
+    "treasuryAdminDeployer": false,
+    "controllerGovernorGovernance": true,
+    "controllerAdminGovernance": true,
+    "controllerAdminDeployer": false,
+    "controllerPublisherGovernance": false,
+    "controllerPublisherOperations": false,
+    "controllerPublisherDeployer": false,
+    "controllerPublisherVault": false,
+    "vaultAdminGovernance": true,
+    "vaultPauserGovernance": true,
+    "vaultPauserOperations": true,
+    "vaultEpochController": false,
+    "vaultAdminDeployer": false,
+    "distributorAdminGovernance": true,
+    "distributorPauserOperations": true,
+    "distributorPublisherDeployer": false,
+    "distributorAdminDeployer": false,
+    "registryAdminGovernance": true,
+    "registryAdminDeployer": false
+  },
+  "economicState": {
+    "flowTotalSupply": "1000000000000000000000000000",
+    "treasurySafeFlowBalance": "1000000000000000000000000000",
+    "distributorFlowBalance": "0",
+    "distributorTotalReserved": "0",
+    "distributorTotalClaimed": "0",
+    "distributorEpochCount": "0",
+    "distributorCampaignBudget": "0",
+    "distributorFreeBalance": "0",
+    "distributorPaused": false,
+    "treasuryFlowBalance": "0",
+    "treasuryFreeBalance": "0",
+    "treasuryTotalObligations": "0",
+    "treasuryReservedGenesis": "0",
+    "treasuryReservedFloors": "0",
+    "treasuryCommittedEpoch": "0",
+    "treasuryAccruedUnclaimed": "0",
+    "vaultFlowBalance": "0",
+    "vaultTotalPrincipal": "0",
+    "vaultNextPositionId": "0",
+    "vaultCurrentEpochCommitted": "0",
+    "vaultCurrentEpochEnd": "0",
+    "vaultCurrentEpochMoved": "0",
+    "vaultFlowPerSecondByProduct": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "vaultStakedByProduct": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "vaultPaused": false,
+    "controllerMaxFlowPerEpoch": "50000000000000000000000",
+    "controllerWeeklyUsdBudget8": "0",
+    "controllerOracle": "0x0000000000000000000000000000000000000000",
+    "controllerEpochCommitted": "0",
+    "controllerEpochEnd": "0",
+    "controllerGenesisYear1Used": "0",
+    "controllerStandardYear1Used": "0",
+    "controllerEmergencyMode": false,
+    "registryPaused": false
+  },
+  "year1Ceilings": {
+    "genesisYear1Cap": "1000000000000000000000000",
+    "standardYear1Cap": "2000000000000000000000000",
+    "totalYear1Cap": "3000000000000000000000000"
+  },
+  "quarantine": {
+    "V30.1 FlowToken": {
+      "address": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+      "newFlowBalance": "0"
+    },
+    "V30.1 RewardsDistributor": {
+      "address": "0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB",
+      "newFlowBalance": "0"
+    },
+    "V30.1 StakingRewardTreasury": {
+      "address": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+      "newFlowBalance": "0"
+    },
+    "V30.1 StakingController": {
+      "address": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+      "newFlowBalance": "0"
+    },
+    "V30.1 StakingVaultV2": {
+      "address": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+      "newFlowBalance": "0"
+    },
+    "V30.1 ActivityRegistry": {
+      "address": "0xa80d8740f378989F649ca14C54e4B4a42E68753c",
+      "newFlowBalance": "0"
+    },
+    "V30.2A FlowToken (superseded)": {
+      "address": "0x123e64b12D0Da5a0e5a0B6E1e9A4E6Ff9f51DB63",
+      "newFlowBalance": "0"
+    }
+  },
+  "appRegistryReadiness": {
+    "rewardsRegistryMainnet": true,
+    "stakingRegistryMainnet": true,
+    "conclusion": "App registries are fail-closed for BOT Mainnet (token/distributor/vault null, claims + staking disabled) and carry no superseded address. Promotion to the V30.2B addresses is a separate public-activation gate and was deliberately NOT performed."
+  },
+  "treasurySafe": {
+    "address": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "nonce": 0,
+    "threshold": 2,
+    "owners": [
+      "0xF951c408f2412304ea08ADE94d53D7Df1EBdb25e",
+      "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+      "0x2eA57676b4086300C949A7eeba8697AE2fc1A1F0"
+    ],
+    "flowBalance": "1000000000000000000000000000"
+  },
+  "fundingActions": [
+    {
+      "id": "REWARDS_1M",
+      "description": "ERC-20 transfer of 1,000,000 FLOW to the new Rewards Distributor (R2)",
+      "sourceSafe": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+      "tokenTarget": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+      "recipient": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+      "amountFlow": "1000000",
+      "amountTokenUnits": "1000000000000000000000000",
+      "selector": "0xa9059cbb",
+      "calldata": "0xa9059cbb0000000000000000000000007b805b036b22e2b71ef5e8f7ea21d8791819b92200000000000000000000000000000000000000000000d3c21bcecceda1000000",
+      "calldataKeccak": "0x9e9b90cb8580894e2f1c279c80f454e31f82e3e5551ce5a55656ccecdff9e67c",
+      "value": "0",
+      "operation": "CALL",
+      "treasurySafeNonce": 0,
+      "requiredConfirmations": 2,
+      "simulation": "OK",
+      "gasEstimate": "52019",
+      "expectedPostState": {
+        "treasurySafeFlow": "-1000000 FLOW",
+        "recipientFlow": "+1000000 FLOW",
+        "obligationsOrReserved": "0 (unchanged — funding is inventory only)",
+        "epochsOrRoots": "0 (unchanged — no activation)"
+      },
+      "signed": false,
+      "broadcast": false
+    },
+    {
+      "id": "STAKING_10M",
+      "description": "ERC-20 transfer of 10,000,000 FLOW to the new Staking Reward Treasury (R4)",
+      "sourceSafe": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+      "tokenTarget": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+      "recipient": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+      "amountFlow": "10000000",
+      "amountTokenUnits": "10000000000000000000000000",
+      "selector": "0xa9059cbb",
+      "calldata": "0xa9059cbb00000000000000000000000096552909998f3dbaf5ff4979dc158508b3442e65000000000000000000000000000000000000000000084595161401484a000000",
+      "calldataKeccak": "0x1594b6a434b16f69c13ff78937adc113d98d84c134828ec83f739910a133dac8",
+      "value": "0",
+      "operation": "CALL",
+      "treasurySafeNonce": 1,
+      "requiredConfirmations": 2,
+      "simulation": "OK",
+      "gasEstimate": "52031",
+      "expectedPostState": {
+        "treasurySafeFlow": "-10000000 FLOW",
+        "recipientFlow": "+10000000 FLOW",
+        "obligationsOrReserved": "0 (unchanged — funding is inventory only)",
+        "epochsOrRoots": "0 (unchanged — no activation)"
+      },
+      "signed": false,
+      "broadcast": false
+    }
+  ],
+  "broadcastLedger": {
+    "transactionsSigned": 0,
+    "transactionsBroadcast": 0,
+    "flowTransferred": "0",
+    "roleChanges": 0,
+    "configurationWrites": 0,
+    "rootsPublished": 0,
+    "epochsCommitted": 0
+  },
+  "failures": [],
+  "verdict": "V30.2B W2 POST-WIRING SNAPSHOT + FUNDING READINESS PASS — PREPARED, NOT FUNDED"
+}
