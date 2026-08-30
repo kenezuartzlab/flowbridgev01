@@ -2,7 +2,7 @@
   "gate": "V30.2B_R5_PREFLIGHT",
   "mode": "READ_ONLY_NO_SIGNING_NO_BROADCAST",
   "chainId": 677,
-  "observedBlock": 21507548,
+  "observedBlock": 21507586,
   "buildMatrix": {
     "solc": "0.8.24+commit.e11b9ed9",
     "optimizer": {
@@ -124,8 +124,7 @@
     "caps": {
       "genesisYear1Cap": true,
       "standardYear1Cap": true,
-      "totalYear1Cap": true,
-      "enforcedBy": 0
+      "totalYear1Cap": true
     },
     "capEnforcementSites": 3,
     "oracleFailClosed": {
@@ -143,7 +142,8 @@
     }
   },
   "initialInertState": {
-    "vaultDefaultZero": false,
+    "vaultDeclaredWithoutInitializer": true,
+    "vaultNotAssignedInConstructor": true,
     "vaultSetOnlyByGovernor": true,
     "maxFlowPerEpochNotSetInConstructor": true,
     "weeklyUsdBudget8NotSetInConstructor": true,

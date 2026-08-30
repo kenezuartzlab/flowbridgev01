@@ -96,7 +96,6 @@ const caps = {
   genesisYear1Cap: /GENESIS_YEAR1_CAP\s*=\s*1_000_000 ether/.test(src),
   standardYear1Cap: /STANDARD_YEAR1_CAP\s*=\s*2_000_000 ether/.test(src),
   totalYear1Cap: /TOTAL_YEAR1_CAP\s*=\s*3_000_000 ether/.test(src),
-  enforcedBy: [...src.matchesAll?.(/x/g) ?? []].length,
 };
 const capEnforcementSites = (src.match(/Year1CapExceeded\(\)/g) || []).length;
 
@@ -116,7 +115,10 @@ const noMint = {
 };
 
 const initialInertState = {
-  vaultDefaultZero: /address public vault;/.test(src) && !/vault\s*=\s*[^;]*;\s*\n?\s*\/\/ constructor/.test(src),
+  vaultDeclaredWithoutInitializer: /IFlowStakingVaultV2View public vault;/.test(src),
+  vaultNotAssignedInConstructor: !/constructor[\s\S]*?vault\s*=/.test(
+    src.slice(src.indexOf('constructor('), src.indexOf('// ------------------------------------------------------------ governance')),
+  ),
   vaultSetOnlyByGovernor: /function setVault\([^)]*\)[^{]*onlyRole\(GOVERNOR_ROLE\)/.test(src),
   maxFlowPerEpochNotSetInConstructor: !/constructor[\s\S]*?maxFlowPerEpoch\s*=/.test(
     src.slice(src.indexOf('constructor('), src.indexOf('// ------------------------------------------------------------ governance')),
