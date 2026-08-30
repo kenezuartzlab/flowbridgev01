@@ -1,0 +1,120 @@
+{
+  "gate": "V30.2A.R1",
+  "verdict": "FLOWBRIDGE V30.2A R1 FLOWTOKEN PREFLIGHT PASS — APPROVED, NOT BROADCAST",
+  "preparedAtUtc": "2026-08-30T10:55:00Z",
+  "chainId": 677,
+  "network": "BOT Mainnet",
+  "broadcast": false,
+  "signed": false,
+  "funding": "NONE",
+  "approvedCandidateDigest": "fnv1a64:e0ac31b5bb297880",
+  "compilerMatrix": {
+    "language": "Solidity",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "solcLongVersion": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+    "optimizer": { "enabled": true, "runs": 200 },
+    "viaIR": false,
+    "evmVersion": "cancun",
+    "metadata": { "bytecodeHash": "ipfs", "appendCBOR": true },
+    "solidityWarnings": 0,
+    "doubleBuildIdentical": true
+  },
+  "artifact": {
+    "contractId": "FlowToken",
+    "contractPath": "FlowToken.sol",
+    "sourceSha256": "96a757b53494a5cee3268ef289183c660c6c8b6bd22e27a44469b6780c83229e",
+    "standardInputSha256": "d8188e0288c79807f2ff8a209cb099e48cedce51a3ef69086e44c6a448d73590",
+    "creationSha256": "f15c487550c01c071784a39ff1de895645cb24ab626a719d449103730c7258d5",
+    "runtimeSha256": "73dcb8db0657a18bd57e4021900c57a646da1c6cb9b6eda3c2e3e725db4130f9",
+    "normalizedAbiSha256": "879c21aabfb51e2982e4f45db18453a5812d302be5f75a19484ba127da78b851",
+    "runtimeBytes": 3760,
+    "eip170Headroom": 20816
+  },
+  "constructorArgs": [
+    { "name": "name_", "type": "string", "value": "FlowBridge" },
+    { "name": "symbol_", "type": "string", "value": "FLOW" },
+    { "name": "treasury_", "type": "address", "value": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4" },
+    { "name": "totalSupply_", "type": "uint256", "value": "1000000000000000000000000000" }
+  ],
+  "constructorArgsAbiHex": "0x000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000efc13d1a1dc30ba2da0bb005ba5a783c6b229ea40000000000000000000000000000000000000000033b2e3c9fd0803ce8000000000000000000000000000000000000000000000000000000000000000000000a466c6f77427269646765000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004464c4f5700000000000000000000000000000000000000000000000000000000",
+  "constructorArgsSha256": "06b40677b34dcbee89ef0a52799c99b453117ef16288f2430bca5fd8cb3b631a",
+  "economics": { "totalSupplyFlow": "1000000000", "decimals": 18, "recipient": "Treasury Safe 0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4" },
+  "safetyProperties": {
+    "owner": false,
+    "mintFunction": false,
+    "minterRole": false,
+    "transferTax": false,
+    "blacklist": false,
+    "rebase": false,
+    "reflection": false,
+    "upgradeableProxy": false,
+    "transferHooks": false,
+    "fixedSupplyMintedOnceInConstructor": true
+  },
+  "deployer": {
+    "address": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "code": "0x",
+    "isEoa": true,
+    "nonce": 8,
+    "balanceWei": "2206706800000000000",
+    "balanceBot": "2.2067068"
+  },
+  "chainObservation": { "chainId": 677, "blockNumber": 21471458, "gasPriceWei": "20000000000" },
+  "expectedCreateAddress": "0x123E64D074FD5d66DBd4BD62Dc4e71da7101DB63",
+  "gas": {
+    "estimate": 994903,
+    "bufferBps": 3000,
+    "bufferedLimit": 1293373,
+    "maxCostWei": "25867460000000000",
+    "maxCostBot": "0.02586746"
+  },
+  "unsignedTransaction": {
+    "chainId": 677,
+    "from": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "to": null,
+    "value": "0x0",
+    "nonce": 8,
+    "gasPrice": "0x4a817c800",
+    "gasLimit": 1293373,
+    "dataBytes": 5780,
+    "dataKeccak256": "0xa2f4737d87d3618603dfcc190d6c7c51cdc5c8839d4a1f4eca5b3573d46e423e",
+    "dataSha256": "27badf4f90f80d41b2e1637b89bb076f450b17252eadf8019bb8d802df87c0e6"
+  },
+  "verificationPackage": {
+    "type": "SOLIDITY_STANDARD_JSON_INPUT",
+    "viaIR": false,
+    "path": "contracts/production/v30-2a-candidate/standard-inputs/FlowToken.standard-input.json",
+    "standardInputSha256": "d8188e0288c79807f2ff8a209cb099e48cedce51a3ef69086e44c6a448d73590",
+    "contractName": "FlowToken",
+    "constructorArgsProvided": true,
+    "readyForImmediateVerification": true
+  },
+  "oldFlowToken": {
+    "address": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+    "lifecycle": "DEPRECATED_PENDING_REPLACEMENT",
+    "runtimeCodeBytesObserved": 3539,
+    "allowanceGranted": false,
+    "transferPrepared": false,
+    "fundingPrepared": false,
+    "burnPrepared": false,
+    "migrationPrepared": false
+  },
+  "routerStack": { "touched": false, "routerV4": "unchanged", "routerLens": "unchanged", "routerV3": "live, unchanged" },
+  "policyFrozen": {
+    "id": "V30_2_SETTLED_AND_PUBLICLY_VERIFIED",
+    "statement": "A replacement contract does not unlock its dependent deployment until the replacement contract is both on-chain settled and publicly source verified."
+  },
+  "r6ViaIrException": {
+    "stage": "R6",
+    "contractId": "FlowStakingVaultV2",
+    "code": "viaIR REQUIRED — STACK_TOO_DEEP",
+    "status": "REQUIRED_PENDING_REVIEW",
+    "ownerApproved": false
+  },
+  "oneTimeApproval": {
+    "stage": "R1",
+    "scope": "UNSIGNED_DEPLOYMENT_PREPARATION_ONLY",
+    "boundTo": ["candidateDigest", "artifactHashes", "constructorArgs", "deployer", "nonce", "chainId", "unsignedDataKeccak", "gasLimit"],
+    "invalidatedByAnyChange": true
+  }
+}
