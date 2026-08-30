@@ -201,6 +201,8 @@ for (const p of PROJECTS) {
     ) + "\n",
   );
 
+  const solcPkg = p.solc === "0.8.20" ? "solc-0.8.20" : "solc-0.8.24";
+
   write(
     join(root, "package.json"),
     JSON.stringify(
@@ -208,11 +210,14 @@ for (const p of PROJECTS) {
         name: `flowbridge-verify-${p.dir}`,
         version: "1.0.0",
         private: true,
-        description: `Frozen Hardhat verification project for ${p.contractName} on BOT Mainnet 677`,
+        description: `Frozen verification project for ${p.contractName} on BOT Mainnet 677`,
         scripts: {
-          compile: "../node_modules/.bin/hardhat compile",
-          hashes: "node scripts/hashes.js",
-          verify: "../node_modules/.bin/hardhat run scripts/verify.js --network bot",
+          // Byte-exact path: compile the preserved Standard-JSON verbatim.
+          rebuild: "node scripts/rebuild.js",
+          submit: "node scripts/submit.js",
+          // Optional convenience only — see README (source ordering caveat).
+          "hardhat:compile": "../node_modules/.bin/hardhat compile",
+          "hardhat:verify": "../node_modules/.bin/hardhat run scripts/verify.js --network bot",
         },
       },
       null,
