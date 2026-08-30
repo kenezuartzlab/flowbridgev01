@@ -10,6 +10,7 @@ import {
   keccak256,
   getContractAddress,
   formatEther,
+  getAddress,
 } from 'viem';
 
 const D = path.dirname(new URL(import.meta.url).pathname).replace(/\/scripts$/, '');
@@ -33,7 +34,7 @@ const encoded = encodeAbiParameters(
     { type: 'address' }, { type: 'address' }, { type: 'address' }, { type: 'address' },
     { type: 'address' }, { type: 'address' }, { type: 'uint64' },
   ],
-  Object.values(ARGS),
+  Object.values(ARGS).map((v) => (typeof v === "string" ? getAddress(v.toLowerCase()) : v)),
 );
 const data = creation + encoded.slice(2);
 
