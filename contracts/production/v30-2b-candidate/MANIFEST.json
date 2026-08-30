@@ -1,0 +1,63 @@
+{
+  "$comment": "FlowBridge V30.2B FlowToken candidate — frozen source, independently reproduced. No transaction signed or broadcast.",
+  "gate": "V30.2B-R1",
+  "contract": "FlowToken",
+  "sourcePath": "contracts/production/v30-2b-candidate/sources/FlowToken.sol",
+  "compiler": {
+    "version": "0.8.24+commit.e11b9ed9",
+    "optimizer": { "enabled": true, "runs": 200 },
+    "viaIR": false,
+    "evmVersion": "cancun",
+    "metadata": { "bytecodeHash": "ipfs", "appendCBOR": true },
+    "openzeppelin": "5.6.1"
+  },
+  "reproduced": {
+    "sourceSha256": "959f7df216faadf100a5b09c8d97eac14ab7ae0283318b93f49f0d7de47df66f",
+    "creationSha256": "5d968091e8140cfd872d69ce54b3c64bf33f417b26f9fe7796d1ae1302280f4e",
+    "runtimeSha256": "2f86c4bb190f0d46e7d0154d6f1de02f35e69d4aa2015e7ceecf647de5d7a5ca",
+    "normalizedAbiSha256": "fd29c0fa3214601afa01f57dc1f9971604201104e266c5b8a949ab83ea7144f1",
+    "creationBytes": 3061,
+    "runtimeBytes": 1786,
+    "doubleBuild": "REPRODUCIBLE_BYTE_IDENTICAL"
+  },
+  "expected": {
+    "sourceSha256": "959f7df216faadf100a5b09c8d97eac14ab7ae0283318b93f49f0d7de47df66f",
+    "creationSha256": "5d968091e8140cfd872d69ce54b3c64bf33f417b26f9fe7796d1ae1302280f4e",
+    "runtimeSha256": "2f86c4bb190f0d46e7d0154d6f1de02f35e69d4aa2015e7ceecf647de5d7a5ca",
+    "normalizedAbiSha256": "fd29c0fa3214601afa01f57dc1f9971604201104e266c5b8a949ab83ea7144f1",
+    "creationBytes": 3061,
+    "runtimeBytes": 1786,
+    "deploymentDataKeccak256": "0xf5c8efb4faa6319c5b99b1e267d7a5a1bce83265973ffeac86798bce883a1d7c"
+  },
+  "hashParity": "ALL_MATCH",
+  "constructorArgs": {
+    "name": "FlowBridge",
+    "symbol": "FLOW",
+    "treasury": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "totalSupply": "1000000000000000000000000000",
+    "abiEncodedFile": "constructor-args.txt"
+  },
+  "deploymentData": {
+    "file": "unsigned-deployment-data.txt",
+    "bytes": 3317,
+    "keccak256": "0xf5c8efb4faa6319c5b99b1e267d7a5a1bce83265973ffeac86798bce883a1d7c"
+  },
+  "chainState": {
+    "readAt": "2026-08-30T16:59:00Z",
+    "chainId": 677,
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "pendingNonce": 9,
+    "balanceBOT": 2.18698858,
+    "predictedCreateAddress": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "predictedAddressCode": "0x",
+    "predictedAddressCodeless": true
+  },
+  "verificationBundle": {
+    "standardInputJson": "standard-input.json",
+    "standardInputSha256": "977f9ee389b18c7894a5425c7ded2f893cb3fb89d5b0af56b04041ca673f0c35",
+    "sourceFileCount": 6,
+    "perFileHashes": "SHA256SUMS.txt"
+  },
+  "verdict": "REPRODUCED_EXACTLY — AWAITING OWNER SIGNING AUTHORIZATION",
+  "broadcast": "NONE — nothing signed, nothing sent"
+}
