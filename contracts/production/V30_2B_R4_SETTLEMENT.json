@@ -1,0 +1,114 @@
+{
+  "$comment": "FlowBridge V30.2B R4 \u2014 FlowStakingRewardTreasury clean replacement SETTLEMENT. Exactly one deployment broadcast from the frozen R4 payload.",
+  "gate": "V30.2B_R4_SETTLEMENT",
+  "verdict": "V30.2B R4 PASS \u2014 REWARD TREASURY DEPLOYED, PUBLICLY VERIFIED, UNFUNDED AND UNWIRED",
+  "chainId": 677,
+  "candidateDigest": "fnv1a64:e0ac31b5bb297880",
+  "transaction": {
+    "hash": "0xf90eb5c65d7bf64f77b2ce3bdce11ec5d07d1491822fa156e438c90222644b11",
+    "block": 21506932,
+    "status": "success",
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "nonce": 12,
+    "valueBOT": "0",
+    "gasUsed": 1151495,
+    "gasLimitBuffered30": 1510341,
+    "deploymentDataKeccak": "0x2de68bf07e8e1296421602ffd6c59063f8fec32eb99df3b41cb7779c3a569fad",
+    "payloadSource": "frozen contracts/production/v30-2b-treasury/unsigned-deployment-data.txt (never reconstructed from chat)"
+  },
+  "contract": {
+    "address": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "expectedAddressMatch": true,
+    "predictedCodelessBeforeBroadcast": true
+  },
+  "buildIdentity": {
+    "solcLong": "v0.8.24+commit.e11b9ed9",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": false,
+    "evmVersion": "cancun",
+    "openzeppelin": "5.6.1 (vendored verbatim)",
+    "sourceUnits": 14,
+    "license": "MIT"
+  },
+  "artifactParity": {
+    "sourceSha256": "963ce367246ebc673e1d915202759a5159604dd0a794484b68500f921155d8a8",
+    "creationSha256": "d3b676d3da8cc38247be64b9ab83dc49cc0675cc4e4b41dbd3a638611d518360",
+    "frozenRuntimeSha256": "747a268c8740d24099594de823af2a10b9472f09d85f61da5a17a597f7a09cea",
+    "deployedRuntimeSha256": "42e7a42dbf6a0f642e8d9bf1038f0f4990aeed5cfb2b84eea6dcb155437e1d6b",
+    "deployedRuntimeBytes": 4827,
+    "lengthIdentical": true,
+    "runtimeParity": "EXACT_MODULO_CONSTRUCTOR_IMMUTABLES",
+    "immutableDivergence": {
+      "count": 6,
+      "onlyValue": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF placed into the six immutable token slots that are zero in the pre-deployment artifact",
+      "otherDifferences": 0
+    },
+    "abiSha256": "3cfeefcdd459ca697e3f6f1891e3ffe9a325896f544d9b32a7358fabb115065a",
+    "standardInputSha256": "99848d1f1aa7ab20f56acb61ee77447e8608af30b53e1a50fafb130b2656896a"
+  },
+  "constructorVerified": {
+    "token": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "admin": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "recoveryRecipient": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "keccak": "0x3223b853bc48ce8e0125684cdd6a0f5df2708ab38be759cbd4fcaa444ce63957"
+  },
+  "rewardTokenBinding": {
+    "address": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "isVerifiedV302bFlow": true,
+    "symbol": "FLOW",
+    "totalSupplyWei": "1000000000000000000000000000",
+    "oldTokenReferenced": false
+  },
+  "roleMatrix": {
+    "governanceHasDefaultAdmin": true,
+    "vaultRoleAssigned": false,
+    "controllerRoleAssigned": false,
+    "deployerHasAnyRole": false,
+    "roleGrantedEvents": 1,
+    "grantedTo": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507 (DEFAULT_ADMIN_ROLE only)"
+  },
+  "initialState": {
+    "flowBalanceWei": "0",
+    "reservedGenesis": "0",
+    "reservedFloors": "0",
+    "committedEpoch": "0",
+    "accruedUnclaimed": "0",
+    "totalObligations": "0",
+    "freeBalance": "0",
+    "recoveryBoundedByFreeBalance": true
+  },
+  "publicVerification": {
+    "explorer": "https://scan.botchain.ai/address/0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "method": "standard-input (frozen non-viaIR Standard JSON)",
+    "is_verified": true,
+    "is_fully_verified": true,
+    "name": "FlowStakingRewardTreasury",
+    "compiler": "v0.8.24+commit.e11b9ed9",
+    "evmVersion": "cancun",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "license": "mit",
+    "sourceFiles": 14
+  },
+  "notPerformed": [
+    "10,000,000 FLOW transfer",
+    "VAULT_ROLE grant",
+    "CONTROLLER_ROLE grant",
+    "any reservation, epoch commit, accrual or payout",
+    "recovery recipient change",
+    "R5 deployment"
+  ],
+  "hardStops": {
+    "nonceDrift": false,
+    "addressDrift": false,
+    "destinationHadCode": false,
+    "tokenOrRoleMismatch": false,
+    "artifactOrBuildDrift": false,
+    "oldStackAddressPresent": false
+  }
+}
