@@ -1,0 +1,6 @@
+module.exports = [
+  "FlowBridge",
+  "FLOW",
+  "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+  "1000000000000000000000000000"
+];
