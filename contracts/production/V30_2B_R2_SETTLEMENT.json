@@ -1,0 +1,98 @@
+{
+  "release": "V30.2B R2 — FlowRewardsMerkleDistributor (replacement production distributor)",
+  "status": "PASS — SETTLED, RUNTIME PARITY CONFIRMED, PUBLICLY SOURCE VERIFIED",
+  "authorization": "Owner-authorized single deployment, frozen payload only (no calldata reconstructed from chat)",
+  "chainId": 677,
+  "network": "BOT Mainnet",
+  "rpc": "https://rpc.botchain.ai",
+  "transaction": {
+    "hash": "0x4b119a48458db324eada60c9942827eaa57e698df39d38cea4009d3aac977115",
+    "blockNumber": 21502392,
+    "status": "success",
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "nonce": 10,
+    "value": "0",
+    "gasLimit": 2192473,
+    "gasUsed": 1672080,
+    "gasPriceWei": "20000000000",
+    "type": "legacy"
+  },
+  "contract": {
+    "address": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "expectedAddress": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "addressMatch": true
+  },
+  "prebroadcastRevalidation": {
+    "chainId": 677,
+    "pendingNonce": 10,
+    "predictedCreateAddressCodeless": true,
+    "deploymentDataKeccak256": "0xdc112416d0f2366133b65ac6ddc52a7c25c1302ba2dd5ea0786338e0f17c1366",
+    "constructorArgsKeccak256": "0xa4d993b870d7f3ca9be280d13c2c636cf7bffbaebc512962c641392038ed8b31",
+    "creationSha256": "b54e6071d7859265dbf12999f6804f5f5f26af759104aea5a2cb85a8b043f0f5",
+    "compilerSettingsUnchanged": true,
+    "constructorValuesUnchanged": true,
+    "deployerBalanceBOT": 2.17593088
+  },
+  "runtimeParity": {
+    "frozenRuntimeSha256": "0d240fe4af5ebb24d16cead6aacd8175dbf6620e516754bd26809be35fa24713",
+    "onchainRuntimeSha256": "8fe7fbc2aca7362bd0d8e83f915e594e1830b4e9563923d53b2110e906b02ab2",
+    "onchainRuntimeBytes": 6629,
+    "frozenRuntimeBytes": 6629,
+    "byteDifferences": 100,
+    "differenceRanges": [[1352, 1371], [1528, 1547], [2019, 2038], [3141, 3160], [4682, 4701]],
+    "differenceExplanation": "All 100 differing bytes are the five inlined 20-byte immutable slots for the reward token address; frozen build holds zero placeholders and the deployed runtime holds 0xcaaB50F36252a57529AFeF651fa6B9f9281917fF. No other byte differs.",
+    "verdict": "EXACT PARITY MODULO CONSTRUCTOR-POPULATED IMMUTABLES"
+  },
+  "onchainState": {
+    "token": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "tokenIsVerifiedV302BFlow": true,
+    "minPublishDelaySeconds": 86400,
+    "minPublishDelayFloorSeconds": 3600,
+    "minPublishDelayCeilingSeconds": 604800,
+    "totalReserved": "0",
+    "totalClaimed": "0",
+    "epochCount": "0",
+    "campaignBudget": "0",
+    "budgetRemaining": "0",
+    "freeBalance": "0",
+    "flowBalance": "0",
+    "recoveryRecipient": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+    "paused": false,
+    "roles": {
+      "DEFAULT_ADMIN_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+      "BUDGET_MANAGER_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+      "PUBLISHER_ROLE": "0x971E7790Fe6c8f77Dc666bB05D4aeDa362653F94",
+      "PAUSER_ROLE": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+      "deployerHoldsNoRole": true
+    },
+    "recoveryBoundedByFreeBalance": true,
+    "noCampaignRootOrEpochExists": true,
+    "notFunded": true
+  },
+  "sourceVerification": {
+    "explorer": "https://scan.botchain.ai/address/0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "isVerified": true,
+    "isFullyVerified": true,
+    "verifiedAt": "2026-08-30T17:46:45.512398Z",
+    "name": "FlowRewardsMerkleDistributor",
+    "compilerVersion": "v0.8.24+commit.e11b9ed9",
+    "optimizerEnabled": true,
+    "optimizerRuns": 200,
+    "evmVersion": "cancun",
+    "viaIR": false,
+    "license": "mit",
+    "method": "solidity-standard-json-input",
+    "packageFile": "contracts/production/v30-2b-distributor/verification-standard-input.json",
+    "packageSha256": "8f6cfa587fd2125f63252f0e0e3a2a00036906579e44729ecfd5c137b254fb16",
+    "packageNote": "Self-contained Standard JSON (16 sources, frozen OZ 5.6.1 inlined). Recompiles byte-identically to the frozen creation/runtime bytecode; identical settings to the deployed build.",
+    "constructorArgsOnExplorer": "0x000000000000000000000000caab50f36252a57529afef651fa6b9f9281917ff00000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce950700000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507000000000000000000000000971e7790fe6c8f77dc666bb05d4aeda362653f940000000000000000000000001ce0b1df5d2055f6e92122d8cb7669609c2359ef000000000000000000000000efc13d1a1dc30ba2da0bb005ba5a783c6b229ea40000000000000000000000000000000000000000000000000000000000015180"
+  },
+  "scopeGuards": {
+    "distributorFunded": false,
+    "rootPublished": false,
+    "epochCreated": false,
+    "r3Deployed": false,
+    "flowTransfers": 0,
+    "productActivation": false
+  }
+}
