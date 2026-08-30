@@ -1,0 +1,265 @@
+{
+  "gate": "V30.2B_R6_PREFLIGHT",
+  "mode": "READ_ONLY_NO_SIGNING_NO_BROADCAST",
+  "verdict": "R6 VIAIR TECHNICAL-NECESSITY PREFLIGHT PASS \u2014 FROZEN CANDIDATE REPRODUCIBLE, ZERO WRITES",
+  "chainId": 677,
+  "observedBlock": 21509299,
+  "live": {
+    "rpcHost": "rpc.botchain.ai",
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "pendingNonce": 14,
+    "balanceWei": "2060533820000000000",
+    "balanceBOT": "2.06053382",
+    "predictedAddress": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "predictedCode": "0x",
+    "gasPriceWei": "20000000000",
+    "gasEstimate": "2390840",
+    "gasLimitPlus30pct": "3108092",
+    "dependencyCodePresent": {
+      "token": true,
+      "controller": true,
+      "treasury": true
+    },
+    "r5ControllerState": {
+      "vault": "0x0000000000000000000000000000000000000000",
+      "maxFlowPerEpoch": "0",
+      "weeklyUsdBudget8": "0"
+    }
+  },
+  "constructor": {
+    "signature": "constructor(address token_, address controller_, address treasury_, address admin)",
+    "args": {
+      "token": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+      "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+      "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+      "admin": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507"
+    },
+    "encoded": "0x000000000000000000000000caab50f36252a57529afef651fa6b9f9281917ff00000000000000000000000044b9b880c6188d8b8dbe4f68216ae28a5a1253bf00000000000000000000000096552909998f3dbaf5ff4979dc158508b3442e6500000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507",
+    "argsKeccak": "0x9585cb6f43265bd83999405e04db60f956ddaadb71b638d223293621b7b8749e"
+  },
+  "deployment": {
+    "dataBytes": 11382,
+    "dataKeccak": "0xcdcd8dafa54a0bf2e11c91acb7b96092f8f1c476836952190b25fe81ea29d27d",
+    "dataSha256": "98d9aa00c3a081cc5ff468561edb84ec3ec7b86a07058e1f9222e0e921f4a02a"
+  },
+  "artifact": {
+    "creationSha256": "159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6",
+    "runtimeSha256": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
+    "normalizedAbiSha256": "a22dacc20032a9a188034b1fd1ea4c66eaa8ae3827259ac790a6897fd52369e0",
+    "standardInputSha256": "5b35d7eb0ed90baabd8862e28d32a1b27498833aefd1e78a81f9de4e74d6bcef",
+    "creationBytes": 11254,
+    "runtimeBytes": 10366,
+    "eip170": {
+      "limit": 24576,
+      "headroomBytes": 14210
+    }
+  },
+  "economics": {
+    "fiveProductsFromControllerOnly": true,
+    "noLocalProductTable": true,
+    "genesisWindowNinetyDays": true,
+    "genesisLifetimeLineage": true,
+    "genesisAntiReset": true,
+    "genesisReservedAtEntry": true,
+    "genesisBudgetReleasedOnFailure": true,
+    "floorFullyReservedOrRevert": true,
+    "variableAccrualAccumulator": true,
+    "epochSettlementControllerOnly": true,
+    "unvestedRemainderReleasedOnWithdraw": true
+  },
+  "principalSafety": {
+    "principalHeldByVault": true,
+    "principalReturnedToOwnerOnly": true,
+    "rewardsPaidByTreasuryNotFromPrincipal": true,
+    "noRewardPathTouchesVaultBalance": true,
+    "noMintPath": true,
+    "noSweepOrRescue": true,
+    "noArbitraryCall": true,
+    "noProxyOrUpgrade": true,
+    "noTokenTax": true,
+    "reentrancyGuardedMutators": true
+  },
+  "pauseModel": {
+    "pauserRoleConstant": true,
+    "pauseRestrictedToPauser": true,
+    "unpauseRestrictedToAdmin": true,
+    "canPause": [
+      "openPosition",
+      "claim"
+    ],
+    "cannotBePaused": [
+      "withdraw"
+    ],
+    "principalExitAlwaysAvailable": true
+  },
+  "initialState": {
+    "nextPositionIdStartsAtZeroIdsFromOne": true,
+    "constructorOnlyBindsAndGrantsAdminRoles": true,
+    "constructorGrantsDefaultAdmin": true,
+    "constructorGrantsPauser": true,
+    "constructorNoTokenMovement": true,
+    "constructorNoApproval": true,
+    "constructorRejectsZeroDependencies": true,
+    "noPositionsOrPrincipalAtDeploy": true,
+    "noRewardInventoryHeld": true
+  },
+  "roleMatrix": {
+    "DEFAULT_ADMIN_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "PAUSER_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "deployerRoles": "NONE",
+    "vaultRoleOnTreasury": "NOT_GRANTED_IN_THIS_GATE",
+    "vaultBindingOnController": "NOT_SET_IN_THIS_GATE",
+    "note": "Operations pauser delegation and treasury VAULT_ROLE are separate authorized wiring gates."
+  },
+  "dependencyProof": {
+    "boundTo": {
+      "token": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+      "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+      "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+      "admin": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507"
+    },
+    "tokenIsV30_2B_R1": true,
+    "controllerIsV30_2B_R5": true,
+    "treasuryIsV30_2B_R4": true,
+    "allDependenciesHaveCode": true,
+    "oldAddressesInSource": [],
+    "oldAddressesInPayload": []
+  },
+  "noWrites": {
+    "signatures": 0,
+    "broadcasts": 0,
+    "fundingTransfers": 0,
+    "approvals": 0,
+    "roleGrants": 0,
+    "controllerVaultWiring": 0,
+    "oracleConfig": 0,
+    "publisherAssignment": 0,
+    "maxFlowPerEpochUpdates": 0,
+    "epochPublications": 0
+  },
+  "verificationPackage": "contracts/production/v30-2b-vault/verification-standard-input.json",
+  "checks": {
+    "chainIdIs677": true,
+    "predictedDestinationCodeless": true,
+    "deployerHasGas": true,
+    "eip170": true,
+    "dependenciesDeployed": true,
+    "noOldAddressContamination": true,
+    "economicsIntact": true,
+    "principalSafetyIntact": true,
+    "pauseModelIntact": true,
+    "initialStateEmpty": true,
+    "r5ControllerStillInert": true,
+    "gasEstimated": true
+  },
+  "blockers": [],
+  "rebuild": {
+    "gate": "V30.2B_R6_REBUILD",
+    "mode": "READ_ONLY_NO_SIGNING_NO_BROADCAST",
+    "solc": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+    "buildMatrix": {
+      "solc": "0.8.24+commit.e11b9ed9",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "viaIR": true,
+      "evmVersion": "cancun",
+      "metadata": {
+        "bytecodeHash": "ipfs",
+        "appendCBOR": true
+      },
+      "sourceUnits": 14,
+      "settingsSource": "contracts/production/V30_2A_REDEPLOY_PREFLIGHT.json replacements[R6]"
+    },
+    "nonViaIrAttempt": {
+      "viaIR": false,
+      "sourceEdited": false,
+      "settingsChangedBeyondViaIr": false,
+      "result": "COMPILE_FAILED",
+      "errors": [
+        {
+          "type": "CompilerError",
+          "message": "CompilerError: Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing local variables.\n   --> FlowStakingVaultV2.sol:331:39:\n    |\n331 |         p.varPaid = varPerTokenStored[productId];\n    |                                       ^^^^^^^^^"
+        }
+      ]
+    },
+    "solidityWarnings": 0,
+    "sourceSha256": "4a82e4f0f9c07e2a24bc7150d80675c6c3d1b8359ce11589aac55fb7c75b2531",
+    "standardInputSha256": "5b35d7eb0ed90baabd8862e28d32a1b27498833aefd1e78a81f9de4e74d6bcef",
+    "creationSha256": "159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6",
+    "runtimeSha256": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
+    "normalizedAbiSha256": "a22dacc20032a9a188034b1fd1ea4c66eaa8ae3827259ac790a6897fd52369e0",
+    "creationBytes": 11254,
+    "runtimeBytes": 10366,
+    "eip170": {
+      "limit": 24576,
+      "withinLimit": true,
+      "headroomBytes": 14210
+    },
+    "doubleBuildIdentical": true
+  },
+  "tests": {
+    "runner": "forge 1.4.4 (foundry), solc 0.8.24, optimizer 200, viaIR true, EVM cancun",
+    "suite": "contracts/production/staking-v2/test/FlowStakingV2.t.sol",
+    "sourceUnderTestSha256": "4a82e4f0f9c07e2a24bc7150d80675c6c3d1b8359ce11589aac55fb7c75b2531",
+    "sourceUnderTestIdenticalToCandidate": true,
+    "total": 29,
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0,
+    "fuzzRunsPerProperty": 512,
+    "names": [
+      "testFuzz_accountingConservation",
+      "testFuzz_exactPrincipalReturned",
+      "test_belowMinimumReverts",
+      "test_commitBeyondFundingReverts",
+      "test_existingReservationsImmutableOnCapExhaustion",
+      "test_fiveProductsConfigured",
+      "test_floorRequiresFundedReserve",
+      "test_floorSurvivesWhenVariableZero",
+      "test_genesisAccrualAndClaim",
+      "test_genesisQuotaAntiReset",
+      "test_genesisQuotaPartiallyConsumedFlexible",
+      "test_genesisRepriceWhenCapacityExhausted",
+      "test_lockedMaturityExactPrincipalAndFloor",
+      "test_lockedWithdrawBeforeMaturityReverts",
+      "test_lowLiquidityOracleBlocksEpoch",
+      "test_maxFlowPerEpochClampsBudget",
+      "test_noOracleBlocksEpoch",
+      "test_openAllFiveProducts",
+      "test_pauseBlocksNewRiskButNotMatureWithdrawal",
+      "test_principalIsolatedFromRewards",
+      "test_rateGuardTenPercentWeekOverWeek",
+      "test_recoveryOnlyFreeBalance",
+      "test_reentrancyGuardBlocksCallback",
+      "test_repeatedClaimRevertsWhenZero",
+      "test_staleOracleBlocksEpoch",
+      "test_variableEpochAccrualAndRemainder",
+      "test_variableNeverExceedsHardCap",
+      "test_year1TotalCapEnforced",
+      "test_zeroStakerEpochFullyReconciled"
+    ],
+    "slitherEvidence": "contracts/production/staking-v2/slither-final-FlowStakingVaultV2.json"
+  },
+  "nonViaIrDiagnostic": {
+    "viaIR": false,
+    "sourceEdited": false,
+    "settingsChangedBeyondViaIr": false,
+    "result": "COMPILE_FAILED",
+    "errors": [
+      {
+        "type": "CompilerError",
+        "message": "CompilerError: Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing local variables.\n   --> FlowStakingVaultV2.sol:331:39:\n    |\n331 |         p.varPaid = varPerTokenStored[productId];\n    |                                       ^^^^^^^^^"
+      }
+    ]
+  },
+  "viaIrTechnicalNecessity": {
+    "nonViaIrCompiles": false,
+    "error": "CompilerError: Stack too deep ... viaIR: true ... FlowStakingVaultV2.sol:331:39 p.varPaid = varPerTokenStored[productId];",
+    "sourceRewritten": false,
+    "optimizerOrEvmSettingsChanged": false,
+    "statement": "viaIR=true is technically required to compile the exact frozen FlowStakingVaultV2 source. Disabling it is impossible without rewriting reviewed accounting code, which would create a new candidate requiring independent review. Explicit owner approval is required before deploying with viaIR."
+  },
+  "$comment": "FlowBridge V30.2B R6 \u2014 FlowStakingVaultV2 production preflight. Read-only evidence. No transaction signed or broadcast, no funding, no wiring, no role grant, no oracle/publisher/epoch change."
+}
