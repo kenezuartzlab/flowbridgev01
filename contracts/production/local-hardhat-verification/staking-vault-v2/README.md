@@ -16,6 +16,7 @@ Explorer: https://scan.botchain.ai/address/0x3cc0799fB4169A9BB5dA9812Bea23CBa97B
 | Contract target | `FlowStakingVaultV2.sol:FlowStakingVaultV2` |
 | Creation sha256 | `159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6` |
 | Runtime sha256 | `af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce` (10366 bytes) |
+| Local reproduction | EXACT — `npm run rebuild` prints MATCH |
 | Constructor args | `constructor-args.js` (ABI-encoded in that file's header) |
 
 Constructor args keccak256 0xc19ac2409811e9b37f32175a7869863cc7673216514e19ee5db98241e39b3c54.

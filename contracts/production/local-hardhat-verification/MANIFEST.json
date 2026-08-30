@@ -27,7 +27,9 @@
         "creationSha256": "200a6a559c6e43a357f7b7fb677a1d7a4e1d89344fd78bcc34398265fa2107a2",
         "runtimeSha256": "f7be82e4d98df2b7ab421ae8ec4b1d2ea1b0fd124b7865aaaad5e77656226edf",
         "runtimeBytes": 3539
-      }
+      },
+      "reproduction": "EXACT",
+      "reproductionNote": "On-chain runtime differs from the frozen local runtime only in the 131 bytes of EIP-712 immutables written by the constructor."
     },
     {
       "project": "rewards-distributor",
@@ -51,7 +53,9 @@
         "creationSha256": "21c96796f0e7fbc32ed114edf6194147ddb3949c88a9907d8cc28c9ed5157581",
         "runtimeSha256": "a708b596b82367893813a4ed39650bcf26f95a23fad678955a4b938fca40d367",
         "runtimeBytes": 5861
-      }
+      },
+      "reproduction": "EXACT",
+      "reproductionNote": "On-chain runtime differs only in the 100 bytes of the five `token` immutable slots."
     },
     {
       "project": "staking-vault-v2",
@@ -75,7 +79,9 @@
         "creationSha256": "159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6",
         "runtimeSha256": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
         "runtimeBytes": 10366
-      }
+      },
+      "reproduction": "EXACT",
+      "reproductionNote": "Constructor args keccak256 0xc19ac2409811e9b37f32175a7869863cc7673216514e19ee5db98241e39b3c54."
     },
     {
       "project": "activity-registry",
@@ -99,7 +105,9 @@
         "creationSha256": "25ec99e2bc31648d9e0cb2376c00063c404d2b535afe887f1b9cb37ebfc2cc6d",
         "runtimeSha256": "53a83eea932da41016a7021926113e4ed50612525768bb6ba0eb1ec876b3e03b",
         "runtimeBytes": 2713
-      }
+      },
+      "reproduction": "LAYOUT_DIVERGENT",
+      "reproductionNote": "Deployed runtime is byte-identical to the frozen deployment artifact (no immutables), and this bundle reproduces the same size and the same metadata hash — but not the same viaIR jump layout. Both the published wasm and the published native solc 0.8.20+commit.a1b79de6 builds produce runtime sha256 c164c24b6d9b4929b5c69696600e1458a049341fa4593863da453d2c2d377aa6 from these exact sources and settings, so no local rebuild currently reproduces the deployed bytes and explorer verification is expected to fail for this contract only. Attester address stays lowercase in the ABI-encoded args as broadcast."
     }
   ]
 }

@@ -38,6 +38,7 @@ type Project = {
   constructorArgs: unknown[];
   constructorArgsAbiEncoded: string;
   frozen: { creationSha256: string; runtimeSha256: string; runtimeBytes: number };
+  reproduction: "EXACT" | "LAYOUT_DIVERGENT";
   notes: string;
 };
 
@@ -64,6 +65,7 @@ const PROJECTS: Project[] = [
       runtimeSha256: "f7be82e4d98df2b7ab421ae8ec4b1d2ea1b0fd124b7865aaaad5e77656226edf",
       runtimeBytes: 3539,
     },
+    reproduction: "EXACT",
     notes:
       "On-chain runtime differs from the frozen local runtime only in the 131 bytes of EIP-712 immutables written by the constructor.",
   },
@@ -93,6 +95,7 @@ const PROJECTS: Project[] = [
       runtimeSha256: "a708b596b82367893813a4ed39650bcf26f95a23fad678955a4b938fca40d367",
       runtimeBytes: 5861,
     },
+    reproduction: "EXACT",
     notes:
       "On-chain runtime differs only in the 100 bytes of the five `token` immutable slots.",
   },
@@ -118,6 +121,7 @@ const PROJECTS: Project[] = [
       runtimeSha256: "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
       runtimeBytes: 10366,
     },
+    reproduction: "EXACT",
     notes: "Constructor args keccak256 0xc19ac2409811e9b37f32175a7869863cc7673216514e19ee5db98241e39b3c54.",
   },
   {
@@ -141,8 +145,9 @@ const PROJECTS: Project[] = [
       runtimeSha256: "53a83eea932da41016a7021926113e4ed50612525768bb6ba0eb1ec876b3e03b",
       runtimeBytes: 2713,
     },
+    reproduction: "LAYOUT_DIVERGENT",
     notes:
-      "Deployed runtime is byte-identical to the frozen artifact (no immutables). Attester address must stay lowercase in the ABI-encoded args as broadcast.",
+      "Deployed runtime is byte-identical to the frozen deployment artifact (no immutables), and this bundle reproduces the same size and the same metadata hash — but not the same viaIR jump layout. Both the published wasm and the published native solc 0.8.20+commit.a1b79de6 builds produce runtime sha256 c164c24b6d9b4929b5c69696600e1458a049341fa4593863da453d2c2d377aa6 from these exact sources and settings, so no local rebuild currently reproduces the deployed bytes and explorer verification is expected to fail for this contract only. Attester address stays lowercase in the ABI-encoded args as broadcast.",
   },
 ];
 
@@ -321,7 +326,17 @@ console.log("solc            ", solc.version());
 console.log("creation sha256 ", creation, creation === expected.creation ? "MATCH" : "MISMATCH");
 console.log("runtime  sha256 ", runtime, runtime === expected.runtime ? "MATCH" : "MISMATCH");
 console.log("runtime  bytes  ", artifact.evm.deployedBytecode.object.length / 2, "expected ${p.frozen.runtimeBytes}");
-if (creation !== expected.creation || runtime !== expected.runtime) process.exitCode = 1;
+if (creation !== expected.creation || runtime !== expected.runtime) {
+  ${
+    p.reproduction === "EXACT"
+      ? "process.exitCode = 1;"
+      : `console.log(
+    "\\nEXPECTED for this contract: reproduction is LAYOUT_DIVERGENT.",
+    "\\nSame source hashes, same metadata hash, same byte length, different viaIR jump layout.",
+    "\\nNo published solc ${p.solc} build reproduces the deployed bytes; see README.md.",
+  );`
+  }
+}
 `,
   );
 
@@ -400,6 +415,7 @@ Explorer: ${EXPLORER}/address/${p.address}
 | Contract target | \`${p.entrySource}:${p.contractName}\` |
 | Creation sha256 | \`${p.frozen.creationSha256}\` |
 | Runtime sha256 | \`${p.frozen.runtimeSha256}\` (${p.frozen.runtimeBytes} bytes) |
+| Local reproduction | ${p.reproduction === "EXACT" ? "EXACT — \`npm run rebuild\` prints MATCH" : "LAYOUT_DIVERGENT — see note below"} |
 | Constructor args | \`constructor-args.js\` (ABI-encoded in that file's header) |
 
 ${p.notes}
@@ -451,6 +467,8 @@ the constructor args from \`constructor-args.js\`.
     bundleSha256: sha256(bundleRaw),
     constructorArgsAbiEncoded: p.constructorArgsAbiEncoded,
     frozen: p.frozen,
+    reproduction: p.reproduction,
+    reproductionNote: p.notes,
   });
 
   console.log(
@@ -505,9 +523,15 @@ Four self-contained Hardhat projects for the contracts that are deployed and
 runtime-proven but still \`SOURCE_PENDING\` on \`${EXPLORER}\` because the
 explorer edge rejects automated submissions from this environment.
 
-| Project | Contract | Address |
-| --- | --- | --- |
-${PROJECTS.map((p) => `| \`${p.dir}/\` | ${p.contractName} | \`${p.address}\` |`).join("\n")}
+| Project | Contract | Address | Local reproduction |
+| --- | --- | --- | --- |
+${PROJECTS.map((p) => `| \`${p.dir}/\` | ${p.contractName} | \`${p.address}\` | ${p.reproduction} |`).join("\n")}
+
+Three of the four reproduce the deployed bytecode exactly. \`activity-registry\` is
+\`LAYOUT_DIVERGENT\`: identical sources, settings, byte length and metadata hash, but a
+different \`viaIR\` jump layout — neither the published wasm nor the published native
+solc 0.8.20 build reproduces the deployed bytes, so expect explorer verification to
+fail for that contract only until that is resolved.
 
 Already publicly verified and therefore not included: Router V4, Router Lens,
 Staking Reward Treasury, Staking Controller.

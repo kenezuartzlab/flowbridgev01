@@ -16,6 +16,7 @@ Explorer: https://scan.botchain.ai/address/0x3824681c3560A63e1c9ceDABBfcAB2691c5
 | Contract target | `FlowRewardsMerkleDistributor.sol:FlowRewardsMerkleDistributor` |
 | Creation sha256 | `21c96796f0e7fbc32ed114edf6194147ddb3949c88a9907d8cc28c9ed5157581` |
 | Runtime sha256 | `a708b596b82367893813a4ed39650bcf26f95a23fad678955a4b938fca40d367` (5861 bytes) |
+| Local reproduction | EXACT — `npm run rebuild` prints MATCH |
 | Constructor args | `constructor-args.js` (ABI-encoded in that file's header) |
 
 On-chain runtime differs only in the 100 bytes of the five `token` immutable slots.

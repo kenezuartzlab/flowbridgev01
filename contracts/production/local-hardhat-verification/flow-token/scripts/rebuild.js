@@ -25,4 +25,6 @@ console.log("solc            ", solc.version());
 console.log("creation sha256 ", creation, creation === expected.creation ? "MATCH" : "MISMATCH");
 console.log("runtime  sha256 ", runtime, runtime === expected.runtime ? "MATCH" : "MISMATCH");
 console.log("runtime  bytes  ", artifact.evm.deployedBytecode.object.length / 2, "expected 3539");
-if (creation !== expected.creation || runtime !== expected.runtime) process.exitCode = 1;
+if (creation !== expected.creation || runtime !== expected.runtime) {
+  process.exitCode = 1;
+}

@@ -4,12 +4,18 @@ Four self-contained Hardhat projects for the contracts that are deployed and
 runtime-proven but still `SOURCE_PENDING` on `https://scan.botchain.ai` because the
 explorer edge rejects automated submissions from this environment.
 
-| Project | Contract | Address |
-| --- | --- | --- |
-| `flow-token/` | FlowToken | `0x535ddda826142ac42ce288154e9595f080940ae9` |
-| `rewards-distributor/` | FlowRewardsMerkleDistributor | `0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB` |
-| `staking-vault-v2/` | FlowStakingVaultV2 | `0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8` |
-| `activity-registry/` | FlowBridgeActivityRegistry | `0xa80d8740f378989F649ca14C54e4B4a42E68753c` |
+| Project | Contract | Address | Local reproduction |
+| --- | --- | --- | --- |
+| `flow-token/` | FlowToken | `0x535ddda826142ac42ce288154e9595f080940ae9` | EXACT |
+| `rewards-distributor/` | FlowRewardsMerkleDistributor | `0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB` | EXACT |
+| `staking-vault-v2/` | FlowStakingVaultV2 | `0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8` | EXACT |
+| `activity-registry/` | FlowBridgeActivityRegistry | `0xa80d8740f378989F649ca14C54e4B4a42E68753c` | LAYOUT_DIVERGENT |
+
+Three of the four reproduce the deployed bytecode exactly. `activity-registry` is
+`LAYOUT_DIVERGENT`: identical sources, settings, byte length and metadata hash, but a
+different `viaIR` jump layout — neither the published wasm nor the published native
+solc 0.8.20 build reproduces the deployed bytes, so expect explorer verification to
+fail for that contract only until that is resolved.
 
 Already publicly verified and therefore not included: Router V4, Router Lens,
 Staking Reward Treasury, Staking Controller.
