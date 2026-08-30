@@ -292,35 +292,87 @@ main().catch((e) => {
   );
 
   write(
-    join(root, "scripts", "hashes.js"),
-    `// Prove the local rebuild reproduces the frozen deployment artifact.
+    join(root, "scripts", "rebuild.js"),
+    `// Byte-exact rebuild: compiles the preserved Standard-JSON input VERBATIM with
+// the pinned solc and checks the frozen deployment hashes. This is the
+// authoritative local reproduction check.
 const { createHash } = require("node:crypto");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
+const solc = require("${solcPkg}");
 
-const artifact = JSON.parse(
-  readFileSync(
-    path.join(
-      __dirname,
-      "..",
-      "artifacts",
-      "${p.entrySource}",
-      "${p.contractName}.json",
-    ),
-    "utf8",
-  ),
-);
+const input = readFileSync(path.join(__dirname, "..", "standard-input.json"), "utf8");
+const out = JSON.parse(solc.compile(input));
+const fatal = (out.errors || []).filter((e) => e.severity === "error");
+if (fatal.length) {
+  for (const e of fatal) console.error(e.formattedMessage || e.message);
+  process.exit(1);
+}
+const artifact = out.contracts["${p.entrySource}"]["${p.contractName}"];
 const h = (hex) => createHash("sha256").update(Buffer.from(hex.replace(/^0x/, ""), "hex")).digest("hex");
-const creation = h(artifact.bytecode);
-const runtime = h(artifact.deployedBytecode);
+const creation = h(artifact.evm.bytecode.object);
+const runtime = h(artifact.evm.deployedBytecode.object);
 const expected = {
   creation: "${p.frozen.creationSha256}",
   runtime: "${p.frozen.runtimeSha256}",
 };
-console.log("creation sha256", creation, creation === expected.creation ? "MATCH" : "MISMATCH");
-console.log("runtime  sha256", runtime, runtime === expected.runtime ? "MATCH" : "MISMATCH");
-console.log("runtime  bytes ", (artifact.deployedBytecode.length - 2) / 2, "expected ${p.frozen.runtimeBytes}");
+console.log("solc            ", solc.version());
+console.log("creation sha256 ", creation, creation === expected.creation ? "MATCH" : "MISMATCH");
+console.log("runtime  sha256 ", runtime, runtime === expected.runtime ? "MATCH" : "MISMATCH");
+console.log("runtime  bytes  ", artifact.evm.deployedBytecode.object.length / 2, "expected ${p.frozen.runtimeBytes}");
 if (creation !== expected.creation || runtime !== expected.runtime) process.exitCode = 1;
+`,
+  );
+
+  write(
+    join(root, "scripts", "submit.js"),
+    `// Submits the preserved Standard-JSON input to the explorer from YOUR machine.
+// The bundle is sent verbatim, so the explorer compiles exactly what was
+// deployed. Read-only with respect to the chain: no key, no transaction.
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
+
+const ADDRESS = "${p.address}";
+const EXPLORER = process.env.BOT_EXPLORER_URL || "${EXPLORER}";
+const bundle = readFileSync(path.join(__dirname, "..", "standard-input.json"), "utf8");
+
+async function main() {
+  const form = new FormData();
+  form.append("compiler_version", "${p.solcLong}");
+  form.append("license_type", "mit");
+  form.append("autodetect_constructor_args", "false");
+  form.append("constructor_args", "${p.constructorArgsAbiEncoded}");
+  form.append(
+    "files[0]",
+    new Blob([bundle], { type: "application/json" }),
+    "standard-input.json",
+  );
+
+  const url = \`\${EXPLORER}/api/v2/smart-contracts/\${ADDRESS}/verification/via/standard-input\`;
+  const res = await fetch(url, { method: "POST", body: form });
+  const text = await res.text();
+  console.log("submit", res.status, text.slice(0, 400));
+  if (!res.ok) {
+    console.error(
+      "\\nIf this is an HTML Cloudflare page, use the browser fallback described in README.md.",
+    );
+    process.exitCode = 1;
+    return;
+  }
+  for (let i = 0; i < 20; i += 1) {
+    await new Promise((r) => setTimeout(r, 6000));
+    const s = await fetch(\`\${EXPLORER}/api/v2/smart-contracts/\${ADDRESS}\`).then((r) => r.json());
+    console.log("status", s.is_verified ? "VERIFIED" : "pending", s.name || "");
+    if (s.is_verified) return;
+  }
+  console.error("still not verified after polling; check the explorer page");
+  process.exitCode = 1;
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exitCode = 1;
+});
 `,
   );
 
