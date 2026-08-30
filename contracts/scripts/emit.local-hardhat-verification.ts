@@ -470,6 +470,8 @@ write(
       devDependencies: {
         hardhat: "2.26.1",
         "@nomicfoundation/hardhat-verify": "2.0.12",
+        "solc-0.8.20": "npm:solc@0.8.20",
+        "solc-0.8.24": "npm:solc@0.8.24",
       },
     },
     null,
