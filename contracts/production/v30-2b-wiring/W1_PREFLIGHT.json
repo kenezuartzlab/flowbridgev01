@@ -1,10 +1,10 @@
 {
   "gate": "V30.2B W1 — Staking Governance Wiring Preflight",
   "mode": "READ-ONLY — no signature, no broadcast, no funding",
-  "generatedAt": "2026-08-30T19:07:31.770Z",
+  "generatedAt": "2026-08-30T19:08:03.075Z",
   "chain": {
     "chainId": 677,
-    "blockNumber": "21510630",
+    "blockNumber": "21510672",
     "rpcHost": "rpc.botchain.ai"
   },
   "addresses": {
@@ -235,8 +235,6 @@
     "Vault positions / principal": "0 / 0",
     "Active staking epoch or rewards": "none — publishEpoch/commitEpoch not called by any W1 call"
   },
-  "verdict": "FAIL",
-  "failures": [
-    "preserve: no committed epoch on Controller"
-  ]
+  "verdict": "V30.2B W1 GOVERNANCE WIRING PREFLIGHT PASS",
+  "failures": []
 }

@@ -136,7 +136,7 @@ check(pre.treasuryAccrued === 0n, 'preserve: Treasury accruedUnclaimed == 0');
 check(pre.vaultPrincipal === 0n, 'preserve: Vault totalPrincipal == 0');
 check(pre.vaultNextPositionId === 0n, 'preserve: Vault has no positions');
 check(pre.vaultBalance === 0n, 'preserve: Vault FLOW balance == 0');
-check(pre.epochCommitted === false, 'preserve: no committed epoch on Controller');
+check(pre.epochCommitted === 0n && pre.epochEnd === 0n, 'preserve: no committed epoch on Controller', `epochCommitted=${pre.epochCommitted} epochEnd=${pre.epochEnd}`);
 check(!pre.publisherGov && !pre.publisherOps && !pre.publisherDeployer && !pre.publisherVault, 'preserve: PUBLISHER_ROLE unassigned to all known parties');
 
 // ------------------------------------------------------------------ the 5 calls
