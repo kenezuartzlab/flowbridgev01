@@ -1,0 +1,125 @@
+{
+  "receipt": {
+    "hash": "0xe149da164d6cca7c9fdc9fe4e92afdf5817d431a0faf56a7327bf4bc781e37b6",
+    "status": "success",
+    "block": 21508267,
+    "contract": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "gasUsed": 2142607,
+    "gasLimit": 2809012
+  },
+  "addressMatch": true,
+  "runtime": {
+    "onchainSha256": "703f5f5c70c8e1cea3b93d29076d5bc1463d4041fc89a13618fd107df33b9ad0",
+    "frozenSha256": "408ee63a90219cdb873fbff9602dbddfe4875e3c78108ea44c1d7e601c95a250",
+    "bytes": 7997,
+    "maskedImmutableParity": true,
+    "diffByteCount": 4,
+    "immutable": {
+      "name": "year1Start",
+      "offset": 1060,
+      "length": 4,
+      "onchainValue": "1788115065",
+      "note": "solc packs immutable year1Start = block.timestamp into runtime; only difference"
+    }
+  },
+  "roles": {
+    "governanceHasAdmin": true,
+    "governanceHasGovernor": true,
+    "governanceHasPublisher": false,
+    "zeroHasPublisher": false,
+    "deployerHasAdmin": false,
+    "deployerHasGovernor": false,
+    "deployerHasPublisher": false
+  },
+  "state": {
+    "vault": "0x0000000000000000000000000000000000000000",
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "maxFlowPerEpoch": "0",
+    "weeklyUsdBudget8": "0",
+    "epochEnd": "0",
+    "epochCommitted": "0",
+    "genesisYear1Used": "0",
+    "standardYear1Used": "0",
+    "emergencyMode": false,
+    "year1Start": "1788115065"
+  },
+  "caps": {
+    "GENESIS_YEAR1_CAP": "1000000000000000000000000",
+    "STANDARD_YEAR1_CAP": "2000000000000000000000000",
+    "TOTAL_YEAR1_CAP": "3000000000000000000000000"
+  },
+  "products": [
+    {
+      "active": true,
+      "lockSeconds": 0,
+      "genesisAprBps": 1800,
+      "floorBps": 0,
+      "targetBps": 1000,
+      "hardCapBps": 1200,
+      "minPrincipal": "1000000000000000000"
+    },
+    {
+      "active": true,
+      "lockSeconds": 2592000,
+      "genesisAprBps": 2700,
+      "floorBps": 800,
+      "targetBps": 1400,
+      "hardCapBps": 1800,
+      "minPrincipal": "1000000000000000000"
+    },
+    {
+      "active": true,
+      "lockSeconds": 7776000,
+      "genesisAprBps": 3600,
+      "floorBps": 1000,
+      "targetBps": 1800,
+      "hardCapBps": 2400,
+      "minPrincipal": "1000000000000000000"
+    },
+    {
+      "active": true,
+      "lockSeconds": 15552000,
+      "genesisAprBps": 4800,
+      "floorBps": 1200,
+      "targetBps": 2400,
+      "hardCapBps": 3200,
+      "minPrincipal": "1000000000000000000"
+    },
+    {
+      "active": true,
+      "lockSeconds": 31536000,
+      "genesisAprBps": 6000,
+      "floorBps": 1500,
+      "targetBps": 3000,
+      "hardCapBps": 4000,
+      "minPrincipal": "1000000000000000000"
+    }
+  ],
+  "gate": "V30.2B_R5_SETTLEMENT",
+  "verdict": "V30.2B R5 SETTLED \u2014 FLOWSTAKINGCONTROLLER LIVE, INERT, PUBLICLY VERIFIED",
+  "chainId": 677,
+  "constructor": {
+    "admin": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "governor": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "publisher": "0x0000000000000000000000000000000000000000",
+    "argsKeccak": "0xf03d5b653f96d9a93b75aceb736e3596e106e4db698b3d0667234dd76f24c856"
+  },
+  "publicVerification": {
+    "explorer": "https://scan.botchain.ai/address/0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "isVerified": true,
+    "name": "FlowStakingController",
+    "compiler": "v0.8.24+commit.e11b9ed9",
+    "optimizationRuns": 200,
+    "evmVersion": "cancun",
+    "viaIR": false,
+    "method": "standard-json-input (frozen non-viaIR package)"
+  },
+  "actionsWithheld": [
+    "R4 role wiring",
+    "50,000 FLOW epoch cap",
+    "oracle configuration",
+    "publisher assignment",
+    "R6 deployment",
+    "FLOW funding"
+  ]
+}
