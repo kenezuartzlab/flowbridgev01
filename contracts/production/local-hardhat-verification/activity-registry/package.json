@@ -1,0 +1,18 @@
+{
+  "name": "flowbridge-verify-activity-registry",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frozen Hardhat verification project for FlowBridgeActivityRegistry on BOT Mainnet 677",
+  "scripts": {
+    "compile": "hardhat compile",
+    "verify": "hardhat run scripts/verify.js --network bot",
+    "hashes": "node scripts/hashes.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "file:./oz"
+  },
+  "devDependencies": {
+    "hardhat": "2.26.1",
+    "@nomicfoundation/hardhat-verify": "2.0.12"
+  }
+}

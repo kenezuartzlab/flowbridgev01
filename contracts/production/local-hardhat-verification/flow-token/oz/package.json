@@ -1,0 +1,6 @@
+{
+  "name": "@openzeppelin/contracts",
+  "version": "5.6.1",
+  "description": "Frozen subset of OpenZeppelin Contracts 5.6.1, copied byte-for-byte from the deployment Standard-JSON input. Do not edit.",
+  "license": "MIT"
+}
