@@ -1,0 +1,42 @@
+{
+  "gate": "V30.2B_R6",
+  "tx": "0x4ec853c82a1dc9acd1da6a7aab8ae7d91f3dc97c490c8c32639eb54721142992",
+  "block": "21510026",
+  "gasUsed": "2370856",
+  "address": "0x15e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d",
+  "receiptStatus": "success",
+  "runtime": {
+    "sha256": "71d28895d88c7847956697b0c475020a3b2913043cdaa41d282a191a8a098c70",
+    "expected": "af5ed43ffce266a56bcc8bffcd1b8d8067155a5716024cda089dac286294b7ce",
+    "exactParity": false,
+    "bytes": 10366
+  },
+  "bindings": {
+    "token": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65"
+  },
+  "roles": {
+    "governanceHasAdmin": true,
+    "governanceHasPauser": true,
+    "deployerHasAdmin": false,
+    "deployerHasPauser": false,
+    "deployerHasEpoch": false
+  },
+  "state": {
+    "nextPositionId": "0",
+    "totalPrincipal": "0",
+    "paused": false,
+    "currentEpochCommitted": "0",
+    "currentEpochEnd": "0",
+    "vaultFlowBalance": "0",
+    "transferLogsFromDeployment": 0,
+    "logsEmitted": 2
+  },
+  "upstream": {
+    "r5Vault": "0x0000000000000000000000000000000000000000",
+    "r5MaxFlowPerEpoch": "0",
+    "r4VaultRoleGranted": false
+  },
+  "withdrawUnpausable": true
+}
