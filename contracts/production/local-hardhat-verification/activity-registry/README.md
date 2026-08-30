@@ -11,7 +11,7 @@ Explorer: https://scan.botchain.ai/address/0xa80d8740f378989F649ca14C54e4B4a42E6
 | Optimizer | enabled, 1 runs |
 | viaIR | true |
 | EVM version | `shanghai` |
-| OpenZeppelin | 5.6.1 (vendored in `../vendor/activity-registry-oz/`, 6 files, byte-identical to deployment) |
+| OpenZeppelin | 5.6.1 (vendored in `../vendor/openzeppelin-contracts-5.6.1/`, 6 files used, byte-identical to deployment) |
 | License | MIT |
 | Contract target | `FlowBridgeActivityRegistry.sol:FlowBridgeActivityRegistry` |
 | Creation sha256 | `25ec99e2bc31648d9e0cb2376c00063c404d2b535afe887f1b9cb37ebfc2cc6d` |
@@ -23,8 +23,10 @@ Deployed runtime is byte-identical to the frozen artifact (no immutables). Attes
 ## Run locally
 
 ```bash
-npm ci            # first run without a lockfile: npm install, then commit the lockfile
-npx hardhat compile
+cd ..             # dependencies are installed once, one level up
+npm ci            # first run without a lockfile: npm install, then keep the lockfile
+cd activity-registry
+npm run compile
 npm run hashes    # must print MATCH for creation and runtime
 npm run verify    # submits to https://scan.botchain.ai; no private key needed
 ```

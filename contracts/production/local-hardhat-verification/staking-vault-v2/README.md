@@ -11,7 +11,7 @@ Explorer: https://scan.botchain.ai/address/0x3cc0799fB4169A9BB5dA9812Bea23CBa97B
 | Optimizer | enabled, 200 runs |
 | viaIR | true |
 | EVM version | `cancun` |
-| OpenZeppelin | 5.6.1 (vendored in `../vendor/staking-vault-v2-oz/`, 13 files, byte-identical to deployment) |
+| OpenZeppelin | 5.6.1 (vendored in `../vendor/openzeppelin-contracts-5.6.1/`, 13 files used, byte-identical to deployment) |
 | License | MIT |
 | Contract target | `FlowStakingVaultV2.sol:FlowStakingVaultV2` |
 | Creation sha256 | `159b884935907d9cf892a160a7bb7f671aad86ca5616c29acc15f6686e80e4f6` |
@@ -23,8 +23,10 @@ Constructor args keccak256 0xc19ac2409811e9b37f32175a7869863cc7673216514e19ee5db
 ## Run locally
 
 ```bash
-npm ci            # first run without a lockfile: npm install, then commit the lockfile
-npx hardhat compile
+cd ..             # dependencies are installed once, one level up
+npm ci            # first run without a lockfile: npm install, then keep the lockfile
+cd staking-vault-v2
+npm run compile
 npm run hashes    # must print MATCH for creation and runtime
 npm run verify    # submits to https://scan.botchain.ai; no private key needed
 ```

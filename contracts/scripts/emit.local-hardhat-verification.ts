@@ -20,6 +20,8 @@ import { dirname, join, resolve } from "node:path";
 const REPO = resolve(join(import.meta.dirname ?? ".", "..", ".."));
 const OUT = join(REPO, "contracts/production/local-hardhat-verification");
 const OZ_PREFIX = "@openzeppelin/contracts/";
+const OZ_DIR_REL = "vendor/openzeppelin-contracts-5.6.1";
+const OZ_DIR = join(OUT, OZ_DIR_REL);
 const RPC = "https://rpc.botchain.ai";
 const EXPLORER = "https://scan.botchain.ai";
 
@@ -173,7 +175,7 @@ for (const p of PROJECTS) {
   let ozFiles = 0;
   for (const [key, { content }] of Object.entries(bundle.sources)) {
     if (key.startsWith(OZ_PREFIX)) {
-      write(join(OUT, "vendor", `${p.dir}-oz`, key.slice(OZ_PREFIX.length)), content);
+      write(join(OZ_DIR, key.slice(OZ_PREFIX.length)), content);
       ozFiles += 1;
     } else {
       // Source name must stay exactly as compiled at deployment ("Foo.sol"),
@@ -185,7 +187,7 @@ for (const p of PROJECTS) {
 
   // Local, immutable OpenZeppelin package — pinned by content, not by registry.
   write(
-    join(OUT, "vendor", `${p.dir}-oz`, "package.json"),
+    join(OZ_DIR, "package.json"),
     JSON.stringify(
       {
         name: "@openzeppelin/contracts",
@@ -208,14 +210,9 @@ for (const p of PROJECTS) {
         private: true,
         description: `Frozen Hardhat verification project for ${p.contractName} on BOT Mainnet 677`,
         scripts: {
-          compile: "hardhat compile",
-          verify: "hardhat run scripts/verify.js --network bot",
+          compile: "../node_modules/.bin/hardhat compile",
           hashes: "node scripts/hashes.js",
-        },
-        dependencies: { "@openzeppelin/contracts": `file:../vendor/${p.dir}-oz` },
-        devDependencies: {
-          hardhat: "2.26.1",
-          "@nomicfoundation/hardhat-verify": "2.0.12",
+          verify: "../node_modules/.bin/hardhat run scripts/verify.js --network bot",
         },
       },
       null,
@@ -340,7 +337,7 @@ Explorer: ${EXPLORER}/address/${p.address}
 | Optimizer | ${bundle.settings.optimizer.enabled ? "enabled" : "disabled"}, ${bundle.settings.optimizer.runs} runs |
 | viaIR | ${bundle.settings.viaIR} |
 | EVM version | \`${bundle.settings.evmVersion}\` |
-| OpenZeppelin | 5.6.1 (vendored in \`../vendor/${p.dir}-oz/\`, ${ozFiles} files, byte-identical to deployment) |
+| OpenZeppelin | 5.6.1 (vendored in \`../${OZ_DIR_REL}/\`, ${ozFiles} files used, byte-identical to deployment) |
 | License | MIT |
 | Contract target | \`${p.entrySource}:${p.contractName}\` |
 | Creation sha256 | \`${p.frozen.creationSha256}\` |
@@ -352,8 +349,10 @@ ${p.notes}
 ## Run locally
 
 \`\`\`bash
-npm ci            # first run without a lockfile: npm install, then commit the lockfile
-npx hardhat compile
+cd ..             # dependencies are installed once, one level up
+npm ci            # first run without a lockfile: npm install, then keep the lockfile
+cd ${p.dir}
+npm run compile
 npm run hashes    # must print MATCH for creation and runtime
 npm run verify    # submits to ${EXPLORER}; no private key needed
 \`\`\`
@@ -396,6 +395,26 @@ the constructor args from \`constructor-args.js\`.
 }
 
 write(
+  join(OUT, "package.json"),
+  JSON.stringify(
+    {
+      name: "flowbridge-local-hardhat-verification",
+      version: "1.0.0",
+      private: true,
+      description:
+        "Shared pinned toolchain for the four frozen FlowBridge verification projects (BOT Mainnet 677).",
+      dependencies: { "@openzeppelin/contracts": `file:./${OZ_DIR_REL}` },
+      devDependencies: {
+        hardhat: "2.26.1",
+        "@nomicfoundation/hardhat-verify": "2.0.12",
+      },
+    },
+    null,
+    2,
+  ) + "\n",
+);
+
+write(
   join(OUT, "MANIFEST.json"),
   JSON.stringify(
     {
@@ -430,9 +449,10 @@ Staking Reward Treasury, Staking Controller.
 ## How to use
 
 1. Download / clone this repository locally — do not copy Solidity into a new project.
-2. \`cd contracts/production/local-hardhat-verification/<project>\`
-3. \`npm ci\` (first run without a committed lockfile: \`npm install\`, then keep the lockfile)
-4. \`npx hardhat compile\`
+2. \`cd contracts/production/local-hardhat-verification\`
+3. \`npm ci\` once in \`contracts/production/local-hardhat-verification/\` (first run without a
+   committed lockfile: \`npm install\`, then keep the lockfile)
+4. \`cd <project> && npm run compile\`
 5. \`npm run hashes\` — must print \`MATCH\` for creation and runtime before you verify
 6. \`npm run verify\`
 
@@ -443,7 +463,7 @@ Optional: \`export BOT_MAINNET_RPC_URL=${RPC}\` (already the default) and
 
 - Every Solidity file, including OpenZeppelin 5.6.1, is copied byte-for-byte out
   of the Standard-JSON input used at deployment; OpenZeppelin is a local
-  \`file:../vendor/<project>-oz\` dependency, so registry drift cannot change the bytes.
+  \`file:./${OZ_DIR_REL}\` dependency, so registry drift cannot change the bytes.
 - Compiler version, optimizer runs, \`viaIR\` and EVM version are the frozen
   deployment settings.
 - No private key, mnemonic or deployer secret is used or needed. Verification is

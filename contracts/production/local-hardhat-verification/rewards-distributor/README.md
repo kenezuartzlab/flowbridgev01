@@ -11,7 +11,7 @@ Explorer: https://scan.botchain.ai/address/0x3824681c3560A63e1c9ceDABBfcAB2691c5
 | Optimizer | enabled, 200 runs |
 | viaIR | true |
 | EVM version | `cancun` |
-| OpenZeppelin | 5.6.1 (vendored in `../vendor/rewards-distributor-oz/`, 15 files, byte-identical to deployment) |
+| OpenZeppelin | 5.6.1 (vendored in `../vendor/openzeppelin-contracts-5.6.1/`, 15 files used, byte-identical to deployment) |
 | License | MIT |
 | Contract target | `FlowRewardsMerkleDistributor.sol:FlowRewardsMerkleDistributor` |
 | Creation sha256 | `21c96796f0e7fbc32ed114edf6194147ddb3949c88a9907d8cc28c9ed5157581` |
@@ -23,8 +23,10 @@ On-chain runtime differs only in the 100 bytes of the five `token` immutable slo
 ## Run locally
 
 ```bash
-npm ci            # first run without a lockfile: npm install, then commit the lockfile
-npx hardhat compile
+cd ..             # dependencies are installed once, one level up
+npm ci            # first run without a lockfile: npm install, then keep the lockfile
+cd rewards-distributor
+npm run compile
 npm run hashes    # must print MATCH for creation and runtime
 npm run verify    # submits to https://scan.botchain.ai; no private key needed
 ```

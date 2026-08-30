@@ -17,9 +17,10 @@ Staking Reward Treasury, Staking Controller.
 ## How to use
 
 1. Download / clone this repository locally — do not copy Solidity into a new project.
-2. `cd contracts/production/local-hardhat-verification/<project>`
-3. `npm ci` (first run without a committed lockfile: `npm install`, then keep the lockfile)
-4. `npx hardhat compile`
+2. `cd contracts/production/local-hardhat-verification`
+3. `npm ci` once in `contracts/production/local-hardhat-verification/` (first run without a
+   committed lockfile: `npm install`, then keep the lockfile)
+4. `cd <project> && npm run compile`
 5. `npm run hashes` — must print `MATCH` for creation and runtime before you verify
 6. `npm run verify`
 
@@ -30,7 +31,7 @@ Optional: `export BOT_MAINNET_RPC_URL=https://rpc.botchain.ai` (already the defa
 
 - Every Solidity file, including OpenZeppelin 5.6.1, is copied byte-for-byte out
   of the Standard-JSON input used at deployment; OpenZeppelin is a local
-  `file:../vendor/<project>-oz` dependency, so registry drift cannot change the bytes.
+  `file:./vendor/openzeppelin-contracts-5.6.1` dependency, so registry drift cannot change the bytes.
 - Compiler version, optimizer runs, `viaIR` and EVM version are the frozen
   deployment settings.
 - No private key, mnemonic or deployer secret is used or needed. Verification is

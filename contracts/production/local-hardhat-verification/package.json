@@ -1,0 +1,13 @@
+{
+  "name": "flowbridge-local-hardhat-verification",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared pinned toolchain for the four frozen FlowBridge verification projects (BOT Mainnet 677).",
+  "dependencies": {
+    "@openzeppelin/contracts": "file:./vendor/openzeppelin-contracts-5.6.1"
+  },
+  "devDependencies": {
+    "hardhat": "2.26.1",
+    "@nomicfoundation/hardhat-verify": "2.0.12"
+  }
+}

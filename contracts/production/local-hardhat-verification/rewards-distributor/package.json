@@ -4,15 +4,8 @@
   "private": true,
   "description": "Frozen Hardhat verification project for FlowRewardsMerkleDistributor on BOT Mainnet 677",
   "scripts": {
-    "compile": "hardhat compile",
-    "verify": "hardhat run scripts/verify.js --network bot",
-    "hashes": "node scripts/hashes.js"
-  },
-  "dependencies": {
-    "@openzeppelin/contracts": "file:../vendor/rewards-distributor-oz"
-  },
-  "devDependencies": {
-    "hardhat": "2.26.1",
-    "@nomicfoundation/hardhat-verify": "2.0.12"
+    "compile": "../node_modules/.bin/hardhat compile",
+    "hashes": "node scripts/hashes.js",
+    "verify": "../node_modules/.bin/hardhat run scripts/verify.js --network bot"
   }
 }

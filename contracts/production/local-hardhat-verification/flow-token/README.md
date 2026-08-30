@@ -11,7 +11,7 @@ Explorer: https://scan.botchain.ai/address/0x535ddda826142ac42ce288154e9595f0809
 | Optimizer | enabled, 200 runs |
 | viaIR | true |
 | EVM version | `cancun` |
-| OpenZeppelin | 5.6.1 (vendored in `../vendor/flow-token-oz/`, 20 files, byte-identical to deployment) |
+| OpenZeppelin | 5.6.1 (vendored in `../vendor/openzeppelin-contracts-5.6.1/`, 20 files used, byte-identical to deployment) |
 | License | MIT |
 | Contract target | `FlowToken.sol:FlowToken` |
 | Creation sha256 | `200a6a559c6e43a357f7b7fb677a1d7a4e1d89344fd78bcc34398265fa2107a2` |
@@ -23,8 +23,10 @@ On-chain runtime differs from the frozen local runtime only in the 131 bytes of 
 ## Run locally
 
 ```bash
-npm ci            # first run without a lockfile: npm install, then commit the lockfile
-npx hardhat compile
+cd ..             # dependencies are installed once, one level up
+npm ci            # first run without a lockfile: npm install, then keep the lockfile
+cd flow-token
+npm run compile
 npm run hashes    # must print MATCH for creation and runtime
 npm run verify    # submits to https://scan.botchain.ai; no private key needed
 ```
