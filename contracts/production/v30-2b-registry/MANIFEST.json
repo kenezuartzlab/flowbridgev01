@@ -1,0 +1,126 @@
+{
+  "$comment": "FlowBridge V30.2B R3 — FlowBridgeActivityRegistry clean replacement PREFLIGHT. Read-only. Nothing signed, broadcast, or attested.",
+  "gate": "V30.2B_R3_PREFLIGHT",
+  "verdict": "V30.2B R3 PREFLIGHT PASS — CLEAN REGISTRY CANDIDATE READY, ZERO WRITES",
+  "chainId": 677,
+  "candidateDigest": "fnv1a64:e0ac31b5bb297880",
+  "supersedes": {
+    "contract": "0xa80d8740f378989F649ca14C54e4B4a42E68753c",
+    "status": "QUARANTINED_NOT_PROMOTED",
+    "reason": "LAYOUT_DIVERGENT viaIR build; no published solc 0.8.20 build reproduces its runtime bytes"
+  },
+  "buildMatrix": {
+    "solc": "0.8.20+commit.a1b79de6.Emscripten.clang",
+    "solcLong": "v0.8.20+commit.a1b79de6",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": false,
+    "evmVersion": "shanghai",
+    "metadata": {
+      "bytecodeHash": "ipfs",
+      "appendCBOR": true
+    },
+    "openzeppelin": "5.6.1 (vendored verbatim)",
+    "sourceUnits": 7,
+    "license": "MIT",
+    "doubleBuild": "TWO_CLEAN_COMPILES_BYTE_IDENTICAL",
+    "solidityWarnings": 0,
+    "settingsSource": "contracts/production/V30_2A_REDEPLOY_PREFLIGHT.json replacements[R3] — read from frozen candidate evidence, not inferred from another contract family"
+  },
+  "artifact": {
+    "sourceSha256": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e",
+    "creationSha256": "cc61be5fadf4fd164a6c996e3f30874197702795c8ebe99c70124e85f0d0037e",
+    "creationBytes": 3661,
+    "runtimeSha256": "9f4b0026beb3b139065313193309605aa312d06343af34def8dd46b178b9df78",
+    "runtimeBytes": 3082,
+    "normalizedAbiSha256": "e021c7402ce241fe89624df8c395b30347b82bdac888758530e4bfe597a8978d",
+    "standardInputSha256": "8ccef59346968e5d800f237ca0deecd9ea51970f0c90b7bbb88c1a4ce4b8976f",
+    "eip170": {
+      "limit": 24576,
+      "withinLimit": true,
+      "headroomBytes": 21494
+    },
+    "frozenEvidenceParity": "EXACT_MATCH_V30_2A_REDEPLOY_PREFLIGHT_R3"
+  },
+  "provenanceClosure": {
+    "oldBuild": {
+      "optimizerRuns": 1,
+      "viaIR": true,
+      "creationSha256": "25ec99e2bc31648d9e0cb2376c00063c404d2b535afe887f1b9cb37ebfc2cc6d",
+      "runtimeSha256": "53a83eea932da41016a7021926113e4ed50612525768bb6ba0eb1ec876b3e03b",
+      "problem": "viaIR jump layout not reproducible by any published solc 0.8.20 wasm or native build; local rebuild yields c164c24b6d9b4929b5c69696600e1458a049341fa4593863da453d2c2d377aa6"
+    },
+    "newBuild": {
+      "viaIR": false,
+      "optimizerRuns": 200,
+      "reproducible": true,
+      "proof": "two clean compiles byte-identical and equal to the frozen V30.2A R3 hashes; non-viaIR pipeline is the reproducible published path"
+    },
+    "sourceDrift": "NONE — sourceSha256 identical to the reviewed pack and to the old deployment record",
+    "abiParity": "IDENTICAL normalizedAbiSha256 e021c740…8978d"
+  },
+  "authorities": {
+    "admin": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "attester": "0xfa3de5cfa1de8ecc36197dcc0fc34fef5c1c7e47",
+    "pauser": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+    "adminAttesterSeparate": true,
+    "constructorEnforcesSeparation": "AdminAttesterMustDiffer revert",
+    "deployerRetainsNoRole": true
+  },
+  "safetyInvariants": {
+    "tokenCustody": "NONE — no IERC20 import, no transfer path, no payable function",
+    "rewardMovingAuthority": "NONE",
+    "mintAuthority": "NONE",
+    "upgradeableProxy": "NONE — non-upgradeable, no initializer, no delegatecall",
+    "activityIdEncoding": "keccak256(abi.encode(sourceChainId, sourceTxHash, sourceLogIndex, actionType)) — preserved verbatim",
+    "evidenceSemantics": "append-only; DuplicateActivity revert; getActivity/isRecorded reads preserved",
+    "writeSurface": [
+      "recordActivity (ATTESTER_ROLE)",
+      "pause/unpause (PAUSER_ROLE)",
+      "role admin (DEFAULT_ADMIN_ROLE)"
+    ],
+    "initialState": "EMPTY — no activity recorded at deployment; no production attestation performed in this gate"
+  },
+  "unsignedPayload": {
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "valueBOT": "0",
+    "constructorArgs": "0x00000000000000000000000088a4cc1f5771523baeb83daeea07d323a3ce9507000000000000000000000000fa3de5cfa1de8ecc36197dcc0fc34fef5c1c7e470000000000000000000000001ce0b1df5d2055f6e92122d8cb7669609c2359ef",
+    "constructorArgsKeccak": "0xbf9ffd3a7d092cacdc704d5d1399a0629c3a1dfb6d22a0fe247259e6c3ed01ba",
+    "deploymentDataBytes": 3757,
+    "deploymentDataKeccak": "0x35531219108b86eac22474e3760b4a41ae7d45eccf36521eec5b21f243446ba5",
+    "deploymentDataSha256": "f36bd77ad796db319f3c1396b09576a3e2db2ea396ace1c1f8cb9fd631bf8418"
+  },
+  "liveReadOnlyPreflight": {
+    "rpc": "https://rpc.botchain.ai",
+    "chainId": 677,
+    "observedBlock": 21504805,
+    "pendingNonce": 11,
+    "balanceBOT": "2.14248928",
+    "gasPriceGwei": "20",
+    "predictedAddress": "0x86590b7C8A2Ad9a1dAD8183Eaf627AE4B7Ff3814",
+    "predictedAddressCodeless": true,
+    "gasEstimate": "811217",
+    "gasLimitBuffered30": "1054582"
+  },
+  "writesPerformed": "NONE — no signing, no broadcast, no funding, no attestation, no role change, no Router/Lens change",
+  "hardStops": {
+    "sourceDrift": false,
+    "nonReproducibleBytecode": false,
+    "roleMismatch": false,
+    "adminEqualsAttester": false,
+    "unexpectedTokenOrRewardAuthority": false,
+    "unexpectedExistingCode": false,
+    "viaIRRequired": false
+  },
+  "files": {
+    "standard-input.json": "8ccef59346968e5d800f237ca0deecd9ea51970f0c90b7bbb88c1a4ce4b8976f",
+    "abi.json": "e021c7402ce241fe89624df8c395b30347b82bdac888758530e4bfe597a8978d",
+    "creation-bytecode.txt": "8657179a2563e33c7c1b5ca315cca8e030c70323b4ed11dad25928eabc46a03f",
+    "runtime-bytecode.txt": "ff78f9fc7645fa3efecdc3d9b9338fe4b31a2e7e90ff7249f02937aab381bfaf",
+    "constructor-args.txt": "f916d5bb8f5372871a863e38122f667bc98aa0f3b262e087ce94e416a019b618",
+    "unsigned-deployment-data.txt": "ee60382967e5f640b4113acfa6635d541c27d6c5217eb35efcdeb32b1d9fe17e",
+    "sources/FlowBridgeActivityRegistry.sol": "2735de22c1f59a4c7ba7c4c66a2944b03db19aa3c76d670d0ef9a20ff5aeca6e"
+  }
+}
