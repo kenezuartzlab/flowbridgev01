@@ -1,0 +1,12 @@
+{
+  "name": "flowbridge-verify-rewards-distributor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frozen verification project for FlowRewardsMerkleDistributor on BOT Mainnet 677",
+  "scripts": {
+    "rebuild": "node scripts/rebuild.js",
+    "submit": "node scripts/submit.js",
+    "hardhat:compile": "../node_modules/.bin/hardhat compile",
+    "hardhat:verify": "../node_modules/.bin/hardhat run scripts/verify.js --network bot"
+  }
+}

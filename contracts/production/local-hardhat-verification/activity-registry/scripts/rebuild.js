@@ -1,0 +1,34 @@
+// Byte-exact rebuild: compiles the preserved Standard-JSON input VERBATIM with
+// the pinned solc and checks the frozen deployment hashes. This is the
+// authoritative local reproduction check.
+const { createHash } = require("node:crypto");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
+const solc = require("solc-0.8.20");
+
+const input = readFileSync(path.join(__dirname, "..", "standard-input.json"), "utf8");
+const out = JSON.parse(solc.compile(input));
+const fatal = (out.errors || []).filter((e) => e.severity === "error");
+if (fatal.length) {
+  for (const e of fatal) console.error(e.formattedMessage || e.message);
+  process.exit(1);
+}
+const artifact = out.contracts["FlowBridgeActivityRegistry.sol"]["FlowBridgeActivityRegistry"];
+const h = (hex) => createHash("sha256").update(Buffer.from(hex.replace(/^0x/, ""), "hex")).digest("hex");
+const creation = h(artifact.evm.bytecode.object);
+const runtime = h(artifact.evm.deployedBytecode.object);
+const expected = {
+  creation: "25ec99e2bc31648d9e0cb2376c00063c404d2b535afe887f1b9cb37ebfc2cc6d",
+  runtime: "53a83eea932da41016a7021926113e4ed50612525768bb6ba0eb1ec876b3e03b",
+};
+console.log("solc            ", solc.version());
+console.log("creation sha256 ", creation, creation === expected.creation ? "MATCH" : "MISMATCH");
+console.log("runtime  sha256 ", runtime, runtime === expected.runtime ? "MATCH" : "MISMATCH");
+console.log("runtime  bytes  ", artifact.evm.deployedBytecode.object.length / 2, "expected 2713");
+if (creation !== expected.creation || runtime !== expected.runtime) {
+  console.log(
+    "\nEXPECTED for this contract: reproduction is LAYOUT_DIVERGENT.",
+    "\nSame source hashes, same metadata hash, same byte length, different viaIR jump layout.",
+    "\nNo published solc 0.8.20 build reproduces the deployed bytes; see README.md.",
+  );
+}
