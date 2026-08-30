@@ -1,0 +1,242 @@
+{
+  "gate": "V30.2B W1 — Staking Governance Wiring Preflight",
+  "mode": "READ-ONLY — no signature, no broadcast, no funding",
+  "generatedAt": "2026-08-30T19:07:31.770Z",
+  "chain": {
+    "chainId": 677,
+    "blockNumber": "21510630",
+    "rpcHost": "rpc.botchain.ai"
+  },
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "governance": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "operations": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD"
+  },
+  "roleHashes": {
+    "treasuryVault": "0x31e0210044b4f6757ce6aa31f9c6e8d4896d24a755014887391a926c5224d959",
+    "treasuryController": "0x7b765e0e932d348852a6f810bfa1ab891e259123f02db8cdcde614c570223357",
+    "treasuryAdmin": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "vaultPauser": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+    "vaultAdmin": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "controllerGovernor": "0x7935bd0ae54bc31f548c14dba4d37c5c64b3f8ca900cb468fb8abd54d5894f55",
+    "controllerPublisher": "0x0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a",
+    "controllerAdmin": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "currentState": {
+    "controllerVault": "0x0000000000000000000000000000000000000000",
+    "maxFlowPerEpoch": "0",
+    "weeklyUsdBudget8": "0",
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "epochCommitted": "0",
+    "epochEnd": "0",
+    "govGovernor": true,
+    "govControllerAdmin": true,
+    "publisherGov": false,
+    "publisherOps": false,
+    "publisherDeployer": false,
+    "publisherVault": false,
+    "treasuryVaultToVault": false,
+    "treasuryCtrlToCtrl": false,
+    "treasuryAdminGov": true,
+    "treasuryToken": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasuryBalance": "0",
+    "treasuryObligations": "0",
+    "treasuryAccrued": "0",
+    "treasuryCommittedEpoch": "0",
+    "vaultAdminGov": true,
+    "vaultPauserGov": true,
+    "vaultPauserOps": false,
+    "vaultController": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vaultTreasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "vaultToken": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "vaultPrincipal": "0",
+    "vaultNextPositionId": "0",
+    "vaultBalance": "0",
+    "governanceSafeNonce": "5"
+  },
+  "ceiling": {
+    "human": "50,000 FLOW",
+    "decimals": 18,
+    "encoded": "50000000000000000000000"
+  },
+  "calls": [
+    {
+      "id": "W1.1",
+      "label": "Controller.setVault(Vault V2)",
+      "target": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+      "functionName": "setVault",
+      "args": [
+        "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+      ],
+      "decoded": {
+        "vault_": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+      },
+      "authority": "Governance Safe 0x88A4CC1F5771523baeB83DaEea07D323a3ce9507 (Controller GOVERNOR_ROLE)",
+      "prerequisite": "Controller.vault == address(0); Governance holds GOVERNOR_ROLE",
+      "expected": "Controller.vault == 0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+      "selector": "0x6817031b",
+      "calldata": "0x6817031b00000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d",
+      "calldataKeccak": "0x8583a488fb62f52086b5bbb81b6ecea9d22ce6bf87f2146f5435b260878f0be0",
+      "simulation": "ok",
+      "gasEstimate": "46843",
+      "unauthorizedCaller": "reverts (as required)",
+      "safeExecution": {
+        "callingSafe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+        "safeNonceNow": "5",
+        "requiredSafeNonce": "5 + queue index (sequential 0..4 as ordered)",
+        "threshold": "2-of-3 owner signatures required at execution time",
+        "value": "0",
+        "operation": "CALL (0)"
+      }
+    },
+    {
+      "id": "W1.2",
+      "label": "RewardTreasury.grantRole(VAULT_ROLE, Vault V2)",
+      "target": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+      "functionName": "grantRole",
+      "args": [
+        "0x31e0210044b4f6757ce6aa31f9c6e8d4896d24a755014887391a926c5224d959",
+        "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+      ],
+      "decoded": {
+        "role": "VAULT_ROLE 0x31e0210044b4f6757ce6aa31f9c6e8d4896d24a755014887391a926c5224d959",
+        "account": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+      },
+      "authority": "Governance Safe 0x88A4CC1F5771523baeB83DaEea07D323a3ce9507 (Treasury DEFAULT_ADMIN_ROLE)",
+      "prerequisite": "Treasury VAULT_ROLE not held by Vault; Governance is role admin",
+      "expected": "Treasury.hasRole(VAULT_ROLE, Vault V2) == true",
+      "selector": "0x2f2ff15d",
+      "calldata": "0x2f2ff15d31e0210044b4f6757ce6aa31f9c6e8d4896d24a755014887391a926c5224d95900000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d",
+      "calldataKeccak": "0x49e460201e6aca70357657a0350692660d8d7e135854b9fd88873db1c6aa73af",
+      "simulation": "ok",
+      "gasEstimate": "51911",
+      "unauthorizedCaller": "reverts (as required)",
+      "safeExecution": {
+        "callingSafe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+        "safeNonceNow": "5",
+        "requiredSafeNonce": "5 + queue index (sequential 0..4 as ordered)",
+        "threshold": "2-of-3 owner signatures required at execution time",
+        "value": "0",
+        "operation": "CALL (0)"
+      }
+    },
+    {
+      "id": "W1.3",
+      "label": "RewardTreasury.grantRole(CONTROLLER_ROLE, Controller)",
+      "target": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+      "functionName": "grantRole",
+      "args": [
+        "0x7b765e0e932d348852a6f810bfa1ab891e259123f02db8cdcde614c570223357",
+        "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF"
+      ],
+      "decoded": {
+        "role": "CONTROLLER_ROLE 0x7b765e0e932d348852a6f810bfa1ab891e259123f02db8cdcde614c570223357",
+        "account": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF"
+      },
+      "authority": "Governance Safe 0x88A4CC1F5771523baeB83DaEea07D323a3ce9507 (Treasury DEFAULT_ADMIN_ROLE)",
+      "prerequisite": "Treasury CONTROLLER_ROLE not held by Controller; Governance is role admin",
+      "expected": "Treasury.hasRole(CONTROLLER_ROLE, Controller) == true",
+      "selector": "0x2f2ff15d",
+      "calldata": "0x2f2ff15d7b765e0e932d348852a6f810bfa1ab891e259123f02db8cdcde614c57022335700000000000000000000000044b9b880c6188d8b8dbe4f68216ae28a5a1253bf",
+      "calldataKeccak": "0xc039a13ba5a1800577554a584ed48dff59a2f828f499aa645e8003d8dfca026e",
+      "simulation": "ok",
+      "gasEstimate": "51923",
+      "unauthorizedCaller": "reverts (as required)",
+      "safeExecution": {
+        "callingSafe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+        "safeNonceNow": "5",
+        "requiredSafeNonce": "5 + queue index (sequential 0..4 as ordered)",
+        "threshold": "2-of-3 owner signatures required at execution time",
+        "value": "0",
+        "operation": "CALL (0)"
+      }
+    },
+    {
+      "id": "W1.4",
+      "label": "VaultV2.grantRole(PAUSER_ROLE, Operations Safe)",
+      "target": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+      "functionName": "grantRole",
+      "args": [
+        "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF"
+      ],
+      "decoded": {
+        "role": "PAUSER_ROLE 0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF"
+      },
+      "authority": "Governance Safe 0x88A4CC1F5771523baeB83DaEea07D323a3ce9507 (Vault DEFAULT_ADMIN_ROLE)",
+      "prerequisite": "Operations lacks PAUSER_ROLE; Governance is role admin and keeps its own PAUSER_ROLE",
+      "expected": "Vault.hasRole(PAUSER_ROLE, Operations) == true; Governance pauser + admin unchanged",
+      "selector": "0x2f2ff15d",
+      "calldata": "0x2f2ff15d65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a0000000000000000000000001ce0b1df5d2055f6e92122d8cb7669609c2359ef",
+      "calldataKeccak": "0xa65a9a60b7e05f98a6d6126c58042a2708ef0e245c2beebe07e9dbd476bf494e",
+      "simulation": "ok",
+      "gasEstimate": "51686",
+      "unauthorizedCaller": "reverts (as required)",
+      "safeExecution": {
+        "callingSafe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+        "safeNonceNow": "5",
+        "requiredSafeNonce": "5 + queue index (sequential 0..4 as ordered)",
+        "threshold": "2-of-3 owner signatures required at execution time",
+        "value": "0",
+        "operation": "CALL (0)"
+      }
+    },
+    {
+      "id": "W1.5",
+      "label": "Controller.setBudgets(weeklyUsdBudget8 = 0, maxFlowPerEpoch = 50,000e18)",
+      "target": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+      "functionName": "setBudgets",
+      "args": [
+        "0",
+        "50000000000000000000000"
+      ],
+      "decoded": {
+        "weeklyUsdBudget8_": "0",
+        "maxFlowPerEpoch_": "50000000000000000000000 (50000 FLOW, 18dp)"
+      },
+      "authority": "Governance Safe 0x88A4CC1F5771523baeB83DaEea07D323a3ce9507 (Controller GOVERNOR_ROLE)",
+      "prerequisite": "maxFlowPerEpoch == 0 and weeklyUsdBudget8 == 0",
+      "expected": "maxFlowPerEpoch == 50000000000000000000000; weeklyUsdBudget8 stays 0; no epoch published",
+      "selector": "0x5181ecd3",
+      "calldata": "0x5181ecd30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a968163f0a57b400000",
+      "calldataKeccak": "0x9410508219448179db1408fa9683ada69b8811f84238d609ffd3fc06b2ad8da5",
+      "simulation": "ok",
+      "gasEstimate": "50162",
+      "unauthorizedCaller": "reverts (as required)",
+      "safeExecution": {
+        "callingSafe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+        "safeNonceNow": "5",
+        "requiredSafeNonce": "5 + queue index (sequential 0..4 as ordered)",
+        "threshold": "2-of-3 owner signatures required at execution time",
+        "value": "0",
+        "operation": "CALL (0)"
+      }
+    }
+  ],
+  "postSequenceExpectations": {
+    "Controller.vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "Treasury VAULT_ROLE holder": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "Treasury CONTROLLER_ROLE holder": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "Vault PAUSER_ROLE holders": [
+      "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+      "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF"
+    ],
+    "Vault DEFAULT_ADMIN_ROLE": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "Controller.maxFlowPerEpoch": "50000000000000000000000 (50,000 FLOW)",
+    "Controller.weeklyUsdBudget8": "0",
+    "Controller.oracle": "0x0000000000000000000000000000000000000000",
+    "Controller PUBLISHER_ROLE": "unassigned",
+    "Treasury FLOW balance / obligations": "0 / 0",
+    "Vault positions / principal": "0 / 0",
+    "Active staking epoch or rewards": "none — publishEpoch/commitEpoch not called by any W1 call"
+  },
+  "verdict": "FAIL",
+  "failures": [
+    "preserve: no committed epoch on Controller"
+  ]
+}
