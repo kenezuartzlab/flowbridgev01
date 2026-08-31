@@ -48,9 +48,15 @@ export const FLOW_REWARDS_CHAINS: readonly FlowRewardsChainConfig[] = [
     label: "BOT Mainnet",
     isMainnet: true,
     v12Built: true,
-    token: null,
-    distributor: null,
-    claimsEnabled: false,
+    // V30.2B P1: canonical verified + funded mainnet addresses only. Selection
+    // is FUNDED_READY, never FEATURE_ACTIVE — claims stay disabled below, so no
+    // claim transaction can be prepared on mainnet.
+    token: resolveCanonicalAddress(BOT_MAINNET_CHAIN_ID, "FlowToken"),
+    distributor: resolveCanonicalAddress(
+      BOT_MAINNET_CHAIN_ID,
+      "FlowRewardsMerkleDistributor",
+    ),
+    claimsEnabled: V30_2B_FEATURE_ACTIVATION.rewardClaimsEnabled,
   },
 ] as const;
 
