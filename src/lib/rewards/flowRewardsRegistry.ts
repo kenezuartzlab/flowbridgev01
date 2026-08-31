@@ -12,6 +12,11 @@
  * later deployment gate, from source-controlled deployment config.
  */
 
+import {
+  V30_2B_FEATURE_ACTIVATION,
+  resolveCanonicalAddress,
+} from "@/lib/deploy/v302bCanonicalRegistry";
+
 export type Hex = `0x${string}`;
 
 export interface FlowRewardsChainConfig {

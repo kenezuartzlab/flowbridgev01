@@ -10,6 +10,10 @@ import {
   STAKING_POLICY_VERSION,
   type Hex,
 } from "./flowStakingPolicy";
+import {
+  V30_2B_FEATURE_ACTIVATION,
+  resolveCanonicalAddress,
+} from "@/lib/deploy/v302bCanonicalRegistry";
 
 export const BOT_TESTNET_CHAIN_ID = 968;
 export const BOT_MAINNET_CHAIN_ID = 677;
@@ -42,9 +46,11 @@ export const FLOW_STAKING_CHAINS: readonly FlowStakingChainConfig[] = [
     chainId: BOT_MAINNET_CHAIN_ID,
     label: "BOT Mainnet",
     isMainnet: true,
-    token: null,
-    vault: null,
-    stakingEnabled: false,
+    // V30.2B P1: canonical verified V30.2B addresses only. Staking execution
+    // stays disabled, so no stake transaction can be prepared on mainnet.
+    token: resolveCanonicalAddress(BOT_MAINNET_CHAIN_ID, "FlowToken"),
+    vault: resolveCanonicalAddress(BOT_MAINNET_CHAIN_ID, "FlowStakingVaultV2"),
+    stakingEnabled: V30_2B_FEATURE_ACTIVATION.stakingExecutionEnabled,
     policyVersion: STAKING_POLICY_VERSION,
   },
 ] as const;
