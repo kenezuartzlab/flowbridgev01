@@ -1,0 +1,370 @@
+{
+  "gate": "V30.2B P2A — Genesis Core Swap Canary decision freeze + reward preflight",
+  "mode": "READ_ONLY",
+  "generatedAt": "2026-08-31T03:58:41.112Z",
+  "chain": {
+    "chainId": 677,
+    "rpcHost": "rpc.botchain.ai"
+  },
+  "eligibilityCutoffBlock": 21553131,
+  "cutoffBlockTimestamp": 1788148713,
+  "decision": {
+    "priorDecisionVersion": "V30.1D.4",
+    "priorManifestHash": "fnv1a64:9972234982dbe76f",
+    "newDecisionVersion": "V30.2B.P2A",
+    "decisionId": "REWARDS_GENESIS_CORE_SWAP_CANARY",
+    "decisionHash": "fnv1a64:e9a8266bb7581acc",
+    "newManifestHash": "fnv1a64:e6e25189723dce79",
+    "value": {
+      "campaignId": "MAINNET_GENESIS_CORE_SWAP_CANARY_V1",
+      "chainId": 677,
+      "campaignBudgetFlow": 1,
+      "rewardFlowPerRecipient": 1,
+      "rewardWeiPerRecipient": "1000000000000000000",
+      "maxRecipients": 1,
+      "eligibilitySource": "CORE_SWAP",
+      "winnerOrdering": [
+        "blockNumber ASC",
+        "transactionIndex ASC",
+        "logIndex ASC",
+        "txHash ASC"
+      ],
+      "eligibilityCutoffBlock": 21553131,
+      "conversions": {
+        "flowPointsConversion": false,
+        "campaignPtsConversion": false,
+        "usdVolumeConversion": false,
+        "referralMultiplier": false,
+        "stakingMultiplier": false,
+        "aprOrRewardRateRule": false
+      },
+      "publishDelaySeconds": 86400,
+      "ownerApproval": "APPROVED"
+    },
+    "amendment": {
+      "amendmentVersion": "V30.2B.P2A",
+      "priorDecisionVersion": "V30.1D.4",
+      "priorManifestHash": "fnv1a64:9972234982dbe76f",
+      "supersedes": {
+        "decisionId": "REWARDS_LAUNCH_PLAN",
+        "field": "launchCampaignBudgetFlow",
+        "previousValue": 0,
+        "amendedValue": 1,
+        "scope": "MAINNET_GENESIS_CORE_SWAP_CANARY_V1",
+        "scopeNote": "Superseded for this single canary only. The original REWARDS_LAUNCH_PLAN decision object and hash are preserved unchanged in audit history."
+      },
+      "settlementEvidenceNote": "The already-executed 1,000,000 FLOW Distributor funding is settlement evidence, not a retroactive owner decision."
+    },
+    "schemaValidation": {
+      "ok": true,
+      "findings": []
+    }
+  },
+  "distributorPreState": {
+    "balanceFlow": "1000000",
+    "campaignBudget": "0",
+    "budgetRemaining": "0",
+    "totalReserved": "0",
+    "totalClaimed": "0",
+    "epochCount": "0",
+    "minPublishDelay": "86400",
+    "paused": false
+  },
+  "dataset": {
+    "query": "select id, wallet_address, chain_id, tx_hash, source_log_index, verified_activity_id, activity_key, reason, verified_usd, points, base_points, created_at from flow_points_ledger where chain_id = 677 order by created_at asc",
+    "capturedAt": "2026-08-31T00:00:00.000Z",
+    "rows": [
+      {
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+        "storedActivityKey": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:0",
+        "storedSourceLogIndex": null,
+        "verifiedActivityId": null,
+        "verifiedUsd": 1.4477296817964482,
+        "blockNumber": 20400804,
+        "transactionIndex": 0,
+        "onchain": {
+          "status": "success",
+          "from": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+          "to": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445",
+          "canonicalRouterLogs": [
+            5
+          ]
+        }
+      },
+      {
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
+        "storedActivityKey": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:0",
+        "storedSourceLogIndex": null,
+        "verifiedActivityId": null,
+        "verifiedUsd": 1,
+        "blockNumber": 20400922,
+        "transactionIndex": 0,
+        "onchain": {
+          "status": "success",
+          "from": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+          "to": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445",
+          "canonicalRouterLogs": [
+            5
+          ]
+        }
+      },
+      {
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
+        "storedActivityKey": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:0",
+        "storedSourceLogIndex": null,
+        "verifiedActivityId": null,
+        "verifiedUsd": 1.158215708234597,
+        "blockNumber": 20401190,
+        "transactionIndex": 0,
+        "onchain": {
+          "status": "success",
+          "from": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+          "to": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445",
+          "canonicalRouterLogs": [
+            5
+          ]
+        }
+      },
+      {
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
+        "storedActivityKey": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:0",
+        "storedSourceLogIndex": null,
+        "verifiedActivityId": null,
+        "verifiedUsd": 4.8847155006408665,
+        "blockNumber": 20419230,
+        "transactionIndex": 0,
+        "onchain": {
+          "status": "success",
+          "from": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+          "to": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445",
+          "canonicalRouterLogs": [
+            8
+          ]
+        }
+      }
+    ],
+    "eligibility": {
+      "status": "FAIL_CLOSED",
+      "cutoffBlock": 21553131,
+      "considered": 4,
+      "qualified": [],
+      "rejected": [
+        {
+          "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
+          "reason": "missing actual receipt log index — canonical log identity unknown"
+        },
+        {
+          "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
+          "reason": "missing actual receipt log index — canonical log identity unknown"
+        },
+        {
+          "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
+          "reason": "missing actual receipt log index — canonical log identity unknown"
+        },
+        {
+          "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
+          "reason": "missing actual receipt log index — canonical log identity unknown"
+        }
+      ],
+      "winner": null,
+      "entitlementWei": null,
+      "blockers": [
+        "no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
+      ]
+    }
+  },
+  "rootPackage": null,
+  "governanceBudgetTransaction": {
+    "target": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "function": "setCampaignBudget(uint256)",
+    "selector": "0x7bc0db46",
+    "decodedArgs": {
+      "newBudgetWei": "1000000000000000000",
+      "newBudgetFlow": 1
+    },
+    "calldata": "0x7bc0db460000000000000000000000000000000000000000000000000de0b6b3a7640000",
+    "calldataKeccak": "0xd1f0d65e07007de361b6ae180f69cbf2e596d50efba5dd5d5128c3c7098d735f",
+    "governanceSafe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "liveGovernanceNonce": 1,
+    "simulation": {
+      "ok": true,
+      "detail": "simulated successfully from the Governance Safe"
+    },
+    "gasEstimate": "52158",
+    "expectedPostState": {
+      "campaignBudget": "1000000000000000000",
+      "budgetRemaining": "1000000000000000000",
+      "totalReserved": "0",
+      "epochCount": "0",
+      "root": "none",
+      "claims": "none",
+      "distributorTokenBalance": "unchanged (1,000,000 FLOW)"
+    },
+    "signed": false,
+    "broadcast": false
+  },
+  "rootPublisherReadiness": {
+    "address": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
+    "liveNonce": 0,
+    "balanceBot": "0",
+    "liveGasPriceWei": "20000000000",
+    "publishEpochGasEstimate": null,
+    "bufferedGas": null,
+    "recommendedFundingBot": null,
+    "proposedFundingSource": "Treasury Safe 0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4 — requires separate owner approval",
+    "funded": false
+  },
+  "stateChanges": {
+    "signatures": 0,
+    "broadcasts": 0,
+    "flowTransfers": 0,
+    "roots": 0,
+    "epochs": 0,
+    "manifestPublished": false
+  },
+  "checks": [
+    {
+      "name": "chain is BOT Mainnet 677",
+      "ok": true,
+      "detail": "677"
+    },
+    {
+      "name": "decision amendment schema validation",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "new manifest hash differs from the frozen V30.1D.4 hash",
+      "ok": true,
+      "detail": "fnv1a64:e6e25189723dce79"
+    },
+    {
+      "name": "manifest hash reproduces deterministically",
+      "ok": true,
+      "detail": "fnv1a64:e6e25189723dce79"
+    },
+    {
+      "name": "distributor funded with 1,000,000 FLOW",
+      "ok": true,
+      "detail": "1000000"
+    },
+    {
+      "name": "campaignBudget is 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "totalReserved is 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "totalClaimed is 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "epochCount is 0 (no root, no epoch)",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "minPublishDelay is 86400",
+      "ok": true,
+      "detail": "86400"
+    },
+    {
+      "name": "distributor not paused",
+      "ok": true,
+      "detail": "false"
+    },
+    {
+      "name": "distributor token is canonical FLOW",
+      "ok": true,
+      "detail": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF"
+    },
+    {
+      "name": "recovery recipient is Treasury Safe",
+      "ok": true,
+      "detail": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4"
+    },
+    {
+      "name": "Governance holds DEFAULT_ADMIN_ROLE",
+      "ok": true,
+      "detail": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507"
+    },
+    {
+      "name": "Governance holds BUDGET_MANAGER_ROLE",
+      "ok": true,
+      "detail": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507"
+    },
+    {
+      "name": "approved Root Publisher holds PUBLISHER_ROLE",
+      "ok": true,
+      "detail": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94"
+    },
+    {
+      "name": "Operations holds PAUSER_ROLE",
+      "ok": true,
+      "detail": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF"
+    },
+    {
+      "name": "Root Publisher is not a budget manager",
+      "ok": true,
+      "detail": "separated"
+    },
+    {
+      "name": "dataset snapshot is chain 677 CORE_SWAP only",
+      "ok": true,
+      "detail": "4 rows"
+    },
+    {
+      "name": "a qualifying canonical CORE_SWAP with complete economic identity exists",
+      "ok": false,
+      "detail": "no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
+    },
+    {
+      "name": "campaign-budget setter derived from the verified ABI",
+      "ok": true,
+      "detail": "setCampaignBudget(uint256)"
+    },
+    {
+      "name": "campaign-budget action simulates from the Governance Safe",
+      "ok": true,
+      "detail": "simulated successfully from the Governance Safe"
+    },
+    {
+      "name": "non-Governance caller is rejected by the setter",
+      "ok": true,
+      "detail": "unauthorized reverts"
+    },
+    {
+      "name": "rewards claims remain disabled (no epoch published)",
+      "ok": true,
+      "detail": "claims impossible"
+    },
+    {
+      "name": "no root exists before the later publication transaction",
+      "ok": true,
+      "detail": "epochCount 0"
+    },
+    {
+      "name": "no dataset row originates from chain 968 or 1024",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "no points or PTS conversion introduced",
+      "ok": true,
+      "detail": "all conversion rules false"
+    }
+  ],
+  "blockers": [
+    "a qualifying canonical CORE_SWAP with complete economic identity exists: no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
+  ],
+  "verdict": "BLOCKED"
+}

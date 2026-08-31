@@ -1,0 +1,64 @@
+{
+  "note": "Verbatim capture of the ONLY BOT Mainnet 677 CORE_SWAP records that exist in canonical application state. No row is edited, enriched or invented. `verified_activities` contains no chain-677 record at all, so verified_activity_id and source_log_index are canonically absent here.",
+  "query": "select id, wallet_address, chain_id, tx_hash, source_log_index, verified_activity_id, activity_key, reason, verified_usd, points, base_points, created_at from flow_points_ledger where chain_id = 677 order by created_at asc",
+  "capturedAt": "2026-08-31T00:00:00.000Z",
+  "verifiedActivitiesChain677RowCount": 0,
+  "rows": [
+    {
+      "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "chainId": 677,
+      "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+      "sourceLogIndex": null,
+      "verifiedActivityId": null,
+      "activityKey": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:0",
+      "reason": "CORE_SWAP",
+      "verifiedUsd": 1.4477296817964482,
+      "points": 0,
+      "basePoints": 0,
+      "createdAt": "2026-08-21T03:54:28.622191Z"
+    },
+    {
+      "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "chainId": 677,
+      "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
+      "sourceLogIndex": null,
+      "verifiedActivityId": null,
+      "activityKey": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:0",
+      "reason": "CORE_SWAP",
+      "verifiedUsd": 1,
+      "points": 0,
+      "basePoints": 0,
+      "createdAt": "2026-08-21T03:55:55.244616Z"
+    },
+    {
+      "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "chainId": 677,
+      "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
+      "sourceLogIndex": null,
+      "verifiedActivityId": null,
+      "activityKey": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:0",
+      "reason": "CORE_SWAP",
+      "verifiedUsd": 1.158215708234597,
+      "points": 0,
+      "basePoints": 0,
+      "createdAt": "2026-08-21T03:59:16.02979Z"
+    },
+    {
+      "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "chainId": 677,
+      "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
+      "sourceLogIndex": null,
+      "verifiedActivityId": null,
+      "activityKey": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:0",
+      "reason": "CORE_SWAP",
+      "verifiedUsd": 4.8847155006408665,
+      "points": 0,
+      "basePoints": 0,
+      "createdAt": "2026-08-21T07:44:49.89516Z"
+    }
+  ]
+}
