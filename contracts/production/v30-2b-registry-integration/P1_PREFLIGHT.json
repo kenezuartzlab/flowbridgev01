@@ -1,0 +1,188 @@
+{
+  "gate": "V30.2B_P1_CANONICAL_REGISTRY_INTEGRATION_PREFLIGHT",
+  "verdict": "PASS_PREPARED_NOT_PUBLISHED",
+  "readOnly": true,
+  "signed": 0,
+  "broadcast": 0,
+  "flowTransferred": "0",
+  "roots": 0,
+  "epochs": 0,
+  "chain": {
+    "chainId": 677,
+    "blockNumber": "21541092",
+    "rpcHost": "rpc.botchain.ai"
+  },
+  "canonical": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "distributor": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "activityRegistry": "0x86590b7C8A2Ad9a1dAD8183Eaf627AE4B7Ff3814",
+    "stakingTreasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "supersededQuarantined": [
+    "0x535dDDA826142AC42cE288154e9595f080940aE9",
+    "0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB",
+    "0xa80d8740f378989F649ca14C54e4B4a42E68753c",
+    "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+    "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf",
+    "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8",
+    "0x123E64D074FD5d66DBd4BD62Dc4e71da7101DB63"
+  ],
+  "featureActivation": {
+    "rewardClaimsEnabled": false,
+    "stakingExecutionEnabled": false,
+    "dynamicStakingEnabled": false,
+    "oracleConfigured": false,
+    "stakingPublisherAssigned": false,
+    "rewardRootPublished": false,
+    "routerV3Live": true,
+    "routerV4Promoted": false,
+    "officialBridgeDirect": true
+  },
+  "checksTotal": 28,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "chain_is_bot_mainnet_677",
+      "pass": true,
+      "detail": "677"
+    },
+    {
+      "name": "no_968_or_1024_contamination",
+      "pass": true,
+      "detail": "677"
+    },
+    {
+      "name": "code_present_flow",
+      "pass": true,
+      "detail": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF bytes=1786"
+    },
+    {
+      "name": "code_present_distributor",
+      "pass": true,
+      "detail": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922 bytes=6629"
+    },
+    {
+      "name": "code_present_activityRegistry",
+      "pass": true,
+      "detail": "0x86590b7C8A2Ad9a1dAD8183Eaf627AE4B7Ff3814 bytes=3082"
+    },
+    {
+      "name": "code_present_stakingTreasury",
+      "pass": true,
+      "detail": "0x96552909998F3DbAf5Ff4979dc158508b3442e65 bytes=4827"
+    },
+    {
+      "name": "code_present_controller",
+      "pass": true,
+      "detail": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF bytes=7997"
+    },
+    {
+      "name": "code_present_vault",
+      "pass": true,
+      "detail": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D bytes=10366"
+    },
+    {
+      "name": "distributor_funded_1m_flow",
+      "pass": true,
+      "detail": "1000000"
+    },
+    {
+      "name": "staking_treasury_funded_10m_flow",
+      "pass": true,
+      "detail": "10000000"
+    },
+    {
+      "name": "vault_unfunded",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "controller_vault_bound_to_r6",
+      "pass": true,
+      "detail": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+    },
+    {
+      "name": "controller_epoch_cap_50k_flow",
+      "pass": true,
+      "detail": "50000"
+    },
+    {
+      "name": "weekly_usd_budget_zero",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "superseded_unfunded_0x535dDDA8",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "superseded_not_canonical_0x535dDDA8",
+      "pass": true,
+      "detail": "0x535dDDA826142AC42cE288154e9595f080940aE9"
+    },
+    {
+      "name": "superseded_unfunded_0x3824681c",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "superseded_not_canonical_0x3824681c",
+      "pass": true,
+      "detail": "0x3824681c3560A63e1c9ceDABBfcAB2691c5673FB"
+    },
+    {
+      "name": "superseded_unfunded_0xa80d8740",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "superseded_not_canonical_0xa80d8740",
+      "pass": true,
+      "detail": "0xa80d8740f378989F649ca14C54e4B4a42E68753c"
+    },
+    {
+      "name": "superseded_unfunded_0xA861152C",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "superseded_not_canonical_0xA861152C",
+      "pass": true,
+      "detail": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e"
+    },
+    {
+      "name": "superseded_unfunded_0x5095ecc7",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "superseded_not_canonical_0x5095ecc7",
+      "pass": true,
+      "detail": "0x5095ecc7226AD6dEceE99846Bc83363cA41b52bf"
+    },
+    {
+      "name": "superseded_unfunded_0x3cc0799f",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "superseded_not_canonical_0x3cc0799f",
+      "pass": true,
+      "detail": "0x3cc0799fB4169A9BB5dA9812Bea23CBa97B989c8"
+    },
+    {
+      "name": "superseded_unfunded_0x123E64D0",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "superseded_not_canonical_0x123E64D0",
+      "pass": true,
+      "detail": "0x123E64D074FD5d66DBd4BD62Dc4e71da7101DB63"
+    }
+  ],
+  "generatedAt": "2026-08-31T01:28:09.299Z"
+}
