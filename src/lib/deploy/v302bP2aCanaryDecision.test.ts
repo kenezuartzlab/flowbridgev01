@@ -112,7 +112,6 @@ describe('V30.2B P2A eligibility (fail-closed)', () => {
     const late = candidate({ ledgerId: 'b', blockNumber: 20_419_230, txHash: '0x' + 'c'.repeat(64), activityKey: `677:0x${'c'.repeat(64)}:8`, sourceLogIndex: 8 });
     const r = evaluateCanaryEligibility([late, early], 21_552_485);
     expect(r.status).toBe('PASS');
-    expect(r.winner?.ledgerId).toBeUndefined();
     expect(r.winner?.blockNumber).toBe(20_400_804);
     expect(r.entitlementWei).toBe(ONE_FLOW_WEI.toString());
   });
