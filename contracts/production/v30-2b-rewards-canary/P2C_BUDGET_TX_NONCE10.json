@@ -1,0 +1,85 @@
+{
+  "gate": "V30.2B P2C — setCampaignBudget(1 FLOW) rebuilt at live Safe nonce 10",
+  "readOnly": true,
+  "signed": false,
+  "broadcast": false,
+  "executionBlocked": {
+    "reason": "no Governance Safe owner key is available in this environment; the Safe is 2-of-3 and none of the environment keys is an owner",
+    "safeOwners": [
+      "0x524Db06954de917025180057BCBeB36eC96A98c5",
+      "0x145E201c658706D3D2b9f35E0c51270474453B2B",
+      "0x0EdFf26415660c9d2d12320678192f1B97BEBb85"
+    ],
+    "threshold": 2,
+    "environmentKeyAddresses": [
+      "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+      "0xFA3DE5CFa1DE8EcC36197dCC0FC34fef5c1C7e47",
+      "0x32a3B14250E14561D3146FfaEBcc1B3f51A207ed",
+      "0xA7d016C50e2B54B0942e8bEF0b4E5a82362330a2"
+    ]
+  },
+  "preSignRereads": {
+    "chainId": 677,
+    "block": 21559304,
+    "safeNonce": 10,
+    "safeVersion": "1.4.1",
+    "distributor": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "distributorFlowBalanceWei": "1000000000000000000000000",
+    "campaignBudget": "0",
+    "budgetRemaining": "0",
+    "totalReserved": "0",
+    "totalClaimed": "0",
+    "epochCount": "0",
+    "paused": false,
+    "p2bEligibleRecipient": {
+      "status": "PASS",
+      "canonicalIdentity": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "entitlementFlow": 1
+    }
+  },
+  "innerCall": {
+    "target": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "function": "setCampaignBudget(uint256)",
+    "selector": "0x7bc0db46",
+    "argWei": "1000000000000000000",
+    "calldata": "0x7bc0db460000000000000000000000000000000000000000000000000de0b6b3a7640000",
+    "calldataKeccak": "0xd1f0d65e07007de361b6ae180f69cbf2e596d50efba5dd5d5128c3c7098d735f",
+    "keccakMatchesFrozen": true,
+    "unchangedFromP2A": true
+  },
+  "safeTransaction": {
+    "safe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "to": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "value": "0",
+    "data": "0x7bc0db460000000000000000000000000000000000000000000000000de0b6b3a7640000",
+    "operation": 0,
+    "safeTxGas": "0",
+    "baseGas": "0",
+    "gasPrice": "0",
+    "gasToken": "0x0000000000000000000000000000000000000000",
+    "refundReceiver": "0x0000000000000000000000000000000000000000",
+    "nonce": 10,
+    "safeTxHash": "0xfd43c66fa6ee04c627be38f57a769580596788611fba690c4b6a44cf0ac8d983",
+    "safeTxHashSource": "matches Safe.getTransactionHash() on chain and local EIP-712 computation"
+  },
+  "simulation": {
+    "fromGovernanceSafe": "success",
+    "fromDeployer": "reverts (expected, unauthorized)",
+    "expectedPostState": {
+      "campaignBudget": "1000000000000000000",
+      "budgetRemaining": "1000000000000000000",
+      "totalReserved": "0",
+      "epochCount": "0",
+      "root": "none",
+      "distributorTokenBalance": "unchanged (1,000,000 FLOW)"
+    },
+    "gasEstimate": "52158"
+  },
+  "invariants": {
+    "noRootPublished": true,
+    "noRootPublisherFunding": true,
+    "noClaimsEnabled": true,
+    "noOtherStateChange": true
+  }
+}
