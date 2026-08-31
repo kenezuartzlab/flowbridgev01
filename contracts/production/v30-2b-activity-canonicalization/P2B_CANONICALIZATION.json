@@ -1,7 +1,7 @@
 {
   "gate": "V30.2B P2B — Mainnet Activity Canonicalization + P2A rerun",
   "mode": "REPAIR_THEN_VERIFY",
-  "generatedAt": "2026-08-31T04:36:24.098Z",
+  "generatedAt": "2026-08-31T04:36:42.866Z",
   "chain": {
     "chainId": 677,
     "rpcHost": "rpc.botchain.ai"
@@ -36,7 +36,7 @@
       "blockNumber": 20400804,
       "transactionIndex": 0,
       "actualLogIndex": 5,
-      "storedLogIndexBefore": null,
+      "storedLogIndexBefore": 5,
       "activityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060",
       "activityKey": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
       "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
@@ -54,7 +54,7 @@
       "blockNumber": 20400922,
       "transactionIndex": 0,
       "actualLogIndex": 5,
-      "storedLogIndexBefore": null,
+      "storedLogIndexBefore": 5,
       "activityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307",
       "activityKey": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5",
       "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
@@ -72,7 +72,7 @@
       "blockNumber": 20401190,
       "transactionIndex": 0,
       "actualLogIndex": 5,
-      "storedLogIndexBefore": null,
+      "storedLogIndexBefore": 5,
       "activityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1",
       "activityKey": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5",
       "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
@@ -90,7 +90,7 @@
       "blockNumber": 20419230,
       "transactionIndex": 0,
       "actualLogIndex": 8,
-      "storedLogIndexBefore": null,
+      "storedLogIndexBefore": 8,
       "activityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31",
       "activityKey": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8",
       "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
@@ -113,7 +113,7 @@
       "activityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060",
       "logIndex": 5,
       "activityInserted": false,
-      "ledgerBound": true,
+      "ledgerBound": false,
       "replayNoOp": true,
       "points": 0,
       "basePoints": 0,
@@ -123,8 +123,8 @@
       "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
       "activityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307",
       "logIndex": 5,
-      "activityInserted": true,
-      "ledgerBound": true,
+      "activityInserted": false,
+      "ledgerBound": false,
       "replayNoOp": true,
       "points": 0,
       "basePoints": 0,
@@ -134,8 +134,8 @@
       "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
       "activityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1",
       "logIndex": 5,
-      "activityInserted": true,
-      "ledgerBound": true,
+      "activityInserted": false,
+      "ledgerBound": false,
       "replayNoOp": true,
       "points": 0,
       "basePoints": 0,
@@ -145,8 +145,8 @@
       "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
       "activityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31",
       "logIndex": 8,
-      "activityInserted": true,
-      "ledgerBound": true,
+      "activityInserted": false,
+      "ledgerBound": false,
       "replayNoOp": true,
       "points": 0,
       "basePoints": 0,
@@ -253,7 +253,7 @@
     {
       "name": "stored placeholder log index differs from the actual one (0x396b25fd9e…)",
       "ok": true,
-      "detail": "stored=null actual=5"
+      "detail": "stored=5 actual=5"
     },
     {
       "name": "canonical activity is at or before the frozen cutoff (0x396b25fd9e…)",
@@ -283,7 +283,7 @@
     {
       "name": "stored placeholder log index differs from the actual one (0x716faf8448…)",
       "ok": true,
-      "detail": "stored=null actual=5"
+      "detail": "stored=5 actual=5"
     },
     {
       "name": "canonical activity is at or before the frozen cutoff (0x716faf8448…)",
@@ -313,7 +313,7 @@
     {
       "name": "stored placeholder log index differs from the actual one (0xb4348e141e…)",
       "ok": true,
-      "detail": "stored=null actual=5"
+      "detail": "stored=5 actual=5"
     },
     {
       "name": "canonical activity is at or before the frozen cutoff (0xb4348e141e…)",
@@ -343,7 +343,7 @@
     {
       "name": "stored placeholder log index differs from the actual one (0xd5be1d1238…)",
       "ok": true,
-      "detail": "stored=null actual=8"
+      "detail": "stored=8 actual=8"
     },
     {
       "name": "canonical activity is at or before the frozen cutoff (0xd5be1d1238…)",
