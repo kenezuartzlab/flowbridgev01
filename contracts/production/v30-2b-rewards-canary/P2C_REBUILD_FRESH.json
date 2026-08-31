@@ -1,0 +1,176 @@
+{
+  "gate": "V30.2B P2C — fresh-state publishEpoch rebuild",
+  "mode": "READ_ONLY",
+  "generatedAt": "2026-08-31T06:25:19.247Z",
+  "chain": {
+    "chainId": 677,
+    "rpcHost": "rpc.botchain.ai",
+    "headBlock": 21564866,
+    "latestBlockTimestamp": 1788157514
+  },
+  "frozen": {
+    "chainId": 677,
+    "epochId": 1,
+    "index": 0,
+    "recipient": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+    "entitlementWei": "1000000000000000000",
+    "root": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
+    "proof": []
+  },
+  "scheduling": {
+    "frozenDelaySeconds": 86400,
+    "schedulingMarginSeconds": 900,
+    "effectiveDelaySeconds": 87300
+  },
+  "publication": {
+    "target": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "function": "publishEpoch(bytes32,uint256,uint64,uint64)",
+    "selector": "0x34b7fe84",
+    "decodedArgs": {
+      "root": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
+      "allocationWei": "1000000000000000000",
+      "allocationFlow": "1",
+      "claimStart": "1788244814",
+      "claimStartIso": "2026-09-01T06:40:14.000Z",
+      "claimEnd": "1790836814",
+      "claimEndIso": "2026-10-01T06:40:14.000Z"
+    },
+    "calldata": "0x34b7fe84e5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e64560000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006a96734e000000000000000000000000000000000000000000000000000000006abe004e",
+    "calldataKeccak": "0xf039ec919638867be3caca1257544be0d72428c641f45f8663c01b8e020b36d3",
+    "chainId": 677,
+    "rootPublisher": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
+    "rootPublisherNonce": 0,
+    "rootPublisherBalanceBot": "0.05",
+    "gasEstimate": "156221",
+    "bufferedGas30pct": "203087",
+    "gasPriceWei": "20000000000",
+    "gasPriceGwei": "20",
+    "requiredBotWithBuffer": "0.00406174",
+    "requiredWeiWithBuffer": "4061740000000000",
+    "publisherBalanceCoversRequirement": true,
+    "expectedPostState": {
+      "epochCount": "1",
+      "totalReserved": "1000000000000000000",
+      "budgetRemaining": "0",
+      "totalClaimed": "0",
+      "distributorFlowBalance": "1000000 FLOW (unchanged)",
+      "claimAvailableBeforeClaimStart": false,
+      "rewardClaimsEnabled": false
+    },
+    "simulation": {
+      "ok": true,
+      "detail": "simulation returns epochId 1"
+    },
+    "signed": false,
+    "broadcast": false
+  },
+  "checks": [
+    {
+      "name": "chain is BOT Mainnet 677",
+      "ok": true,
+      "detail": "677"
+    },
+    {
+      "name": "on-chain leafHash() equals the frozen root",
+      "ok": true,
+      "detail": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456"
+    },
+    {
+      "name": "local encoder equals the frozen root",
+      "ok": true,
+      "detail": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456"
+    },
+    {
+      "name": "independent fresh-process rebuild equals the frozen root",
+      "ok": true,
+      "detail": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456"
+    },
+    {
+      "name": "proof remains empty (single-leaf tree)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "Distributor balance is 1,000,000 FLOW",
+      "ok": true,
+      "detail": "1000000"
+    },
+    {
+      "name": "campaignBudget is 1 FLOW",
+      "ok": true,
+      "detail": "1000000000000000000"
+    },
+    {
+      "name": "budgetRemaining is 1 FLOW",
+      "ok": true,
+      "detail": "1000000000000000000"
+    },
+    {
+      "name": "totalReserved is 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "totalClaimed is 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "epochCount is 0 (publication would assign epoch 1)",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "Distributor is not paused",
+      "ok": true,
+      "detail": "false"
+    },
+    {
+      "name": "Root Publisher holds PUBLISHER_ROLE",
+      "ok": true,
+      "detail": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94"
+    },
+    {
+      "name": "publishEpoch signature derived from verified deployed ABI",
+      "ok": true,
+      "detail": "bytes32 root|uint256 allocation|uint64 claimStart|uint64 claimEnd"
+    },
+    {
+      "name": "claimStart is more than 86,400s ahead of the latest block timestamp",
+      "ok": true,
+      "detail": "delay 87300s (86,400 + 900 margin)"
+    },
+    {
+      "name": "publishEpoch simulates successfully FROM the Root Publisher",
+      "ok": true,
+      "detail": "simulation returns epochId 1"
+    },
+    {
+      "name": "simulation returns epochId 1",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "non-publisher caller is rejected",
+      "ok": true,
+      "detail": "unauthorized reverts"
+    },
+    {
+      "name": "Publisher's BOT balance covers the 30%-buffered gas cost",
+      "ok": true,
+      "detail": "balance 0.05 BOT vs required 0.00406174 BOT"
+    },
+    {
+      "name": "Publisher balance contains no FLOW authority implication (native BOT only)",
+      "ok": true,
+      "detail": "native gas token only"
+    },
+    {
+      "name": "Publisher holds no FLOW",
+      "ok": true,
+      "detail": "0 FLOW"
+    }
+  ],
+  "blockers": [],
+  "verdict": "PASS"
+}
