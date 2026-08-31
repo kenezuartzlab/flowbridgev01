@@ -1,12 +1,12 @@
 {
   "gate": "V30.2B P2C — fresh-state publishEpoch rebuild",
   "mode": "READ_ONLY",
-  "generatedAt": "2026-08-31T06:25:19.247Z",
+  "generatedAt": "2026-08-31T06:58:22.486Z",
   "chain": {
     "chainId": 677,
     "rpcHost": "rpc.botchain.ai",
-    "headBlock": 21564866,
-    "latestBlockTimestamp": 1788157514
+    "headBlock": 21567510,
+    "latestBlockTimestamp": 1788159497
   },
   "frozen": {
     "chainId": 677,
@@ -30,23 +30,23 @@
       "root": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
       "allocationWei": "1000000000000000000",
       "allocationFlow": "1",
-      "claimStart": "1788244814",
-      "claimStartIso": "2026-09-01T06:40:14.000Z",
-      "claimEnd": "1790836814",
-      "claimEndIso": "2026-10-01T06:40:14.000Z"
+      "claimStart": "1788246797",
+      "claimStartIso": "2026-09-01T07:13:17.000Z",
+      "claimEnd": "1790838797",
+      "claimEndIso": "2026-10-01T07:13:17.000Z"
     },
-    "calldata": "0x34b7fe84e5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e64560000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006a96734e000000000000000000000000000000000000000000000000000000006abe004e",
-    "calldataKeccak": "0xf039ec919638867be3caca1257544be0d72428c641f45f8663c01b8e020b36d3",
+    "calldata": "0x34b7fe84e5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e64560000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006a967b0d000000000000000000000000000000000000000000000000000000006abe080d",
+    "calldataKeccak": "0xa18aa2b263df86cc588e051245968b1b101cd13751e3c73a8b4831c85840a8fa",
     "chainId": 677,
     "rootPublisher": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
     "rootPublisherNonce": 0,
     "rootPublisherBalanceBot": "0.05",
-    "gasEstimate": "156221",
-    "bufferedGas30pct": "203087",
+    "gasEstimate": "156233",
+    "bufferedGas30pct": "203102",
     "gasPriceWei": "20000000000",
     "gasPriceGwei": "20",
-    "requiredBotWithBuffer": "0.00406174",
-    "requiredWeiWithBuffer": "4061740000000000",
+    "requiredBotWithBuffer": "0.00406204",
+    "requiredWeiWithBuffer": "4062040000000000",
     "publisherBalanceCoversRequirement": true,
     "expectedPostState": {
       "epochCount": "1",
@@ -158,7 +158,7 @@
     {
       "name": "Publisher's BOT balance covers the 30%-buffered gas cost",
       "ok": true,
-      "detail": "balance 0.05 BOT vs required 0.00406174 BOT"
+      "detail": "balance 0.05 BOT vs required 0.00406204 BOT"
     },
     {
       "name": "Publisher balance contains no FLOW authority implication (native BOT only)",
