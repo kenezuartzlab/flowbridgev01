@@ -1233,8 +1233,9 @@ export type Database = {
           campaign_id: string
           created_at: string
           destination_chain_id: number
-          intent_hash: string
-          intent_nonce: string
+          evidence_source: string
+          intent_hash: string | null
+          intent_nonce: string | null
           kind: string
           observed_at: string
           occurred_at: string
@@ -1252,8 +1253,9 @@ export type Database = {
           campaign_id: string
           created_at?: string
           destination_chain_id: number
-          intent_hash: string
-          intent_nonce: string
+          evidence_source?: string
+          intent_hash?: string | null
+          intent_nonce?: string | null
           kind: string
           observed_at: string
           occurred_at: string
@@ -1271,8 +1273,9 @@ export type Database = {
           campaign_id?: string
           created_at?: string
           destination_chain_id?: number
-          intent_hash?: string
-          intent_nonce?: string
+          evidence_source?: string
+          intent_hash?: string | null
+          intent_nonce?: string | null
           kind?: string
           observed_at?: string
           occurred_at?: string
@@ -1290,6 +1293,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_bind_core_swap_evidence: {
+        Args: {
+          p_activity_id: string
+          p_chain_id: number
+          p_source_log_index: number
+          p_tx_hash: string
+        }
+        Returns: {
+          activity_key: string
+          base_points: number
+          bound: boolean
+          ledger_id: string
+          points: number
+        }[]
+      }
       admin_bind_wallet: {
         Args: { p_user_id: string; p_wallet: string }
         Returns: {
@@ -1314,6 +1332,23 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_record_router_v3_swap_evidence: {
+        Args: {
+          p_action_type: string
+          p_activity_id: string
+          p_amount_raw: number
+          p_occurred_at: string
+          p_source_chain_id: number
+          p_source_log_index: number
+          p_source_tx_hash: string
+          p_token: string
+          p_user_wallet: string
+        }
+        Returns: {
+          activity_id: string
+          inserted: boolean
+        }[]
       }
       admin_record_verified_activity: {
         Args: {
