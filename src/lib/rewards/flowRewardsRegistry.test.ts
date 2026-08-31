@@ -21,15 +21,18 @@ describe("flow rewards registry", () => {
     ]);
   });
 
-  it("never lets mainnet inherit testnet addresses", () => {
+  it("never lets mainnet inherit testnet addresses (V30.2B canonical only)", () => {
     const mainnet = getFlowRewardsChainConfig(BOT_MAINNET_CHAIN_ID)!;
     const testnet = getFlowRewardsChainConfig(BOT_TESTNET_CHAIN_ID)!;
-    expect(mainnet.token).toBeNull();
-    expect(mainnet.distributor).toBeNull();
+    expect(mainnet.token).toBe("0xcaaB50F36252a57529AFeF651fa6B9f9281917fF");
+    expect(mainnet.distributor).toBe("0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922");
+    expect(mainnet.token).not.toBe(testnet.token);
+    expect(mainnet.distributor).not.toBe(testnet.distributor);
     expect(mainnet.chainId).not.toBe(testnet.chainId);
+    // Funded + verified, but claims remain disabled: no mainnet claim path.
     expect(resolveFlowClaimReadiness(BOT_MAINNET_CHAIN_ID, true)).toMatchObject({
       ready: false,
-      reason: "mainnetPromotionPending",
+      reason: "claimsDisabled",
     });
   });
 

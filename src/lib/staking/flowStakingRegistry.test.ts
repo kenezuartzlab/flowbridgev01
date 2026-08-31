@@ -18,10 +18,13 @@ describe("FLOW staking registry (V13.2 testnet live, mainnet fail-closed)", () =
     if (!unfunded.ready) expect(unfunded.reason).toBe("scheduleNotFunded");
   });
 
-  it("keeps mainnet unpromoted", () => {
+  it("keeps mainnet staking inactive on the canonical V30.2B addresses", () => {
     const r = resolveFlowStakingReadiness(BOT_MAINNET_CHAIN_ID, true);
     expect(r.ready).toBe(false);
-    if (!r.ready) expect(r.reason).toBe("mainnetPromotionPending");
+    if (!r.ready) expect(r.reason).toBe("stakingDisabled");
+    const cfg = getFlowStakingChainConfig(BOT_MAINNET_CHAIN_ID)!;
+    expect(cfg.vault).toBe("0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D");
+    expect(cfg.stakingEnabled).toBe(false);
   });
 
   it("fails closed on unsupported chains", () => {
@@ -34,7 +37,9 @@ describe("FLOW staking registry (V13.2 testnet live, mainnet fail-closed)", () =
 
   it("binds testnet staking principal to the existing FLOW token", () => {
     expect(getFlowStakingChainConfig(BOT_TESTNET_CHAIN_ID)!.token).toBe(FLOW_TOKEN_BOT_TESTNET);
-    expect(getFlowStakingChainConfig(BOT_MAINNET_CHAIN_ID)!.token).toBeNull();
+    expect(getFlowStakingChainConfig(BOT_MAINNET_CHAIN_ID)!.token).toBe(
+      "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    );
   });
 
   it("has blocked copy that never implies a live yield", () => {
