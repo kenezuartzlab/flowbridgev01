@@ -183,11 +183,11 @@ if (APPLY && blockers.length === 0) {
       activityId: a.activityId,
       logIndex: a.logIndex,
       activityInserted: rec.data?.[0]?.inserted ?? rec.data?.inserted ?? null,
-      ledgerBound: bind.data?.[0]?.bound ?? null,
-      replayNoOp: (again.data?.[0]?.bound ?? true) === false,
-      points: bind.data?.[0]?.points ?? null,
-      basePoints: bind.data?.[0]?.base_points ?? null,
-      activityKey: bind.data?.[0]?.activity_key ?? null,
+      ledgerBound: bind.data?.[0]?.out_bound ?? null,
+      replayNoOp: (again.data?.[0]?.out_bound ?? true) === false,
+      points: bind.data?.[0]?.out_points ?? null,
+      basePoints: bind.data?.[0]?.out_base_points ?? null,
+      activityKey: bind.data?.[0]?.out_activity_key ?? null,
     });
   }
   check('every repair is idempotent on replay', persistence.every((p) => p.replayNoOp), `${persistence.length} rows`);

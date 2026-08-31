@@ -1,7 +1,7 @@
 {
   "gate": "V30.2B P2B — Mainnet Activity Canonicalization + P2A rerun",
-  "mode": "READ_ONLY_DRY_RUN",
-  "generatedAt": "2026-08-31T04:34:44.972Z",
+  "mode": "REPAIR_THEN_VERIFY",
+  "generatedAt": "2026-08-31T04:36:24.098Z",
   "chain": {
     "chainId": 677,
     "rpcHost": "rpc.botchain.ai"
@@ -107,35 +107,106 @@
     "ok": true,
     "collisions": []
   },
-  "persistence": [],
+  "persistence": [
+    {
+      "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+      "activityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060",
+      "logIndex": 5,
+      "activityInserted": false,
+      "ledgerBound": true,
+      "replayNoOp": true,
+      "points": 0,
+      "basePoints": 0,
+      "activityKey": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5"
+    },
+    {
+      "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
+      "activityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307",
+      "logIndex": 5,
+      "activityInserted": true,
+      "ledgerBound": true,
+      "replayNoOp": true,
+      "points": 0,
+      "basePoints": 0,
+      "activityKey": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5"
+    },
+    {
+      "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
+      "activityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1",
+      "logIndex": 5,
+      "activityInserted": true,
+      "ledgerBound": true,
+      "replayNoOp": true,
+      "points": 0,
+      "basePoints": 0,
+      "activityKey": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5"
+    },
+    {
+      "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
+      "activityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31",
+      "logIndex": 8,
+      "activityInserted": true,
+      "ledgerBound": true,
+      "replayNoOp": true,
+      "points": 0,
+      "basePoints": 0,
+      "activityKey": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8"
+    }
+  ],
   "eligibility": {
-    "status": "FAIL_CLOSED",
+    "status": "PASS",
     "cutoffBlock": 21553131,
     "considered": 4,
-    "qualified": [],
-    "rejected": [
+    "qualified": [
       {
-        "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
-        "reason": "missing actual receipt log index — canonical log identity unknown"
+        "canonicalIdentity": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+        "logIndex": 5,
+        "blockNumber": 20400804,
+        "transactionIndex": 0,
+        "verifiedActivityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060"
       },
       {
-        "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
-        "reason": "missing actual receipt log index — canonical log identity unknown"
+        "canonicalIdentity": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
+        "logIndex": 5,
+        "blockNumber": 20400922,
+        "transactionIndex": 0,
+        "verifiedActivityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307"
       },
       {
-        "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
-        "reason": "missing actual receipt log index — canonical log identity unknown"
+        "canonicalIdentity": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
+        "logIndex": 5,
+        "blockNumber": 20401190,
+        "transactionIndex": 0,
+        "verifiedActivityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1"
       },
       {
-        "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
-        "reason": "missing actual receipt log index — canonical log identity unknown"
+        "canonicalIdentity": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
+        "logIndex": 8,
+        "blockNumber": 20419230,
+        "transactionIndex": 0,
+        "verifiedActivityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31"
       }
     ],
-    "winner": null,
-    "entitlementWei": null,
-    "blockers": [
-      "no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
-    ]
+    "rejected": [],
+    "winner": {
+      "canonicalIdentity": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+      "logIndex": 5,
+      "blockNumber": 20400804,
+      "transactionIndex": 0,
+      "verifiedActivityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060"
+    },
+    "entitlementWei": "1000000000000000000",
+    "blockers": []
   },
   "stateChanges": {
     "signatures": 0,
@@ -295,6 +366,11 @@
       "detail": "4"
     },
     {
+      "name": "every repair is idempotent on replay",
+      "ok": true,
+      "detail": "4 rows"
+    },
+    {
       "name": "ledger row count unchanged",
       "ok": true,
       "detail": "23 → 23"
@@ -315,6 +391,16 @@
       "detail": "3800.495660890672"
     },
     {
+      "name": "every repaired row now carries a canonical verified activity and actual log index",
+      "ok": true,
+      "detail": "5/bound, 5/bound, 5/bound, 8/bound"
+    },
+    {
+      "name": "repaired activity keys equal chainId:txHash:actualLogIndex",
+      "ok": true,
+      "detail": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5, 677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5, 677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5, 677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8"
+    },
+    {
       "name": "no canonical mainnet evidence derives from chain 968 or 1024",
       "ok": true,
       "detail": "4 mainnet evidence records, 4 mainnet rows"
@@ -328,6 +414,26 @@
       "name": "P2A rerun uses the frozen cutoff block 21,553,131",
       "ok": true,
       "detail": "21553131"
+    },
+    {
+      "name": "a real reproducible reward set now exists",
+      "ok": true,
+      "detail": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5"
+    },
+    {
+      "name": "exactly one canary recipient is selected",
+      "ok": true,
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
+    },
+    {
+      "name": "entitlement is exactly 1 FLOW",
+      "ok": true,
+      "detail": "1000000000000000000"
+    },
+    {
+      "name": "winner is the earliest canonical activity",
+      "ok": true,
+      "detail": "20400804"
     }
   ],
   "blockers": [],
