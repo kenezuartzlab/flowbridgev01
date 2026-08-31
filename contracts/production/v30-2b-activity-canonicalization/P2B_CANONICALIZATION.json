@@ -1,0 +1,332 @@
+{
+  "gate": "V30.2B P2B — Mainnet Activity Canonicalization + P2A rerun",
+  "mode": "READ_ONLY_DRY_RUN",
+  "generatedAt": "2026-08-31T04:34:26.305Z",
+  "chain": {
+    "chainId": 677,
+    "rpcHost": "rpc.botchain.ai"
+  },
+  "frozenCutoffBlock": 21553131,
+  "routerV3": "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
+  "eventSignature": "SwapExecuted(uint256 indexed routerId, address indexed tokenIn, address indexed tokenOut, address sender, address recipient, uint256 swapAmount, uint256 amountOut, uint256 fee)",
+  "eventTopic0": "0x927ca8b36d4e2f5dfd8714cd69677b2deda6f17ad7ed9b304b6525a1643d9b46",
+  "economics": {
+    "before": {
+      "rows": 23,
+      "points": 3986,
+      "basePoints": 3991,
+      "verifiedUsd": 3800.495660890672
+    },
+    "after": {
+      "rows": 23,
+      "points": 3986,
+      "basePoints": 3991,
+      "verifiedUsd": 3800.495660890672
+    },
+    "delta": {
+      "rows": 0,
+      "points": 0,
+      "basePoints": 0
+    }
+  },
+  "evidence": [
+    {
+      "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
+      "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+      "blockNumber": 20400804,
+      "transactionIndex": 0,
+      "actualLogIndex": 5,
+      "storedLogIndexBefore": null,
+      "activityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060",
+      "activityKey": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "tokenIn": "0x0000000000000000000000000000000000000000",
+      "tokenOut": "0x546307af427902a75771434df831d88219784e19",
+      "amountRaw": "150000000000000000",
+      "amountOut": "52679906193908364",
+      "fee": "0",
+      "routerId": "3",
+      "occurredAt": 1787284463
+    },
+    {
+      "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
+      "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
+      "blockNumber": 20400922,
+      "transactionIndex": 0,
+      "actualLogIndex": 5,
+      "storedLogIndexBefore": null,
+      "activityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307",
+      "activityKey": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "tokenIn": "0x0000000000000000000000000000000000000000",
+      "tokenOut": "0x546307af427902a75771434df831d88219784e19",
+      "amountRaw": "102784134395608614",
+      "amountOut": "36100853890730620",
+      "fee": "0",
+      "routerId": "3",
+      "occurredAt": 1787284552
+    },
+    {
+      "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
+      "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
+      "blockNumber": 20401190,
+      "transactionIndex": 0,
+      "actualLogIndex": 5,
+      "storedLogIndexBefore": null,
+      "activityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1",
+      "activityKey": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "tokenIn": "0x0000000000000000000000000000000000000000",
+      "tokenOut": "0x546307af427902a75771434df831d88219784e19",
+      "amountRaw": "120000000000000000",
+      "amountOut": "42140492598223566",
+      "fee": "0",
+      "routerId": "3",
+      "occurredAt": 1787284753
+    },
+    {
+      "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
+      "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
+      "blockNumber": 20419230,
+      "transactionIndex": 0,
+      "actualLogIndex": 8,
+      "storedLogIndexBefore": null,
+      "activityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31",
+      "activityKey": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8",
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "tokenIn": "0x546307af427902a75771434df831d88219784e19",
+      "tokenOut": "0x0000000000000000000000000000000000000000",
+      "amountRaw": "180933301542956061",
+      "amountOut": "427989439693322340",
+      "fee": "0",
+      "routerId": "3",
+      "occurredAt": 1787298283
+    }
+  ],
+  "collisionScan": {
+    "ok": true,
+    "collisions": []
+  },
+  "persistence": [],
+  "eligibility": {
+    "status": "FAIL_CLOSED",
+    "cutoffBlock": 21553131,
+    "considered": 4,
+    "qualified": [],
+    "rejected": [
+      {
+        "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
+        "reason": "missing actual receipt log index — canonical log identity unknown"
+      },
+      {
+        "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
+        "reason": "missing actual receipt log index — canonical log identity unknown"
+      },
+      {
+        "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
+        "reason": "missing actual receipt log index — canonical log identity unknown"
+      },
+      {
+        "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
+        "reason": "missing actual receipt log index — canonical log identity unknown"
+      }
+    ],
+    "winner": null,
+    "entitlementWei": null,
+    "blockers": [
+      "no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
+    ]
+  },
+  "stateChanges": {
+    "signatures": 0,
+    "broadcasts": 0,
+    "flowTransfers": 0,
+    "campaignBudgetChanges": 0,
+    "roots": 0,
+    "epochs": 0,
+    "pointsAwarded": 0,
+    "featureFlagsChanged": 0,
+    "routePromotions": 0
+  },
+  "checks": [
+    {
+      "name": "chain is BOT Mainnet 677",
+      "ok": true,
+      "detail": "677"
+    },
+    {
+      "name": "historical chain-677 CORE_SWAP rows located",
+      "ok": true,
+      "detail": "4 rows"
+    },
+    {
+      "name": "receipt evidence verified for 0x396b25fd9e…",
+      "ok": true,
+      "detail": "log index 5"
+    },
+    {
+      "name": "identity is deterministic for 0x396b25fd9e…",
+      "ok": true,
+      "detail": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060"
+    },
+    {
+      "name": "transaction target is the live Router v3 for 0x396b25fd9e…",
+      "ok": true,
+      "detail": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445"
+    },
+    {
+      "name": "on-chain actor matches the ledger wallet for 0x396b25fd9e…",
+      "ok": true,
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
+    },
+    {
+      "name": "stored placeholder log index differs from the actual one (0x396b25fd9e…)",
+      "ok": true,
+      "detail": "stored=null actual=5"
+    },
+    {
+      "name": "canonical activity is at or before the frozen cutoff (0x396b25fd9e…)",
+      "ok": true,
+      "detail": "20400804 <= 21553131"
+    },
+    {
+      "name": "receipt evidence verified for 0x716faf8448…",
+      "ok": true,
+      "detail": "log index 5"
+    },
+    {
+      "name": "identity is deterministic for 0x716faf8448…",
+      "ok": true,
+      "detail": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307"
+    },
+    {
+      "name": "transaction target is the live Router v3 for 0x716faf8448…",
+      "ok": true,
+      "detail": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445"
+    },
+    {
+      "name": "on-chain actor matches the ledger wallet for 0x716faf8448…",
+      "ok": true,
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
+    },
+    {
+      "name": "stored placeholder log index differs from the actual one (0x716faf8448…)",
+      "ok": true,
+      "detail": "stored=null actual=5"
+    },
+    {
+      "name": "canonical activity is at or before the frozen cutoff (0x716faf8448…)",
+      "ok": true,
+      "detail": "20400922 <= 21553131"
+    },
+    {
+      "name": "receipt evidence verified for 0xb4348e141e…",
+      "ok": true,
+      "detail": "log index 5"
+    },
+    {
+      "name": "identity is deterministic for 0xb4348e141e…",
+      "ok": true,
+      "detail": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1"
+    },
+    {
+      "name": "transaction target is the live Router v3 for 0xb4348e141e…",
+      "ok": true,
+      "detail": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445"
+    },
+    {
+      "name": "on-chain actor matches the ledger wallet for 0xb4348e141e…",
+      "ok": true,
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
+    },
+    {
+      "name": "stored placeholder log index differs from the actual one (0xb4348e141e…)",
+      "ok": true,
+      "detail": "stored=null actual=5"
+    },
+    {
+      "name": "canonical activity is at or before the frozen cutoff (0xb4348e141e…)",
+      "ok": true,
+      "detail": "20401190 <= 21553131"
+    },
+    {
+      "name": "receipt evidence verified for 0xd5be1d1238…",
+      "ok": true,
+      "detail": "log index 8"
+    },
+    {
+      "name": "identity is deterministic for 0xd5be1d1238…",
+      "ok": true,
+      "detail": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31"
+    },
+    {
+      "name": "transaction target is the live Router v3 for 0xd5be1d1238…",
+      "ok": true,
+      "detail": "0x986962de6f00d0ec571b1a34fa70aeeb445b5445"
+    },
+    {
+      "name": "on-chain actor matches the ledger wallet for 0xd5be1d1238…",
+      "ok": true,
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
+    },
+    {
+      "name": "stored placeholder log index differs from the actual one (0xd5be1d1238…)",
+      "ok": true,
+      "detail": "stored=null actual=8"
+    },
+    {
+      "name": "canonical activity is at or before the frozen cutoff (0xd5be1d1238…)",
+      "ok": true,
+      "detail": "20419230 <= 21553131"
+    },
+    {
+      "name": "all four historical swaps verified from live receipts",
+      "ok": true,
+      "detail": "4/4"
+    },
+    {
+      "name": "no two ledger rows collapse onto one canonical identity",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "canonical activity ids are unique",
+      "ok": true,
+      "detail": "4"
+    },
+    {
+      "name": "ledger row count unchanged",
+      "ok": true,
+      "detail": "23 → 23"
+    },
+    {
+      "name": "total FLOW Points unchanged",
+      "ok": true,
+      "detail": "3986 → 3986"
+    },
+    {
+      "name": "total base points unchanged",
+      "ok": true,
+      "detail": "3991 → 3991"
+    },
+    {
+      "name": "verified USD unchanged",
+      "ok": true,
+      "detail": "3800.495660890672"
+    },
+    {
+      "name": "no ledger row originates from chain 968 or 1024",
+      "ok": false,
+      "detail": "clean"
+    },
+    {
+      "name": "P2A rerun uses the frozen cutoff block 21,553,131",
+      "ok": true,
+      "detail": "21553131"
+    }
+  ],
+  "blockers": [
+    "no ledger row originates from chain 968 or 1024: clean"
+  ],
+  "verdict": "BLOCKED"
+}
