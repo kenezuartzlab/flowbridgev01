@@ -50,7 +50,7 @@ describe("authorizeFlowTokenClaim", () => {
       chainId: BOT_MAINNET_CHAIN_ID,
       deps: d,
     });
-    expect(res).toMatchObject({ authorized: false, reason: "mainnetPromotionPending" });
+    expect(res).toMatchObject({ authorized: false, reason: "claimsDisabled" });
     expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
