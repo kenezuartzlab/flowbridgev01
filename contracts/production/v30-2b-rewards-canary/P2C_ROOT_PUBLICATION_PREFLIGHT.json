@@ -1,0 +1,319 @@
+{
+  "gate": "V30.2B P2C — Genesis Canary root publication preflight",
+  "mode": "READ_ONLY",
+  "generatedAt": "2026-08-31T06:05:07.465Z",
+  "chain": {
+    "chainId": 677,
+    "rpcHost": "rpc.botchain.ai",
+    "headBlock": 21563247
+  },
+  "frozen": {
+    "chainId": 677,
+    "cutoffBlock": 21553131,
+    "campaignId": "MAINNET_GENESIS_CORE_SWAP_CANARY_V1",
+    "recipient": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+    "canonicalIdentity": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+    "entitlementWei": "1000000000000000000",
+    "cutoffTimestamp": 1788148713
+  },
+  "dataset": {
+    "query": "select va.activity_id, va.source_chain_id, va.user_wallet, va.source_tx_hash, va.source_log_index, va.action_type, va.kind, va.status, va.evidence_source, va.occurred_at, l.id, l.activity_key, l.reason, l.points, l.verified_usd from verified_activities va left join flow_points_ledger l on l.verified_activity_id = va.activity_id where va.source_chain_id = 677 order by va.occurred_at",
+    "rows": [
+      {
+        "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
+        "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+        "blockNumber": 20400804,
+        "transactionIndex": 0,
+        "activityKey": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+        "activityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060",
+        "verification": "VERIFIED"
+      },
+      {
+        "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
+        "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
+        "blockNumber": 20400922,
+        "transactionIndex": 0,
+        "activityKey": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5",
+        "activityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307",
+        "verification": "VERIFIED"
+      },
+      {
+        "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
+        "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
+        "blockNumber": 20401190,
+        "transactionIndex": 0,
+        "activityKey": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5",
+        "activityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1",
+        "verification": "VERIFIED"
+      },
+      {
+        "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
+        "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
+        "blockNumber": 20419230,
+        "transactionIndex": 0,
+        "activityKey": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8",
+        "activityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31",
+        "verification": "VERIFIED"
+      }
+    ],
+    "eligibility": {
+      "status": "FAIL_CLOSED",
+      "cutoffBlock": 21553131,
+      "considered": 4,
+      "qualified": [],
+      "rejected": [
+        {
+          "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
+          "reason": "missing or malformed recipient wallet"
+        },
+        {
+          "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
+          "reason": "missing or malformed recipient wallet"
+        },
+        {
+          "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
+          "reason": "missing or malformed recipient wallet"
+        },
+        {
+          "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
+          "reason": "missing or malformed recipient wallet"
+        }
+      ],
+      "winner": null,
+      "entitlementWei": null,
+      "blockers": [
+        "no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
+      ]
+    }
+  },
+  "rewardTree": null,
+  "distributorPreState": {
+    "balanceFlow": "1000000",
+    "campaignBudget": "1000000000000000000",
+    "budgetRemaining": "1000000000000000000",
+    "totalReserved": "0",
+    "totalClaimed": "0",
+    "epochCount": "0",
+    "minPublishDelay": "86400",
+    "freeBalance": "1000000000000000000000000",
+    "paused": false
+  },
+  "publication": null,
+  "gasFunding": null,
+  "fundingCandidates": [
+    {
+      "label": "Deployer EOA (roleless, no Safe authority, no FLOW custody)",
+      "address": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+      "balanceBot": "2.0131167",
+      "type": "EOA",
+      "canCover": null
+    },
+    {
+      "label": "Operations Safe (PAUSER only, 2-of-3 multisig)",
+      "address": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+      "balanceBot": "0.1",
+      "type": "contract (Safe)",
+      "canCover": null
+    },
+    {
+      "label": "Treasury Safe (FLOW custody, 2-of-3 multisig)",
+      "address": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+      "balanceBot": "0.1",
+      "type": "contract (Safe)",
+      "canCover": null
+    },
+    {
+      "label": "Governance Safe (admin authority, 2-of-3 multisig)",
+      "address": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+      "balanceBot": "0.1",
+      "type": "contract (Safe)",
+      "canCover": null
+    }
+  ],
+  "stateChanges": {
+    "signatures": 0,
+    "broadcasts": 0,
+    "roots": 0,
+    "epochs": 0,
+    "botTransfers": 0,
+    "flowTransfers": 0,
+    "claimsEnabled": false
+  },
+  "checks": [
+    {
+      "name": "chain is BOT Mainnet 677",
+      "ok": true,
+      "detail": "677"
+    },
+    {
+      "name": "frozen cutoff block is final and behind the head",
+      "ok": true,
+      "detail": "head 21563247"
+    },
+    {
+      "name": "dataset uses canonical Router v3 receipt evidence only (no placeholder identity)",
+      "ok": true,
+      "detail": "4 canonical rows"
+    },
+    {
+      "name": "live re-verification of 0x396b25fd9e…",
+      "ok": true,
+      "detail": "VERIFIED"
+    },
+    {
+      "name": "canonical identity is reproduced for 0x396b25fd9e…",
+      "ok": true,
+      "detail": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5 / 0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060"
+    },
+    {
+      "name": "live re-verification of 0x716faf8448…",
+      "ok": true,
+      "detail": "VERIFIED"
+    },
+    {
+      "name": "canonical identity is reproduced for 0x716faf8448…",
+      "ok": true,
+      "detail": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5 / 0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307"
+    },
+    {
+      "name": "live re-verification of 0xb4348e141e…",
+      "ok": true,
+      "detail": "VERIFIED"
+    },
+    {
+      "name": "canonical identity is reproduced for 0xb4348e141e…",
+      "ok": true,
+      "detail": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5 / 0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1"
+    },
+    {
+      "name": "live re-verification of 0xd5be1d1238…",
+      "ok": true,
+      "detail": "VERIFIED"
+    },
+    {
+      "name": "canonical identity is reproduced for 0xd5be1d1238…",
+      "ok": true,
+      "detail": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8 / 0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31"
+    },
+    {
+      "name": "deterministic eligibility PASSes on real evidence",
+      "ok": false,
+      "detail": "no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
+    },
+    {
+      "name": "exactly one recipient is selected",
+      "ok": false,
+      "detail": "none"
+    },
+    {
+      "name": "selected recipient matches the frozen P2A snapshot",
+      "ok": false,
+      "detail": "none"
+    },
+    {
+      "name": "selected canonical evidence matches the frozen identity",
+      "ok": false,
+      "detail": "none"
+    },
+    {
+      "name": "entitlement is exactly 1 FLOW",
+      "ok": false,
+      "detail": "null"
+    },
+    {
+      "name": "Distributor balance is 1,000,000 FLOW",
+      "ok": true,
+      "detail": "1000000"
+    },
+    {
+      "name": "campaignBudget is 1 FLOW",
+      "ok": true,
+      "detail": "1000000000000000000"
+    },
+    {
+      "name": "budgetRemaining is 1 FLOW",
+      "ok": true,
+      "detail": "1000000000000000000"
+    },
+    {
+      "name": "totalReserved is 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "totalClaimed is 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "epochCount is 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "minPublishDelay is 86400",
+      "ok": true,
+      "detail": "86400"
+    },
+    {
+      "name": "Distributor is not paused",
+      "ok": true,
+      "detail": "false"
+    },
+    {
+      "name": "Root Publisher holds PUBLISHER_ROLE",
+      "ok": true,
+      "detail": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94"
+    },
+    {
+      "name": "publishEpoch derived from the verified deployed ABI",
+      "ok": true,
+      "detail": "bytes32 root, uint256 allocation, uint64 claimStart, uint64 claimEnd"
+    },
+    {
+      "name": "deployed publishEpoch argument order is as encoded",
+      "ok": true,
+      "detail": "bytes32 root|uint256 allocation|uint64 claimStart|uint64 claimEnd"
+    },
+    {
+      "name": "a minimal-authority funding source can cover the buffered gas",
+      "ok": false,
+      "detail": "none"
+    },
+    {
+      "name": "gas funding is prepared without any FLOW transfer",
+      "ok": false,
+      "detail": "not prepared"
+    },
+    {
+      "name": "no root published in this run",
+      "ok": true,
+      "detail": "epochCount still 0"
+    },
+    {
+      "name": "rewardClaimsEnabled remains false",
+      "ok": true,
+      "detail": "claims remain disabled by registry flag and delay"
+    },
+    {
+      "name": "no dataset row from chain 968 or 1024",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "no points or USD conversion used for the entitlement",
+      "ok": true,
+      "detail": "fixed 1 FLOW, no points math"
+    }
+  ],
+  "blockers": [
+    "deterministic eligibility PASSes on real evidence: no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff",
+    "exactly one recipient is selected: none",
+    "selected recipient matches the frozen P2A snapshot: none",
+    "selected canonical evidence matches the frozen identity: none",
+    "entitlement is exactly 1 FLOW: null",
+    "a minimal-authority funding source can cover the buffered gas: none",
+    "gas funding is prepared without any FLOW transfer: not prepared"
+  ],
+  "verdict": "BLOCKED"
+}
