@@ -1,11 +1,11 @@
 {
   "gate": "V30.2B P2C — Genesis Canary root publication preflight",
   "mode": "READ_ONLY",
-  "generatedAt": "2026-08-31T06:05:07.465Z",
+  "generatedAt": "2026-08-31T06:06:04.022Z",
   "chain": {
     "chainId": 677,
     "rpcHost": "rpc.botchain.ai",
-    "headBlock": 21563247
+    "headBlock": 21563320
   },
   "frozen": {
     "chainId": 677,
@@ -24,8 +24,10 @@
         "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
         "blockNumber": 20400804,
         "transactionIndex": 0,
+        "logIndex": 5,
         "activityKey": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
         "activityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
         "verification": "VERIFIED"
       },
       {
@@ -33,8 +35,10 @@
         "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
         "blockNumber": 20400922,
         "transactionIndex": 0,
+        "logIndex": 5,
         "activityKey": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5",
         "activityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
         "verification": "VERIFIED"
       },
       {
@@ -42,8 +46,10 @@
         "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
         "blockNumber": 20401190,
         "transactionIndex": 0,
+        "logIndex": 5,
         "activityKey": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5",
         "activityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
         "verification": "VERIFIED"
       },
       {
@@ -51,42 +57,88 @@
         "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
         "blockNumber": 20419230,
         "transactionIndex": 0,
+        "logIndex": 8,
         "activityKey": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8",
         "activityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
         "verification": "VERIFIED"
       }
     ],
     "eligibility": {
-      "status": "FAIL_CLOSED",
+      "status": "PASS",
       "cutoffBlock": 21553131,
       "considered": 4,
-      "qualified": [],
-      "rejected": [
+      "qualified": [
         {
-          "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
-          "reason": "missing or malformed recipient wallet"
+          "canonicalIdentity": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+          "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+          "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+          "logIndex": 5,
+          "blockNumber": 20400804,
+          "transactionIndex": 0,
+          "verifiedActivityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060"
         },
         {
-          "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
-          "reason": "missing or malformed recipient wallet"
+          "canonicalIdentity": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5",
+          "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+          "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
+          "logIndex": 5,
+          "blockNumber": 20400922,
+          "transactionIndex": 0,
+          "verifiedActivityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307"
         },
         {
-          "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
-          "reason": "missing or malformed recipient wallet"
+          "canonicalIdentity": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5",
+          "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+          "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
+          "logIndex": 5,
+          "blockNumber": 20401190,
+          "transactionIndex": 0,
+          "verifiedActivityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1"
         },
         {
-          "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
-          "reason": "missing or malformed recipient wallet"
+          "canonicalIdentity": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8",
+          "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+          "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
+          "logIndex": 8,
+          "blockNumber": 20419230,
+          "transactionIndex": 0,
+          "verifiedActivityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31"
         }
       ],
-      "winner": null,
-      "entitlementWei": null,
-      "blockers": [
-        "no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
-      ]
+      "rejected": [],
+      "winner": {
+        "canonicalIdentity": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+        "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+        "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+        "logIndex": 5,
+        "blockNumber": 20400804,
+        "transactionIndex": 0,
+        "verifiedActivityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060"
+      },
+      "entitlementWei": "1000000000000000000",
+      "blockers": []
     }
   },
-  "rewardTree": null,
+  "rewardTree": {
+    "epochId": 0,
+    "index": 0,
+    "account": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+    "amountWei": "1000000000000000000",
+    "amountFlow": "1",
+    "leaf": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
+    "root": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
+    "proof": [],
+    "leafCount": 1,
+    "totalAllocationWei": "1000000000000000000",
+    "totalAllocationFlow": "1",
+    "independentRebuild": {
+      "leaf": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
+      "root": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
+      "proof": [],
+      "leafCount": 1
+    }
+  },
   "distributorPreState": {
     "balanceFlow": "1000000",
     "campaignBudget": "1000000000000000000",
@@ -98,7 +150,48 @@
     "freeBalance": "1000000000000000000000000",
     "paused": false
   },
-  "publication": null,
+  "publication": {
+    "target": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "function": "publishEpoch(bytes32,uint256,uint64,uint64)",
+    "selector": "0x34b7fe84",
+    "decodedArgs": {
+      "root": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
+      "allocationWei": "1000000000000000000",
+      "allocationFlow": "1",
+      "claimStart": "1788242760",
+      "claimStartIso": "2026-09-01T06:06:00.000Z",
+      "claimEnd": "1790834760",
+      "claimEndIso": "2026-10-01T06:06:00.000Z"
+    },
+    "calldata": "0x34b7fe84058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c00000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006a966b48000000000000000000000000000000000000000000000000000000006abdf848",
+    "calldataKeccak": "0xf4fabb2476732344bfc44e866c958dfd7e9fb7798810d4ac33290756f482b487",
+    "rootPublisher": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
+    "rootPublisherNonce": 0,
+    "rootPublisherBalanceBot": "0",
+    "gasEstimate": null,
+    "bufferedGas30pct": null,
+    "gasPriceWei": "20000000000",
+    "gasPriceGwei": "20",
+    "requiredBotWithBuffer": null,
+    "requiredWeiWithBuffer": null,
+    "activationTimestampAfterDelay": "1788242760",
+    "activationIso": "2026-09-01T06:06:00.000Z",
+    "expectedPostState": {
+      "epochCount": "1",
+      "totalReserved": "1000000000000000000",
+      "budgetRemaining": "0",
+      "totalClaimed": "0",
+      "distributorFlowBalance": "1000000 FLOW (unchanged)",
+      "claimAvailableDuringDelay": false,
+      "rewardClaimsEnabled": false
+    },
+    "simulation": {
+      "ok": false,
+      "detail": "ContractFunctionExecutionError: The contract function \"publishEpoch\" reverted.\n\nError: PublishDelayTooShort()\n \nContract Call:\n  address:   0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922\n  function:  publishEpoch(bytes32 root, uint256 allocatio"
+    },
+    "signed": false,
+    "broadcast": false
+  },
   "gasFunding": null,
   "fundingCandidates": [
     {
@@ -148,7 +241,7 @@
     {
       "name": "frozen cutoff block is final and behind the head",
       "ok": true,
-      "detail": "head 21563247"
+      "detail": "head 21563320"
     },
     {
       "name": "dataset uses canonical Router v3 receipt evidence only (no placeholder identity)",
@@ -197,28 +290,53 @@
     },
     {
       "name": "deterministic eligibility PASSes on real evidence",
-      "ok": false,
-      "detail": "no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff"
+      "ok": true,
+      "detail": "winner selected"
     },
     {
       "name": "exactly one recipient is selected",
-      "ok": false,
-      "detail": "none"
+      "ok": true,
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
     },
     {
       "name": "selected recipient matches the frozen P2A snapshot",
-      "ok": false,
-      "detail": "none"
+      "ok": true,
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
     },
     {
       "name": "selected canonical evidence matches the frozen identity",
-      "ok": false,
-      "detail": "none"
+      "ok": true,
+      "detail": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5"
     },
     {
       "name": "entitlement is exactly 1 FLOW",
-      "ok": false,
-      "detail": "null"
+      "ok": true,
+      "detail": "1000000000000000000"
+    },
+    {
+      "name": "local leaf encoding equals the deployed contract leafHash()",
+      "ok": true,
+      "detail": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0"
+    },
+    {
+      "name": "independent fresh-process rebuild yields the identical leaf",
+      "ok": true,
+      "detail": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0"
+    },
+    {
+      "name": "independent fresh-process rebuild yields the identical root",
+      "ok": true,
+      "detail": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0"
+    },
+    {
+      "name": "proof is empty and identical across both rebuilds",
+      "ok": true,
+      "detail": "[] (single-leaf tree)"
+    },
+    {
+      "name": "total allocation is exactly 1 FLOW",
+      "ok": true,
+      "detail": "1000000000000000000"
     },
     {
       "name": "Distributor balance is 1,000,000 FLOW",
@@ -276,6 +394,26 @@
       "detail": "bytes32 root|uint256 allocation|uint64 claimStart|uint64 claimEnd"
     },
     {
+      "name": "publishEpoch simulates successfully FROM the Root Publisher",
+      "ok": false,
+      "detail": "ContractFunctionExecutionError: The contract function \"publishEpoch\" reverted.\n\nError: PublishDelayTooShort()\n \nContract Call:\n  address:   0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922\n  function:  publishEpoch(bytes32 root, uint256 allocatio"
+    },
+    {
+      "name": "non-publisher caller is rejected",
+      "ok": true,
+      "detail": "unauthorized reverts"
+    },
+    {
+      "name": "Root Publisher is unfunded and needs exactly the buffered gas",
+      "ok": false,
+      "detail": "0 BOT"
+    },
+    {
+      "name": "claim is not available during the 86,400s delay",
+      "ok": true,
+      "detail": "claimStart 1788242760"
+    },
+    {
       "name": "a minimal-authority funding source can cover the buffered gas",
       "ok": false,
       "detail": "none"
@@ -307,11 +445,8 @@
     }
   ],
   "blockers": [
-    "deterministic eligibility PASSes on real evidence: no qualifying canonical CORE_SWAP with complete economic identity exists at the frozen cutoff",
-    "exactly one recipient is selected: none",
-    "selected recipient matches the frozen P2A snapshot: none",
-    "selected canonical evidence matches the frozen identity: none",
-    "entitlement is exactly 1 FLOW: null",
+    "publishEpoch simulates successfully FROM the Root Publisher: ContractFunctionExecutionError: The contract function \"publishEpoch\" reverted.\n\nError: PublishDelayTooShort()\n \nContract Call:\n  address:   0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922\n  function:  publishEpoch(bytes32 root, uint256 allocatio",
+    "Root Publisher is unfunded and needs exactly the buffered gas: 0 BOT",
     "a minimal-authority funding source can cover the buffered gas: none",
     "gas funding is prepared without any FLOW transfer: not prepared"
   ],
