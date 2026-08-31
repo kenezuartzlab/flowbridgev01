@@ -1,11 +1,11 @@
 {
   "gate": "V30.2B P2C — Genesis Canary root publication preflight",
   "mode": "READ_ONLY",
-  "generatedAt": "2026-08-31T06:06:30.510Z",
+  "generatedAt": "2026-08-31T06:07:12.165Z",
   "chain": {
     "chainId": 677,
     "rpcHost": "rpc.botchain.ai",
-    "headBlock": 21563354
+    "headBlock": 21563410
   },
   "frozen": {
     "chainId": 677,
@@ -121,20 +121,20 @@
     }
   },
   "rewardTree": {
-    "epochId": 0,
+    "epochId": 1,
     "index": 0,
     "account": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
     "amountWei": "1000000000000000000",
     "amountFlow": "1",
-    "leaf": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
-    "root": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
+    "leaf": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
+    "root": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
     "proof": [],
     "leafCount": 1,
     "totalAllocationWei": "1000000000000000000",
     "totalAllocationFlow": "1",
     "independentRebuild": {
-      "leaf": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
-      "root": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
+      "leaf": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
+      "root": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
       "proof": [],
       "leafCount": 1
     }
@@ -155,16 +155,16 @@
     "function": "publishEpoch(bytes32,uint256,uint64,uint64)",
     "selector": "0x34b7fe84",
     "decodedArgs": {
-      "root": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
+      "root": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
       "allocationWei": "1000000000000000000",
       "allocationFlow": "1",
-      "claimStart": "1788243686",
-      "claimStartIso": "2026-09-01T06:21:26.000Z",
-      "claimEnd": "1790835686",
-      "claimEndIso": "2026-10-01T06:21:26.000Z"
+      "claimStart": "1788243728",
+      "claimStartIso": "2026-09-01T06:22:08.000Z",
+      "claimEnd": "1790835728",
+      "claimEndIso": "2026-10-01T06:22:08.000Z"
     },
-    "calldata": "0x34b7fe84058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c00000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006a966ee6000000000000000000000000000000000000000000000000000000006abdfbe6",
-    "calldataKeccak": "0xda9505401588aaf6c54b845d76aa20c167631d52a899d6fba8092220c0a4d60d",
+    "calldata": "0x34b7fe84e5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e64560000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006a966f10000000000000000000000000000000000000000000000000000000006abdfc10",
+    "calldataKeccak": "0xdb5dc054bcb7b9513910ab82e55263805c4a9e923c4113f7dde21c265d64d07b",
     "rootPublisher": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
     "rootPublisherNonce": 0,
     "rootPublisherBalanceBot": "0",
@@ -174,10 +174,10 @@
     "gasPriceGwei": "20",
     "requiredBotWithBuffer": "0.00406204",
     "requiredWeiWithBuffer": "4062040000000000",
-    "activationTimestampAfterDelay": "1788243686",
+    "activationTimestampAfterDelay": "1788243728",
     "frozenDelaySeconds": 86400,
     "schedulingMarginSeconds": 900,
-    "activationIso": "2026-09-01T06:21:26.000Z",
+    "activationIso": "2026-09-01T06:22:08.000Z",
     "expectedPostState": {
       "epochCount": "1",
       "totalReserved": "1000000000000000000",
@@ -258,7 +258,7 @@
     {
       "name": "frozen cutoff block is final and behind the head",
       "ok": true,
-      "detail": "head 21563354"
+      "detail": "head 21563410"
     },
     {
       "name": "dataset uses canonical Router v3 receipt evidence only (no placeholder identity)",
@@ -333,17 +333,17 @@
     {
       "name": "local leaf encoding equals the deployed contract leafHash()",
       "ok": true,
-      "detail": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0"
+      "detail": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456"
     },
     {
       "name": "independent fresh-process rebuild yields the identical leaf",
       "ok": true,
-      "detail": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0"
+      "detail": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456"
     },
     {
       "name": "independent fresh-process rebuild yields the identical root",
       "ok": true,
-      "detail": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0"
+      "detail": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456"
     },
     {
       "name": "proof is empty and identical across both rebuilds",
@@ -384,6 +384,11 @@
       "name": "epochCount is 0",
       "ok": true,
       "detail": "0"
+    },
+    {
+      "name": "leaf epoch domain equals the epoch id publishEpoch will assign",
+      "ok": true,
+      "detail": "epochId 1"
     },
     {
       "name": "minPublishDelay is 86400",
@@ -428,7 +433,7 @@
     {
       "name": "claim is not available during the 86,400s delay",
       "ok": true,
-      "detail": "claimStart 1788243686"
+      "detail": "claimStart 1788243728"
     },
     {
       "name": "a minimal-authority funding source can cover the buffered gas",

@@ -169,7 +169,9 @@ check(
 check('entitlement is exactly 1 FLOW', eligibility.entitlementWei === FROZEN.entitlementWei.toString(), eligibility.entitlementWei);
 
 // --------------------------------------------- 2. leaf / root / proof / epoch
-const epochId = Number(await read('epochCount')); // next epoch id
+// Epochs are 1-INDEXED in the deployed contract (epochId = ++epochCount), so
+// the leaf domain for the first publication is epoch 1, not 0.
+const epochId = Number(await read('epochCount')) + 1;
 const index = 0;
 let tree = null;
 if (winner) {
@@ -243,6 +245,7 @@ check('budgetRemaining is 1 FLOW', pre.budgetRemaining === ONE_FLOW_WEI, pre.bud
 check('totalReserved is 0', pre.totalReserved === 0n, pre.totalReserved);
 check('totalClaimed is 0', pre.totalClaimed === 0n, pre.totalClaimed);
 check('epochCount is 0', pre.epochCount === 0n, pre.epochCount);
+check('leaf epoch domain equals the epoch id publishEpoch will assign', epochId === 1, `epochId ${epochId}`);
 check('minPublishDelay is 86400', pre.minPublishDelay === 86_400n, pre.minPublishDelay);
 check('Distributor is not paused', pre.paused === false, pre.paused);
 const publisherRole = await read('PUBLISHER_ROLE');
