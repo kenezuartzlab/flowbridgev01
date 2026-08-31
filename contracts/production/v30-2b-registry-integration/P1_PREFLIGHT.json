@@ -9,7 +9,7 @@
   "epochs": 0,
   "chain": {
     "chainId": 677,
-    "blockNumber": "21541092",
+    "blockNumber": "21542652",
     "rpcHost": "rpc.botchain.ai"
   },
   "canonical": {
@@ -184,5 +184,5 @@
       "detail": "0x123E64D074FD5d66DBd4BD62Dc4e71da7101DB63"
     }
   ],
-  "generatedAt": "2026-08-31T01:28:09.299Z"
+  "generatedAt": "2026-08-31T01:47:39.161Z"
 }
