@@ -259,7 +259,11 @@ check(
 );
 
 const now = Number((await client.getBlock()).timestamp);
-const claimStart = BigInt(now + CANARY_PUBLISH_DELAY_SECONDS);
+// The contract enforces claimStart - block.timestamp >= minPublishDelay at
+// EXECUTION time, so a small scheduling margin is added on top of the frozen
+// 86,400-second delay. The effective delay is never shorter than 86,400s.
+const PUBLISH_SCHEDULING_MARGIN = 900;
+const claimStart = BigInt(now + CANARY_PUBLISH_DELAY_SECONDS + PUBLISH_SCHEDULING_MARGIN);
 const claimEnd = claimStart + 30n * 86_400n;
 let publication = null;
 if (tree && fn) {
@@ -332,6 +336,8 @@ if (tree && fn) {
     requiredBotWithBuffer: requiredWei ? formatEther(requiredWei) : null,
     requiredWeiWithBuffer: requiredWei ? requiredWei.toString() : null,
     activationTimestampAfterDelay: claimStart.toString(),
+    frozenDelaySeconds: CANARY_PUBLISH_DELAY_SECONDS,
+    schedulingMarginSeconds: PUBLISH_SCHEDULING_MARGIN,
     activationIso: new Date(Number(claimStart) * 1000).toISOString(),
     expectedPostState: {
       epochCount: '1',

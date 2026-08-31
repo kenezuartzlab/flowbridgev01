@@ -1,11 +1,11 @@
 {
   "gate": "V30.2B P2C — Genesis Canary root publication preflight",
   "mode": "READ_ONLY",
-  "generatedAt": "2026-08-31T06:06:04.022Z",
+  "generatedAt": "2026-08-31T06:06:30.510Z",
   "chain": {
     "chainId": 677,
     "rpcHost": "rpc.botchain.ai",
-    "headBlock": 21563320
+    "headBlock": 21563354
   },
   "frozen": {
     "chainId": 677,
@@ -158,24 +158,26 @@
       "root": "0x058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c0",
       "allocationWei": "1000000000000000000",
       "allocationFlow": "1",
-      "claimStart": "1788242760",
-      "claimStartIso": "2026-09-01T06:06:00.000Z",
-      "claimEnd": "1790834760",
-      "claimEndIso": "2026-10-01T06:06:00.000Z"
+      "claimStart": "1788243686",
+      "claimStartIso": "2026-09-01T06:21:26.000Z",
+      "claimEnd": "1790835686",
+      "claimEndIso": "2026-10-01T06:21:26.000Z"
     },
-    "calldata": "0x34b7fe84058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c00000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006a966b48000000000000000000000000000000000000000000000000000000006abdf848",
-    "calldataKeccak": "0xf4fabb2476732344bfc44e866c958dfd7e9fb7798810d4ac33290756f482b487",
+    "calldata": "0x34b7fe84058632121b6328d1dd84fa16f54d0d02e435088a2fd5568c0f4faca5b6e898c00000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000006a966ee6000000000000000000000000000000000000000000000000000000006abdfbe6",
+    "calldataKeccak": "0xda9505401588aaf6c54b845d76aa20c167631d52a899d6fba8092220c0a4d60d",
     "rootPublisher": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
     "rootPublisherNonce": 0,
     "rootPublisherBalanceBot": "0",
-    "gasEstimate": null,
-    "bufferedGas30pct": null,
+    "gasEstimate": "156233",
+    "bufferedGas30pct": "203102",
     "gasPriceWei": "20000000000",
     "gasPriceGwei": "20",
-    "requiredBotWithBuffer": null,
-    "requiredWeiWithBuffer": null,
-    "activationTimestampAfterDelay": "1788242760",
-    "activationIso": "2026-09-01T06:06:00.000Z",
+    "requiredBotWithBuffer": "0.00406204",
+    "requiredWeiWithBuffer": "4062040000000000",
+    "activationTimestampAfterDelay": "1788243686",
+    "frozenDelaySeconds": 86400,
+    "schedulingMarginSeconds": 900,
+    "activationIso": "2026-09-01T06:21:26.000Z",
     "expectedPostState": {
       "epochCount": "1",
       "totalReserved": "1000000000000000000",
@@ -186,41 +188,56 @@
       "rewardClaimsEnabled": false
     },
     "simulation": {
-      "ok": false,
-      "detail": "ContractFunctionExecutionError: The contract function \"publishEpoch\" reverted.\n\nError: PublishDelayTooShort()\n \nContract Call:\n  address:   0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922\n  function:  publishEpoch(bytes32 root, uint256 allocatio"
+      "ok": true,
+      "detail": "returns epochId 1"
     },
     "signed": false,
     "broadcast": false
   },
-  "gasFunding": null,
+  "gasFunding": {
+    "rationale": "The deployer EOA holds no Distributor, staking or Safe role and custodies no FLOW, so a plain BOT value transfer from it is the least-privileged path. Safes are avoided: they hold FLOW custody or admin/pauser authority and each transfer would consume multisig authority.",
+    "from": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "to": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
+    "valueWei": "4062040000000000",
+    "valueBot": "0.00406204",
+    "data": "0x",
+    "chainId": 677,
+    "nonce": 15,
+    "gasLimit": "21000",
+    "gasPriceWei": "20000000000",
+    "overfundCheck": "exactly the 30%-buffered publishEpoch gas cost — no surplus, no FLOW",
+    "flowTransferred": false,
+    "signed": false,
+    "broadcast": false
+  },
   "fundingCandidates": [
     {
       "label": "Deployer EOA (roleless, no Safe authority, no FLOW custody)",
       "address": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
       "balanceBot": "2.0131167",
       "type": "EOA",
-      "canCover": null
+      "canCover": true
     },
     {
       "label": "Operations Safe (PAUSER only, 2-of-3 multisig)",
       "address": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
       "balanceBot": "0.1",
       "type": "contract (Safe)",
-      "canCover": null
+      "canCover": true
     },
     {
       "label": "Treasury Safe (FLOW custody, 2-of-3 multisig)",
       "address": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
       "balanceBot": "0.1",
       "type": "contract (Safe)",
-      "canCover": null
+      "canCover": true
     },
     {
       "label": "Governance Safe (admin authority, 2-of-3 multisig)",
       "address": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
       "balanceBot": "0.1",
       "type": "contract (Safe)",
-      "canCover": null
+      "canCover": true
     }
   ],
   "stateChanges": {
@@ -241,7 +258,7 @@
     {
       "name": "frozen cutoff block is final and behind the head",
       "ok": true,
-      "detail": "head 21563320"
+      "detail": "head 21563354"
     },
     {
       "name": "dataset uses canonical Router v3 receipt evidence only (no placeholder identity)",
@@ -395,8 +412,8 @@
     },
     {
       "name": "publishEpoch simulates successfully FROM the Root Publisher",
-      "ok": false,
-      "detail": "ContractFunctionExecutionError: The contract function \"publishEpoch\" reverted.\n\nError: PublishDelayTooShort()\n \nContract Call:\n  address:   0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922\n  function:  publishEpoch(bytes32 root, uint256 allocatio"
+      "ok": true,
+      "detail": "returns epochId 1"
     },
     {
       "name": "non-publisher caller is rejected",
@@ -405,23 +422,23 @@
     },
     {
       "name": "Root Publisher is unfunded and needs exactly the buffered gas",
-      "ok": false,
+      "ok": true,
       "detail": "0 BOT"
     },
     {
       "name": "claim is not available during the 86,400s delay",
       "ok": true,
-      "detail": "claimStart 1788242760"
+      "detail": "claimStart 1788243686"
     },
     {
       "name": "a minimal-authority funding source can cover the buffered gas",
-      "ok": false,
-      "detail": "none"
+      "ok": true,
+      "detail": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD (2.0131167 BOT)"
     },
     {
       "name": "gas funding is prepared without any FLOW transfer",
-      "ok": false,
-      "detail": "not prepared"
+      "ok": true,
+      "detail": "0.00406204 BOT"
     },
     {
       "name": "no root published in this run",
@@ -444,11 +461,6 @@
       "detail": "fixed 1 FLOW, no points math"
     }
   ],
-  "blockers": [
-    "publishEpoch simulates successfully FROM the Root Publisher: ContractFunctionExecutionError: The contract function \"publishEpoch\" reverted.\n\nError: PublishDelayTooShort()\n \nContract Call:\n  address:   0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922\n  function:  publishEpoch(bytes32 root, uint256 allocatio",
-    "Root Publisher is unfunded and needs exactly the buffered gas: 0 BOT",
-    "a minimal-authority funding source can cover the buffered gas: none",
-    "gas funding is prepared without any FLOW transfer: not prepared"
-  ],
-  "verdict": "BLOCKED"
+  "blockers": [],
+  "verdict": "PASS"
 }
