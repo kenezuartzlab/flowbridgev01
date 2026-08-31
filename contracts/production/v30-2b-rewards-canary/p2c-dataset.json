@@ -1,0 +1,71 @@
+{
+  "note": "Canonical chain-677 verified CORE_SWAP evidence rebuilt from verified_activities joined to flow_points_ledger (P2B canonicalization). Placeholder ledger identities are NOT used: identity comes from evidence_source=ROUTER_V3_RECEIPT receipt facts.",
+  "capturedAt": "2026-08-31T05:59:00.000Z",
+  "query": "select va.activity_id, va.source_chain_id, va.user_wallet, va.source_tx_hash, va.source_log_index, va.action_type, va.kind, va.status, va.evidence_source, va.occurred_at, l.id, l.activity_key, l.reason, l.points, l.verified_usd from verified_activities va left join flow_points_ledger l on l.verified_activity_id = va.activity_id where va.source_chain_id = 677 order by va.occurred_at",
+  "rows": [
+    {
+      "ledgerId": "d200e549-24b5-4df3-bcba-b7c30acaa069",
+      "verifiedActivityId": "0xc81fb5c9cd19707f8f671d72ee4e4962ebf8f49064d287044ecbfccf6c4b3060",
+      "activityKey": "677:0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516:5",
+      "chainId": 677,
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "txHash": "0x396b25fd9e4e66c8189ed139681da280a8d9fc43df3e8854a14649cb760c0516",
+      "sourceLogIndex": 5,
+      "evidenceSource": "ROUTER_V3_RECEIPT",
+      "kind": "SWAP_EXECUTED",
+      "status": "CONFIRMED",
+      "reason": "CORE_SWAP",
+      "points": 0,
+      "verifiedUsd": 1.4477296817964482,
+      "occurredAt": 1787284463
+    },
+    {
+      "ledgerId": "0c348d55-f873-495f-a271-5722ab8f97e7",
+      "verifiedActivityId": "0x1b560adb8cdd10be9a4685e812901abdd8696d098662f1c70ea3befa30520307",
+      "activityKey": "677:0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f:5",
+      "chainId": 677,
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "txHash": "0x716faf844881d500ca4594780d367c011b738bf4ba20fa41deda5285fe39ac9f",
+      "sourceLogIndex": 5,
+      "evidenceSource": "ROUTER_V3_RECEIPT",
+      "kind": "SWAP_EXECUTED",
+      "status": "CONFIRMED",
+      "reason": "CORE_SWAP",
+      "points": 0,
+      "verifiedUsd": 1,
+      "occurredAt": 1787284552
+    },
+    {
+      "ledgerId": "e9966fab-6923-4a16-86f7-349af30846dd",
+      "verifiedActivityId": "0x9aad757640ae86c8b6ebd5e502349d3544a3329dd3842372748daf21362368f1",
+      "activityKey": "677:0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3:5",
+      "chainId": 677,
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "txHash": "0xb4348e141e717685f5a5ea6fac98b644a2d120a58c2863ac52692ea472c565f3",
+      "sourceLogIndex": 5,
+      "evidenceSource": "ROUTER_V3_RECEIPT",
+      "kind": "SWAP_EXECUTED",
+      "status": "CONFIRMED",
+      "reason": "CORE_SWAP",
+      "points": 0,
+      "verifiedUsd": 1.158215708234597,
+      "occurredAt": 1787284753
+    },
+    {
+      "ledgerId": "07fe5d3d-d014-4e98-bfd9-18885e934430",
+      "verifiedActivityId": "0x12af76b91e122a296937a71ba3efc13519a4ab5da709fd41c40692cfe194dc31",
+      "activityKey": "677:0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56:8",
+      "chainId": 677,
+      "wallet": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+      "txHash": "0xd5be1d12384595a8f942848e46942febe895629ada2c5e34d62acbfb76874f56",
+      "sourceLogIndex": 8,
+      "evidenceSource": "ROUTER_V3_RECEIPT",
+      "kind": "SWAP_EXECUTED",
+      "status": "CONFIRMED",
+      "reason": "CORE_SWAP",
+      "points": 0,
+      "verifiedUsd": 4.8847155006408665,
+      "occurredAt": 1787298283
+    }
+  ]
+}
