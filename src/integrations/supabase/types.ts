@@ -1301,11 +1301,11 @@ export type Database = {
           p_tx_hash: string
         }
         Returns: {
-          activity_key: string
-          base_points: number
-          bound: boolean
-          ledger_id: string
-          points: number
+          out_activity_key: string
+          out_base_points: number
+          out_bound: boolean
+          out_ledger_id: string
+          out_points: number
         }[]
       }
       admin_bind_wallet: {
