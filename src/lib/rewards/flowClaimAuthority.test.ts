@@ -42,7 +42,7 @@ describe("authorizeFlowTokenClaim", () => {
     expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
-  it("never signs on unpromoted mainnet", async () => {
+  it("never signs on mainnet while claims are disabled (V30.2B P1)", async () => {
     const d = deps({ conversionPolicyApproved: true });
     const res = await authorizeFlowTokenClaim({
       userId: "u1",
