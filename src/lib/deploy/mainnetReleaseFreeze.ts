@@ -48,31 +48,13 @@ export const RELEASE_DECISION_VERSION = 'V30.1D.4' as const;
 /* Deterministic public-value hashing                                          */
 /* -------------------------------------------------------------------------- */
 
-/** Stable, key-sorted JSON so the same decision object always hashes equally. */
-export function stableStringify(value: unknown): string {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value ?? null);
-  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
-  const entries = Object.entries(value as Record<string, unknown>)
-    .filter(([, v]) => v !== undefined)
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-  return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`).join(',')}}`;
-}
+/**
+ * Canonical digest primitives live in `decisionDigest.ts` so every decision
+ * version hashes identically. Re-exported here for existing consumers.
+ */
+export { stableStringify, fnv1a64, digestOf } from './decisionDigest';
+import { digestOf } from './decisionDigest';
 
-/** FNV-1a 64-bit digest — an integrity fingerprint, never a security claim. */
-export function fnv1a64(input: string): string {
-  let hash = 0xcbf29ce484222325n;
-  const prime = 0x100000001b3n;
-  const mask = 0xffffffffffffffffn;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash ^ BigInt(input.charCodeAt(i))) & mask;
-    hash = (hash * prime) & mask;
-  }
-  return `fnv1a64:${hash.toString(16).padStart(16, '0')}`;
-}
-
-export function digestOf(value: unknown): string {
-  return fnv1a64(stableStringify(value));
-}
 
 /** Digest of the frozen production candidate source/runtime hashes. */
 export function currentCandidateDigest(): string {
