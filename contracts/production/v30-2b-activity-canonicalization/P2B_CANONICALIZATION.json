@@ -1,7 +1,7 @@
 {
   "gate": "V30.2B P2B — Mainnet Activity Canonicalization + P2A rerun",
   "mode": "READ_ONLY_DRY_RUN",
-  "generatedAt": "2026-08-31T04:34:26.305Z",
+  "generatedAt": "2026-08-31T04:34:44.972Z",
   "chain": {
     "chainId": 677,
     "rpcHost": "rpc.botchain.ai"
@@ -315,9 +315,14 @@
       "detail": "3800.495660890672"
     },
     {
-      "name": "no ledger row originates from chain 968 or 1024",
-      "ok": false,
-      "detail": "clean"
+      "name": "no canonical mainnet evidence derives from chain 968 or 1024",
+      "ok": true,
+      "detail": "4 mainnet evidence records, 4 mainnet rows"
+    },
+    {
+      "name": "historical testnet ledger rows were not modified",
+      "ok": true,
+      "detail": "12 untouched"
     },
     {
       "name": "P2A rerun uses the frozen cutoff block 21,553,131",
@@ -325,8 +330,6 @@
       "detail": "21553131"
     }
   ],
-  "blockers": [
-    "no ledger row originates from chain 968 or 1024: clean"
-  ],
-  "verdict": "BLOCKED"
+  "blockers": [],
+  "verdict": "PASS"
 }

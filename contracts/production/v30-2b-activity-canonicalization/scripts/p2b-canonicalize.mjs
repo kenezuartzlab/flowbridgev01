@@ -214,7 +214,19 @@ if (APPLY) {
     repaired.map((r) => r.activity_key).join(', '),
   );
 }
-check('no ledger row originates from chain 968 or 1024', after.every((r) => r.chain_id !== 968 && r.chain_id !== 1024), 'clean');
+// Contamination scope: canonical mainnet evidence must derive ONLY from chain
+// 677. Historical testnet ledger rows (968/1024) stay untouched and excluded.
+check(
+  'no canonical mainnet evidence derives from chain 968 or 1024',
+  evidence.every((e) => e.activity.chainId === 677) && repaired.every((r) => r.chain_id === 677),
+  `${evidence.length} mainnet evidence records, ${repaired.length} mainnet rows`,
+);
+check(
+  'historical testnet ledger rows were not modified',
+  before.filter((r) => r.chain_id === 968 || r.chain_id === 1024).length ===
+    after.filter((r) => r.chain_id === 968 || r.chain_id === 1024).length,
+  `${after.filter((r) => r.chain_id === 968 || r.chain_id === 1024).length} untouched`,
+);
 
 // -------------------------------------------- P2A rerun at the frozen cutoff
 const byTx = new Map(evidence.map((e) => [e.activity.txHash, e.activity]));
