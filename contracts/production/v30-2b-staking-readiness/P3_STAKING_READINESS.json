@@ -1,0 +1,105 @@
+{
+  "gate": "V30.2B_P3_STAKING_ACTIVATION_READINESS",
+  "mode": "READ_ONLY_PREPARATION",
+  "generatedAt": "2026-09-02T06:28:37.168Z",
+  "chainId": 677,
+  "blockNumber": "21795511",
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "bindings": {
+    "treasuryToken": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "vaultToken": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "vaultController": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vaultTreasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controllerVault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "inventory": {
+    "treasuryFlow": "10000000000000000000000000",
+    "treasuryFree": "10000000000000000000000000",
+    "treasuryObligations": "0",
+    "reservedGenesis": "0",
+    "reservedFloors": "0",
+    "committedEpoch": "0",
+    "accruedUnclaimed": "0",
+    "vaultFlow": "0",
+    "vaultPrincipal": "0",
+    "vaultNextPositionId": "0",
+    "treasurySafeFlow": "988000000000000000000000000"
+  },
+  "caps": {
+    "maxFlowPerEpoch": "50000000000000000000000",
+    "weeklyUsdBudget8": "0",
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "epochCommitted": "0",
+    "epochEnd": "0",
+    "genesisYear1Used": "0",
+    "standardYear1Used": "0",
+    "emergencyMode": false,
+    "genesisYear1Cap": "1000000000000000000000000",
+    "standardYear1Cap": "2000000000000000000000000",
+    "epochDuration": null
+  },
+  "products": [
+    {
+      "product": 0,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "product": 1,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "product": 2,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "product": 3,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "product": 4,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    }
+  ],
+  "publisherHolders": [],
+  "vaultEpochHolders": [],
+  "deployerAuthority": [],
+  "pauseState": {
+    "vault": false,
+    "emergencyMode": false
+  },
+  "writes": {
+    "signed": 0,
+    "broadcast": 0,
+    "funded": 0,
+    "oracleWrites": 0,
+    "publisherAssignments": 0,
+    "epochPublications": 0
+  },
+  "result": "STAKING_ACTIVATION_BLOCKED",
+  "stateFailures": [],
+  "blockingItems": [
+    "ORACLE_UNSET_PENDING_POOL: no FLOW/USD liquidity reference exists on chain 677, so the dynamic (USD-budgeted) staking path must stay disabled and fail closed. No oracle may be invented or substituted.",
+    "VAULT_EPOCH_ROLE_UNASSIGNED: Vault EPOCH_ROLE is held by no address (not even the Controller), so no epoch emission can reach the Vault. Granting it is an authorized governance write and is NOT performed by this gate.",
+    "STAKING_PUBLISHER_UNASSIGNED: no address holds Controller PUBLISHER_ROLE, so no staking epoch can be published. Assignment is an authorized governance write and is NOT performed by this gate."
+  ],
+  "nextAuthorizedTransactionPlan": {
+    "note": "NOT EXECUTED IN THIS GATE. Minimal fixed-rate / Genesis-only activation path, if separately authorized.",
+    "steps": [
+      "Governance Safe: grantRole(EPOCH_ROLE, Controller) on Vault 0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+      "Governance Safe: grantRole(PUBLISHER_ROLE, <approved publisher>) on Controller 0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+      "Publisher: commit a fixed-rate Genesis epoch <= 50,000 FLOW for 7 days, within the 1,000,000 FLOW Genesis year-1 ceiling",
+      "Leave oracle unset and weeklyUsdBudget8 == 0 so the dynamic USD-budgeted path stays disabled"
+    ],
+    "prerequisitesProven": false
+  }
+}
