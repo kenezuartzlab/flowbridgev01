@@ -237,6 +237,11 @@ function EarnPage() {
           </Surface>
         ) : null}
 
+        {/* V30.2B P2E — BOT Mainnet 677 published-epoch claim. Wallet-keyed and
+            entirely separate from the testnet authorization flow, so it does not
+            depend on being signed in. */}
+        <MainnetFlowClaimCard />
+
         {user && (
           <>
             <MetricStrip
@@ -393,10 +398,6 @@ function EarnPage() {
               campaignPts={campaignAuthed ? campaignPointsTotal : null}
               onClaimed={refresh}
             />
-
-            {/* V30.2B P2E — BOT Mainnet 677 published-epoch claim, fully separate
-                from the testnet authorization flow above. */}
-            <MainnetFlowClaimCard />
 
             {/* V13.2 — testnet vault live and funded; read-only surface, never a quoted rate. */}
             <Link
