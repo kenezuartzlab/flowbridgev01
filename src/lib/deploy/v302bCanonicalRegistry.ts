@@ -242,7 +242,7 @@ export interface ActivationMatrixRow {
   lifecycle: CanonicalLifecycleState;
   /** Feature flags that must all be true before this contract can execute. */
   requiredFlags: readonly V30_2BFeatureFlag[];
-  featureActive: false;
+  featureActive: boolean;
 }
 
 export function activationMatrix(): readonly ActivationMatrixRow[] {
