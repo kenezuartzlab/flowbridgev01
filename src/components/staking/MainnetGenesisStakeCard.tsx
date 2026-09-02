@@ -78,7 +78,7 @@ export function MainnetGenesisStakeCard() {
         ? `Minimum stake is ${fmtFlow(stake.minPrincipal)} FLOW.`
         : balance != null && principal > balance
           ? `Your wallet holds ${fmtFlow(stake.balance)} FLOW.`
-          : genesisSecs === 0
+          : wallet && genesisSecs === 0
             ? 'This wallet has already used its lifetime Genesis reward window.'
             : null;
 
@@ -189,11 +189,15 @@ export function MainnetGenesisStakeCard() {
         <p className="text-[12px] leading-relaxed text-muted">
           {stake.loading
             ? 'Reading live staking state from BOT Mainnet…'
-            : (amountProblem ??
-              stake.blockedReason ??
-              `Estimated Genesis reward reserved for this position: ${fmtFlow(
-                projectedGenesis.toString(),
-              )} FLOW over the remaining ${Math.floor(genesisSecs / 86_400)} Genesis days. APR, never compounded.`)}
+            : (stake.blockedReason ??
+              amountProblem ??
+              (projectedGenesis > 0n
+                ? `Estimated Genesis reward reserved for this position: ${fmtFlow(
+                    projectedGenesis.toString(),
+                  )} FLOW over the remaining ${Math.floor(
+                    genesisSecs / 86_400,
+                  )} Genesis days. APR, never compounded.`
+                : 'Enter an amount to see the Genesis reward that will be reserved for your position.'))}
         </p>
 
         <div className="flex flex-col gap-2 sm:flex-row">
