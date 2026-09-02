@@ -1,0 +1,365 @@
+{
+  "gate": "V30_2B_P3B_GENESIS_MAINNET_LIFECYCLE_CANARY_SETTLEMENT",
+  "mode": "READ_ONLY_SETTLEMENT_VERIFICATION",
+  "generatedAt": "2026-09-02T13:14:37.986Z",
+  "chainId": 677,
+  "blockNumber": "21828005",
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "distributor": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "canaryWallet": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+  "positionId": "1",
+  "transactions": {
+    "claim": {
+      "hash": "0x1514c6db432b5fe9f974da4d319ae3705b424c3028c52eda3ea80d835dae1570",
+      "status": "success",
+      "block": "21826909",
+      "gasUsed": "156140"
+    },
+    "withdraw": {
+      "hash": "0x531116aba0310af070e4312660d5f737d56d97e88628e047f48e764288ab57e9",
+      "status": "success",
+      "block": "21826974",
+      "gasUsed": "162662"
+    }
+  },
+  "lifecycle": {
+    "genesisReserved": "44383561643835616",
+    "rewardClaimed": "6706621004566",
+    "rewardClaimedFlow": "0.000006706621004566",
+    "genesisReleased": "44376575342465754",
+    "genesisReleasedFlow": "0.044376575342465754",
+    "principalReturned": "1000000000000000000",
+    "positionStatus": "1",
+    "positionPrincipal": "1000000000000000000",
+    "pending": "279680365296"
+  },
+  "stakingTreasury": {
+    "balance": "9999999999993293378995434",
+    "balanceFlow": "9999999.999993293378995434",
+    "obligations": "279680365296",
+    "free": "9999999999993013698630138",
+    "reservedGenesis": "0",
+    "reservedFloors": "0",
+    "committedEpoch": "0",
+    "accruedUnclaimed": "279680365296",
+    "solvent": true
+  },
+  "vault": {
+    "totalPrincipal": "0",
+    "flexibleTotalStaked": "0",
+    "flowBalance": "0",
+    "canaryPositionCount": "1",
+    "canaryAllowance": "0",
+    "paused": false
+  },
+  "standardDynamic": {
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "weeklyUsdBudget8": "0",
+    "standardYear1Used": "0",
+    "genesisYear1Used": "6986301369862",
+    "epochEnd": "0",
+    "epochCommitted": "0",
+    "epochRoleToController": false,
+    "publisherRoleAssigned": false,
+    "enabled": false
+  },
+  "rewardsDistributor": {
+    "epochCount": "1",
+    "totalReserved": "0",
+    "totalClaimed": "1000000000000000000",
+    "campaignBudget": "1000000000000000000",
+    "budgetRemaining": "0",
+    "flowBalance": "999999000000000000000000",
+    "touchedByStakingCanary": false
+  },
+  "checks": [
+    {
+      "ok": true,
+      "label": "chain is BOT Mainnet 677",
+      "detail": "chainId=677"
+    },
+    {
+      "ok": true,
+      "label": "claim receipt status success",
+      "detail": "0x1514c6db432b5fe9f974da4d319ae3705b424c3028c52eda3ea80d835dae1570"
+    },
+    {
+      "ok": true,
+      "label": "claim signed by canary wallet",
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
+    },
+    {
+      "ok": true,
+      "label": "claim target is R6 Vault",
+      "detail": "0x15e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d"
+    },
+    {
+      "ok": true,
+      "label": "claim carries 0 BOT value",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "withdraw receipt status success",
+      "detail": "0x531116aba0310af070e4312660d5f737d56d97e88628e047f48e764288ab57e9"
+    },
+    {
+      "ok": true,
+      "label": "withdraw signed by canary wallet",
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
+    },
+    {
+      "ok": true,
+      "label": "withdraw target is R6 Vault",
+      "detail": "0x15e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d"
+    },
+    {
+      "ok": true,
+      "label": "withdraw carries 0 BOT value",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "claim tx emitted RewardsClaimed",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "claim transferred a positive contract-computed reward",
+      "detail": "0.000006706621004566 FLOW"
+    },
+    {
+      "ok": true,
+      "label": "claimed reward within the exact Genesis reservation",
+      "detail": "<= 0.044383561643835616 FLOW"
+    },
+    {
+      "ok": true,
+      "label": "claim credited the canary wallet",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "claim moved exactly the reward amount to the canary",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "reward was paid from the R4 reward treasury, not from principal",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "claim moved no FLOW out of the Vault (principal never reduced)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "claim did not close the position",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "withdraw tx emitted PositionClosed",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "withdraw closed the same canary position",
+      "detail": "positionId=1"
+    },
+    {
+      "ok": true,
+      "label": "closed position owner is the canary wallet",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "withdraw returned exactly 1 FLOW principal",
+      "detail": "1 FLOW"
+    },
+    {
+      "ok": true,
+      "label": "no floor reservation existed to release (Flexible floorBps == 0)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "exactly one 1 FLOW Vault -> canary principal transfer",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "claim settled at or before withdrawal",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "position is closed / inactive",
+      "detail": "status=1"
+    },
+    {
+      "ok": true,
+      "label": "closed position accrues nothing further (only settled dust remains)",
+      "detail": "0.000000279680365296"
+    },
+    {
+      "ok": true,
+      "label": "Genesis reservation fully conserved (claimed + released + earned dust == reserved)",
+      "detail": "0.000006706621004566 + 0.044376575342465754 + 0.000000279680365296"
+    },
+    {
+      "ok": true,
+      "label": "Vault totalPrincipal back to 0",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "Flexible product totalStaked back to 0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "Vault holds 0 FLOW (no stranded principal)",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "canary allowance to Vault fully consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "reservedGenesis reconciled to 0",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "reservedFloors == 0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "committedEpoch == 0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "accruedUnclaimed equals exactly the canary earned dust",
+      "detail": "0.000000279680365296"
+    },
+    {
+      "ok": true,
+      "label": "only outstanding obligation is the earned dust",
+      "detail": "0.000000279680365296"
+    },
+    {
+      "ok": true,
+      "label": "staking treasury solvent (balance >= obligations)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "free inventory == balance - obligations",
+      "detail": "9999999.999993013698630138"
+    },
+    {
+      "ok": true,
+      "label": "staking treasury free inventory effectively intact",
+      "detail": "9999999.999993013698630138"
+    },
+    {
+      "ok": true,
+      "label": "treasury balance decreased by exactly the claimed reward",
+      "detail": "9999999.999993293378995434"
+    },
+    {
+      "ok": true,
+      "label": "canary holds principal + reward (1 FLOW + reward)",
+      "detail": "1.000006706621004566"
+    },
+    {
+      "ok": true,
+      "label": "oracle = 0x0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "weeklyUsdBudget8 == 0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "standard Year-1 used == 0 (no standard emission)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "no live standard epoch",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "EPOCH_ROLE -> Controller = false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PUBLISHER_ROLE -> 0x05F7...aB22 = false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "controller emergencyMode == false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "Vault unpaused",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "distributor still has exactly 1 published epoch",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "distributor totalReserved unchanged at 0 (epoch-1 fully claimed)",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "distributor totalClaimed still 1 FLOW (epoch-1 canary only)",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "campaignBudget unchanged at 1 FLOW",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "budgetRemaining unchanged at 0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "distributor FLOW inventory unchanged by the staking canary",
+      "detail": "999999"
+    },
+    {
+      "ok": true,
+      "label": "staking canary emitted no Rewards Distributor logs",
+      "detail": null
+    }
+  ],
+  "checkCount": 56,
+  "failures": [],
+  "settlement": "PASS"
+}

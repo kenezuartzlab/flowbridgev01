@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { SafeAreaPage, SectionHeader, Surface } from "@/components/ui-kit/primitives";
 import { FlowStakingPreviewCard } from "@/components/staking/FlowStakingPreviewCard";
 import { StakingV2PreviewCard } from "@/components/staking/StakingV2PreviewCard";
+import { MainnetGenesisStakeCard } from "@/components/staking/MainnetGenesisStakeCard";
 import { resolveStakeHandoffFromServer } from "@/lib/ai/mission/missionClient";
 import {
   parseStakeHandoff,
@@ -28,7 +29,7 @@ import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
 export const Route = createFileRoute("/stake")({
   head: () => ({
     meta: [
-      { title: "FLOW Staking — FlowBridge" },
+      { title: "FLOW Staking — Flexible Genesis on BOT Mainnet" },
       {
         name: "description",
         content:
@@ -119,6 +120,8 @@ function StakePage() {
           </Link>
           <h1 className="text-[18px] font-black tracking-[-0.01em]">FLOW staking</h1>
         </div>
+
+        <MainnetGenesisStakeCard />
 
         <FlowStakingPreviewCard
           flowPoints={Number(incentives?.flowPoints ?? 0)}

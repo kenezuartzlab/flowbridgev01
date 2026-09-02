@@ -93,10 +93,10 @@ export const V30_2B_CANONICAL_CONTRACTS: readonly CanonicalContractEntry[] = [
     stage: 'R4',
     chainId: BOT_MAINNET_CHAIN_ID,
     address: '0x96552909998F3DbAf5Ff4979dc158508b3442e65',
-    lifecycle: 'FUNDED_READY',
+    lifecycle: 'FEATURE_ACTIVE',
     sourceVerified: true,
     fundedFlow: '10000000',
-    featureActive: false,
+    featureActive: true,
   },
   {
     contractId: 'FlowStakingController',
@@ -113,10 +113,10 @@ export const V30_2B_CANONICAL_CONTRACTS: readonly CanonicalContractEntry[] = [
     stage: 'R6',
     chainId: BOT_MAINNET_CHAIN_ID,
     address: '0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D',
-    lifecycle: 'DEPLOYED_VERIFIED',
+    lifecycle: 'FEATURE_ACTIVE',
     sourceVerified: true,
     fundedFlow: '0',
-    featureActive: false,
+    featureActive: true,
   },
 ] as const;
 
@@ -181,7 +181,13 @@ export const SUPERSEDED_MAINNET_ADDRESSES: readonly {
  */
 export const V30_2B_FEATURE_ACTIVATION = {
   rewardClaimsEnabled: true,
-  stakingExecutionEnabled: false,
+  /**
+   * V30.2B P3B — the Flexible Genesis lifecycle (approve → open → accrue →
+   * claim → exact principal withdrawal) is proven end-to-end on chain 677, so
+   * staking execution is activated for that path only.
+   */
+  stakingExecutionEnabled: true,
+  genesisFlexibleStakingEnabled: true,
   dynamicStakingEnabled: false,
   oracleConfigured: false,
   stakingPublisherAssigned: false,
@@ -273,7 +279,10 @@ export function canPrepareMainnetEconomicAction(
       V30_2B_FEATURE_ACTIVATION.rewardRootPublished
     );
   }
-  return V30_2B_FEATURE_ACTIVATION.stakingExecutionEnabled;
+  return (
+    V30_2B_FEATURE_ACTIVATION.stakingExecutionEnabled &&
+    V30_2B_FEATURE_ACTIVATION.genesisFlexibleStakingEnabled
+  );
 }
 
 /** Chain ids this registry accepts. 968 is testnet-only; 1024 never resolves. */

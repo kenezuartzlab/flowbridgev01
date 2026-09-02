@@ -41,12 +41,17 @@ describe('V30.2B canonical mainnet registry', () => {
     const byId = Object.fromEntries(V30_2B_CANONICAL_CONTRACTS.map((c) => [c.contractId, c]));
     expect(byId.FlowToken.lifecycle).toBe('FUNDED_READY');
     expect(byId.FlowRewardsMerkleDistributor.lifecycle).toBe('FEATURE_ACTIVE');
-    expect(byId.FlowStakingRewardTreasury.lifecycle).toBe('FUNDED_READY');
+    expect(byId.FlowStakingRewardTreasury.lifecycle).toBe('FEATURE_ACTIVE');
     expect(byId.FlowStakingRewardTreasury.fundedFlow).toBe('10000000');
     expect(byId.FlowRewardsMerkleDistributor.fundedFlow).toBe('1000000');
+    // V30.2B P3B activated the proven Flexible Genesis staking path.
     expect(
       V30_2B_CANONICAL_CONTRACTS.filter((c) => c.lifecycle === 'FEATURE_ACTIVE').map((c) => c.contractId),
-    ).toEqual(['FlowRewardsMerkleDistributor']);
+    ).toEqual([
+      'FlowRewardsMerkleDistributor',
+      'FlowStakingRewardTreasury',
+      'FlowStakingVaultV2',
+    ]);
   });
 
   it('never lets a superseded V30.1/V30.2A address resolve as canonical', () => {
@@ -74,9 +79,10 @@ describe('V30.2B canonical mainnet registry', () => {
     expect(resolveCanonicalAddress(1, 'FlowStakingController')).toBeNull();
   });
 
-  it('activates only the reward claim path and keeps staking disabled', () => {
+  it('activates the reward claim path and Flexible-Genesis staking only', () => {
     expect(V30_2B_FEATURE_ACTIVATION.rewardClaimsEnabled).toBe(true);
-    expect(V30_2B_FEATURE_ACTIVATION.stakingExecutionEnabled).toBe(false);
+    expect(V30_2B_FEATURE_ACTIVATION.stakingExecutionEnabled).toBe(true);
+    expect(V30_2B_FEATURE_ACTIVATION.genesisFlexibleStakingEnabled).toBe(true);
     expect(V30_2B_FEATURE_ACTIVATION.dynamicStakingEnabled).toBe(false);
     expect(V30_2B_FEATURE_ACTIVATION.oracleConfigured).toBe(false);
     expect(V30_2B_FEATURE_ACTIVATION.stakingPublisherAssigned).toBe(false);
@@ -89,22 +95,33 @@ describe('V30.2B canonical mainnet registry', () => {
     expect(V30_2B_FEATURE_ACTIVATION.officialBridgeDirect).toBe(true);
   });
 
-  it('allows only claim preparation on mainnet; staking stays blocked', () => {
+  it('allows claim and Flexible-Genesis staking preparation on mainnet', () => {
     expect(canPrepareMainnetEconomicAction('CLAIM_FLOW')).toBe(true);
-    expect(canPrepareMainnetEconomicAction('STAKE_FLOW')).toBe(false);
-    expect(canPrepareMainnetEconomicAction('UNSTAKE_FLOW')).toBe(false);
+    expect(canPrepareMainnetEconomicAction('STAKE_FLOW')).toBe(true);
+    expect(canPrepareMainnetEconomicAction('UNSTAKE_FLOW')).toBe(true);
   });
 
-  it('publishes an activation matrix where only the rewards distributor is active', () => {
+  it('publishes an activation matrix consistent with its own required flags', () => {
     const rows = activationMatrix();
     expect(rows).toHaveLength(6);
+    const active = new Set([
+      'FlowRewardsMerkleDistributor',
+      'FlowStakingRewardTreasury',
+      'FlowStakingVaultV2',
+    ]);
     for (const row of rows) {
-      const isRewards = row.contractId === 'FlowRewardsMerkleDistributor';
-      expect(row.featureActive).toBe(isRewards);
-      expect(row.lifecycle === 'FEATURE_ACTIVE').toBe(isRewards);
-      for (const flag of row.requiredFlags) {
-        expect(V30_2B_FEATURE_ACTIVATION[flag]).toBe(isRewards);
+      const expected = active.has(row.contractId);
+      expect(row.featureActive).toBe(expected);
+      expect(row.lifecycle === 'FEATURE_ACTIVE').toBe(expected);
+      if (expected) {
+        for (const flag of row.requiredFlags) {
+          expect(V30_2B_FEATURE_ACTIVATION[flag]).toBe(true);
+        }
       }
     }
+    // The controller keeps an unmet flag: no publisher, no standard/dynamic path.
+    const controller = rows.find((r) => r.contractId === 'FlowStakingController')!;
+    expect(controller.featureActive).toBe(false);
+    expect(V30_2B_FEATURE_ACTIVATION.stakingPublisherAssigned).toBe(false);
   });
 });
