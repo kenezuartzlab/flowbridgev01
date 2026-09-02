@@ -52,6 +52,7 @@ import {
 } from "@/lib/rewards/flowRewardsRegistry";
 import { isFlowConversionPolicyApprovedForChain } from "@/lib/rewards/flowConversionPolicy";
 import { FlowTokenClaimCard } from "@/components/rewards/FlowTokenClaimCard";
+import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
 
 
 /**
@@ -235,6 +236,11 @@ function EarnPage() {
             <SignInButton label="Sign in" returnTo="/earn" />
           </Surface>
         ) : null}
+
+        {/* V30.2B P2E — BOT Mainnet 677 published-epoch claim. Wallet-keyed and
+            entirely separate from the testnet authorization flow, so it does not
+            depend on being signed in. */}
+        <MainnetFlowClaimCard />
 
         {user && (
           <>

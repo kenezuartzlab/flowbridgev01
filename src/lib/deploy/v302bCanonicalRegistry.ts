@@ -50,7 +50,7 @@ export interface CanonicalContractEntry {
   /** Live-reconciled FLOW balance in whole FLOW (18 decimals assumed). */
   fundedFlow: string;
   /** True once an end-user feature reads/writes this contract in production. */
-  featureActive: false;
+  featureActive: boolean;
 }
 
 /** The only mainnet economic addresses the app may select. */
@@ -70,10 +70,13 @@ export const V30_2B_CANONICAL_CONTRACTS: readonly CanonicalContractEntry[] = [
     stage: 'R2',
     chainId: BOT_MAINNET_CHAIN_ID,
     address: '0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922',
-    lifecycle: 'FUNDED_READY',
+    // V30.2B P2E: genesis canary epoch 1 published (root
+    // 0xe5cf2f…6456) and claimed on chain, so the user-facing claim surface
+    // reads this contract in production.
+    lifecycle: 'FEATURE_ACTIVE',
     sourceVerified: true,
     fundedFlow: '1000000',
-    featureActive: false,
+    featureActive: true,
   },
   {
     contractId: 'FlowBridgeActivityRegistry',
@@ -172,16 +175,17 @@ export const SUPERSEDED_MAINNET_ADDRESSES: readonly {
 ] as const;
 
 /**
- * Feature activation switchboard. Every flag is false in P1 — the registry
- * migration is address selection only, never activation.
+ * Feature activation switchboard. P1 shipped with every flag false; V30.2B P2E
+ * activates the REWARD CLAIM path only — the genesis canary epoch is published
+ * on chain and claims verify against live contract state. Staking stays off.
  */
 export const V30_2B_FEATURE_ACTIVATION = {
-  rewardClaimsEnabled: false,
+  rewardClaimsEnabled: true,
   stakingExecutionEnabled: false,
   dynamicStakingEnabled: false,
   oracleConfigured: false,
   stakingPublisherAssigned: false,
-  rewardRootPublished: false,
+  rewardRootPublished: true,
   /** Untouched pre-existing swap/bridge posture, restated for the matrix. */
   routerV3Live: true,
   routerV4Promoted: false,
@@ -238,7 +242,7 @@ export interface ActivationMatrixRow {
   lifecycle: CanonicalLifecycleState;
   /** Feature flags that must all be true before this contract can execute. */
   requiredFlags: readonly V30_2BFeatureFlag[];
-  featureActive: false;
+  featureActive: boolean;
 }
 
 export function activationMatrix(): readonly ActivationMatrixRow[] {

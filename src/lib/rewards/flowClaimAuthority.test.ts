@@ -42,7 +42,7 @@ describe("authorizeFlowTokenClaim", () => {
     expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
-  it("never signs on mainnet while claims are disabled (V30.2B P1)", async () => {
+  it("never signs on mainnet — mainnet uses the epoch distributor (V30.2B P2E)", async () => {
     const d = deps({ conversionPolicyApproved: true });
     const res = await authorizeFlowTokenClaim({
       userId: "u1",
@@ -50,7 +50,7 @@ describe("authorizeFlowTokenClaim", () => {
       chainId: BOT_MAINNET_CHAIN_ID,
       deps: d,
     });
-    expect(res).toMatchObject({ authorized: false, reason: "claimsDisabled" });
+    expect(res).toMatchObject({ authorized: false, reason: "signerModelNotCanonical" });
     expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
