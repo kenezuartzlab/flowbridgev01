@@ -1,0 +1,201 @@
+{
+  "gate": "V30.2B_P3A_STAKING_PUBLISHER_WIRING_GENESIS_PREFLIGHT",
+  "mode": "READ_ONLY_PREFLIGHT_AND_PREPARATION",
+  "generatedAt": "2026-09-02T10:47:58.073Z",
+  "chainId": 677,
+  "blockNumber": "21816261",
+  "blockTimestamp": "1788346060",
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "governance": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "operations": "0x1Ce0b1DF5d2055f6e92122D8cB7669609C2359eF",
+    "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "stakingPublisher": "0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22"
+  },
+  "roleHashes": {
+    "epoch": "0xd5a89e8a650061fa538ac2ef45b7e2fa231077c8f19d034f623c35bd12bf68ac",
+    "pauser": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+    "publisher": "0x0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a",
+    "governor": "0x7935bd0ae54bc31f548c14dba4d37c5c64b3f8ca900cb468fb8abd54d5894f55",
+    "admin": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "bindings": {
+    "vaultController": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vaultTreasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "vaultToken": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "controllerVault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "authority": {
+    "vaultAdminGov": true,
+    "vaultAdminDeployer": false,
+    "controllerAdminGov": true,
+    "controllerGovernorGov": true,
+    "controllerAdminDeployer": false
+  },
+  "roleState": {
+    "epochRoleHolders": [],
+    "publisherRoleHolders": [],
+    "epochRoleToController": false,
+    "publisherRoleToApprovedPublisher": false
+  },
+  "economics": {
+    "treasuryFlow": "10000000000000000000000000",
+    "vaultFlow": "0",
+    "vaultPrincipal": "0",
+    "nextPositionId": "0",
+    "maxFlowPerEpoch": "50000000000000000000000",
+    "weeklyUsdBudget8": "0",
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "epochEnd": "0",
+    "epochCommitted": "0",
+    "genesisYear1Used": "0",
+    "standardYear1Used": "0",
+    "genesisCap": "1000000000000000000000000",
+    "standardCap": "2000000000000000000000000",
+    "totalCap": "3000000000000000000000000",
+    "epochSeconds": "604800",
+    "genesisMaxSeconds": "7776000",
+    "emergencyMode": false,
+    "vaultPaused": false,
+    "vaultEpochEnd": "0",
+    "vaultEpochCommitted": "0",
+    "treasuryObligations": "0"
+  },
+  "products": [
+    {
+      "product": 0,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "product": 1,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "product": 2,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "product": 3,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "product": 4,
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    }
+  ],
+  "governanceSafe": {
+    "address": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "nonce": "11",
+    "threshold": "2"
+  },
+  "wiringCalls": [
+    {
+      "id": "P3A.W1",
+      "label": "VaultV2.grantRole(EPOCH_ROLE, Controller R5)",
+      "target": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+      "functionName": "grantRole",
+      "args": [
+        "0xd5a89e8a650061fa538ac2ef45b7e2fa231077c8f19d034f623c35bd12bf68ac",
+        "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF"
+      ],
+      "decoded": {
+        "role": "EPOCH_ROLE 0xd5a89e8a650061fa538ac2ef45b7e2fa231077c8f19d034f623c35bd12bf68ac",
+        "account": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF"
+      },
+      "prerequisite": "Vault EPOCH_ROLE unheld by Controller; Governance is role admin",
+      "expected": "Vault.hasRole(EPOCH_ROLE, Controller) == true",
+      "selector": "0x2f2ff15d",
+      "calldata": "0x2f2ff15dd5a89e8a650061fa538ac2ef45b7e2fa231077c8f19d034f623c35bd12bf68ac00000000000000000000000044b9b880c6188d8b8dbe4f68216ae28a5a1253bf",
+      "calldataKeccak": "0x7a10c975743eeb02ee55e25dd9d09187f7a52304e5981c7782e9a56bbb2be7db",
+      "simulation": "ok",
+      "gasEstimate": "51674",
+      "unauthorizedCaller": "reverts (as required)",
+      "safeExecution": {
+        "callingSafe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+        "safeNonceNow": "11",
+        "requiredSafeNonce": "11 + queue index (W1 then W2)",
+        "threshold": "2-of-owners signatures required at execution time",
+        "value": "0",
+        "operation": "CALL (0)"
+      }
+    },
+    {
+      "id": "P3A.W2",
+      "label": "Controller.grantRole(PUBLISHER_ROLE, approved staking publisher)",
+      "target": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+      "functionName": "grantRole",
+      "args": [
+        "0x0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a",
+        "0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22"
+      ],
+      "decoded": {
+        "role": "PUBLISHER_ROLE 0x0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a",
+        "account": "0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22"
+      },
+      "prerequisite": "Controller PUBLISHER_ROLE unheld by 0x05F7…aB22; Governance is role admin",
+      "expected": "Controller.hasRole(PUBLISHER_ROLE, 0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22) == true",
+      "selector": "0x2f2ff15d",
+      "calldata": "0x2f2ff15d0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a00000000000000000000000005f7e3ea71093d8224abb9de078d1a2e480fab22",
+      "calldataKeccak": "0xdd5d21a47f56264af029f53610bcf6b7a0c9e9a9bf06a428518c242aca1c71e1",
+      "simulation": "ok",
+      "gasEstimate": "51989",
+      "unauthorizedCaller": "reverts (as required)",
+      "safeExecution": {
+        "callingSafe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+        "safeNonceNow": "11",
+        "requiredSafeNonce": "11 + queue index (W1 then W2)",
+        "threshold": "2-of-owners signatures required at execution time",
+        "value": "0",
+        "operation": "CALL (0)"
+      }
+    }
+  ],
+  "wiringExecution": {
+    "executed": false,
+    "reason": "Governance Safe is multi-signature (2-of-3). No Safe owner key exists in this environment, so the two role grants cannot be signed or broadcast here; both are prepared and simulated only.",
+    "signed": 0,
+    "broadcast": 0,
+    "funded": 0
+  },
+  "genesisEpochPreparation": {
+    "status": "BLOCKED",
+    "publisher": "0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22",
+    "publisherNativeBot": "0.2",
+    "epochRelatedFunctions": [
+      "EPOCH()",
+      "epochCommitted()",
+      "epochEnd()",
+      "maxFlowPerEpoch()",
+      "publishEpoch(uint8[],uint256[])",
+      "quoteEpochBudget()",
+      "settleEpoch()"
+    ],
+    "onlyEpochPublishFunction": "publishEpoch(uint8[] productIds, uint256[] flowPerSecond) onlyRole(PUBLISHER_ROLE)",
+    "enforcedEpochDuration": "604800s (7 days, immutable constant EPOCH)",
+    "findings": [
+      "The deployed R5 exposes exactly one epoch-publishing entrypoint, publishEpoch(uint8[],uint256[]). It has no fixed-rate or Genesis mode argument.",
+      "publishEpoch calls quoteEpochBudget() first, which reverts OracleNotConfigured() while oracle == address(0). The epoch path is therefore fail-closed and cannot be simulated, let alone published, without an oracle.",
+      "publishEpoch consumes STANDARD Year-1 budget (_consumeStandard) — not Genesis. A Genesis-only epoch is not expressible through this function, so publishing it would activate standard-rate emissions, which P3A forbids.",
+      "Genesis economics in the frozen design are per-position, not per-epoch: the Vault reserves Genesis APR at openPosition() via controller.tryConsumeGenesisBudget(), which is onlyVault and needs no epoch and no publisher.",
+      "Every product currently has totalStaked == 0, so any published epoch would emit to zero stakers."
+    ],
+    "simulation": "not attempted for a Genesis epoch — no ABI-derived Genesis epoch transaction exists to simulate",
+    "signed": false,
+    "broadcast": false
+  },
+  "preflight": "PASS",
+  "failures": [],
+  "blockingItems": [
+    "GENESIS_EPOCH_NOT_EXPRESSIBLE: deployed R5 has no fixed-rate Genesis epoch function; publishEpoch is the oracle-gated STANDARD-rate path and reverts OracleNotConfigured() with oracle == address(0).",
+    "VAULT_EPOCH_ROLE_UNASSIGNED: requires Governance Safe execution of P3A.W1 (2-of-3 signatures) — this environment holds no Safe owner key.",
+    "STAKING_PUBLISHER_UNASSIGNED: requires Governance Safe execution of P3A.W2 (2-of-3 signatures) — this environment holds no Safe owner key."
+  ]
+}
