@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.enforce_verified_wallet_binding() FROM PUBLIC, anon, authenticated;
