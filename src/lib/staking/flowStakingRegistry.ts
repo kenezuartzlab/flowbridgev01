@@ -11,7 +11,6 @@ import {
   type Hex,
 } from "./flowStakingPolicy";
 import {
-  V30_2B_FEATURE_ACTIVATION,
   resolveCanonicalAddress,
 } from "@/lib/deploy/v302bCanonicalRegistry";
 
@@ -46,11 +45,14 @@ export const FLOW_STAKING_CHAINS: readonly FlowStakingChainConfig[] = [
     chainId: BOT_MAINNET_CHAIN_ID,
     label: "BOT Mainnet",
     isMainnet: true,
-    // V30.2B P1: canonical verified V30.2B addresses only. Staking execution
-    // stays disabled, so no stake transaction can be prepared on mainnet.
+    // V30.2B P1/P3B: canonical verified V30.2B addresses only. This legacy
+    // V13.2 execution path stays disabled on mainnet by construction — the only
+    // proven mainnet path is Flexible Genesis via the P3B surface
+    // (src/lib/staking/mainnetGenesisStaking.ts), which gates itself on the
+    // Flexible product and re-reads live contract state before every action.
     token: resolveCanonicalAddress(BOT_MAINNET_CHAIN_ID, "FlowToken"),
     vault: resolveCanonicalAddress(BOT_MAINNET_CHAIN_ID, "FlowStakingVaultV2"),
-    stakingEnabled: V30_2B_FEATURE_ACTIVATION.stakingExecutionEnabled,
+    stakingEnabled: false,
     policyVersion: STAKING_POLICY_VERSION,
   },
 ] as const;
