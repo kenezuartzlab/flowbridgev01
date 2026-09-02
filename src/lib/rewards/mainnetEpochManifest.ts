@@ -14,7 +14,9 @@
  *  - Nothing in this module reads, writes or authorizes anything.
  */
 import { BOT_MAINNET_CHAIN_ID } from './flowRewardsRegistry';
-import type { Hex, MerkleClaimLeaf } from './merkleClaim';
+import type { Hex } from 'viem';
+
+import type { MerkleClaimLeaf } from './merkleClaim';
 
 export interface MainnetEpochManifest {
   chainId: typeof BOT_MAINNET_CHAIN_ID;
