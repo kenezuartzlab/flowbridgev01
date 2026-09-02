@@ -175,16 +175,17 @@ export const SUPERSEDED_MAINNET_ADDRESSES: readonly {
 ] as const;
 
 /**
- * Feature activation switchboard. Every flag is false in P1 — the registry
- * migration is address selection only, never activation.
+ * Feature activation switchboard. P1 shipped with every flag false; V30.2B P2E
+ * activates the REWARD CLAIM path only — the genesis canary epoch is published
+ * on chain and claims verify against live contract state. Staking stays off.
  */
 export const V30_2B_FEATURE_ACTIVATION = {
-  rewardClaimsEnabled: false,
+  rewardClaimsEnabled: true,
   stakingExecutionEnabled: false,
   dynamicStakingEnabled: false,
   oracleConfigured: false,
   stakingPublisherAssigned: false,
-  rewardRootPublished: false,
+  rewardRootPublished: true,
   /** Untouched pre-existing swap/bridge posture, restated for the matrix. */
   routerV3Live: true,
   routerV4Promoted: false,
