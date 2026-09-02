@@ -1,0 +1,182 @@
+{
+  "gate": "V30.2B_P3B_GENESIS_ONLY_MAINNET_CANARY_PREFLIGHT",
+  "mode": "READ_ONLY_PREFLIGHT_AND_SIMULATION",
+  "generatedAt": "2026-09-02T12:04:13.989Z",
+  "chainId": 677,
+  "blockNumber": "21822363",
+  "blockTimestamp": "1788350637",
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "governance": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "approvedFuturePublisher": "0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22",
+    "canaryWallet": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164"
+  },
+  "authority": {
+    "vaultAdminGov": true,
+    "ctrlAdminGov": true,
+    "treasuryVaultRoleR6": true,
+    "treasuryCtrlRoleR5": true,
+    "epochRoleToController": false,
+    "publisherRoleAssigned": false
+  },
+  "economics": {
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "weeklyUsdBudget8": "0",
+    "genesisYear1Used": "0",
+    "standardYear1Used": "0",
+    "genesisCap": "1000000000000000000000000",
+    "standardCap": "2000000000000000000000000",
+    "totalCap": "3000000000000000000000000",
+    "epochEnd": "0",
+    "epochCommitted": "0",
+    "emergencyMode": false,
+    "vaultPaused": false,
+    "treasuryFlow": "10000000000000000000000000",
+    "treasuryFree": "10000000000000000000000000",
+    "treasuryObligations": "0",
+    "reservedGenesis": "0",
+    "reservedFloors": "0",
+    "vaultFlow": "0",
+    "totalPrincipal": "0",
+    "nextPositionId": "0",
+    "genesisMaxSeconds": "7776000"
+  },
+  "products": [
+    {
+      "productId": 0,
+      "active": true,
+      "lockSeconds": 0,
+      "genesisAprBps": 1800,
+      "floorBps": 0,
+      "targetBps": 1000,
+      "hardCapBps": 1200,
+      "minPrincipal": "1000000000000000000",
+      "minPrincipalFlow": "1",
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "productId": 1,
+      "active": true,
+      "lockSeconds": 2592000,
+      "genesisAprBps": 2700,
+      "floorBps": 800,
+      "targetBps": 1400,
+      "hardCapBps": 1800,
+      "minPrincipal": "1000000000000000000",
+      "minPrincipalFlow": "1",
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "productId": 2,
+      "active": true,
+      "lockSeconds": 7776000,
+      "genesisAprBps": 3600,
+      "floorBps": 1000,
+      "targetBps": 1800,
+      "hardCapBps": 2400,
+      "minPrincipal": "1000000000000000000",
+      "minPrincipalFlow": "1",
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "productId": 3,
+      "active": true,
+      "lockSeconds": 15552000,
+      "genesisAprBps": 4800,
+      "floorBps": 1200,
+      "targetBps": 2400,
+      "hardCapBps": 3200,
+      "minPrincipal": "1000000000000000000",
+      "minPrincipalFlow": "1",
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    },
+    {
+      "productId": 4,
+      "active": true,
+      "lockSeconds": 31536000,
+      "genesisAprBps": 6000,
+      "floorBps": 1500,
+      "targetBps": 3000,
+      "hardCapBps": 4000,
+      "minPrincipal": "1000000000000000000",
+      "minPrincipalFlow": "1",
+      "totalStaked": "0",
+      "flowPerSecond": "0"
+    }
+  ],
+  "flexible": {
+    "productId": 0,
+    "active": true,
+    "lockSeconds": 0,
+    "genesisAprBps": 1800,
+    "floorBps": 0,
+    "targetBps": 1000,
+    "hardCapBps": 1200,
+    "minPrincipal": "1000000000000000000",
+    "minPrincipalFlow": "1",
+    "totalStaked": "0",
+    "flowPerSecond": "0"
+  },
+  "canary": {
+    "wallet": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+    "flowBalance": "1000000000000000000",
+    "flowBalanceFormatted": "1",
+    "allowanceToVault": "0",
+    "nativeGas": "5896818158696951331",
+    "nativeGasFormatted": "5.896818158696951331",
+    "genesisSecondsConsumed": "0",
+    "genesisQuotaRemainingSeconds": "7776000",
+    "positionCount": "0"
+  },
+  "quote": {
+    "productId": 0,
+    "principal": "1000000000000000000",
+    "genesisRateBps": 1800,
+    "genesisSeconds": 7776000,
+    "genesisObligation": "44383561643835616",
+    "genesisObligationFlow": "0.044383561643835616",
+    "floorRateBps": 0,
+    "floorObligation": "0"
+  },
+  "transactions": [
+    {
+      "id": "P3B.TX1",
+      "label": "FlowToken.approve(R6 Vault, exactly 1 FLOW)",
+      "from": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+      "target": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+      "value": "0",
+      "data": "0x095ea7b300000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+      "simulation": "ok",
+      "gasEstimate": "46750",
+      "signer": "CANARY_USER_WALLET"
+    },
+    {
+      "id": "P3B.TX2",
+      "label": "R6.openPosition(productId=0 Flexible, 1 FLOW)",
+      "from": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+      "target": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+      "value": "0",
+      "data": "0x02c6234700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000de0b6b3a7640000",
+      "simulation": "blocked_on_allowance_only",
+      "error": "ContractFunctionExecutionError: The contract function \"openPosition\" reverted with the following signature:\n0xfb8f41b2\n\nUnable to decode signature \"0xfb8f41b2\" as it was not found on the provided ABI.\nMake sure you are using the correct ABI and that the error exists on it.\nYou can look up the decoded signature here: https://4byte.sourcify.dev/?q=0xfb8f41b2.\n \nContract Call:\n  address:   0x15e7B1b4",
+      "signer": "CANARY_USER_WALLET"
+    }
+  ],
+  "execution": {
+    "signed": 0,
+    "broadcast": 0,
+    "funded": 0,
+    "reason": "P3B requires the canary user wallet to sign both transactions. No key for 0x3d8a…0164 exists in this environment, and auto-signing is forbidden by the gate."
+  },
+  "preflight": "PASS",
+  "failures": [],
+  "blockingItems": [],
+  "checkCount": 43
+}
