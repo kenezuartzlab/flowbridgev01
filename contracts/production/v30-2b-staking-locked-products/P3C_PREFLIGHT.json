@@ -1,0 +1,237 @@
+{
+  "gate": "V30.2B P3C — Locked Genesis Products Fast-Track Preflight",
+  "readOnly": true,
+  "broadcast": false,
+  "chainId": 677,
+  "block": 21831752,
+  "blockTimestamp": 1788357678,
+  "canary": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "gates": {
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "emergencyMode": false,
+    "vaultPaused": false,
+    "epochRoleController": false,
+    "publisherRole": false,
+    "standardEpochCommitted": "0",
+    "dynamicStaking": "DISABLED"
+  },
+  "capacity": {
+    "treasuryFreeFlow": "9999999.999993013698630138",
+    "reservedGenesisFlow": "0",
+    "reservedFloorsFlow": "0",
+    "committedEpochFlow": "0",
+    "accruedUnclaimedFlow": "0.000000279680365296",
+    "genesisYear1RemainingFlow": "999999.999993013698630138",
+    "standardYear1RemainingFlow": "2000000",
+    "vaultTotalPrincipal": "0",
+    "canaryGenesisQuotaSeconds": 7774776,
+    "canaryFlowBalance": "1.000006706621004566",
+    "canaryAllowanceToVault": "0"
+  },
+  "products": {
+    "1": {
+      "productId": 1,
+      "name": "30 Days",
+      "active": true,
+      "lockSeconds": 2592000,
+      "genesisAprBps": 2700,
+      "floorBps": 800,
+      "minPrincipal": "1",
+      "genesisSecondsGranted": 2592000,
+      "genesisCoversFullTerm": true,
+      "productGenesisCoversFullTerm": true,
+      "genesisObligationFlow": "0.022191780821917808",
+      "floorObligationFlow": "0.006575342465753424",
+      "totalEntryReservationFlow": "0.028767123287671232",
+      "maturityAtIfOpenedNow": 1790949678,
+      "maturityIsoIfOpenedNow": "2026-10-02T14:01:18.000Z",
+      "earliestWithdrawalIso": "2026-10-02T14:01:18.000Z",
+      "simulation": "ALLOWANCE_ONLY",
+      "simulationError": "Execution reverted with reason: 0xfb8f41b200000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d",
+      "decision": "CANARY_READY",
+      "blockers": []
+    },
+    "2": {
+      "productId": 2,
+      "name": "90 Days",
+      "active": true,
+      "lockSeconds": 7776000,
+      "genesisAprBps": 3600,
+      "floorBps": 1000,
+      "minPrincipal": "1",
+      "genesisSecondsGranted": 7774776,
+      "genesisCoversFullTerm": false,
+      "productGenesisCoversFullTerm": true,
+      "genesisObligationFlow": "0.088753150684931506",
+      "floorObligationFlow": "0.024657534246575342",
+      "totalEntryReservationFlow": "0.113410684931506848",
+      "maturityAtIfOpenedNow": 1796133678,
+      "maturityIsoIfOpenedNow": "2026-12-01T14:01:18.000Z",
+      "earliestWithdrawalIso": "2026-12-01T14:01:18.000Z",
+      "simulation": "ALLOWANCE_ONLY",
+      "simulationError": "Execution reverted with reason: 0xfb8f41b200000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d",
+      "decision": "BLOCKED",
+      "blockers": [
+        "canary wallet lifetime Genesis quota (7774776s) is short of the 7776000s term by 1224s — a canary from this wallet would not be fully Genesis-covered through maturity"
+      ]
+    },
+    "3": {
+      "productId": 3,
+      "name": "180 Days",
+      "active": true,
+      "lockSeconds": 15552000,
+      "genesisAprBps": 4800,
+      "floorBps": 1200,
+      "minPrincipal": "1",
+      "genesisSecondsGranted": 7774776,
+      "genesisCoversFullTerm": false,
+      "productGenesisCoversFullTerm": false,
+      "genesisObligationFlow": "0.118337534246575342",
+      "floorObligationFlow": "0.059178082191780821",
+      "totalEntryReservationFlow": "0.177515616438356163",
+      "maturityAtIfOpenedNow": 1803909678,
+      "maturityIsoIfOpenedNow": "2027-03-01T14:01:18.000Z",
+      "earliestWithdrawalIso": "2027-03-01T14:01:18.000Z",
+      "simulation": "ALLOWANCE_ONLY",
+      "simulationError": "Execution reverted with reason: 0xfb8f41b200000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d",
+      "decision": "BLOCKED",
+      "blockers": [
+        "locked term outlives the 90-day Genesis window by 7776000s — post-Genesis period is floor-reserved only and has no proven live lifecycle"
+      ]
+    },
+    "4": {
+      "productId": 4,
+      "name": "365 Days",
+      "active": true,
+      "lockSeconds": 31536000,
+      "genesisAprBps": 6000,
+      "floorBps": 1500,
+      "minPrincipal": "1",
+      "genesisSecondsGranted": 7774776,
+      "genesisCoversFullTerm": false,
+      "productGenesisCoversFullTerm": false,
+      "genesisObligationFlow": "0.147921917808219178",
+      "floorObligationFlow": "0.15",
+      "totalEntryReservationFlow": "0.297921917808219178",
+      "maturityAtIfOpenedNow": 1819893678,
+      "maturityIsoIfOpenedNow": "2027-09-02T14:01:18.000Z",
+      "earliestWithdrawalIso": "2027-09-02T14:01:18.000Z",
+      "simulation": "ALLOWANCE_ONLY",
+      "simulationError": "Execution reverted with reason: 0xfb8f41b200000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d",
+      "decision": "BLOCKED",
+      "blockers": [
+        "locked term outlives the 90-day Genesis window by 23760000s — post-Genesis period is floor-reserved only and has no proven live lifecycle"
+      ]
+    }
+  },
+  "checks": [
+    {
+      "ok": true,
+      "label": "chain is BOT Mainnet 677",
+      "detail": "chainId=677"
+    },
+    {
+      "ok": true,
+      "label": "controller oracle is unset (0x0)",
+      "detail": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "ok": true,
+      "label": "controller emergencyMode false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "vault not paused",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "no standard epoch committed on controller",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "no live standard epoch window",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "vault currentEpochCommitted is zero",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "EPOCH_ROLE -> Controller is false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PUBLISHER_ROLE -> staking publisher is false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "reward treasury has free inventory",
+      "detail": "9999999.999993013698630138"
+    },
+    {
+      "ok": true,
+      "label": "vault totalPrincipal is zero (no open liability)",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "P3B Flexible product still active",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "P3B Flexible lockSeconds still 0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "P3B Flexible has no floor obligation",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30 Days: independent math equals deployed quoteOpen",
+      "detail": "genesis 0.022191780821917808 floor 0.006575342465753424 secs 2592000"
+    },
+    {
+      "ok": true,
+      "label": "90 Days: independent math equals deployed quoteOpen",
+      "detail": "genesis 0.088753150684931506 floor 0.024657534246575342 secs 7774776"
+    },
+    {
+      "ok": true,
+      "label": "180 Days: independent math equals deployed quoteOpen",
+      "detail": "genesis 0.118337534246575342 floor 0.059178082191780821 secs 7774776"
+    },
+    {
+      "ok": true,
+      "label": "365 Days: independent math equals deployed quoteOpen",
+      "detail": "genesis 0.147921917808219178 floor 0.15 secs 7774776"
+    },
+    {
+      "ok": true,
+      "label": "rewards distributor untouched and live",
+      "detail": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922"
+    }
+  ],
+  "verdict": {
+    "P3C": "PASS",
+    "30D": "CANARY_READY",
+    "90D": "BLOCKED",
+    "180D": "BLOCKED",
+    "365D": "BLOCKED"
+  }
+}
