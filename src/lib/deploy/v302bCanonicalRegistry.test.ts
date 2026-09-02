@@ -24,7 +24,7 @@ describe('V30.2B canonical mainnet registry', () => {
     for (const c of V30_2B_CANONICAL_CONTRACTS) {
       expect(c.chainId).toBe(BOT_MAINNET_CHAIN_ID);
       expect(c.sourceVerified).toBe(true);
-      expect(c.featureActive).toBe(false);
+      expect(typeof c.featureActive).toBe('boolean');
       expect(CANONICAL_LIFECYCLE_ORDER).toContain(c.lifecycle);
     }
     expect(V30_2B_CANONICAL_CONTRACTS.map((c) => c.address)).toEqual([
@@ -37,14 +37,16 @@ describe('V30.2B canonical mainnet registry', () => {
     ]);
   });
 
-  it('reports FUNDED_READY only for live-funded contracts and never FEATURE_ACTIVE', () => {
+  it('reports FUNDED_READY for live-funded contracts and FEATURE_ACTIVE only for rewards', () => {
     const byId = Object.fromEntries(V30_2B_CANONICAL_CONTRACTS.map((c) => [c.contractId, c]));
     expect(byId.FlowToken.lifecycle).toBe('FUNDED_READY');
-    expect(byId.FlowRewardsMerkleDistributor.lifecycle).toBe('FUNDED_READY');
+    expect(byId.FlowRewardsMerkleDistributor.lifecycle).toBe('FEATURE_ACTIVE');
     expect(byId.FlowStakingRewardTreasury.lifecycle).toBe('FUNDED_READY');
     expect(byId.FlowStakingRewardTreasury.fundedFlow).toBe('10000000');
     expect(byId.FlowRewardsMerkleDistributor.fundedFlow).toBe('1000000');
-    expect(V30_2B_CANONICAL_CONTRACTS.some((c) => c.lifecycle === 'FEATURE_ACTIVE')).toBe(false);
+    expect(
+      V30_2B_CANONICAL_CONTRACTS.filter((c) => c.lifecycle === 'FEATURE_ACTIVE').map((c) => c.contractId),
+    ).toEqual(['FlowRewardsMerkleDistributor']);
   });
 
   it('never lets a superseded V30.1/V30.2A address resolve as canonical', () => {
