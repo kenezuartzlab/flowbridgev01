@@ -1,0 +1,37 @@
+{
+  "gate": "V30.2B_P2F_REWARDS_SECURITY_FREEZE",
+  "mode": "READ_ONLY",
+  "generatedAt": "2026-09-02T06:27:16.900Z",
+  "chainId": 677,
+  "blockNumber": "21795421",
+  "distributor": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+  "epoch1": {
+    "root": "0xe5cf2fb350d37fce3ee74757d19d671d96c69f756f15f3227bdb6d156e8e6456",
+    "allocation": "1000000000000000000",
+    "claimed": "1000000000000000000",
+    "claimStart": 1788248562,
+    "claimEnd": 1790840562,
+    "cancelled": false,
+    "released": false,
+    "canaryClaimed": true
+  },
+  "economics": {
+    "paused": false,
+    "totalReserved": "0",
+    "totalClaimed": "1000000000000000000",
+    "campaignBudget": "1000000000000000000",
+    "budgetRemaining": "0",
+    "freeBalance": "999999000000000000000000",
+    "minPublishDelay": "86400",
+    "distributorFlow": "999999000000000000000000",
+    "canaryFlow": "1000000000000000000"
+  },
+  "writes": {
+    "signed": 0,
+    "broadcast": 0,
+    "funded": 0,
+    "rootsPublished": 0
+  },
+  "result": "REWARDS_PRODUCTION_FROZEN",
+  "blockers": []
+}
