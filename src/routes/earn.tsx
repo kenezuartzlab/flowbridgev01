@@ -52,6 +52,7 @@ import {
 } from "@/lib/rewards/flowRewardsRegistry";
 import { isFlowConversionPolicyApprovedForChain } from "@/lib/rewards/flowConversionPolicy";
 import { FlowTokenClaimCard } from "@/components/rewards/FlowTokenClaimCard";
+import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
 
 
 /**
@@ -392,6 +393,10 @@ function EarnPage() {
               campaignPts={campaignAuthed ? campaignPointsTotal : null}
               onClaimed={refresh}
             />
+
+            {/* V30.2B P2E — BOT Mainnet 677 published-epoch claim, fully separate
+                from the testnet authorization flow above. */}
+            <MainnetFlowClaimCard />
 
             {/* V13.2 — testnet vault live and funded; read-only surface, never a quoted rate. */}
             <Link

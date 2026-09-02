@@ -72,13 +72,13 @@ describe('V30.2B canonical mainnet registry', () => {
     expect(resolveCanonicalAddress(1, 'FlowStakingController')).toBeNull();
   });
 
-  it('keeps every economic feature flag disabled', () => {
-    expect(V30_2B_FEATURE_ACTIVATION.rewardClaimsEnabled).toBe(false);
+  it('activates only the reward claim path and keeps staking disabled', () => {
+    expect(V30_2B_FEATURE_ACTIVATION.rewardClaimsEnabled).toBe(true);
     expect(V30_2B_FEATURE_ACTIVATION.stakingExecutionEnabled).toBe(false);
     expect(V30_2B_FEATURE_ACTIVATION.dynamicStakingEnabled).toBe(false);
     expect(V30_2B_FEATURE_ACTIVATION.oracleConfigured).toBe(false);
     expect(V30_2B_FEATURE_ACTIVATION.stakingPublisherAssigned).toBe(false);
-    expect(V30_2B_FEATURE_ACTIVATION.rewardRootPublished).toBe(false);
+    expect(V30_2B_FEATURE_ACTIVATION.rewardRootPublished).toBe(true);
   });
 
   it('preserves the swap/bridge posture untouched', () => {
@@ -87,20 +87,21 @@ describe('V30.2B canonical mainnet registry', () => {
     expect(V30_2B_FEATURE_ACTIVATION.officialBridgeDirect).toBe(true);
   });
 
-  it('blocks preparation of every mainnet economic action while flags are off', () => {
-    expect(canPrepareMainnetEconomicAction('CLAIM_FLOW')).toBe(false);
+  it('allows only claim preparation on mainnet; staking stays blocked', () => {
+    expect(canPrepareMainnetEconomicAction('CLAIM_FLOW')).toBe(true);
     expect(canPrepareMainnetEconomicAction('STAKE_FLOW')).toBe(false);
     expect(canPrepareMainnetEconomicAction('UNSTAKE_FLOW')).toBe(false);
   });
 
-  it('publishes an activation matrix with no active feature', () => {
+  it('publishes an activation matrix where only the rewards distributor is active', () => {
     const rows = activationMatrix();
     expect(rows).toHaveLength(6);
     for (const row of rows) {
-      expect(row.featureActive).toBe(false);
-      expect(row.lifecycle).not.toBe('FEATURE_ACTIVE');
+      const isRewards = row.contractId === 'FlowRewardsMerkleDistributor';
+      expect(row.featureActive).toBe(isRewards);
+      expect(row.lifecycle === 'FEATURE_ACTIVE').toBe(isRewards);
       for (const flag of row.requiredFlags) {
-        expect(V30_2B_FEATURE_ACTIVATION[flag]).toBe(false);
+        expect(V30_2B_FEATURE_ACTIVATION[flag]).toBe(isRewards);
       }
     }
   });
