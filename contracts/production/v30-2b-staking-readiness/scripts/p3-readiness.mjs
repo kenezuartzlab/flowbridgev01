@@ -158,7 +158,14 @@ check(await has(A.controller, abi.controller, roles.ctrlAdmin, SAFES.governance)
 check(await has(A.vault, abi.vault, roles.vaultAdmin, SAFES.governance), 'Vault admin == Governance Safe');
 check(await has(A.vault, abi.vault, roles.vaultPauser, SAFES.governance), 'Vault PAUSER_ROLE == Governance Safe');
 check(await has(A.vault, abi.vault, roles.vaultPauser, SAFES.operations), 'Vault PAUSER_ROLE also with Operations Safe');
-check(await has(A.vault, abi.vault, roles.vaultEpoch, A.controller), 'Vault EPOCH_ROLE held by Controller');
+const vaultEpochHolders = [];
+for (const [name, who] of Object.entries({ ...SAFES, vault: A.vault, controller: A.controller, treasury: A.treasury })) {
+  if (await has(A.vault, abi.vault, roles.vaultEpoch, who)) vaultEpochHolders.push(name);
+}
+check(!vaultEpochHolders.some((n) => n === 'deployer'), 'Vault EPOCH_ROLE not held by deployer', vaultEpochHolders.join(',') || 'unassigned');
+if (!vaultEpochHolders.includes('controller')) {
+  blockers.push('VAULT_EPOCH_ROLE_UNASSIGNED: Vault EPOCH_ROLE is held by no address (not even the Controller), so no epoch emission can reach the Vault. Granting it is an authorized governance write and is NOT performed by this gate.');
+}
 
 const publisherHolders = [];
 for (const [name, who] of Object.entries({ ...SAFES, vault: A.vault, controller: A.controller })) {
@@ -198,6 +205,7 @@ const evidence = {
   caps: Object.fromEntries(Object.entries(caps).map(([k, v]) => [k, typeof v === 'bigint' ? v.toString() : v])),
   products,
   publisherHolders,
+  vaultEpochHolders,
   deployerAuthority,
   pauseState: paused,
   writes: { signed: 0, broadcast: 0, funded: 0, oracleWrites: 0, publisherAssignments: 0, epochPublications: 0 },
@@ -209,6 +217,7 @@ const evidence = {
     : {
         note: 'NOT EXECUTED IN THIS GATE. Minimal fixed-rate / Genesis-only activation path, if separately authorized.',
         steps: [
+          'Governance Safe: grantRole(EPOCH_ROLE, Controller) on Vault 0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D',
           'Governance Safe: grantRole(PUBLISHER_ROLE, <approved publisher>) on Controller 0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF',
           'Publisher: commit a fixed-rate Genesis epoch <= 50,000 FLOW for 7 days, within the 1,000,000 FLOW Genesis year-1 ceiling',
           'Leave oracle unset and weeklyUsdBudget8 == 0 so the dynamic USD-budgeted path stays disabled',
