@@ -166,21 +166,24 @@ for (const pid of [1, 2, 3, 4]) {
   if (genesisObligation > genesisRemaining) blockers.push('genesis obligation exceeds remaining GENESIS Year-1 capacity');
 
   // Genesis coverage vs maturity.
+  //  * Product-level: the deployed vault grants min(lockSeconds, 90 days).
+  //  * Wallet-level: further clamped by the wallet's lifetime Genesis quota.
+  const productGenesisCoversTerm = lock <= GENESIS_MAX_SECONDS;
   const genesisCoversTerm = grant >= lock;
-  if (!genesisCoversTerm) {
-    // Post-Genesis remainder of the locked term. It must be contractually
-    // defined AND fully reserved at entry with no oracle/epoch dependency.
-    const postGenesisSeconds = lock - grant;
+  if (!productGenesisCoversTerm) {
+    // 180D / 365D: the locked term outlives the 90-day Genesis window by
+    // construction. The remaining term is contractually defined only by the
+    // fixed floor rate reserved at entry (no oracle, no epoch needed), but the
+    // fast-track rules keep these BLOCKED for public execution until a
+    // product-specific live lifecycle is proven through maturity.
+    const postGenesisSeconds = lock - GENESIS_MAX_SECONDS;
     const floorCoversPostGenesis = p.floorBps > 0 && floorObligation > 0n;
     if (!floorCoversPostGenesis) {
       blockers.push(`post-Genesis ${postGenesisSeconds}s of the locked term has no reserved floor obligation`);
     }
-    // Variable tier is oracle/epoch-driven and MUST NOT be required.
-    // It is additive-only in the deployed vault (varPerTokenStored stays 0
-    // while no epoch exists), so it is not a funding dependency — but the
-    // fast-track rules keep 180D/365D BLOCKED for public execution until a
-    // product-specific live lifecycle is proven to maturity.
-    blockers.push('locked term extends beyond the 90-day Genesis window — requires its own proven post-Genesis lifecycle before public execution');
+    blockers.push(`locked term outlives the 90-day Genesis window by ${postGenesisSeconds}s — post-Genesis period is floor-reserved only and has no proven live lifecycle`);
+  } else if (!genesisCoversTerm) {
+    blockers.push(`canary wallet lifetime Genesis quota (${quotaRemaining}s) is short of the ${lock}s term by ${lock - grant}s — a canary from this wallet would not be fully Genesis-covered through maturity`);
   }
 
   // Simulation from the canary wallet with current mainnet state.
@@ -197,9 +200,12 @@ for (const pid of [1, 2, 3, 4]) {
     } catch (e) {
       const msg = `${e.shortMessage ?? ''} ${e.details ?? ''} ${e.message ?? ''}`;
       simError = (e.shortMessage ?? e.message ?? '').slice(0, 220);
-      if (/allowance|InsufficientAllowance|transfer amount exceeds allowance/i.test(msg)) {
+      // OpenZeppelin v5 custom errors, matched by selector on the raw data.
+      const ALLOWANCE_SELECTOR = '0xfb8f41b2'; // ERC20InsufficientAllowance
+      const BALANCE_SELECTOR = '0xe450d38c'; // ERC20InsufficientBalance
+      if (msg.includes(ALLOWANCE_SELECTOR) || /InsufficientAllowance|exceeds allowance/i.test(msg)) {
         simulation = 'ALLOWANCE_ONLY';
-      } else if (/balance/i.test(msg) && /exceeds/i.test(msg)) {
+      } else if (msg.includes(BALANCE_SELECTOR) || (/balance/i.test(msg) && /exceeds/i.test(msg))) {
         simulation = 'INSUFFICIENT_BALANCE';
       } else {
         simulation = 'REVERT';
@@ -224,6 +230,7 @@ for (const pid of [1, 2, 3, 4]) {
     minPrincipal: formatEther(principal),
     genesisSecondsGranted: Number(grant),
     genesisCoversFullTerm: genesisCoversTerm,
+    productGenesisCoversFullTerm: productGenesisCoversTerm,
     genesisObligationFlow: formatEther(genesisObligation),
     floorObligationFlow: formatEther(floorObligation),
     totalEntryReservationFlow: formatEther(genesisObligation + floorObligation),
