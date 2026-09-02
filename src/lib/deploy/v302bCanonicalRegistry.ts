@@ -50,7 +50,7 @@ export interface CanonicalContractEntry {
   /** Live-reconciled FLOW balance in whole FLOW (18 decimals assumed). */
   fundedFlow: string;
   /** True once an end-user feature reads/writes this contract in production. */
-  featureActive: false;
+  featureActive: boolean;
 }
 
 /** The only mainnet economic addresses the app may select. */
