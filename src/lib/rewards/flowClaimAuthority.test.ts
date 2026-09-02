@@ -50,7 +50,7 @@ describe("authorizeFlowTokenClaim", () => {
       chainId: BOT_MAINNET_CHAIN_ID,
       deps: d,
     });
-    expect(res).toMatchObject({ authorized: false, reason: "modelNotCanonicalForChain" });
+    expect(res).toMatchObject({ authorized: false, reason: "signerModelNotCanonical" });
     expect(d.signTypedData).not.toHaveBeenCalled();
   });
 
