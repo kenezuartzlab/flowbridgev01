@@ -14,11 +14,11 @@ describe("flow rewards registry", () => {
     expect(resolveFlowClaimReadiness(97, true)).toMatchObject({ ready: false, reason: "unsupportedChain" });
   });
 
-  it("keeps mainnet claims disabled in the V12.2C gate", () => {
-    expect(getFlowRewardsChainConfig(BOT_MAINNET_CHAIN_ID)!.claimsEnabled).toBe(false);
-    expect(FLOW_REWARDS_CHAINS.filter((c) => c.claimsEnabled).map((c) => c.chainId)).toEqual([
-      BOT_TESTNET_CHAIN_ID,
-    ]);
+  it("enables mainnet claims only after the V30.2B P2E activation gate", () => {
+    expect(getFlowRewardsChainConfig(BOT_MAINNET_CHAIN_ID)!.claimsEnabled).toBe(true);
+    expect(FLOW_REWARDS_CHAINS.filter((c) => c.claimsEnabled).map((c) => c.chainId).sort()).toEqual(
+      [BOT_MAINNET_CHAIN_ID, BOT_TESTNET_CHAIN_ID].sort(),
+    );
   });
 
   it("never lets mainnet inherit testnet addresses (V30.2B canonical only)", () => {
@@ -29,10 +29,12 @@ describe("flow rewards registry", () => {
     expect(mainnet.token).not.toBe(testnet.token);
     expect(mainnet.distributor).not.toBe(testnet.distributor);
     expect(mainnet.chainId).not.toBe(testnet.chainId);
-    // Funded + verified, but claims remain disabled: no mainnet claim path.
-    expect(resolveFlowClaimReadiness(BOT_MAINNET_CHAIN_ID, true)).toMatchObject({
+    // V30.2B P2E: mainnet claims are live, but only through the budgeted epoch
+    // distributor — never a signer authorization, and never on testnet addresses.
+    expect(resolveFlowClaimReadiness(BOT_MAINNET_CHAIN_ID, true)).toMatchObject({ ready: true });
+    expect(resolveFlowClaimReadiness(BOT_MAINNET_CHAIN_ID, false)).toMatchObject({
       ready: false,
-      reason: "claimsDisabled",
+      reason: "conversionPolicyNotApproved",
     });
   });
 
