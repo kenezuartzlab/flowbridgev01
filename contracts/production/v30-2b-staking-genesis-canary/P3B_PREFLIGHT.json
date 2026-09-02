@@ -1,10 +1,10 @@
 {
   "gate": "V30.2B_P3B_GENESIS_ONLY_MAINNET_CANARY_PREFLIGHT",
   "mode": "READ_ONLY_PREFLIGHT_AND_SIMULATION",
-  "generatedAt": "2026-09-02T12:03:33.129Z",
+  "generatedAt": "2026-09-02T12:04:13.989Z",
   "chainId": 677,
-  "blockNumber": "21822309",
-  "blockTimestamp": "1788350596",
+  "blockNumber": "21822363",
+  "blockTimestamp": "1788350637",
   "addresses": {
     "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
     "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
@@ -164,7 +164,7 @@
       "target": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
       "value": "0",
       "data": "0x02c6234700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000de0b6b3a7640000",
-      "simulation": "revert",
+      "simulation": "blocked_on_allowance_only",
       "error": "ContractFunctionExecutionError: The contract function \"openPosition\" reverted with the following signature:\n0xfb8f41b2\n\nUnable to decode signature \"0xfb8f41b2\" as it was not found on the provided ABI.\nMake sure you are using the correct ABI and that the error exists on it.\nYou can look up the decoded signature here: https://4byte.sourcify.dev/?q=0xfb8f41b2.\n \nContract Call:\n  address:   0x15e7B1b4",
       "signer": "CANARY_USER_WALLET"
     }
@@ -175,12 +175,8 @@
     "funded": 0,
     "reason": "P3B requires the canary user wallet to sign both transactions. No key for 0x3d8a…0164 exists in this environment, and auto-signing is forbidden by the gate."
   },
-  "preflight": "FAIL",
-  "failures": [
-    "TX2 simulation: R6.openPosition(Flexible, 1 FLOW) :: ContractFunctionExecutionError: The contract function \"openPosition\" reverted with the following signature:\n0xfb8f41b2\n\nUnable to decode signature \"0xfb8f41b2\" as it was not found on the provided ABI."
-  ],
-  "blockingItems": [
-    "OPEN_POSITION_SIMULATION_REVERT: ContractFunctionExecutionError: The contract function \"openPosition\" reverted with the following signature:\n0xfb8f41b2\n\nUnable to decode signature \"0xfb8f41b2\" as it was not found on the provided ABI."
-  ],
+  "preflight": "PASS",
+  "failures": [],
+  "blockingItems": [],
   "checkCount": 43
 }

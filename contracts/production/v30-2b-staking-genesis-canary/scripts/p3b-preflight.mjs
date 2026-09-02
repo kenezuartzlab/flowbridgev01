@@ -225,7 +225,8 @@ if (openData) {
     check(true, 'TX2 simulation: R6.openPosition(Flexible, 1 FLOW)', `positionId=${result}`);
   } catch (e) {
     const msg = String(e);
-    const allowanceGated = /allowance|ERC20InsufficientAllowance|transfer amount exceeds/i.test(msg);
+    // 0xfb8f41b2 == ERC20InsufficientAllowance(address,uint256,uint256)
+    const allowanceGated = /0xfb8f41b2|ERC20InsufficientAllowance|allowance/i.test(msg);
     sims.openPosition = {
       simulation: allowanceGated ? 'blocked_on_allowance_only' : 'revert',
       error: msg.slice(0, 400),
