@@ -159,9 +159,11 @@ export function MainnetFlowClaimCard() {
           </dl>
         )}
 
-        <p className="text-[12px] leading-relaxed text-muted">
-          {claim.loading ? 'Reading live reward state from BOT Mainnet…' : claim.message}
-        </p>
+        {wallet ? (
+          <p className="text-[12px] leading-relaxed text-muted">
+            {claim.loading ? 'Reading live reward state from BOT Mainnet…' : claim.message}
+          </p>
+        ) : null}
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
