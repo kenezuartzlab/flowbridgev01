@@ -70,10 +70,13 @@ export const V30_2B_CANONICAL_CONTRACTS: readonly CanonicalContractEntry[] = [
     stage: 'R2',
     chainId: BOT_MAINNET_CHAIN_ID,
     address: '0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922',
-    lifecycle: 'FUNDED_READY',
+    // V30.2B P2E: genesis canary epoch 1 published (root
+    // 0xe5cf2f…6456) and claimed on chain, so the user-facing claim surface
+    // reads this contract in production.
+    lifecycle: 'FEATURE_ACTIVE',
     sourceVerified: true,
     fundedFlow: '1000000',
-    featureActive: false,
+    featureActive: true,
   },
   {
     contractId: 'FlowBridgeActivityRegistry',
