@@ -96,7 +96,8 @@ export function evaluateLockedExecution(
 ): LockedExecutionEvaluation {
   const blockers: string[] = [];
 
-  if (!isLockedStakingActivated()) blockers.push('Locked staking is not activated.');
+  const activated = gates.activated ?? isLockedStakingActivated();
+  if (!activated) blockers.push('Locked staking is not activated.');
   if (gates.chainId !== BOT_MAINNET_CHAIN_ID) blockers.push('Switch to BOT Mainnet to stake.');
   if (gates.vaultPaused) blockers.push('The staking vault is paused on chain.');
   if (gates.emergencyMode) blockers.push('The staking controller is in emergency mode.');
