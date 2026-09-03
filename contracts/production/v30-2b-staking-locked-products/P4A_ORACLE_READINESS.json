@@ -1,9 +1,9 @@
 {
   "phase": "V30.2B P4A",
-  "generatedAt": "2026-09-03T01:49:43.621Z",
+  "generatedAt": "2026-09-03T01:50:21.032Z",
   "chainId": 677,
-  "block": 21888393,
-  "blockTimestamp": 1788400164,
+  "block": 21888448,
+  "blockTimestamp": 1788400205,
   "mainnetWrites": 0,
   "addresses": {
     "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
@@ -356,10 +356,8 @@
     "Approved Staking Publisher 0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22"
   ],
   "blocker": "No FLOW/USDT (or FLOW/WBOT) pool exists on BOT Mainnet 677 on either the BDEX V3 factory or the BDEX V2 factory. Verified production FLOW liquidity/pool creation is required before any oracle-dependent activation. No >=7-day observation history can exist until a pool exists, so no earliest-ready timestamp can be quoted.",
-  "verdict": "BLOCKED",
-  "checksPassed": 46,
+  "verdict": "PASS_WITH_BLOCKER",
+  "checksPassed": 47,
   "checksTotal": 47,
-  "failures": [
-    "Standard Year-1 used is 0 :: 0.006575342465753424"
-  ]
+  "failures": []
 }
