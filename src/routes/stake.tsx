@@ -124,6 +124,9 @@ function StakePage() {
 
         <MainnetGenesisStakeCard />
 
+        <MainnetLockedStakeCard />
+
+
         <FlowStakingPreviewCard
           flowPoints={Number(incentives?.flowPoints ?? 0)}
           campaignPts={authenticated ? campaignPointsTotal : null}
