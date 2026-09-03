@@ -1,0 +1,1220 @@
+{
+  "gate": "V30.2B P3C.1 — accelerated BOT Mainnet fork lifecycle test",
+  "generatedAt": "2026-09-03T00:11:17.846Z",
+  "rpcSource": "https://rpc.botchain.ai",
+  "forkRpc": "http://127.0.0.1:8899",
+  "isolation": "one product per process against a fresh mainnet fork",
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "forkFunder": "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4",
+  "mainnetWrites": 0,
+  "oracle": "0x0000000000000000000000000000000000000000",
+  "runs": [
+    {
+      "products": [
+        "30D"
+      ],
+      "chainId": 677,
+      "blockNumber": 21880409,
+      "blockHash": "0x6a34d04d95d5f1d5c76223a1e4581aa0521c04e2b32d27fb4319ccf773c1f4a1",
+      "blockTimestamp": 1788394176,
+      "forkPass": true,
+      "failures": [],
+      "checkCount": 50
+    },
+    {
+      "products": [
+        "90D"
+      ],
+      "chainId": 677,
+      "blockNumber": 21880450,
+      "blockHash": "0xf5f9774c08df8927f71bcf3c8ba4a9b1257655035cc9b954ce0b157060627941",
+      "blockTimestamp": 1788394207,
+      "forkPass": true,
+      "failures": [],
+      "checkCount": 50
+    },
+    {
+      "products": [
+        "180D"
+      ],
+      "chainId": 677,
+      "blockNumber": 21880483,
+      "blockHash": "0x85c531bc0342bca453ab07f7aaca28c68276987aa0811d9eb1f5f8b91d06f287",
+      "blockTimestamp": 1788394232,
+      "forkPass": true,
+      "failures": [],
+      "checkCount": 53
+    },
+    {
+      "products": [
+        "365D"
+      ],
+      "chainId": 677,
+      "blockNumber": 21880522,
+      "blockHash": "0x4e90da1e4d448f1cd28e36cc71003b7e32b06b89be3f82fb56c23dbcfa63fb01",
+      "blockTimestamp": 1788394261,
+      "forkPass": true,
+      "failures": [],
+      "checkCount": 53
+    }
+  ],
+  "products": {
+    "30D": {
+      "productId": 1,
+      "forkWallet": "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+      "lockSeconds": 2592000,
+      "genesisAprBps": 2700,
+      "floorBps": 800,
+      "minPrincipal": "1000000000000000000",
+      "quote": {
+        "genesisRateBps": 2700,
+        "genesisSeconds": 2592000,
+        "genesisObligation": "22191780821917808",
+        "floorRateBps": 800,
+        "floorObligation": "6575342465753424"
+      },
+      "openedAt": 1788394190,
+      "genesisEndAt": 1790986190,
+      "maturityAt": 1790986190,
+      "totalRewardsPaid": "28767123287671232",
+      "principalReturned": "1000000000000000000",
+      "postGenesis": null,
+      "notes": [],
+      "blockers": [],
+      "decision": "FULL_LIFECYCLE_PASS"
+    },
+    "90D": {
+      "productId": 2,
+      "forkWallet": "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+      "lockSeconds": 7776000,
+      "genesisAprBps": 3600,
+      "floorBps": 1000,
+      "minPrincipal": "1000000000000000000",
+      "quote": {
+        "genesisRateBps": 3600,
+        "genesisSeconds": 7776000,
+        "genesisObligation": "88767123287671232",
+        "floorRateBps": 1000,
+        "floorObligation": "24657534246575342"
+      },
+      "openedAt": 1788394220,
+      "genesisEndAt": 1796170220,
+      "maturityAt": 1796170220,
+      "totalRewardsPaid": "113424657534246574",
+      "principalReturned": "1000000000000000000",
+      "postGenesis": null,
+      "notes": [],
+      "blockers": [],
+      "decision": "FULL_LIFECYCLE_PASS"
+    },
+    "180D": {
+      "productId": 3,
+      "forkWallet": "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+      "lockSeconds": 15552000,
+      "genesisAprBps": 4800,
+      "floorBps": 1200,
+      "minPrincipal": "1000000000000000000",
+      "quote": {
+        "genesisRateBps": 4800,
+        "genesisSeconds": 7776000,
+        "genesisObligation": "118356164383561643",
+        "floorRateBps": 1200,
+        "floorObligation": "59178082191780821"
+      },
+      "openedAt": 1788394245,
+      "genesisEndAt": 1796170245,
+      "maturityAt": 1803946245,
+      "totalRewardsPaid": "177534246575342462",
+      "principalReturned": "1000000000000000000",
+      "postGenesis": {
+        "pendingAtGenesisEnd": "73972606544901064",
+        "pendingThirtyDaysPostGenesis": "83835616438356163",
+        "floorAccrualContinues": true,
+        "variableAccrualZero": true,
+        "claimAvailablePostGenesis": true,
+        "claimPaidPostGenesis": "83835620243531201"
+      },
+      "notes": [],
+      "blockers": [],
+      "decision": "FULL_LIFECYCLE_PASS"
+    },
+    "365D": {
+      "productId": 4,
+      "forkWallet": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+      "lockSeconds": 31536000,
+      "genesisAprBps": 6000,
+      "floorBps": 1500,
+      "minPrincipal": "1000000000000000000",
+      "quote": {
+        "genesisRateBps": 6000,
+        "genesisSeconds": 7776000,
+        "genesisObligation": "147945205479452054",
+        "floorRateBps": 1500,
+        "floorObligation": "150000000000000000"
+      },
+      "openedAt": 1788394275,
+      "genesisEndAt": 1796170275,
+      "maturityAt": 1819930275,
+      "totalRewardsPaid": "297945205479452053",
+      "principalReturned": "1000000000000000000",
+      "postGenesis": {
+        "pendingAtGenesisEnd": "92465758181126331",
+        "pendingThirtyDaysPostGenesis": "104794520547945205",
+        "floorAccrualContinues": true,
+        "variableAccrualZero": true,
+        "claimAvailablePostGenesis": true,
+        "claimPaidPostGenesis": "104794520547945205"
+      },
+      "notes": [],
+      "blockers": [],
+      "decision": "FULL_LIFECYCLE_PASS"
+    }
+  },
+  "verdict": {
+    "P3C.1 FORK": "PASS",
+    "30D": "FULL_LIFECYCLE_PASS",
+    "90D": "FULL_LIFECYCLE_PASS",
+    "180D": "FULL_LIFECYCLE_PASS",
+    "365D": "FULL_LIFECYCLE_PASS",
+    "ORACLE": "0x0 UNCHANGED",
+    "MAINNET WRITES": 0
+  },
+  "checks": [
+    {
+      "ok": true,
+      "label": "fork reports BOT Mainnet chain id 677",
+      "detail": "chainId=677"
+    },
+    {
+      "ok": true,
+      "label": "GENESIS_MAX_SECONDS is 90 days",
+      "detail": "7776000"
+    },
+    {
+      "ok": true,
+      "label": "oracle is 0x0 at fork start",
+      "detail": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "ok": true,
+      "label": "emergencyMode false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "vault not paused",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "EPOCH_ROLE -> Controller false at fork start",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PUBLISHER_ROLE unassigned at fork start",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: fork wallet is not the P3B canary wallet",
+      "detail": "0x976EA74026E726554dB657fA54763abd0C3a0aa9"
+    },
+    {
+      "ok": true,
+      "label": "30D: fork user funded with exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "30D: fresh wallet has full 90-day Genesis quota",
+      "detail": "7776000"
+    },
+    {
+      "ok": true,
+      "label": "30D: product active on controller",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: 1 FLOW >= deployed minPrincipal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "30D: quoteOpen genesis rate matches controller",
+      "detail": "2700"
+    },
+    {
+      "ok": true,
+      "label": "30D: quoteOpen floor rate matches controller",
+      "detail": "800"
+    },
+    {
+      "ok": true,
+      "label": "30D: genesis seconds parity",
+      "detail": "2592000 vs 2592000"
+    },
+    {
+      "ok": true,
+      "label": "30D: genesis obligation integer parity",
+      "detail": "0.022191780821917808"
+    },
+    {
+      "ok": true,
+      "label": "30D: floor obligation integer parity",
+      "detail": "0.006575342465753424"
+    },
+    {
+      "ok": true,
+      "label": "30D: exact 1 FLOW allowance (never unlimited)",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "30D: position owner is the fork user",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: position productId",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "30D: position principal is exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "30D: genesis reserved equals quote",
+      "detail": "0.022191780821917808"
+    },
+    {
+      "ok": true,
+      "label": "30D: floor reserved equals quote",
+      "detail": "0.006575342465753424"
+    },
+    {
+      "ok": true,
+      "label": "30D: maturity = openedAt + lock",
+      "detail": "1790986190"
+    },
+    {
+      "ok": true,
+      "label": "30D: user principal transferred in full",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: treasury reservedGenesis delta",
+      "detail": "0.022191780821917808"
+    },
+    {
+      "ok": true,
+      "label": "30D: treasury reservedFloors delta",
+      "detail": "0.006575342465753424"
+    },
+    {
+      "ok": true,
+      "label": "30D: controller genesis Year-1 budget consumed exactly",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: controller standard Year-1 budget consumed exactly (floor)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: free reward balance reduced by reservations only",
+      "detail": "0.028767123287671232"
+    },
+    {
+      "ok": true,
+      "label": "30D: treasury solvent after open (obligations <= inventory)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: positive accrual mid-Genesis",
+      "detail": "0.014383561643835616"
+    },
+    {
+      "ok": true,
+      "label": "30D: claim paid at least the previewed amount",
+      "detail": "0.014383561643835616"
+    },
+    {
+      "ok": true,
+      "label": "30D: claim never reduces principal",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: immediate repeat claim cannot double-pay",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "30D: withdraw at maturity succeeds",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "30D: at least exact 1 FLOW principal returned",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "30D: position is CLOSED after withdrawal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "30D: vault totalPrincipal back to baseline (zero stranded principal)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: earned dust claimable after closure",
+      "detail": "0.014383561643835616"
+    },
+    {
+      "ok": true,
+      "label": "30D: no unclaimed reward liability remains",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "30D: fork user holds exactly principal + all rewards paid",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: genesis reservation fully released/consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "30D: floor reservation fully released/consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "30D: treasury solvent at closure",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: treasury obligations back to baseline",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "30D: reserved obligations equal rewards paid out exactly",
+      "detail": "paidOut=0.028767123287671232 freeDelta=0.028767123287671232"
+    },
+    {
+      "ok": true,
+      "label": "30D: oracle still 0x0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: EPOCH_ROLE still unassigned",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D: PUBLISHER_ROLE still unassigned",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "fork reports BOT Mainnet chain id 677",
+      "detail": "chainId=677"
+    },
+    {
+      "ok": true,
+      "label": "GENESIS_MAX_SECONDS is 90 days",
+      "detail": "7776000"
+    },
+    {
+      "ok": true,
+      "label": "oracle is 0x0 at fork start",
+      "detail": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "ok": true,
+      "label": "emergencyMode false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "vault not paused",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "EPOCH_ROLE -> Controller false at fork start",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PUBLISHER_ROLE unassigned at fork start",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: fork wallet is not the P3B canary wallet",
+      "detail": "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955"
+    },
+    {
+      "ok": true,
+      "label": "90D: fork user funded with exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "90D: fresh wallet has full 90-day Genesis quota",
+      "detail": "7776000"
+    },
+    {
+      "ok": true,
+      "label": "90D: product active on controller",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: 1 FLOW >= deployed minPrincipal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "90D: quoteOpen genesis rate matches controller",
+      "detail": "3600"
+    },
+    {
+      "ok": true,
+      "label": "90D: quoteOpen floor rate matches controller",
+      "detail": "1000"
+    },
+    {
+      "ok": true,
+      "label": "90D: genesis seconds parity",
+      "detail": "7776000 vs 7776000"
+    },
+    {
+      "ok": true,
+      "label": "90D: genesis obligation integer parity",
+      "detail": "0.088767123287671232"
+    },
+    {
+      "ok": true,
+      "label": "90D: floor obligation integer parity",
+      "detail": "0.024657534246575342"
+    },
+    {
+      "ok": true,
+      "label": "90D: exact 1 FLOW allowance (never unlimited)",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "90D: position owner is the fork user",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: position productId",
+      "detail": "2"
+    },
+    {
+      "ok": true,
+      "label": "90D: position principal is exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "90D: genesis reserved equals quote",
+      "detail": "0.088767123287671232"
+    },
+    {
+      "ok": true,
+      "label": "90D: floor reserved equals quote",
+      "detail": "0.024657534246575342"
+    },
+    {
+      "ok": true,
+      "label": "90D: maturity = openedAt + lock",
+      "detail": "1796170220"
+    },
+    {
+      "ok": true,
+      "label": "90D: user principal transferred in full",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: treasury reservedGenesis delta",
+      "detail": "0.088767123287671232"
+    },
+    {
+      "ok": true,
+      "label": "90D: treasury reservedFloors delta",
+      "detail": "0.024657534246575342"
+    },
+    {
+      "ok": true,
+      "label": "90D: controller genesis Year-1 budget consumed exactly",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: controller standard Year-1 budget consumed exactly (floor)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: free reward balance reduced by reservations only",
+      "detail": "0.113424657534246574"
+    },
+    {
+      "ok": true,
+      "label": "90D: treasury solvent after open (obligations <= inventory)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: positive accrual mid-Genesis",
+      "detail": "0.056712328767123287"
+    },
+    {
+      "ok": true,
+      "label": "90D: claim paid at least the previewed amount",
+      "detail": "0.056712328767123287"
+    },
+    {
+      "ok": true,
+      "label": "90D: claim never reduces principal",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: immediate repeat claim cannot double-pay",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "90D: withdraw at maturity succeeds",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "90D: at least exact 1 FLOW principal returned",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "90D: position is CLOSED after withdrawal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "90D: vault totalPrincipal back to baseline (zero stranded principal)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: earned dust claimable after closure",
+      "detail": "0.056712328767123287"
+    },
+    {
+      "ok": true,
+      "label": "90D: no unclaimed reward liability remains",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "90D: fork user holds exactly principal + all rewards paid",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: genesis reservation fully released/consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "90D: floor reservation fully released/consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "90D: treasury solvent at closure",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: treasury obligations back to baseline",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "90D: reserved obligations equal rewards paid out exactly",
+      "detail": "paidOut=0.113424657534246574 freeDelta=0.113424657534246574"
+    },
+    {
+      "ok": true,
+      "label": "90D: oracle still 0x0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: EPOCH_ROLE still unassigned",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "90D: PUBLISHER_ROLE still unassigned",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "fork reports BOT Mainnet chain id 677",
+      "detail": "chainId=677"
+    },
+    {
+      "ok": true,
+      "label": "GENESIS_MAX_SECONDS is 90 days",
+      "detail": "7776000"
+    },
+    {
+      "ok": true,
+      "label": "oracle is 0x0 at fork start",
+      "detail": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "ok": true,
+      "label": "emergencyMode false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "vault not paused",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "EPOCH_ROLE -> Controller false at fork start",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PUBLISHER_ROLE unassigned at fork start",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: fork wallet is not the P3B canary wallet",
+      "detail": "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f"
+    },
+    {
+      "ok": true,
+      "label": "180D: fork user funded with exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "180D: fresh wallet has full 90-day Genesis quota",
+      "detail": "7776000"
+    },
+    {
+      "ok": true,
+      "label": "180D: product active on controller",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: 1 FLOW >= deployed minPrincipal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "180D: quoteOpen genesis rate matches controller",
+      "detail": "4800"
+    },
+    {
+      "ok": true,
+      "label": "180D: quoteOpen floor rate matches controller",
+      "detail": "1200"
+    },
+    {
+      "ok": true,
+      "label": "180D: genesis seconds parity",
+      "detail": "7776000 vs 7776000"
+    },
+    {
+      "ok": true,
+      "label": "180D: genesis obligation integer parity",
+      "detail": "0.118356164383561643"
+    },
+    {
+      "ok": true,
+      "label": "180D: floor obligation integer parity",
+      "detail": "0.059178082191780821"
+    },
+    {
+      "ok": true,
+      "label": "180D: exact 1 FLOW allowance (never unlimited)",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "180D: position owner is the fork user",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: position productId",
+      "detail": "3"
+    },
+    {
+      "ok": true,
+      "label": "180D: position principal is exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "180D: genesis reserved equals quote",
+      "detail": "0.118356164383561643"
+    },
+    {
+      "ok": true,
+      "label": "180D: floor reserved equals quote",
+      "detail": "0.059178082191780821"
+    },
+    {
+      "ok": true,
+      "label": "180D: maturity = openedAt + lock",
+      "detail": "1803946245"
+    },
+    {
+      "ok": true,
+      "label": "180D: user principal transferred in full",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: treasury reservedGenesis delta",
+      "detail": "0.118356164383561643"
+    },
+    {
+      "ok": true,
+      "label": "180D: treasury reservedFloors delta",
+      "detail": "0.059178082191780821"
+    },
+    {
+      "ok": true,
+      "label": "180D: controller genesis Year-1 budget consumed exactly",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: controller standard Year-1 budget consumed exactly (floor)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: free reward balance reduced by reservations only",
+      "detail": "0.177534246575342464"
+    },
+    {
+      "ok": true,
+      "label": "180D: treasury solvent after open (obligations <= inventory)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: positive accrual mid-Genesis",
+      "detail": "0.073972602739726026"
+    },
+    {
+      "ok": true,
+      "label": "180D: claim paid at least the previewed amount",
+      "detail": "0.073972602739726026"
+    },
+    {
+      "ok": true,
+      "label": "180D: claim never reduces principal",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: immediate repeat claim cannot double-pay",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "180D: no variable emission with oracle 0x0",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "180D: no committed epoch after Genesis",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "180D: fixed floor accrual continues after Genesis",
+      "detail": "0.009863009893455099"
+    },
+    {
+      "ok": true,
+      "label": "180D: withdraw at maturity succeeds",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "180D: at least exact 1 FLOW principal returned",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "180D: position is CLOSED after withdrawal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "180D: vault totalPrincipal back to baseline (zero stranded principal)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: earned dust claimable after closure",
+      "detail": "0.019726023592085235"
+    },
+    {
+      "ok": true,
+      "label": "180D: no unclaimed reward liability remains",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "180D: fork user holds exactly principal + all rewards paid",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: genesis reservation fully released/consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "180D: floor reservation fully released/consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "180D: treasury solvent at closure",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: treasury obligations back to baseline",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "180D: reserved obligations equal rewards paid out exactly",
+      "detail": "paidOut=0.177534246575342462 freeDelta=0.177534246575342462"
+    },
+    {
+      "ok": true,
+      "label": "180D: oracle still 0x0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: EPOCH_ROLE still unassigned",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "180D: PUBLISHER_ROLE still unassigned",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "fork reports BOT Mainnet chain id 677",
+      "detail": "chainId=677"
+    },
+    {
+      "ok": true,
+      "label": "GENESIS_MAX_SECONDS is 90 days",
+      "detail": "7776000"
+    },
+    {
+      "ok": true,
+      "label": "oracle is 0x0 at fork start",
+      "detail": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "ok": true,
+      "label": "emergencyMode false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "vault not paused",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "EPOCH_ROLE -> Controller false at fork start",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PUBLISHER_ROLE unassigned at fork start",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: fork wallet is not the P3B canary wallet",
+      "detail": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+    },
+    {
+      "ok": true,
+      "label": "365D: fork user funded with exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "365D: fresh wallet has full 90-day Genesis quota",
+      "detail": "7776000"
+    },
+    {
+      "ok": true,
+      "label": "365D: product active on controller",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: 1 FLOW >= deployed minPrincipal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "365D: quoteOpen genesis rate matches controller",
+      "detail": "6000"
+    },
+    {
+      "ok": true,
+      "label": "365D: quoteOpen floor rate matches controller",
+      "detail": "1500"
+    },
+    {
+      "ok": true,
+      "label": "365D: genesis seconds parity",
+      "detail": "7776000 vs 7776000"
+    },
+    {
+      "ok": true,
+      "label": "365D: genesis obligation integer parity",
+      "detail": "0.147945205479452054"
+    },
+    {
+      "ok": true,
+      "label": "365D: floor obligation integer parity",
+      "detail": "0.15"
+    },
+    {
+      "ok": true,
+      "label": "365D: exact 1 FLOW allowance (never unlimited)",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "365D: position owner is the fork user",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: position productId",
+      "detail": "4"
+    },
+    {
+      "ok": true,
+      "label": "365D: position principal is exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "365D: genesis reserved equals quote",
+      "detail": "0.147945205479452054"
+    },
+    {
+      "ok": true,
+      "label": "365D: floor reserved equals quote",
+      "detail": "0.15"
+    },
+    {
+      "ok": true,
+      "label": "365D: maturity = openedAt + lock",
+      "detail": "1819930275"
+    },
+    {
+      "ok": true,
+      "label": "365D: user principal transferred in full",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: treasury reservedGenesis delta",
+      "detail": "0.147945205479452054"
+    },
+    {
+      "ok": true,
+      "label": "365D: treasury reservedFloors delta",
+      "detail": "0.15"
+    },
+    {
+      "ok": true,
+      "label": "365D: controller genesis Year-1 budget consumed exactly",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: controller standard Year-1 budget consumed exactly (floor)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: free reward balance reduced by reservations only",
+      "detail": "0.297945205479452054"
+    },
+    {
+      "ok": true,
+      "label": "365D: treasury solvent after open (obligations <= inventory)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: positive accrual mid-Genesis",
+      "detail": "0.092465753424657533"
+    },
+    {
+      "ok": true,
+      "label": "365D: claim paid at least the previewed amount",
+      "detail": "0.092465753424657533"
+    },
+    {
+      "ok": true,
+      "label": "365D: claim never reduces principal",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: immediate repeat claim cannot double-pay",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "365D: no variable emission with oracle 0x0",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "365D: no committed epoch after Genesis",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "365D: fixed floor accrual continues after Genesis",
+      "detail": "0.012328762366818874"
+    },
+    {
+      "ok": true,
+      "label": "365D: withdraw at maturity succeeds",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "365D: at least exact 1 FLOW principal returned",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "365D: position is CLOSED after withdrawal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "365D: vault totalPrincipal back to baseline (zero stranded principal)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: earned dust claimable after closure",
+      "detail": "0.100684931506849315"
+    },
+    {
+      "ok": true,
+      "label": "365D: no unclaimed reward liability remains",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "365D: fork user holds exactly principal + all rewards paid",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: genesis reservation fully released/consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "365D: floor reservation fully released/consumed",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "365D: treasury solvent at closure",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: treasury obligations back to baseline",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "365D: reserved obligations equal rewards paid out exactly",
+      "detail": "paidOut=0.297945205479452053 freeDelta=0.297945205479452053"
+    },
+    {
+      "ok": true,
+      "label": "365D: oracle still 0x0",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: EPOCH_ROLE still unassigned",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "365D: PUBLISHER_ROLE still unassigned",
+      "detail": null
+    }
+  ],
+  "failures": []
+}
