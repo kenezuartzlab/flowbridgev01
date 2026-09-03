@@ -1,0 +1,212 @@
+{
+  "gate": "V30.2B P3D — 30D mainnet canary settlement",
+  "generatedAt": "2026-09-03T01:03:05.441Z",
+  "rpcSource": "https://rpc.botchain.ai",
+  "chainId": 677,
+  "tx2": {
+    "hash": "0x6bf89b2bde06ab3ca86d32e766e0abe91b41d6d48c3adf07d3d1e7e275be3488",
+    "blockNumber": 21884468,
+    "status": "success",
+    "from": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164",
+    "to": "0x15e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d",
+    "gasUsed": "388028"
+  },
+  "positionId": "2",
+  "position": {
+    "owner": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+    "productId": 1,
+    "status": 0,
+    "principalFlow": "1",
+    "openedAt": 1788397220,
+    "maturityAt": 1790989220,
+    "genesisEndAt": 1790989220,
+    "genesisRateBps": 2700,
+    "floorRateBps": 800,
+    "genesisReservedFlow": "0.022191780821917808",
+    "floorReservedFlow": "0.006575342465753424"
+  },
+  "treasury": {
+    "freeFlow": "9999999.971225890410958906",
+    "reservedGenesisFlow": "0.022191780821917808",
+    "reservedFloorsFlow": "0.006575342465753424",
+    "totalObligationsFlow": "0.028767402968036528",
+    "inventoryFlow": "9999999.999993293378995434"
+  },
+  "oracle": "0x0000000000000000000000000000000000000000",
+  "allowanceAfterFlow": "0",
+  "mainnetWrites": 0,
+  "verdict": {
+    "P3D SETTLEMENT": "PASS",
+    "ORACLE": "0x0 UNCHANGED",
+    "ROLES": "UNCHANGED",
+    "30D REAL MATURITY WITHDRAWAL": "PENDING"
+  },
+  "checks": [
+    {
+      "ok": true,
+      "label": "chain is BOT Mainnet 677",
+      "detail": "chainId=677"
+    },
+    {
+      "ok": true,
+      "label": "TX2 receipt status is success",
+      "detail": "success"
+    },
+    {
+      "ok": true,
+      "label": "TX2 sender is the authorized canary wallet",
+      "detail": "0x3d8a7fa490f9db09dd8006b74688213ace9c0164"
+    },
+    {
+      "ok": true,
+      "label": "TX2 target is the canonical Staking Vault V2",
+      "detail": "0x15e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d"
+    },
+    {
+      "ok": true,
+      "label": "TX2 calldata captured",
+      "detail": "0x02c62347"
+    },
+    {
+      "ok": true,
+      "label": "TX2 productId argument is 1 (30D)",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "TX2 principal argument is exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "TX2 emitted PositionOpened from the vault",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PositionOpened owner is the canary wallet",
+      "detail": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164"
+    },
+    {
+      "ok": true,
+      "label": "PositionOpened productId is 1",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "PositionOpened principal is exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "PositionOpened Genesis rate is 2700 bps",
+      "detail": "2700"
+    },
+    {
+      "ok": true,
+      "label": "PositionOpened floor rate is 800 bps",
+      "detail": "800"
+    },
+    {
+      "ok": true,
+      "label": "Genesis was applied to this position",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D is fully Genesis-covered to maturity",
+      "detail": "genesisEndAt=1790989220 maturityAt=1790989220"
+    },
+    {
+      "ok": true,
+      "label": "live position owner is the canary wallet",
+      "detail": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164"
+    },
+    {
+      "ok": true,
+      "label": "live position status is open",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "live position principal is exactly 1 FLOW",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "live Genesis reservation matches accepted economics",
+      "detail": "0.022191780821917808"
+    },
+    {
+      "ok": true,
+      "label": "live floor reservation matches accepted economics",
+      "detail": "0.006575342465753424"
+    },
+    {
+      "ok": true,
+      "label": "30D lock is 2592000s",
+      "detail": "2592000"
+    },
+    {
+      "ok": true,
+      "label": "no variable reward has been paid",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "label": "30D real maturity withdrawal is still PENDING (position not yet matured)",
+      "detail": "now=1788397381 maturityAt=1790989220"
+    },
+    {
+      "ok": true,
+      "label": "reward treasury remains solvent after reservation",
+      "detail": "free=9999999.971225890410958906 obl=0.028767402968036528 inv=9999999.999993293378995434"
+    },
+    {
+      "ok": true,
+      "label": "treasury reservedGenesis covers this position",
+      "detail": "0.022191780821917808"
+    },
+    {
+      "ok": true,
+      "label": "treasury reservedFloors covers this position",
+      "detail": "0.006575342465753424"
+    },
+    {
+      "ok": true,
+      "label": "controller oracle is still unset (0x0)",
+      "detail": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "ok": true,
+      "label": "controller emergencyMode false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "vault not paused",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "EPOCH_ROLE -> Controller unchanged (false)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PUBLISHER_ROLE unchanged (false)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "no standard epoch committed",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "canary allowance to vault fully consumed by TX2",
+      "detail": "0"
+    }
+  ],
+  "failures": []
+}
