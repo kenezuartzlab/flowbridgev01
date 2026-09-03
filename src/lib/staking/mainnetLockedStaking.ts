@@ -65,6 +65,8 @@ export interface LockedExecutionGates {
   treasuryFreeWei: bigint;
   genesisYear1RemainingWei: bigint;
   standardYear1RemainingWei: bigint;
+  /** Defaults to the registry activation flag; explicit only for tests. */
+  activated?: boolean;
 }
 
 export type LockedExecutionDecision = 'EXECUTABLE' | 'BLOCKED';
