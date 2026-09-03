@@ -7,6 +7,7 @@ import { SafeAreaPage, SectionHeader, Surface } from "@/components/ui-kit/primit
 import { FlowStakingPreviewCard } from "@/components/staking/FlowStakingPreviewCard";
 import { StakingV2PreviewCard } from "@/components/staking/StakingV2PreviewCard";
 import { MainnetGenesisStakeCard } from "@/components/staking/MainnetGenesisStakeCard";
+import { MainnetLockedStakeCard } from "@/components/staking/MainnetLockedStakeCard";
 import { resolveStakeHandoffFromServer } from "@/lib/ai/mission/missionClient";
 import {
   parseStakeHandoff,
@@ -122,6 +123,9 @@ function StakePage() {
         </div>
 
         <MainnetGenesisStakeCard />
+
+        <MainnetLockedStakeCard />
+
 
         <FlowStakingPreviewCard
           flowPoints={Number(incentives?.flowPoints ?? 0)}

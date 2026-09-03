@@ -188,6 +188,16 @@ export const V30_2B_FEATURE_ACTIVATION = {
    */
   stakingExecutionEnabled: true,
   genesisFlexibleStakingEnabled: true,
+  /**
+   * V30.2B P3D — locked Genesis products (30D/90D/180D/365D). The 26-check
+   * pre-signing gate PASSED on live chain 677 and P3C.1 proved the full
+   * accelerated maturity lifecycle on exact deployed bytecode, but the gate
+   * authorizes only two user-signed canary writes (approve + openPosition 30D)
+   * and TX2 has NOT settled yet. This flag stays false until it does; flipping
+   * it to true is the only step needed to expose the fail-closed,
+   * live-`quoteOpen()`-gated locked staking UI.
+   */
+  lockedGenesisStakingEnabled: false,
   dynamicStakingEnabled: false,
   oracleConfigured: false,
   stakingPublisherAssigned: false,

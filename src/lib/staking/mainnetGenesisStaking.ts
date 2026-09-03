@@ -199,6 +199,27 @@ export const STAKING_CONTROLLER_PRODUCT_ABI = [
     inputs: [],
     outputs: [{ type: 'uint256' }],
   },
+  {
+    type: 'function',
+    name: 'standardYear1Used',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'STANDARD_YEAR1_CAP',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'oracle',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'address' }],
+  },
 ] as const;
 
 export const STAKING_TREASURY_ABI = [
