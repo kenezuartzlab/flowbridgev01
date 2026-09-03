@@ -1,0 +1,365 @@
+{
+  "phase": "V30.2B P4A",
+  "generatedAt": "2026-09-03T01:49:43.621Z",
+  "chainId": 677,
+  "block": 21888393,
+  "blockTimestamp": 1788400164,
+  "mainnetWrites": 0,
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "usdt": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+    "wbot": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+    "v3Factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+    "v2Factory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+    "governor": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "publisher": "0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22"
+  },
+  "live": {
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "oraclePolicy": [
+      "7200",
+      "0",
+      "500"
+    ],
+    "weeklyUsdBudget8": "0",
+    "maxFlowPerEpoch": "50000000000000000000000",
+    "genesisCap": "1000000000000000000000000",
+    "genesisUsed": "22198767123287670",
+    "standardCap": "2000000000000000000000000",
+    "standardUsed": "6575342465753424",
+    "totalCap": "3000000000000000000000000",
+    "epochCommitted": "0",
+    "epochEnd": "0",
+    "prevImpliedVarBps": "0",
+    "emergencyMode": "false",
+    "vaultOfController": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "vaultPaused": "false",
+    "free": "9999999971225890410958906",
+    "reservedGenesis": "22191780821917808",
+    "reservedFloors": "6575342465753424",
+    "totalObligations": "28767402968036528",
+    "inventory": "9999999999993293378995434"
+  },
+  "roles": {
+    "EPOCH_ROLE": "0xd5a89e8a650061fa538ac2ef45b7e2fa231077c8f19d034f623c35bd12bf68ac",
+    "PUBLISHER_ROLE": "0x0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a",
+    "epochRoleToController": false,
+    "publisherRoleToPublisher": false
+  },
+  "productMatrix": [
+    {
+      "productId": 0,
+      "active": true,
+      "lockSeconds": 0,
+      "genesisAprBps": 1800,
+      "floorBps": 0,
+      "targetBps": 1000,
+      "hardCapBps": 1200,
+      "minPrincipal": "1"
+    },
+    {
+      "productId": 1,
+      "active": true,
+      "lockSeconds": 2592000,
+      "genesisAprBps": 2700,
+      "floorBps": 800,
+      "targetBps": 1400,
+      "hardCapBps": 1800,
+      "minPrincipal": "1"
+    },
+    {
+      "productId": 2,
+      "active": true,
+      "lockSeconds": 7776000,
+      "genesisAprBps": 3600,
+      "floorBps": 1000,
+      "targetBps": 1800,
+      "hardCapBps": 2400,
+      "minPrincipal": "1"
+    },
+    {
+      "productId": 3,
+      "active": true,
+      "lockSeconds": 15552000,
+      "genesisAprBps": 4800,
+      "floorBps": 1200,
+      "targetBps": 2400,
+      "hardCapBps": 3200,
+      "minPrincipal": "1"
+    },
+    {
+      "productId": 4,
+      "active": true,
+      "lockSeconds": 31536000,
+      "genesisAprBps": 6000,
+      "floorBps": 1500,
+      "targetBps": 3000,
+      "hardCapBps": 4000,
+      "minPrincipal": "1"
+    }
+  ],
+  "poolDiscovery": {
+    "verdict": "NOT_FOUND",
+    "registryHits": [],
+    "poolCreatedTotal": 18,
+    "flowPoolsFromLogs": [],
+    "candidates": []
+  },
+  "twapVerdict": "BLOCKED",
+  "oracleInterface": {
+    "expected": "IFlowReferenceOracle.latestReference() -> (priceUsd8, updatedAt, liquidityUsd8, deviationBps)",
+    "priceUnits": "USD per FLOW, 8 decimals",
+    "failClosedCodes": {
+      "1": "not configured",
+      "2": "zero/malformed price",
+      "3": "stale",
+      "4": "insufficient liquidity",
+      "5": "deviation too high"
+    },
+    "deployedPolicy": {
+      "maxStalenessSeconds": "7200",
+      "minLiquidityUsd8": "0",
+      "maxDeviationBps": "500"
+    }
+  },
+  "forkSimulations": {
+    "available": true,
+    "rpc": "http://127.0.0.1:8901",
+    "scenarios": [
+      {
+        "scenario": "unavailable / not configured",
+        "expectCode": 1,
+        "gotCode": 1,
+        "ok": false,
+        "quoted": null,
+        "reverted": "The contract function \"quoteEpochBudget\" reverted."
+      },
+      {
+        "scenario": "malformed zero price",
+        "expectCode": 2,
+        "gotCode": 2,
+        "ok": false,
+        "quoted": null,
+        "reverted": "The contract function \"quoteEpochBudget\" reverted."
+      },
+      {
+        "scenario": "stale reference",
+        "expectCode": 3,
+        "gotCode": 3,
+        "ok": false,
+        "quoted": null,
+        "reverted": "The contract function \"quoteEpochBudget\" reverted."
+      },
+      {
+        "scenario": "insufficient liquidity",
+        "expectCode": 4,
+        "gotCode": 4,
+        "ok": false,
+        "quoted": null,
+        "reverted": "The contract function \"quoteEpochBudget\" reverted."
+      },
+      {
+        "scenario": "excessive deviation",
+        "expectCode": 5,
+        "gotCode": 5,
+        "ok": false,
+        "quoted": null,
+        "reverted": "The contract function \"quoteEpochBudget\" reverted."
+      },
+      {
+        "scenario": "recovery to a valid reference",
+        "expectCode": 0,
+        "gotCode": 0,
+        "ok": true,
+        "quoted": "0",
+        "reverted": null
+      }
+    ]
+  },
+  "standardEconomics": {
+    "standardYear1Used": "0.006575342465753424",
+    "standardYear1Remaining": "1999999.993424657534246576",
+    "totalYear1Remaining": "2999999.971225890410958906",
+    "freeRewardCapacity": "9999999.971225890410958906",
+    "reservedGenesis": "0.022191780821917808",
+    "reservedFloors": "0.006575342465753424",
+    "maxFlowPerEpoch": "50000",
+    "weeklyUsdBudget8": "0",
+    "budgetSamplesAreMathTestsOnly": true,
+    "budgetSamples": [
+      {
+        "sampleUsdPerFlow": "0.01",
+        "sampleWeeklyUsdBudget": "1000",
+        "unboundedFlow": "100000",
+        "boundedFlow": "50000",
+        "boundedBy": "maxFlowPerEpoch",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.01",
+        "sampleWeeklyUsdBudget": "5000",
+        "unboundedFlow": "500000",
+        "boundedFlow": "50000",
+        "boundedBy": "maxFlowPerEpoch",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.01",
+        "sampleWeeklyUsdBudget": "25000",
+        "unboundedFlow": "2500000",
+        "boundedFlow": "50000",
+        "boundedBy": "maxFlowPerEpoch",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.025",
+        "sampleWeeklyUsdBudget": "1000",
+        "unboundedFlow": "40000",
+        "boundedFlow": "40000",
+        "boundedBy": "none",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.025",
+        "sampleWeeklyUsdBudget": "5000",
+        "unboundedFlow": "200000",
+        "boundedFlow": "50000",
+        "boundedBy": "maxFlowPerEpoch",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.025",
+        "sampleWeeklyUsdBudget": "25000",
+        "unboundedFlow": "1000000",
+        "boundedFlow": "50000",
+        "boundedBy": "maxFlowPerEpoch",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.05",
+        "sampleWeeklyUsdBudget": "1000",
+        "unboundedFlow": "20000",
+        "boundedFlow": "20000",
+        "boundedBy": "none",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.05",
+        "sampleWeeklyUsdBudget": "5000",
+        "unboundedFlow": "100000",
+        "boundedFlow": "50000",
+        "boundedBy": "maxFlowPerEpoch",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.05",
+        "sampleWeeklyUsdBudget": "25000",
+        "unboundedFlow": "500000",
+        "boundedFlow": "50000",
+        "boundedBy": "maxFlowPerEpoch",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.10",
+        "sampleWeeklyUsdBudget": "1000",
+        "unboundedFlow": "10000",
+        "boundedFlow": "10000",
+        "boundedBy": "none",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.10",
+        "sampleWeeklyUsdBudget": "5000",
+        "unboundedFlow": "50000",
+        "boundedFlow": "50000",
+        "boundedBy": "none",
+        "withinFreeRewardCapacity": true
+      },
+      {
+        "sampleUsdPerFlow": "0.10",
+        "sampleWeeklyUsdBudget": "25000",
+        "unboundedFlow": "250000",
+        "boundedFlow": "50000",
+        "boundedBy": "maxFlowPerEpoch",
+        "withinFreeRewardCapacity": true
+      }
+    ],
+    "variableHeadroom": [
+      {
+        "productId": 0,
+        "floorBps": 0,
+        "hardCapBps": 1200,
+        "maxVariableBps": 1200
+      },
+      {
+        "productId": 1,
+        "floorBps": 800,
+        "hardCapBps": 1800,
+        "maxVariableBps": 1000
+      },
+      {
+        "productId": 2,
+        "floorBps": 1000,
+        "hardCapBps": 2400,
+        "maxVariableBps": 1400
+      },
+      {
+        "productId": 3,
+        "floorBps": 1200,
+        "hardCapBps": 3200,
+        "maxVariableBps": 2000
+      },
+      {
+        "productId": 4,
+        "floorBps": 1500,
+        "hardCapBps": 4000,
+        "maxVariableBps": 2500
+      }
+    ]
+  },
+  "rolePrep": {
+    "required": true,
+    "simulated": true,
+    "unsignedSafeActions": [
+      {
+        "step": "P4B-R1",
+        "description": "Vault R6 grants EPOCH_ROLE to Controller R5 (required before any variable epoch can settle)",
+        "to": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+        "value": "0",
+        "data": "0x2f2ff15dd5a89e8a650061fa538ac2ef45b7e2fa231077c8f19d034f623c35bd12bf68ac00000000000000000000000044b9b880c6188d8b8dbe4f68216ae28a5a1253bf"
+      },
+      {
+        "step": "P4B-R2",
+        "description": "Controller R5 grants PUBLISHER_ROLE to the approved Staking Publisher",
+        "to": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+        "value": "0",
+        "data": "0x2f2ff15d0ac90c257048ef1c3e387c26d4a99bde06894efbcbff862dc1885c3a9319308a00000000000000000000000005f7e3ea71093d8224abb9de078d1a2e480fab22"
+      }
+    ],
+    "signed": false,
+    "broadcast": false
+  },
+  "ownerDecisionsStillRequired": [
+    "Observation window for the FLOW/USD reference (target >= 7 days)",
+    "Maximum freshness age (maxStalenessSeconds)",
+    "Minimum liquidity threshold (minLiquidityUsd8)",
+    "Maximum deviation threshold (maxDeviationBps)",
+    "Nonzero weeklyUsdBudget8"
+  ],
+  "alreadyFrozenDoNotReapprove": [
+    "maxFlowPerEpoch = 50,000 FLOW / 7 days",
+    "Year-1 ceilings 1M Genesis / 2M Standard / 3M total",
+    "Product floor / target / hard-cap matrix",
+    "Approved Staking Publisher 0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22"
+  ],
+  "blocker": "No FLOW/USDT (or FLOW/WBOT) pool exists on BOT Mainnet 677 on either the BDEX V3 factory or the BDEX V2 factory. Verified production FLOW liquidity/pool creation is required before any oracle-dependent activation. No >=7-day observation history can exist until a pool exists, so no earliest-ready timestamp can be quoted.",
+  "verdict": "BLOCKED",
+  "checksPassed": 46,
+  "checksTotal": 47,
+  "failures": [
+    "Standard Year-1 used is 0 :: 0.006575342465753424"
+  ]
+}
