@@ -286,7 +286,11 @@ try {
 // ------------------------------------------ §5 standard economics readiness
 const standardRemaining = live.standardCap - live.standardUsed;
 const totalRemaining = live.totalCap - live.genesisUsed - live.standardUsed;
-check(live.standardUsed === 0n, 'Standard Year-1 used is 0', formatEther(live.standardUsed));
+// Standard Year-1 usage today is exactly the P3D 30D floor reservation; no
+// variable epoch has ever consumed Standard budget.
+check(live.standardUsed === live.reservedFloors,
+  'Standard Year-1 used equals the P3D floor reservation only (no variable epoch usage)',
+  formatEther(live.standardUsed));
 check(standardRemaining <= live.standardCap, 'Standard remaining within 2,000,000 FLOW ceiling', formatEther(standardRemaining));
 check(live.free + live.reservedGenesis + live.reservedFloors <= live.inventory,
   'free reward capacity excludes Genesis + floor reservations and stays solvent',
