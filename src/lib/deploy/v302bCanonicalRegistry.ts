@@ -197,7 +197,7 @@ export const V30_2B_FEATURE_ACTIVATION = {
    * it to true is the only step needed to expose the fail-closed,
    * live-`quoteOpen()`-gated locked staking UI.
    */
-  lockedGenesisStakingEnabled: false,
+  lockedGenesisStakingEnabled: true,
   dynamicStakingEnabled: false,
   oracleConfigured: false,
   stakingPublisherAssigned: false,
