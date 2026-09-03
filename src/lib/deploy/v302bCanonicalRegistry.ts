@@ -188,6 +188,14 @@ export const V30_2B_FEATURE_ACTIVATION = {
    */
   stakingExecutionEnabled: true,
   genesisFlexibleStakingEnabled: true,
+  /**
+   * V30.2B P3D — the 30D locked Genesis opening path is proven on chain 677 and
+   * P3C.1 proved the accelerated maturity lifecycle for 30D/90D/180D/365D on
+   * exact deployed bytecode, so locked products are executable strictly from
+   * the live per-wallet `quoteOpen()` result. Maturity withdrawal of the real
+   * mainnet canary remains pending its actual maturity.
+   */
+  lockedGenesisStakingEnabled: true,
   dynamicStakingEnabled: false,
   oracleConfigured: false,
   stakingPublisherAssigned: false,
