@@ -42,19 +42,18 @@ const gates = (over: Partial<LockedExecutionGates> = {}): LockedExecutionGates =
   treasuryFreeWei: 9_999_999n * ONE,
   genesisYear1RemainingWei: 999_999n * ONE,
   standardYear1RemainingWei: 2_000_000n * ONE,
-  // P3D policy is exercised independently of the registry activation flag,
-  // which stays false until the user-signed 30D canary open settles.
+  // P3D policy is exercised independently of the registry activation flag.
   activated: true,
   ...over,
 });
 
 describe('P3D locked staking activation', () => {
-  it('stays deactivated until the user-signed 30D canary open settles', () => {
-    expect(isLockedStakingActivated()).toBe(false);
+  it('is activated after the user-signed 30D canary open settled', () => {
+    expect(isLockedStakingActivated()).toBe(true);
   });
 
   it('blocks execution while the activation flag is off', () => {
-    const r = evaluateLockedExecution(quote30(), gates({ activated: undefined }));
+    const r = evaluateLockedExecution(quote30(), gates({ activated: false }));
     expect(r.decision).toBe('BLOCKED');
     expect(r.blockers.join(' ')).toMatch(/not activated/i);
   });
