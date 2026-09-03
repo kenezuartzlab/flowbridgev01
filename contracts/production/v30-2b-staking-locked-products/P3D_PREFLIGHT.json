@@ -1,0 +1,220 @@
+{
+  "gate": "V30.2B P3D — 30D mainnet canary pre-signing gate",
+  "generatedAt": "2026-09-03T00:33:56.649Z",
+  "rpcSource": "https://rpc.botchain.ai",
+  "chainId": 677,
+  "block": 21882347,
+  "blockHash": "0x0be80dbb1ef33b76bbadedf55f2aa9a8952c4a4f4de02c7bec714ea280c8f5bd",
+  "blockTimestamp": 1788395630,
+  "addresses": {
+    "flow": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "treasury": "0x96552909998F3DbAf5Ff4979dc158508b3442e65",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D"
+  },
+  "canary": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+  "productId": 1,
+  "principalWei": "1000000000000000000",
+  "liveTerms": {
+    "active": true,
+    "lockSeconds": 2592000,
+    "genesisAprBps": 2700,
+    "floorBps": 800,
+    "targetBps": 1400,
+    "hardCapBps": 1800,
+    "minPrincipalWei": "1000000000000000000"
+  },
+  "quote": {
+    "genesisRateBps": 2700,
+    "genesisSeconds": 2592000,
+    "genesisReservedWei": "22191780821917808",
+    "genesisReservedFlow": "0.022191780821917808",
+    "floorRateBps": 800,
+    "floorReservedWei": "6575342465753424",
+    "floorReservedFlow": "0.006575342465753424",
+    "totalReservationFlow": "0.028767123287671232",
+    "projectedMaturityAt": 1790987630
+  },
+  "wallet": {
+    "balanceFlow": "1.000006706621004566",
+    "allowanceToVaultFlow": "1",
+    "genesisQuotaRemainingSeconds": 7774776
+  },
+  "treasury": {
+    "freeFlow": "9999999.999993013698630138",
+    "reservedGenesisFlow": "0",
+    "reservedFloorsFlow": "0",
+    "totalObligationsFlow": "0.000000279680365296",
+    "inventoryFlow": "9999999.999993293378995434"
+  },
+  "capacity": {
+    "genesisRemainingFlow": "999999.999993013698630138",
+    "standardRemainingFlow": "2000000"
+  },
+  "oracle": "0x0000000000000000000000000000000000000000",
+  "roles": {
+    "epochRoleToController": false,
+    "publisherRole": false
+  },
+  "mainnetWrites": 0,
+  "transactions": {
+    "TX1": {
+      "target": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+      "fn": "approve(address,uint256)",
+      "args": [
+        "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+        "1000000000000000000"
+      ],
+      "signer": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+      "status": "USER_SIGNED_PENDING"
+    },
+    "TX2": {
+      "target": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+      "fn": "openPosition(uint8,uint256)",
+      "args": [
+        1,
+        "1000000000000000000"
+      ],
+      "signer": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+      "status": "USER_SIGNED_PENDING"
+    }
+  },
+  "verdict": {
+    "P3D PRE-SIGNING GATE": "PASS",
+    "ORACLE": "0x0 UNCHANGED",
+    "ROLES": "UNCHANGED"
+  },
+  "checks": [
+    {
+      "ok": true,
+      "label": "chain is BOT Mainnet 677",
+      "detail": "chainId=677"
+    },
+    {
+      "ok": true,
+      "label": "controller oracle is unset (0x0)",
+      "detail": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "ok": true,
+      "label": "controller emergencyMode false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "vault not paused",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "EPOCH_ROLE -> Controller is false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "PUBLISHER_ROLE -> staking publisher is false",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "no standard epoch committed",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D product active on controller",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D lockSeconds is 2592000",
+      "detail": "2592000"
+    },
+    {
+      "ok": true,
+      "label": "30D Genesis APR is 2700 bps",
+      "detail": "2700"
+    },
+    {
+      "ok": true,
+      "label": "canary principal meets live minPrincipal",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "reward treasury solvent",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "canary wallet holds at least 1 FLOW",
+      "detail": "1.000006706621004566"
+    },
+    {
+      "ok": true,
+      "label": "quote Genesis seconds equals independent value",
+      "detail": "2592000"
+    },
+    {
+      "ok": true,
+      "label": "quote Genesis obligation equals independent value",
+      "detail": "0.022191780821917808"
+    },
+    {
+      "ok": true,
+      "label": "quote floor obligation equals independent value",
+      "detail": "0.006575342465753424"
+    },
+    {
+      "ok": true,
+      "label": "quote Genesis rate equals product rate",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "quote floor rate equals product rate",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "30D fully Genesis-covered to maturity",
+      "detail": "2592000s of 2592000s"
+    },
+    {
+      "ok": true,
+      "label": "Genesis reservation matches accepted P3C economics",
+      "detail": "0.022191780821917808"
+    },
+    {
+      "ok": true,
+      "label": "floor reservation matches accepted P3C economics",
+      "detail": "0.006575342465753424"
+    },
+    {
+      "ok": true,
+      "label": "floor obligation fits remaining standard Year-1 capacity",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "genesis obligation fits remaining Genesis Year-1 capacity",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "total entry reservation is fully funded now",
+      "detail": "0.028767123287671232"
+    },
+    {
+      "ok": true,
+      "label": "TX1 approve(vault, 1 FLOW) simulates successfully from canary wallet",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "label": "TX2 pre-signing simulation state is consistent with current allowance",
+      "detail": "allowance=1"
+    }
+  ],
+  "failures": []
+}
