@@ -389,7 +389,8 @@ async function bestV3Step(
   const outAddr = (tokenOut.isNative ? c.wbot : tokenOut.address).toLowerCase() as Address;
   if (inAddr === outAddr) return null;
 
-  const quoted = await Promise.all(BDEX_V3_FEE_TIERS.map(async (fee) => {
+  const feeTiers = await enabledFeeTiers(client, factory);
+  const quoted = await Promise.all(feeTiers.map(async (fee) => {
     try {
       const pool = (await client.readContract({ address: factory, abi: UNISWAP_V3_FACTORY_ABI, functionName: "getPool", args: [inAddr, outAddr, fee] })) as Address;
       if (pool.toLowerCase() === ZERO) return null;
