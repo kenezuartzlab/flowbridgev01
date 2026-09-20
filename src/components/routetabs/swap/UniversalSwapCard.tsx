@@ -666,6 +666,34 @@ export function UniversalSwapCard({
       const latestQuote = await getBestRoute(tokenIn, tokenOut, initialAmount, isMainnet);
       if (!latestQuote) throw new Error("No live route available. Refresh and try again.");
       setQuote(latestQuote);
+      // V30.2B P4A.2 — revalidate the guarded FLOW/USDT route immediately before
+      // signing. A changed route, pool, chain, amount or protection mode voids
+      // the prepared transaction instead of silently signing something else.
+      if (guard.guarded) {
+        const pool = guard.reference?.pool;
+        const fee = latestQuote.steps[0]?.v3Fee ?? null;
+        const routerId = latestQuote.steps[0]?.routerId ?? null;
+        if (!pool || fee === null || routerId === null) {
+          throw new Error("Price protection could not be revalidated. Refresh and try again.");
+        }
+        const revalidated = preparationFingerprint({
+          chainId: 677,
+          pool,
+          routerId,
+          routeFee: fee,
+          tokenIn: tokenIn.address,
+          tokenOut: tokenOut.address,
+          amountIn: initialAmount,
+          mode: guard.policy?.mode ?? "paused",
+        });
+        if (
+          guard.policy?.mode === "paused" ||
+          !guardFingerprintRef.current ||
+          isPreparationStale(guardFingerprintRef.current, revalidated)
+        ) {
+          throw new Error("Route or protection mode changed. Review the new quote and try again.");
+        }
+      }
       let lastTx: `0x${string}` | null = null;
       let nextAmount = initialAmount;
       let activeQuote = latestQuote;
@@ -940,6 +968,7 @@ export function UniversalSwapCard({
     if (!isConnected) return onConnect();
     if (!isNetworkCorrect) return onSwitchNetwork();
     if (!quote || !amountIn || parsedAmount === 0n) return;
+    if (guardBlocked) return;
     setConfirmOpen(true);
   };
 
@@ -1218,7 +1247,7 @@ export function UniversalSwapCard({
         toAmount={amountOutDisplay || "0"}
         toSymbol={tokenOut.symbol}
         priceRate={`1 ${tokenIn.symbol} ≈ ${rate ? rate.toFixed(6) : "0"} ${tokenOut.symbol}`}
-        slippageTolerance={`${slippage}%`}
+        slippageTolerance={`${effectiveSlippage}%`}
         minimumReceived={minReceived ? minReceived.toFixed(6) : undefined}
         tradingFee={tradingFeeLabel}
         priceImpact={priceImpactLabel}
