@@ -1077,6 +1077,26 @@ export function UniversalSwapCard({
         <span>{buttonLabel}</span>
       </button>
 
+      {/* V30.2B P4A.2 — why this FLOW/USDT trade is restricted */}
+      {guardBlocked && guard.decision && (
+        <div className="bg-amber-500/5 border border-amber-500/25 rounded-xl px-3 py-2.5 text-[12px] font-mono text-amber-300 space-y-1">
+          <div className="font-black uppercase tracking-widest text-[11px]">
+            {guard.policy?.mode === "paused" ? "Swap preparation paused" : "Trade restricted"}
+          </div>
+          <div>{guard.decision.reason}</div>
+          {guard.decision.maxSafeAmountIn && guard.decision.maxSafeAmountIn > 0n ? (
+            <div>
+              Maximum safe amount right now:{" "}
+              {formatBalance4(formatUnits(guard.decision.maxSafeAmountIn, tokenIn.decimals))} {tokenIn.symbol}. Enter it
+              yourself — FlowBridge never changes your amount or splits a trade for you.
+            </div>
+          ) : null}
+          <div className="text-amber-300/70">
+            This limit applies to FlowBridge only. The pool itself is untouched.
+          </div>
+        </div>
+      )}
+
       {/* Details — collapsed by default, summary row always visible */}
       {quote && !quoteError && (
         <div className="bg-[#010C1B]/60 border border-white/10 rounded-xl text-[12px] font-mono text-[#C5C1B9] overflow-hidden">
