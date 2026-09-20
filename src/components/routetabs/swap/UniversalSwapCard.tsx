@@ -23,6 +23,8 @@ import {
   type Token,
 } from "@/lib/swap/tokenRegistry";
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
+import { useFlowRouteGuard } from "@/lib/swap/useFlowRouteGuard";
+import { isPreparationStale, preparationFingerprint } from "@/lib/swap/routeGuard";
 import type { SwapHydrationPlan } from "@/lib/ai/handoffHydration";
 import {
   clearSwapDraft,
@@ -351,15 +353,44 @@ export function UniversalSwapCard({
   const { writeContractAsync } = useWriteContract();
   const { signMessageAsync } = useSignMessage();
 
-  const minOutFor = (expected: bigint) =>
-    (expected * BigInt(Math.floor((100 - slippage) * 1000))) / 100000n;
-
   const v3Fees = quote?.steps.flatMap((step) => step.v3Fee == null ? [] : [step.v3Fee]) ?? [];
   const tradingFeeLabel = v3Fees.length > 0
     ? v3Fees.map((fee) => `${(fee / 10_000).toFixed(fee % 10_000 === 0 ? 0 : 2)}%`).join(" + ")
     : "Router quoted";
   const livePriceImpactBps = quote?.steps.reduce((sum, step) => sum + (step.priceImpactBps ?? 0), 0) ?? 0;
   const priceImpactLabel = `${(livePriceImpactBps / 100).toFixed(2)}%`;
+
+  // ── V30.2B P4A.2 — FLOW/USDT route circuit breaker ───────────────────────
+  // Applies to the canonical FLOW/USDT route only. Read-only protection on
+  // FlowBridge transaction preparation; it never touches the BDEX pool.
+  const guardAmountIn = (() => {
+    try {
+      return amountIn && parseFloat(amountIn) > 0 ? parseUnits(amountIn, tokenIn.decimals) : 0n;
+    } catch {
+      return 0n;
+    }
+  })();
+  const guard = useFlowRouteGuard({
+    isMainnet,
+    tokenIn,
+    tokenOut,
+    amountIn: guardAmountIn,
+    amountOut: quote?.amountOut ?? null,
+    routeFee: quote?.steps[0]?.v3Fee ?? null,
+    routerId: quote?.steps[0]?.routerId ?? null,
+    quotedImpactBps: quote ? livePriceImpactBps : null,
+    chainOk: isNetworkCorrect,
+  });
+  // Never widen slippage: the mode cap and the absolute 5% ceiling both apply.
+  const effectiveSlippage = guard.slippageCapPct != null
+    ? Math.min(slippage, guard.slippageCapPct)
+    : slippage;
+  const guardBlocked = guard.guarded && !!guard.decision && !guard.decision.allowed && guardAmountIn > 0n;
+  const guardFingerprintRef = useRef<string | null>(null);
+  guardFingerprintRef.current = guard.fingerprint;
+
+  const minOutFor = (expected: bigint) =>
+    (expected * BigInt(Math.floor((100 - effectiveSlippage) * 1000))) / 100000n;
 
   // Execute a single SwapStep through FlowBridgeRouter v3.
   // `amountInRaw` is the net swap amount (in token-in units). The router charges a
@@ -635,6 +666,34 @@ export function UniversalSwapCard({
       const latestQuote = await getBestRoute(tokenIn, tokenOut, initialAmount, isMainnet);
       if (!latestQuote) throw new Error("No live route available. Refresh and try again.");
       setQuote(latestQuote);
+      // V30.2B P4A.2 — revalidate the guarded FLOW/USDT route immediately before
+      // signing. A changed route, pool, chain, amount or protection mode voids
+      // the prepared transaction instead of silently signing something else.
+      if (guard.guarded) {
+        const pool = guard.reference?.pool;
+        const fee = latestQuote.steps[0]?.v3Fee ?? null;
+        const routerId = latestQuote.steps[0]?.routerId ?? null;
+        if (!pool || fee === null || routerId === null) {
+          throw new Error("Price protection could not be revalidated. Refresh and try again.");
+        }
+        const revalidated = preparationFingerprint({
+          chainId: 677,
+          pool,
+          routerId,
+          routeFee: fee,
+          tokenIn: tokenIn.address,
+          tokenOut: tokenOut.address,
+          amountIn: initialAmount,
+          mode: guard.policy?.mode ?? "paused",
+        });
+        if (
+          guard.policy?.mode === "paused" ||
+          !guardFingerprintRef.current ||
+          isPreparationStale(guardFingerprintRef.current, revalidated)
+        ) {
+          throw new Error("Route or protection mode changed. Review the new quote and try again.");
+        }
+      }
       let lastTx: `0x${string}` | null = null;
       let nextAmount = initialAmount;
       let activeQuote = latestQuote;
@@ -885,6 +944,9 @@ export function UniversalSwapCard({
   } else if (!quote) {
     buttonLabel = "No route";
     buttonDisabled = true;
+  } else if (guardBlocked) {
+    buttonLabel = guard.policy?.mode === "paused" ? "Swap paused — price protection" : "Trade restricted";
+    buttonDisabled = true;
   } else if (needsApproval) {
     // V15.3K §6 — two wallet confirmations, stated up front.
     buttonLabel = busy ? busyMsg : `Approve then Swap · 2 wallet confirmations`;
@@ -899,13 +961,14 @@ export function UniversalSwapCard({
       ? parseFloat(amountOutDisplay) / parseFloat(amountIn)
       : 0;
   const minReceived = quote
-    ? (Number(formatUnits(quote.amountOut, tokenOut.decimals)) * (100 - slippage)) / 100
+    ? (Number(formatUnits(quote.amountOut, tokenOut.decimals)) * (100 - effectiveSlippage)) / 100
     : 0;
 
   const handleSubmit = () => {
     if (!isConnected) return onConnect();
     if (!isNetworkCorrect) return onSwitchNetwork();
     if (!quote || !amountIn || parsedAmount === 0n) return;
+    if (guardBlocked) return;
     setConfirmOpen(true);
   };
 
@@ -1014,6 +1077,26 @@ export function UniversalSwapCard({
         <span>{buttonLabel}</span>
       </button>
 
+      {/* V30.2B P4A.2 — why this FLOW/USDT trade is restricted */}
+      {guardBlocked && guard.decision && (
+        <div className="bg-amber-500/5 border border-amber-500/25 rounded-xl px-3 py-2.5 text-[12px] font-mono text-amber-300 space-y-1">
+          <div className="font-black uppercase tracking-widest text-[11px]">
+            {guard.policy?.mode === "paused" ? "Swap preparation paused" : "Trade restricted"}
+          </div>
+          <div>{guard.decision.reason}</div>
+          {guard.decision.maxSafeAmountIn && guard.decision.maxSafeAmountIn > 0n ? (
+            <div>
+              Maximum safe amount right now:{" "}
+              {formatBalance4(formatUnits(guard.decision.maxSafeAmountIn, tokenIn.decimals))} {tokenIn.symbol}. Enter it
+              yourself — FlowBridge never changes your amount or splits a trade for you.
+            </div>
+          ) : null}
+          <div className="text-amber-300/70">
+            This limit applies to FlowBridge only. The pool itself is untouched.
+          </div>
+        </div>
+      )}
+
       {/* Details — collapsed by default, summary row always visible */}
       {quote && !quoteError && (
         <div className="bg-[#010C1B]/60 border border-white/10 rounded-xl text-[12px] font-mono text-[#C5C1B9] overflow-hidden">
@@ -1039,11 +1122,29 @@ export function UniversalSwapCard({
             <div className="overflow-hidden">
               <div className="px-3 pb-3 space-y-1.5 border-t border-white/5 pt-2.5">
                 <Row label="Min received" value={`${minReceived.toFixed(6)} ${tokenOut.symbol}`} />
-                <Row label="Slippage" value={`${slippage}%`} />
+                <Row label="Slippage" value={`${effectiveSlippage}%`} />
                 <Row label="Route" value={quote.symbolPath.join(" → ")} />
                 <Row label="Trading fee" value={tradingFeeLabel} />
                 <Row label="Price impact" value={priceImpactLabel} />
                 <Row label="Quote basis" value="Executable (on-chain)" />
+                {guard.guarded && guard.policy ? (
+                  <>
+                    <Row
+                      label="Protection mode"
+                      value={`${guard.policy.mode.toUpperCase()} · max ${(guard.policy.maxPriceImpactBps / 100).toFixed(2)}% impact`}
+                    />
+                    <Row
+                      label="Price reference"
+                      value={
+                        guard.reference?.referenceState === "ready"
+                          ? `30-min average · ${((guard.reference.deviationBps ?? 0) / 100).toFixed(2)}% off`
+                          : guard.reference?.referenceState === "warmup"
+                            ? "Warming up (live quote checks only)"
+                            : "Unavailable — preparation paused"
+                      }
+                    />
+                  </>
+                ) : null}
                 <Row label="Platform fee" value={platformFeeLabel} />
                 {disclosedFeeBps === 0 ? (
                   <Row label="Fee status" value="Router fee currently 0 bps" />
@@ -1166,7 +1267,7 @@ export function UniversalSwapCard({
         toAmount={amountOutDisplay || "0"}
         toSymbol={tokenOut.symbol}
         priceRate={`1 ${tokenIn.symbol} ≈ ${rate ? rate.toFixed(6) : "0"} ${tokenOut.symbol}`}
-        slippageTolerance={`${slippage}%`}
+        slippageTolerance={`${effectiveSlippage}%`}
         minimumReceived={minReceived ? minReceived.toFixed(6) : undefined}
         tradingFee={tradingFeeLabel}
         priceImpact={priceImpactLabel}
