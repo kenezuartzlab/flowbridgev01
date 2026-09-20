@@ -79,7 +79,7 @@ export function TokenPickerModal({
       }
       const liquid = await hasAnyLiquidity(meta.address, isMainnet);
       if (!liquid) {
-        setImportError("No tradable liquidity found on any active BOT Chain router against BOT, USDT or CA.");
+        setImportError("No pool with liquidity found on any live V2 factory or V3 fee tier against BOT, USDT, CA or FLOW.");
         return;
       }
       addImportedToken(isMainnet, meta);
