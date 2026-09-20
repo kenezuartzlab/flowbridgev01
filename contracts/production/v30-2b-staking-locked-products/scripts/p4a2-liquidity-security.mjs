@@ -126,17 +126,26 @@ async function main() {
       return res;
     } catch (e) { return null; }
   };
-  const twap = {};
-  for (const [label, secs] of Object.entries(windows)) {
-    const res = await observe(secs);
-    if (!res) { twap[label] = { status: "WARMING", reason: "observation history does not cover window" }; continue; }
-    const [c0, c1] = res[0];
-    const avgTick = Number((c1 - c0) / BigInt(secs));
-    twap[label] = { status: "READY", averageTick: avgTick };
-  }
   const oldest = await client.readContract({ address: pool, abi: POOL_ABI, functionName: "observations", args: [0n] });
   const oldestTs = Number(oldest[0]);
   const ageSeconds = Number(block.timestamp) - oldestTs;
+  const cardinality = Number(slot0[3]);
+  const twap = {};
+  for (const [label, secs] of Object.entries(windows)) {
+    // Fail closed: a window is READY only when the ring buffer actually holds
+    // more than one observation AND real history covers the whole window.
+    // Single-observation extrapolation is rejected — it is the launch price,
+    // not an observed average.
+    if (cardinality <= 1) {
+      twap[label] = { status: "WARMING", reason: `observationCardinality=${cardinality}: no multi-observation history, single-observation extrapolation rejected` };
+      continue;
+    }
+    if (ageSeconds < secs) { twap[label] = { status: "WARMING", reason: `history ${ageSeconds}s < window ${secs}s` }; continue; }
+    const res = await observe(secs);
+    if (!res) { twap[label] = { status: "WARMING", reason: "observe() does not cover window" }; continue; }
+    const [c0, c1] = res[0];
+    twap[label] = { status: "READY", averageTick: Number((c1 - c0) / BigInt(secs)) };
+  }
   const earliest7d = oldestTs + 604800;
   ok("observe() cumulative tick data readable at 0s", !!(await observe(0)), true);
   ok("oldest observation initialized", oldest[3] === true, oldestTs);
@@ -189,12 +198,12 @@ async function main() {
 
   // ── Staking boundary frozen ─────────────────────────────────────────────
   const [oracle, budget, maxFlow, emergency] = await Promise.all([
-    client.readContract({ address: VAULT, abi: VAULT_ABI, functionName: "oracle" }).catch(() => null),
-    client.readContract({ address: VAULT, abi: VAULT_ABI, functionName: "weeklyUsdBudget8" }).catch(() => null),
-    client.readContract({ address: VAULT, abi: VAULT_ABI, functionName: "maxFlowPerEpoch" }).catch(() => null),
-    client.readContract({ address: VAULT, abi: VAULT_ABI, functionName: "emergencyMode" }).catch(() => null),
+    client.readContract({ address: CONTROLLER, abi: VAULT_ABI, functionName: "oracle" }).catch(() => null),
+    client.readContract({ address: CONTROLLER, abi: VAULT_ABI, functionName: "weeklyUsdBudget8" }).catch(() => null),
+    client.readContract({ address: CONTROLLER, abi: VAULT_ABI, functionName: "maxFlowPerEpoch" }).catch(() => null),
+    client.readContract({ address: CONTROLLER, abi: VAULT_ABI, functionName: "emergencyMode" }).catch(() => null),
   ]);
-  ok("R5/vault oracle is address(0)", oracle === "0x0000000000000000000000000000000000000000", oracle);
+  ok("R5 controller oracle is address(0)", oracle === "0x0000000000000000000000000000000000000000", oracle);
   ok("weeklyUsdBudget8 == 0", budget === 0n, budget?.toString());
   ok("emergencyMode false", emergency === false, emergency);
   evidence.staking = {

@@ -2,8 +2,8 @@
   "gate": "V30.2B-P4A.2",
   "chainId": 677,
   "block": {
-    "number": 23900235,
-    "timestamp": 1789909584
+    "number": 23900277,
+    "timestamp": 1789909616
   },
   "pool": {
     "address": "0xDaCFc2574b6110892351Bd31afb36F95E7206162",
@@ -21,20 +21,20 @@
   "twap": {
     "windows": {
       "30m": {
-        "status": "READY",
-        "averageTick": 368382
+        "status": "WARMING",
+        "reason": "observationCardinality=1: no multi-observation history, single-observation extrapolation rejected"
       },
       "6h": {
-        "status": "READY",
-        "averageTick": 368382
+        "status": "WARMING",
+        "reason": "observationCardinality=1: no multi-observation history, single-observation extrapolation rejected"
       },
       "7d": {
         "status": "WARMING",
-        "reason": "observation history does not cover window"
+        "reason": "observationCardinality=1: no multi-observation history, single-observation extrapolation rejected"
       }
     },
     "oldestObservationTimestamp": 1789878999,
-    "observationAgeSeconds": 30585,
+    "observationAgeSeconds": 30617,
     "earliest7dTwapTimestamp": 1790483799,
     "earliest7dTwapIso": "2026-09-27T04:36:39.000Z",
     "observationCardinality": 1
@@ -84,8 +84,10 @@
   "staking": {
     "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
     "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
-    "oracle": null,
-    "emergencyMode": null,
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "weeklyUsdBudget8": "0",
+    "maxFlowPerEpoch": "50000000000000000000000",
+    "emergencyMode": false,
     "dynamicStandard": "DISABLED"
   },
   "quotes": {
@@ -174,26 +176,27 @@
     {
       "name": "7d TWAP not claimed before 604800s of real history",
       "pass": true,
-      "detail": 30585
+      "detail": 30617
     },
     {
-      "name": "R5/vault oracle is address(0)",
-      "pass": false,
-      "detail": null
+      "name": "R5 controller oracle is address(0)",
+      "pass": true,
+      "detail": "0x0000000000000000000000000000000000000000"
     },
     {
       "name": "weeklyUsdBudget8 == 0",
-      "pass": false
+      "pass": true,
+      "detail": "0"
     },
     {
       "name": "emergencyMode false",
-      "pass": false,
-      "detail": null
+      "pass": true,
+      "detail": false
     }
   ],
   "summary": {
     "total": 18,
-    "passed": 15,
-    "failed": 3
+    "passed": 18,
+    "failed": 0
   }
 }
