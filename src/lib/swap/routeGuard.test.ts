@@ -172,6 +172,8 @@ describe("P4A.2 tick reference maths", () => {
     expect(tickDeviationBps(1000, 1000)).toBe(0);
     expect(tickDeviationBps(1100, 1000)).toBe(100);
     expect(tickDeviationBps(900, 1000)).toBe(99);
-    expect(tickDeviationBps(1000, 4000)).toBeGreaterThanOrEqual(BREAKER_DEVIATION_BPS);
+    // A 3566-tick collapse is a ~30% price move — exactly breaker territory.
+    expect(tickDeviationBps(1000, 4566)).toBeGreaterThanOrEqual(BREAKER_DEVIATION_BPS);
+    expect(ready(tickDeviationBps(1000, 4566)).mode).toBe("paused");
   });
 });
