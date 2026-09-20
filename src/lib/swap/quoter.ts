@@ -567,11 +567,13 @@ async function computeBestRoute(
       symbol: t.symbol,
     }));
   } catch { /* no localStorage or module missing — skip */ }
+  const flow = c.flowToken.toLowerCase() as Address;
   const hopBases: { addr: Address; symbol: string }[] = [
     { addr: wbot, symbol: "BOT" },
     { addr: caWbot, symbol: "BOT" },
     { addr: usdt, symbol: "USDT" },
     { addr: caToken, symbol: "CA" },
+    ...(isMainnet && flow !== ZERO ? [{ addr: flow, symbol: "FLOW" }] : []),
     ...importedHops,
   ];
 
