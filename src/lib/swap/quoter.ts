@@ -6,7 +6,7 @@
 // admin adds/removes a router, this quoter picks it up on the next fetch.
 //
 //   type 0 = Uniswap V2-style AMM (uses getAmountsOut against a factory)
-//   type 1 = Uniswap V3-style pool (currently only the BOT/USDT V3 pool)
+//   type 1 = Uniswap V3-style pool (factory-discovered, allowlisted fee tiers)
 //
 // CA token has liquidity only on CaSwap. CA ↔ USDT is split:
 //   CA → BOT (CaSwap V2) + BOT → USDT (BDex V3) — two transactions.
@@ -17,6 +17,8 @@ import {
   getContracts,
   UNISWAP_V2_ROUTER_ABI,
   UNISWAP_V3_POOL_ABI,
+  UNISWAP_V3_FACTORY_ABI,
+  UNISWAP_V3_QUOTER_V2_ABI,
   FLOW_BRIDGE_ROUTER_V3_ABI,
 } from "@/lib/contracts";
 import { FLOW_BRIDGE_ROUTER_LENS_ABI } from "@/lib/flowbridge/routerV4Abi";
@@ -44,6 +46,7 @@ export interface SwapStep {
   expectedOut: bigint;
   // V3-only:
   v3Fee?: number;             // Uniswap V3 pool fee (e.g. 3000 = 0.3%)
+  priceImpactBps?: number;    // derived from current vs post-quote pool price
 }
 
 
@@ -129,7 +132,7 @@ async function fetchActiveRouters(isMainnet: boolean): Promise<ActiveRouter[]> {
     }
     const fallback: ActiveRouter[] = [
       { id: 1, name: "BDex V2 (legacy)", version: "2.0", type: 0, addr: c.bdexRouter.toLowerCase() as Address },
-      { id: 2, name: "BDex V3", version: "3.0", type: 1, addr: c.bdexRouter.toLowerCase() as Address },
+      { id: 2, name: "BDex V3", version: "3.0", type: 1, addr: c.bdexV3Router.toLowerCase() as Address },
       { id: 3, name: "CaSwapRouter", version: "3.0", type: 0, addr: c.caSwapRouter.toLowerCase() as Address },
       { id: 4, name: "BDex UniswapV2R2", version: "2.2", type: 0, addr: c.bdexV2Router.toLowerCase() as Address },
     ];
@@ -217,10 +220,10 @@ async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
 // Router ID for the V3-style (type 1) pool router, read from the live registry.
 // Fails closed with null when the registry has no type-1 router, so we never
 // send a swap with an invented router ID.
-async function bdexV3RouterId(isMainnet: boolean): Promise<number | null> {
+async function bdexV3Router(isMainnet: boolean): Promise<ActiveRouter | null> {
   const routers = await fetchActiveRouters(isMainnet);
   const v3 = routers.find((r) => r.type === 1);
-  return v3 ? v3.id : null;
+  return v3 ?? null;
 }
 
 
@@ -283,65 +286,17 @@ function addrFor(token: Token, dex: DexCfg): Address {
   return (token.isNative ? dex.wnative : token.address).toLowerCase() as Address;
 }
 
-// Detect BOT/USDT pair (either token may be native BOT or WBOT).
-function isBotUsdtPair(
-  tokenIn: Token,
-  tokenOut: Token,
-  wbot: Address,
-  usdt: Address,
-): { isBotIn: boolean } | null {
-  const inAddr = (tokenIn.isNative ? wbot : tokenIn.address.toLowerCase()) as Address;
-  const outAddr = (tokenOut.isNative ? wbot : tokenOut.address.toLowerCase()) as Address;
-  if (inAddr === wbot && outAddr === usdt) return { isBotIn: true };
-  if (inAddr === usdt && outAddr === wbot) return { isBotIn: false };
-  return null;
+export const BDEX_V3_FEE_TIERS = [100, 500, 2500, 3000, 10000] as const;
+
+export function sqrtPriceImpactBps(before: bigint, after: bigint): number {
+  if (before <= 0n || after <= 0n) return 0;
+  const beforeSquared = before * before;
+  const afterSquared = after * after;
+  const delta = beforeSquared > afterSquared ? beforeSquared - afterSquared : afterSquared - beforeSquared;
+  return Number((delta * 10_000n) / beforeSquared);
 }
 
-// V3 quote for the WBOT/USDT pool. token0 = USDT (6dec), token1 = WBOT (18dec).
-// Returns expected output applying the pool fee. Spot-price approximation —
-// fine for retail-sized trades against the deep V3 pool.
-async function quoteV3BotUsdt(
-  client: ReturnType<typeof publicClient>,
-  poolV3: Address,
-  isBotIn: boolean,
-  amountIn: bigint,
-): Promise<{ amountOut: bigint; fee: number } | null> {
-  try {
-    const [slot0, fee] = await Promise.all([
-      client.readContract({
-        address: poolV3,
-        abi: UNISWAP_V3_POOL_ABI,
-        functionName: "slot0",
-      }) as Promise<readonly [bigint, ...unknown[]]>,
-      client.readContract({
-        address: poolV3,
-        abi: UNISWAP_V3_POOL_ABI,
-        functionName: "fee",
-      }) as Promise<number>,
-    ]);
-    const sqrtPriceX96 = BigInt(slot0[0].toString());
-    if (sqrtPriceX96 <= 0n) return null;
-    const Q192 = 1n << 192n;
-    const sp2 = sqrtPriceX96 * sqrtPriceX96;
-    // raw price P = sp2 / Q192 represents raw_token1 per raw_token0 (= raw WBOT per raw USDT).
-    let outRaw: bigint;
-    if (isBotIn) {
-      // BOT (token1) -> USDT (token0): outRaw_usdt = amountIn_bot * Q192 / sp2
-      outRaw = (amountIn * Q192) / sp2;
-    } else {
-      // USDT (token0) -> BOT (token1): outRaw_bot = amountIn_usdt * sp2 / Q192
-      outRaw = (amountIn * sp2) / Q192;
-    }
-    const feeNum = Number(fee);
-    const after = (outRaw * BigInt(1_000_000 - feeNum)) / 1_000_000n;
-    return { amountOut: after, fee: feeNum };
-  } catch {
-    return null;
-  }
-}
-
-// Build a single BOT↔USDT step (V3).
-async function botUsdtStep(
+async function bestV3Step(
   client: ReturnType<typeof publicClient>,
   isMainnet: boolean,
   tokenIn: Token,
@@ -349,39 +304,47 @@ async function botUsdtStep(
   amountIn: bigint,
 ): Promise<SwapStep | null> {
   const c = getContracts(isMainnet);
-  const wbot = c.wbot.toLowerCase() as Address;
-  const usdt = c.usdtBot.toLowerCase() as Address;
-  const poolV3 = c.usdtBotPoolV3.toLowerCase() as Address;
-  const bdexRouter = c.bdexRouter.toLowerCase() as Address;
+  const factory = c.bdexV3Factory.toLowerCase() as Address;
+  const quoter = c.bdexV3Quoter.toLowerCase() as Address;
+  const configuredRouter = c.bdexV3Router.toLowerCase() as Address;
+  if (factory === ZERO || quoter === ZERO || configuredRouter === ZERO) return null;
+  const registryRouter = await bdexV3Router(isMainnet);
+  if (!registryRouter || registryRouter.addr !== configuredRouter) return null;
+  const inAddr = (tokenIn.isNative ? c.wbot : tokenIn.address).toLowerCase() as Address;
+  const outAddr = (tokenOut.isNative ? c.wbot : tokenOut.address).toLowerCase() as Address;
+  if (inAddr === outAddr) return null;
 
-  const detect = isBotUsdtPair(tokenIn, tokenOut, wbot, usdt);
-  if (!detect) return null;
-
-  const q = await quoteV3BotUsdt(client, poolV3, detect.isBotIn, amountIn);
-  if (!q || q.amountOut <= 0n) return null;
-
-  const routerId = await bdexV3RouterId(isMainnet);
-  if (routerId === null) return null;
-
-  const inAddr = detect.isBotIn ? wbot : usdt;
-  const outAddr = detect.isBotIn ? usdt : wbot;
-
+  const quoted = await Promise.all(BDEX_V3_FEE_TIERS.map(async (fee) => {
+    try {
+      const pool = (await client.readContract({ address: factory, abi: UNISWAP_V3_FACTORY_ABI, functionName: "getPool", args: [inAddr, outAddr, fee] })) as Address;
+      if (pool.toLowerCase() === ZERO) return null;
+      const [token0, token1, poolFee, liquidity, slot0] = await Promise.all([
+        client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "token0" }) as Promise<Address>,
+        client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "token1" }) as Promise<Address>,
+        client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "fee" }) as Promise<number>,
+        client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "liquidity" }) as Promise<bigint>,
+        client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "slot0" }) as Promise<readonly [bigint, number, number, number, number, number, boolean]>,
+      ]);
+      const ordered = [token0.toLowerCase(), token1.toLowerCase()].sort().join(":") === [inAddr, outAddr].sort().join(":");
+      if (!ordered || Number(poolFee) !== fee || liquidity <= 0n || slot0[0] <= 0n || !slot0[6]) return null;
+      const simulation = await client.simulateContract({
+        address: quoter, abi: UNISWAP_V3_QUOTER_V2_ABI, functionName: "quoteExactInputSingle",
+        args: [{ tokenIn: inAddr, tokenOut: outAddr, amountIn, fee, sqrtPriceLimitX96: 0n }],
+      });
+      const result = simulation.result as readonly [bigint, bigint, number, bigint];
+      if (result[0] <= 0n) return null;
+      return { amountOut: result[0], fee, priceImpactBps: sqrtPriceImpactBps(slot0[0], result[1]) };
+    } catch { return null; }
+  }));
+  const best = quoted.filter((q): q is NonNullable<typeof q> => q !== null)
+    .sort((a, b) => b.amountOut > a.amountOut ? 1 : b.amountOut < a.amountOut ? -1 : 0)[0];
+  if (!best) return null;
   return {
-    dex: "bdex-v3",
-    routerId,
-    router: bdexRouter,
-
-    path: [inAddr, outAddr],
-    symbolPath: [
-      detect.isBotIn ? "BOT" : "USDT",
-      detect.isBotIn ? "USDT" : "BOT",
-    ],
-    inIsNative: !!tokenIn.isNative,
-    outIsNative: !!tokenOut.isNative,
-    expectedOut: q.amountOut,
-    v3Fee: q.fee,
+    dex: "bdex-v3", routerId: registryRouter.id, router: registryRouter.addr,
+    path: [inAddr, outAddr], symbolPath: [tokenIn.symbol, tokenOut.symbol],
+    inIsNative: !!tokenIn.isNative, outIsNative: !!tokenOut.isNative,
+    expectedOut: best.amountOut, v3Fee: best.fee, priceImpactBps: best.priceImpactBps,
   };
-
 }
 
 // Best single-DEX V2 quote. Tries direct + hop through every base in `hops`
@@ -551,7 +514,7 @@ async function computeBestRoute(
   // ── Phase A: everything that only depends on `amountIn` runs together ──
   const [v3, singleDex, legOnes] = await Promise.all([
     // 1. Direct BOT↔USDT via BDex V3
-    botUsdtStep(client, isMainnet, tokenIn, tokenOut, amountIn),
+    bestV3Step(client, isMainnet, tokenIn, tokenOut, amountIn),
     // 2. Single-DEX V2 routes — one probe per active router, in parallel
     Promise.all(
       allV2.map((dex) => bestOnV2Dex(client, dex, hopBases, tokenIn, tokenOut, amountIn)),
@@ -653,7 +616,7 @@ async function computeBestRoute(
     const legTwos = await Promise.all(
       allV2.map((_, i) =>
         legOnes[i]
-          ? botUsdtStep(client, isMainnet, NATIVE_BOT, usdtToken, legOnes[i]!.amountOut)
+          ? bestV3Step(client, isMainnet, NATIVE_BOT, usdtToken, legOnes[i]!.amountOut)
           : Promise.resolve(null),
       ),
     );
@@ -685,7 +648,7 @@ async function computeBestRoute(
 
   if (tokenInIsUsdt && !tokenOut.isNative && tokenOut.address.toLowerCase() !== usdt) {
     // USDT → BOT via V3, then BOT → tokenOut on each V2 dex
-    const leg1 = await botUsdtStep(client, isMainnet, usdtToken, NATIVE_BOT, amountIn);
+    const leg1 = await bestV3Step(client, isMainnet, usdtToken, NATIVE_BOT, amountIn);
     if (leg1) {
       const legTwos = await Promise.all(
         allV2.map((dexB) =>

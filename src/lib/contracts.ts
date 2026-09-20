@@ -44,7 +44,19 @@ export const CASWAP_ROUTER_ABI = UNISWAP_V2_ROUTER_ABI;
 
 export const UNISWAP_V3_POOL_ABI = parseAbi([
   'function slot0() view returns (uint160 sqrtPriceX96, int24 tick, uint16 observationIndex, uint16 observationCardinality, uint16 observationCardinalityNext, uint8 feeProtocol, bool unlocked)',
-  'function fee() view returns (uint24)'
+  'function fee() view returns (uint24)',
+  'function token0() view returns (address)',
+  'function token1() view returns (address)',
+  'function liquidity() view returns (uint128)'
+]);
+
+export const UNISWAP_V3_FACTORY_ABI = parseAbi([
+  'function getPool(address tokenA, address tokenB, uint24 fee) view returns (address pool)'
+]);
+
+export const UNISWAP_V3_QUOTER_V2_ABI = parseAbi([
+  'function factory() view returns (address)',
+  'function quoteExactInputSingle((address tokenIn, address tokenOut, uint256 amountIn, uint24 fee, uint160 sqrtPriceLimitX96) params) returns (uint256 amountOut, uint160 sqrtPriceX96After, uint32 initializedTicksCrossed, uint256 gasEstimate)'
 ]);
 
 export const UNISWAP_V3_ROUTER_ABI = parseAbi([
@@ -111,6 +123,10 @@ export interface ChainContracts {
   flowBridgeRouter: string;
   flowBridgeRouterV3: string;
   usdtBotPoolV3: string;
+  bdexV3Factory: string;
+  bdexV3Router: string;
+  bdexV3Quoter: string;
+  flowToken: string;
 }
 
 // Shared USDT resource ID across every BOT-Chain bridge gateway (BSC, ETH, TRX).
@@ -146,7 +162,11 @@ export const MAINNET_CONTRACTS: ChainContracts = {
   tronBridgeProxy: "TGhXbQpjBgC6bDp5jAexzeQPHEXXsx5f35", // base58, requires TronLink
   flowBridgeRouter: "0x19784e19546307af427902a75771434df831d882",
   flowBridgeRouterV3: "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
-  usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
+  usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05",
+  bdexV3Factory: "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+  bdexV3Router: "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+  bdexV3Quoter: "0x034A705b36067cFF99AbF5C662BE881cbd8D0176",
+  flowToken: "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF"
 };
 
 
@@ -172,7 +192,11 @@ export const TESTNET_CONTRACTS: ChainContracts = {
   tronBridgeProxy: "",                                          // not published for testnet — disable TRX bridge on testnet
   flowBridgeRouter: "0x72c7d69f44cf0ce056b1c39032c41ee97e09bc8e",
   flowBridgeRouterV3: "0x6a8C4ce7544A75fEc6E577b990e44fe621D8a5ac",
-  usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05"
+  usdtBotPoolV3: "0x64f418471a1a7932a190e10da5a8551db5abec05",
+  bdexV3Factory: "0x0000000000000000000000000000000000000000",
+  bdexV3Router: "0x0000000000000000000000000000000000000000",
+  bdexV3Quoter: "0x0000000000000000000000000000000000000000",
+  flowToken: "0x0000000000000000000000000000000000000000"
 };
 
 
