@@ -2,8 +2,8 @@
   "gate": "V30.2B-P4A.2",
   "chainId": 677,
   "block": {
-    "number": 23900277,
-    "timestamp": 1789909616
+    "number": 23900288,
+    "timestamp": 1789909624
   },
   "pool": {
     "address": "0xDaCFc2574b6110892351Bd31afb36F95E7206162",
@@ -34,7 +34,7 @@
       }
     },
     "oldestObservationTimestamp": 1789878999,
-    "observationAgeSeconds": 30617,
+    "observationAgeSeconds": 30625,
     "earliest7dTwapTimestamp": 1790483799,
     "earliest7dTwapIso": "2026-09-27T04:36:39.000Z",
     "observationCardinality": 1
@@ -176,7 +176,7 @@
     {
       "name": "7d TWAP not claimed before 604800s of real history",
       "pass": true,
-      "detail": 30617
+      "detail": 30625
     },
     {
       "name": "R5 controller oracle is address(0)",
