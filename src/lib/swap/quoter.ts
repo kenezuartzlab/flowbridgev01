@@ -235,18 +235,6 @@ async function bdexV3Router(isMainnet: boolean): Promise<ActiveRouter | null> {
 const PAIR_CACHE = new Map<string, { exists: boolean; at: number }>();
 const PAIR_NEGATIVE_TTL_MS = 120_000;
 
-/**
- * Drop every memoised discovery result (router registry, router metadata, pair
- * existence). Called before verifying a freshly-listed token so a pool created
- * seconds ago is picked up instead of a stale "missing" answer.
- */
-export function resetDiscoveryCaches(): void {
-  ROUTER_CACHE.clear();
-  ROUTER_META_CACHE.clear();
-  PAIR_CACHE.clear();
-  QUOTE_INFLIGHT.clear();
-}
-
 async function pairExists(
   client: ReturnType<typeof publicClient>,
   factory: Address,
