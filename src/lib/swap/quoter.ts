@@ -286,7 +286,82 @@ function addrFor(token: Token, dex: DexCfg): Address {
   return (token.isNative ? dex.wnative : token.address).toLowerCase() as Address;
 }
 
-export const BDEX_V3_FEE_TIERS = [100, 500, 2500, 3000, 10000] as const;
+/**
+ * Candidate V3 fee tiers. The live set is narrowed on-chain via
+ * factory.feeAmountTickSpacing(fee), so a tier the factory has not enabled can
+ * never be quoted, and a newly enabled tier is picked up automatically.
+ */
+export const BDEX_V3_FEE_TIERS = [100, 200, 500, 1500, 2500, 3000, 5000, 10000, 20000] as const;
+
+// Enabled tiers per factory. Cached for the tab; re-checked every 5 minutes so
+// governance-enabled tiers appear without a reload.
+const FEE_TIER_CACHE = new Map<string, { at: number; tiers: number[] }>();
+const FEE_TIER_TTL_MS = 5 * 60_000;
+
+async function enabledFeeTiers(
+  client: ReturnType<typeof publicClient>,
+  factory: Address,
+): Promise<number[]> {
+  const cached = FEE_TIER_CACHE.get(factory);
+  if (cached && Date.now() - cached.at < FEE_TIER_TTL_MS) return cached.tiers;
+  const checks = await Promise.all(
+    BDEX_V3_FEE_TIERS.map(async (fee) => {
+      try {
+        const spacing = (await client.readContract({
+          address: factory,
+          abi: UNISWAP_V3_FACTORY_ABI,
+          functionName: "feeAmountTickSpacing",
+          args: [fee],
+        })) as number;
+        return Number(spacing) > 0 ? fee : null;
+      } catch {
+        return fee; // factory doesn't expose the view — keep the candidate, pool checks still gate it
+      }
+    }),
+  );
+  const tiers = checks.filter((f): f is number => f !== null);
+  const resolved = tiers.length > 0 ? tiers : [...BDEX_V3_FEE_TIERS];
+  FEE_TIER_CACHE.set(factory, { at: Date.now(), tiers: resolved });
+  return resolved;
+}
+
+/**
+ * True when any enabled V3 fee tier has a live, initialised pool with active
+ * liquidity for the pair. Used by the token-import liquidity probe so a brand
+ * new pool is detected even when a 1-unit quote would round to zero.
+ */
+async function anyV3PoolWithLiquidity(
+  client: ReturnType<typeof publicClient>,
+  factory: Address,
+  a: Address,
+  b: Address,
+): Promise<boolean> {
+  if (factory === ZERO || a === b) return false;
+  const tiers = await enabledFeeTiers(client, factory);
+  const results = await Promise.all(
+    tiers.map(async (fee) => {
+      try {
+        const pool = (await client.readContract({
+          address: factory,
+          abi: UNISWAP_V3_FACTORY_ABI,
+          functionName: "getPool",
+          args: [a, b, fee],
+        })) as Address;
+        if (pool.toLowerCase() === ZERO) return false;
+        const [liquidity, slot0] = await Promise.all([
+          client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "liquidity" }) as Promise<bigint>,
+          client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "slot0" }) as Promise<
+            readonly [bigint, number, number, number, number, number, boolean]
+          >,
+        ]);
+        return liquidity > 0n && slot0[0] > 0n && slot0[6] === true;
+      } catch {
+        return false;
+      }
+    }),
+  );
+  return results.some(Boolean);
+}
 
 export function sqrtPriceImpactBps(before: bigint, after: bigint): number {
   if (before <= 0n || after <= 0n) return 0;
