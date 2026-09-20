@@ -313,14 +313,14 @@ async function enabledFeeTiers(
           functionName: "feeAmountTickSpacing",
           args: [fee],
         })) as number;
-        return Number(spacing) > 0 ? fee : null;
+        return Number(spacing) > 0 ? (fee as number) : null;
       } catch {
-        return fee; // factory doesn't expose the view — keep the candidate, pool checks still gate it
+        return fee as number; // factory doesn't expose the view — keep the candidate, pool checks still gate it
       }
     }),
   );
-  const tiers = checks.filter((f): f is number => f !== null);
-  const resolved = tiers.length > 0 ? tiers : [...BDEX_V3_FEE_TIERS];
+  const tiers = checks.filter((f): f is number => typeof f === "number");
+  const resolved: number[] = tiers.length > 0 ? tiers : [...BDEX_V3_FEE_TIERS];
   FEE_TIER_CACHE.set(factory, { at: Date.now(), tiers: resolved });
   return resolved;
 }
