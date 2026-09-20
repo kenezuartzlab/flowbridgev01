@@ -354,6 +354,13 @@ export function UniversalSwapCard({
   const minOutFor = (expected: bigint) =>
     (expected * BigInt(Math.floor((100 - slippage) * 1000))) / 100000n;
 
+  const v3Fees = quote?.steps.flatMap((step) => step.v3Fee == null ? [] : [step.v3Fee]) ?? [];
+  const tradingFeeLabel = v3Fees.length > 0
+    ? v3Fees.map((fee) => `${(fee / 10_000).toFixed(fee % 10_000 === 0 ? 0 : 2)}%`).join(" + ")
+    : "Router quoted";
+  const livePriceImpactBps = quote?.steps.reduce((sum, step) => sum + (step.priceImpactBps ?? 0), 0) ?? 0;
+  const priceImpactLabel = `${(livePriceImpactBps / 100).toFixed(2)}%`;
+
   // Execute a single SwapStep through FlowBridgeRouter v3.
   // `amountInRaw` is the net swap amount (in token-in units). The router charges a
   // configurable protocol fee ON TOP of this — for ERC20 in we approve `swapAmount + fee`,
@@ -1034,7 +1041,8 @@ export function UniversalSwapCard({
                 <Row label="Min received" value={`${minReceived.toFixed(6)} ${tokenOut.symbol}`} />
                 <Row label="Slippage" value={`${slippage}%`} />
                 <Row label="Route" value={quote.symbolPath.join(" → ")} />
-                <Row label="Trading fee" value="0.30%" />
+                <Row label="Trading fee" value={tradingFeeLabel} />
+                <Row label="Price impact" value={priceImpactLabel} />
                 <Row label="Quote basis" value="Executable (on-chain)" />
                 <Row label="Platform fee" value={platformFeeLabel} />
                 {disclosedFeeBps === 0 ? (
@@ -1160,7 +1168,8 @@ export function UniversalSwapCard({
         priceRate={`1 ${tokenIn.symbol} ≈ ${rate ? rate.toFixed(6) : "0"} ${tokenOut.symbol}`}
         slippageTolerance={`${slippage}%`}
         minimumReceived={minReceived ? minReceived.toFixed(6) : undefined}
-        tradingFee="0.30%"
+        tradingFee={tradingFeeLabel}
+        priceImpact={priceImpactLabel}
         platformFee={platformFeeLabel}
       />
     </div>

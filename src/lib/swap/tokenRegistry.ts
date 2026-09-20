@@ -43,6 +43,9 @@ export function getCuratedTokens(isMainnet: boolean): Token[] {
       name: "CaryPact",
       decimals: 18,
     },
+    ...(isMainnet
+      ? [{ address: c.flowToken.toLowerCase(), symbol: "FLOW", name: "Flow Token", decimals: 18 } satisfies Token]
+      : []),
   ];
 
   // Admin-published tokens (persisted server-side, visible to every user).
