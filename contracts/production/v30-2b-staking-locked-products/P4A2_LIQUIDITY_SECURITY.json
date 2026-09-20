@@ -1,0 +1,199 @@
+{
+  "gate": "V30.2B-P4A.2",
+  "chainId": 677,
+  "block": {
+    "number": 23900235,
+    "timestamp": 1789909584
+  },
+  "pool": {
+    "address": "0xDaCFc2574b6110892351Bd31afb36F95E7206162",
+    "token0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+    "token1": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "fee": 10000,
+    "liquidity": "84338189164129918",
+    "sqrtPriceX96": "7903214541872129475246500481434631255",
+    "tick": 368382,
+    "observationIndex": 0,
+    "observationCardinality": 1,
+    "observationCardinalityNext": 1,
+    "tickSpacing": 200
+  },
+  "twap": {
+    "windows": {
+      "30m": {
+        "status": "READY",
+        "averageTick": 368382
+      },
+      "6h": {
+        "status": "READY",
+        "averageTick": 368382
+      },
+      "7d": {
+        "status": "WARMING",
+        "reason": "observation history does not cover window"
+      }
+    },
+    "oldestObservationTimestamp": 1789878999,
+    "observationAgeSeconds": 30585,
+    "earliest7dTwapTimestamp": 1790483799,
+    "earliest7dTwapIso": "2026-09-27T04:36:39.000Z",
+    "observationCardinality": 1
+  },
+  "manipulation": {
+    "methodology": "Uniswap-V3 in-range swap math applied to the live L and sqrtPriceX96. Cost to move spot by X% is the token input that shifts sqrtP by sqrt(1±X). TWAP distortion cost ≈ spot-move cost × (fraction of window sustained), because a geometric-mean TWAP over W seconds moves proportionally to the sustained duration; one-block manipulation of a 1800s window shifts it by ~(block_time/1800) of the spot move.",
+    "spotMoveCost": {
+      "5%": {
+        "pushPriceUp_token1In": 207758.51733938456,
+        "pushPriceUp_token1Symbol": "FLOW",
+        "pushPriceDown_token0In": 21.964012525929427,
+        "pushPriceDown_token0Symbol": "USDT",
+        "note": "in-range only; crossing a range boundary makes the move cheaper still"
+      },
+      "10%": {
+        "pushPriceUp_token1In": 410626.5428847781,
+        "pushPriceUp_token1Symbol": "FLOW",
+        "pushPriceDown_token0In": 45.733829317239824,
+        "pushPriceDown_token0Symbol": "USDT",
+        "note": "in-range only; crossing a range boundary makes the move cheaper still"
+      },
+      "20%": {
+        "pushPriceUp_token1In": 802975.2612744563,
+        "pushPriceUp_token1Symbol": "FLOW",
+        "pushPriceDown_token0In": 99.79462896222897,
+        "pushPriceDown_token0Symbol": "USDT",
+        "note": "in-range only; crossing a range boundary makes the move cheaper still"
+      },
+      "30%": {
+        "pushPriceUp_token1In": 1179289.2552023623,
+        "pushPriceUp_token1Symbol": "FLOW",
+        "pushPriceDown_token0In": 165.06064768022281,
+        "pushPriceDown_token0Symbol": "USDT",
+        "note": "in-range only; crossing a range boundary makes the move cheaper still"
+      }
+    },
+    "twapDistortionModel": {
+      "30m": "sustaining a 10% spot move for 3 min moves the 30m TWAP ~1%",
+      "6h": "same 10% move must persist ~36 min to move the 6h TWAP ~1%",
+      "7d": "same 10% move must persist ~16.8 h to move the 7d TWAP ~1%"
+    },
+    "boundaryBehaviour": "Outside the LP range active liquidity is 0: quotes revert or return 0 and the app must fail closed (no-active-liquidity block).",
+    "classification": "BOOTSTRAP_ONLY",
+    "usdtCostToMoveSpot30pct": 165.06064768022281,
+    "minLiquidityProposal": "OWNER_DECISION_REQUIRED"
+  },
+  "staking": {
+    "vault": "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D",
+    "controller": "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF",
+    "oracle": null,
+    "emergencyMode": null,
+    "dynamicStandard": "DISABLED"
+  },
+  "quotes": {
+    "oneFlowOutUsdt6": "99",
+    "oneUsdtOutFlow18": "9839552206317815517553",
+    "flowToUsdtSqrtAfter": "7903215471888313916653158224198829009",
+    "usdtToFlowSqrtAfter": "7893971165306945920365766162411622361"
+  },
+  "checks": [
+    {
+      "name": "chain id 677",
+      "pass": true,
+      "detail": 677
+    },
+    {
+      "name": "fee tier 10000 enabled on factory",
+      "pass": true,
+      "detail": 200
+    },
+    {
+      "name": "FLOW/USDT pool resolved from factory",
+      "pass": true,
+      "detail": "0xDaCFc2574b6110892351Bd31afb36F95E7206162"
+    },
+    {
+      "name": "pool holds exactly canonical FLOW + USDT",
+      "pass": true,
+      "detail": [
+        "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+        "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF"
+      ]
+    },
+    {
+      "name": "pool fee == 10000",
+      "pass": true,
+      "detail": 10000
+    },
+    {
+      "name": "active liquidity > 0",
+      "pass": true,
+      "detail": "84338189164129918"
+    },
+    {
+      "name": "pool initialized + unlocked",
+      "pass": true,
+      "detail": {
+        "sqrtPriceX96": "7903214541872129475246500481434631255",
+        "unlocked": true
+      }
+    },
+    {
+      "name": "1 FLOW -> USDT quote > 0",
+      "pass": true,
+      "detail": "99"
+    },
+    {
+      "name": "1 USDT -> FLOW quote > 0",
+      "pass": true,
+      "detail": "9839552206317815517553"
+    },
+    {
+      "name": "quoter bound to verified factory",
+      "pass": true,
+      "detail": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419"
+    },
+    {
+      "name": "BDEX V3 router deployed",
+      "pass": true,
+      "detail": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929"
+    },
+    {
+      "name": "FlowBridge Router v3 deployed",
+      "pass": true,
+      "detail": "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445"
+    },
+    {
+      "name": "observe() cumulative tick data readable at 0s",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "oldest observation initialized",
+      "pass": true,
+      "detail": 1789878999
+    },
+    {
+      "name": "7d TWAP not claimed before 604800s of real history",
+      "pass": true,
+      "detail": 30585
+    },
+    {
+      "name": "R5/vault oracle is address(0)",
+      "pass": false,
+      "detail": null
+    },
+    {
+      "name": "weeklyUsdBudget8 == 0",
+      "pass": false
+    },
+    {
+      "name": "emergencyMode false",
+      "pass": false,
+      "detail": null
+    }
+  ],
+  "summary": {
+    "total": 18,
+    "passed": 15,
+    "failed": 3
+  }
+}
