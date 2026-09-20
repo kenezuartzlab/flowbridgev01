@@ -51,7 +51,8 @@ export const UNISWAP_V3_POOL_ABI = parseAbi([
 ]);
 
 export const UNISWAP_V3_FACTORY_ABI = parseAbi([
-  'function getPool(address tokenA, address tokenB, uint24 fee) view returns (address pool)'
+  'function getPool(address tokenA, address tokenB, uint24 fee) view returns (address pool)',
+  'function feeAmountTickSpacing(uint24 fee) view returns (int24)'
 ]);
 
 export const UNISWAP_V3_QUOTER_V2_ABI = parseAbi([

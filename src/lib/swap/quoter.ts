@@ -286,7 +286,82 @@ function addrFor(token: Token, dex: DexCfg): Address {
   return (token.isNative ? dex.wnative : token.address).toLowerCase() as Address;
 }
 
-export const BDEX_V3_FEE_TIERS = [100, 500, 2500, 3000, 10000] as const;
+/**
+ * Candidate V3 fee tiers. The live set is narrowed on-chain via
+ * factory.feeAmountTickSpacing(fee), so a tier the factory has not enabled can
+ * never be quoted, and a newly enabled tier is picked up automatically.
+ */
+export const BDEX_V3_FEE_TIERS = [100, 200, 500, 1500, 2500, 3000, 5000, 10000, 20000] as const;
+
+// Enabled tiers per factory. Cached for the tab; re-checked every 5 minutes so
+// governance-enabled tiers appear without a reload.
+const FEE_TIER_CACHE = new Map<string, { at: number; tiers: number[] }>();
+const FEE_TIER_TTL_MS = 5 * 60_000;
+
+async function enabledFeeTiers(
+  client: ReturnType<typeof publicClient>,
+  factory: Address,
+): Promise<number[]> {
+  const cached = FEE_TIER_CACHE.get(factory);
+  if (cached && Date.now() - cached.at < FEE_TIER_TTL_MS) return cached.tiers;
+  const checks = await Promise.all(
+    BDEX_V3_FEE_TIERS.map(async (fee) => {
+      try {
+        const spacing = (await client.readContract({
+          address: factory,
+          abi: UNISWAP_V3_FACTORY_ABI,
+          functionName: "feeAmountTickSpacing",
+          args: [fee],
+        })) as number;
+        return Number(spacing) > 0 ? (fee as number) : null;
+      } catch {
+        return fee as number; // factory doesn't expose the view — keep the candidate, pool checks still gate it
+      }
+    }),
+  );
+  const tiers = checks.filter((f): f is number => typeof f === "number");
+  const resolved: number[] = tiers.length > 0 ? tiers : [...BDEX_V3_FEE_TIERS];
+  FEE_TIER_CACHE.set(factory, { at: Date.now(), tiers: resolved });
+  return resolved;
+}
+
+/**
+ * True when any enabled V3 fee tier has a live, initialised pool with active
+ * liquidity for the pair. Used by the token-import liquidity probe so a brand
+ * new pool is detected even when a 1-unit quote would round to zero.
+ */
+async function anyV3PoolWithLiquidity(
+  client: ReturnType<typeof publicClient>,
+  factory: Address,
+  a: Address,
+  b: Address,
+): Promise<boolean> {
+  if (factory === ZERO || a === b) return false;
+  const tiers = await enabledFeeTiers(client, factory);
+  const results = await Promise.all(
+    tiers.map(async (fee) => {
+      try {
+        const pool = (await client.readContract({
+          address: factory,
+          abi: UNISWAP_V3_FACTORY_ABI,
+          functionName: "getPool",
+          args: [a, b, fee],
+        })) as Address;
+        if (pool.toLowerCase() === ZERO) return false;
+        const [liquidity, slot0] = await Promise.all([
+          client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "liquidity" }) as Promise<bigint>,
+          client.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "slot0" }) as Promise<
+            readonly [bigint, number, number, number, number, number, boolean]
+          >,
+        ]);
+        return liquidity > 0n && slot0[0] > 0n && slot0[6] === true;
+      } catch {
+        return false;
+      }
+    }),
+  );
+  return results.some(Boolean);
+}
 
 export function sqrtPriceImpactBps(before: bigint, after: bigint): number {
   if (before <= 0n || after <= 0n) return 0;
@@ -314,7 +389,8 @@ async function bestV3Step(
   const outAddr = (tokenOut.isNative ? c.wbot : tokenOut.address).toLowerCase() as Address;
   if (inAddr === outAddr) return null;
 
-  const quoted = await Promise.all(BDEX_V3_FEE_TIERS.map(async (fee) => {
+  const feeTiers = await enabledFeeTiers(client, factory);
+  const quoted = await Promise.all(feeTiers.map(async (fee) => {
     try {
       const pool = (await client.readContract({ address: factory, abi: UNISWAP_V3_FACTORY_ABI, functionName: "getPool", args: [inAddr, outAddr, fee] })) as Address;
       if (pool.toLowerCase() === ZERO) return null;
@@ -491,11 +567,13 @@ async function computeBestRoute(
       symbol: t.symbol,
     }));
   } catch { /* no localStorage or module missing — skip */ }
+  const flow = c.flowToken.toLowerCase() as Address;
   const hopBases: { addr: Address; symbol: string }[] = [
     { addr: wbot, symbol: "BOT" },
     { addr: caWbot, symbol: "BOT" },
     { addr: usdt, symbol: "USDT" },
     { addr: caToken, symbol: "CA" },
+    ...(isMainnet && flow !== ZERO ? [{ addr: flow, symbol: "FLOW" }] : []),
     ...importedHops,
   ];
 
@@ -686,12 +764,49 @@ async function computeBestRoute(
   return candidates[0];
 }
 
+const PAIR_RESERVES_ABI = parseAbi([
+  "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+]);
+
+/** True when a V2 factory has a pair for the token with non-empty reserves. */
+async function anyV2PairWithReserves(
+  client: ReturnType<typeof publicClient>,
+  factory: Address,
+  a: Address,
+  b: Address,
+): Promise<boolean> {
+  if (factory === ZERO || a === b) return false;
+  try {
+    const pair = (await client.readContract({
+      address: factory,
+      abi: FACTORY_ABI,
+      functionName: "getPair",
+      args: [a, b],
+    })) as Address;
+    if (pair.toLowerCase() === ZERO) return false;
+    const reserves = (await client.readContract({
+      address: pair,
+      abi: PAIR_RESERVES_ABI,
+      functionName: "getReserves",
+    })) as readonly [bigint, bigint, number];
+    return reserves[0] > 0n && reserves[1] > 0n;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Deep liquidity probe for custom-imported tokens.
- * Uses the full router (getBestRoute) with a small probe amount, testing the
- * token against every base (BOT native, USDT, CA). If any router/DEX in the
- * registry yields a positive quote, the token is tradable — no manual pair
- * address needed.
+ *
+ * Two independent, fail-closed passes against every base (BOT/WBOT, USDT, CA,
+ * and FLOW on Mainnet):
+ *  1. Direct pool discovery — every live V2 factory in the on-chain router
+ *     registry (pair must hold reserves) and every factory-enabled V3 fee tier
+ *     (pool must be initialised with active liquidity). This catches brand-new
+ *     pools whose price makes a 1-unit quote round to zero.
+ *  2. Executable quote — the real routing path at escalating probe sizes, so
+ *     the token is only accepted when a route can actually be quoted.
+ * Nothing is hardcoded and no write ever happens.
  */
 export async function hasAnyLiquidity(
   tokenAddress: string,
@@ -699,18 +814,19 @@ export async function hasAnyLiquidity(
 ): Promise<boolean> {
   const c = getContracts(isMainnet);
   const candidateAddr = tokenAddress.toLowerCase();
+  const client = publicClient(isMainnet);
 
   const bases = [
     c.wbot.toLowerCase(),
     c.caWbot.toLowerCase(),
     c.usdtBot.toLowerCase(),
     c.caToken.toLowerCase(),
+    ...(isMainnet && c.flowToken.toLowerCase() !== ZERO ? [c.flowToken.toLowerCase()] : []),
   ];
   if (bases.includes(candidateAddr)) return true;
 
   let decimals = 18;
   try {
-    const client = publicClient(isMainnet);
     const ERC20_DEC = parseAbi(["function decimals() view returns (uint8)"]);
     decimals = Number(
       await client.readContract({
@@ -722,8 +838,35 @@ export async function hasAnyLiquidity(
   } catch {
     /* keep 18 */
   }
-  const probeAmount = 10n ** BigInt(decimals);
+  const unit = 10n ** BigInt(decimals);
 
+  // ── Pass 1: direct factory pool discovery (V2 + V3) ──────────────────────
+  const v3Factory = c.bdexV3Factory.toLowerCase() as Address;
+  const dexes = await v2Dexes(isMainnet).catch(() => [] as DexCfg[]);
+  const factories = Array.from(
+    new Set<string>([
+      ...dexes.map((d) => d.factory.toLowerCase()),
+      c.bdexFactory.toLowerCase(),
+      c.caSwapFactory.toLowerCase(),
+    ]),
+  ).filter((f) => f !== ZERO) as Address[];
+
+  const directProbes: Promise<boolean>[] = [];
+  for (const base of bases) {
+    if (base === candidateAddr || base === ZERO) continue;
+    for (const factory of factories) {
+      directProbes.push(
+        anyV2PairWithReserves(client, factory, candidateAddr as Address, base as Address),
+      );
+    }
+    directProbes.push(
+      anyV3PoolWithLiquidity(client, v3Factory, candidateAddr as Address, base as Address),
+    );
+  }
+  const direct = await Promise.all(directProbes);
+  if (direct.some(Boolean)) return true;
+
+  // ── Pass 2: executable quote at escalating probe sizes ───────────────────
   const candidateIn: Token = {
     address: candidateAddr,
     symbol: "T",
@@ -735,18 +878,26 @@ export async function hasAnyLiquidity(
     NATIVE_BOT,
     USDT_TOKEN(isMainnet),
     { address: c.caToken.toLowerCase(), symbol: "CA", name: "CaryPact", decimals: 18 },
+    ...(isMainnet && c.flowToken.toLowerCase() !== ZERO
+      ? [{ address: c.flowToken.toLowerCase(), symbol: "FLOW", name: "Flow Token", decimals: 18 }]
+      : []),
   ];
 
-  for (const out of targets) {
-    if (out.address.toLowerCase() === candidateAddr) continue;
-    try {
-      const r = await getBestRoute(candidateIn, out, probeAmount, isMainnet);
-      if (r && r.amountOut > 0n) return true;
-    } catch { /* try next */ }
-    try {
-      const r = await getBestRoute(out, candidateIn, probeAmount, isMainnet);
-      if (r && r.amountOut > 0n) return true;
-    } catch { /* try next */ }
+  const probeAmounts = [unit, unit * 1000n];
+  for (const probeAmount of probeAmounts) {
+    for (const out of targets) {
+      if (out.address.toLowerCase() === candidateAddr) continue;
+      try {
+        const r = await getBestRoute(candidateIn, out, probeAmount, isMainnet);
+        if (r && r.amountOut > 0n) return true;
+      } catch { /* try next */ }
+      try {
+        const outUnit = 10n ** BigInt(out.decimals);
+        const inverse = probeAmount === unit ? outUnit : outUnit * 1000n;
+        const r = await getBestRoute(out, candidateIn, inverse, isMainnet);
+        if (r && r.amountOut > 0n) return true;
+      } catch { /* try next */ }
+    }
   }
   return false;
 }
