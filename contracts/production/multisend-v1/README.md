@@ -46,3 +46,13 @@ Deploy a separate verified instance per network.
 ## Required release gate
 
 This package is source-level only until it passes the FlowBridge pinned Solidity toolchain, automated contract tests, static analysis, testnet deployment rehearsal, UI simulation tests, explorer verification, and owner/treasury governance approval.
+
+## BOT Testnet release commands
+
+```text
+bun run multisend:compile
+bun run multisend:preflight
+bun run multisend:verify
+```
+
+`multisend:compile` is network-free and writes the pinned compiler artifact plus explorer standard input. `multisend:preflight` never signs or broadcasts; it fails closed until the approved owner and fee recipient are recorded in `contracts/config/multisend-bot-testnet.json`. After a wallet-authorized deployment, its receipt belongs in `contracts/deployments/multisend-bot-testnet.json`; `multisend:verify` then checks chain 968, deployed code, ownership, treasury, fee, recipient limit, nonce, and pause state. The app inventory remains `null` until explorer verification is separately confirmed.

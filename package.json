@@ -11,7 +11,10 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "multisend:compile": "bun contracts/scripts/compile.multisend.ts",
+    "multisend:preflight": "bun contracts/scripts/preflight.multisend.bot-testnet.ts",
+    "multisend:verify": "bun contracts/scripts/verify.multisend.bot-testnet.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
