@@ -192,3 +192,45 @@ describe('read failure posture', () => {
     expect(LOCKED_UNAVAILABLE_COPY).toMatch(/unavailable/i);
   });
 });
+
+describe('P4A.2.1 terms-change guard', () => {
+  it('a reviewed snapshot compared with an identical but separate fresh read is not stale', () => {
+    const reviewed = quote30();
+    const fresh = quote30({ quotedAt: quote30().quotedAt + 45 });
+    // Distinct objects, identical economics: only the read timestamp moved.
+    expect(reviewed).not.toBe(fresh);
+    expect(isLockedQuoteStale(reviewed, fresh)).toBe(false);
+  });
+
+  it('any material economic change invalidates the reviewed terms', () => {
+    const reviewed = quote30();
+    const drifts: Partial<LiveLockedQuote>[] = [
+      { genesisRateBps: 2600 },
+      { genesisSeconds: 20 * DAY },
+      { genesisReservedWei: 1n },
+      { floorRateBps: 700 },
+      { floorReservedWei: 1n },
+      { lockSeconds: 90 * DAY },
+      { principalWei: 2n * ONE },
+      { productId: 2 },
+    ];
+    for (const drift of drifts) {
+      expect(isLockedQuoteStale(reviewed, quote30(drift))).toBe(true);
+    }
+  });
+
+  it('the fingerprint is self-consistent and never compares an object with itself to pass', () => {
+    const q = quote30();
+    expect(lockedQuoteFingerprint(q)).toBe(lockedQuoteFingerprint(quote30()));
+    expect(lockedQuoteFingerprint(q)).not.toBe(lockedQuoteFingerprint(quote30({ floorRateBps: 801 })));
+  });
+
+  it('all four locked products stay owner-approved and quote-gated', () => {
+    for (const id of LOCKED_PRODUCT_IDS) {
+      const r = evaluateLockedExecution(quote30({ productId: id }), gates());
+      expect(r.decision).toBe('EXECUTABLE');
+    }
+    // No product is hard-disabled in app policy; on-chain gates decide.
+    expect(isLockedStakingActivated()).toBe(true);
+  });
+});

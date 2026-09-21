@@ -12,6 +12,7 @@ import {
   isLockedQuoteStale,
   isLockedStakingActivated,
   lockedPhaseCopy,
+  type LiveLockedQuote,
   type LockedProductId,
 } from '@/lib/staking/mainnetLockedStaking';
 import { useMainnetLockedStake } from '@/lib/staking/useMainnetLockedStake';
@@ -47,6 +48,13 @@ export function MainnetLockedStakeCard() {
   const [busy, setBusy] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * P4A.2.1 — the exact economic snapshot the user reviewed. Approval and open
+   * are only offered after an explicit review, and the snapshot is compared
+   * against a genuinely fresh on-chain quote immediately before signing.
+   */
+  const [reviewed, setReviewed] = useState<LiveLockedQuote | null>(null);
+
 
   const principal = useMemo(() => {
     try {
@@ -68,12 +76,35 @@ export function MainnetLockedStakeCard() {
       .catch(() => undefined);
   }, []);
 
+  // Changing product or amount voids any previously reviewed terms.
+  useEffect(() => {
+    setReviewed(null);
+  }, [productId, principal, wallet]);
+
   if (!isLockedStakingActivated()) return null;
 
   const quote = stake.quote;
   const evaluation = stake.evaluation;
   const copy = quote ? lockedPhaseCopy(quote) : null;
   const executable = evaluation?.decision === 'EXECUTABLE' && !stake.loading && busy == null;
+
+  /** Wallet connection ONLY — never an approval, stake, claim or swap. */
+  const connectOnly = async () => {
+    setError(null);
+    setBusy('connect');
+    try {
+      const eth = (globalThis as { window?: { ethereum?: { request: (a: unknown) => Promise<unknown> } } })
+        .window?.ethereum;
+      if (!eth) throw new Error('No wallet detected in this browser.');
+      const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
+      setWallet(accounts?.[0] ? accounts[0].toLowerCase() : null);
+    } catch (e) {
+      const err = e as { shortMessage?: string; message?: string };
+      setError(err.shortMessage ?? err.message ?? 'Wallet connection failed.');
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const send = async (kind: 'approve' | 'open' | 'claim' | 'withdraw', positionId?: string) => {
     setError(null);
@@ -82,9 +113,10 @@ export function MainnetLockedStakeCard() {
       const eth = (globalThis as { window?: { ethereum?: { request: (a: unknown) => Promise<unknown> } } })
         .window?.ethereum;
       if (!eth) throw new Error('No wallet detected in this browser.');
-      const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
-      const from = (accounts?.[0] ?? '').toLowerCase();
-      setWallet(from || null);
+      // The wallet must already be connected: no economic action ever triggers
+      // the connection request itself.
+      const from = (wallet ?? '').toLowerCase();
+      if (!from) throw new Error('Connect your wallet first — nothing was submitted.');
       const hexChain = `0x${BOT_MAINNET_CHAIN_ID.toString(16)}`;
       if ((await eth.request({ method: 'eth_chainId' })) !== hexChain) {
         await eth.request({
@@ -97,26 +129,37 @@ export function MainnetLockedStakeCard() {
       let to = stake.vault;
       let data: `0x${string}`;
       if (kind === 'approve') {
-        if (!quote) throw new Error('Live terms unavailable — nothing was submitted.');
+        // Approval is only ever offered after the user reviewed the live terms.
+        if (!reviewed) throw new Error('Review the live terms first — nothing was submitted.');
         to = stake.token;
         // Exact allowance only, never unlimited.
         data = encodeFunctionData({
           abi: FLOW_ERC20_ABI,
           functionName: 'approve',
-          args: [stake.vault, quote.principalWei],
+          args: [stake.vault, reviewed.principalWei],
         });
       } else if (kind === 'open') {
-        if (!quote) throw new Error('Live terms unavailable — nothing was submitted.');
-        // Terms freeze: re-read the quote and refuse to sign different economics.
-        await stake.refresh();
-        const fresh = stake.quote;
-        if (fresh && isLockedQuoteStale(quote, fresh)) {
-          throw new Error('Live terms changed since they were shown. Review the new terms and retry.');
+        if (!reviewed) throw new Error('Review the live terms first — nothing was submitted.');
+        // Terms-change guard: compare the REVIEWED snapshot against a genuinely
+        // fresh on-chain quote (a separate read, never the same object).
+        const fresh = await stake.fetchFreshQuote();
+        if (!fresh) {
+          throw new Error('Live terms could not be re-read from BOT Mainnet — nothing was submitted.');
+        }
+        if (isLockedQuoteStale(reviewed, fresh)) {
+          setReviewed(null);
+          await stake.refresh();
+          throw new Error('Live terms changed since they were shown. Review the refreshed terms and retry.');
         }
         data = encodeFunctionData({
           abi: STAKING_VAULT_ABI,
           functionName: 'openPosition',
-          args: [productId, quote.principalWei],
+          args: [productId, reviewed.principalWei],
+        });
+        // Exact simulation from the connected wallet before any signature.
+        await eth.request({
+          method: 'eth_call',
+          params: [{ from, to, data, value: '0x0' }, 'latest'],
         });
       } else {
         data = encodeFunctionData({
@@ -230,7 +273,31 @@ export function MainnetLockedStakeCard() {
             Re-check live terms
           </button>
 
-          {evaluation?.needsApproval ? (
+          {!wallet ? (
+            <button
+              type="button"
+              onClick={() => void connectOnly()}
+              disabled={busy != null}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl border border-primary/40 bg-primary/10 px-4 text-[13px] font-black text-foreground transition-opacity disabled:opacity-45"
+            >
+              {busy === 'connect' ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <ShieldCheck className="h-4 w-4" aria-hidden />
+              )}
+              Connect wallet
+            </button>
+          ) : !reviewed ? (
+            <button
+              type="button"
+              onClick={() => setReviewed(quote ? { ...quote } : null)}
+              disabled={!quote || stake.loading || busy != null}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl border border-primary/40 bg-primary/10 px-4 text-[13px] font-black text-foreground transition-opacity disabled:opacity-45"
+            >
+              <ShieldCheck className="h-4 w-4" aria-hidden />
+              Review these terms to continue
+            </button>
+          ) : evaluation?.needsApproval ? (
             <button
               type="button"
               onClick={() => void send('approve')}
@@ -262,9 +329,11 @@ export function MainnetLockedStakeCard() {
         </div>
 
         <p className="text-[11px] leading-relaxed text-muted-soft">
-          Approval and locking are two separate wallet confirmations. Nothing is submitted
-          automatically and no unlimited approval is ever requested. Locked principal cannot be
-          withdrawn before its on-chain unlock date.
+          Connecting a wallet only connects it — no approval or staking request is ever sent at that
+          point. Approval and locking are two separate wallet confirmations after you review the live
+          terms, nothing is submitted automatically, and no unlimited approval is ever requested. If
+          the live terms change before you sign, the transaction is cancelled and you review again.
+          Locked principal cannot be withdrawn before its on-chain unlock date.
         </p>
 
         {txHash ? (

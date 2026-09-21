@@ -24,7 +24,13 @@ import {
 } from "@/lib/swap/tokenRegistry";
 import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
 import { useFlowRouteGuard } from "@/lib/swap/useFlowRouteGuard";
-import { isPreparationStale, preparationFingerprint } from "@/lib/swap/routeGuard";
+import {
+  isBlockingMode,
+  isPreparationStale,
+  preparationFingerprint,
+  routeSignature,
+  type RouteHop,
+} from "@/lib/swap/routeGuard";
 import type { SwapHydrationPlan } from "@/lib/ai/handoffHydration";
 import {
   clearSwapDraft,
@@ -370,14 +376,26 @@ export function UniversalSwapCard({
       return 0n;
     }
   })();
+  // Every hop of the quoted route: a better canonical multi-hop route (e.g.
+  // FLOW → BOT → USDT) is allowed. The guard validates canonical hops and the
+  // effective execution price, never the identity of the first hop.
+  const guardHops: RouteHop[] = useMemo(
+    () =>
+      (quote?.steps ?? []).map((step) => ({
+        routerId: step.routerId ?? null,
+        router: step.router ?? null,
+        path: step.path ?? [],
+        v3Fee: step.v3Fee ?? null,
+      })),
+    [quote],
+  );
   const guard = useFlowRouteGuard({
     isMainnet,
     tokenIn,
     tokenOut,
     amountIn: guardAmountIn,
     amountOut: quote?.amountOut ?? null,
-    routeFee: quote?.steps[0]?.v3Fee ?? null,
-    routerId: quote?.steps[0]?.routerId ?? null,
+    hops: guardHops,
     quotedImpactBps: quote ? livePriceImpactBps : null,
     chainOk: isNetworkCorrect,
   });
@@ -671,26 +689,31 @@ export function UniversalSwapCard({
       // the prepared transaction instead of silently signing something else.
       if (guard.guarded) {
         const pool = guard.reference?.pool;
-        const fee = latestQuote.steps[0]?.v3Fee ?? null;
-        const routerId = latestQuote.steps[0]?.routerId ?? null;
-        if (!pool || fee === null || routerId === null) {
+        const mode = guard.policy?.mode ?? "reference_unavailable";
+        const freshRoute = routeSignature(
+          latestQuote.steps.map((step) => ({
+            routerId: step.routerId ?? null,
+            router: step.router ?? null,
+            path: step.path ?? [],
+            v3Fee: step.v3Fee ?? null,
+          })),
+        );
+        if (!pool || latestQuote.steps.length === 0) {
           throw new Error("Price protection could not be revalidated. Refresh and try again.");
         }
         const revalidated = preparationFingerprint({
           chainId: 677,
           pool,
-          routerId,
-          routeFee: fee,
+          route: freshRoute,
           tokenIn: tokenIn.address,
           tokenOut: tokenOut.address,
           amountIn: initialAmount,
-          mode: guard.policy?.mode ?? "paused",
+          mode,
         });
-        if (
-          guard.policy?.mode === "paused" ||
-          !guardFingerprintRef.current ||
-          isPreparationStale(guardFingerprintRef.current, revalidated)
-        ) {
+        if (isBlockingMode(mode)) {
+          throw new Error(guard.decision?.reason ?? "Price protection is blocking this swap right now.");
+        }
+        if (!guardFingerprintRef.current || isPreparationStale(guardFingerprintRef.current, revalidated)) {
           throw new Error("Route or protection mode changed. Review the new quote and try again.");
         }
       }
@@ -945,7 +968,12 @@ export function UniversalSwapCard({
     buttonLabel = "No route";
     buttonDisabled = true;
   } else if (guardBlocked) {
-    buttonLabel = guard.policy?.mode === "paused" ? "Swap paused — price protection" : "Trade restricted";
+    buttonLabel =
+      guard.policy?.mode === "reference_unavailable"
+        ? "Price protection retrying…"
+        : guard.policy?.mode === "paused_risk"
+          ? "Swap paused — price protection"
+          : "Trade restricted";
     buttonDisabled = true;
   } else if (needsApproval) {
     // V15.3K §6 — two wallet confirmations, stated up front.
@@ -1081,9 +1109,18 @@ export function UniversalSwapCard({
       {guardBlocked && guard.decision && (
         <div className="bg-amber-500/5 border border-amber-500/25 rounded-xl px-3 py-2.5 text-[12px] font-mono text-amber-300 space-y-1">
           <div className="font-black uppercase tracking-widest text-[11px]">
-            {guard.policy?.mode === "paused" ? "Swap preparation paused" : "Trade restricted"}
+            {guard.policy?.mode === "reference_unavailable"
+              ? "Price protection retrying"
+              : guard.policy?.mode === "paused_risk"
+                ? "Swap preparation paused"
+                : "Trade restricted"}
           </div>
           <div>{guard.decision.reason}</div>
+          {guard.decision.retryable ? (
+            <div className="text-amber-300/70">
+              This clears by itself as soon as the live price check succeeds — no reload needed.
+            </div>
+          ) : null}
           {guard.decision.maxSafeAmountIn && guard.decision.maxSafeAmountIn > 0n ? (
             <div>
               Maximum safe amount right now:{" "}
@@ -1140,9 +1177,15 @@ export function UniversalSwapCard({
                           ? `30-min average · ${((guard.reference.deviationBps ?? 0) / 100).toFixed(2)}% off`
                           : guard.reference?.referenceState === "warmup"
                             ? "Warming up (live quote checks only)"
-                            : "Unavailable — preparation paused"
+                            : "Temporarily unavailable — retrying"
                       }
                     />
+                    {guard.effectiveDeviationBps !== null ? (
+                      <Row
+                        label="Effective vs reference"
+                        value={`${(guard.effectiveDeviationBps / 100).toFixed(2)}%`}
+                      />
+                    ) : null}
                   </>
                 ) : null}
                 <Row label="Platform fee" value={platformFeeLabel} />

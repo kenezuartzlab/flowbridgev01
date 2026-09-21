@@ -55,6 +55,8 @@ export interface PoolReference {
   pool: Address | null;
   /** Active in-range liquidity present and pool initialised + unlocked. */
   poolActive: boolean;
+  /** True when canonical FLOW is token1 of the reference pool. */
+  flowIsToken1: boolean | null;
   fee: number | null;
   currentTick: number | null;
   observationCardinality: number;
@@ -80,10 +82,50 @@ export function tickDeviationBps(liveTick: number, referenceTick: number): numbe
   return Math.round(Math.abs(ratio - 1) * 10_000);
 }
 
+export const FLOW_DECIMALS = 18;
+export const USDT_DECIMALS = 6;
+
+/**
+ * Human FLOW per 1 human USDT implied by a pool tick.
+ * A V3 tick encodes raw token1/token0, so the decimal difference is applied
+ * explicitly and the ratio is inverted when FLOW is token0.
+ */
+export function referenceFlowPerUsdt(tick: number, flowIsToken1: boolean): number {
+  const raw = Math.pow(1.0001, tick);
+  const scale = Math.pow(10, USDT_DECIMALS - FLOW_DECIMALS); // 1e-12
+  return flowIsToken1 ? raw * scale : 1 / (raw / scale);
+}
+
+/**
+ * |route-effective execution price vs protection reference| in bps, derived
+ * only from the final quoted input/output of the whole route. Works for any
+ * number of hops, because it never inspects the path.
+ */
+export function effectiveTradeDeviationBps(args: {
+  amountIn: bigint;
+  amountOut: bigint;
+  tokenInIsFlow: boolean;
+  referenceTick: number;
+  flowIsToken1: boolean;
+}): number | null {
+  const { amountIn, amountOut, tokenInIsFlow, referenceTick, flowIsToken1 } = args;
+  if (amountIn <= 0n || amountOut <= 0n) return null;
+  const inDec = tokenInIsFlow ? FLOW_DECIMALS : USDT_DECIMALS;
+  const outDec = tokenInIsFlow ? USDT_DECIMALS : FLOW_DECIMALS;
+  const inHuman = Number(amountIn) / Math.pow(10, inDec);
+  const outHuman = Number(amountOut) / Math.pow(10, outDec);
+  if (!Number.isFinite(inHuman) || !Number.isFinite(outHuman) || inHuman <= 0 || outHuman <= 0) return null;
+  const effectiveFlowPerUsdt = tokenInIsFlow ? inHuman / outHuman : outHuman / inHuman;
+  const reference = referenceFlowPerUsdt(referenceTick, flowIsToken1);
+  if (!Number.isFinite(reference) || reference <= 0) return null;
+  return Math.round(Math.abs(effectiveFlowPerUsdt / reference - 1) * 10_000);
+}
+
 export async function readFlowUsdtReference(isMainnet = true): Promise<PoolReference> {
   const empty: PoolReference = {
     pool: null,
     poolActive: false,
+    flowIsToken1: null,
     fee: null,
     currentTick: null,
     observationCardinality: 0,
@@ -115,7 +157,7 @@ export async function readFlowUsdtReference(isMainnet = true): Promise<PoolRefer
       return { ...empty, detail: "No live FLOW/USDT 1% pool on the verified factory." };
     }
 
-    const [fee, liquidity, slot0, oldest, block] = await Promise.all([
+    const [fee, liquidity, slot0, oldest, block, token1] = await Promise.all([
       pub.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "fee" }) as Promise<number>,
       pub.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "liquidity" }) as Promise<bigint>,
       pub.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "slot0" }) as Promise<
@@ -125,6 +167,7 @@ export async function readFlowUsdtReference(isMainnet = true): Promise<PoolRefer
         readonly [number, bigint, bigint, boolean]
       >,
       pub.getBlock(),
+      pub.readContract({ address: pool, abi: UNISWAP_V3_POOL_ABI, functionName: "token1" }) as Promise<Address>,
     ]);
 
     const poolActive = liquidity > 0n && slot0[0] > 0n && slot0[6] === true;
@@ -136,6 +179,7 @@ export async function readFlowUsdtReference(isMainnet = true): Promise<PoolRefer
       ...empty,
       pool,
       poolActive,
+      flowIsToken1: token1.toLowerCase() === flow,
       fee: Number(fee),
       currentTick: Number(slot0[1]),
       observationCardinality: cardinality,
