@@ -81,6 +81,12 @@ export interface MainnetLockedStakeState {
   oracle: string | null;
   positions: readonly MainnetLockedPosition[];
   refresh: () => Promise<void>;
+  /**
+   * P4A.2.1 — fresh on-chain `quoteOpen()` read that RETURNS the value instead
+   * of only updating state, so the terms-change guard can compare the reviewed
+   * snapshot against genuinely fresh chain state (never against itself).
+   */
+  fetchFreshQuote: () => Promise<LiveLockedQuote | null>;
 }
 
 const EMPTY: Omit<MainnetLockedStakeState, 'refresh'> = {
@@ -239,9 +245,43 @@ export function useMainnetLockedStake(
     }
   }, [wallet, productId, principal]);
 
+  const fetchFreshQuote = useCallback(async (): Promise<LiveLockedQuote | null> => {
+    if (!wallet || principal <= 0n || !isLockedStakingActivated()) return null;
+    const { vault } = mainnetStakingAddresses();
+    const controller = resolveCanonicalAddress(BOT_MAINNET_CHAIN_ID, 'FlowStakingController');
+    if (!vault || !controller) return null;
+    try {
+      const client = createPublicClient({ chain: botMainnet, transport: http() });
+      const read = (address: Hex, abi: unknown, functionName: string, args: unknown[] = []) =>
+        client.readContract({ address, abi, functionName, args } as never);
+      const [block, product, q] = await Promise.all([
+        client.getBlock(),
+        read(controller, STAKING_CONTROLLER_PRODUCT_ABI, 'products', [BigInt(productId)]) as Promise<
+          readonly [boolean, number, number, number, number, number, bigint]
+        >,
+        read(vault, VAULT_QUOTE_ABI, 'quoteOpen', [productId, wallet as Hex, principal]) as Promise<
+          readonly [number, bigint, bigint, number, bigint]
+        >,
+      ]);
+      return {
+        productId,
+        principalWei: principal,
+        lockSeconds: Number(product[1]),
+        genesisRateBps: Number(q[0]),
+        genesisSeconds: Number(q[1]),
+        genesisReservedWei: q[2],
+        floorRateBps: Number(q[3]),
+        floorReservedWei: q[4],
+        quotedAt: Number(block.timestamp),
+      };
+    } catch {
+      return null;
+    }
+  }, [wallet, productId, principal]);
+
   useEffect(() => {
     void load();
   }, [load]);
 
-  return { ...state, refresh: load } as MainnetLockedStakeState;
+  return { ...state, refresh: load, fetchFreshQuote } as MainnetLockedStakeState;
 }
