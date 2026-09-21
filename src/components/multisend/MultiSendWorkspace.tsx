@@ -8,10 +8,12 @@
  * configuration immediately before each signature.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract } from "wagmi";
 import {
   AlertTriangle,
+  ArrowLeft,
   Check,
   ClipboardPaste,
   Download,
@@ -23,6 +25,7 @@ import {
 } from "lucide-react";
 
 import { SectionHeader, StatusPill, Surface } from "@/components/ui-kit/primitives";
+import { Button } from "@/components/ui/button";
 import { QrScanButton } from "@/components/wallet/QrScanButton";
 import { ERC20_ABI } from "@/lib/contracts";
 import { getCuratedTokens } from "@/lib/swap/tokenRegistry";
@@ -448,6 +451,14 @@ export function MultiSendWorkspace() {
         <SectionHeader
           title="MultiSend"
           hint="Send, consolidate, or organize multiple wallet transfers."
+          action={
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/" aria-label="Exit MultiSend">
+                <ArrowLeft aria-hidden="true" />
+                Exit
+              </Link>
+            </Button>
+          }
           badge={
             executable ? (
               <StatusPill tone="ok">Live</StatusPill>
