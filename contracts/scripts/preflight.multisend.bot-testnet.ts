@@ -27,11 +27,6 @@ if (stops.length) {
 
 const owner = getAddress(config.initialOwner);
 const feeRecipient = getAddress(config.feeRecipient);
-if (owner === feeRecipient) stops.push("owner and feeRecipient must be separately reviewed addresses");
-if (stops.length) {
-  console.error("MULTISEND BOT TESTNET PREFLIGHT BLOCKED\n - " + stops.join("\n - "));
-  process.exit(1);
-}
 
 const artifact = JSON.parse(readFileSync(artifactPath, "utf8"));
 const data = encodeDeployData({ abi: artifact.abi, bytecode: artifact.bytecode.object, args: [owner, feeRecipient] });

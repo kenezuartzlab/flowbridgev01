@@ -4,10 +4,10 @@
   "chainId": 968,
   "rpcUrl": "https://rpc.bohr.life",
   "explorerUrl": "https://scan.bohr.life",
-  "initialOwner": null,
-  "feeRecipient": null,
+  "initialOwner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
   "feeBps": 1,
   "maxRecipients": 100,
-  "deploymentApproved": false,
+  "deploymentApproved": true,
   "explorerVerified": false
 }

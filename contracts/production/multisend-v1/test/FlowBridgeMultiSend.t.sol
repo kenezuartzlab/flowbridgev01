@@ -178,8 +178,8 @@ contract FlowBridgeMultiSendTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 100 ether;
 
-        vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(FlowBridgeMultiSend.FeeChanged.selector, reviewedFee, 2));
+        vm.prank(alice);
         multi.sendNative{value: 101 ether}(batchId, recipients, amounts, reviewedFee, reviewedNonce, block.timestamp + 10 minutes);
     }
 
@@ -194,8 +194,8 @@ contract FlowBridgeMultiSendTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 100 ether;
 
-        vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(FlowBridgeMultiSend.ConfigChanged.selector, reviewedNonce, 1));
+        vm.prank(alice);
         multi.sendNative{value: 101 ether}(batchId, recipients, amounts, reviewedFee, reviewedNonce, block.timestamp + 10 minutes);
     }
 
@@ -206,9 +206,9 @@ contract FlowBridgeMultiSendTest is Test {
         amounts[0] = 1 ether;
 
         vm.warp(100);
-        vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(FlowBridgeMultiSend.TransactionExpired.selector, 99, 100));
-        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, multi.feeBps(), multi.configNonce(), 99);
+        vm.prank(alice);
+        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, 1, 0, 99);
     }
 
     function test_RejectsIncorrectNativeValue() public {
@@ -218,9 +218,9 @@ contract FlowBridgeMultiSendTest is Test {
         amounts[0] = 10_000;
         uint256 required = 10_001;
 
-        vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(FlowBridgeMultiSend.IncorrectNativeValue.selector, required, 10_000));
-        multi.sendNative{value: 10_000}(batchId, recipients, amounts, multi.feeBps(), multi.configNonce(), block.timestamp + 1 hours);
+        vm.prank(alice);
+        multi.sendNative{value: 10_000}(batchId, recipients, amounts, 1, 0, block.timestamp + 1 hours);
     }
 
     function test_RejectsSelfRecipient() public {
@@ -229,9 +229,9 @@ contract FlowBridgeMultiSendTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1 ether;
 
-        vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(FlowBridgeMultiSend.RecipientIsSender.selector, 0));
-        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, multi.feeBps(), multi.configNonce(), block.timestamp + 1 hours);
+        vm.prank(alice);
+        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, 1, 0, block.timestamp + 1 hours);
     }
 
     function test_RejectsFeeOnTransferToken() public {
@@ -241,11 +241,11 @@ contract FlowBridgeMultiSendTest is Test {
         amounts[0] = 1_000 ether;
         uint256 fee = multi.quoteFee(1_000 ether);
 
-        vm.startPrank(alice);
+        vm.prank(alice);
         taxToken.approve(address(multi), 1_000 ether + fee);
         vm.expectRevert();
-        multi.sendToken(batchId, address(taxToken), recipients, amounts, multi.feeBps(), multi.configNonce(), block.timestamp + 1 hours);
-        vm.stopPrank();
+        vm.prank(alice);
+        multi.sendToken(batchId, address(taxToken), recipients, amounts, 1, 0, block.timestamp + 1 hours);
     }
 
     function test_PauseBlocksExecution() public {
@@ -257,9 +257,9 @@ contract FlowBridgeMultiSendTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1 ether;
 
-        vm.prank(alice);
         vm.expectRevert();
-        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, multi.feeBps(), multi.configNonce(), block.timestamp + 1 hours);
+        vm.prank(alice);
+        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, 1, 0, block.timestamp + 1 hours);
     }
 
     function test_NonOwnerCannotChangeFee() public {

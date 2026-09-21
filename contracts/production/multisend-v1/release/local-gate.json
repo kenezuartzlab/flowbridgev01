@@ -1,0 +1,57 @@
+{
+  "gate": "MULTISEND_V1_LOCAL_RELEASE_GATE",
+  "verdict": "PASS_AWAITING_TESTNET_GAS",
+  "compiler": {
+    "version": "0.8.20",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": true,
+    "evmVersion": "shanghai"
+  },
+  "contractTests": {
+    "runner": "Foundry 1.4.4",
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0
+  },
+  "staticChecks": {
+    "passed": 14,
+    "failed": 0,
+    "checks": [
+      "no delegatecall",
+      "no selfdestruct",
+      "no tx.origin",
+      "no arbitrary calldata execution",
+      "reentrancy guard",
+      "pause gate",
+      "two-step ownership",
+      "renounce disabled",
+      "fee hard cap",
+      "recipient hard cap",
+      "exact token receipt",
+      "deadline check",
+      "fee snapshot",
+      "configuration snapshot"
+    ]
+  },
+  "runtimeBytes": 6771,
+  "eip170HeadroomBytes": 17805,
+  "sourceSha256": "3284801055c7f40c939e55a660d740e0d7caf2bf243311659810d6a8c00d91f4",
+  "abiSha256": "918f74150f872a11ad41f5660ab4d3bda082bd6e4bbf5df27e3a548de7f0f8e7",
+  "creationBytecodeSha256": "8cb6aeaadf019cee1e18bd3c230d0bbafeaac961565500d69f445bfec761eef0",
+  "unsignedDeploymentDataSha256": "5cf2090e61e8c8a06c156c2194d3507958cb6686a6c59718c92ac58056149164",
+  "chainId": 968,
+  "owner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "broadcast": false,
+  "broadcastAttempt": {
+    "submitted": false,
+    "blocker": "INSUFFICIENT_TESTNET_GAS",
+    "walletBalanceTBOT": "0",
+    "estimatedGas": "1608030",
+    "gasPriceWei": "20000000000",
+    "minimumTBOT": "0.0321606",
+    "recommendedTBOT": "0.04020075"
+  },
+  "mainnetWrites": 0
+}
