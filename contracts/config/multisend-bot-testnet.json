@@ -1,0 +1,13 @@
+{
+  "release": "MultiSend V1",
+  "network": "bot-testnet",
+  "chainId": 968,
+  "rpcUrl": "https://rpc.bohr.life",
+  "explorerUrl": "https://scan.bohr.life",
+  "initialOwner": null,
+  "feeRecipient": null,
+  "feeBps": 1,
+  "maxRecipients": 100,
+  "deploymentApproved": false,
+  "explorerVerified": false
+}
