@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import { PRIMARY_NAV, isNavActive } from "./navModel";
+import { MENU_NAV, isNavActive } from "./navModel";
 
 export function ShellNavMenu({ className = "" }: { className?: string }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -57,7 +57,7 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
           className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-hairline bg-card/95 backdrop-blur-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
         >
           <ul className="py-1">
-            {PRIMARY_NAV.map((dest) => {
+            {MENU_NAV.map((dest) => {
               const active = isNavActive(dest, pathname);
               const { Icon } = dest;
               return (

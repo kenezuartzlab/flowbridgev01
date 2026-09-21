@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router';
 import { cn } from '../../lib/utils';
 
 export type TabId = 'CA/BOT' | 'BOT/USDT' | 'BRIDGE';
@@ -50,14 +49,6 @@ export function RouteTabs({ activeTab, onTabChange }: RouteTabsProps) {
             </button>
           );
         })}
-        <Link
-          to="/multisend"
-          role="tab"
-          aria-selected={false}
-          className="fb-segment min-h-[38px] cursor-pointer truncate px-1.5 py-2 text-center text-[11px] font-black uppercase tracking-[0.1em] text-muted outline-none hover:bg-foreground/5 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/70 sm:text-[12px]"
-        >
-          MULTISEND
-        </Link>
       </nav>
 
       {mode === 'SWAP' && (
