@@ -4,7 +4,7 @@
  * on Home, Explore, Activity or Profile (the V9 centre-item defect).
  */
 import { describe, expect, it } from 'vitest';
-import { OPERATOR_NAV, PRIMARY_NAV, activeNavId, isNavActive } from './navModel';
+import { MENU_NAV, OPERATOR_NAV, PRIMARY_NAV, activeNavId, isNavActive } from './navModel';
 import { computeShellMode } from './useShellMode';
 
 const trade = PRIMARY_NAV.find((d) => d.id === 'trade')!;
@@ -48,6 +48,12 @@ describe('V9.1 navigation model', () => {
     }
     expect(isNavActive(trade, '/trade')).toBe(true);
     expect(isNavActive(trade, '/')).toBe(true);
+    expect(isNavActive(trade, '/multisend')).toBe(false);
+  });
+
+  it('keeps MultiSend in the menu without adding it to the primary navigation', () => {
+    expect(MENU_NAV.some((item) => item.id === 'multisend' && item.to === '/multisend')).toBe(true);
+    expect(PRIMARY_NAV.some((item) => item.id === 'multisend')).toBe(false);
   });
 
   it('keeps operator surfaces out of the primary set', () => {
