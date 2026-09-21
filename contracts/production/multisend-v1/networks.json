@@ -1,0 +1,10 @@
+{
+  "botchain": {
+    "mainnet": {"chainId": 677, "nativeSymbol": "BOT", "enabledForMultiSend": true, "priority": 1},
+    "testnet": {"chainId": 968, "nativeSymbol": "BOT", "enabledForMultiSend": true, "priority": 1}
+  },
+  "bnb": {
+    "mainnet": {"chainId": 56, "nativeSymbol": "BNB", "enabledForMultiSend": true, "priority": 2},
+    "testnet": {"chainId": 97, "nativeSymbol": "tBNB", "enabledForMultiSend": true, "priority": 2}
+  }
+}
