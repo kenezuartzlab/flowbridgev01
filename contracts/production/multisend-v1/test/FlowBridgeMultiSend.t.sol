@@ -208,7 +208,7 @@ contract FlowBridgeMultiSendTest is Test {
         vm.warp(100);
         vm.expectRevert(abi.encodeWithSelector(FlowBridgeMultiSend.TransactionExpired.selector, 99, 100));
         vm.prank(alice);
-        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, multi.feeBps(), multi.configNonce(), 99);
+        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, 1, 0, 99);
     }
 
     function test_RejectsIncorrectNativeValue() public {
@@ -220,7 +220,7 @@ contract FlowBridgeMultiSendTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(FlowBridgeMultiSend.IncorrectNativeValue.selector, required, 10_000));
         vm.prank(alice);
-        multi.sendNative{value: 10_000}(batchId, recipients, amounts, multi.feeBps(), multi.configNonce(), block.timestamp + 1 hours);
+        multi.sendNative{value: 10_000}(batchId, recipients, amounts, 1, 0, block.timestamp + 1 hours);
     }
 
     function test_RejectsSelfRecipient() public {
@@ -231,7 +231,7 @@ contract FlowBridgeMultiSendTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(FlowBridgeMultiSend.RecipientIsSender.selector, 0));
         vm.prank(alice);
-        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, multi.feeBps(), multi.configNonce(), block.timestamp + 1 hours);
+        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, 1, 0, block.timestamp + 1 hours);
     }
 
     function test_RejectsFeeOnTransferToken() public {
@@ -245,7 +245,7 @@ contract FlowBridgeMultiSendTest is Test {
         taxToken.approve(address(multi), 1_000 ether + fee);
         vm.expectRevert();
         vm.prank(alice);
-        multi.sendToken(batchId, address(taxToken), recipients, amounts, multi.feeBps(), multi.configNonce(), block.timestamp + 1 hours);
+        multi.sendToken(batchId, address(taxToken), recipients, amounts, 1, 0, block.timestamp + 1 hours);
     }
 
     function test_PauseBlocksExecution() public {
@@ -259,7 +259,7 @@ contract FlowBridgeMultiSendTest is Test {
 
         vm.expectRevert();
         vm.prank(alice);
-        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, multi.feeBps(), multi.configNonce(), block.timestamp + 1 hours);
+        multi.sendNative{value: 1 ether}(batchId, recipients, amounts, 1, 0, block.timestamp + 1 hours);
     }
 
     function test_NonOwnerCannotChangeFee() public {
