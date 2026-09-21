@@ -89,7 +89,7 @@ export interface MainnetLockedStakeState {
   fetchFreshQuote: () => Promise<LiveLockedQuote | null>;
 }
 
-const EMPTY: Omit<MainnetLockedStakeState, 'refresh'> = {
+const EMPTY: Omit<MainnetLockedStakeState, 'refresh' | 'fetchFreshQuote'> = {
   loading: false,
   unavailable: null,
   token: null,
