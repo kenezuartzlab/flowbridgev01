@@ -91,7 +91,7 @@ export function useFlowRouteGuard(args: {
     let cancelled = false;
     void getActiveRouters(isMainnet)
       .then((rs) => {
-        if (!cancelled) setAllowedRouterIds(rs.map((r) => r.routerId));
+        if (!cancelled) setAllowedRouterIds(rs.map((r) => r.id));
       })
       .catch(() => undefined);
     return () => {
