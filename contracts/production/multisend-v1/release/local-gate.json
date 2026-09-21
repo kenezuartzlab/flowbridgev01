@@ -1,6 +1,6 @@
 {
   "gate": "MULTISEND_V1_LOCAL_RELEASE_GATE",
-  "verdict": "PASS_AWAITING_WALLET_AUTHORIZATION",
+  "verdict": "PASS_AWAITING_TESTNET_GAS",
   "compiler": {
     "version": "0.8.20",
     "optimizer": true,
@@ -44,5 +44,14 @@
   "owner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
   "feeRecipient": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
   "broadcast": false,
+  "broadcastAttempt": {
+    "submitted": false,
+    "blocker": "INSUFFICIENT_TESTNET_GAS",
+    "walletBalanceTBOT": "0",
+    "estimatedGas": "1608030",
+    "gasPriceWei": "20000000000",
+    "minimumTBOT": "0.0321606",
+    "recommendedTBOT": "0.04020075"
+  },
   "mainnetWrites": 0
 }
