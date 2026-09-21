@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { cn } from '../../lib/utils';
 
 export type TabId = 'CA/BOT' | 'BOT/USDT' | 'BRIDGE';
