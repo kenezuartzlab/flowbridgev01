@@ -398,7 +398,7 @@ export function MultiSendWorkspace() {
         functionName: isNative ? "sendNative" : "sendToken",
         args: args as never,
         account: connected,
-        value: isNative ? source.requiredAssetSpend : undefined,
+        value: (isNative ? source.requiredAssetSpend : undefined) as never,
       });
 
       persist(receipts.map((r, i) => (i === index ? { ...r, status: "awaiting-signature" } : r)));
@@ -408,7 +408,7 @@ export function MultiSendWorkspace() {
         functionName: isNative ? "sendNative" : "sendToken",
         args: args as never,
         chainId,
-        value: isNative ? source.requiredAssetSpend : undefined,
+        value: (isNative ? source.requiredAssetSpend : undefined) as never,
       });
       persist(receipts.map((r, i) => (i === index ? { ...r, status: "submitted", txHash: hash } : r)));
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
