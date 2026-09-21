@@ -31,7 +31,7 @@ export const PRIMARY_NAV: NavDestination[] = [
     label: "Trade",
     to: "/trade",
     Icon: ArrowLeftRight,
-    aliases: ["/"],
+    aliases: ["/", "/multisend"],
     primary: true,
   },
   { id: "activity", label: "Activity", to: "/activity", Icon: History },
