@@ -24,6 +24,7 @@ const input = {
   sources: { [SOURCE]: { content: readFileSync(sourcePath, "utf8") } },
   settings: {
     optimizer: { enabled: true, runs: 200 },
+    viaIR: true,
     evmVersion: "shanghai",
     metadata: { bytecodeHash: "ipfs" },
     outputSelection: {
@@ -51,7 +52,7 @@ if (runtimeBytes >= eip170Limit) throw new Error(`EIP_170_LIMIT_EXCEEDED:${runti
 const sha256 = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
 const artifact = {
   contractName: "FlowBridgeMultiSend",
-  compiler: { version: "0.8.20", optimizer: { enabled: true, runs: 200 }, evmVersion: "shanghai" },
+  compiler: { version: "0.8.20", optimizer: { enabled: true, runs: 200 }, viaIR: true, evmVersion: "shanghai" },
   sourceSha256: sha256(readFileSync(sourcePath)),
   abiSha256: sha256(JSON.stringify(compiled.abi)),
   creationBytecodeSha256: sha256(bytecode),
