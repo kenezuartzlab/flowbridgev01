@@ -44,10 +44,13 @@ const recipient = (label: string) => getAddress(`0x${keccak256(toHex(`flowbridge
 const clientBatchId = keccak256(toHex(`multisend-rehearsal-${Date.now()}`));
 const deadline = BigInt(Math.floor(Date.now() / 1000) + 1800);
 
+const feeRecipient = getAddress(manifest.feeRecipient);
+
 const groups = [
-  { mode: "distribute", recipients: [recipient("d1"), recipient("d2"), recipient("d3")], amounts: [parseEther("0.001"), parseEther("0.002"), parseEther("0.0005")] },
-  { mode: "consolidate", recipients: [recipient("destination")], amounts: [parseEther("0.003")] },
-  { mode: "advanced", recipients: [recipient("a1"), recipient("a2")], amounts: [parseEther("0.0015"), parseEther("0.0025")] },
+  { mode: "distribute", recipients: [recipient("d1"), recipient("d2"), recipient("d3")], amounts: [parseEther("0.0001"), parseEther("0.0002"), parseEther("0.00005")] },
+  { mode: "consolidate", recipients: [recipient("destination")], amounts: [parseEther("0.0003")] },
+  { mode: "advanced", recipients: [recipient("a1"), recipient("a2")], amounts: [parseEther("0.00015"), parseEther("0.00025")] },
+  { mode: "duplicate-recipients", recipients: [recipient("dup"), recipient("dup")], amounts: [parseEther("0.0001"), parseEther("0.0002")] },
 ];
 
 const results: unknown[] = [];
@@ -57,16 +60,21 @@ for (const group of groups) {
   const required = (await publicClient.readContract({ address, abi: artifact.abi, functionName: "quoteRequiredSpend", args: [recipientsTotal] })) as bigint;
   if (required !== recipientsTotal + fee) throw new Error(`QUOTE_MISMATCH:${group.mode}`);
 
+  const unique = [...new Set(group.recipients)];
+  const expected = unique.map((to) => group.recipients.reduce((sum, r, i) => (r === to ? sum + group.amounts[i]! : sum), 0n));
   const args = [clientBatchId, group.recipients, group.amounts, feeBps, configNonce, deadline] as const;
-  const before = await Promise.all(group.recipients.map((to) => publicClient.getBalance({ address: to })));
+  const before = await Promise.all(unique.map((to) => publicClient.getBalance({ address: to })));
+  const feeBefore = await publicClient.getBalance({ address: feeRecipient });
   const gas = await publicClient.estimateContractGas({ address, abi: artifact.abi, functionName: "sendNative", args, value: required, account });
   const hash = await walletClient.writeContract({ address, abi: artifact.abi, functionName: "sendNative", args, value: required });
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   if (receipt.status !== "success") throw new Error(`REHEARSAL_REVERTED:${group.mode}`);
 
-  const after = await Promise.all(group.recipients.map((to) => publicClient.getBalance({ address: to })));
-  const exact = after.every((balance, index) => balance - before[index]! === group.amounts[index]!);
+  const after = await Promise.all(unique.map((to) => publicClient.getBalance({ address: to })));
+  const exact = after.every((balance, index) => balance - before[index]! === expected[index]!);
   if (!exact) throw new Error(`INEXACT_RECIPIENT_CREDIT:${group.mode}`);
+  const feeAfter = await publicClient.getBalance({ address: feeRecipient });
+  if (feeAfter - feeBefore !== fee) throw new Error(`FEE_NOT_EXACT:${group.mode}`);
   if ((await publicClient.getBalance({ address })) !== 0n) throw new Error(`CONTRACT_RETAINED_CUSTODY:${group.mode}`);
 
   results.push({
