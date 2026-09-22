@@ -71,7 +71,7 @@ export function AppTopBar({
           {actions}
           {/* The menu stays available at every width so tools such as MultiSend
               are reachable on desktop too, not only on compact layouts. */}
-          <ShellNavMenu />}
+          <ShellNavMenu />
           <button
             type="button"
             onClick={() => setTheme()}
