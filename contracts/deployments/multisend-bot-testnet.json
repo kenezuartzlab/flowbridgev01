@@ -5,7 +5,7 @@
   "address": "0x535dDDA826142AC42cE288154e9595f080940aE9",
   "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
   "owner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
-  "feeRecipient": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
   "deployTxHash": "0xcaf7df7178a02c5d5c4f6b4c4ad74f54b1d4f1c95c407c65f94fce17877e5971",
   "blockNumber": "24259496",
   "sourceSha256": "3284801055c7f40c939e55a660d740e0d7caf2bf243311659810d6a8c00d91f4",
@@ -23,13 +23,22 @@
   },
   "live": {
     "owner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
-    "feeRecipient": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "feeRecipient": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
     "feeBps": 1,
     "maxRecipients": 100,
-    "configNonce": 0,
+    "configNonce": 1,
     "paused": false,
     "runtimeBytes": 6771
   },
   "explorerVerified": false,
-  "deployedAt": "2026-09-22T05:03:16.038Z"
+  "deployedAt": "2026-09-22T05:03:16.038Z",
+  "feeRecipientUpdates": [
+    {
+      "from": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+      "to": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+      "txHash": "0xf07d48f3666e783a3d1f7b5b2bf5b1b975e7b2d8c736d4a49f06e4f26dd087d7",
+      "blockNumber": "24266867",
+      "at": "2026-09-22T06:35:19.855Z"
+    }
+  ]
 }
