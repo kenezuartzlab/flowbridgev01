@@ -47,7 +47,7 @@ collect(SOURCE);
 
 const settings = {
   optimizer: { enabled: true, runs: 200 },
-  viaIR: false,
+  viaIR: true, // RC2: viaIR OFF cannot compile the unchanged accepted source (stack too deep); bundle is self-contained instead
   evmVersion: "shanghai",
   metadata: { bytecodeHash: "ipfs" },
   outputSelection: {
@@ -105,7 +105,7 @@ const artifact = {
   compiler: {
     version: "v0.8.20+commit.a1b79de6",
     optimizer: { enabled: true, runs: 200 },
-    viaIR: false,
+    viaIR: true, // RC2: viaIR OFF cannot compile the unchanged accepted source (stack too deep); bundle is self-contained instead
     evmVersion: "shanghai",
     metadata: { bytecodeHash: "ipfs" },
     license: "MIT",
