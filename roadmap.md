@@ -11,7 +11,10 @@
 - [x] Run live native rehearsals for Distribute, Consolidate, and Advanced with exact recipient credit,
       1 bps fee, and zero contract custody afterwards.
 - [x] Record the verified testnet address in the app inventory and enable BOT Testnet MultiSend.
-- [ ] Submit the source for explorer verification on scan.bohr.life (standard JSON input is frozen at
-      contracts/production/multisend-v1/verification/standard-input.json; no public verify API available here).
-- [ ] Run an ERC-20 rehearsal once a supported testnet token balance is available on the source wallet.
+- [x] Prove the frozen source reproduces the deployed bytecode exactly (release/bot-testnet-source-reproduction.json).
+- [ ] Submit that frozen standard JSON through the scan.bohr.life explorer UI (no public verify API; manual step).
+- [x] Run the ERC-20 rehearsal for all three modes plus 17 negative paths with the MSTT test token.
+- [x] Run the adversarial contract suite (41/41) and the live pause acceptance check.
+- [x] Show estimated network gas, total required and balance-after per source wallet on Review.
+- [x] Group MultiSend sessions as one receipt on Activity while keeping every transaction hash.
 - [ ] BOT Mainnet remains out of scope until testnet evidence is frozen and approved.
