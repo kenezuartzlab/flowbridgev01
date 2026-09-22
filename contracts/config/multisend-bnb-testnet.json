@@ -1,0 +1,16 @@
+{
+  "release": "MultiSend V1 (RC2 build line)",
+  "network": "bnb-testnet",
+  "chainId": 97,
+  "rpcUrl": "https://bsc-testnet-rpc.publicnode.com",
+  "explorerUrl": "https://testnet.bscscan.com",
+  "explorerApiUrl": "https://api.etherscan.io/v2/api",
+  "approvedDeployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "initialOwner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+  "feeBps": 1,
+  "maxRecipients": 100,
+  "deploymentApproved": true,
+  "explorerVerified": false,
+  "$comment": "Owner and fee recipient are the wallets already approved and used for the accepted BOT Testnet RC2 release, confirmed by the FlowBridge owner for BNB Testnet (chain 97) on 2026-09-22. Source, bundle, compiler, optimizer, viaIR, EVM target, metadata and ABI are identical to the accepted BOT releases; no BNB-specific contract logic exists."
+}

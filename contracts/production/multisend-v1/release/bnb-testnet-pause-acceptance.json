@@ -1,0 +1,14 @@
+{
+  "gate": "MULTISEND_V1_BNB_TESTNET_LIVE_PAUSE_ACCEPTANCE",
+  "verdict": "PASS",
+  "chainId": 97,
+  "contract": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+  "owner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "pauseTxHash": "0x3a854fd63175bb225340d8e2f009538ec068f6bac44106106caf5b7d512932e0",
+  "unpauseTxHash": "0x474726bbbe6c618903dec816e958a08a78c57fcc4a4656eeda829b7d08df5552",
+  "acceptedWhileLive": true,
+  "rejectedWhilePaused": true,
+  "acceptedAfterUnpause": true,
+  "finalPaused": false,
+  "executedAt": "2026-09-22T23:14:08.092Z"
+}
