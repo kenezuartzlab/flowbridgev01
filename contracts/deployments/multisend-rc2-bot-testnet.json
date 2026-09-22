@@ -55,7 +55,21 @@
     "paused": false,
     "runtimeBytes": 6860
   },
-  "explorerVerified": false,
+  "explorerVerified": true,
   "supersedes": "0x535dDDA826142AC42cE288154e9595f080940aE9",
-  "deployedAt": "2026-09-22T16:18:15.776Z"
+  "deployedAt": "2026-09-22T16:18:15.776Z",
+  "explorerVerification": {
+    "explorer": "https://scan.bohr.life",
+    "address": "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
+    "method": "Etherscan-compatible verifysourcecode, solidity-standard-json-input, exact deployment bundle",
+    "compilerVersion": "v0.8.20+commit.a1b79de6",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "shanghai",
+    "license": "none",
+    "publishedRuntimeBytecodeSha256": "7b2e4e5bee31d6bb9a6af0e7782fd88036929ad30ac924345924ff6ace7dc0a6",
+    "matchesFrozenRuntime": true
+  }
 }
