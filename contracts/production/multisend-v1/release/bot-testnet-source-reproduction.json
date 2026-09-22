@@ -1,0 +1,60 @@
+{
+  "gate": "MULTISEND_V1_BOT_TESTNET_SOURCE_REPRODUCTION",
+  "verdict": "SOURCE_REPRODUCES_DEPLOYED_BYTECODE",
+  "chainId": 968,
+  "network": "BOT Chain Testnet",
+  "explorer": "https://scan.bohr.life",
+  "contractAddress": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+  "contractName": "FlowBridgeMultiSend",
+  "deploymentTransaction": "0xcaf7df7178a02c5d5c4f6b4c4ad74f54b1d4f1c95c407c65f94fce17877e5971",
+  "deploymentBlock": "24259496",
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "compiler": {
+    "version": "v0.8.20+commit.a1b79de6",
+    "language": "Solidity",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "metadataBytecodeHash": "ipfs",
+    "licence": "MIT"
+  },
+  "constructorArguments": {
+    "types": [
+      "address initialOwner",
+      "address initialFeeRecipient"
+    ],
+    "values": [
+      "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+      "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD"
+    ],
+    "abiEncoded": "0x000000000000000000000000851275569923c62a2ef962ec35bfbb8f1bcbf3dd000000000000000000000000851275569923c62a2ef962ec35bfbb8f1bcbf3dd",
+    "reEncodedMatchesDeployment": true,
+    "note": "initialFeeRecipient was later changed on chain by the owner; see feeRecipientUpdates in the deployment manifest."
+  },
+  "reproduction": {
+    "standardJsonInput": "contracts/production/multisend-v1/verification/standard-input.json",
+    "recompiledRuntimeSha256": "5453b43e504d89ce9dd922eb08a5a202e5d93f11aa7a736ba937a2f6a9047349",
+    "onChainRuntimeSha256": "5453b43e504d89ce9dd922eb08a5a202e5d93f11aa7a736ba937a2f6a9047349",
+    "runtimeBytes": 6771,
+    "exactRuntimeMatch": true,
+    "executableRuntimeMatchIgnoringMetadata": true,
+    "creationCalldataStartsWithRecompiledCreationBytecode": true,
+    "creationBytecodeSha256": "8cb6aeaadf019cee1e18bd3c230d0bbafeaac961565500d69f445bfec761eef0",
+    "abiSha256": "918f74150f872a11ad41f5660ab4d3bda082bd6e4bbf5df27e3a548de7f0f8e7",
+    "sourceSha256": "3284801055c7f40c939e55a660d740e0d7caf2bf243311659810d6a8c00d91f4"
+  },
+  "submission": {
+    "method": "Standard JSON input (single-file verification)",
+    "files": {
+      "standardJson": "contracts/production/multisend-v1/verification/standard-input.json",
+      "flattenedSource": "contracts/production/multisend-v1/verification/FlowBridgeMultiSend.flat.sol",
+      "abi": "contracts/production/multisend-v1/artifacts/FlowBridgeMultiSend.json"
+    },
+    "explorerVerified": false,
+    "note": "scan.bohr.life exposes no public verification API; submit the frozen standard JSON through the explorer UI."
+  },
+  "producedAt": "2026-09-22T06:58:54.682Z"
+}
