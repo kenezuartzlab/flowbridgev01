@@ -1,4 +1,7 @@
+import { Link } from '@tanstack/react-router';
+import { Send } from 'lucide-react';
 import { cn } from '../../lib/utils';
+
 
 export type TabId = 'CA/BOT' | 'BOT/USDT' | 'BRIDGE';
 
@@ -50,6 +53,24 @@ export function RouteTabs({ activeTab, onTabChange }: RouteTabsProps) {
           );
         })}
       </nav>
+
+      {/*
+        Strategic MultiSend shortcut. It is deliberately NOT a trade mode tab:
+        MultiSend is a separate destination, so this is a plain navigation link
+        that never changes the active swap/bridge mode or touches execution.
+      */}
+      <div className="flex items-center justify-end px-0.5">
+        <Link
+          to="/multisend"
+          data-testid="trade-multisend-link"
+          className="inline-flex min-h-[30px] items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] text-primary transition-colors hover:bg-primary/20 outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+        >
+          <Send className="h-3 w-3" aria-hidden="true" />
+          MultiSend
+        </Link>
+      </div>
+
+
 
       {mode === 'SWAP' && (
         <div
