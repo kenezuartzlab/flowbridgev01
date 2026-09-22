@@ -11,6 +11,7 @@ import {
   Copy,
   ExternalLink,
   RefreshCw,
+  Send,
 } from "lucide-react";
 import { wagmiConfig } from "@/lib/wagmi";
 import { SignInButton } from "@/components/auth/SignInButton";
@@ -316,6 +317,13 @@ function WalletPage() {
                 >
                   <ArrowDownLeft className="h-3.5 w-3.5" /> Receive
                 </button>
+                <Link
+                  to="/multisend"
+                  data-testid="wallet-multisend-link"
+                  className="fb-hero-tile col-span-2 inline-flex min-h-[46px] items-center justify-center gap-1.5 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em]"
+                >
+                  <Send className="h-3.5 w-3.5" /> MultiSend
+                </Link>
               </div>
 
               <div className="relative mt-3 flex flex-wrap items-center gap-2">

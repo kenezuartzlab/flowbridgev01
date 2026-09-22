@@ -13,6 +13,7 @@ import {
   Moon,
   Pencil,
   QrCode,
+  Send,
   ShieldCheck,
   Sun,
   Users,
@@ -221,6 +222,14 @@ function AccountPage() {
             label="Export data"
             value="JSON"
             onClick={download}
+          />
+        </Group>
+
+        <Group title="Tools">
+          <RowLink
+            to="/multisend"
+            icon={<Send className="h-4 w-4" />}
+            label="MultiSend — batch transfers"
           />
         </Group>
 

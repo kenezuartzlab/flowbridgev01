@@ -69,7 +69,9 @@ export function AppTopBar({
 
         <div className="flex shrink-0 items-center gap-1.5">
           {actions}
-          {shellMode !== "desktop" && <ShellNavMenu />}
+          {/* The menu stays available at every width so tools such as MultiSend
+              are reachable on desktop too, not only on compact layouts. */}
+          <ShellNavMenu />
           <button
             type="button"
             onClick={() => setTheme()}
