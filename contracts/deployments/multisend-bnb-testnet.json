@@ -58,7 +58,21 @@
     "runtimeBytes": 6860,
     "nativeBalanceWei": "0"
   },
-  "explorerVerified": false,
+  "explorerVerified": true,
   "acceptedBotTestnetRelease": "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
-  "deployedAt": "2026-09-22T23:10:48.702Z"
+  "deployedAt": "2026-09-22T23:10:48.702Z",
+  "explorerVerification": {
+    "explorer": "https://testnet.bscscan.com",
+    "api": "https://api.etherscan.io/v2/api",
+    "verifiedAt": "2026-09-22T23:11:25.739Z",
+    "verified": true,
+    "compilerVersion": "v0.8.20+commit.a1b79de6",
+    "optimizationUsed": "1",
+    "runs": "200",
+    "evmVersion": "shanghai",
+    "licenseType": "MIT",
+    "publishedConstructorArgs": "000000000000000000000000851275569923c62a2ef962ec35bfbb8f1bcbf3dd000000000000000000000000628e237b73c5a37ef3968527563fa1a26b32bb97",
+    "constructorArgsMatch": true,
+    "contractName": "FlowBridgeMultiSend"
+  }
 }
