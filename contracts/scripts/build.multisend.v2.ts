@@ -150,7 +150,7 @@ writeFileSync(
 console.log(
   JSON.stringify(
     {
-      candidate: "MULTISEND_V1_RC2_VIAIR_OFF",
+      candidate: "MULTISEND_V1_RC2_SELF_CONTAINED",
       sources: Object.keys(sources).length,
       bundleSha256: artifact.bundle.sha256,
       sourceSha256: artifact.sourceSha256,

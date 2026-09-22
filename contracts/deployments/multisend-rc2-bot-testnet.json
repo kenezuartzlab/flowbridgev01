@@ -1,0 +1,75 @@
+{
+  "release": "MultiSend V1 RC2 (self-contained Standard-JSON bundle)",
+  "network": "bot-testnet",
+  "chainId": 968,
+  "address": "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "owner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+  "deployTxHash": "0x638d7694d1045c23f44db57a7ddbcbca1987472f3a22ee0413ecf4b188695b44",
+  "blockNumber": "24312919",
+  "sourceSha256": "3284801055c7f40c939e55a660d740e0d7caf2bf243311659810d6a8c00d91f4",
+  "abiSha256": "91a6f2bd6d754fc85bb403a5d4b155fccbe7c60bdbfee4308a288586a50a4784",
+  "creationBytecodeSha256": "a9b9b1297c681703cbc669e6a25817d6b9cb8c2f4603c4e95e6a092a6ed4eed1",
+  "frozenRuntimeBytecodeSha256": "7b2e4e5bee31d6bb9a6af0e7782fd88036929ad30ac924345924ff6ace7dc0a6",
+  "onChainRuntimeBytecodeSha256": "7b2e4e5bee31d6bb9a6af0e7782fd88036929ad30ac924345924ff6ace7dc0a6",
+  "runtimeExactMatch": true,
+  "compiler": {
+    "version": "v0.8.20+commit.a1b79de6",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "license": "MIT"
+  },
+  "bundle": {
+    "path": "contracts/production/multisend-v1/candidate-rc2/verification/standard-input.json",
+    "sourceCount": 17,
+    "openzeppelin": "5.6.1 (vendored, byte-for-byte from the npm 5.6.1 tarball)",
+    "selfContained": true,
+    "importCallbackUsed": false,
+    "sha256": "f81dd258eec6c3c285785b8af0bd1731e28b77907156cb5f47f932ad4879e44f"
+  },
+  "constructorArguments": {
+    "types": [
+      "address initialOwner",
+      "address initialFeeRecipient"
+    ],
+    "values": [
+      "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+      "0x628e237b73C5a37EF3968527563FA1a26b32BB97"
+    ],
+    "abiEncoded": "0x000000000000000000000000851275569923c62a2ef962ec35bfbb8f1bcbf3dd000000000000000000000000628e237b73c5a37ef3968527563fa1a26b32bb97"
+  },
+  "live": {
+    "owner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+    "feeRecipient": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+    "feeBps": 1,
+    "maxRecipients": 100,
+    "configNonce": 0,
+    "paused": false,
+    "runtimeBytes": 6860
+  },
+  "explorerVerified": true,
+  "supersedes": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+  "deployedAt": "2026-09-22T16:18:15.776Z",
+  "explorerVerification": {
+    "explorer": "https://scan.bohr.life",
+    "address": "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
+    "method": "Etherscan-compatible verifysourcecode, solidity-standard-json-input, exact deployment bundle",
+    "compilerVersion": "v0.8.20+commit.a1b79de6",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "shanghai",
+    "license": "none",
+    "publishedRuntimeBytecodeSha256": "7b2e4e5bee31d6bb9a6af0e7782fd88036929ad30ac924345924ff6ace7dc0a6",
+    "matchesFrozenRuntime": true
+  }
+}

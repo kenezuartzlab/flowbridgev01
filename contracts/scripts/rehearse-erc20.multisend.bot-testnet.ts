@@ -27,12 +27,12 @@ import { privateKeyToAccount } from "viem/accounts";
 const REPO = resolve(join(import.meta.dirname ?? ".", "../.."));
 const config = JSON.parse(readFileSync(join(REPO, "contracts/config/multisend-bot-testnet.json"), "utf8"));
 const artifact = JSON.parse(
-  readFileSync(join(REPO, "contracts/production/multisend-v1/artifacts/FlowBridgeMultiSend.json"), "utf8"),
+  readFileSync(join(REPO, (process.env["MULTISEND_ARTIFACT"] ?? "contracts/production/multisend-v1/artifacts/FlowBridgeMultiSend.json")), "utf8"),
 );
 const tokenArtifact = JSON.parse(
   readFileSync(join(REPO, "contracts/production/multisend-v1/test-assets/artifacts/MultiSendTestToken.json"), "utf8"),
 );
-const manifestPath = join(REPO, "contracts/deployments/multisend-bot-testnet.json");
+const manifestPath = join(REPO, (process.env["MULTISEND_MANIFEST"] ?? "contracts/deployments/multisend-bot-testnet.json"));
 if (!existsSync(manifestPath)) throw new Error("DEPLOYMENT_MANIFEST_MISSING");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 if (!process.argv.includes("--broadcast")) throw new Error("BROADCAST_FLAG_REQUIRED");
