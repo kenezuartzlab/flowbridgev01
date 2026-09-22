@@ -1,0 +1,12 @@
+{
+  "purpose": "MultiSend V1 BNB Testnet ERC-20 rehearsal asset only — never mainnet, never product code",
+  "network": "bnb-testnet",
+  "chainId": 97,
+  "address": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+  "symbol": "MSTT",
+  "decimals": 18,
+  "totalSupply": "1000000000000000000000000",
+  "holder": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "deployTxHash": "0x9dca9abd579898fc4dac25d1bbfa1b98882924be2dc299944a5ac7044c6ea35e",
+  "deployedAt": "2026-09-22T23:13:01.671Z"
+}
