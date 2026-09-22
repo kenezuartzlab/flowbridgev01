@@ -26,11 +26,23 @@ describe("multisend deployments", () => {
     expect(multiSendContract(677)).not.toBe(RC2);
   });
 
-  it("keeps both BNB networks locked", () => {
-    for (const chainId of [56, 97]) {
-      expect(multiSendContract(chainId)).toBeNull();
-      expect(isMultiSendExecutable(chainId)).toBe(false);
-    }
+  it("keeps BNB mainnet locked", () => {
+    expect(multiSendContract(56)).toBeNull();
+    expect(isMultiSendExecutable(56)).toBe(false);
+  });
+
+  it("routes BNB testnet sends to its own verified contract only", () => {
+    expect(multiSendContract(97)).toBe(BNB_TESTNET);
+    expect(isMultiSendExecutable(97)).toBe(true);
+    // Chain-scoped: BOT networks never resolve to the BNB testnet deployment.
+    expect(multiSendContract(677)).not.toBe(BNB_TESTNET);
+    expect(multiSendContract(968)).not.toBe(BNB_TESTNET);
+  });
+
+  it("treats the quarantined BOT testnet address as blocked on 968 only", () => {
+    // Same address string, different chain: 968 stays blocked, 97 stays live.
+    expect(isSupersededMultiSendContract(968, BNB_TESTNET)).toBe(true);
+    expect(isSupersededMultiSendContract(97, BNB_TESTNET)).toBe(false);
   });
 
 
