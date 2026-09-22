@@ -9,6 +9,7 @@ import {
 
   LineChart,
   History,
+  Send,
   Sparkles,
   TrendingDown,
   TrendingUp,
@@ -220,6 +221,24 @@ function HomePage() {
             </span>
             <span className="mt-1.5 block text-[11.5px] leading-relaxed text-muted">
               What is actually live today — with the rules, the labels and how it helps BOT Chain.
+            </span>
+          </span>
+          <ArrowUpRight className="h-4 w-4 shrink-0 text-muted" />
+        </Link>
+
+        {/* MultiSend shortcut — navigation only, nothing is signed or sent here. */}
+        <Link
+          to="/multisend"
+          data-testid="home-multisend-link"
+          className="fb-surface flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:border-primary/40"
+        >
+          <span className="min-w-0">
+            <span className="fb-eyebrow flex items-center gap-1.5">
+              <Send className="h-3.5 w-3.5 text-primary" />
+              MultiSend
+            </span>
+            <span className="mt-1.5 block text-[11.5px] leading-relaxed text-muted">
+              Send to many wallets, consolidate into one, or both — reviewed before you sign.
             </span>
           </span>
           <ArrowUpRight className="h-4 w-4 shrink-0 text-muted" />
