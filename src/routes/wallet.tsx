@@ -11,6 +11,7 @@ import {
   Copy,
   ExternalLink,
   RefreshCw,
+  Send,
 } from "lucide-react";
 import { wagmiConfig } from "@/lib/wagmi";
 import { SignInButton } from "@/components/auth/SignInButton";
