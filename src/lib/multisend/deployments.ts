@@ -78,7 +78,17 @@ export const MULTISEND_NETWORKS: MultiSendNetwork[] = [
     nativeSymbol: "tBNB",
     testnet: true,
     priority: 4,
-    contract: null,
+    /**
+     * Deployed 2026-09-22 from the accepted RC2 build line (unchanged source,
+     * self-contained Standard-JSON bundle, OpenZeppelin 5.6.1, solc 0.8.20,
+     * optimizer 200, viaIR, shanghai), runtime byte-exact with the frozen
+     * build, source-verified on testnet.bscscan.com, and rehearsed live:
+     * native tBNB and ERC-20 Distribute / Consolidate / Advanced / duplicate
+     * recipients with exact credit, a 1 bps fee in the transferred asset,
+     * zero contract custody, 17 live rejections and live pause acceptance.
+     * Chain-scoped: never shared with BOT networks and never a fallback.
+     */
+    contract: "0x535dDDA826142AC42cE288154e9595f080940aE9",
     explorer: "https://testnet.bscscan.com",
   },
 ];
