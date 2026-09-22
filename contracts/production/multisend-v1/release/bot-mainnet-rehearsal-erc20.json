@@ -1,0 +1,128 @@
+{
+  "gate": "MULTISEND_V1_BOT_MAINNET_ERC20_REHEARSAL",
+  "verdict": "PASS",
+  "chainId": 677,
+  "contract": "0xc54CAcfd96330949db0eAEd72dE930a2d06d9778",
+  "token": {
+    "address": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "symbol": "FLOW",
+    "decimals": 18,
+    "approved": "FlowBridge production FLOW token"
+  },
+  "source": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+  "clientBatchId": "0x4f783b4b5c081d28be1830389317c1ce69fa25bedccd87aad302f5d0e4f83583",
+  "feeBps": 1,
+  "configNonce": "0",
+  "positives": [
+    {
+      "case": "distribute",
+      "txHash": "0x6e75403156b314d55e5e2a091c706a22133781b809543dd5b62d183f113cbfea",
+      "approvalTxHash": "0x9cd3a245def208a32d5988e448ee63b9f09078df77caf056f06e93f4393dd70c",
+      "blockNumber": "24174126",
+      "recipients": 3,
+      "recipientsTotal": "350000000000000000",
+      "serviceFee": "35000000000000",
+      "feeAsset": "FLOW (same token as the transfer)",
+      "gasEstimated": "172057",
+      "gasUsed": "161021",
+      "exactRecipientCredit": true,
+      "exactAllowanceConsumed": true,
+      "contractTokenBalanceAfter": "0",
+      "status": "PASS"
+    },
+    {
+      "case": "consolidate",
+      "txHash": "0x78ab12880c840f5b4f7402062c867ed453193fb569a40c14f52dd45f72fabefc",
+      "approvalTxHash": "0xd91729e69118ea2a6774b6dbfc27b92d7fdd4f77f729bb70515372d58f77c771",
+      "blockNumber": "24174133",
+      "recipients": 1,
+      "recipientsTotal": "300000000000000000",
+      "serviceFee": "30000000000000",
+      "feeAsset": "FLOW (same token as the transfer)",
+      "gasEstimated": "94362",
+      "gasUsed": "84391",
+      "exactRecipientCredit": true,
+      "exactAllowanceConsumed": true,
+      "contractTokenBalanceAfter": "0",
+      "status": "PASS"
+    },
+    {
+      "case": "advanced",
+      "txHash": "0xdf10834832fb7ae0ea9ac6589fe411cac2cfa71874a8a8e8281054ec7bb777fb",
+      "approvalTxHash": "0x844d962f743bdae69b892e722d7fbc671fe29dd8e5920610de2c26b2ebea8cd3",
+      "blockNumber": "24174140",
+      "recipients": 2,
+      "recipientsTotal": "400000000000000000",
+      "serviceFee": "40000000000000",
+      "feeAsset": "FLOW (same token as the transfer)",
+      "gasEstimated": "124553",
+      "gasUsed": "114168",
+      "exactRecipientCredit": true,
+      "exactAllowanceConsumed": true,
+      "contractTokenBalanceAfter": "0",
+      "status": "PASS"
+    },
+    {
+      "case": "duplicate-recipients",
+      "txHash": "0x442b0f68fc8028851153ef1a449ffe856848c35357e6a1f1a5020b5bbae34371",
+      "approvalTxHash": "0x8bd23487be752d33e2fa3a2be07b8a8064cb2eb4b814f439c5805c90ac5cc25e",
+      "blockNumber": "24174147",
+      "recipients": 2,
+      "recipientsTotal": "30000000000000000",
+      "serviceFee": "3000000000000",
+      "feeAsset": "FLOW (same token as the transfer)",
+      "gasEstimated": "102324",
+      "gasUsed": "92244",
+      "exactRecipientCredit": true,
+      "exactAllowanceConsumed": true,
+      "contractTokenBalanceAfter": "0",
+      "status": "PASS"
+    }
+  ],
+  "negatives": [
+    {
+      "case": "zero-recipient",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "zero-amount",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "empty-batch",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "length-mismatch",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "stale-fee-snapshot",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "stale-config-nonce",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "expired-deadline",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "insufficient-allowance",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted with the following signature:"
+    }
+  ],
+  "residualAllowanceAfterAll": "0",
+  "contractTokenBalanceAfterAll": "0",
+  "executedAt": "2026-09-22T22:10:22.860Z"
+}
