@@ -1,0 +1,14 @@
+{
+  "gate": "MULTISEND_V1_BOT_TESTNET_LIVE_PAUSE_ACCEPTANCE",
+  "verdict": "PASS",
+  "chainId": 968,
+  "contract": "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
+  "owner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "pauseTxHash": "0x30a876c78897308d972db04dba32185d9d336599a1152ba727e611f260ba8e35",
+  "unpauseTxHash": "0x818922049db812f9da5788eee1fa0dba7713f959e31d7c0a68f3a6e6437785b5",
+  "acceptedWhileLive": true,
+  "rejectedWhilePaused": true,
+  "acceptedAfterUnpause": true,
+  "finalPaused": false,
+  "executedAt": "2026-09-22T16:21:05.835Z"
+}

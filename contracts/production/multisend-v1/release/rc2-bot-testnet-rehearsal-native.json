@@ -1,0 +1,52 @@
+{
+  "gate": "MULTISEND_V1_BOT_TESTNET_NATIVE_REHEARSAL",
+  "verdict": "PASS",
+  "chainId": 968,
+  "contract": "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
+  "source": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "clientBatchId": "0x4f49381387b25f9cbfd27b29e18ab4118710240a7422a072f93c0d2b72b45d56",
+  "feeBps": 1,
+  "configNonce": "0",
+  "groups": [
+    {
+      "mode": "distribute",
+      "txHash": "0xb21854a3e9911657a3236c8cf6c0c6ef34fe4dc2b35e9acf82ca401aa15b5a9b",
+      "blockNumber": "24313027",
+      "recipients": 3,
+      "recipientsTotalWei": "3500000000000000",
+      "serviceFeeWei": "350000000000",
+      "totalSpendWei": "3500350000000000",
+      "gasEstimated": "82621",
+      "gasUsed": "77019",
+      "exactRecipientCredit": true,
+      "contractCustodyAfter": "0"
+    },
+    {
+      "mode": "consolidate",
+      "txHash": "0x4b4533128230f93fccce92bbbc885385fe658bf604a6d8a4a0331960f2addd02",
+      "blockNumber": "24313031",
+      "recipients": 1,
+      "recipientsTotalWei": "3000000000000000",
+      "serviceFeeWei": "300000000000",
+      "totalSpendWei": "3000300000000000",
+      "gasEstimated": "60648",
+      "gasUsed": "55347",
+      "exactRecipientCredit": true,
+      "contractCustodyAfter": "0"
+    },
+    {
+      "mode": "advanced",
+      "txHash": "0x83a9595fc9fe7289b1010d4e50490c0f112d4b151424311444a915ad0bb5473b",
+      "blockNumber": "24313034",
+      "recipients": 2,
+      "recipientsTotalWei": "4000000000000000",
+      "serviceFeeWei": "400000000000",
+      "totalSpendWei": "4000400000000000",
+      "gasEstimated": "71647",
+      "gasUsed": "66195",
+      "exactRecipientCredit": true,
+      "contractCustodyAfter": "0"
+    }
+  ],
+  "executedAt": "2026-09-22T16:19:40.776Z"
+}
