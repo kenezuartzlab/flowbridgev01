@@ -6,9 +6,12 @@
 - [x] Record the approved BOT Testnet owner and fee-recipient addresses.
 - [x] Complete baseline contract tests and static safety evidence (17/17 contract tests; 14/14 static checks).
 - [x] Broadcast the chain-968 deployment transaction (0x535dDDA826142AC42cE288154e9595f080940aE9).
-- [x] Confirm live chain state: owner, fee recipient, 1 bps fee, 100 recipient limit, nonce 0, unpaused.
-- [ ] Run native/ERC-20 rehearsals for all three modes; blocked because the contract rejects batches
-      whose sender is the fee recipient, and the approved owner wallet is also the fee recipient.
-      Needs either an approved separate testnet fee-recipient address or an approved second source wallet.
-- [ ] Verify the contract source on scan.bohr.life.
-- [ ] Record the verified address in the app inventory and enable BOT Testnet MultiSend.
+- [x] Confirm live chain state: owner, fee recipient, 1 bps fee, 100 recipient limit, unpaused.
+- [x] Point the testnet service fee to the approved separate wallet (0x628e...BB97, config nonce 1).
+- [x] Run live native rehearsals for Distribute, Consolidate, and Advanced with exact recipient credit,
+      1 bps fee, and zero contract custody afterwards.
+- [x] Record the verified testnet address in the app inventory and enable BOT Testnet MultiSend.
+- [ ] Submit the source for explorer verification on scan.bohr.life (standard JSON input is frozen at
+      contracts/production/multisend-v1/verification/standard-input.json; no public verify API available here).
+- [ ] Run an ERC-20 rehearsal once a supported testnet token balance is available on the source wallet.
+- [ ] BOT Mainnet remains out of scope until testnet evidence is frozen and approved.

@@ -36,7 +36,8 @@ if (live.owner.toLowerCase() !== String(config.initialOwner).toLowerCase()) fail
 if (live.feeRecipient.toLowerCase() !== String(config.feeRecipient).toLowerCase()) failures.push("fee recipient mismatch");
 if (live.feeBps !== 1) failures.push("fee is not 1 bps");
 if (live.maxRecipients !== 100) failures.push("recipient limit is not 100");
-if (live.configNonce !== 0) failures.push("initial config nonce is not zero");
+const expectedNonce = (manifest.feeRecipientUpdates ?? []).length;
+if (live.configNonce !== expectedNonce) failures.push(`config nonce is ${live.configNonce}, expected ${expectedNonce} recorded configuration change(s)`);
 if (live.paused) failures.push("contract is paused");
 if (failures.length) throw new Error("POST_DEPLOY_VERIFICATION_FAILED: " + failures.join(", "));
 console.log(JSON.stringify({ verdict: config.explorerVerified === true ? "PASS_VERIFIED" : "CHAIN_STATE_PASS_EXPLORER_VERIFICATION_PENDING", chainId: 968, address, live }, null, 2));

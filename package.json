@@ -16,7 +16,8 @@
     "multisend:preflight": "bun contracts/scripts/preflight.multisend.bot-testnet.ts",
     "multisend:deploy:testnet": "bun contracts/scripts/deploy.multisend.bot-testnet.ts",
     "multisend:verify": "bun contracts/scripts/verify.multisend.bot-testnet.ts",
-    "multisend:rehearse:testnet": "bun contracts/scripts/rehearse.multisend.bot-testnet.ts"
+    "multisend:rehearse:testnet": "bun contracts/scripts/rehearse.multisend.bot-testnet.ts",
+    "multisend:setfee:testnet": "bun contracts/scripts/setfeerecipient.multisend.bot-testnet.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

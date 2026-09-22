@@ -40,7 +40,12 @@ export const MULTISEND_NETWORKS: MultiSendNetwork[] = [
     nativeSymbol: "tBOT",
     testnet: true,
     priority: 2,
-    contract: null,
+    /**
+     * Deployed and chain-state verified on 2026-09-22; native Distribute,
+     * Consolidate, and Advanced rehearsals passed with exact recipient credit,
+     * a 1 bps fee, and zero contract custody afterwards.
+     */
+    contract: "0x535dDDA826142AC42cE288154e9595f080940aE9",
     explorer: "https://scan.bohr.life",
   },
   {

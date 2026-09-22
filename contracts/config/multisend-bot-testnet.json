@@ -5,7 +5,7 @@
   "rpcUrl": "https://rpc.bohr.life",
   "explorerUrl": "https://scan.bohr.life",
   "initialOwner": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
-  "feeRecipient": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
   "feeBps": 1,
   "maxRecipients": 100,
   "deploymentApproved": true,
