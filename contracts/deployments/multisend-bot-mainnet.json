@@ -1,5 +1,5 @@
 {
-  "release": "MultiSend V1 (RC2 build line) — BOT Mainnet",
+  "release": "MultiSend V1 (RC2 build line) \u2014 BOT Mainnet",
   "network": "bot-mainnet",
   "chainId": 677,
   "address": "0xc54CAcfd96330949db0eAEd72dE930a2d06d9778",
@@ -58,7 +58,30 @@
     "runtimeBytes": 6860,
     "nativeBalanceWei": "0"
   },
-  "explorerVerified": false,
+  "explorerVerified": true,
   "acceptedTestnetRelease": "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
-  "deployedAt": "2026-09-22T21:55:43.859Z"
+  "deployedAt": "2026-09-22T21:55:43.859Z",
+  "explorerVerification": {
+    "explorer": "https://scan.botchain.ai",
+    "address": "0xc54CAcfd96330949db0eAEd72dE930a2d06d9778",
+    "method": "self-contained Standard-JSON bundle (identical to deployment bundle); explorer reports fully verified",
+    "isFullyVerified": true,
+    "isPartiallyVerified": false,
+    "sourceFiles": 17,
+    "compilerVersion": "v0.8.20+commit.a1b79de6",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "publishedConstructorArgs": "000000000000000000000000524db06954de917025180057bcbeb36ec96a98c5000000000000000000000000abe9ac1bc4b9e99b89c27f97c580b5a0b8fa75e1",
+    "publishedRuntimeBytecodeSha256": "7b2e4e5bee31d6bb9a6af0e7782fd88036929ad30ac924345924ff6ace7dc0a6",
+    "matchesFrozenRuntime": true
+  },
+  "nativeRehearsal": "contracts/production/multisend-v1/release/bot-mainnet-rehearsal-native.json",
+  "erc20Rehearsal": "PENDING \u2014 no approved production ERC-20 balance held by the approved sending wallet"
 }
