@@ -41,12 +41,16 @@ export const MULTISEND_NETWORKS: MultiSendNetwork[] = [
     testnet: true,
     priority: 2,
     /**
-     * Deployed and chain-state verified on 2026-09-22; native Distribute,
-     * Consolidate, and Advanced rehearsals passed with exact recipient credit,
-     * a 1 bps fee, and zero contract custody afterwards.
+     * RC2 (self-contained Standard-JSON bundle, OpenZeppelin 5.6.1) deployed
+     * 2026-09-22, runtime byte-exact with the frozen build, publicly source
+     * verified on scan.bohr.life, and re-rehearsed live: native and ERC-20
+     * Distribute / Consolidate / Advanced with exact recipient credit, a 1 bps
+     * fee in the transferred asset, zero contract custody, and live pause
+     * acceptance. Supersedes 0x535dDDA826142AC42cE288154e9595f080940aE9.
      */
-    contract: "0x535dDDA826142AC42cE288154e9595f080940aE9",
+    contract: "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
     explorer: "https://scan.bohr.life",
+
   },
   {
     key: "bnb-mainnet",
