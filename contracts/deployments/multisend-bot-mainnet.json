@@ -83,5 +83,9 @@
     "matchesFrozenRuntime": true
   },
   "nativeRehearsal": "contracts/production/multisend-v1/release/bot-mainnet-rehearsal-native.json",
-  "erc20Rehearsal": "PENDING \u2014 no approved production ERC-20 balance held by the approved sending wallet"
+  "erc20Rehearsal": {
+    "path": "contracts/production/multisend-v1/release/bot-mainnet-rehearsal-erc20.json",
+    "token": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF (FLOW, approved production token)",
+    "verdict": "PASS"
+  }
 }

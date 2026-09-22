@@ -36,10 +36,10 @@ selectors (no behavioural difference).
 | Explorer source verification | PASS — fully verified on scan.botchain.ai, 17 files, published runtime `sha256 7b2e4e5b…` matches the frozen runtime; constructor args match owner + fee recipient |
 | Live settings vs frozen manifest | PASS |
 | Native mainnet rehearsals | PASS — Distribute (3), Consolidate (1), Advanced (2) in one client batch id; exact recipient credit, 1 bps fee credited to the approved fee recipient, one batch event per group, zero contract residual |
-| ERC-20 mainnet rehearsals | PENDING — the approved sending wallet holds no approved production ERC-20 balance; no unknown or experimental token was used |
+| ERC-20 mainnet rehearsals | PASS — approved production token FLOW `0xcaaB50F36252a57529AFeF651fa6B9f9281917fF`: Distribute (3), Consolidate, Advanced and a duplicate-recipient batch; exact recipient credit, 1 bps fee paid in FLOW to the approved fee recipient, exact (never unlimited) allowance fully consumed, zero residual approval, zero contract token balance; 8 rejection paths still rejected by simulation |
 | App acceptance | PASS — 1306 tests pass, build clean |
 
-Native rehearsal evidence: `bot-mainnet-rehearsal-native.json`.
+Rehearsal evidence: `bot-mainnet-rehearsal-native.json`, `bot-mainnet-rehearsal-erc20.json`.
 
 ## Network state
 
