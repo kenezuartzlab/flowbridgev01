@@ -95,7 +95,12 @@ export function MultiSendWorkspace() {
   const [preview, setPreview] = useState<ImportPreview | null>(null);
 
   const [balances, setBalances] = useState<Record<string, { asset: bigint; native: bigint }>>({});
-  const [reviewed, setReviewed] = useState<{ plan: MultiSendPlan; configFp: string } | null>(null);
+  const [reviewed, setReviewed] = useState<{
+    plan: MultiSendPlan;
+    configFp: string;
+    /** Estimated network gas cost in native units, per source wallet. */
+    gasCost: Record<string, bigint>;
+  } | null>(null);
   const [receipts, setReceipts] = useState<SourceReceipt[] | null>(null);
   const [batchId, setBatchId] = useState<`0x${string}` | null>(null);
   const [busy, setBusy] = useState(false);
@@ -313,7 +318,36 @@ export function MultiSendWorkspace() {
         if (!check.ok) throw new Error(`${shortAddress(source.source)}: ${check.reason}`);
       }
 
-      setReviewed({ plan, configFp: `${fresh.configNonce}:${fresh.feeBps}:${fresh.feeRecipient}` });
+      // Estimated network gas per source wallet, shown separately from the FlowBridge fee.
+      const gasCost: Record<string, bigint> = {};
+      if (publicClient) {
+        const gasPrice = await publicClient.getGasPrice().catch(() => 0n);
+        const contract = multiSendContract(chainId);
+        const isNative = asset.kind === NATIVE;
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + DEADLINE_SECONDS);
+        for (const source of plan.sources) {
+          let gas = 21_000n + 40_000n * BigInt(source.recipients.length); // conservative fallback
+          if (contract) {
+            try {
+              gas = await publicClient.estimateContractGas({
+                address: contract,
+                abi: MULTISEND_ABI,
+                functionName: isNative ? "sendNative" : "sendToken",
+                args: (isNative
+                  ? [plan.clientBatchId, source.recipients, source.amounts, fresh.feeBps, fresh.configNonce, deadline]
+                  : [plan.clientBatchId, asset.address as Address, source.recipients, source.amounts, fresh.feeBps, fresh.configNonce, deadline]) as never,
+                account: source.source,
+                value: (isNative ? source.requiredAssetSpend : undefined) as never,
+              });
+            } catch {
+              /* keep the conservative estimate — an approval may still be pending */
+            }
+          }
+          gasCost[source.source.toLowerCase()] = gas * gasPrice;
+        }
+      }
+
+      setReviewed({ plan, configFp: `${fresh.configNonce}:${fresh.feeBps}:${fresh.feeRecipient}`, gasCost });
       setReceipts(initialReceipts(plan));
     } catch (e) {
       setReviewed(null);
@@ -438,6 +472,8 @@ export function MultiSendWorkspace() {
 
   /* ----------------------------------------------------------------- UI --- */
   const fmt = (v: bigint) => formatUnits(v, asset.decimals);
+  /** Native-unit formatter for gas estimates and remaining coin balances. */
+  const gasFmt = (v: bigint) => Number(formatUnits(v, 18)).toFixed(6);
   const status = receipts ? sessionStatus(receipts) : "draft";
   const nextIndex = receipts ? nextSignableIndex(receipts) : null;
   const canReview =
@@ -842,22 +878,59 @@ export function MultiSendWorkspace() {
                 {fmt(reviewed.plan.serviceFeeTotal)} {asset.symbol}
               </span>
             </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Estimated network gas (all wallets)</span>
+              <span>
+                ≈ {gasFmt(Object.values(reviewed.gasCost).reduce((a, b) => a + b, 0n))} {nativeSymbol}
+              </span>
+            </div>
             <div className="flex justify-between font-black">
               <span>Total asset spend</span>
               <span>
-                {fmt(reviewed.plan.recipientsTotal + reviewed.plan.serviceFeeTotal)} {asset.symbol} + network gas
+                {fmt(reviewed.plan.recipientsTotal + reviewed.plan.serviceFeeTotal)} {asset.symbol}
               </span>
             </div>
+            <p className="text-[10.5px] text-muted">
+              The FlowBridge fee and the network gas are always shown separately and never combined.
+            </p>
 
-            <div className="space-y-1 pt-2">
-              {reviewed.plan.sources.map((s) => (
-                <div key={s.source} className="flex justify-between text-[11px]">
-                  <span className="text-muted">{shortAddress(s.source)}</span>
-                  <span>
-                    {fmt(s.recipientsTotal)} + {fmt(s.serviceFee)} fee
-                  </span>
-                </div>
-              ))}
+            {/* Per source wallet: total required now, estimated gas, and what stays behind. */}
+            <div className="space-y-1.5 pt-2">
+              {reviewed.plan.sources.map((s) => {
+                const key = s.source.toLowerCase();
+                const bal = balances[key] ?? { asset: 0n, native: 0n };
+                const gas = reviewed.gasCost[key] ?? 0n;
+                const nativeOut = asset.kind === NATIVE ? s.requiredAssetSpend + gas : gas;
+                const assetLeft = bal.asset > s.requiredAssetSpend ? bal.asset - s.requiredAssetSpend : 0n;
+                const nativeLeft = bal.native > nativeOut ? bal.native - nativeOut : 0n;
+                return (
+                  <div key={s.source} className="rounded-lg border border-hairline p-2 text-[10.5px]">
+                    <p className="font-bold">
+                      {shortAddress(s.source)} · {s.recipients.length} recipients
+                    </p>
+                    <div className="mt-1 flex justify-between">
+                      <span className="text-muted">Total required</span>
+                      <span>
+                        {fmt(s.requiredAssetSpend)} {asset.symbol} ({fmt(s.recipientsTotal)} + {fmt(s.serviceFee)} fee)
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted">Estimated gas</span>
+                      <span>
+                        ≈ {gasFmt(gas)} {nativeSymbol}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted">Balance after</span>
+                      <span>
+                        {asset.kind === NATIVE
+                          ? `${gasFmt(nativeLeft)} ${nativeSymbol}`
+                          : `${fmt(assetLeft)} ${asset.symbol} · ${gasFmt(nativeLeft)} ${nativeSymbol}`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {receipts && (

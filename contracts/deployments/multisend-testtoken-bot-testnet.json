@@ -1,0 +1,12 @@
+{
+  "purpose": "MultiSend V1 BOT Testnet ERC-20 rehearsal asset only — never mainnet, never product code",
+  "network": "bot-testnet",
+  "chainId": 968,
+  "address": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+  "symbol": "MSTT",
+  "decimals": 18,
+  "totalSupply": "1000000000000000000000000",
+  "holder": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "deployTxHash": "0xe5198d77a70a46d2c7a695dc3a47b615b6413fde0183729c3e876d7f214a8b57",
+  "deployedAt": "2026-09-22T06:54:55.102Z"
+}

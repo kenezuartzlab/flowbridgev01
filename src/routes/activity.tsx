@@ -19,6 +19,7 @@ import { AppTopBar } from "@/components/layout/AppTopBar";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { TabBanner } from "@/components/banners/TabBanner";
 import { VerifiedActivityPanel } from "@/components/app/VerifiedActivityPanel";
+import { MultiSendSessionsPanel } from "@/components/multisend/MultiSendSessionsPanel";
 import {
   MetricStrip,
   SafeAreaPage,
@@ -150,6 +151,9 @@ function ActivityPage() {
 
             {/* Source 1 — server-verified evidence. */}
             <VerifiedActivityPanel />
+
+            {/* Grouped MultiSend sessions — one session, every source transaction. */}
+            <MultiSendSessionsPanel />
 
             {/* Source 2 — local submissions from this device. */}
             <Surface>

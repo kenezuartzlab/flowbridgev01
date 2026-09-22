@@ -1,0 +1,196 @@
+{
+  "gate": "MULTISEND_V1_BOT_TESTNET_ERC20_AND_ADVERSARIAL_REHEARSAL",
+  "verdict": "PASS",
+  "chainId": 968,
+  "contract": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+  "token": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+  "tokenSymbol": "MSTT",
+  "tokenDecimals": 18,
+  "tokenDeployTxHash": "0xe5198d77a70a46d2c7a695dc3a47b615b6413fde0183729c3e876d7f214a8b57",
+  "source": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+  "feeBps": 1,
+  "configNonce": "1",
+  "maxRecipients": 100,
+  "clientBatchId": "0x33f8d1a8237c102ffecac01dd7922c641ae0e6a512aa259cddadb3ec29e7e7c9",
+  "positives": [
+    {
+      "case": "distribute",
+      "txHash": "0xb0f13c8c538c4cd8c3ae78c74f4194ee2c4877432f7f11f8eb3fcf507e2f3edf",
+      "approvalTxHash": "0xff72e7a09587eadb57b4fe7bad4cd266191ec79fec6ba53e4e95ab0c47bfe4a5",
+      "blockNumber": "24268548",
+      "recipients": 3,
+      "recipientsTotal": "35500000000000000000",
+      "serviceFee": "3550000000000000",
+      "feeAsset": "MSTT (same token as the transfer)",
+      "gasEstimated": "102509",
+      "gasUsed": "92426",
+      "exactRecipientCredit": true,
+      "exactAllowanceConsumed": true,
+      "contractTokenBalanceAfter": "0",
+      "status": "PASS"
+    },
+    {
+      "case": "consolidate",
+      "txHash": "0xbd733c5e6aaced83fcf1250ec8fe7b328bdeb4bd46a645e9a21707c995500ca0",
+      "approvalTxHash": "0x2ecdb094948960a7e08fae1456c24eb9e1b5102cb32db70ec496c2ee0a3ad60f",
+      "blockNumber": "24268555",
+      "recipients": 1,
+      "recipientsTotal": "30000000000000000000",
+      "serviceFee": "3000000000000000",
+      "feeAsset": "MSTT (same token as the transfer)",
+      "gasEstimated": "77446",
+      "gasUsed": "67022",
+      "exactRecipientCredit": true,
+      "exactAllowanceConsumed": true,
+      "contractTokenBalanceAfter": "0",
+      "status": "PASS"
+    },
+    {
+      "case": "advanced",
+      "txHash": "0xf79b3ccd102b4dac523b5b3282d7be9244547185a641a886048d2e4c1a9bc321",
+      "approvalTxHash": "0xcdde1a0733c446820b9becd86ac3274487fab99177117178820705cf83933ff2",
+      "blockNumber": "24268562",
+      "recipients": 2,
+      "recipientsTotal": "40000000000000000000",
+      "serviceFee": "4000000000000000",
+      "feeAsset": "MSTT (same token as the transfer)",
+      "gasEstimated": "89624",
+      "gasUsed": "79718",
+      "exactRecipientCredit": true,
+      "exactAllowanceConsumed": true,
+      "contractTokenBalanceAfter": "0",
+      "status": "PASS"
+    },
+    {
+      "case": "duplicate-recipients",
+      "txHash": "0xf22865dd558b1b661488cde5072d80a9595ce7be84522a3c81d165d3a8dbfc6a",
+      "approvalTxHash": "0xdc109b20c8a39d7aaa2216d7ab5777bf55add0aaec8bbaad959b0d1899a50297",
+      "blockNumber": "24268569",
+      "recipients": 2,
+      "recipientsTotal": "3000000000000000000",
+      "serviceFee": "300000000000000",
+      "feeAsset": "MSTT (same token as the transfer)",
+      "gasEstimated": "84758",
+      "gasUsed": "74918",
+      "exactRecipientCredit": true,
+      "exactAllowanceConsumed": true,
+      "contractTokenBalanceAfter": "0",
+      "status": "PASS"
+    }
+  ],
+  "negatives": [
+    {
+      "case": "erc20-insufficient-allowance",
+      "expected": "transferFrom rejected without approval",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted with the following reason:"
+    },
+    {
+      "case": "zero-recipient-address",
+      "expected": "InvalidRecipient",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "zero-transfer-amount",
+      "expected": "InvalidAmount",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "self-recipient",
+      "expected": "RecipientIsSender",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "malformed-length-mismatch",
+      "expected": "LengthMismatch",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "empty-batch",
+      "expected": "EmptyBatch",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "over-100-recipients",
+      "expected": "TooManyRecipients",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "insufficient-token-balance",
+      "expected": "transferFrom balance check",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted with the following reason:"
+    },
+    {
+      "case": "expired-deadline",
+      "expected": "TransactionExpired",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "fee-changed-after-review",
+      "expected": "FeeChanged",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "configuration-changed-after-review",
+      "expected": "ConfigChanged",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "zero-token-address",
+      "expected": "InvalidToken",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "non-token-address-as-token",
+      "expected": "no ERC-20 at address",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted."
+    },
+    {
+      "case": "unauthorized-fee-change",
+      "expected": "Ownable unauthorized (non-owner simulation)",
+      "status": "PASS",
+      "detail": "The contract function \"setFeeBps\" reverted."
+    },
+    {
+      "case": "unauthorized-pause",
+      "expected": "Ownable unauthorized (non-owner simulation)",
+      "status": "PASS",
+      "detail": "The contract function \"pause\" reverted."
+    },
+    {
+      "case": "unauthorized-rescue",
+      "expected": "Ownable unauthorized (non-owner simulation)",
+      "status": "PASS",
+      "detail": "The contract function \"rescueToken\" reverted."
+    },
+    {
+      "case": "max-plus-one-base-unit",
+      "expected": "balance exceeded by one unit above MAX",
+      "status": "PASS",
+      "detail": "The contract function \"sendToken\" reverted with the following reason:"
+    }
+  ],
+  "maxBehaviour": {
+    "holderBalance": "999782978300000000000000",
+    "maxRecipientsTotal": "999683009999000099990001",
+    "requiredSpendAtMax": "999782978300000000000000",
+    "simulatedAtMax": "PASS",
+    "oneUnitAboveMax": "REJECTED"
+  },
+  "residualAllowance": "0",
+  "contractTokenBalance": "0",
+  "executedAt": "2026-09-22T06:56:46.095Z"
+}
