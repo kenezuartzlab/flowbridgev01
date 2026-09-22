@@ -30,9 +30,18 @@ export const MULTISEND_NETWORKS: MultiSendNetwork[] = [
     nativeSymbol: "BOT",
     testnet: false,
     priority: 1,
-    contract: null,
+    /**
+     * Deployed 2026-09-22 from the accepted RC2 build line (unchanged source,
+     * self-contained Standard-JSON bundle, OpenZeppelin 5.6.1, solc 0.8.20,
+     * optimizer 200, viaIR, shanghai), runtime byte-exact with the frozen
+     * build, fully source-verified on scan.botchain.ai, and rehearsed live
+     * (native Distribute / Consolidate / Advanced with exact recipient credit,
+     * 1 bps fee to the approved production fee recipient, zero custody).
+     */
+    contract: "0xc54CAcfd96330949db0eAEd72dE930a2d06d9778",
     explorer: "https://scan.botchain.ai",
   },
+
   {
     key: "bot-testnet",
     chainId: 968,

@@ -1,0 +1,59 @@
+{
+  "gate": "MULTISEND_V1_BOT_MAINNET_NATIVE_REHEARSAL",
+  "verdict": "PASS",
+  "chainId": 677,
+  "contract": "0xc54CAcfd96330949db0eAEd72dE930a2d06d9778",
+  "source": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "feeRecipient": "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+  "clientBatchId": "0xaab504cdbeafcbd69737f2f98dc26328ba1091e214a8245b9bde3ffde0c8e4e2",
+  "feeBps": 1,
+  "configNonce": "0",
+  "groups": [
+    {
+      "mode": "distribute",
+      "txHash": "0x2c5975de7609bcaf73e30160f5f2a6b85a38806fea2c93d5c0871a8cd8cde823",
+      "blockNumber": "24173293",
+      "recipients": 3,
+      "recipientsTotalWei": "350000000000000",
+      "serviceFeeWei": "35000000000",
+      "totalSpendWei": "350035000000000",
+      "gasEstimated": "157689",
+      "gasUsed": "151995",
+      "exactRecipientCredit": true,
+      "feeCreditedToApprovedRecipient": true,
+      "contractEventLogs": 1,
+      "contractCustodyAfter": "0"
+    },
+    {
+      "mode": "consolidate",
+      "txHash": "0xf6c73f6b0ba2c1cc1d5143b4ec976f763e479757e96c1efa3525c2380fde6602",
+      "blockNumber": "24173298",
+      "recipients": 1,
+      "recipientsTotalWei": "300000000000000",
+      "serviceFeeWei": "30000000000",
+      "totalSpendWei": "300030000000000",
+      "gasEstimated": "85995",
+      "gasUsed": "80347",
+      "exactRecipientCredit": true,
+      "feeCreditedToApprovedRecipient": true,
+      "contractEventLogs": 1,
+      "contractCustodyAfter": "0"
+    },
+    {
+      "mode": "advanced",
+      "txHash": "0x1cf0acc420fa51128ef7fc77eba5831c93c6ad745d17a2b0b545ebdde1e65bba",
+      "blockNumber": "24173302",
+      "recipients": 2,
+      "recipientsTotalWei": "400000000000000",
+      "serviceFeeWei": "40000000000",
+      "totalSpendWei": "400040000000000",
+      "gasEstimated": "121438",
+      "gasUsed": "116171",
+      "exactRecipientCredit": true,
+      "feeCreditedToApprovedRecipient": true,
+      "contractEventLogs": 1,
+      "contractCustodyAfter": "0"
+    }
+  ],
+  "executedAt": "2026-09-22T21:59:46.063Z"
+}

@@ -1,0 +1,15 @@
+{
+  "release": "MultiSend V1 (RC2 build line)",
+  "network": "bot-mainnet",
+  "chainId": 677,
+  "rpcUrl": "https://rpc.botchain.ai",
+  "explorerUrl": "https://scan.botchain.ai",
+  "approvedDeployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "initialOwner": "0x524Db06954de917025180057BCBeB36eC96A98c5",
+  "feeRecipient": "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+  "feeBps": 1,
+  "maxRecipients": 100,
+  "deploymentApproved": true,
+  "explorerVerified": false,
+  "$comment": "Owner and fee recipient supplied and approved by the FlowBridge owner for the BOT Mainnet MultiSend release (2026-09-22). Build line, bundle, compiler, optimizer, viaIR, EVM target and metadata are identical to the accepted BOT Testnet RC2 release; only the constructor addresses differ."
+}
