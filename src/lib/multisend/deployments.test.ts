@@ -11,6 +11,7 @@ import {
 
 const RC2 = "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960";
 const LEGACY = "0x535dDDA826142AC42cE288154e9595f080940aE9";
+const MAINNET = "0xc54CAcfd96330949db0eAEd72dE930a2d06d9778";
 
 describe("multisend deployments", () => {
   it("routes BOT testnet sends to the explorer-verified RC2 contract", () => {
@@ -18,12 +19,20 @@ describe("multisend deployments", () => {
     expect(isMultiSendExecutable(968)).toBe(true);
   });
 
-  it("keeps BOT mainnet and both BNB networks locked", () => {
-    for (const chainId of [677, 56, 97]) {
+  it("routes BOT mainnet sends only to the verified mainnet contract", () => {
+    expect(multiSendContract(677)).toBe(MAINNET);
+    expect(isMultiSendExecutable(677)).toBe(true);
+    // No cross-network fallback: mainnet never resolves to the testnet address.
+    expect(multiSendContract(677)).not.toBe(RC2);
+  });
+
+  it("keeps both BNB networks locked", () => {
+    for (const chainId of [56, 97]) {
       expect(multiSendContract(chainId)).toBeNull();
       expect(isMultiSendExecutable(chainId)).toBe(false);
     }
   });
+
 
   it("fails closed for unknown networks", () => {
     expect(networkForChain(1)).toBeNull();
