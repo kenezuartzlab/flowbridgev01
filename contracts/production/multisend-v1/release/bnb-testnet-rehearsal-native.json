@@ -1,0 +1,65 @@
+{
+  "gate": "MULTISEND_V1_BNB_TESTNET_NATIVE_REHEARSAL",
+  "verdict": "PASS",
+  "chainId": 97,
+  "contract": "0x535dDDA826142AC42cE288154e9595f080940aE9",
+  "source": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "clientBatchId": "0x278cff6bda24bfe6c4273d09f9f401433527928ed5d84dc1d0b7dfd1e2e7eb37",
+  "feeBps": 1,
+  "configNonce": "0",
+  "groups": [
+    {
+      "mode": "distribute",
+      "txHash": "0xb1031bc59cbde9b550ec7cac3c4be74036c95bcb2fae006cedda601c98fc4a23",
+      "blockNumber": "132604061",
+      "recipients": 3,
+      "recipientsTotalWei": "350000000000000",
+      "serviceFeeWei": "35000000000",
+      "totalSpendWei": "350035000000000",
+      "gasEstimated": "157689",
+      "gasUsed": "151995",
+      "exactRecipientCredit": true,
+      "contractCustodyAfter": "0"
+    },
+    {
+      "mode": "consolidate",
+      "txHash": "0x00abb1c271defb798374822688fa5e5e2519fa5e293a52844a76611d0c8f2569",
+      "blockNumber": "132604071",
+      "recipients": 1,
+      "recipientsTotalWei": "300000000000000",
+      "serviceFeeWei": "30000000000",
+      "totalSpendWei": "300030000000000",
+      "gasEstimated": "85995",
+      "gasUsed": "80347",
+      "exactRecipientCredit": true,
+      "contractCustodyAfter": "0"
+    },
+    {
+      "mode": "advanced",
+      "txHash": "0xbbad6696609050f74095685f657d367f45405a635c8277d78d526660351c0199",
+      "blockNumber": "132604081",
+      "recipients": 2,
+      "recipientsTotalWei": "400000000000000",
+      "serviceFeeWei": "40000000000",
+      "totalSpendWei": "400040000000000",
+      "gasEstimated": "121438",
+      "gasUsed": "116171",
+      "exactRecipientCredit": true,
+      "contractCustodyAfter": "0"
+    },
+    {
+      "mode": "duplicate-recipients",
+      "txHash": "0x61be582ca1e4efeca5c3e62544dcc65db764af26cc9f41f1d54869560d133731",
+      "blockNumber": "132604090",
+      "recipients": 2,
+      "recipientsTotalWei": "300000000000000",
+      "serviceFeeWei": "30000000000",
+      "totalSpendWei": "300030000000000",
+      "gasEstimated": "94435",
+      "gasUsed": "88671",
+      "exactRecipientCredit": true,
+      "contractCustodyAfter": "0"
+    }
+  ],
+  "executedAt": "2026-09-22T23:12:48.631Z"
+}
