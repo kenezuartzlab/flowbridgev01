@@ -69,7 +69,7 @@ export function AppTopBar({
 
         <div className="flex shrink-0 items-center gap-1.5">
           {actions}
-          {shellMode === "compact" && <ShellNavMenu />}
+          {shellMode !== "desktop" && <ShellNavMenu />}
           <button
             type="button"
             onClick={() => setTheme()}
