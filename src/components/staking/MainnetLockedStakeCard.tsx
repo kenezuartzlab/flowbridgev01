@@ -195,20 +195,26 @@ export function MainnetLockedStakeCard() {
 
       <div className="space-y-3 border-t border-hairline p-4">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {LOCKED_PRODUCT_IDS.map((id) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setProductId(id)}
-              className={`min-h-[44px] rounded-xl border px-3 py-2 text-[12px] font-black transition-colors ${
-                productId === id
-                  ? 'border-primary bg-primary/10 text-foreground'
-                  : 'border-hairline bg-card/60 text-muted'
-              }`}
-            >
-              {LOCKED_PRODUCT_LABELS[id]}
-            </button>
-          ))}
+          {LOCKED_PRODUCT_IDS.map((id) => {
+            const authorized = isLockedProductAuthorized(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                disabled={!authorized}
+                title={authorized ? undefined : 'Not approved yet'}
+                onClick={() => authorized && setProductId(id)}
+                className={`min-h-[44px] rounded-xl border px-3 py-2 text-[12px] font-black transition-colors ${
+                  productId === id
+                    ? 'border-primary bg-primary/10 text-foreground'
+                    : 'border-hairline bg-card/60 text-muted'
+                } ${authorized ? '' : 'cursor-not-allowed opacity-45'}`}
+              >
+                {LOCKED_PRODUCT_LABELS[id]}
+                {authorized ? '' : ' · soon'}
+              </button>
+            );
+          })}
         </div>
 
         <label className="block">
