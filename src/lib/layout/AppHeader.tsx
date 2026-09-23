@@ -4,7 +4,7 @@ import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut, SlidersHorizontal,
-  ChevronDown, LogIn, CircleUser,
+  ChevronDown, LogIn, CircleUser, Send,
 } from 'lucide-react';
 
 import { cn } from '../utils';
@@ -245,6 +245,13 @@ export function AppHeader({
           onClick: () => { onRewardsClick?.(); setMenuOpen(false); },
           accent: true,
           show: !!onRewardsClick,
+        },
+        {
+          id: 'multisend',
+          label: 'MultiSend',
+          icon: <Send className="w-4 h-4" />,
+          onClick: go('/multisend'),
+          show: true,
         },
         {
           id: 'history',
