@@ -15,7 +15,7 @@ describe('V9.1 navigation model', () => {
       'home',
       'explore',
       'trade',
-      'activity',
+      'wallet',
       'profile',
     ]);
     expect(PRIMARY_NAV[2]!.id).toBe('trade');
@@ -29,7 +29,8 @@ describe('V9.1 navigation model', () => {
     expect(activeNavId('/campaigns')).toBe('explore');
     expect(activeNavId('/campaigns/grant-demo')).toBe('explore');
     expect(activeNavId('/campaigns/me')).toBe('explore');
-    expect(activeNavId('/activity')).toBe('activity');
+    expect(activeNavId('/wallet')).toBe('wallet');
+    expect(activeNavId('/activity')).toBeNull();
     expect(activeNavId('/account')).toBe('profile');
     expect(activeNavId('/markets')).toBeNull();
   });
@@ -41,6 +42,7 @@ describe('V9.1 navigation model', () => {
       '/campaigns/grant-demo',
       '/campaigns/me',
       '/activity',
+      '/wallet',
       '/account',
     ]) {
       expect(isNavActive(trade, path)).toBe(false);
