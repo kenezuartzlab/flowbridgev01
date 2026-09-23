@@ -31,6 +31,16 @@ export const LOCKED_PRODUCT_LABELS: Readonly<Record<LockedProductId, string>> = 
   4: '365 Days',
 };
 
+/**
+ * Owner-authorized locked terms. Only the 30-day term is approved for public
+ * execution; 90D / 180D / 365D stay blocked until they are approved separately.
+ */
+export const AUTHORIZED_LOCKED_PRODUCT_IDS: readonly LockedProductId[] = [1];
+
+export function isLockedProductAuthorized(id: LockedProductId): boolean {
+  return AUTHORIZED_LOCKED_PRODUCT_IDS.includes(id);
+}
+
 /** P3D activates locked Genesis execution only when staking execution is on. */
 export function isLockedStakingActivated(): boolean {
   return (
@@ -98,6 +108,9 @@ export function evaluateLockedExecution(
 
   const activated = gates.activated ?? isLockedStakingActivated();
   if (!activated) blockers.push('Locked staking is not activated.');
+  if (!isLockedProductAuthorized(quote.productId)) {
+    blockers.push('This locked term is not approved yet — only the 30-day term can be opened.');
+  }
   if (gates.chainId !== BOT_MAINNET_CHAIN_ID) blockers.push('Switch to BOT Mainnet to stake.');
   if (gates.vaultPaused) blockers.push('The staking vault is paused on chain.');
   if (gates.emergencyMode) blockers.push('The staking controller is in emergency mode.');

@@ -9,6 +9,7 @@ import { FLOW_ERC20_ABI, STAKING_VAULT_ABI } from '@/lib/staking/mainnetGenesisS
 import {
   LOCKED_PRODUCT_IDS,
   LOCKED_PRODUCT_LABELS,
+  isLockedProductAuthorized,
   isLockedQuoteStale,
   isLockedStakingActivated,
   lockedPhaseCopy,
@@ -189,26 +190,32 @@ export function MainnetLockedStakeCard() {
     <Surface id="mainnet-locked-staking">
       <SectionHeader
         title="Locked FLOW staking — Genesis terms"
-        hint="30D / 90D / 180D / 365D. Rate, Genesis duration and reserved rewards are read live from the contract for your wallet before anything can be signed."
+        hint="Only the 30-day term is open — 90D / 180D / 365D are not approved yet. Rate, Genesis duration and reserved rewards are read live from the contract for your wallet before anything can be signed."
         badge={<StatusPill tone={executable ? 'ok' : 'warn'}>{executable ? 'Live' : 'Blocked'}</StatusPill>}
       />
 
       <div className="space-y-3 border-t border-hairline p-4">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {LOCKED_PRODUCT_IDS.map((id) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setProductId(id)}
-              className={`min-h-[44px] rounded-xl border px-3 py-2 text-[12px] font-black transition-colors ${
-                productId === id
-                  ? 'border-primary bg-primary/10 text-foreground'
-                  : 'border-hairline bg-card/60 text-muted'
-              }`}
-            >
-              {LOCKED_PRODUCT_LABELS[id]}
-            </button>
-          ))}
+          {LOCKED_PRODUCT_IDS.map((id) => {
+            const authorized = isLockedProductAuthorized(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                disabled={!authorized}
+                title={authorized ? undefined : 'Not approved yet'}
+                onClick={() => authorized && setProductId(id)}
+                className={`min-h-[44px] rounded-xl border px-3 py-2 text-[12px] font-black transition-colors ${
+                  productId === id
+                    ? 'border-primary bg-primary/10 text-foreground'
+                    : 'border-hairline bg-card/60 text-muted'
+                } ${authorized ? '' : 'cursor-not-allowed opacity-45'}`}
+              >
+                {LOCKED_PRODUCT_LABELS[id]}
+                {authorized ? '' : ' · soon'}
+              </button>
+            );
+          })}
         </div>
 
         <label className="block">
