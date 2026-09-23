@@ -230,6 +230,13 @@ export interface PreparationInput {
    * impact is enforced.
    */
   effectiveDeviationBps: number | null;
+  /**
+   * Total pool fee of the executed route, in bps (e.g. the 1% FLOW/USDT tier is
+   * 100 bps). The effective execution price is net of this fee, so the fee is
+   * added to the impact ceiling when the effective deviation is checked —
+   * otherwise a fee larger than the ceiling would block every trade size.
+   */
+  routeFeeBps?: number | null;
   amountIn: bigint;
   policy: ProtectionPolicy;
 }
@@ -282,10 +289,13 @@ export function evaluatePreparation(input: PreparationInput): PreparationDecisio
     if (!Number.isFinite(effective) || effective < 0) {
       return block("Effective execution price could not be measured — preparation is blocked.", { retryable: true });
     }
-    if (effective > input.policy.maxPriceImpactBps) {
+    const fee = input.routeFeeBps;
+    const feeAllowance = fee !== null && fee !== undefined && Number.isFinite(fee) && fee > 0 ? Math.floor(fee) : 0;
+    const effectiveCeiling = input.policy.maxPriceImpactBps + feeAllowance;
+    if (effective > effectiveCeiling) {
       return block(
-        `Effective execution price is ${(effective / 100).toFixed(2)}% away from the protection reference, above the ${(input.policy.maxPriceImpactBps / 100).toFixed(2)}% limit for ${input.policy.mode} mode.`,
-        { maxSafeAmountIn: maxSafeAmountIn(input.amountIn, effective, input.policy.maxPriceImpactBps) },
+        `Effective execution price is ${(effective / 100).toFixed(2)}% away from the protection reference, above the ${(effectiveCeiling / 100).toFixed(2)}% limit for ${input.policy.mode} mode.`,
+        { maxSafeAmountIn: maxSafeAmountIn(input.amountIn, effective, effectiveCeiling) },
       );
     }
   }
