@@ -60,9 +60,18 @@ exact recipient credit, exact 1 bps fee to the approved production treasury,
 gas accounted separately from the service fee, zero contract custody after each
 batch.
 
-ERC-20: PENDING. FlowBridge has no approved BNB Smart Chain production token in
-its registry, and no test token may be deployed or used on mainnet. Token
-activation stays closed until the owner approves a production BNB token.
+ERC-20: PASS, report `release/bnb-mainnet-rehearsal-erc20.json`. Owner-named
+production token PEPE `0x25d887Ce7a35172C62FeBFD67a1856F20FaEbB00` (18 decimals,
+mainnet asset; no test token was deployed or used). Distribute (3 recipients),
+Consolidate, Advanced and a duplicate-recipient batch all delivered exact
+recipient amounts with the 1 bps fee charged in the transferred token to the
+approved production treasury; approval was exact (never unlimited), fully
+consumed, no residual allowance and zero token balance left in MultiSend.
+Live rejections re-asserted on chain 56 by simulation: 17 PASS (insufficient
+allowance, zero recipient, zero amount, self recipient, length mismatch, empty
+batch, >100 recipients, insufficient balance, expired deadline, changed fee,
+stale config, zero/non-token address, unauthorized fee change / pause / rescue,
+max+1 base unit). No hostile or wasteful transaction was broadcast.
 
 ## App state
 677 BOT Mainnet `0xc54CAcfd96330949db0eAEd72dE930a2d06d9778` (unchanged) ·
