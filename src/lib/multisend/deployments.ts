@@ -68,9 +68,25 @@ export const MULTISEND_NETWORKS: MultiSendNetwork[] = [
     nativeSymbol: "BNB",
     testnet: false,
     priority: 3,
-    contract: null,
+    /**
+     * Deployed 2026-09-23 from the accepted RC2 build line (unchanged source,
+     * self-contained Standard-JSON bundle, OpenZeppelin 5.6.1, solc 0.8.20,
+     * optimizer 200, viaIR, shanghai), runtime byte-exact with the frozen
+     * build, source-verified on bscscan.com, live settings read back from
+     * chain (fee 1 bps, MAX_FEE_BPS 100, cap 100, configNonce 0, unpaused,
+     * zero balance) with the approved production owner and fee recipient, and
+     * rehearsed live in native BNB (Distribute / Consolidate / Advanced /
+     * duplicate recipients) with exact credit, exact 1 bps fee to the approved
+     * production treasury and zero contract custody.
+     *
+     * Deployment identity is strictly chainId + address: this address string
+     * also exists on other chains from the same deployer nonce and must never
+     * be interpreted without its chain id.
+     */
+    contract: "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
     explorer: "https://bscscan.com",
   },
+
   {
     key: "bnb-testnet",
     chainId: 97,
