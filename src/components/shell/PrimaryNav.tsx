@@ -9,7 +9,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { PRIMARY_NAV, isNavActive } from "./navModel";
 
-const DESKTOP_ORDER = ["home", "trade", "explore", "activity"];
+const DESKTOP_ORDER = ["home", "trade", "explore", "wallet"];
 
 export function PrimaryNav({ className = "" }: { className?: string }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
