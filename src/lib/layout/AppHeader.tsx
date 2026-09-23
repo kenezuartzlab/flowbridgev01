@@ -247,6 +247,13 @@ export function AppHeader({
           show: !!onRewardsClick,
         },
         {
+          id: 'multisend',
+          label: 'MultiSend',
+          icon: <Send className="w-4 h-4" />,
+          onClick: go('/multisend'),
+          show: true,
+        },
+        {
           id: 'history',
           label: 'History',
           icon: <History className="w-4 h-4" />,
