@@ -27,10 +27,15 @@ describe("multisend deployments", () => {
     expect(multiSendContract(677)).not.toBe(RC2);
   });
 
-  it("keeps BNB mainnet locked", () => {
-    expect(multiSendContract(56)).toBeNull();
-    expect(isMultiSendExecutable(56)).toBe(false);
+  it("routes BNB mainnet sends only to its own verified mainnet contract", () => {
+    expect(multiSendContract(56)).toBe(BNB_MAINNET);
+    expect(isMultiSendExecutable(56)).toBe(true);
+    // Chain-scoped identity: no other network resolves to the BNB mainnet address.
+    expect(multiSendContract(677)).not.toBe(BNB_MAINNET);
+    expect(multiSendContract(968)).not.toBe(BNB_MAINNET);
+    expect(multiSendContract(97)).not.toBe(BNB_MAINNET);
   });
+
 
   it("routes BNB testnet sends to its own verified contract only", () => {
     expect(multiSendContract(97)).toBe(BNB_TESTNET);
