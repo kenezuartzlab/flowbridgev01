@@ -1,5 +1,5 @@
 /**
- * FlowBridge MultiSend V1 — BscScan (BNB Mainnet, chain 97) source verification.
+ * FlowBridge MultiSend V1 — BscScan (BNB Mainnet, chain 56) source verification.
  *
  * Submits the exact self-contained Standard-JSON bundle that produced the
  * deployed bytecode. No flattening, no rebuild, no source change.

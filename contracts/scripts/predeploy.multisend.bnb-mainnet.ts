@@ -1,5 +1,5 @@
 /**
- * FlowBridge MultiSend V1 — BNB Smart Chain Mainnet (97) predeployment gate.
+ * FlowBridge MultiSend V1 — BNB Smart Chain Mainnet (56) predeployment gate.
  *
  * Read-only. No signing, no broadcast. Every check must pass before the
  * BNB Mainnet creation transaction may be prepared. The build line is the
@@ -122,8 +122,7 @@ const testOnlyAddresses = new Set(
 add(
   "NO_TEST_ONLY_ADDRESS_REUSE",
   !testOnlyAddresses.has(owner.toLowerCase()) &&
-    !testOnlyAddresses.has(feeRecipient.toLowerCase()) &&
-    !testOnlyAddresses.has(deployer.toLowerCase() === deployer.toLowerCase() ? "" : ""),
+    !testOnlyAddresses.has(feeRecipient.toLowerCase()),
   "no testnet wallet and no test token address enters the mainnet configuration",
 );
 add(
@@ -143,7 +142,7 @@ add(
 );
 
 const manifestPath = join(REPO, "contracts/deployments/multisend-bnb-mainnet.json");
-add("BNB_MAINNET_SLOT_UNDEPLOYED", !existsSync(manifestPath), "no existing BNB testnet manifest");
+add("BNB_MAINNET_SLOT_UNDEPLOYED", !existsSync(manifestPath), "no existing BNB mainnet manifest");
 
 const rawKey = process.env["DEPLOYER_PRIVATE_KEY"];
 add("APPROVED_SIGNER_AVAILABLE", Boolean(rawKey), "signer present server-side (value never read out)");

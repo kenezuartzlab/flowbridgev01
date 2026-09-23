@@ -1,8 +1,8 @@
 /**
- * FlowBridge MultiSend V1 — BNB Smart Chain Mainnet (97) deployer.
+ * FlowBridge MultiSend V1 — BNB Smart Chain Mainnet (56) deployer.
  *
  * Deploys the frozen RC2 build line (unchanged source, self-contained
- * Standard-JSON bundle) with the approved BNB testnet owner and fee recipient.
+ * Standard-JSON bundle) with the approved FlowBridge production owner and fee recipient.
  * Requires --broadcast. Fails closed on any chain or state mismatch.
  */
 import { createHash } from "node:crypto";
