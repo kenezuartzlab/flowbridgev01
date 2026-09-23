@@ -9,6 +9,7 @@ import { FLOW_ERC20_ABI, STAKING_VAULT_ABI } from '@/lib/staking/mainnetGenesisS
 import {
   LOCKED_PRODUCT_IDS,
   LOCKED_PRODUCT_LABELS,
+  isLockedProductAuthorized,
   isLockedQuoteStale,
   isLockedStakingActivated,
   lockedPhaseCopy,
@@ -189,7 +190,7 @@ export function MainnetLockedStakeCard() {
     <Surface id="mainnet-locked-staking">
       <SectionHeader
         title="Locked FLOW staking — Genesis terms"
-        hint="30D / 90D / 180D / 365D. Rate, Genesis duration and reserved rewards are read live from the contract for your wallet before anything can be signed."
+        hint="Only the 30-day term is open — 90D / 180D / 365D are not approved yet. Rate, Genesis duration and reserved rewards are read live from the contract for your wallet before anything can be signed."
         badge={<StatusPill tone={executable ? 'ok' : 'warn'}>{executable ? 'Live' : 'Blocked'}</StatusPill>}
       />
 
