@@ -100,7 +100,7 @@ describe('90D per-wallet quota', () => {
 
   it('never infers eligibility across wallets — a partial quota yields floor-only tail', () => {
     const r = evaluateLockedExecution(
-      quote30({ productId: 2, lockSeconds: 90 * DAY, genesisSeconds: 10 * DAY }),
+      quote30({ productId: 1, lockSeconds: 30 * DAY, genesisSeconds: 10 * DAY }),
       gates(),
     );
     expect(r.decision).toBe('EXECUTABLE');
