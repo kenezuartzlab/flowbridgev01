@@ -218,6 +218,9 @@ export function useFlowRouteGuard(args: {
       amountOut,
       quotedImpactBps,
       effectiveDeviationBps: effective,
+      // Pool fee of the executed route in bps (V3 fee tiers are hundredths of a
+      // bip); the effective price is net of it, so it is not adverse deviation.
+      routeFeeBps: hops.reduce((sum, h) => sum + (h.v3Fee ? h.v3Fee / 100 : 0), 0),
       amountIn,
       policy,
     });

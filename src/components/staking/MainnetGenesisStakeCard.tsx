@@ -137,7 +137,30 @@ export function MainnetGenesisStakeCard() {
     }
   };
 
-  const connect = () => void send('approve').catch(() => undefined);
+  /**
+   * Connect-only: requests accounts and (optionally) the network switch.
+   * It must NEVER produce a signature request — no approval, no staking tx.
+   */
+  const connect = async () => {
+    setError(null);
+    setBusy('connect');
+    try {
+      const eth = (globalThis as any).window?.ethereum;
+      if (!eth) throw new Error('No wallet detected in this browser.');
+      const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
+      const from = (accounts?.[0] ?? '').toLowerCase();
+      setWallet(from || null);
+      const hexChain = `0x${BOT_MAINNET_CHAIN_ID.toString(16)}`;
+      if ((await eth.request({ method: 'eth_chainId' })) !== hexChain) {
+        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexChain }] });
+      }
+      await stake.refresh();
+    } catch (e: any) {
+      setError(e?.shortMessage ?? e?.message ?? 'Could not connect the wallet.');
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <Surface id="mainnet-flow-staking">
