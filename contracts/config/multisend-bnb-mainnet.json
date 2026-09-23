@@ -12,5 +12,5 @@
   "maxRecipients": 100,
   "deploymentApproved": true,
   "explorerVerified": false,
-  "$comment": "Owner and fee recipient are the approved FlowBridge production addresses already used for the accepted BOT Mainnet MultiSend release, confirmed by the FlowBridge owner for BNB Smart Chain Mainnet (chain 56) on 2026-09-23. Source, bundle, compiler, optimizer, viaIR, EVM target, metadata and ABI are identical to the accepted BOT and BNB Testnet releases; no BNB-specific contract logic exists. No test-only wallet or test token (e.g. MSTT) may enter this configuration."
+  "$comment": "Owner and fee recipient are the approved FlowBridge production addresses already used for the accepted BOT Mainnet MultiSend release, confirmed by the FlowBridge owner for BNB Smart Chain Mainnet (chain 56) on 2026-09-23. Source, bundle, compiler, optimizer, viaIR, EVM target, metadata and ABI are identical to the accepted BOT and BNB Testnet releases; no BNB-specific contract logic exists. No test-only wallet and no disposable test-token address may enter this configuration."
 }
