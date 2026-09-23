@@ -96,11 +96,43 @@ add(
   "fee recipient must not be a sending wallet (FeeRecipientIsSender)",
 );
 add(
-  "NO_PRODUCTION_ADDRESS_REUSE",
-  owner.toLowerCase() !== String(botMainnet.owner).toLowerCase() &&
-    feeRecipient.toLowerCase() !== String(botMainnet.feeRecipient).toLowerCase(),
-  "BNB testnet never reuses the BOT production owner/treasury",
+  "APPROVED_PRODUCTION_OWNER_EXACT",
+  owner.toLowerCase() === String(botMainnet.owner).toLowerCase(),
+  `owner matches the approved FlowBridge production owner ${botMainnet.owner}`,
 );
+add(
+  "APPROVED_PRODUCTION_FEE_RECIPIENT_EXACT",
+  feeRecipient.toLowerCase() === String(botMainnet.feeRecipient).toLowerCase(),
+  `fee recipient matches the approved FlowBridge production treasury ${botMainnet.feeRecipient}`,
+);
+const bnbTestnet = JSON.parse(
+  readFileSync(join(REPO, "contracts/deployments/multisend-bnb-testnet.json"), "utf8"),
+);
+const testOnlyAddresses = new Set(
+  [
+    bnbTestnet.owner,
+    bnbTestnet.feeRecipient,
+    bnbTestnet.address,
+    botTestnet.owner,
+    botTestnet.feeRecipient,
+    botTestnet.address,
+    "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e", // MSTT — TEST ONLY token, never mainnet
+  ].map((a: string) => String(a).toLowerCase()),
+);
+add(
+  "NO_TEST_ONLY_ADDRESS_REUSE",
+  !testOnlyAddresses.has(owner.toLowerCase()) &&
+    !testOnlyAddresses.has(feeRecipient.toLowerCase()) &&
+    !testOnlyAddresses.has(deployer.toLowerCase() === deployer.toLowerCase() ? "" : ""),
+  "no testnet wallet and no test token address enters the mainnet configuration",
+);
+add(
+  "CONFIG_CONTAINS_NO_TEST_TOKEN",
+  !JSON.stringify(config).toLowerCase().includes("0xa861152ca3676bccf7b5fdafb9eb6a57b9d32d0e") &&
+    !/mstt/i.test(JSON.stringify(config)),
+  "MSTT / test-token address absent from mainnet config",
+);
+
 
 const encode = (a: string) => a.replace(/^0x/, "").toLowerCase().padStart(64, "0");
 const abiEncodedArgs = `0x${encode(owner)}${encode(feeRecipient)}`;
