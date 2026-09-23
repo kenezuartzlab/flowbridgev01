@@ -6,7 +6,7 @@
  *  - Consolidate : one source -> single destination (one source group of a many->one session)
  *  - Advanced    : one source -> many recipients as one group of a many->many session
  * All three groups in a session share one clientBatchId, exactly like the app.
- * Testnet only (chain 97). Requires the approved signer and --broadcast.
+ * Mainnet (chain 56). Requires the approved signer and --broadcast.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
