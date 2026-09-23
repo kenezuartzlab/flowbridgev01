@@ -4,7 +4,7 @@ import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut, SlidersHorizontal,
-  ChevronDown, LogIn, CircleUser,
+  ChevronDown, LogIn, CircleUser, Send,
 } from 'lucide-react';
 
 import { cn } from '../utils';
