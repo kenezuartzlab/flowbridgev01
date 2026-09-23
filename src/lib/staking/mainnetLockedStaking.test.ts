@@ -225,12 +225,16 @@ describe('P4A.2.1 terms-change guard', () => {
     expect(lockedQuoteFingerprint(q)).not.toBe(lockedQuoteFingerprint(quote30({ floorRateBps: 801 })));
   });
 
-  it('all four locked products stay owner-approved and quote-gated', () => {
+  it('only the owner-approved 30-day term is executable; longer terms stay blocked', () => {
     for (const id of LOCKED_PRODUCT_IDS) {
       const r = evaluateLockedExecution(quote30({ productId: id }), gates());
-      expect(r.decision).toBe('EXECUTABLE');
+      if (id === 1) {
+        expect(r.decision).toBe('EXECUTABLE');
+      } else {
+        expect(r.decision).toBe('BLOCKED');
+        expect(r.blockers.join(' ')).toContain('not approved yet');
+      }
     }
-    // No product is hard-disabled in app policy; on-chain gates decide.
     expect(isLockedStakingActivated()).toBe(true);
   });
 });
