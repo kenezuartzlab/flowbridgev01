@@ -2,7 +2,7 @@
   "release": "MultiSend V1 (RC2 build line)",
   "network": "bnb-mainnet",
   "chainId": 56,
-  "rpcUrl": "https://bsc-rpc.publicnode.com",
+  "rpcUrl": "https://bsc-dataseed.bnbchain.org",
   "explorerUrl": "https://bscscan.com",
   "explorerApiUrl": "https://api.etherscan.io/v2/api",
   "approvedDeployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
