@@ -1,0 +1,78 @@
+{
+  "release": "MultiSend V1 (RC2 build line) — BNB Smart Chain Mainnet",
+  "network": "bnb-mainnet",
+  "chainId": 56,
+  "address": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+  "deployer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "owner": "0x524Db06954de917025180057BCBeB36eC96A98c5",
+  "feeRecipient": "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+  "deployTxHash": "0x0a754977d8127b8adfc072fa5f2ab6baa57bb68667ec1ac63d026576c4100280",
+  "blockNumber": "123546080",
+  "gasUsed": "1634064",
+  "sourceSha256": "3284801055c7f40c939e55a660d740e0d7caf2bf243311659810d6a8c00d91f4",
+  "abiSha256": "91a6f2bd6d754fc85bb403a5d4b155fccbe7c60bdbfee4308a288586a50a4784",
+  "creationBytecodeSha256": "a9b9b1297c681703cbc669e6a25817d6b9cb8c2f4603c4e95e6a092a6ed4eed1",
+  "frozenRuntimeBytecodeSha256": "7b2e4e5bee31d6bb9a6af0e7782fd88036929ad30ac924345924ff6ace7dc0a6",
+  "onChainRuntimeBytecodeSha256": "7b2e4e5bee31d6bb9a6af0e7782fd88036929ad30ac924345924ff6ace7dc0a6",
+  "runtimeExactMatch": true,
+  "compiler": {
+    "version": "v0.8.20+commit.a1b79de6",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "license": "MIT"
+  },
+  "bundle": {
+    "path": "contracts/production/multisend-v1/candidate-rc2/verification/standard-input.json",
+    "sourceCount": 17,
+    "openzeppelin": "5.6.1 (vendored, byte-for-byte from the npm 5.6.1 tarball)",
+    "selfContained": true,
+    "importCallbackUsed": false,
+    "sha256": "f81dd258eec6c3c285785b8af0bd1731e28b77907156cb5f47f932ad4879e44f"
+  },
+  "constructorArguments": {
+    "types": [
+      "address initialOwner",
+      "address initialFeeRecipient"
+    ],
+    "values": [
+      "0x524Db06954de917025180057BCBeB36eC96A98c5",
+      "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1"
+    ],
+    "abiEncoded": "0x000000000000000000000000524db06954de917025180057bcbeb36ec96a98c5000000000000000000000000abe9ac1bc4b9e99b89c27f97c580b5a0b8fa75e1"
+  },
+  "live": {
+    "owner": "0x524Db06954de917025180057BCBeB36eC96A98c5",
+    "feeRecipient": "0xAbe9AC1bC4b9E99b89c27f97c580B5a0b8Fa75E1",
+    "feeBps": 1,
+    "maxFeeBps": 100,
+    "maxRecipients": 100,
+    "configNonce": 0,
+    "paused": false,
+    "runtimeBytes": 6860,
+    "nativeBalanceWei": "0"
+  },
+  "explorerVerified": true,
+  "acceptedBotTestnetRelease": "0x1b97CCbAE4D5128f8E5591ada21476609c7F2960",
+  "deployedAt": "2026-09-23T10:06:32.609Z",
+  "explorerVerification": {
+    "explorer": "https://bscscan.com",
+    "api": "https://api.etherscan.io/v2/api",
+    "verifiedAt": "2026-09-23T10:06:45.496Z",
+    "verified": true,
+    "compilerVersion": "v0.8.20+commit.a1b79de6",
+    "optimizationUsed": "1",
+    "runs": "200",
+    "evmVersion": "shanghai",
+    "licenseType": "MIT",
+    "publishedConstructorArgs": "000000000000000000000000524db06954de917025180057bcbeb36ec96a98c5000000000000000000000000abe9ac1bc4b9e99b89c27f97c580b5a0b8fa75e1",
+    "constructorArgsMatch": true,
+    "contractName": "FlowBridgeMultiSend"
+  }
+}
