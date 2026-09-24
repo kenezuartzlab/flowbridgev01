@@ -115,18 +115,56 @@ export function MultiSendWorkspace() {
   const nativeSymbol = network?.nativeSymbol ?? "BOT";
   const executable = Boolean(multiSendContract(chainId));
 
+  // Draft persistence: switching accounts in a mobile wallet often reloads the
+  // page. The whole plan + queue is kept on this device so the next wallet can
+  // continue exactly where the previous one stopped.
+  const hydratedRef = useRef(false);
+  const restoredKeyRef = useRef<string | null>(null);
+  const restoredChainRef = useRef<number | null>(null);
+  const pendingResumeRef = useRef<SourceReceipt[] | null>(null);
+  const draftKey = (c: number, a: AssetChoice, m: MultiSendMode | null, d: string, r: DraftRow[]) =>
+    JSON.stringify([c, a.address, a.kind, m, d, r]);
+
+  useEffect(() => {
+    const draft = loadDraft();
+    hydratedRef.current = true;
+    if (!draft) return;
+    restoredKeyRef.current = draftKey(draft.chainId, draft.asset, draft.mode, draft.destination, draft.rows);
+    restoredChainRef.current = draft.chainId;
+    pendingResumeRef.current = draft.receipts;
+    setMode(draft.mode);
+    setChainId(draft.chainId);
+    setAsset(draft.asset);
+    setDestination(draft.destination);
+    setRows(draft.rows);
+    setBatchId(draft.batchId);
+  }, []);
+
   // Any network / token / mode change invalidates a prepared review.
   useEffect(() => {
+    if (restoredKeyRef.current && restoredKeyRef.current === draftKey(chainId, asset, mode, destination, rows)) return;
+    restoredKeyRef.current = null;
+    pendingResumeRef.current = null;
     setReviewed(null);
     setReceipts(null);
     setError("");
   }, [chainId, asset.address, asset.kind, mode, rows, destination]);
 
   useEffect(() => {
+    if (restoredChainRef.current === chainId) {
+      restoredChainRef.current = null;
+      return;
+    }
+    restoredChainRef.current = null;
     setAsset({ kind: NATIVE, address: null, symbol: nativeSymbol, decimals: 18 });
     setRows([]);
     setDestination("");
   }, [chainId, nativeSymbol]);
+
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    saveDraft({ mode, chainId, asset, destination, rows, batchId, receipts });
+  }, [mode, chainId, asset, destination, rows, batchId, receipts]);
 
   /* ------------------------------------------------------------ balances -- */
   const sourceList = useMemo(() => {
