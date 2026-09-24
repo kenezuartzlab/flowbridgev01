@@ -7,7 +7,7 @@
  * never requests a wallet transaction before Review, and re-reads the live fee /
  * configuration immediately before each signature.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract } from "wagmi";
@@ -73,6 +73,39 @@ interface AssetChoice {
 }
 
 const rowId = () => Math.random().toString(36).slice(2, 10);
+
+const DRAFT_KEY = "fb.multisend.draft.v1";
+interface Draft {
+  mode: MultiSendMode | null;
+  chainId: number;
+  asset: AssetChoice;
+  destination: string;
+  rows: DraftRow[];
+  batchId: `0x${string}` | null;
+  receipts: SourceReceipt[] | null;
+}
+function saveDraft(d: Draft) {
+  try {
+    window.localStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify(d, (_k, v) => (typeof v === "bigint" ? { __b: v.toString() } : v)),
+    );
+  } catch {
+    /* storage unavailable */
+  }
+}
+function loadDraft(): Draft | null {
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw, (_k, v) =>
+      v && typeof v === "object" && typeof v.__b === "string" && Object.keys(v).length === 1 ? BigInt(v.__b) : v,
+    ) as Draft;
+    return d && typeof d.chainId === "number" && Array.isArray(d.rows) ? d : null;
+  } catch {
+    return null;
+  }
+}
 
 export function MultiSendWorkspace() {
   const { address: connected } = useAccount();
@@ -346,7 +379,12 @@ export function MultiSendWorkspace() {
         maxRecipientsPerSource: fresh.maxRecipients,
       });
 
+      const resume = pendingResumeRef.current;
+      const doneSources = new Set(
+        (resume ?? []).filter((r) => r.status === "confirmed").map((r) => r.source.toLowerCase()),
+      );
       for (const source of plan.sources) {
+        if (doneSources.has(source.source.toLowerCase())) continue;
         const bal = balances[source.source.toLowerCase()] ?? { asset: 0n, native: 0n };
         const check = validateSourceAffordability({
           plan: source,
@@ -387,7 +425,25 @@ export function MultiSendWorkspace() {
       }
 
       setReviewed({ plan, configFp: `${fresh.configNonce}:${fresh.feeBps}:${fresh.feeRecipient}`, gasCost });
-      setReceipts(initialReceipts(plan));
+      let nextReceipts = initialReceipts(plan);
+      if (resume) {
+        pendingResumeRef.current = null;
+        const merged: SourceReceipt[] = [];
+        for (const r of nextReceipts) {
+          const prev = resume.find((p) => p.source.toLowerCase() === r.source.toLowerCase());
+          if (!prev) { merged.push(r); continue; }
+          if (prev.status === "submitted" && prev.txHash && publicClient) {
+            const rc = await publicClient.getTransactionReceipt({ hash: prev.txHash }).catch(() => null);
+            merged.push(rc ? { ...prev, status: rc.status === "success" ? "confirmed" : "failed" } : { ...prev });
+          } else if (prev.status === "awaiting-signature" || prev.status === "awaiting-approval") {
+            merged.push({ ...prev, status: "ready", error: undefined });
+          } else {
+            merged.push(prev);
+          }
+        }
+        nextReceipts = merged;
+      }
+      setReceipts(nextReceipts);
     } catch (e) {
       setReviewed(null);
       setError(e instanceof Error ? e.message : "Could not prepare this session.");
