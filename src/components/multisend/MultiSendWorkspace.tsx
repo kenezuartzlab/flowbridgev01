@@ -125,21 +125,6 @@ export function MultiSendWorkspace() {
   const draftKey = (c: number, a: AssetChoice, m: MultiSendMode | null, d: string, r: DraftRow[]) =>
     JSON.stringify([c, a.address, a.kind, m, d, r]);
 
-  useEffect(() => {
-    const draft = loadDraft();
-    hydratedRef.current = true;
-    if (!draft) return;
-    restoredKeyRef.current = draftKey(draft.chainId, draft.asset, draft.mode, draft.destination, draft.rows);
-    restoredChainRef.current = draft.chainId;
-    pendingResumeRef.current = draft.receipts;
-    setMode(draft.mode);
-    setChainId(draft.chainId);
-    setAsset(draft.asset);
-    setDestination(draft.destination);
-    setRows(draft.rows);
-    setBatchId(draft.batchId);
-  }, []);
-
   // Any network / token / mode change invalidates a prepared review.
   useEffect(() => {
     if (restoredKeyRef.current && restoredKeyRef.current === draftKey(chainId, asset, mode, destination, rows)) return;
@@ -160,6 +145,21 @@ export function MultiSendWorkspace() {
     setRows([]);
     setDestination("");
   }, [chainId, nativeSymbol]);
+
+  useEffect(() => {
+    const draft = loadDraft();
+    hydratedRef.current = true;
+    if (!draft) return;
+    restoredKeyRef.current = draftKey(draft.chainId, draft.asset, draft.mode, draft.destination, draft.rows);
+    restoredChainRef.current = draft.chainId;
+    pendingResumeRef.current = draft.receipts;
+    setMode(draft.mode);
+    setChainId(draft.chainId);
+    setAsset(draft.asset);
+    setDestination(draft.destination);
+    setRows(draft.rows);
+    setBatchId(draft.batchId);
+  }, []);
 
   useEffect(() => {
     if (!hydratedRef.current) return;
