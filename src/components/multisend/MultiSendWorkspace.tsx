@@ -52,6 +52,7 @@ import {
 import { isConfigStale, useMultiSendConfig } from "@/lib/multisend/useMultiSendConfig";
 import type { Address, MultiSendMode, MultiSendPlan, SourceReceipt } from "@/lib/multisend/types";
 import { MultiSendModePicker } from "./MultiSendModePicker";
+import { MultiSendGuide } from "./MultiSendGuide";
 
 const ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
 const NATIVE = "native" as const;
@@ -504,6 +505,7 @@ export function MultiSendWorkspace() {
           }
         />
         <MultiSendModePicker value={mode} onChange={setMode} />
+        {mode && <MultiSendGuide mode={mode} />}
       </Surface>
 
       {!executable && (
@@ -793,6 +795,18 @@ export function MultiSendWorkspace() {
               {preview && (
                 <div className="space-y-2 rounded-lg border border-hairline bg-foreground/5 p-2">
                   <p className="font-mono text-[11px]">{importSummaryText(preview)}</p>
+                  {[...preview.invalid, ...preview.unsupportedAmount].length > 0 && (
+                    <ul className="space-y-0.5 text-[10.5px] text-muted">
+                      {[...preview.invalid, ...preview.unsupportedAmount]
+                        .sort((a, b) => a.line - b.line)
+                        .slice(0, 5)
+                        .map((r) => (
+                          <li key={r.line}>
+                            Line {r.line}: {r.reason}
+                          </li>
+                        ))}
+                    </ul>
+                  )}
                   <div className="flex flex-wrap gap-1.5">
                     <button
                       type="button"

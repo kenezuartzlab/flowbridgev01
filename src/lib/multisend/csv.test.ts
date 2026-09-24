@@ -56,7 +56,13 @@ describe("MultiSend import", () => {
   });
 
   it("rejects rows with missing columns", () => {
-    expect(parseImport({ mode: "many-to-many", text: `${A},${B}` }).invalid).toHaveLength(1);
+    expect(parseImport({ mode: "many-to-many", text: `${A}` }).invalid).toHaveLength(1);
+  });
+
+  it("accepts address-only rows so amounts can be filled in later", () => {
+    const p = parseImport({ mode: "many-to-one", text: `${A}\n${B}` });
+    expect(p.valid).toHaveLength(2);
+    expect(p.valid[0].amountText).toBe("");
   });
 
   it("exports a receipt CSV", () => {
