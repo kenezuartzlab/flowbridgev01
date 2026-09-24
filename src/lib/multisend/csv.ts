@@ -93,7 +93,9 @@ export function parseImport(args: {
     }
 
     const expected = mode === "many-to-many" ? 3 : 2;
-    if (cells.length < expected) {
+    // Address-only rows are accepted; the amount is filled in afterwards.
+    const addressOnly = cells.length === expected - 1 && cells.every((c) => ADDRESS_RE.test(c));
+    if (cells.length < expected && !addressOnly) {
       preview.invalid.push({ line, raw, reason: `Expected ${expected} columns` });
       return;
     }
@@ -104,14 +106,14 @@ export function parseImport(args: {
 
     if (mode === "one-to-many") {
       recipient = cells[0] as Address;
-      amountText = cells[1];
+      amountText = cells[1] ?? "";
     } else if (mode === "many-to-one") {
       source = cells[0] as Address;
-      amountText = cells[1];
+      amountText = cells[1] ?? "";
     } else {
       source = cells[0] as Address;
       recipient = cells[1] as Address;
-      amountText = cells[2];
+      amountText = cells[2] ?? "";
     }
 
     for (const addr of [source, recipient]) {
@@ -129,7 +131,7 @@ export function parseImport(args: {
       preview.invalid.push({ line, raw, reason: "Sends back to its own wallet" });
       return;
     }
-    if (!amountOk(amountText)) {
+    if (!addressOnly && !amountOk(amountText)) {
       preview.unsupportedAmount.push({ line, raw, reason: "Amount must be a plain number above zero" });
       return;
     }
