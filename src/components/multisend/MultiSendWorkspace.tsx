@@ -576,6 +576,13 @@ export function MultiSendWorkspace() {
     rows.every((r) => ADDRESS_RE.test(r.source) && ADDRESS_RE.test(r.recipient) && Number(r.amountText) > 0) &&
     (mode !== "many-to-one" || ADDRESS_RE.test(destination));
 
+  // After a reload (e.g. switching accounts in the wallet), reopen the saved queue.
+  const balancesReady = rows.every((r) => !ADDRESS_RE.test(r.source) || balances[r.source.toLowerCase()]);
+  useEffect(() => {
+    if (pendingResumeRef.current && canReview && balancesReady && !reviewed && !busy) void openReview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canReview, balancesReady, reviewed, busy]);
+
   return (
     <div className="space-y-4">
       <Surface>
