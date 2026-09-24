@@ -7,7 +7,7 @@
  * never requests a wallet transaction before Review, and re-reads the live fee /
  * configuration immediately before each signature.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract } from "wagmi";
@@ -74,6 +74,39 @@ interface AssetChoice {
 
 const rowId = () => Math.random().toString(36).slice(2, 10);
 
+const DRAFT_KEY = "fb.multisend.draft.v1";
+interface Draft {
+  mode: MultiSendMode | null;
+  chainId: number;
+  asset: AssetChoice;
+  destination: string;
+  rows: DraftRow[];
+  batchId: `0x${string}` | null;
+  receipts: SourceReceipt[] | null;
+}
+function saveDraft(d: Draft) {
+  try {
+    window.localStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify(d, (_k, v) => (typeof v === "bigint" ? { __b: v.toString() } : v)),
+    );
+  } catch {
+    /* storage unavailable */
+  }
+}
+function loadDraft(): Draft | null {
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw, (_k, v) =>
+      v && typeof v === "object" && typeof v.__b === "string" && Object.keys(v).length === 1 ? BigInt(v.__b) : v,
+    ) as Draft;
+    return d && typeof d.chainId === "number" && Array.isArray(d.rows) ? d : null;
+  } catch {
+    return null;
+  }
+}
+
 export function MultiSendWorkspace() {
   const { address: connected } = useAccount();
   const walletChainId = useChainId();
@@ -115,18 +148,56 @@ export function MultiSendWorkspace() {
   const nativeSymbol = network?.nativeSymbol ?? "BOT";
   const executable = Boolean(multiSendContract(chainId));
 
+  // Draft persistence: switching accounts in a mobile wallet often reloads the
+  // page. The whole plan + queue is kept on this device so the next wallet can
+  // continue exactly where the previous one stopped.
+  const hydratedRef = useRef(false);
+  const restoredKeyRef = useRef<string | null>(null);
+  const restoredChainRef = useRef<number | null>(null);
+  const pendingResumeRef = useRef<SourceReceipt[] | null>(null);
+  const draftKey = (c: number, a: AssetChoice, m: MultiSendMode | null, d: string, r: DraftRow[]) =>
+    JSON.stringify([c, a.address, a.kind, m, d, r]);
+
   // Any network / token / mode change invalidates a prepared review.
   useEffect(() => {
+    if (restoredKeyRef.current && restoredKeyRef.current === draftKey(chainId, asset, mode, destination, rows)) return;
+    restoredKeyRef.current = null;
+    pendingResumeRef.current = null;
     setReviewed(null);
     setReceipts(null);
     setError("");
   }, [chainId, asset.address, asset.kind, mode, rows, destination]);
 
   useEffect(() => {
+    if (restoredChainRef.current === chainId) {
+      restoredChainRef.current = null;
+      return;
+    }
+    restoredChainRef.current = null;
     setAsset({ kind: NATIVE, address: null, symbol: nativeSymbol, decimals: 18 });
     setRows([]);
     setDestination("");
   }, [chainId, nativeSymbol]);
+
+  useEffect(() => {
+    const draft = loadDraft();
+    hydratedRef.current = true;
+    if (!draft) return;
+    restoredKeyRef.current = draftKey(draft.chainId, draft.asset, draft.mode, draft.destination, draft.rows);
+    restoredChainRef.current = draft.chainId;
+    pendingResumeRef.current = draft.receipts;
+    setMode(draft.mode);
+    setChainId(draft.chainId);
+    setAsset(draft.asset);
+    setDestination(draft.destination);
+    setRows(draft.rows);
+    setBatchId(draft.batchId);
+  }, []);
+
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    saveDraft({ mode, chainId, asset, destination, rows, batchId, receipts });
+  }, [mode, chainId, asset, destination, rows, batchId, receipts]);
 
   /* ------------------------------------------------------------ balances -- */
   const sourceList = useMemo(() => {
@@ -308,7 +379,12 @@ export function MultiSendWorkspace() {
         maxRecipientsPerSource: fresh.maxRecipients,
       });
 
+      const resume = pendingResumeRef.current;
+      const doneSources = new Set(
+        (resume ?? []).filter((r) => r.status === "confirmed").map((r) => r.source.toLowerCase()),
+      );
       for (const source of plan.sources) {
+        if (doneSources.has(source.source.toLowerCase())) continue;
         const bal = balances[source.source.toLowerCase()] ?? { asset: 0n, native: 0n };
         const check = validateSourceAffordability({
           plan: source,
@@ -349,7 +425,25 @@ export function MultiSendWorkspace() {
       }
 
       setReviewed({ plan, configFp: `${fresh.configNonce}:${fresh.feeBps}:${fresh.feeRecipient}`, gasCost });
-      setReceipts(initialReceipts(plan));
+      let nextReceipts = initialReceipts(plan);
+      if (resume) {
+        pendingResumeRef.current = null;
+        const merged: SourceReceipt[] = [];
+        for (const r of nextReceipts) {
+          const prev = resume.find((p) => p.source.toLowerCase() === r.source.toLowerCase());
+          if (!prev) { merged.push(r); continue; }
+          if (prev.status === "submitted" && prev.txHash && publicClient) {
+            const rc = await publicClient.getTransactionReceipt({ hash: prev.txHash }).catch(() => null);
+            merged.push(rc ? { ...prev, status: rc.status === "success" ? "confirmed" : "failed" } : { ...prev });
+          } else if (prev.status === "awaiting-signature" || prev.status === "awaiting-approval") {
+            merged.push({ ...prev, status: "ready", error: undefined });
+          } else {
+            merged.push(prev);
+          }
+        }
+        nextReceipts = merged;
+      }
+      setReceipts(nextReceipts);
     } catch (e) {
       setReviewed(null);
       setError(e instanceof Error ? e.message : "Could not prepare this session.");
@@ -481,6 +575,13 @@ export function MultiSendWorkspace() {
     executable && Boolean(mode) && Boolean(config) && !config?.paused && rows.length > 0 &&
     rows.every((r) => ADDRESS_RE.test(r.source) && ADDRESS_RE.test(r.recipient) && Number(r.amountText) > 0) &&
     (mode !== "many-to-one" || ADDRESS_RE.test(destination));
+
+  // After a reload (e.g. switching accounts in the wallet), reopen the saved queue.
+  const balancesReady = rows.every((r) => !ADDRESS_RE.test(r.source) || balances[r.source.toLowerCase()]);
+  useEffect(() => {
+    if (pendingResumeRef.current && canReview && balancesReady && !reviewed && !busy) void openReview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canReview, balancesReady, reviewed, busy]);
 
   return (
     <div className="space-y-4">
