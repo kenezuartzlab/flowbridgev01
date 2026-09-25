@@ -106,6 +106,17 @@ function loadDraft(): Draft | null {
     return null;
   }
 }
+function clearDraft() {
+  try {
+    window.localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* storage unavailable */
+  }
+}
+/** A draft may only be resumed while at least one source still needs a signature. */
+function hasSignableReceipts(receipts: SourceReceipt[] | null): receipts is SourceReceipt[] {
+  return Boolean(receipts && receipts.length > 0 && nextSignableIndex(receipts) !== null);
+}
 
 export function MultiSendWorkspace() {
   const { address: connected } = useAccount();
