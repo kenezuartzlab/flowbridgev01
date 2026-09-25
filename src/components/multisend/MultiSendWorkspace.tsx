@@ -106,6 +106,17 @@ function loadDraft(): Draft | null {
     return null;
   }
 }
+function clearDraft() {
+  try {
+    window.localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* storage unavailable */
+  }
+}
+/** A draft may only be resumed while at least one source still needs a signature. */
+function hasSignableReceipts(receipts: SourceReceipt[] | null): receipts is SourceReceipt[] {
+  return Boolean(receipts && receipts.length > 0 && nextSignableIndex(receipts) !== null);
+}
 
 export function MultiSendWorkspace() {
   const { address: connected } = useAccount();
@@ -183,6 +194,12 @@ export function MultiSendWorkspace() {
     const draft = loadDraft();
     hydratedRef.current = true;
     if (!draft) return;
+    // A settled session (completed / cancelled / failed) must never come back:
+    // drop the saved batch id and queue so a fresh visit starts a brand-new send.
+    if (draft.receipts && !hasSignableReceipts(draft.receipts)) {
+      clearDraft();
+      return;
+    }
     restoredKeyRef.current = draftKey(draft.chainId, draft.asset, draft.mode, draft.destination, draft.rows);
     restoredChainRef.current = draft.chainId;
     pendingResumeRef.current = draft.receipts;
@@ -364,7 +381,9 @@ export function MultiSendWorkspace() {
       const fresh = await refresh();
       if (!fresh) throw new Error("MultiSend configuration is unavailable — nothing can be prepared.");
       if (fresh.paused) throw new Error("MultiSend is paused right now.");
-      const id = batchId ?? newClientBatchId();
+      // Reuse the saved batch id only while its queue still has a source to
+      // sign; otherwise start a fresh id so a settled batch is never resubmitted.
+      const id = batchId && hasSignableReceipts(receipts) ? batchId : newClientBatchId();
       setBatchId(id);
       const plan = buildMultiSendPlan({
         mode: mode!,
@@ -455,6 +474,9 @@ export function MultiSendWorkspace() {
   /* ------------------------------------------------------------- signing -- */
   const persist = (next: SourceReceipt[]) => {
     setReceipts(next);
+    // Once nothing is left to sign, the draft is done — remove it so the next
+    // visit never resurrects a finished (or abandoned) batch.
+    if (!hasSignableReceipts(next)) clearDraft();
     if (!batchId || !mode || !config) return;
     saveSession({
       clientBatchId: batchId,
