@@ -194,6 +194,12 @@ export function MultiSendWorkspace() {
     const draft = loadDraft();
     hydratedRef.current = true;
     if (!draft) return;
+    // A settled session (completed / cancelled / failed) must never come back:
+    // drop the saved batch id and queue so a fresh visit starts a brand-new send.
+    if (draft.receipts && !hasSignableReceipts(draft.receipts)) {
+      clearDraft();
+      return;
+    }
     restoredKeyRef.current = draftKey(draft.chainId, draft.asset, draft.mode, draft.destination, draft.rows);
     restoredChainRef.current = draft.chainId;
     pendingResumeRef.current = draft.receipts;
