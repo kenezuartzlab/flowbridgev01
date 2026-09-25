@@ -381,7 +381,9 @@ export function MultiSendWorkspace() {
       const fresh = await refresh();
       if (!fresh) throw new Error("MultiSend configuration is unavailable — nothing can be prepared.");
       if (fresh.paused) throw new Error("MultiSend is paused right now.");
-      const id = batchId ?? newClientBatchId();
+      // Reuse the saved batch id only while its queue still has a source to
+      // sign; otherwise start a fresh id so a settled batch is never resubmitted.
+      const id = batchId && hasSignableReceipts(receipts) ? batchId : newClientBatchId();
       setBatchId(id);
       const plan = buildMultiSendPlan({
         mode: mode!,
