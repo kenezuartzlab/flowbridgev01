@@ -472,6 +472,9 @@ export function MultiSendWorkspace() {
   /* ------------------------------------------------------------- signing -- */
   const persist = (next: SourceReceipt[]) => {
     setReceipts(next);
+    // Once nothing is left to sign, the draft is done — remove it so the next
+    // visit never resurrects a finished (or abandoned) batch.
+    if (!hasSignableReceipts(next)) clearDraft();
     if (!batchId || !mode || !config) return;
     saveSession({
       clientBatchId: batchId,
