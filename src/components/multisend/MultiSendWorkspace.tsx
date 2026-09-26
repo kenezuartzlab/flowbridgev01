@@ -113,9 +113,20 @@ function clearDraft() {
     /* storage unavailable */
   }
 }
-/** A draft may only be resumed while at least one source still needs a signature. */
-function hasSignableReceipts(receipts: SourceReceipt[] | null): receipts is SourceReceipt[] {
-  return Boolean(receipts && receipts.length > 0 && nextSignableIndex(receipts) !== null);
+/**
+ * A draft stays alive while any source is still actionable: retryable
+ * (ready / failed / cancelled — a rejected wallet prompt must survive) or
+ * in-flight (awaiting-signature / submitted across a wallet-app reload).
+ * Only a fully confirmed queue is settled and may be discarded.
+ */
+function hasOpenReceipts(receipts: SourceReceipt[] | null): receipts is SourceReceipt[] {
+  return Boolean(
+    receipts &&
+      receipts.length > 0 &&
+      receipts.some(
+        (r) => isRetryable(r) || r.status === "awaiting-signature" || r.status === "submitted",
+      ),
+  );
 }
 
 export function MultiSendWorkspace() {
