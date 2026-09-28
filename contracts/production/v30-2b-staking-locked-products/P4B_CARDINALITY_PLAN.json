@@ -1,0 +1,123 @@
+{
+  "gate": "V30.2B-P4B-CARDINALITY-PLAN",
+  "mainnetWrites": 0,
+  "broadcast": false,
+  "rpc": "https://rpc.botchain.ai",
+  "chainId": 677,
+  "block": {
+    "number": "24775498",
+    "timestamp": 1790566033,
+    "gasLimit": 35000000
+  },
+  "pool": {
+    "address": "0xDaCFc2574b6110892351Bd31afb36F95E7206162",
+    "creationBlock": "23854178",
+    "creationTs": 1789875040,
+    "poolCreatedLogFound": true,
+    "observationIndex": 0,
+    "observationCardinality": 1,
+    "observationCardinalityNext": 1,
+    "unlocked": true
+  },
+  "abi": {
+    "function": "increaseObservationCardinalityNext(uint16)",
+    "selector": "0x32148f67",
+    "selectorInRuntime": true,
+    "permissionless": true
+  },
+  "activity": {
+    "counts": {
+      "swap": 13,
+      "mint": 2,
+      "burn": 1
+    },
+    "oracleWritingBlocks": 16,
+    "lifetimeSeconds": 690993,
+    "avgIntervalSeconds": 43187,
+    "medianGapSeconds": 1520,
+    "p10GapSeconds": 17,
+    "worstIntervalSeconds": 175227,
+    "sinceLastWriteSeconds": 131375
+  },
+  "minCardinalityFor7d": {
+    "1x": 15,
+    "2x": 29,
+    "5x": 71,
+    "10x": 141
+  },
+  "simulations": [
+    {
+      "target": 64,
+      "callOk": true,
+      "gasEstimate": 1442414,
+      "fitsBlock": true,
+      "blockGasLimitPct": 4.12,
+      "retentionSecondsCurrent": 2763972,
+      "retentionDaysCurrent": 31.99,
+      "retentionSeconds5x": 552794,
+      "retentionDays5x": 6.4,
+      "error": null
+    },
+    {
+      "target": 128,
+      "callOk": true,
+      "gasEstimate": 2876941,
+      "fitsBlock": true,
+      "blockGasLimitPct": 8.22,
+      "retentionSecondsCurrent": 5527944,
+      "retentionDaysCurrent": 63.98,
+      "retentionSeconds5x": 1105589,
+      "retentionDays5x": 12.8,
+      "error": null
+    },
+    {
+      "target": 256,
+      "callOk": true,
+      "gasEstimate": 5745996,
+      "fitsBlock": true,
+      "blockGasLimitPct": 16.42,
+      "retentionSecondsCurrent": 11055888,
+      "retentionDaysCurrent": 127.96,
+      "retentionSeconds5x": 2211178,
+      "retentionDays5x": 25.59,
+      "error": null
+    },
+    {
+      "target": 512,
+      "callOk": true,
+      "gasEstimate": 11484106,
+      "fitsBlock": true,
+      "blockGasLimitPct": 32.81,
+      "retentionSecondsCurrent": 22111776,
+      "retentionDaysCurrent": 255.92,
+      "retentionSeconds5x": 4422355,
+      "retentionDays5x": 51.18,
+      "error": null
+    },
+    {
+      "target": 1024,
+      "callOk": true,
+      "gasEstimate": 22960326,
+      "fitsBlock": true,
+      "blockGasLimitPct": 65.6,
+      "retentionSecondsCurrent": 44223552,
+      "retentionDaysCurrent": 511.85,
+      "retentionSeconds5x": 8844710,
+      "retentionDays5x": 102.37,
+      "error": null
+    },
+    {
+      "target": 2048,
+      "callOk": true,
+      "gasEstimate": null,
+      "fitsBlock": false,
+      "blockGasLimitPct": null,
+      "retentionSecondsCurrent": 88447104,
+      "retentionDaysCurrent": 1023.69,
+      "retentionSeconds5x": 17689421,
+      "retentionDays5x": 204.74,
+      "error": "Execution reverted with reason: gas required exceeds allowance (35000000)."
+    }
+  ],
+  "selected": 128
+}
