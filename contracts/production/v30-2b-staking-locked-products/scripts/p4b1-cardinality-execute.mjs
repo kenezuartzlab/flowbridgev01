@@ -4,14 +4,22 @@
  * Exactly ONE transaction is sent. Preflight + simulation must PASS first.
  *   bun contracts/production/v30-2b-staking-locked-products/scripts/p4b1-cardinality-execute.mjs
  */
-import { createPublicClient, createWalletClient, http, parseAbi, getAddress, encodeFunctionData } from "viem";
+import { createPublicClient, createWalletClient, http, parseAbi, getAddress, encodeFunctionData, keccak256, toBytes } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { writeFileSync } from "node:fs";
 
 const RPC = process.env.BOT_RPC || "https://rpc.botchain.ai";
 const POOL = getAddress("0xDaCFc2574b6110892351Bd31afb36F95E7206162");
 const TARGET = 128;
-const VAULT = getAddress("0x15e7B1b4d0E0d0A1d90C0B8f0d0E0f0A0b0c0790D".toLowerCase()); // placeholder guard below
+const VAULT = getAddress("0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D");
+const CONTROLLER = getAddress("0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF");
+const PUBLISHER = getAddress("0x05F7E3eA71093D8224ABB9DE078D1a2e480faB22");
+const EPOCH_ROLE = keccak256(toBytes("EPOCH_ROLE"));
+const PUBLISHER_ROLE = keccak256(toBytes("PUBLISHER_ROLE"));
+const STAKING_ABI = parseAbi([
+  "function oracle() view returns (address)",
+  "function hasRole(bytes32,address) view returns (bool)",
+]);
 const CHAIN = { id: 677, name: "BOT", nativeCurrency: { name: "BOT", symbol: "BOT", decimals: 18 }, rpcUrls: { default: { http: [RPC] } } };
 
 const POOL_ABI = parseAbi([
@@ -70,6 +78,14 @@ ev.checks = {
   sqrtPriceUnchanged: ev.before.sqrtPriceX96 === ev.after.sqrtPriceX96,
   stillUnlocked: ev.after.unlocked === true,
 };
+
+// --- staking surface unchanged: oracle still 0x0, roles still unassigned ---
+const oracle = await pub.readContract({ address: VAULT, abi: STAKING_ABI, functionName: "oracle" });
+const epochGranted = await pub.readContract({ address: VAULT, abi: STAKING_ABI, functionName: "hasRole", args: [EPOCH_ROLE, CONTROLLER] });
+const publisherGranted = await pub.readContract({ address: CONTROLLER, abi: STAKING_ABI, functionName: "hasRole", args: [PUBLISHER_ROLE, PUBLISHER] });
+ev.staking = { oracle, epochRoleToController: epochGranted, publisherRoleToPublisher: publisherGranted };
+ev.checks.oracleStillZero = oracle === "0x0000000000000000000000000000000000000000";
+ev.checks.rolesUnchanged = epochGranted === false && publisherGranted === false;
 if (!ev.checks.cardinalityNextIs128) throw new Error("STOP: cardinalityNext != 128 after tx");
 
 writeFileSync("contracts/production/v30-2b-staking-locked-products/P4B1_CARDINALITY_EXECUTION.json", JSON.stringify(ev, null, 2));
