@@ -53,7 +53,9 @@ export function sessionStatus(receipts: SourceReceipt[]): SessionStatus {
 
 /** Index of the source that should sign next, or null when the queue is done. */
 export function nextSignableIndex(receipts: SourceReceipt[]): number | null {
-  const i = receipts.findIndex((r) => r.status === "ready" || r.status === "failed" || r.status === "awaiting-approval");
+  const i = receipts.findIndex(
+    (r) => r.status === "ready" || r.status === "failed" || r.status === "cancelled" || r.status === "awaiting-approval",
+  );
   return i === -1 ? null : i;
 }
 
