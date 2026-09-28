@@ -79,4 +79,12 @@ describe("MultiSend session queue", () => {
     receipts[2] = { ...receipts[2], status: "confirmed" };
     expect(nextSignableIndex(receipts)).toBeNull();
   });
+
+  it("retries a cancelled wallet prompt after confirmed sources", () => {
+    const receipts = initialReceipts(plan);
+    receipts[0] = { ...receipts[0], status: "confirmed" };
+    receipts[1] = { ...receipts[1], status: "cancelled" };
+    expect(nextSignableIndex(receipts)).toBe(1);
+    expect(queueLabel(receipts, 1)).toContain("Cancelled");
+  });
 });
