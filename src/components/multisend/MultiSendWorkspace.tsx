@@ -19,6 +19,7 @@ import {
   Download,
   Loader2,
   Plus,
+  RotateCcw,
   ShieldCheck,
   Trash2,
   Upload,
@@ -615,6 +616,29 @@ export function MultiSendWorkspace() {
     if (pendingResumeRef.current && canReview && balancesReady && !reviewed && !busy) void openReview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canReview, balancesReady, reviewed, busy]);
+
+  /** Manual restart: discard the saved draft and return to the mode picker. */
+  const startOver = () => {
+    if (
+      !window.confirm(
+        "Clear this MultiSend draft and start fresh? Transfers already confirmed on chain stay confirmed — only the saved plan and signing queue are removed.",
+      )
+    )
+      return;
+    clearDraft();
+    pendingResumeRef.current = null;
+    restoredKeyRef.current = null;
+    restoredChainRef.current = chainId;
+    setReviewed(null);
+    setReceipts(null);
+    setBatchId(null);
+    setRows([]);
+    setDestination("");
+    setPreview(null);
+    setPasteText("");
+    setError("");
+    setMode(null);
+  };
 
   return (
     <div className="space-y-4">
