@@ -1,0 +1,478 @@
+{
+  "gate": "V30.2B-P4A.3+P4B",
+  "mainnetWrites": 0,
+  "rpc": "https://rpc.botchain.ai",
+  "block": {
+    "number": 24774215,
+    "timestamp": 1790565071,
+    "iso": "2026-09-28T03:11:11.000Z"
+  },
+  "pool": {
+    "address": "0xDaCFc2574b6110892351Bd31afb36F95E7206162",
+    "token0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+    "token1": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "decimals": [
+      6,
+      18
+    ],
+    "tick": 367397,
+    "sqrtPriceX96": "7523452564962232558184420885631742342",
+    "activeLiquidity": "1687657489191256923",
+    "tickSpacing": 200,
+    "observationIndex": 0,
+    "observationCardinality": 1,
+    "observationCardinalityNext": 1,
+    "spotUsdtPerFlow": 0.00011089827561970987,
+    "inRange": true,
+    "initializedTicks": [
+      {
+        "tick": 361400,
+        "liquidityNet": "84338189164129918"
+      },
+      {
+        "tick": 366800,
+        "liquidityNet": "1603319300027127005"
+      },
+      {
+        "tick": 367400,
+        "liquidityNet": "-1603319300027127005"
+      },
+      {
+        "tick": 375200,
+        "liquidityNet": "-84338189164129918"
+      }
+    ],
+    "lpRangeTicks": [
+      361400,
+      375200
+    ],
+    "lpRangeUsdtPerFlow": [
+      0.00005082597530660385,
+      0.00020201431342595536
+    ],
+    "activePositionTokens": {
+      "USDT": "5740.720813",
+      "FLOW": "41519850.474254577125029091"
+    },
+    "poolTokenBalances": {
+      "token0": "289.423569",
+      "token1": "6556257.098440317265277235",
+      "note": "includes uncollected fees/protocol dust; active-position amounts above are authoritative"
+    }
+  },
+  "manipulation": {
+    "baseline": {
+      "5%": {
+        "up": {
+          "direction": "FLOW +5% (buy FLOW with USDT)",
+          "inputToken": "USDT",
+          "grossInput": "443.324662",
+          "netInput": "438.891415",
+          "poolFeePaid": "4.433247",
+          "outputToken": "FLOW",
+          "grossOutput": "3862225.63729364112629841",
+          "grossInputUsd": 443.32,
+          "netCostUsdAtStartSpot": 15.01,
+          "endTick": null,
+          "endPriceUsdtPerFlow": 0.00011644318940069536,
+          "ticksCrossed": 0,
+          "staysInsideActiveRange": true
+        },
+        "down": {
+          "direction": "FLOW -5% (sell FLOW for USDT)",
+          "inputToken": "FLOW",
+          "grossInput": "228978.627597681012864446",
+          "netInput": "226688.841321704202735801",
+          "poolFeePaid": "2289.786275976810128645",
+          "outputToken": "USDT",
+          "grossOutput": "24.554934",
+          "grossInputUsd": 25.39,
+          "netCostUsdAtStartSpot": 0.84,
+          "endTick": null,
+          "endPriceUsdtPerFlow": 0.00010535336183872435,
+          "ticksCrossed": 1,
+          "staysInsideActiveRange": true
+        }
+      },
+      "10%": {
+        "up": {
+          "direction": "FLOW +10% (buy FLOW with USDT)",
+          "inputToken": "USDT",
+          "grossInput": "561.006928",
+          "netInput": "555.396858",
+          "poolFeePaid": "5.61007",
+          "outputToken": "FLOW",
+          "grossOutput": "4854067.947594335960517546",
+          "grossInputUsd": 561.01,
+          "netCostUsdAtStartSpot": 22.7,
+          "endTick": null,
+          "endPriceUsdtPerFlow": 0.00012198810318168088,
+          "ticksCrossed": 1,
+          "staysInsideActiveRange": true
+        },
+        "down": {
+          "direction": "FLOW -10% (sell FLOW for USDT)",
+          "inputToken": "FLOW",
+          "grossInput": "456411.078186468754344921",
+          "netInput": "451846.967404604066801471",
+          "poolFeePaid": "4564.11078186468754345",
+          "outputToken": "USDT",
+          "grossOutput": "47.643421",
+          "grossInputUsd": 50.62,
+          "netCostUsdAtStartSpot": 2.97,
+          "endTick": null,
+          "endPriceUsdtPerFlow": 0.0000998084480577389,
+          "ticksCrossed": 1,
+          "staysInsideActiveRange": true
+        }
+      },
+      "20%": {
+        "up": {
+          "direction": "FLOW +20% (buy FLOW with USDT)",
+          "inputToken": "USDT",
+          "grossInput": "602.845347",
+          "netInput": "596.816892",
+          "poolFeePaid": "6.028455",
+          "outputToken": "FLOW",
+          "grossOutput": "5179154.263122231891765997",
+          "grossInputUsd": 602.85,
+          "netCostUsdAtStartSpot": 28.49,
+          "endTick": null,
+          "endPriceUsdtPerFlow": 0.00013307793074365183,
+          "ticksCrossed": 1,
+          "staysInsideActiveRange": true
+        },
+        "down": {
+          "direction": "FLOW -20% (sell FLOW for USDT)",
+          "inputToken": "FLOW",
+          "grossInput": "973671.276361159802265259",
+          "netInput": "963934.563597548204242605",
+          "poolFeePaid": "9736.712763611598022654",
+          "outputToken": "USDT",
+          "grossOutput": "95.831021",
+          "grossInputUsd": 107.98,
+          "netCostUsdAtStartSpot": 12.15,
+          "endTick": null,
+          "endPriceUsdtPerFlow": 0.0000887186204957679,
+          "ticksCrossed": 1,
+          "staysInsideActiveRange": true
+        }
+      },
+      "30%": {
+        "up": {
+          "direction": "FLOW +30% (buy FLOW with USDT)",
+          "inputToken": "USDT",
+          "grossInput": "642.973888",
+          "netInput": "636.544148",
+          "poolFeePaid": "6.42974",
+          "outputToken": "FLOW",
+          "grossOutput": "5465969.015148479140734241",
+          "grossInputUsd": 642.97,
+          "netCostUsdAtStartSpot": 36.81,
+          "endTick": null,
+          "endPriceUsdtPerFlow": 0.0001441677583056228,
+          "ticksCrossed": 1,
+          "staysInsideActiveRange": true
+        },
+        "down": {
+          "direction": "FLOW -30% (sell FLOW for USDT)",
+          "inputToken": "FLOW",
+          "grossInput": "1598144.351081424259549132",
+          "netInput": "1582162.90757061001695364",
+          "poolFeePaid": "15981.443510814242595492",
+          "outputToken": "USDT",
+          "grossOutput": "147.136969",
+          "grossInputUsd": 177.23,
+          "netCostUsdAtStartSpot": 30.09,
+          "endTick": null,
+          "endPriceUsdtPerFlow": 0.0000776287929337969,
+          "ticksCrossed": 1,
+          "staysInsideActiveRange": true
+        }
+      }
+    },
+    "quoterParity": [
+      {
+        "move": "5%",
+        "dir": "up",
+        "quoterOut": "3862225643320600953640336",
+        "mathOut": "3862225637293641126298410",
+        "outRelDiff": 1.5604887941153973e-9,
+        "sqrtRelDiff": 3.853639029781673e-11,
+        "match": true
+      },
+      {
+        "move": "5%",
+        "dir": "down",
+        "quoterOut": "24554934",
+        "mathOut": "24554934",
+        "outRelDiff": 0,
+        "sqrtRelDiff": 9.988068647437338e-27,
+        "match": true
+      },
+      {
+        "move": "10%",
+        "dir": "up",
+        "quoterOut": "4854067952002285189461321",
+        "mathOut": "4854067947594335960517546",
+        "outRelDiff": 9.080938455194767e-10,
+        "sqrtRelDiff": 5.772594494930461e-10,
+        "match": true
+      },
+      {
+        "move": "10%",
+        "dir": "down",
+        "quoterOut": "47643421",
+        "mathOut": "47643421",
+        "outRelDiff": 0,
+        "sqrtRelDiff": 1.1440595751756185e-25,
+        "match": true
+      },
+      {
+        "move": "20%",
+        "dir": "up",
+        "quoterOut": "5179154269942955903347181",
+        "mathOut": "5179154263122231891765997",
+        "outRelDiff": 1.3169571063267266e-9,
+        "sqrtRelDiff": 9.32951837936007e-10,
+        "match": true
+      },
+      {
+        "move": "20%",
+        "dir": "down",
+        "quoterOut": "95831021",
+        "mathOut": "95831021",
+        "outRelDiff": 0,
+        "sqrtRelDiff": 6.656756255711051e-26,
+        "match": true
+      },
+      {
+        "move": "30%",
+        "dir": "up",
+        "quoterOut": "5465969016013416236395848",
+        "mathOut": "5465969015148479140734241",
+        "outRelDiff": 1.58240394935373e-10,
+        "sqrtRelDiff": 1.2313863198025997e-10,
+        "match": true
+      },
+      {
+        "move": "30%",
+        "dir": "down",
+        "quoterOut": "147136969",
+        "mathOut": "147136969",
+        "outRelDiff": 0,
+        "sqrtRelDiff": 3.354324057920771e-26,
+        "match": true
+      }
+    ]
+  },
+  "requiredLiquidity": {
+    "basis": "30% move, cheaper direction, net attacker cost at start spot; liquidity added to the same live range at the current price",
+    "current30MoveCostUsd": 30.09,
+    "targets": {
+      "$1000": {
+        "requiredActiveLiquidity": "6592043303382646788",
+        "multipleOfCurrent": 3.906031493713587,
+        "additionalFLOW": "120657993.092462805027987321",
+        "additionalUSDT": "16682.715478",
+        "recomputedCosts": {
+          "5%": {
+            "upUsd": 58.63,
+            "downUsd": 48.36
+          },
+          "10%": {
+            "upUsd": 165.48,
+            "downUsd": 174.56
+          },
+          "20%": {
+            "upUsd": 507.78,
+            "downUsd": 717.31
+          },
+          "30%": {
+            "upUsd": 1000,
+            "downUsd": 1778.9
+          }
+        }
+      },
+      "$2500": {
+        "requiredActiveLiquidity": "14229785262013918630",
+        "multipleOfCurrent": 8.431678437804926,
+        "additionalFLOW": "308562177.510402314339896821",
+        "additionalUSDT": "42663.19108",
+        "recomputedCosts": {
+          "5%": {
+            "upUsd": 126.56,
+            "downUsd": 122.38
+          },
+          "10%": {
+            "upUsd": 387.83,
+            "downUsd": 441.77
+          },
+          "20%": {
+            "upUsd": 1254.2,
+            "downUsd": 1815.48
+          },
+          "30%": {
+            "upUsd": 2500,
+            "downUsd": 4502.37
+          }
+        }
+      },
+      "$5000": {
+        "requiredActiveLiquidity": "26959355182692557556",
+        "multipleOfCurrent": 15.974423338477147,
+        "additionalFLOW": "621735817.951759167934907792",
+        "additionalUSDT": "85963.983714",
+        "recomputedCosts": {
+          "5%": {
+            "upUsd": 239.78,
+            "downUsd": 245.73
+          },
+          "10%": {
+            "upUsd": 758.41,
+            "downUsd": 887.13
+          },
+          "20%": {
+            "upUsd": 2498.23,
+            "downUsd": 3645.76
+          },
+          "30%": {
+            "upUsd": 5000,
+            "downUsd": 9041.49
+          }
+        }
+      },
+      "$10000": {
+        "requiredActiveLiquidity": "52418495028879659760",
+        "multipleOfCurrent": 31.059913142683445,
+        "additionalFLOW": "1248083098.953296502665640788",
+        "additionalUSDT": "172565.568999",
+        "recomputedCosts": {
+          "5%": {
+            "upUsd": 466.22,
+            "downUsd": 492.44
+          },
+          "10%": {
+            "upUsd": 1499.58,
+            "downUsd": 1777.84
+          },
+          "20%": {
+            "upUsd": 4986.28,
+            "downUsd": 7306.33
+          },
+          "30%": {
+            "upUsd": 10000,
+            "downUsd": 18119.72
+          }
+        }
+      }
+    }
+  },
+  "p4b": {
+    "runner": "READY",
+    "liveRun": "NOT_READY",
+    "twap": {
+      "30m": {
+        "status": "WARMING",
+        "reason": "observationCardinality=1: only one observation slot; history is overwritten every block with a swap, no multi-observation window can be reproduced"
+      },
+      "6h": {
+        "status": "WARMING",
+        "reason": "observationCardinality=1: only one observation slot; history is overwritten every block with a swap, no multi-observation window can be reproduced"
+      },
+      "7d": {
+        "status": "WARMING",
+        "reason": "observationCardinality=1: only one observation slot; history is overwritten every block with a swap, no multi-observation window can be reproduced"
+      }
+    },
+    "observation": {
+      "cardinality": 1,
+      "cardinalityNext": 1,
+      "index": 0,
+      "oldestTimestamp": 1790434658,
+      "realCoverageSeconds": 130413
+    },
+    "ownerPolicies": {
+      "minimumLiquidityThreshold": "UNAPPROVED",
+      "freshnessRule": "UNAPPROVED",
+      "maxDeviationRule": "UNAPPROVED"
+    },
+    "result": "NOT_READY"
+  },
+  "staking": {
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "weeklyUsdBudget8": "0",
+    "standardDynamic": "DISABLED"
+  },
+  "classification": "ORACLE_THRESHOLD_CANDIDATE_MATH_READY",
+  "checks": [
+    {
+      "name": "chain id 677",
+      "pass": true
+    },
+    {
+      "name": "pool resolved from verified factory (FLOW, USDT, 10000)",
+      "pass": true,
+      "detail": "0xDaCFc2574b6110892351Bd31afb36F95E7206162"
+    },
+    {
+      "name": "canonical token pair",
+      "pass": true,
+      "detail": [
+        "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+        "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF"
+      ]
+    },
+    {
+      "name": "fee 10000",
+      "pass": true,
+      "detail": 10000
+    },
+    {
+      "name": "tick-bitmap reconstruction reproduces active liquidity",
+      "pass": true,
+      "detail": {
+        "reconstructed": "1687657489191256923",
+        "live": "1687657489191256923"
+      }
+    },
+    {
+      "name": "price inside LP range",
+      "pass": true,
+      "detail": {
+        "tick": 367397,
+        "lower": 361400,
+        "upper": 375200
+      }
+    },
+    {
+      "name": "exact V3 math parity with live QuoterV2 (8 moves, both directions)",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "R5 oracle is address(0)",
+      "pass": true,
+      "detail": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "name": "weeklyUsdBudget8 == 0",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "P4B earliest timestamp passed",
+      "pass": true,
+      "detail": "2026-09-28T03:11:11.000Z"
+    },
+    {
+      "name": "no 7d PASS without >=604800s real coverage",
+      "pass": true,
+      "detail": 130413
+    }
+  ],
+  "summary": {
+    "total": 11,
+    "passed": 11
+  }
+}
