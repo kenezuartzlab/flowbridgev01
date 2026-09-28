@@ -647,12 +647,26 @@ export function MultiSendWorkspace() {
           title="MultiSend"
           hint="Send, consolidate, or organize multiple wallet transfers."
           action={
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/" aria-label="Exit MultiSend">
-                <ArrowLeft aria-hidden="true" />
-                Exit
-              </Link>
-            </Button>
+            <div className="flex items-center gap-1">
+              {mode && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={startOver}
+                  disabled={busy}
+                  aria-label="Clear this draft and start a new MultiSend"
+                >
+                  <RotateCcw aria-hidden="true" />
+                  Start over
+                </Button>
+              )}
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/" aria-label="Exit MultiSend">
+                  <ArrowLeft aria-hidden="true" />
+                  Exit
+                </Link>
+              </Button>
+            </div>
           }
           badge={
             executable ? (
