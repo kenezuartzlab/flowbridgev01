@@ -19,6 +19,7 @@ import {
   Download,
   Loader2,
   Plus,
+  RotateCcw,
   ShieldCheck,
   Trash2,
   Upload,
@@ -616,6 +617,29 @@ export function MultiSendWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canReview, balancesReady, reviewed, busy]);
 
+  /** Manual restart: discard the saved draft and return to the mode picker. */
+  const startOver = () => {
+    if (
+      !window.confirm(
+        "Clear this MultiSend draft and start fresh? Transfers already confirmed on chain stay confirmed — only the saved plan and signing queue are removed.",
+      )
+    )
+      return;
+    clearDraft();
+    pendingResumeRef.current = null;
+    restoredKeyRef.current = null;
+    restoredChainRef.current = chainId;
+    setReviewed(null);
+    setReceipts(null);
+    setBatchId(null);
+    setRows([]);
+    setDestination("");
+    setPreview(null);
+    setPasteText("");
+    setError("");
+    setMode(null);
+  };
+
   return (
     <div className="space-y-4">
       <Surface>
@@ -623,12 +647,26 @@ export function MultiSendWorkspace() {
           title="MultiSend"
           hint="Send, consolidate, or organize multiple wallet transfers."
           action={
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/" aria-label="Exit MultiSend">
-                <ArrowLeft aria-hidden="true" />
-                Exit
-              </Link>
-            </Button>
+            <div className="flex items-center gap-1">
+              {mode && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={startOver}
+                  disabled={busy}
+                  aria-label="Clear this draft and start a new MultiSend"
+                >
+                  <RotateCcw aria-hidden="true" />
+                  Start over
+                </Button>
+              )}
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/" aria-label="Exit MultiSend">
+                  <ArrowLeft aria-hidden="true" />
+                  Exit
+                </Link>
+              </Button>
+            </div>
           }
           badge={
             executable ? (
