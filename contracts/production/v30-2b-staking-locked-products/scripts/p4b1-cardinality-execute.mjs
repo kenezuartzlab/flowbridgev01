@@ -80,7 +80,7 @@ ev.checks = {
 };
 
 // --- staking surface unchanged: oracle still 0x0, roles still unassigned ---
-const oracle = await pub.readContract({ address: VAULT, abi: STAKING_ABI, functionName: "oracle" });
+const oracle = await pub.readContract({ address: CONTROLLER, abi: STAKING_ABI, functionName: "oracle" });
 const epochGranted = await pub.readContract({ address: VAULT, abi: STAKING_ABI, functionName: "hasRole", args: [EPOCH_ROLE, CONTROLLER] });
 const publisherGranted = await pub.readContract({ address: CONTROLLER, abi: STAKING_ABI, functionName: "hasRole", args: [PUBLISHER_ROLE, PUBLISHER] });
 ev.staking = { oracle, epochRoleToController: epochGranted, publisherRoleToPublisher: publisherGranted };
