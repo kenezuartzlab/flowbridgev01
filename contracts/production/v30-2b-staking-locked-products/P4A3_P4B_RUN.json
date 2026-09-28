@@ -1,0 +1,86 @@
+{
+  "halted": "STOP: V3 math cannot be reproduced",
+  "checks": [
+    {
+      "name": "chain id 677",
+      "pass": true
+    },
+    {
+      "name": "pool resolved from verified factory (FLOW, USDT, 10000)",
+      "pass": true,
+      "detail": "0xDaCFc2574b6110892351Bd31afb36F95E7206162"
+    },
+    {
+      "name": "canonical token pair",
+      "pass": true,
+      "detail": [
+        "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+        "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF"
+      ]
+    },
+    {
+      "name": "fee 10000",
+      "pass": true,
+      "detail": 10000
+    },
+    {
+      "name": "tick-bitmap reconstruction reproduces active liquidity",
+      "pass": true,
+      "detail": {
+        "reconstructed": "1687657489191256923",
+        "live": "1687657489191256923"
+      }
+    },
+    {
+      "name": "price inside LP range",
+      "pass": true,
+      "detail": {
+        "tick": 367397,
+        "lower": 361400,
+        "upper": 375200
+      }
+    },
+    {
+      "name": "exact V3 math parity with live QuoterV2 (8 moves, both directions)",
+      "pass": false,
+      "detail": [
+        {
+          "move": "5%",
+          "dir": "up",
+          "quoterOut": "3862225643320600953640336",
+          "mathOut": "3862225637293641126298410",
+          "sqrtRelDiff": 3.853639029781673e-11,
+          "match": false
+        },
+        {
+          "move": "10%",
+          "dir": "up",
+          "quoterOut": "4854067952002285189461321",
+          "mathOut": "4854067947594335960517546",
+          "sqrtRelDiff": 5.772594494930461e-10,
+          "match": false
+        },
+        {
+          "move": "20%",
+          "dir": "up",
+          "quoterOut": "5179154269942955903347181",
+          "mathOut": "5179154263122231891765997",
+          "sqrtRelDiff": 9.32951837936007e-10,
+          "match": false
+        },
+        {
+          "move": "30%",
+          "dir": "up",
+          "quoterOut": "5465969016013416236395848",
+          "mathOut": "5465969015148479140734241",
+          "sqrtRelDiff": 1.2313863198025997e-10,
+          "match": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "passed": 6
+  }
+}
