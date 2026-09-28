@@ -1,0 +1,39 @@
+{
+  "gate": "V30.2B-P4B.1-CARDINALITY-EXECUTION",
+  "chainId": 677,
+  "pool": "0xDaCFc2574b6110892351Bd31afb36F95E7206162",
+  "function": "increaseObservationCardinalityNext(uint16)",
+  "argument": 128,
+  "txHash": "0xe44fa0c8b289c54a9d8f0c336364173fb715cbca1596649367b322fa0f2ff691",
+  "block": "24777215",
+  "status": "success",
+  "gasUsed": "2853130",
+  "before": {
+    "observationCardinality": 1,
+    "observationCardinalityNext": 1,
+    "tick": 367397,
+    "liquidity": "1687657489191256923"
+  },
+  "after": {
+    "observationCardinality": 1,
+    "observationCardinalityNext": 128,
+    "tick": 367397,
+    "liquidity": "1687657489191256923",
+    "unlocked": true
+  },
+  "checks": {
+    "txSuccess": true,
+    "cardinalityNextIs128": true,
+    "liquidityUnchanged": true,
+    "tickUnchanged": true,
+    "oracleStillZero": true,
+    "rolesUnchanged": true,
+    "stillUnlocked": true
+  },
+  "staking": {
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "epochRoleToController": false,
+    "publisherRoleToPublisher": false
+  },
+  "note": "Exactly one transaction sent. TWAP history still requires >=7 days of activity under the new cardinality."
+}
