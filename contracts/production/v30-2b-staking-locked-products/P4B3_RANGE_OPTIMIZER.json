@@ -1,0 +1,1143 @@
+{
+  "gate": "V30.2B-P4B.3",
+  "mainnetWrites": 0,
+  "block": "24818243",
+  "tick": 367429,
+  "spotUsdtPerFlow": 0.00011054937732722662,
+  "tickSpacing": 200,
+  "moveTicks": {
+    "flowUp30": 364805,
+    "flowDown30": 370995
+  },
+  "ranges": {
+    "WIDE": [
+      361400,
+      375200
+    ],
+    "MEDIUM": [
+      362800,
+      373000
+    ],
+    "NARROW": [
+      364600,
+      371200
+    ]
+  },
+  "baseline": {
+    "costs": {
+      "5%": {
+        "flowDown": {
+          "usd": 0.82,
+          "feeUsd": 0.23,
+          "ticksCrossed": 0,
+          "exhausted": false
+        },
+        "flowUp": {
+          "usd": 14.7,
+          "feeUsd": 4.18,
+          "ticksCrossed": 1,
+          "exhausted": false
+        },
+        "minUsd": 0.82
+      },
+      "10%": {
+        "flowDown": {
+          "usd": 2.95,
+          "feeUsd": 0.48,
+          "ticksCrossed": 0,
+          "exhausted": false
+        },
+        "flowUp": {
+          "usd": 24.29,
+          "feeUsd": 5.63,
+          "ticksCrossed": 2,
+          "exhausted": false
+        },
+        "minUsd": 2.95
+      },
+      "20%": {
+        "flowDown": {
+          "usd": 12.11,
+          "feeUsd": 1.06,
+          "ticksCrossed": 0,
+          "exhausted": false
+        },
+        "flowUp": {
+          "usd": 30.06,
+          "feeUsd": 6.05,
+          "ticksCrossed": 2,
+          "exhausted": false
+        },
+        "minUsd": 12.11
+      },
+      "30%": {
+        "flowDown": {
+          "usd": 30.03,
+          "feeUsd": 1.75,
+          "ticksCrossed": 0,
+          "exhausted": false
+        },
+        "flowUp": {
+          "usd": 38.37,
+          "feeUsd": 6.45,
+          "ticksCrossed": 2,
+          "exhausted": false
+        },
+        "minUsd": 30.03
+      }
+    },
+    "min30": 30.03,
+    "covered": true,
+    "activeL": "84338189164129918"
+  },
+  "results": [
+    {
+      "capM": 25,
+      "committedFLOW": "6588315.949415",
+      "best": {
+        "A": {
+          "structure": "A",
+          "split": {
+            "wide": 100
+          },
+          "additionalFLOW": "18411684.050585",
+          "additionalUSDT": "2517.950534",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 8.01,
+                "feeUsd": 2.28,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 21.31,
+                "feeUsd": 6.13,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 8.01
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 28.93,
+                "feeUsd": 4.76,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 45.91,
+                "feeUsd": 9.49,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 28.93
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 118.89,
+                "feeUsd": 10.38,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 102.64,
+                "feeUsd": 13.59,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 102.64
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 294.85,
+                "feeUsd": 17.17,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 184.23,
+                "feeUsd": 17.52,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 184.23
+            }
+          },
+          "min30": 184.23,
+          "covered": true,
+          "activeL": "828190833227913633",
+          "positions": [
+            {
+              "range": [
+                361400,
+                375200
+              ],
+              "liquidity": "743852644063783715"
+            }
+          ]
+        },
+        "B": {
+          "structure": "B",
+          "split": {
+            "wide": 0,
+            "medium": 100
+          },
+          "additionalFLOW": "18411684.050585",
+          "additionalUSDT": "2394.931681",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 9.88,
+                "feeUsd": 2.82,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 23.02,
+                "feeUsd": 6.64,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 9.88
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 35.67,
+                "feeUsd": 5.87,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 51.52,
+                "feeUsd": 10.49,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 35.67
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 146.61,
+                "feeUsd": 12.8,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 121.49,
+                "feeUsd": 15.55,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 121.49
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 363.6,
+                "feeUsd": 21.18,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 222.09,
+                "feeUsd": 20.4,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 222.09
+            }
+          },
+          "min30": 222.09,
+          "covered": true,
+          "activeL": "1021292078161532224",
+          "positions": [
+            {
+              "range": [
+                362800,
+                373000
+              ],
+              "liquidity": "936953888997402306"
+            }
+          ]
+        },
+        "C": {
+          "structure": "C",
+          "split": {
+            "wide": 0,
+            "medium": 10,
+            "narrow": 90
+          },
+          "additionalFLOW": "18411684.050585",
+          "additionalUSDT": "2625.952229",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 14.5,
+                "feeUsd": 4.14,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 27.27,
+                "feeUsd": 7.89,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 14.5
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 52.36,
+                "feeUsd": 8.61,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 65.4,
+                "feeUsd": 12.96,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 52.36
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 215.18,
+                "feeUsd": 18.79,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 168.09,
+                "feeUsd": 20.39,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 168.09
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 533.66,
+                "feeUsd": 31.08,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 315.75,
+                "feeUsd": 27.51,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 315.75
+            }
+          },
+          "min30": 315.75,
+          "covered": true,
+          "activeL": "1498951209568688446",
+          "positions": [
+            {
+              "range": [
+                362800,
+                373000
+              ],
+              "liquidity": "93695388899740230"
+            },
+            {
+              "range": [
+                364600,
+                371200
+              ],
+              "liquidity": "1320917631504818298"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "capM": 50,
+      "committedFLOW": "6588315.949415",
+      "best": {
+        "A": {
+          "structure": "A",
+          "split": {
+            "wide": 100
+          },
+          "additionalFLOW": "43411684.050585",
+          "additionalUSDT": "5936.907929",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 17.79,
+                "feeUsd": 5.07,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 30.28,
+                "feeUsd": 8.78,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 17.79
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 64.21,
+                "feeUsd": 10.56,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 75.26,
+                "feeUsd": 14.72,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 64.21
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 263.89,
+                "feeUsd": 23.04,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 201.2,
+                "feeUsd": 23.83,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 201.2
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 654.44,
+                "feeUsd": 38.11,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 382.28,
+                "feeUsd": 32.56,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 382.28
+            }
+          },
+          "min30": 382.28,
+          "covered": true,
+          "activeL": "1838218816029622113",
+          "positions": [
+            {
+              "range": [
+                361400,
+                375200
+              ],
+              "liquidity": "1753880626865492195"
+            }
+          ]
+        },
+        "B": {
+          "structure": "B",
+          "split": {
+            "wide": 0,
+            "medium": 100
+          },
+          "additionalFLOW": "43411684.050585",
+          "additionalUSDT": "5646.849966",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 22.19,
+                "feeUsd": 6.33,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 34.32,
+                "feeUsd": 9.97,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 22.19
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 80.11,
+                "feeUsd": 13.18,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 88.5,
+                "feeUsd": 17.08,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 80.11
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 329.25,
+                "feeUsd": 28.75,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 245.62,
+                "feeUsd": 28.44,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 245.62
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 816.54,
+                "feeUsd": 47.55,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 471.56,
+                "feeUsd": 39.34,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 471.56
+            }
+          },
+          "min30": 471.56,
+          "covered": true,
+          "activeL": "2293519385591946827",
+          "positions": [
+            {
+              "range": [
+                362800,
+                373000
+              ],
+              "liquidity": "2209181196427816909"
+            }
+          ]
+        },
+        "C": {
+          "structure": "C",
+          "split": {
+            "wide": 0,
+            "medium": 10,
+            "narrow": 90
+          },
+          "additionalFLOW": "43411684.050585",
+          "additionalUSDT": "6191.557934",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 33.09,
+                "feeUsd": 9.44,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 44.32,
+                "feeUsd": 12.93,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 33.09
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 119.46,
+                "feeUsd": 19.65,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 121.23,
+                "feeUsd": 22.92,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 119.46
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 490.93,
+                "feeUsd": 42.87,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 355.51,
+                "feeUsd": 39.86,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 355.51
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 1217.5,
+                "feeUsd": 70.91,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 692.39,
+                "feeUsd": 56.1,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 692.39
+            }
+          },
+          "min30": 692.39,
+          "covered": true,
+          "activeL": "3419760051006014849",
+          "positions": [
+            {
+              "range": [
+                362800,
+                373000
+              ],
+              "liquidity": "220918119642781690"
+            },
+            {
+              "range": [
+                364600,
+                371200
+              ],
+              "liquidity": "3114503742199103241"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "capM": 75,
+      "committedFLOW": "6588315.949415",
+      "best": {
+        "A": {
+          "structure": "A",
+          "split": {
+            "wide": 100
+          },
+          "additionalFLOW": "68411684.050585",
+          "additionalUSDT": "9355.865323",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 27.56,
+                "feeUsd": 7.86,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 39.25,
+                "feeUsd": 11.43,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 27.56
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 99.49,
+                "feeUsd": 16.36,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 104.62,
+                "feeUsd": 19.96,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 99.49
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 408.88,
+                "feeUsd": 35.7,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 299.75,
+                "feeUsd": 34.06,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 299.75
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 1014.03,
+                "feeUsd": 59.06,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 580.33,
+                "feeUsd": 47.6,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 580.33
+            }
+          },
+          "min30": 580.33,
+          "covered": true,
+          "activeL": "2848246798831330592",
+          "positions": [
+            {
+              "range": [
+                361400,
+                375200
+              ],
+              "liquidity": "2763908609667200674"
+            }
+          ]
+        },
+        "B": {
+          "structure": "B",
+          "split": {
+            "wide": 0,
+            "medium": 100
+          },
+          "additionalFLOW": "68411684.050585",
+          "additionalUSDT": "8898.768251",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 34.5,
+                "feeUsd": 9.84,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 45.62,
+                "feeUsd": 13.31,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 34.5
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 124.55,
+                "feeUsd": 20.48,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 125.48,
+                "feeUsd": 23.68,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 124.55
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 511.88,
+                "feeUsd": 44.7,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 369.76,
+                "feeUsd": 41.34,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 369.76
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 1269.47,
+                "feeUsd": 73.93,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 721.02,
+                "feeUsd": 58.28,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 721.02
+            }
+          },
+          "min30": 721.02,
+          "covered": true,
+          "activeL": "3565746693022361431",
+          "positions": [
+            {
+              "range": [
+                362800,
+                373000
+              ],
+              "liquidity": "3481408503858231513"
+            }
+          ]
+        },
+        "C": {
+          "structure": "C",
+          "split": {
+            "wide": 0,
+            "medium": 10,
+            "narrow": 90
+          },
+          "additionalFLOW": "68411684.050585",
+          "additionalUSDT": "9757.163640",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 51.67,
+                "feeUsd": 14.73,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 61.38,
+                "feeUsd": 17.96,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 51.67
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 186.55,
+                "feeUsd": 30.68,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 177.06,
+                "feeUsd": 32.88,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 177.06
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 766.67,
+                "feeUsd": 66.95,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 542.93,
+                "feeUsd": 59.33,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 542.93
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 1901.34,
+                "feeUsd": 110.73,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 1069.03,
+                "feeUsd": 84.7,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 1069.03
+            }
+          },
+          "min30": 1069.03,
+          "covered": true,
+          "activeL": "5340568892443341252",
+          "positions": [
+            {
+              "range": [
+                362800,
+                373000
+              ],
+              "liquidity": "348140850385823151"
+            },
+            {
+              "range": [
+                364600,
+                371200
+              ],
+              "liquidity": "4908089852893388183"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "capM": 100,
+      "committedFLOW": "6588315.949415",
+      "best": {
+        "A": {
+          "structure": "A",
+          "split": {
+            "wide": 100
+          },
+          "additionalFLOW": "93411684.050585",
+          "additionalUSDT": "12774.822718",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 37.33,
+                "feeUsd": 10.65,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 48.22,
+                "feeUsd": 14.08,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 37.33
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 134.77,
+                "feeUsd": 22.17,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 133.98,
+                "feeUsd": 25.19,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 133.98
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 553.88,
+                "feeUsd": 48.37,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 398.3,
+                "feeUsd": 44.3,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 398.3
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 1373.62,
+                "feeUsd": 80,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 778.38,
+                "feeUsd": 62.63,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 778.38
+            }
+          },
+          "min30": 778.38,
+          "covered": true,
+          "activeL": "3858274781633039072",
+          "positions": [
+            {
+              "range": [
+                361400,
+                375200
+              ],
+              "liquidity": "3773936592468909154"
+            }
+          ]
+        },
+        "B": {
+          "structure": "B",
+          "split": {
+            "wide": 0,
+            "medium": 100
+          },
+          "additionalFLOW": "93411684.050585",
+          "additionalUSDT": "12150.686536",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 46.81,
+                "feeUsd": 13.35,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 56.92,
+                "feeUsd": 16.65,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 46.81
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 168.99,
+                "feeUsd": 27.79,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 162.46,
+                "feeUsd": 30.27,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 162.46
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 694.52,
+                "feeUsd": 60.65,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 493.89,
+                "feeUsd": 54.23,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 493.89
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 1722.41,
+                "feeUsd": 100.31,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 970.48,
+                "feeUsd": 77.22,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 970.48
+            }
+          },
+          "min30": 970.48,
+          "covered": true,
+          "activeL": "4837974000452776034",
+          "positions": [
+            {
+              "range": [
+                362800,
+                373000
+              ],
+              "liquidity": "4753635811288646116"
+            }
+          ]
+        },
+        "C": {
+          "structure": "C",
+          "split": {
+            "wide": 0,
+            "medium": 10,
+            "narrow": 90
+          },
+          "additionalFLOW": "93411684.050585",
+          "additionalUSDT": "13322.769345",
+          "costs": {
+            "5%": {
+              "flowDown": {
+                "usd": 70.25,
+                "feeUsd": 20.03,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 78.44,
+                "feeUsd": 23,
+                "ticksCrossed": 1,
+                "exhausted": false
+              },
+              "minUsd": 70.25
+            },
+            "10%": {
+              "flowDown": {
+                "usd": 253.65,
+                "feeUsd": 41.72,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 232.9,
+                "feeUsd": 42.83,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 232.9
+            },
+            "20%": {
+              "flowDown": {
+                "usd": 1042.41,
+                "feeUsd": 91.03,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 730.35,
+                "feeUsd": 78.8,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 730.35
+            },
+            "30%": {
+              "flowDown": {
+                "usd": 2585.19,
+                "feeUsd": 150.56,
+                "ticksCrossed": 0,
+                "exhausted": false
+              },
+              "flowUp": {
+                "usd": 1445.67,
+                "feeUsd": 113.3,
+                "ticksCrossed": 2,
+                "exhausted": false
+              },
+              "minUsd": 1445.67
+            }
+          },
+          "min30": 1445.67,
+          "covered": true,
+          "activeL": "7261377733880667654",
+          "positions": [
+            {
+              "range": [
+                362800,
+                373000
+              ],
+              "liquidity": "475363581128864611"
+            },
+            {
+              "range": [
+                364600,
+                371200
+              ],
+              "liquidity": "6701675963587673125"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
