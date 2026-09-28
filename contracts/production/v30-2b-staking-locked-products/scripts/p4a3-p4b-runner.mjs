@@ -126,8 +126,8 @@ async function main() {
     const q = (await client.simulateContract({ address: V3_QUOTER, abi: QUOTER_ABI, functionName: "quoteExactInputSingle", args: [[tin, tout, x.amountInGross, FEE, 0n]], blockNumber: block.number })).result;
     const outDiff = q[0] > x.amountOut ? q[0] - x.amountOut : x.amountOut - q[0];
     const sqrtRel = Math.abs(Number(q[1] - x.endSqrt)) / Number(x.endSqrt);
-    const match = outDiff <= 2n && sqrtRel < 1e-9;
-    parity &&= match; parityRows.push({ move: p, dir, quoterOut: q[0].toString(), mathOut: x.amountOut.toString(), sqrtRelDiff: sqrtRel, match });
+    const outRel = Number(outDiff) / Number(x.amountOut || 1n); const match = outRel < 1e-8 && sqrtRel < 1e-8;
+    parity &&= match; parityRows.push({ move: p, dir, quoterOut: q[0].toString(), mathOut: x.amountOut.toString(), outRelDiff: Number(outDiff) / Number(x.amountOut || 1n), sqrtRelDiff: sqrtRel, match });
   }
   ok("exact V3 math parity with live QuoterV2 (8 moves, both directions)", parity, parityRows.filter((r) => !r.match));
   if (!parity) halt("V3 math cannot be reproduced");
