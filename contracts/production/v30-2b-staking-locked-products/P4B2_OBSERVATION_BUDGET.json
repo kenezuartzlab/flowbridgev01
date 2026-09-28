@@ -1,0 +1,125 @@
+{
+  "gate": "V30.2B-P4B.2",
+  "mainnetWrites": 0,
+  "block": {
+    "number": "24793281",
+    "timestamp": 1790579370,
+    "iso": "2026-09-28T07:09:30.000Z"
+  },
+  "cardinality": {
+    "txBlock": "24777215",
+    "txTs": 1790567321,
+    "txIso": "2026-09-28T03:48:41.000Z",
+    "observationIndex": 2,
+    "observationCardinality": 128,
+    "observationCardinalityNext": 128,
+    "writesSince": [
+      {
+        "k": "swap",
+        "block": "24792034"
+      },
+      {
+        "k": "swap",
+        "block": "24792243"
+      }
+    ],
+    "retained": [
+      {
+        "i": 0,
+        "ts": 1790434658,
+        "iso": "2026-09-26T14:57:38.000Z"
+      },
+      {
+        "i": 1,
+        "ts": 1790578435,
+        "iso": "2026-09-28T06:53:55.000Z"
+      },
+      {
+        "i": 2,
+        "ts": 1790578592,
+        "iso": "2026-09-28T06:56:32.000Z"
+      }
+    ],
+    "firstRetainedPost": {
+      "index": 1,
+      "ts": 1790578435,
+      "iso": "2026-09-28T06:53:55.000Z"
+    },
+    "true7dEarliest": "2026-10-05T06:53:55.000Z"
+  },
+  "allocation": {
+    "ceilingFLOW": "100000000",
+    "flowAlreadyInPool": "6588315.949415",
+    "remainingFLOW": "93411684.050585",
+    "range": [
+      361400,
+      375200
+    ],
+    "addedL": "3773936592468909154",
+    "multiple": 45.74765974788099,
+    "additionalFLOW": "93411684.050585",
+    "additionalUSDT": "12774.822718"
+  },
+  "spotUsdtPerFlow": 0.00011054937732722662,
+  "costsNow": {
+    "5%": {
+      "upUsd": 14.7,
+      "downUsd": 0.82,
+      "minUsd": 0.82
+    },
+    "10%": {
+      "upUsd": 24.29,
+      "downUsd": 2.95,
+      "minUsd": 2.95
+    },
+    "20%": {
+      "upUsd": 30.06,
+      "downUsd": 12.11,
+      "minUsd": 12.11
+    },
+    "30%": {
+      "upUsd": 38.37,
+      "downUsd": 30.03,
+      "minUsd": 30.03
+    }
+  },
+  "costsAtMaxApproved": {
+    "5%": {
+      "upUsd": 48.22,
+      "downUsd": 37.33,
+      "minUsd": 37.33
+    },
+    "10%": {
+      "upUsd": 133.98,
+      "downUsd": 134.77,
+      "minUsd": 133.98
+    },
+    "20%": {
+      "upUsd": 398.3,
+      "downUsd": 553.88,
+      "minUsd": 398.3
+    },
+    "30%": {
+      "upUsd": 778.38,
+      "downUsd": 1373.62,
+      "minUsd": 778.38
+    }
+  },
+  "behavior": {
+    "swaps": 15,
+    "moveBps": {
+      "p50": 114.33559364438017,
+      "p90": 129.1522341758522,
+      "max": 150.10802251727685
+    },
+    "gapSec": {
+      "p50": 2439,
+      "p90": 143777,
+      "max": 258316
+    }
+  },
+  "guards": {
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "oracleZero": true
+  }
+}
