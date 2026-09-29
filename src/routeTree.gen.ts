@@ -27,7 +27,9 @@ import { Route as GamesRouteImport } from './routes/games'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
 import { Route as EarnRouteImport } from './routes/earn'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as BotChainRouteImport } from './routes/bot-chain'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -85,6 +87,7 @@ import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/a
 import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
+import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/admin.application-materials'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -189,9 +192,19 @@ const EarnRoute = EarnRouteImport.update({
   path: '/earn',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BotChainRoute = BotChainRouteImport.update({
+  id: '/bot-chain',
+  path: '/bot-chain',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AssistantRoute = AssistantRouteImport.update({
@@ -486,6 +499,12 @@ const ApiAdminBannerStatsRoute = ApiAdminBannerStatsRouteImport.update({
   path: '/api/admin/banner-stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminApplicationMaterialsRoute =
+  ApiAdminApplicationMaterialsRouteImport.update({
+    id: '/api/admin/application-materials',
+    path: '/api/admin/application-materials',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -563,7 +582,9 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
+  '/bot-chain': typeof BotChainRoute
   '/discover': typeof DiscoverRoute
+  '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -599,6 +620,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -654,7 +676,9 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
+  '/bot-chain': typeof BotChainRoute
   '/discover': typeof DiscoverRoute
+  '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -690,6 +714,7 @@ export interface FileRoutesByTo {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -746,7 +771,9 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
+  '/bot-chain': typeof BotChainRoute
   '/discover': typeof DiscoverRoute
+  '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
   '/fortune': typeof FortuneRoute
@@ -782,6 +809,7 @@ export interface FileRoutesById {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -839,7 +867,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
+    | '/bot-chain'
     | '/discover'
+    | '/docs'
     | '/earn'
     | '/ecosurge'
     | '/fortune'
@@ -875,6 +905,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/application-materials'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
@@ -930,7 +961,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
+    | '/bot-chain'
     | '/discover'
+    | '/docs'
     | '/earn'
     | '/ecosurge'
     | '/fortune'
@@ -966,6 +999,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/application-materials'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
@@ -1021,7 +1055,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/arcadeflix'
     | '/assistant'
+    | '/bot-chain'
     | '/discover'
+    | '/docs'
     | '/earn'
     | '/ecosurge'
     | '/fortune'
@@ -1057,6 +1093,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/application-materials'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
@@ -1113,7 +1150,9 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
   AssistantRoute: typeof AssistantRoute
+  BotChainRoute: typeof BotChainRoute
   DiscoverRoute: typeof DiscoverRoute
+  DocsRoute: typeof DocsRoute
   EarnRoute: typeof EarnRoute
   EcosurgeRoute: typeof EcosurgeRoute
   FortuneRoute: typeof FortuneRoute
@@ -1149,6 +1188,7 @@ export interface RootRouteChildren {
   CampaignsStudioRoute: typeof CampaignsStudioRoute
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiAdminApplicationMaterialsRoute: typeof ApiAdminApplicationMaterialsRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
   ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
@@ -1315,11 +1355,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EarnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/discover': {
       id: '/discover'
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bot-chain': {
+      id: '/bot-chain'
+      path: '/bot-chain'
+      fullPath: '/bot-chain'
+      preLoaderRoute: typeof BotChainRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/assistant': {
@@ -1721,6 +1775,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminBannerStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/application-materials': {
+      id: '/api/admin/application-materials'
+      path: '/api/admin/application-materials'
+      fullPath: '/api/admin/application-materials'
+      preLoaderRoute: typeof ApiAdminApplicationMaterialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -1901,7 +1962,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ArcadeflixRoute: ArcadeflixRoute,
   AssistantRoute: AssistantRoute,
+  BotChainRoute: BotChainRoute,
   DiscoverRoute: DiscoverRoute,
+  DocsRoute: DocsRoute,
   EarnRoute: EarnRoute,
   EcosurgeRoute: EcosurgeRoute,
   FortuneRoute: FortuneRoute,
@@ -1938,6 +2001,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsStudioRoute: CampaignsStudioRoute,
   CampaignsIndexRoute: CampaignsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiAdminApplicationMaterialsRoute: ApiAdminApplicationMaterialsRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
   ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,

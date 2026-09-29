@@ -24,6 +24,7 @@ import {
   saveAdminToken,
   uploadBannerImage,
   fetchBannerStats,
+  fetchApplicationMaterials,
   type BannerStat,
 } from "@/lib/admin/adminApi";
 import {
@@ -69,6 +70,7 @@ const SECTIONS = [
   "content",
   "campaigns",
   "governance",
+  "application",
 ] as const;
 
 export const Route = createFileRoute("/sets")({
@@ -106,7 +108,8 @@ type Tab =
   | "social"
   | "content"
   | "campaigns"
-  | "governance";
+  | "governance"
+  | "application";
 
 /** Grouped navigation so the panel reads like a real control panel. */
 const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
@@ -118,6 +121,7 @@ const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
       ["pages", "Pages & Heroes"],
     ],
   },
+  { group: "Private", items: [["application", "BOT Application"]] },
   {
     group: "Marketing",
     items: [
@@ -272,6 +276,8 @@ function AdminPage() {
         <PagesPanel wallet={wallet!} />
       ) : tab === "campaigns" ? (
         <CampaignStudioWorkspace embedded />
+      ) : tab === "application" ? (
+        <ApplicationMaterialsPanel wallet={wallet!} />
       ) : tab === "governance" ? (
         <PartnerGovernancePanel wallet={wallet!} />
       ) : (
@@ -683,7 +689,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
 
 /* ------------------------------ Settings ------------------------------ */
 
-function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners" | "partners" | "quick" | "pages"> }) {
+function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tokens" | "banners" | "partners" | "quick" | "pages" | "application"> }) {
   const [cfg, setCfg] = useState<AppConfig>(DEFAULT_APP_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -2739,5 +2745,46 @@ function PagesPanel({ wallet }: { wallet: string }) {
         </button>
       </div>
     </div>
+  );
+}
+
+/** PRIVATE: BOT Ecosystem Support application materials — never public. */
+function ApplicationMaterialsPanel({ wallet }: { wallet: string }) {
+  const [files, setFiles] = useState<{ id: string; title: string; url: string | null }[] | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const load = useCallback(() => {
+    setErr(null);
+    fetchApplicationMaterials(wallet)
+      .then((r) => setFiles(r.files))
+      .catch((e) => setErr(e?.message ?? "Failed to load"));
+  }, [wallet]);
+  useEffect(() => { load(); }, [load]);
+  return (
+    <section className="fb-surface space-y-3 p-4">
+      <p className="fb-eyebrow">Private · unlisted</p>
+      <h2 className="text-[16px] font-black">BOT Ecosystem Support application</h2>
+      <p className="text-[12px] text-muted">
+        Not shown on the public site, sitemap or search. Links below are private and expire after 7 days —
+        copy one to share directly with BOT Chain reviewers.
+      </p>
+      {err && <p className="text-[12px] text-destructive">{err}</p>}
+      {!files && !err && <p className="text-[12px] text-muted">Loading…</p>}
+      <ul className="space-y-2">
+        {files?.map((f) => (
+          <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline p-3">
+            <span className="text-[12.5px] font-bold">{f.title}</span>
+            {f.url ? (
+              <span className="flex gap-2">
+                <a href={f.url} target="_blank" rel="noreferrer" className="rounded-lg border border-primary/40 px-2.5 py-1 text-[11px] font-bold text-primary">Download</a>
+                <button type="button" onClick={() => navigator.clipboard?.writeText(f.url!)} className="rounded-lg border border-hairline px-2.5 py-1 text-[11px] font-bold">Copy private link</button>
+              </span>
+            ) : (
+              <span className="text-[11px] text-muted">Unavailable</span>
+            )}
+          </li>
+        ))}
+      </ul>
+      <button type="button" onClick={load} className="text-[11px] font-bold text-primary">Refresh links</button>
+    </section>
   );
 }

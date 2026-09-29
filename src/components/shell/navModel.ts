@@ -9,7 +9,7 @@
  * alias of `/trade`, so deep links such as `/?mode=swap#bridge` keep working
  * and still light up Trade (and only Trade).
  */
-import { Compass, History, Home, ArrowLeftRight, CircleUser, Send, Wallet } from "lucide-react";
+import { BookOpen, Compass, History, Home, ArrowLeftRight, CircleUser, Send, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavDestination {
@@ -42,6 +42,7 @@ export const MENU_NAV: NavDestination[] = [
   ...PRIMARY_NAV,
   { id: "activity", label: "Activity", to: "/activity", Icon: History },
   { id: "multisend", label: "MultiSend", to: "/multisend", Icon: Send },
+  { id: "docs", label: "Docs", to: "/docs", Icon: BookOpen },
 ];
 
 /**
