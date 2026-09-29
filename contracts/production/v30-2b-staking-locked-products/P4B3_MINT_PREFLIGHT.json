@@ -1,0 +1,208 @@
+{
+  "gate": "V30.2B-P4B.3-MINT-PREFLIGHT",
+  "mainnetWrites": 0,
+  "block": "24899120",
+  "blockTime": "2026-09-29T05:12:30.000Z",
+  "tick": 367401,
+  "sqrtP": "7524998808358086275779258777000923230",
+  "spotUsdtPerFlow": 0.00011085270535101924,
+  "activeL": "84338189164129918",
+  "flowInPool": "6577333991827092362157662",
+  "newFlowBudget": "43422666008172907637842338",
+  "signer": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "npm": "0xDAc3FcFF004d8a8675b94E44941A1a2e3b240090",
+  "wallet": {
+    "flow": "11874096924150396522147",
+    "usdt": "2",
+    "flowAllow": "0",
+    "usdtAllow": "0"
+  },
+  "medium": {
+    "range": [
+      362800,
+      373000
+    ],
+    "liquidity": "222448044190473256",
+    "flow": "4342266600817290753681459",
+    "usdt": "571802141"
+  },
+  "narrow": {
+    "range": [
+      364600,
+      371200
+    ],
+    "liquidity": "3147967365201244583",
+    "flow": "39080399407355616867006554",
+    "usdt": "5732707708"
+  },
+  "totalNewFlow": "43422666008172907620688013",
+  "totalNewUsdt": "6304509849",
+  "totalCommittedAfter": "49999999999999999982845675",
+  "moveTicks30": {
+    "up": 364777,
+    "down": 370968
+  },
+  "preCosts": {
+    "5%": {
+      "flowDown": {
+        "usd": 0.82,
+        "ticksCrossed": 0,
+        "exhausted": false
+      },
+      "flowUp": {
+        "usd": 14.99,
+        "ticksCrossed": 1,
+        "exhausted": false
+      }
+    },
+    "10%": {
+      "flowDown": {
+        "usd": 2.95,
+        "ticksCrossed": 0,
+        "exhausted": false
+      },
+      "flowUp": {
+        "usd": 22.92,
+        "ticksCrossed": 2,
+        "exhausted": false
+      }
+    },
+    "20%": {
+      "flowDown": {
+        "usd": 12.12,
+        "ticksCrossed": 0,
+        "exhausted": false
+      },
+      "flowUp": {
+        "usd": 28.71,
+        "ticksCrossed": 2,
+        "exhausted": false
+      }
+    },
+    "30%": {
+      "flowDown": {
+        "usd": 30.07,
+        "ticksCrossed": 0,
+        "exhausted": false
+      },
+      "flowUp": {
+        "usd": 37.03,
+        "ticksCrossed": 2,
+        "exhausted": false
+      }
+    }
+  },
+  "postCosts": {
+    "5%": {
+      "flowDown": {
+        "usd": 33.47,
+        "ticksCrossed": 0,
+        "exhausted": false
+      },
+      "flowUp": {
+        "usd": 44.96,
+        "ticksCrossed": 1,
+        "exhausted": false
+      }
+    },
+    "10%": {
+      "flowDown": {
+        "usd": 120.84,
+        "ticksCrossed": 0,
+        "exhausted": false
+      },
+      "flowUp": {
+        "usd": 121.02,
+        "ticksCrossed": 2,
+        "exhausted": false
+      }
+    },
+    "20%": {
+      "flowDown": {
+        "usd": 496.63,
+        "ticksCrossed": 0,
+        "exhausted": false
+      },
+      "flowUp": {
+        "usd": 358.02,
+        "ticksCrossed": 2,
+        "exhausted": false
+      }
+    },
+    "30%": {
+      "flowDown": {
+        "usd": 1231.64,
+        "ticksCrossed": 0,
+        "exhausted": false
+      },
+      "flowUp": {
+        "usd": 698.82,
+        "ticksCrossed": 2,
+        "exhausted": false
+      }
+    }
+  },
+  "staking": {
+    "oracle": "0x0000000000000000000000000000000000000000",
+    "epochRole": false,
+    "pubRole": false
+  },
+  "unsigned": {
+    "tx1": {
+      "to": "0xDAc3FcFF004d8a8675b94E44941A1a2e3b240090",
+      "value": "0",
+      "data": "0x88316456000000000000000000000000ababc7ddc03e501d190c676bf3d92ef0e6e87a3c000000000000000000000000caab50f36252a57529afef651fa6b9f9281917ff00000000000000000000000000000000000000000000000000000000000027100000000000000000000000000000000000000000000000000000000000058930000000000000000000000000000000000000000000000000000000000005b108000000000000000000000000000000000000000000000000000000002215021d000000000000000000000000000000000000000000039782be7db8de61f128330000000000000000000000000000000000000000000000000000000021e9621a0000000000000000000000000000000000000000000392e9c537f9396e40975b000000000000000000000000851275569923c62a2ef962ec35bfbb8f1bcbf3dd000000000000000000000000000000000000000000000000000000006abb4fc6",
+      "params": {
+        "token0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+        "token1": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+        "fee": 10000,
+        "tickLower": 362800,
+        "tickUpper": 373000,
+        "amount0Desired": "571802141",
+        "amount1Desired": "4342266600817290753681459",
+        "amount0Min": "568943130",
+        "amount1Min": "4320555267813204299913051",
+        "recipient": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+        "deadline": "1790660550"
+      },
+      "simulation": "BLOCKED",
+      "reason": "The contract function \"mint\" reverted with the following reason:\nSTF"
+    },
+    "tx2": {
+      "to": "0xDAc3FcFF004d8a8675b94E44941A1a2e3b240090",
+      "value": "0",
+      "data": "0x88316456000000000000000000000000ababc7ddc03e501d190c676bf3d92ef0e6e87a3c000000000000000000000000caab50f36252a57529afef651fa6b9f9281917ff00000000000000000000000000000000000000000000000000000000000027100000000000000000000000000000000000000000000000000000000000059038000000000000000000000000000000000000000000000000000000000005aa000000000000000000000000000000000000000000000000000000000155b22d7c000000000000000000000000000000000000000000205398b26b7fd1767a385a0000000000000000000000000000000000000000000000000000000153fcce89000000000000000000000000000000000000000000202a37eef7c304e53ebaa1000000000000000000000000851275569923c62a2ef962ec35bfbb8f1bcbf3dd000000000000000000000000000000000000000000000000000000006abb4fc6",
+      "params": {
+        "token0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+        "token1": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+        "fee": 10000,
+        "tickLower": 364600,
+        "tickUpper": 371200,
+        "amount0Desired": "5732707708",
+        "amount1Desired": "39080399407355616867006554",
+        "amount0Min": "5704044169",
+        "amount1Min": "38884997410318838782671521",
+        "recipient": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+        "deadline": "1790660550"
+      },
+      "simulation": "BLOCKED",
+      "reason": "The contract function \"mint\" reverted with the following reason:\nSTF"
+    }
+  },
+  "checks": {
+    "chain677": true,
+    "poolUnlocked": true,
+    "priceInsideMedium": true,
+    "priceInsideNarrow": true,
+    "capRespected": true,
+    "mediumCovers30": true,
+    "narrowCovers30": true,
+    "post30NotExhausted": true,
+    "oracleZero": true,
+    "epochRoleUnassigned": true,
+    "publisherRoleUnassigned": true,
+    "tx1Sim": false,
+    "tx2Sim": false
+  },
+  "pass": false
+}
