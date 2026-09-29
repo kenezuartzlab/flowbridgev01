@@ -81,23 +81,70 @@ export interface ApplicationField {
   note?: string;
 }
 
-export function applicationFields(opts: { whitepaperUrl: string }): ApplicationField[] {
+export const CORE_HIGHLIGHTS_ANSWER =
+  "FlowBridge is a mainnet-live, non-custodial Web3 application built to make the BOT Chain ecosystem easier to use and grow. It combines trading, bridging, MultiSend, staking, verified rewards, ecosystem discovery and guided wallet interactions in one platform. FlowBridge integrates BDEX V3 and live FLOW/USDT trading on BOT Mainnet, with transparent route information, price-impact protection and explicit wallet confirmation for economic actions. FlowBridge was awarded 1st Place — EVM Deployment Track, BOT Chain Builder Challenge #1. Our goal is to deepen real BOT Chain utility, sustainable liquidity, genuine user participation and verifiable on-chain activity.";
+
+export const PORTAL_FUNDING_REFERENCE =
+  "Up to $350,000 equivalent/project (application portal), plus Gas rebates up to 35% and community points for approved projects.";
+
+/** Final copy-ready answers, in the updated Google Form order. */
+export function applicationFields(_opts: { whitepaperUrl: string }): ApplicationField[] {
   return [
+    { id: "email", label: "Email", value: "flowbridgeweb3@gmail.com", status: "ready" },
     { id: "name", label: "Project Name", value: "FlowBridge", status: "ready" },
-    { id: "highlights", label: "Core Highlights", value: CORE_HIGHLIGHTS.map((h) => `• ${h}`).join("\n"), status: "ready" },
-    { id: "website", label: "Official Website", value: "https://flowbridge.space", status: "ready" },
-    { id: "x", label: "Twitter (X)", value: "https://x.com/flowbridgeweb3", status: "ready" },
-    { id: "community", label: "Telegram / Discord", value: OWNER_INPUT, status: "owner", note: "Official community link not yet supplied." },
+    { id: "highlights", label: "Core Highlights", value: CORE_HIGHLIGHTS_ANSWER, status: "ready" },
+    {
+      id: "channels",
+      label: "Official Channels",
+      value: "Project Website: https://flowbridge.space\nTwitter (X): https://x.com/flowbridgeweb3\nTelegram: https://t.me/flowbridgeweb",
+      status: "ready",
+    },
     { id: "stage", label: "Current Development Stage", value: "Mainnet Live", status: "ready" },
-    { id: "whitepaper", label: "Whitepaper", value: opts.whitepaperUrl, status: "ready" },
-    { id: "deck", label: "Pitch Deck", value: "Private signed link — generate below", status: "private" },
-    { id: "github", label: "GitHub Repository / reviewer access", value: OWNER_INPUT, status: "owner", note: "Repository URL or reviewer GitHub ID and permissions." },
-    { id: "demo", label: "Demo / Live App Link", value: "https://flowbridge.space", status: "ready" },
-    { id: "wallet", label: "Primary Receiving Wallet", value: OWNER_INPUT, status: "owner", note: "Sole wallet for gas rebates and incentives. Never guessed." },
-    { id: "assoc", label: "Backup / Associated Wallets", value: OWNER_INPUT, status: "owner", note: "Project-related wallets the owner confirms." },
-    { id: "evidence", label: "On-chain Interaction Records", value: "Explorer evidence export (below)", status: "private" },
-    { id: "scheme", label: "Support Tier (A / B / C)", value: OWNER_INPUT, status: "owner", note: "Preparation targets Scheme A; final choice is the owner's." },
-    { id: "contactName", label: "Contact Name / Alias", value: OWNER_INPUT, status: "owner" },
-    { id: "contactMethod", label: "Preferred Contact Method", value: OWNER_INPUT, status: "owner", note: "Platform + account (Telegram / WeChat / Email)." },
+    {
+      id: "deck",
+      label: "Whitepaper / Pitch Deck",
+      value: "FlowBridge BOT Ecosystem Support Pitch Deck + Whitepaper — private reviewer package:\n[INSERT FRESH PRIVATE REVIEWER LINK]",
+      status: "private",
+      note: "Use Refresh links below, then paste the fresh signed link.",
+    },
+    { id: "github", label: "GitHub Repository URL", value: "https://github.com/kenezuartzlab/flowbridgev01", status: "ready" },
+    {
+      id: "demo",
+      label: "Demo Video / Testnet Link",
+      value: "Live Mainnet DApp: https://flowbridge.space\nFlowBridge is already live on BOT Mainnet; the production application serves as the primary interactive demo.",
+      status: "ready",
+    },
+    {
+      id: "wallet",
+      label: "Primary Receiving Wallet Address",
+      value: "0x62b1902F23483e0AF44564681865E993AAA47368",
+      status: "ready",
+      note: "Sole wallet for Gas rebates, points and incentives — verify once more before submitting.",
+    },
+    { id: "assoc", label: "Backup / Associated Wallet Address", value: "0x8b3Ab1c5c5ff9a29B0008b5d8B9E5559a181b228", status: "ready" },
+    {
+      id: "evidence",
+      label: "On-chain Interaction Records",
+      value: "BOT Mainnet deployment and usage evidence covering canonical FlowBridge contracts, FLOW/USDT BDEX V3 liquidity and trading, staking, rewards, MultiSend and verified production interactions.",
+      status: "private",
+      note: "Upload the latest On-chain Evidence Pack export from this section.",
+    },
+    {
+      id: "scheme",
+      label: "Support Tier",
+      value: "Option A — DEX Liquidity Support\n\nFlowBridge selects Option A because FLOW/USDT liquidity and trading are already live on BOT Mainnet through BDEX V3 and integrated directly into the FlowBridge trading experience. We intend to grow sustainable liquidity depth, organic trading activity and real BOT Chain participation while maintaining transparent, auditable on-chain metrics.",
+      status: "ready",
+    },
+    { id: "contactName", label: "Contact Name / Alias", value: "Kenezu", status: "ready" },
+    { id: "contactMethod", label: "Preferred Contact Method", value: "Telegram: @crypticmaster\nEmail: flowbridgeweb3@gmail.com", status: "ready" },
+    { id: "bd", label: "Name the BD you contact with, if you have one", value: "N/A — no assigned BOT Chain BD contact yet", status: "ready" },
+    {
+      id: "compliance",
+      label: "Compliance confirmation",
+      value:
+        "I have fully read and understood the BOTChain Ecosystem Support Program Anti-Cheating Compliance Notice.\nI confirm that FlowBridge will not engage in cheating, wash trading, Sybil activity, artificial liquidity/volume inflation or data manipulation.\nI accept BOTChain's risk-control and audit mechanisms.",
+      status: "owner",
+      note: "Owner must personally agree to these terms before ticking them in the form.",
+    },
   ];
 }
