@@ -87,6 +87,7 @@ import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/a
 import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
+import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
 import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/admin.application-materials'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -499,6 +500,12 @@ const ApiAdminBannerStatsRoute = ApiAdminBannerStatsRouteImport.update({
   path: '/api/admin/banner-stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminApplicationReadinessRoute =
+  ApiAdminApplicationReadinessRouteImport.update({
+    id: '/api/admin/application-readiness',
+    path: '/api/admin/application-readiness',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminApplicationMaterialsRoute =
   ApiAdminApplicationMaterialsRouteImport.update({
     id: '/api/admin/application-materials',
@@ -621,6 +628,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
+  '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -715,6 +723,7 @@ export interface FileRoutesByTo {
   '/campaigns': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
+  '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -810,6 +819,7 @@ export interface FileRoutesById {
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
+  '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -906,6 +916,7 @@ export interface FileRouteTypes {
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/application-materials'
+    | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
@@ -1000,6 +1011,7 @@ export interface FileRouteTypes {
     | '/campaigns'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/application-materials'
+    | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
@@ -1094,6 +1106,7 @@ export interface FileRouteTypes {
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
     | '/api/admin/application-materials'
+    | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/mainnet-preflight'
@@ -1189,6 +1202,7 @@ export interface RootRouteChildren {
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAdminApplicationMaterialsRoute: typeof ApiAdminApplicationMaterialsRoute
+  ApiAdminApplicationReadinessRoute: typeof ApiAdminApplicationReadinessRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
   ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
@@ -1775,6 +1789,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminBannerStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/application-readiness': {
+      id: '/api/admin/application-readiness'
+      path: '/api/admin/application-readiness'
+      fullPath: '/api/admin/application-readiness'
+      preLoaderRoute: typeof ApiAdminApplicationReadinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/application-materials': {
       id: '/api/admin/application-materials'
       path: '/api/admin/application-materials'
@@ -2002,6 +2023,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsIndexRoute: CampaignsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAdminApplicationMaterialsRoute: ApiAdminApplicationMaterialsRoute,
+  ApiAdminApplicationReadinessRoute: ApiAdminApplicationReadinessRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
   ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,
