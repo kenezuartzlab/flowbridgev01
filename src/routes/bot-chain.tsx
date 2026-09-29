@@ -1,6 +1,6 @@
 /** Public: how FlowBridge supports BOT Chain + Builder Challenge #1 recognition. */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trophy, Network } from "lucide-react";
+import { Trophy, Network, Wrench, Droplets, Compass, ShieldCheck, Info } from "lucide-react";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import awards from "@/assets/builder-challenge-awards.jpg.asset.json";
@@ -26,10 +26,26 @@ export const Route = createFileRoute("/bot-chain")({
 });
 
 const PILLARS = [
-  ["Liquidity & trading", "Swaps and a FLOW/USDT market give BOT Chain users a place to trade."],
-  ["Onboarding", "Bridging brings assets from other networks into BOT Chain in a few taps."],
-  ["Utility tools", "MultiSend lets teams and communities pay many wallets in one batch."],
-  ["Long-term holders", "Locked staking rewards users who commit to the ecosystem."],
+  {
+    icon: Wrench,
+    title: "Creates real BOT Chain utility",
+    body: "FlowBridge gives users practical ways to use BOT Chain through trading, bridging, MultiSend, staking and verified reward experiences — all designed around explicit wallet confirmation and real on-chain activity.",
+  },
+  {
+    icon: Droplets,
+    title: "Strengthens ecosystem liquidity and trading",
+    body: "FlowBridge integrates BOT Chain liquidity venues such as BDEX and helps users discover safe, executable routes. FLOW/USDT trading includes live quotes, price-impact visibility and FlowBridge price-protection controls.",
+  },
+  {
+    icon: Compass,
+    title: "Makes BOT Chain easier to use",
+    body: "FlowBridge turns complex Web3 actions into guided, mobile-friendly journeys. Users can understand what will happen before signing and move between ecosystem services without needing to understand contract complexity.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Supports verifiable ecosystem growth",
+    body: "FlowBridge records genuine on-chain participation instead of manufacturing activity, creating auditable evidence of real ecosystem usage.",
+  },
 ] as const;
 
 function BotChainPage() {
@@ -46,14 +62,27 @@ function BotChainPage() {
         <section className="fb-surface p-4">
           <p className="fb-eyebrow flex items-center gap-1.5"><Network className="h-3.5 w-3.5 text-primary" />How we support BOT Chain</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {PILLARS.map(([t, b]) => (
-              <div key={t} className="rounded-xl border border-hairline p-3">
-                <p className="text-[13px] font-bold">{t}</p>
-                <p className="mt-1 text-[12px] text-muted">{b}</p>
+            {PILLARS.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="rounded-xl border border-hairline p-3">
+                <p className="flex items-center gap-1.5 text-[13px] font-bold"><Icon className="h-3.5 w-3.5 text-primary" />{title}</p>
+                <p className="mt-1 text-[12px] text-muted">{body}</p>
               </div>
             ))}
           </div>
           <Link to="/docs" className="mt-3 inline-block text-[12px] font-bold text-primary">Read the whitepaper and contract details →</Link>
+        </section>
+        <section className="fb-surface p-4">
+          <p className="fb-eyebrow flex items-center gap-1.5"><Info className="h-3.5 w-3.5 text-primary" />BOT ecosystem context</p>
+          <ul className="mt-2 space-y-1.5 text-[12.5px]">
+            <li className="flex gap-2"><span className="text-primary">•</span>$50M Ecosystem Support Program</li>
+            <li className="flex gap-2"><span className="text-primary">•</span>Up to $1M per project under current published program rules</li>
+            <li className="flex gap-2"><span className="text-primary">•</span>5 support dimensions</li>
+          </ul>
+          <p className="mt-3 rounded-xl border border-hairline p-3 text-[11.5px] leading-relaxed text-muted">
+            Current BOT Chain published program information — checked Sep 29, 2026. These figures describe the
+            ecosystem program itself. FlowBridge has applied for consideration and has not received ecosystem-program
+            funding; nothing on this page implies an award, grant or acceptance.
+          </p>
         </section>
       </main>
       <BottomNav />
