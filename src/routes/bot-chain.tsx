@@ -1,6 +1,6 @@
 /** Public: how FlowBridge supports BOT Chain + Builder Challenge #1 recognition. */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trophy, Network } from "lucide-react";
+import { Trophy, Network, Wrench, Droplets, Compass, ShieldCheck, Info } from "lucide-react";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import awards from "@/assets/builder-challenge-awards.jpg.asset.json";
@@ -26,10 +26,26 @@ export const Route = createFileRoute("/bot-chain")({
 });
 
 const PILLARS = [
-  ["Liquidity & trading", "Swaps and a FLOW/USDT market give BOT Chain users a place to trade."],
-  ["Onboarding", "Bridging brings assets from other networks into BOT Chain in a few taps."],
-  ["Utility tools", "MultiSend lets teams and communities pay many wallets in one batch."],
-  ["Long-term holders", "Locked staking rewards users who commit to the ecosystem."],
+  {
+    icon: Wrench,
+    title: "Creates real BOT Chain utility",
+    body: "FlowBridge gives users practical ways to use BOT Chain through trading, bridging, MultiSend, staking and verified reward experiences — all designed around explicit wallet confirmation and real on-chain activity.",
+  },
+  {
+    icon: Droplets,
+    title: "Strengthens ecosystem liquidity and trading",
+    body: "FlowBridge integrates BOT Chain liquidity venues such as BDEX and helps users discover safe, executable routes. FLOW/USDT trading includes live quotes, price-impact visibility and FlowBridge price-protection controls.",
+  },
+  {
+    icon: Compass,
+    title: "Makes BOT Chain easier to use",
+    body: "FlowBridge turns complex Web3 actions into guided, mobile-friendly journeys. Users can understand what will happen before signing and move between ecosystem services without needing to understand contract complexity.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Supports verifiable ecosystem growth",
+    body: "FlowBridge records genuine on-chain participation instead of manufacturing activity, creating auditable evidence of real ecosystem usage.",
+  },
 ] as const;
 
 function BotChainPage() {
