@@ -52,7 +52,7 @@ export interface ContractEntry {
 
 export const CONTRACT_REGISTRY: ContractEntry[] = [
   { name: "FLOW Token", chainId: 677, address: "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF", state: "LIVE" },
-  { name: "FlowBridge Router v3 (live execution router)", chainId: 677, address: "0x19784e19546307af427902a75771434df831d882", state: "LIVE" },
+  { name: "FlowBridge Router v3 (live execution router)", chainId: 677, address: "0x986962de6f00d0ec571b1a34fa70aeeb445b5445", state: "LIVE" },
   { name: "Rewards Distributor", chainId: 677, address: "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922", state: "LIVE / funded" },
   { name: "Activity Registry", chainId: 677, address: "0x86590b7C8A2Ad9a1dAD8183Eaf627AE4B7Ff3814", state: "DEPLOYED / no new attestations authorized" },
   { name: "Staking Reward Treasury", chainId: 677, address: "0x96552909998F3DbAf5Ff4979dc158508b3442e65", state: "LIVE / funded" },
