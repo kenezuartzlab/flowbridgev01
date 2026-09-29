@@ -55,7 +55,7 @@ export const CONTRACT_REGISTRY: ContractEntry[] = [
   { name: "FlowBridge Router v3 (live execution router)", chainId: 677, address: "0x19784e19546307af427902a75771434df831d882", state: "LIVE" },
   { name: "Rewards Distributor", chainId: 677, address: "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922", state: "LIVE / funded" },
   { name: "Activity Registry", chainId: 677, address: "0x86590b7C8A2Ad9a1dAD8183Eaf627AE4B7Ff3814", state: "DEPLOYED / no new attestations authorized" },
-  { name: "Staking Reward Treasury", chainId: 677, address: "0x965529099998F3DbAf5Ff4979dc158508b3442e65", state: "LIVE / funded" },
+  { name: "Staking Reward Treasury", chainId: 677, address: "0x96552909998F3DbAf5Ff4979dc158508b3442e65", state: "LIVE / funded" },
   { name: "Staking Controller", chainId: 677, address: "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF", state: "LIVE" },
   { name: "Staking Vault V2", chainId: 677, address: "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D", state: "LIVE" },
   { name: "MultiSend V1 (BOT Mainnet)", chainId: 677, address: "0xc54CAcfd96330949db0eAEd72dE930a2d06d9778", state: "LIVE / verified" },
