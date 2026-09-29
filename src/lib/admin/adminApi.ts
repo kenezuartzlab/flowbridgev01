@@ -104,3 +104,8 @@ export async function fetchApplicationMaterials(
 ): Promise<{ files: { id: string; title: string; url: string | null }[]; expiresInSeconds: number }> {
   return parse(await fetch("/api/admin/application-materials", { headers: await headers(wallet) }));
 }
+
+/** PRIVATE Scheme A readiness + on-chain evidence (read-only chain data). */
+export async function fetchApplicationReadiness(wallet: string): Promise<any> {
+  return parse(await fetch("/api/admin/application-readiness", { headers: await headers(wallet) }));
+}
