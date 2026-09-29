@@ -56,6 +56,7 @@ import { hasAnyLiquidity } from "@/lib/swap/quoter";
 import { TokenIcon } from "@/components/TokenIcon";
 import { CampaignStudioWorkspace } from "@/components/campaigns/CampaignStudioWorkspace";
 import { PartnerGovernancePanel } from "@/components/studio/PartnerGovernancePanel";
+import { ApplicationWorkspace } from "@/components/admin/ApplicationWorkspace";
 
 const SECTIONS = [
   "tokens",
@@ -277,7 +278,7 @@ function AdminPage() {
       ) : tab === "campaigns" ? (
         <CampaignStudioWorkspace embedded />
       ) : tab === "application" ? (
-        <ApplicationMaterialsPanel wallet={wallet!} />
+        <ApplicationWorkspace wallet={wallet!} />
       ) : tab === "governance" ? (
         <PartnerGovernancePanel wallet={wallet!} />
       ) : (
