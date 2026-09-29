@@ -62,14 +62,27 @@ function BotChainPage() {
         <section className="fb-surface p-4">
           <p className="fb-eyebrow flex items-center gap-1.5"><Network className="h-3.5 w-3.5 text-primary" />How we support BOT Chain</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {PILLARS.map(([t, b]) => (
-              <div key={t} className="rounded-xl border border-hairline p-3">
-                <p className="text-[13px] font-bold">{t}</p>
-                <p className="mt-1 text-[12px] text-muted">{b}</p>
+            {PILLARS.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="rounded-xl border border-hairline p-3">
+                <p className="flex items-center gap-1.5 text-[13px] font-bold"><Icon className="h-3.5 w-3.5 text-primary" />{title}</p>
+                <p className="mt-1 text-[12px] text-muted">{body}</p>
               </div>
             ))}
           </div>
           <Link to="/docs" className="mt-3 inline-block text-[12px] font-bold text-primary">Read the whitepaper and contract details →</Link>
+        </section>
+        <section className="fb-surface p-4">
+          <p className="fb-eyebrow flex items-center gap-1.5"><Info className="h-3.5 w-3.5 text-primary" />BOT ecosystem context</p>
+          <ul className="mt-2 space-y-1.5 text-[12.5px]">
+            <li className="flex gap-2"><span className="text-primary">•</span>$50M Ecosystem Support Program</li>
+            <li className="flex gap-2"><span className="text-primary">•</span>Up to $1M per project under current published program rules</li>
+            <li className="flex gap-2"><span className="text-primary">•</span>5 support dimensions</li>
+          </ul>
+          <p className="mt-3 rounded-xl border border-hairline p-3 text-[11.5px] leading-relaxed text-muted">
+            Current BOT Chain published program information — checked Sep 29, 2026. These figures describe the
+            ecosystem program itself. FlowBridge has applied for consideration and has not received ecosystem-program
+            funding; nothing on this page implies an award, grant or acceptance.
+          </p>
         </section>
       </main>
       <BottomNav />
