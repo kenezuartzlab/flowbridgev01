@@ -8,6 +8,7 @@ import { formatUnits } from "viem";
 import {
   diagnoseConnectivity,
   dexLabel,
+  routeDexes,
   type ConnectivityReport,
   type DexPreference,
   type QuoteResult,
@@ -18,6 +19,7 @@ const DEX_OPTIONS: { id: DexPreference; label: string }[] = [
   { id: "auto", label: "Auto — Best Route" },
   { id: "bdex-v3", label: "BDEX V3" },
   { id: "bdex-v2", label: "BDEX V2" },
+  { id: "caswap", label: "CaSwap" },
 ];
 
 export function DexSelector({
@@ -55,6 +57,12 @@ export function SmartRoutePanel({ quote, tokenOut }: { quote: QuoteResult; token
       <p className="text-[10px] font-black uppercase tracking-[0.12em] text-primary">
         Best route · {quote.steps.length} {quote.steps.length === 1 ? "step" : "steps"}
       </p>
+      {quote.steps.length > 1 && (
+        <p className="text-[10.5px] font-bold text-foreground">
+          This route uses {routeDexes(quote.steps).length} {routeDexes(quote.steps).length === 1 ? "DEX" : "DEXs"} (
+          {routeDexes(quote.steps).join(" + ")}) and requires {quote.steps.length} transactions.
+        </p>
+      )}
       {quote.steps.map((s, i) => (
         <div key={i} className="flex flex-wrap items-center justify-between gap-x-2 text-[10.5px]">
           <span className="min-w-0 truncate">
