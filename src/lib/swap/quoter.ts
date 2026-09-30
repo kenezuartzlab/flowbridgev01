@@ -1082,3 +1082,50 @@ if (typeof window !== "undefined") {
 
 export { NATIVE_TOKEN_ADDRESS };
 
+
+export interface DiscoveredPool {
+  pair: string;
+  dex: string;
+  version: "V2" | "V3";
+  feeTier: number | null;
+  pool: Address;
+}
+
+/** Read-only discovery of live pools among hub + listed tokens (no TVL/APR invented). */
+export async function discoverPools(tokens: Token[], isMainnet: boolean): Promise<DiscoveredPool[]> {
+  const c = getContracts(isMainnet);
+  const client = publicClient(isMainnet);
+  const dexes = await v2Dexes(isMainnet).catch(() => [] as DexCfg[]);
+  const v3f = c.bdexV3Factory.toLowerCase() as Address;
+  const list = tokens.filter((t, i, a) => a.findIndex((x) => sameToken(x, t)) === i && t.symbol !== "WBOT");
+  const jobs: Promise<DiscoveredPool[]>[] = [];
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+    const a = list[i], b = list[j];
+    const pair = `${a.symbol} / ${b.symbol}`;
+    for (const d of dexes) jobs.push((async () => {
+      const aa = addrFor(a, d), bb = addrFor(b, d);
+      try {
+        const p = (await client.readContract({ address: d.factory, abi: FACTORY_ABI, functionName: "getPair", args: [aa, bb] })) as Address;
+        if (p.toLowerCase() === ZERO) return [];
+        const r = (await client.readContract({ address: p, abi: PAIR_RESERVES_ABI, functionName: "getReserves" })) as readonly [bigint, bigint, number];
+        return r[0] > 0n && r[1] > 0n ? [{ pair, dex: dexLabel(d.id), version: "V2" as const, feeTier: null, pool: p }] : [];
+      } catch { return []; }
+    })());
+    if (v3f !== ZERO) jobs.push((async () => {
+      const aa = (a.isNative ? c.wbot : a.address).toLowerCase() as Address;
+      const bb = (b.isNative ? c.wbot : b.address).toLowerCase() as Address;
+      const tiers = await enabledFeeTiers(client, v3f);
+      const out: DiscoveredPool[] = [];
+      await Promise.all(tiers.map(async (fee) => {
+        try {
+          const p = (await client.readContract({ address: v3f, abi: UNISWAP_V3_FACTORY_ABI, functionName: "getPool", args: [aa, bb, fee] })) as Address;
+          if (p.toLowerCase() === ZERO) return;
+          const l = (await client.readContract({ address: p, abi: UNISWAP_V3_POOL_ABI, functionName: "liquidity" })) as bigint;
+          if (l > 0n) out.push({ pair, dex: "BDEX V3", version: "V3", feeTier: fee, pool: p });
+        } catch { /* skip */ }
+      }));
+      return out;
+    })());
+  }
+  return (await Promise.all(jobs)).flat();
+}
