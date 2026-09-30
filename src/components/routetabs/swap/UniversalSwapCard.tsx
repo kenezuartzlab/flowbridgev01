@@ -864,6 +864,9 @@ export function UniversalSwapCard({
             if (!ref || isBlockingMode(pol.mode)) {
               throw new Error(pol.reason || "FLOW price protection is blocking this route right now.");
             }
+            if (effectiveSlippage * 100 > pol.slippageCapBps) {
+              throw new Error(`Routes through FLOW/USDT allow at most ${pol.slippageCapBps / 100}% slippage right now. Lower slippage and try again.`);
+            }
             if ((step.priceImpactBps ?? 0) > pol.maxPriceImpactBps) {
               throw new Error("FLOW/USDT price impact is above the protection limit. Lower the amount and try again.");
             }
@@ -1136,6 +1139,8 @@ export function UniversalSwapCard({
         />
       </div>
 
+      <DexSelector value={dexPref} onChange={setDexPref} disabled={busy} />
+
       {/* Submit */}
       <button
         onClick={handleSubmit}
@@ -1207,6 +1212,7 @@ export function UniversalSwapCard({
                 <Row label="Min received" value={`${minReceived.toFixed(6)} ${tokenOut.symbol}`} />
                 <Row label="Slippage" value={`${effectiveSlippage}%`} />
                 <Row label="Route" value={quote.symbolPath.join(" → ")} />
+                <SmartRoutePanel quote={quote} tokenOut={tokenOut} />
                 <Row label="Trading fee" value={tradingFeeLabel} />
                 <Row label="Price impact" value={priceImpactLabel} />
                 <Row label="Quote basis" value="Executable (on-chain)" />
@@ -1283,7 +1289,17 @@ export function UniversalSwapCard({
       <LowGasSettingsModal isOpen={gasSettingsOpen} onClose={() => setGasSettingsOpen(false)} />
 
       {quoteError && amountIn && parseFloat(amountIn) > 0 && !quoting && (
-        <WarningPanel type="warning" message={quoteError} />
+        quoteError === "No liquidity route yet" ? (
+          <NoRoutePanel
+            tokenIn={tokenIn}
+            tokenOut={tokenOut}
+            isMainnet={isMainnet}
+            dexPref={dexPref}
+            onTryAuto={() => setDexPref("auto")}
+          />
+        ) : (
+          <WarningPanel type="warning" message={quoteError} />
+        )
       )}
 
       {txError && (
