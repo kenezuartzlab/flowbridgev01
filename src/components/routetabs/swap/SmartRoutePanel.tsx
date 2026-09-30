@@ -119,7 +119,7 @@ export function NoRoutePanel({
       <p className="text-[11px] font-black uppercase tracking-widest">No liquidity route yet</p>
       {dexPref !== "auto" ? (
         <p>
-          No route on {DEX_OPTIONS.find((o) => o.id === dexPref)?.label}. FlowBridge will not switch DEX for you.{" "}
+          No route available on {DEX_OPTIONS.find((o) => o.id === dexPref)?.label}. FlowBridge will not switch DEX for you.{" "}
           <button type="button" onClick={onTryAuto} className="font-bold text-primary underline">
             Try Auto
           </button>
