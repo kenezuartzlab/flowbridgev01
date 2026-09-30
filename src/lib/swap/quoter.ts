@@ -47,6 +47,8 @@ export interface SwapStep {
   // V3-only:
   v3Fee?: number;             // Uniswap V3 pool fee (e.g. 3000 = 0.3%)
   priceImpactBps?: number;    // derived from current vs post-quote pool price
+  /** Leg endpoints (set by the Smart Route Engine; used to re-quote legs). */
+  tokens?: [Token, Token];
 }
 
 
@@ -519,11 +521,12 @@ export async function getBestRoute(
   tokenOut: Token,
   amountIn: bigint,
   isMainnet: boolean,
+  pref: DexPreference = "auto",
 ): Promise<QuoteResult | null> {
-  const key = `${isMainnet ? "m" : "t"}:${tokenIn.address.toLowerCase()}:${!!tokenIn.isNative}:${tokenOut.address.toLowerCase()}:${!!tokenOut.isNative}:${amountIn}`;
+  const key = `${pref}:${isMainnet ? "m" : "t"}:${tokenIn.address.toLowerCase()}:${!!tokenIn.isNative}:${tokenOut.address.toLowerCase()}:${!!tokenOut.isNative}:${amountIn}`;
   const hit = QUOTE_INFLIGHT.get(key);
   if (hit && Date.now() - hit.at < QUOTE_DEDUPE_MS) return hit.p;
-  const p = computeBestRoute(tokenIn, tokenOut, amountIn, isMainnet).finally(() => {
+  const p = computeBestRoute(tokenIn, tokenOut, amountIn, isMainnet, pref).finally(() => {
     setTimeout(() => {
       const cur = QUOTE_INFLIGHT.get(key);
       if (cur && cur.p === p) QUOTE_INFLIGHT.delete(key);
@@ -539,6 +542,7 @@ async function computeBestRoute(
   tokenOut: Token,
   amountIn: bigint,
   isMainnet: boolean,
+  pref: DexPreference,
 ): Promise<QuoteResult | null> {
   if (amountIn <= 0n) return null;
   if (
