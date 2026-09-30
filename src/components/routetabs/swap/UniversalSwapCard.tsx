@@ -433,9 +433,11 @@ export function UniversalSwapCard({
     amountInRaw: bigint,
     deadline: bigint,
     finalToAmountDisplay?: string,
+    minOutFloor?: bigint,
   ): Promise<`0x${string}`> => {
     if (!address) throw new Error("No wallet");
-    const minOut = minOutFor(step.expectedOut);
+    const perLegMin = minOutFor(step.expectedOut);
+    const minOut = minOutFloor != null && minOutFloor > perLegMin ? minOutFloor : perLegMin;
     const to = address as `0x${string}`;
 
     // Read the on-chain protocol fee for this swap so we approve/send the exact amount.
@@ -797,12 +799,27 @@ export function UniversalSwapCard({
       await captureSwapAttribution();
 
 
+      // The whole route must honour the "Min received" shown before confirming.
+      const routeMinOut = minOutFor(latestQuote.amountOut);
+      // Amount actually received from the previous leg (balance delta), so each
+      // next leg swaps everything that arrived — no stray intermediate balance.
+      let receivedFromPrev: bigint | null = null;
+      const readOutBalance = async (s: SwapStep): Promise<bigint> =>
+        s.outIsNative
+          ? await publicClient.getBalance({ address: address as `0x${string}` })
+          : ((await publicClient.readContract({
+              address: s.path[s.path.length - 1],
+              abi: ERC20_ABI,
+              functionName: "balanceOf",
+              args: [address as `0x${string}`],
+            })) as bigint);
+
       for (let i = 0; i < activeQuote.steps.length; i++) {
         let step = activeQuote.steps[i];
         if (i > 0 && step.tokens) {
-          // Smart Route Engine leg: re-quote against the exact safe amount
-          // entering this leg; never reuse the optimistic search quote.
-          nextAmount = minOutFor(activeQuote.steps[i - 1].expectedOut);
+          // Smart Route Engine leg: re-quote against the exact amount received
+          // from the previous leg; never reuse the optimistic search quote.
+          nextAmount = receivedFromPrev ?? minOutFor(activeQuote.steps[i - 1].expectedOut);
           const [legIn, legOut] = step.tokens;
           const refreshedLeg = await quoteLeg(legIn, legOut, nextAmount, isMainnet, dexPref);
           if (!refreshedLeg) throw new Error("Route changed after the previous step. Refresh and try again.");
@@ -813,7 +830,7 @@ export function UniversalSwapCard({
             finalToAmountDisplay = formatUnits(finalExpectedOut, tokenOut.decimals);
           }
         } else if (i > 0 && step.inIsNative) {
-          nextAmount = minOutFor(activeQuote.steps[i - 1].expectedOut);
+          nextAmount = receivedFromPrev ?? minOutFor(activeQuote.steps[i - 1].expectedOut);
 
           // Multi-router routes (CA↔USDT) execute as two confirmed transactions.
           // The second leg must be quoted against the actual amount we will send
@@ -872,9 +889,31 @@ export function UniversalSwapCard({
             }
           }
         }
-        const tx = await executeStep(step, nextAmount, deadline, finalToAmountDisplay);
+        const isLastLeg = i === activeQuote.steps.length - 1;
+        if (isLastLeg && activeQuote.steps.length > 1 && step.expectedOut < routeMinOut) {
+          throw new Error(
+            `Price moved: this route would now return less than the minimum shown (${formatUnits(routeMinOut, tokenOut.decimals)} ${tokenOut.symbol}). Your ${step.symbolPath[0]} from the earlier step is in your wallet — refresh and try again.`,
+          );
+        }
+        const outBefore = isLastLeg ? null : await readOutBalance(step).catch(() => null);
+        const tx = await executeStep(
+          step,
+          nextAmount,
+          deadline,
+          finalToAmountDisplay,
+          isLastLeg && activeQuote.steps.length > 1 ? routeMinOut : undefined,
+        );
         lastTx = tx;
         const rcpt = await publicClient.waitForTransactionReceipt({ hash: tx });
+        if (rcpt.status === "success" && outBefore != null) {
+          const outAfter = await readOutBalance(step).catch(() => null);
+          if (outAfter != null) {
+            // Native output: add back this tx's gas so it isn't mistaken for less received.
+            const gas = step.outIsNative ? rcpt.gasUsed * (rcpt.effectiveGasPrice ?? 0n) : 0n;
+            const delta = outAfter + gas - outBefore;
+            receivedFromPrev = delta > 0n ? delta : null;
+          } else receivedFromPrev = null;
+        } else receivedFromPrev = null;
         if (rcpt.status !== "success") {
           setLastTx(tx);
           toast.error(`Swap reverted on-chain`, {
