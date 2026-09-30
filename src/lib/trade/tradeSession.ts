@@ -127,6 +127,32 @@ export function readSwapDraft(scope: SwapDraftScope): SwapDraft | null {
   return d && d.chainScope === scope ? d : null;
 }
 
+/** Smart Trade — session DEX preference (Auto / BDEX V3 / BDEX V2). */
+export type DexPreferenceSession = "auto" | "bdex-v3" | "bdex-v2";
+let dexPreference: DexPreferenceSession = "auto";
+const dexListeners = new Set<() => void>();
+export function getDexPreference(): DexPreferenceSession {
+  return dexPreference;
+}
+export function setDexPreference(next: DexPreferenceSession) {
+  if (dexPreference === next) return;
+  dexPreference = next;
+  for (const l of dexListeners) l();
+}
+export function useDexPreference(): [DexPreferenceSession, (n: DexPreferenceSession) => void] {
+  const v = useSyncExternalStore(
+    (l) => {
+      dexListeners.add(l);
+      return () => {
+        dexListeners.delete(l);
+      };
+    },
+    getDexPreference,
+    getDexPreference,
+  );
+  return [v, setDexPreference];
+}
+
 export function useTradeSession(): TradeSessionState {
   return useSyncExternalStore(subscribe, getTradeSession, getTradeSession);
 }

@@ -47,6 +47,8 @@ export interface SwapStep {
   // V3-only:
   v3Fee?: number;             // Uniswap V3 pool fee (e.g. 3000 = 0.3%)
   priceImpactBps?: number;    // derived from current vs post-quote pool price
+  /** Leg endpoints (set by the Smart Route Engine; used to re-quote legs). */
+  tokens?: [Token, Token];
 }
 
 
@@ -519,11 +521,12 @@ export async function getBestRoute(
   tokenOut: Token,
   amountIn: bigint,
   isMainnet: boolean,
+  pref: DexPreference = "auto",
 ): Promise<QuoteResult | null> {
-  const key = `${isMainnet ? "m" : "t"}:${tokenIn.address.toLowerCase()}:${!!tokenIn.isNative}:${tokenOut.address.toLowerCase()}:${!!tokenOut.isNative}:${amountIn}`;
+  const key = `${pref}:${isMainnet ? "m" : "t"}:${tokenIn.address.toLowerCase()}:${!!tokenIn.isNative}:${tokenOut.address.toLowerCase()}:${!!tokenOut.isNative}:${amountIn}`;
   const hit = QUOTE_INFLIGHT.get(key);
   if (hit && Date.now() - hit.at < QUOTE_DEDUPE_MS) return hit.p;
-  const p = computeBestRoute(tokenIn, tokenOut, amountIn, isMainnet).finally(() => {
+  const p = computeBestRoute(tokenIn, tokenOut, amountIn, isMainnet, pref).finally(() => {
     setTimeout(() => {
       const cur = QUOTE_INFLIGHT.get(key);
       if (cur && cur.p === p) QUOTE_INFLIGHT.delete(key);
@@ -539,6 +542,7 @@ async function computeBestRoute(
   tokenOut: Token,
   amountIn: bigint,
   isMainnet: boolean,
+  pref: DexPreference,
 ): Promise<QuoteResult | null> {
   if (amountIn <= 0n) return null;
   if (
@@ -759,9 +763,170 @@ async function computeBestRoute(
     }
   }
 
-  if (candidates.length === 0) return null;
-  candidates.sort((a, b) => (b.amountOut > a.amountOut ? 1 : b.amountOut < a.amountOut ? -1 : 0));
-  return candidates[0];
+  // ── Smart Route Engine: bounded hub graph (≤3 hops, sequential legs) ────
+  // Every leg is independently backed by a live pool and a real quote; legs
+  // execute as separate confirmed Router V4 transactions.
+  const graph = await graphCandidates(client, isMainnet, allV2, tokenIn, tokenOut, amountIn, pref);
+  candidates.push(...graph);
+
+  const allowed = candidates.filter((q) => q.steps.every((s) => stepMatchesPref(s, pref)));
+  if (allowed.length === 0) return null;
+  allowed.sort((a, b) => (b.amountOut > a.amountOut ? 1 : b.amountOut < a.amountOut ? -1 : 0));
+  return allowed[0];
+}
+
+/** Session DEX preference. Auto may use any approved on-chain-registered venue. */
+export type DexPreference = "auto" | "bdex-v3" | "bdex-v2";
+
+export function stepMatchesPref(step: SwapStep, pref: DexPreference): boolean {
+  if (pref === "auto") return true;
+  if (pref === "bdex-v3") return step.dex === "bdex-v3";
+  return step.dex !== "bdex-v3" && step.dex !== "caswap" && step.dex.includes("bdex");
+}
+
+export function dexLabel(dex: DexId): string {
+  if (dex === "bdex-v3") return "BDEX V3";
+  if (dex === "caswap") return "CaSwap V2";
+  if (dex.includes("bdex")) return "BDEX V2";
+  return dex;
+}
+
+function sameToken(a: Token, b: Token): boolean {
+  if (a.isNative || b.isNative) return !!a.isNative && !!b.isNative;
+  return a.address.toLowerCase() === b.address.toLowerCase();
+}
+
+/** Best single-pool leg across allowed venues. Direct pools only. */
+async function bestLeg(
+  client: ReturnType<typeof publicClient>,
+  isMainnet: boolean,
+  allV2: DexCfg[],
+  tIn: Token,
+  tOut: Token,
+  amountIn: bigint,
+  pref: DexPreference,
+): Promise<SwapStep | null> {
+  if (amountIn <= 0n || sameToken(tIn, tOut)) return null;
+  const v2Allowed = allV2.filter((d) =>
+    pref === "auto" ? true : pref === "bdex-v2" ? d.id !== "caswap" && d.id.includes("bdex") : false,
+  );
+  const [v3, ...v2] = await Promise.all([
+    pref === "bdex-v2" ? Promise.resolve(null) : bestV3Step(client, isMainnet, tIn, tOut, amountIn),
+    ...v2Allowed.map((dex) => bestOnV2Dex(client, dex, [], tIn, tOut, amountIn)),
+  ]);
+  const legs: SwapStep[] = [];
+  if (v3) legs.push({ ...v3, tokens: [tIn, tOut] });
+  v2Allowed.forEach((dex, i) => {
+    const r = v2[i];
+    if (!r) return;
+    legs.push({
+      dex: dex.id, routerId: dex.routerId, router: dex.router, path: r.path,
+      symbolPath: [tIn.symbol, tOut.symbol], inIsNative: !!tIn.isNative, outIsNative: !!tOut.isNative,
+      expectedOut: r.amountOut, tokens: [tIn, tOut],
+    });
+  });
+  legs.sort((a, b) => (b.expectedOut > a.expectedOut ? 1 : b.expectedOut < a.expectedOut ? -1 : 0));
+  return legs[0] ?? null;
+}
+
+/** Re-quote one leg of a multi-step route against the exact amount entering it. */
+export async function quoteLeg(
+  tIn: Token,
+  tOut: Token,
+  amountIn: bigint,
+  isMainnet: boolean,
+  pref: DexPreference = "auto",
+): Promise<SwapStep | null> {
+  const client = publicClient(isMainnet);
+  const allV2 = await v2Dexes(isMainnet);
+  return bestLeg(client, isMainnet, allV2, tIn, tOut, amountIn, pref);
+}
+
+/** Hub tokens for the bounded route graph. */
+export function routeHubs(isMainnet: boolean): Token[] {
+  const c = getContracts(isMainnet);
+  const flow = c.flowToken.toLowerCase();
+  return [
+    NATIVE_BOT,
+    USDT_TOKEN(isMainnet),
+    { address: c.caToken.toLowerCase(), symbol: "CA", name: "CaryPact", decimals: 18 },
+    ...(isMainnet && flow !== ZERO ? [{ address: flow, symbol: "FLOW", name: "Flow Token", decimals: 18 }] : []),
+  ];
+}
+
+async function graphCandidates(
+  client: ReturnType<typeof publicClient>,
+  isMainnet: boolean,
+  allV2: DexCfg[],
+  tokenIn: Token,
+  tokenOut: Token,
+  amountIn: bigint,
+  pref: DexPreference,
+): Promise<QuoteResult[]> {
+  const hubs = routeHubs(isMainnet).filter((h) => !sameToken(h, tokenIn) && !sameToken(h, tokenOut));
+  const paths: Token[][] = [[tokenIn, tokenOut]];
+  for (const h of hubs) paths.push([tokenIn, h, tokenOut]);
+  for (const h1 of hubs) for (const h2 of hubs) if (!sameToken(h1, h2)) paths.push([tokenIn, h1, h2, tokenOut]);
+
+  // Leg memo: identical (in,out,amount) legs are quoted once per search.
+  const memo = new Map<string, Promise<SwapStep | null>>();
+  const leg = (a: Token, b: Token, amt: bigint) => {
+    const k = `${a.isNative ? "n" : a.address}:${b.isNative ? "n" : b.address}:${amt}`;
+    let p = memo.get(k);
+    if (!p) { p = bestLeg(client, isMainnet, allV2, a, b, amt, pref).catch(() => null); memo.set(k, p); }
+    return p;
+  };
+
+  const results = await Promise.all(paths.map(async (p) => {
+    const steps: SwapStep[] = [];
+    let amt = amountIn;
+    for (let i = 0; i < p.length - 1; i++) {
+      const s = await leg(p[i], p[i + 1], amt);
+      if (!s || s.expectedOut <= 0n) return null;
+      steps.push(s);
+      amt = s.expectedOut;
+    }
+    return {
+      amountOut: amt,
+      steps,
+      symbolPath: p.map((t) => t.symbol),
+      path: steps[0].path,
+    } as QuoteResult;
+  }));
+  return results.filter((r): r is QuoteResult => r !== null);
+}
+
+export interface ConnectivityReport {
+  token: Token;
+  /** Hub tokens this token has a live pool with (V2 reserves or V3 liquidity). */
+  connectedHubs: string[];
+  /** Hubs checked with no live pool. */
+  missingHubs: string[];
+}
+
+/** Read-only: which hub pools a token is actually connected to. */
+export async function diagnoseConnectivity(token: Token, isMainnet: boolean): Promise<ConnectivityReport> {
+  const c = getContracts(isMainnet);
+  const client = publicClient(isMainnet);
+  const addr = (token.isNative ? c.wbot : token.address).toLowerCase() as Address;
+  const dexes = await v2Dexes(isMainnet).catch(() => [] as DexCfg[]);
+  const factories = Array.from(new Set(dexes.map((d) => d.factory.toLowerCase()))) as Address[];
+  const hubs = routeHubs(isMainnet).filter((h) => !sameToken(h, token));
+  const checks = await Promise.all(hubs.map(async (h) => {
+    const hAddr = (h.isNative ? c.wbot : h.address).toLowerCase() as Address;
+    const hAddrs = h.isNative ? [hAddr, c.caWbot.toLowerCase() as Address] : [hAddr];
+    const probes: Promise<boolean>[] = [];
+    for (const ha of hAddrs) {
+      for (const f of factories) probes.push(anyV2PairWithReserves(client, f, addr, ha));
+      probes.push(anyV3PoolWithLiquidity(client, c.bdexV3Factory.toLowerCase() as Address, addr, ha));
+    }
+    return (await Promise.all(probes)).some(Boolean);
+  }));
+  return {
+    token,
+    connectedHubs: hubs.filter((_, i) => checks[i]).map((h) => h.symbol),
+    missingHubs: hubs.filter((_, i) => !checks[i]).map((h) => h.symbol),
+  };
 }
 
 const PAIR_RESERVES_ABI = parseAbi([
@@ -917,3 +1082,50 @@ if (typeof window !== "undefined") {
 
 export { NATIVE_TOKEN_ADDRESS };
 
+
+export interface DiscoveredPool {
+  pair: string;
+  dex: string;
+  version: "V2" | "V3";
+  feeTier: number | null;
+  pool: Address;
+}
+
+/** Read-only discovery of live pools among hub + listed tokens (no TVL/APR invented). */
+export async function discoverPools(tokens: Token[], isMainnet: boolean): Promise<DiscoveredPool[]> {
+  const c = getContracts(isMainnet);
+  const client = publicClient(isMainnet);
+  const dexes = await v2Dexes(isMainnet).catch(() => [] as DexCfg[]);
+  const v3f = c.bdexV3Factory.toLowerCase() as Address;
+  const list = tokens.filter((t, i, a) => a.findIndex((x) => sameToken(x, t)) === i && t.symbol !== "WBOT");
+  const jobs: Promise<DiscoveredPool[]>[] = [];
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+    const a = list[i], b = list[j];
+    const pair = `${a.symbol} / ${b.symbol}`;
+    for (const d of dexes) jobs.push((async () => {
+      const aa = addrFor(a, d), bb = addrFor(b, d);
+      try {
+        const p = (await client.readContract({ address: d.factory, abi: FACTORY_ABI, functionName: "getPair", args: [aa, bb] })) as Address;
+        if (p.toLowerCase() === ZERO) return [];
+        const r = (await client.readContract({ address: p, abi: PAIR_RESERVES_ABI, functionName: "getReserves" })) as readonly [bigint, bigint, number];
+        return r[0] > 0n && r[1] > 0n ? [{ pair, dex: dexLabel(d.id), version: "V2" as const, feeTier: null, pool: p }] : [];
+      } catch { return []; }
+    })());
+    if (v3f !== ZERO) jobs.push((async () => {
+      const aa = (a.isNative ? c.wbot : a.address).toLowerCase() as Address;
+      const bb = (b.isNative ? c.wbot : b.address).toLowerCase() as Address;
+      const tiers = await enabledFeeTiers(client, v3f);
+      const out: DiscoveredPool[] = [];
+      await Promise.all(tiers.map(async (fee) => {
+        try {
+          const p = (await client.readContract({ address: v3f, abi: UNISWAP_V3_FACTORY_ABI, functionName: "getPool", args: [aa, bb, fee] })) as Address;
+          if (p.toLowerCase() === ZERO) return;
+          const l = (await client.readContract({ address: p, abi: UNISWAP_V3_POOL_ABI, functionName: "liquidity" })) as bigint;
+          if (l > 0n) out.push({ pair, dex: "BDEX V3", version: "V3", feeTier: fee, pool: p });
+        } catch { /* skip */ }
+      }));
+      return out;
+    })());
+  }
+  return (await Promise.all(jobs)).flat();
+}

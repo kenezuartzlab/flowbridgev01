@@ -22,7 +22,10 @@ import {
   NATIVE_TOKEN_ADDRESS,
   type Token,
 } from "@/lib/swap/tokenRegistry";
-import { getBestRoute, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
+import { getBestRoute, quoteLeg, type QuoteResult, type SwapStep } from "@/lib/swap/quoter";
+import { readFlowUsdtReference } from "@/lib/swap/poolReference";
+import { evaluateProtection } from "@/lib/swap/routeGuard";
+import { SmartRoutePanel, NoRoutePanel, DexSelector } from "./SmartRoutePanel";
 import { useFlowRouteGuard } from "@/lib/swap/useFlowRouteGuard";
 import {
   isBlockingMode,
@@ -36,6 +39,7 @@ import {
   clearSwapDraft,
   readSwapDraft,
   setSwapDraft,
+  useDexPreference,
   type SwapDraftScope,
 } from "@/lib/trade/tradeSession";
 
@@ -188,6 +192,9 @@ export function UniversalSwapCard({
   const [quoting, setQuoting] = useState(false);
   const [quote, setQuote] = useState<QuoteResult | null>(null);
   const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [dexPref, setDexPref] = useDexPreference();
+  // Quote freshness: executable quotes expire and are re-read every 20s.
+  const [quoteTick, setQuoteTick] = useState(0);
 
   const [busy, setBusy] = useState(false);
   const [busyMsg, setBusyMsg] = useState("");
@@ -331,11 +338,11 @@ export function UniversalSwapCard({
     const handle = setTimeout(async () => {
       try {
         const parsed = parseUnits(amountIn, tokenIn.decimals);
-        const result = await getBestRoute(tokenIn, tokenOut, parsed, isMainnet);
+        const result = await getBestRoute(tokenIn, tokenOut, parsed, isMainnet, dexPref);
         if (cancelled) return;
         if (!result) {
           setQuote(null);
-          setQuoteError("No on-chain route found on any active BOT Chain DEX.");
+          setQuoteError("No liquidity route yet");
         } else {
           setQuote(result);
           setQuoteError(null);
@@ -353,7 +360,13 @@ export function UniversalSwapCard({
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [amountIn, tokenIn, tokenOut, isMainnet]);
+  }, [amountIn, tokenIn, tokenOut, isMainnet, dexPref, quoteTick]);
+
+  useEffect(() => {
+    if (!amountIn || busy) return;
+    const t = setInterval(() => setQuoteTick((n) => n + 1), 20_000);
+    return () => clearInterval(t);
+  }, [amountIn, busy]);
 
   // ── Writes ────────────────────────────────────────────────────────────────
   const { writeContractAsync } = useWriteContract();
@@ -681,7 +694,7 @@ export function UniversalSwapCard({
     try {
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 10);
       const initialAmount = parseUnits(amountIn, tokenIn.decimals);
-      const latestQuote = await getBestRoute(tokenIn, tokenOut, initialAmount, isMainnet);
+      const latestQuote = await getBestRoute(tokenIn, tokenOut, initialAmount, isMainnet, dexPref);
       if (!latestQuote) throw new Error("No live route available. Refresh and try again.");
       setQuote(latestQuote);
       // V30.2B P4A.2 — revalidate the guarded FLOW/USDT route immediately before
@@ -786,7 +799,20 @@ export function UniversalSwapCard({
 
       for (let i = 0; i < activeQuote.steps.length; i++) {
         let step = activeQuote.steps[i];
-        if (i > 0 && step.inIsNative) {
+        if (i > 0 && step.tokens) {
+          // Smart Route Engine leg: re-quote against the exact safe amount
+          // entering this leg; never reuse the optimistic search quote.
+          nextAmount = minOutFor(activeQuote.steps[i - 1].expectedOut);
+          const [legIn, legOut] = step.tokens;
+          const refreshedLeg = await quoteLeg(legIn, legOut, nextAmount, isMainnet, dexPref);
+          if (!refreshedLeg) throw new Error("Route changed after the previous step. Refresh and try again.");
+          step = refreshedLeg;
+          activeQuote = { ...activeQuote, steps: activeQuote.steps.map((s0, j) => (j === i ? refreshedLeg : s0)) };
+          if (i === activeQuote.steps.length - 1) {
+            finalExpectedOut = refreshedLeg.expectedOut;
+            finalToAmountDisplay = formatUnits(finalExpectedOut, tokenOut.decimals);
+          }
+        } else if (i > 0 && step.inIsNative) {
           nextAmount = minOutFor(activeQuote.steps[i - 1].expectedOut);
 
           // Multi-router routes (CA↔USDT) execute as two confirmed transactions.
@@ -823,6 +849,29 @@ export function UniversalSwapCard({
           { id: swapToastId },
         );
 
+        // FLOW/USDT legs inside a multi-hop route keep the P4A.2 circuit breaker.
+        if (!guard.guarded && isMainnet && step.tokens) {
+          const c677 = getContracts(true);
+          const legAddrs = step.tokens.map((t) => (t.isNative ? "native" : t.address.toLowerCase()));
+          const isFlowUsdtLeg =
+            legAddrs.includes(c677.flowToken.toLowerCase()) && legAddrs.includes(c677.usdtBot.toLowerCase());
+          if (isFlowUsdtLeg) {
+            const ref = await readFlowUsdtReference(true).catch(() => null);
+            const pol = evaluateProtection({
+              deviationBps: ref?.deviationBps ?? null,
+              referenceState: ref?.referenceState ?? "failed",
+            });
+            if (!ref || isBlockingMode(pol.mode)) {
+              throw new Error(pol.reason || "FLOW price protection is blocking this route right now.");
+            }
+            if (effectiveSlippage * 100 > pol.slippageCapBps) {
+              throw new Error(`Routes through FLOW/USDT allow at most ${pol.slippageCapBps / 100}% slippage right now. Lower slippage and try again.`);
+            }
+            if ((step.priceImpactBps ?? 0) > pol.maxPriceImpactBps) {
+              throw new Error("FLOW/USDT price impact is above the protection limit. Lower the amount and try again.");
+            }
+          }
+        }
         const tx = await executeStep(step, nextAmount, deadline, finalToAmountDisplay);
         lastTx = tx;
         const rcpt = await publicClient.waitForTransactionReceipt({ hash: tx });
@@ -965,7 +1014,7 @@ export function UniversalSwapCard({
     buttonLabel = "Fetching route…";
     buttonDisabled = true;
   } else if (!quote) {
-    buttonLabel = "No route";
+    buttonLabel = "No liquidity route yet";
     buttonDisabled = true;
   } else if (guardBlocked) {
     buttonLabel =
@@ -1090,6 +1139,8 @@ export function UniversalSwapCard({
         />
       </div>
 
+      <DexSelector value={dexPref} onChange={setDexPref} disabled={busy} />
+
       {/* Submit */}
       <button
         onClick={handleSubmit}
@@ -1161,6 +1212,7 @@ export function UniversalSwapCard({
                 <Row label="Min received" value={`${minReceived.toFixed(6)} ${tokenOut.symbol}`} />
                 <Row label="Slippage" value={`${effectiveSlippage}%`} />
                 <Row label="Route" value={quote.symbolPath.join(" → ")} />
+                <SmartRoutePanel quote={quote} tokenOut={tokenOut} />
                 <Row label="Trading fee" value={tradingFeeLabel} />
                 <Row label="Price impact" value={priceImpactLabel} />
                 <Row label="Quote basis" value="Executable (on-chain)" />
@@ -1237,7 +1289,17 @@ export function UniversalSwapCard({
       <LowGasSettingsModal isOpen={gasSettingsOpen} onClose={() => setGasSettingsOpen(false)} />
 
       {quoteError && amountIn && parseFloat(amountIn) > 0 && !quoting && (
-        <WarningPanel type="warning" message={quoteError} />
+        quoteError === "No liquidity route yet" ? (
+          <NoRoutePanel
+            tokenIn={tokenIn}
+            tokenOut={tokenOut}
+            isMainnet={isMainnet}
+            dexPref={dexPref}
+            onTryAuto={() => setDexPref("auto")}
+          />
+        ) : (
+          <WarningPanel type="warning" message={quoteError} />
+        )
       )}
 
       {txError && (
