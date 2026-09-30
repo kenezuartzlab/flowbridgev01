@@ -21,6 +21,7 @@ import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as MultisendRouteImport } from './routes/multisend'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketsRouteImport } from './routes/markets'
+import { Route as LiquidityRouteImport } from './routes/liquidity'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as GamesRouteImport } from './routes/games'
@@ -161,6 +162,11 @@ const McpRoute = McpRouteImport.update({
 const MarketsRoute = MarketsRouteImport.update({
   id: '/markets',
   path: '/markets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiquidityRoute = LiquidityRouteImport.update({
+  id: '/liquidity',
+  path: '/liquidity',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearnRoute = LearnRouteImport.update({
@@ -598,6 +604,7 @@ export interface FileRoutesByFullPath {
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/learn': typeof LearnRoute
+  '/liquidity': typeof LiquidityRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
@@ -693,6 +700,7 @@ export interface FileRoutesByTo {
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/learn': typeof LearnRoute
+  '/liquidity': typeof LiquidityRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
@@ -789,6 +797,7 @@ export interface FileRoutesById {
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
   '/learn': typeof LearnRoute
+  '/liquidity': typeof LiquidityRoute
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
@@ -886,6 +895,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/home'
     | '/learn'
+    | '/liquidity'
     | '/markets'
     | '/mcp'
     | '/multisend'
@@ -981,6 +991,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/home'
     | '/learn'
+    | '/liquidity'
     | '/markets'
     | '/mcp'
     | '/multisend'
@@ -1076,6 +1087,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/home'
     | '/learn'
+    | '/liquidity'
     | '/markets'
     | '/mcp'
     | '/multisend'
@@ -1172,6 +1184,7 @@ export interface RootRouteChildren {
   GamesRoute: typeof GamesRoute
   HomeRoute: typeof HomeRoute
   LearnRoute: typeof LearnRoute
+  LiquidityRoute: typeof LiquidityRoute
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
   MultisendRoute: typeof MultisendRoute
@@ -1325,6 +1338,13 @@ declare module '@tanstack/react-router' {
       path: '/markets'
       fullPath: '/markets'
       preLoaderRoute: typeof MarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/liquidity': {
+      id: '/liquidity'
+      path: '/liquidity'
+      fullPath: '/liquidity'
+      preLoaderRoute: typeof LiquidityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learn': {
@@ -1992,6 +2012,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesRoute: GamesRoute,
   HomeRoute: HomeRoute,
   LearnRoute: LearnRoute,
+  LiquidityRoute: LiquidityRoute,
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
   MultisendRoute: MultisendRoute,
