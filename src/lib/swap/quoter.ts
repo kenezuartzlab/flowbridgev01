@@ -776,12 +776,24 @@ async function computeBestRoute(
 }
 
 /** Session DEX preference. Auto may use any approved on-chain-registered venue. */
-export type DexPreference = "auto" | "bdex-v3" | "bdex-v2";
+export type DexPreference = "auto" | "bdex-v3" | "bdex-v2" | "caswap";
 
+/** Manual choices are strictly isolated: no silent switching between venues. */
 export function stepMatchesPref(step: SwapStep, pref: DexPreference): boolean {
   if (pref === "auto") return true;
   if (pref === "bdex-v3") return step.dex === "bdex-v3";
+  if (pref === "caswap") return step.dex === "caswap";
   return step.dex !== "bdex-v3" && step.dex !== "caswap" && step.dex.includes("bdex");
+}
+
+/** Distinct venues used by a route, in order — for "uses N DEXs" disclosure. */
+export function routeDexes(steps: SwapStep[]): string[] {
+  const out: string[] = [];
+  for (const s of steps) {
+    const l = dexLabel(s.dex);
+    if (!out.includes(l)) out.push(l);
+  }
+  return out;
 }
 
 export function dexLabel(dex: DexId): string {
@@ -808,10 +820,18 @@ async function bestLeg(
 ): Promise<SwapStep | null> {
   if (amountIn <= 0n || sameToken(tIn, tOut)) return null;
   const v2Allowed = allV2.filter((d) =>
-    pref === "auto" ? true : pref === "bdex-v2" ? d.id !== "caswap" && d.id.includes("bdex") : false,
+    pref === "auto"
+      ? true
+      : pref === "bdex-v2"
+        ? d.id !== "caswap" && d.id.includes("bdex")
+        : pref === "caswap"
+          ? d.id === "caswap"
+          : false,
   );
   const [v3, ...v2] = await Promise.all([
-    pref === "bdex-v2" ? Promise.resolve(null) : bestV3Step(client, isMainnet, tIn, tOut, amountIn),
+    pref === "bdex-v2" || pref === "caswap"
+      ? Promise.resolve(null)
+      : bestV3Step(client, isMainnet, tIn, tOut, amountIn),
     ...v2Allowed.map((dex) => bestOnV2Dex(client, dex, [], tIn, tOut, amountIn)),
   ]);
   const legs: SwapStep[] = [];

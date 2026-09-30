@@ -128,7 +128,7 @@ export function readSwapDraft(scope: SwapDraftScope): SwapDraft | null {
 }
 
 /** Smart Trade — session DEX preference (Auto / BDEX V3 / BDEX V2). */
-export type DexPreferenceSession = "auto" | "bdex-v3" | "bdex-v2";
+export type DexPreferenceSession = "auto" | "bdex-v3" | "bdex-v2" | "caswap";
 let dexPreference: DexPreferenceSession = "auto";
 const dexListeners = new Set<() => void>();
 export function getDexPreference(): DexPreferenceSession {

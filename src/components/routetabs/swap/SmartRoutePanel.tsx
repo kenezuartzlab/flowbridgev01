@@ -8,6 +8,7 @@ import { formatUnits } from "viem";
 import {
   diagnoseConnectivity,
   dexLabel,
+  routeDexes,
   type ConnectivityReport,
   type DexPreference,
   type QuoteResult,
@@ -18,6 +19,7 @@ const DEX_OPTIONS: { id: DexPreference; label: string }[] = [
   { id: "auto", label: "Auto — Best Route" },
   { id: "bdex-v3", label: "BDEX V3" },
   { id: "bdex-v2", label: "BDEX V2" },
+  { id: "caswap", label: "CaSwap" },
 ];
 
 export function DexSelector({
@@ -55,6 +57,12 @@ export function SmartRoutePanel({ quote, tokenOut }: { quote: QuoteResult; token
       <p className="text-[10px] font-black uppercase tracking-[0.12em] text-primary">
         Best route · {quote.steps.length} {quote.steps.length === 1 ? "step" : "steps"}
       </p>
+      {quote.steps.length > 1 && (
+        <p className="text-[10.5px] font-bold text-foreground">
+          This route uses {routeDexes(quote.steps).length} {routeDexes(quote.steps).length === 1 ? "DEX" : "DEXs"} (
+          {routeDexes(quote.steps).join(" + ")}) and requires {quote.steps.length} transactions.
+        </p>
+      )}
       {quote.steps.map((s, i) => (
         <div key={i} className="flex flex-wrap items-center justify-between gap-x-2 text-[10.5px]">
           <span className="min-w-0 truncate">
@@ -111,7 +119,7 @@ export function NoRoutePanel({
       <p className="text-[11px] font-black uppercase tracking-widest">No liquidity route yet</p>
       {dexPref !== "auto" ? (
         <p>
-          No route on {DEX_OPTIONS.find((o) => o.id === dexPref)?.label}. FlowBridge will not switch DEX for you.{" "}
+          No route available on {DEX_OPTIONS.find((o) => o.id === dexPref)?.label}. FlowBridge will not switch DEX for you.{" "}
           <button type="button" onClick={onTryAuto} className="font-bold text-primary underline">
             Try Auto
           </button>
