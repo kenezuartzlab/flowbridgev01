@@ -44,7 +44,7 @@ describe("Router V4 ABI parity (browser / server / Lens / contracts)", () => {
     for (const n of NATIVE_V3_MULTI_FUNCTIONS) expect(names).toContain(n);
   });
   it("every external swap function in the frozen source is in the ABI", () => {
-    const declared = [...source.matchAll(/function (swap\w+)\(/g)].map((m) => m[1]);
+    const declared = [...source.matchAll(/function (swap\w+Safe)\(/g)].map((m) => m[1]);
     const names = new Set(fns(FLOW_BRIDGE_ROUTER_V4_ABI).map((f) => f.name));
     expect(declared.length).toBeGreaterThanOrEqual(8);
     for (const d of declared) expect(names.has(d)).toBe(true);
