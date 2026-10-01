@@ -18,3 +18,14 @@
 - [x] Show estimated network gas, total required and balance-after per source wallet on Review.
 - [x] Group MultiSend sessions as one receipt on Activity while keeping every transaction hash.
 - [ ] BOT Mainnet remains out of scope until testnet evidence is frozen and approved.
+
+# Smart Trade + Liquidity V1
+- [ ] BOT routing (staged) — STOPPED: live router charges the 0.01% FlowBridge fee on every leg (owner decision needed).
+- [ ] BOT→FLOW / FLOW→BOT mainnet rehearsal (blocked on fee decision).
+- [ ] CA / MONEY rehearsals (waiting on wallet holding CA / MONEY).
+- [ ] BDEX V2 add/remove liquidity, LP discovery.
+- [ ] BDEX V3 positions (mint/increase/decrease/collect/burn), My Positions.
+- [ ] Create Pool rehearsal on BOT Testnet (needs testnet BDEX V3 addresses).
+- [ ] CaSwap liquidity capability audit; Earn; liquidity Activity; AI range guidance; mobile acceptance.
+- [ ] Resolve/document unloaded FLOW/USDT liquidity-math test file.
+- [ ] FUTURE (not now): Smart Trade Router Upgrade — atomic BOT/native multi-hop + cross-venue execution. Needs own architecture review, security suite, deployment approval.
