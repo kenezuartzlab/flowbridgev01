@@ -20,7 +20,8 @@
     "multisend:setfee:testnet": "bun contracts/scripts/setfeerecipient.multisend.bot-testnet.ts",
     "multisend:rehearse:erc20:testnet": "bun contracts/scripts/rehearse-erc20.multisend.bot-testnet.ts",
     "multisend:pausecheck:testnet": "bun contracts/scripts/pausecheck.multisend.bot-testnet.ts",
-    "multisend:verifybundle": "bun contracts/scripts/verifybundle.multisend.bot-testnet.ts"
+    "multisend:verifybundle": "bun contracts/scripts/verifybundle.multisend.bot-testnet.ts",
+    "test:bun-harness": "bun test ./contracts/production/v30-2b-staking-locked-products/scripts/v3math.bun-spec.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
