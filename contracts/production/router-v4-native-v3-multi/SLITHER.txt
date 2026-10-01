@@ -1,0 +1,42 @@
+'/root/.svm/0.8.20/solc-0.8.20 --version' running
+'/root/.svm/0.8.20/solc-0.8.20 FlowBridgeRouterV4.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --optimize --via-ir --evm-version shanghai --allow-paths .,/tmp/sl' running
+INFO:Detectors:
+FlowBridgeRouterV4._takeNativeFee(uint256) (FlowBridgeRouterV4.sol#1275-1280) sends eth to arbitrary user
+	Dangerous calls:
+	- (ok,None) = feeTreasury.call{value: fee}() (FlowBridgeRouterV4.sol#1277)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+INFO:Detectors:
+FlowBridgeRouterV4._collectExactTokenInput(address,address,uint256) (FlowBridgeRouterV4.sol#1283-1288) uses a dangerous strict equality:
+	- ! (afterBalance >= beforeBalance && afterBalance - beforeBalance == amount) (FlowBridgeRouterV4.sol#1287)
+FlowBridgeRouterV4._v3ExactInput(address,address,bytes,uint256,uint256,address,uint256,uint256) (FlowBridgeRouterV4.sol#1128-1150) uses a dangerous strict equality:
+	- ! (IERC20(tokenIn).balanceOf(address(this)) == expectedResidual) (FlowBridgeRouterV4.sol#1149)
+FlowBridgeRouterV4.swapNativeToTokenV3MultiSafe(uint256,address,bytes,uint256,uint256,address,uint256,uint256) (FlowBridgeRouterV4.sol#1039-1065) uses a dangerous strict equality:
+	- ! (IERC20(w).balanceOf(address(this)) == wBefore + swapAmount) (FlowBridgeRouterV4.sol#1057)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Reentrancy in FlowBridgeRouterV4._swapMultiHop(FlowBridgeRouterV4.HopParams[],uint256,address,uint256,uint256) (FlowBridgeRouterV4.sol#1166-1214):
+	External calls:
+	- _collectExactTokenInput(tokenIn,msg.sender,swapAmount + fee) (FlowBridgeRouterV4.sol#1182)
+		- IERC20(token).safeTransferFrom(from,address(this),amount) (FlowBridgeRouterV4.sol#1285)
+		- (ok,ret) = token.call(data) (FlowBridgeRouterV4.sol#204)
+	- _takeFee(tokenIn,fee) (FlowBridgeRouterV4.sol#1183)
+		- IERC20(token).safeTransfer(feeTreasury,fee) (FlowBridgeRouterV4.sol#1271)
+		- (ok,ret) = token.call(data) (FlowBridgeRouterV4.sol#204)
+	- IERC20(lastToken).forceApprove(r.router,currentAmount) (FlowBridgeRouterV4.sol#1197)
+	- amounts = IUniswapV2Router(r.router).swapExactTokensForTokens(currentAmount,hop.amountOutMin,hop.path,hopRecipient,deadline) (FlowBridgeRouterV4.sol#1198-1204)
+	- _clearAllowance(lastToken,r.router) (FlowBridgeRouterV4.sol#1205)
+		- IERC20(token).forceApprove(spender,0) (FlowBridgeRouterV4.sol#1292)
+		- (ok,ret) = token.call(data) (FlowBridgeRouterV4.sol#204)
+	State variables written after the call(s):
+	- r = _requireRouter(hop.routerId) (FlowBridgeRouterV4.sol#1193)
+		- r = routers[routerId] (FlowBridgeRouterV4.sol#1250)
+	FlowBridgeRouterV4.routers (FlowBridgeRouterV4.sol#330) can be used in cross function reentrancies:
+	- FlowBridgeRouterV4.registerRouter(address,FlowBridgeRouterV4.RouterType,address,string,string) (FlowBridgeRouterV4.sol#534-554)
+	- FlowBridgeRouterV4.routers (FlowBridgeRouterV4.sol#330)
+	- FlowBridgeRouterV4.setRouterActive(uint256,bool) (FlowBridgeRouterV4.sol#556-561)
+	- FlowBridgeRouterV4.updateRouterWrappedNative(uint256,address) (FlowBridgeRouterV4.sol#581-587)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1
+INFO:Detectors:
+FlowBridgeRouterV4._v3ExactInput(address,address,bytes,uint256,uint256,address,uint256,uint256) (FlowBridgeRouterV4.sol#1128-1150) ignores return value by ISwapRouterV3(v3).exactInput(ISwapRouterV3.ExactInputParams({path:encodedPath,recipient:recipient,deadline:deadline,amountIn:amount,amountOutMinimum:amountOutMinimum})) (FlowBridgeRouterV4.sol#1139-1147)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Slither:FlowBridgeRouterV4.sol analyzed (10 contracts with 58 detectors), 6 result(s) found

@@ -580,7 +580,7 @@ export function UniversalSwapCard({
       const base = (useSafe
         ? {
             address: flowRouter,
-            abi: flowAbi,
+            abi: FLOW_BRIDGE_ROUTER_V4_ABI,
             functionName: "swapNativeToTokenSafe",
             args: [routerIdBig, amountInRaw, step.path[step.path.length - 1], feePool, minOut, step.path, to, deadline, fee],
             value: totalIn,
@@ -588,7 +588,7 @@ export function UniversalSwapCard({
           }
         : {
             address: flowRouter,
-            abi: flowAbi,
+            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
             functionName: "swapNativeToToken",
             args: [routerIdBig, step.path[step.path.length - 1], feePool, minOut, step.path, to, deadline],
             value: totalIn,
@@ -602,14 +602,14 @@ export function UniversalSwapCard({
       const base = (useSafe
         ? {
             address: flowRouter,
-            abi: flowAbi,
+            abi: FLOW_BRIDGE_ROUTER_V4_ABI,
             functionName: "swapTokenToNativeSafe",
             args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline, fee],
             account: address,
           }
         : {
             address: flowRouter,
-            abi: flowAbi,
+            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
             functionName: "swapTokenToNative",
             args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline],
             account: address,
@@ -623,14 +623,14 @@ export function UniversalSwapCard({
       const base = (useSafe
         ? {
             address: flowRouter,
-            abi: flowAbi,
+            abi: FLOW_BRIDGE_ROUTER_V4_ABI,
             functionName: "swapV3SingleSafe",
             args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline, fee],
             account: address,
           }
         : {
             address: flowRouter,
-            abi: flowAbi,
+            abi: FLOW_BRIDGE_ROUTER_V3_ABI,
             functionName: "swapV3Single",
             args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline],
             account: address,
@@ -641,14 +641,14 @@ export function UniversalSwapCard({
     const base = (useSafe
       ? {
           address: flowRouter,
-          abi: flowAbi,
+          abi: FLOW_BRIDGE_ROUTER_V4_ABI,
           functionName: "swapV2Safe",
           args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline, fee],
           account: address,
         }
       : {
           address: flowRouter,
-          abi: flowAbi,
+          abi: FLOW_BRIDGE_ROUTER_V3_ABI,
           functionName: "swapV2",
           args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline],
           account: address,

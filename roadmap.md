@@ -27,5 +27,14 @@
 - [ ] BDEX V3 positions (mint/increase/decrease/collect/burn), My Positions.
 - [ ] Create Pool rehearsal on BOT Testnet (needs testnet BDEX V3 addresses).
 - [ ] CaSwap liquidity capability audit; Earn; liquidity Activity; AI range guidance; mobile acceptance.
-- [ ] Resolve/document unloaded FLOW/USDT liquidity-math test file.
-- [ ] FUTURE (not now): Smart Trade Router Upgrade — atomic BOT/native multi-hop + cross-venue execution. Needs own architecture review, security suite, deployment approval.
+- [x] Unloaded test file: Bun-only harness picked up by vitest (environment mismatch). Renamed to v3math.bun-spec.mjs, runs via `test:bun-harness` (13/13).
+
+# Router V4 Native V3 Multi-Pool Extension
+- [x] Extended V4 candidate (additive), size 21,838 / headroom 2,738, deterministic.
+- [x] Old V4 forge 35/35, new 32/32, fork sims, Slither triaged.
+- [x] ABI regenerated from artifact + parity tests; legacy selectors moved to test fixture.
+- [x] Testnet candidate 0xd985…1C1E deployed, delay-activated, BOT→FLOW and FLOW→BOT atomic PASS.
+- [x] Capability matrix (ATOMIC — V4 vs STAGED) with flags OFF on all chains.
+- [ ] Mainnet promotion steps 1–12 (needs owner approval + Governance Safe signatures).
+- [ ] CaSwap → BDEX V2 existing atomic path: NOT AVAILABLE (no shared token between venues).
+- [ ] FUTURE: ROUTER V4 MIXED-VENUE EXTENSION (V2↔V3, CaSwap↔V3, native + mixed). Own design/security gate. Not implemented.

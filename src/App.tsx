@@ -1662,7 +1662,7 @@ export default function App() {
           setActionStep('swapping_ca');
           const txSwap = await writeContractAsync({
             address: flowRouter,
-            abi: flowExecutionAbi,
+            abi: (useSafeSwap ? FLOW_BRIDGE_ROUTER_V4_ABI : FLOW_BRIDGE_ROUTER_V3_ABI),
             functionName: useSafeSwap ? 'swapTokenToNativeSafe' : 'swapTokenToNative',
             args: useSafeSwap
               ? [routerId, caToken, 0, parsedAmount, 0n, [caToken, caWbot], to, deadline, fee]
@@ -1683,7 +1683,7 @@ export default function App() {
           setActionStep('swapping_ca');
           const txSwap = await writeContractAsync({
             address: flowRouter,
-            abi: flowExecutionAbi,
+            abi: (useSafeSwap ? FLOW_BRIDGE_ROUTER_V4_ABI : FLOW_BRIDGE_ROUTER_V3_ABI),
             functionName: useSafeSwap ? 'swapNativeToTokenSafe' : 'swapNativeToToken',
             args: useSafeSwap
               ? [routerId, parsedAmount, caToken, 0, 0n, [caWbot, caToken], to, deadline, fee]

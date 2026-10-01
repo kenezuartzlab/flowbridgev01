@@ -18,6 +18,7 @@ import {
   type SwapVerifierDeps,
 } from './swapActivityVerifier';
 import { FLOW_BRIDGE_ROUTER_V4_ABI } from '../flowbridge/routerV4Abi';
+import { HISTORICAL_LEGACY_ROUTER_ABI } from './__fixtures__/legacyRouterAbi';
 import { VERIFIED_SWAP_PATHS, VERIFIED_SWAP_V1_ACTION_TYPE } from '../swap/verifiedSwapConfig';
 
 const PATH = VERIFIED_SWAP_PATHS[0]!;
@@ -104,7 +105,7 @@ function safeCalldata(
 
 const legacyCalldata = (): Hex =>
   encodeFunctionData({
-    abi: FLOW_BRIDGE_ROUTER_V4_ABI,
+    abi: HISTORICAL_LEGACY_ROUTER_ABI,
     functionName: 'swapV2',
     args: [PATH.routerId, AMOUNT, 1n, [PATH.tokenIn, PATH.tokenOut], USER, DEADLINE],
   }) as Hex;
@@ -126,7 +127,7 @@ const v3SingleSafeCalldata = (): Hex =>
 
 const legacyTokenToNativeCalldata = (): Hex =>
   encodeFunctionData({
-    abi: FLOW_BRIDGE_ROUTER_V4_ABI,
+    abi: HISTORICAL_LEGACY_ROUTER_ABI,
     functionName: 'swapTokenToNative',
     args: [PATH.routerId, PATH.tokenIn, 0, AMOUNT, 1n, [PATH.tokenIn, PATH.tokenOut], USER, DEADLINE],
   }) as Hex;
