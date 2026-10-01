@@ -1,0 +1,405 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "flowRouter_",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "findBestV2Rate",
+    "inputs": [
+      {
+        "name": "amountIn",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "path",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "found",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "bestRouterId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "bestAmountOut",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "flowRouter",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IFlowBridgeRouterV4View"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getActiveBridges",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "ids",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "names",
+        "type": "string[]",
+        "internalType": "string[]"
+      },
+      {
+        "name": "destChainNames",
+        "type": "string[]",
+        "internalType": "string[]"
+      },
+      {
+        "name": "destChainIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "addrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getActiveRouters",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "ids",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "names",
+        "type": "string[]",
+        "internalType": "string[]"
+      },
+      {
+        "name": "versions",
+        "type": "string[]",
+        "internalType": "string[]"
+      },
+      {
+        "name": "types_",
+        "type": "uint8[]",
+        "internalType": "enum FlowBridgeRouterLens.RouterType[]"
+      },
+      {
+        "name": "addrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBestV2Rate",
+    "inputs": [
+      {
+        "name": "amountIn",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "path",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "bestRouterId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "bestAmountOut",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "allAmountsOut",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBridgeRouteConfig",
+    "inputs": [
+      {
+        "name": "bridgeId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "gateway",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "destinationChainId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "resourceId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "tokenSupported",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "botGasSupported",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "proxyExecutionEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBridgesPage",
+    "inputs": [
+      {
+        "name": "start",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "count",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "ids",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "addrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "destChainIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "actives",
+        "type": "bool[]",
+        "internalType": "bool[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRouter",
+    "inputs": [
+      {
+        "name": "routerId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "router",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "rtype",
+        "type": "uint8",
+        "internalType": "enum FlowBridgeRouterLens.RouterType"
+      },
+      {
+        "name": "wrappedNative",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRoutersPage",
+    "inputs": [
+      {
+        "name": "start",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "count",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "ids",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "addrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "actives",
+        "type": "bool[]",
+        "internalType": "bool[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getV2RatesPage",
+    "inputs": [
+      {
+        "name": "amountIn",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "path",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "start",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "count",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "ids",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "amountsOut",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "error",
+    "name": "BridgeIdOutOfRange",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "DuplicatePathToken",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "IdenticalEndpoints",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidFlowRouter",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidPathToken",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PathTooShort",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RouterIdOutOfRange",
+    "inputs": []
+  }
+]

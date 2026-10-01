@@ -1,0 +1,143 @@
+--- /tmp/baseline.sol	2026-10-01 12:29:49.051441311 +0000
++++ src/FlowBridgeRouterV4.sol	2026-10-01 12:09:22.286248790 +0000
+@@ -133,6 +133,7 @@
+ error IdenticalEndpoints();
+ error IdenticalTokens();
+ error IncorrectMsgValue();
++error InsufficientOutput();
+ error InvalidAddress();
+ error InvalidBridge();
+ error InvalidPathToken();
+@@ -162,6 +163,7 @@
+ error ProtocolFeeChanged();
+ error Reentrant();
+ error RescueFailed();
++error ResidualBalance();
+ error ResourceRequired();
+ error RouterInactive();
+ error RouterNotFound();
+@@ -1030,6 +1032,124 @@
+     }
+ 
+     // ---------------------------------------------------------------------
++    // Native <-> token over an encoded V3 multi-pool path (atomic, fee once)
++    // ---------------------------------------------------------------------
++
++    /** @notice native -> wrapped native -> encoded V3 path -> tokenOut. Fee taken once on the native input. */
++    function swapNativeToTokenV3MultiSafe(
++        uint256 routerId,
++        address tokenOut,
++        bytes calldata encodedPath,
++        uint256 swapAmount,
++        uint256 amountOutMinimum,
++        address to,
++        uint256 deadline,
++        uint256 maxProtocolFee
++    ) external payable nonReentrant whenNotPaused returns (uint256 amountOut) {
++        if (!(tokenOut != address(0))) revert InvalidTokenout();
++        (address v3, address w, uint256 fee) =
++            _nativeV3Prologue(routerId, encodedPath, tokenOut, true, swapAmount, to, deadline, maxProtocolFee);
++        if (!(msg.value == swapAmount + fee)) revert IncorrectMsgValue();
++        _takeNativeFee(fee);
++
++        uint256 wBefore = IERC20(w).balanceOf(address(this));
++        IWrappedNative(w).deposit{value: swapAmount}();
++        if (!(IERC20(w).balanceOf(address(this)) == wBefore + swapAmount)) revert UnsupportedTransferToken();
++
++        uint256 outBefore = IERC20(tokenOut).balanceOf(to);
++        _v3ExactInput(v3, w, encodedPath, swapAmount, amountOutMinimum, to, deadline, wBefore);
++
++        amountOut = IERC20(tokenOut).balanceOf(to) - outBefore;
++        if (!(amountOut >= amountOutMinimum)) revert InsufficientOutput();
++        _emitSwap(routerId, address(0), tokenOut, msg.sender, to, swapAmount, amountOut, fee);
++    }
++
++    /** @notice tokenIn -> encoded V3 path -> wrapped native -> native. Fee taken once on tokenIn. */
++    function swapTokenToNativeV3MultiSafe(
++        uint256 routerId,
++        address tokenIn,
++        bytes calldata encodedPath,
++        uint256 swapAmount,
++        uint256 amountOutMinimum,
++        address payable to,
++        uint256 deadline,
++        uint256 maxProtocolFee
++    ) external nonReentrant whenNotPaused returns (uint256 amountOut) {
++        if (!(tokenIn != address(0))) revert InvalidTokenin();
++        (address v3, address w, uint256 fee) =
++            _nativeV3Prologue(routerId, encodedPath, tokenIn, false, swapAmount, to, deadline, maxProtocolFee);
++        uint256 inBefore = IERC20(tokenIn).balanceOf(address(this));
++        _collectExactTokenInput(tokenIn, msg.sender, swapAmount + fee);
++        _takeFee(tokenIn, fee);
++
++        uint256 wBefore = IERC20(w).balanceOf(address(this));
++        _v3ExactInput(v3, tokenIn, encodedPath, swapAmount, amountOutMinimum, address(this), deadline, inBefore);
++
++        amountOut = IERC20(w).balanceOf(address(this)) - wBefore;
++        if (!(amountOut >= amountOutMinimum)) revert InsufficientOutput();
++        IWrappedNative(w).withdraw(amountOut);
++        (bool ok,) = to.call{value: amountOut}("");
++        if (!(ok)) revert NativeDeliveryFailed();
++        _emitSwap(routerId, tokenIn, address(0), msg.sender, to, swapAmount, amountOut, fee);
++    }
++
++    /** @dev Shared validation for native V3 multi-pool routes; `token` is the ERC20 endpoint. */
++    function _nativeV3Prologue(
++        uint256 routerId,
++        bytes calldata encodedPath,
++        address token,
++        bool nativeIn,
++        uint256 swapAmount,
++        address to,
++        uint256 deadline,
++        uint256 maxProtocolFee
++    ) internal view returns (address v3, address w, uint256 fee) {
++        if (!(swapAmount > 0)) revert ZeroAmount();
++        if (!(to != address(0))) revert InvalidRecipient();
++        _validateDeadline(deadline);
++        RouterEntry storage r = _requireRouter(routerId);
++        if (!(r.rtype == RouterType.V3)) revert NotV3();
++        v3 = r.router;
++        w = r.wrappedNative;
++        if (!(token != w)) revert IdenticalTokens();
++        if (!(encodedPath.length >= 43)) revert V3PathTooShort();
++        if (nativeIn) {
++            if (!(_firstPathAddress(encodedPath) == w)) revert PathMustStartWrappedNative();
++            _validateV3Path(encodedPath, w, token);
++        } else {
++            if (!(_lastPathAddress(encodedPath) == w)) revert PathMustEndWrappedNative();
++            _validateV3Path(encodedPath, token, w);
++        }
++        (fee,) = computeRouterFee(routerId, swapAmount, msg.sender);
++        if (!(fee <= maxProtocolFee)) revert ProtocolFeeChanged();
++    }
++
++    /** @dev Exact approval, exactInput, allowance clear, and proof the router pulled exactly `amount`. */
++    function _v3ExactInput(
++        address v3,
++        address tokenIn,
++        bytes calldata encodedPath,
++        uint256 amount,
++        uint256 amountOutMinimum,
++        address recipient,
++        uint256 deadline,
++        uint256 expectedResidual
++    ) internal {
++        IERC20(tokenIn).forceApprove(v3, amount);
++        ISwapRouterV3(v3).exactInput(
++            ISwapRouterV3.ExactInputParams({
++                path: encodedPath,
++                recipient: recipient,
++                deadline: deadline,
++                amountIn: amount,
++                amountOutMinimum: amountOutMinimum
++            })
++        );
++        _clearAllowance(tokenIn, v3);
++        if (!(IERC20(tokenIn).balanceOf(address(this)) == expectedResidual)) revert ResidualBalance();
++    }
++
++    // ---------------------------------------------------------------------
+     // Cross-router V2 multi-hop
+     // ---------------------------------------------------------------------
+ 
