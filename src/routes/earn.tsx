@@ -53,6 +53,7 @@ import {
 import { isFlowConversionPolicyApprovedForChain } from "@/lib/rewards/flowConversionPolicy";
 import { FlowTokenClaimCard } from "@/components/rewards/FlowTokenClaimCard";
 import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
+import { EarnLiquidityFees } from "@/components/liquidity/EarnLiquidityFees";
 
 
 /**
@@ -553,6 +554,8 @@ function EarnPage() {
             )}
           </Surface>
         )}
+
+        <EarnLiquidityFees />
 
         <p className="px-1 pb-1 text-center text-[10.5px] leading-relaxed text-muted-soft">
           FLOW Points (PTS) are off-chain loyalty points. Campaign PTS are verified campaign

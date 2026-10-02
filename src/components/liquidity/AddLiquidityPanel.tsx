@@ -34,6 +34,7 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
   const [review, setReview] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const tx = useLiquidityTx();
+  const venueClosed = !(p_caps(venue));
 
   const tA = list.find((t) => t.address === a), tB = list.find((t) => t.address === b);
 
@@ -231,8 +232,9 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
 
         {prepared && "error" in prepared && <Notice tone="error">{prepared.error}</Notice>}
         {!address && <Notice>Connect a wallet to see balances and add liquidity.</Notice>}
-        {!writable && <Notice tone="warn">On BOT Mainnet, adding liquidity opens after the Mainnet liquidity canary is approved. Pools and positions are read-only until then.</Notice>}
-        <button type="button" disabled={!writable || !!blocked || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)}
+        {venueClosed && <Notice tone="warn">{venue.label} only lets allowlisted wallets add liquidity or create pairs (the router rejects others with LP_NOT_ALLOWED). FlowBridge won't route this through another DEX. Existing CaSwap LP can still be removed under My Positions.</Notice>}
+      {!writable && <Notice tone="warn">On BOT Mainnet, adding liquidity opens after the Mainnet liquidity canary is approved. Pools and positions are read-only until then.</Notice>}
+        <button type="button" disabled={venueClosed || !writable || !!blocked || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)}
           className="h-12 w-full rounded-2xl bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</button>
         <TxProgress steps={tx.steps} leftover={tx.leftover} busy={tx.busy} explorer={explorer} onClear={(x) => void tx.clearLeftover(chainId, x)} />
       </section>
@@ -247,3 +249,5 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
     </div>
   );
 }
+
+function p_caps(v: { caps: { addLiquidity: boolean; createPool: boolean } }) { return v.caps.addLiquidity && v.caps.createPool; }

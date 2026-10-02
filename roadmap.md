@@ -20,13 +20,12 @@
 - [ ] BOT Mainnet remains out of scope until testnet evidence is frozen and approved.
 
 # Smart Trade + Liquidity V1
-- [ ] BOT routing (staged) — STOPPED: live router charges the 0.01% FlowBridge fee on every leg (owner decision needed).
-- [ ] BOT→FLOW / FLOW→BOT mainnet rehearsal (blocked on fee decision).
-- [ ] CA / MONEY rehearsals (waiting on wallet holding CA / MONEY).
-- [ ] BDEX V2 add/remove liquidity, LP discovery.
-- [ ] BDEX V3 positions (mint/increase/decrease/collect/burn), My Positions.
-- [ ] Create Pool rehearsal on BOT Testnet (needs testnet BDEX V3 addresses).
-- [ ] CaSwap liquidity capability audit; Earn; liquidity Activity; AI range guidance; mobile acceptance.
+- [x] BOT routing: ATOMIC — V4 on Mainnet for native BOT <-> BDEX V3 multi-pool (canaries passed); other classes staged.
+- [x] CaSwap capability audit (add/remove/createPair/LP discovery SUPPORTED; factory read from router).
+- [x] BDEX V2 / CaSwap add + remove liquidity, LP discovery; BDEX V3 mint/increase/decrease/collect/burn; Create Pool.
+- [x] BOT Testnet rehearsal (docs/liquidity/testnet-rehearsal.json); My Positions; Earn liquidity fees; liquidity Activity; Smart AI swap + liquidity; mobile 390px + reduced motion.
+- [ ] Mainnet liquidity canaries (V2 add/remove, V3 mint/increase/decrease/collect/burn, CaSwap add/remove) — need separate approval; Mainnet liquidity writes stay closed until then.
+- [ ] CA / MONEY swap rehearsals (waiting on wallet holding CA / MONEY).
 - [x] Unloaded test file: Bun-only harness picked up by vitest (environment mismatch). Renamed to v3math.bun-spec.mjs, runs via `test:bun-harness` (13/13).
 
 # Router V4 Native V3 Multi-Pool Extension
@@ -38,5 +37,5 @@
 - [ ] Mainnet promotion steps 1–12 (needs owner approval + Governance Safe signatures).
 - [ ] CaSwap → BDEX V2 existing atomic path: NOT AVAILABLE (no shared token between venues).
 - [ ] FUTURE: ROUTER V4 MIXED-VENUE EXTENSION (V2↔V3, CaSwap↔V3, native + mixed). Own design/security gate. Not implemented.
-- [ ] 0x524D…98c5 accepts ownership of Router V4 0x7965…fc61 (owner action)
+- [x] 0x524D…98c5 accepted ownership of Router V4 0x7965…fc61
 - [ ] Future: non-zero Router V4 registry activation delay (needs separate approval)

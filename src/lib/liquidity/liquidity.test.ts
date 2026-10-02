@@ -213,8 +213,12 @@ describe("CaSwap independence", () => {
     }
   });
   it("capability matrix records the audit", () => {
-    expect(CASWAP_CAPABILITY_MATRIX.addLiquidity).toBe("SUPPORTED");
-    expect(CASWAP_CAPABILITY_MATRIX.createPair).toBe("SUPPORTED");
+    expect(CASWAP_CAPABILITY_MATRIX.addLiquidity).toMatch(/^NOT SUPPORTED/);
+    expect(CASWAP_CAPABILITY_MATRIX.createPair).toMatch(/^NOT SUPPORTED/);
+    expect(CASWAP_CAPABILITY_MATRIX.lpDiscovery).toBe("SUPPORTED");
+    const ca = getLiquidityVenues(677).find((x) => x.id === "caswap")!;
+    expect(ca.caps.addLiquidity || ca.caps.createPool).toBe(false);
+    expect(ca.caps.removeLiquidity && ca.caps.lpDiscovery).toBe(true);
   });
   it("unknown chain has no venues", () => expect(getLiquidityVenues(56)).toEqual([]));
 });
