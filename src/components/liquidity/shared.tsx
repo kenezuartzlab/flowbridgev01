@@ -69,7 +69,7 @@ export function Segmented<T extends string>({ value, options, onChange }: { valu
 }
 
 export function Notice({ tone = "info", children }: { tone?: "info" | "warn" | "error"; children: ReactNode }) {
-  const c = tone === "error" ? "border-destructive/40 text-destructive" : tone === "warn" ? "border-warning/40 text-warning" : "border-hairline text-muted";
+  const c = tone === "error" ? "border-danger/40 text-danger" : tone === "warn" ? "border-warning/40 text-warning" : "border-hairline text-muted";
   return <p className={`rounded-xl border px-3 py-2 text-[12px] leading-relaxed ${c}`}>{children}</p>;
 }
 
@@ -82,10 +82,10 @@ export function TxProgress({ steps, leftover, onClear, busy, explorer }: { steps
         <div key={i} className="text-[12px]">
           <div className="flex items-center justify-between gap-2">
             <span className="min-w-0 truncate font-bold">{i + 1}. {s.label}</span>
-            <span className={`shrink-0 font-bold ${s.phase === "confirmed" ? "text-success" : s.phase === "failed" ? "text-destructive" : "text-muted"}`}>{PHASE_LABEL[s.phase]}</span>
+            <span className={`shrink-0 font-bold ${s.phase === "confirmed" ? "text-success" : s.phase === "failed" ? "text-danger" : "text-muted"}`}>{PHASE_LABEL[s.phase]}</span>
           </div>
           {s.hash && <a className="font-mono text-[10.5px] text-primary" href={`${explorer}/tx/${s.hash}`} target="_blank" rel="noreferrer">{s.hash.slice(0, 18)}…</a>}
-          {s.error && <p className="text-[11px] text-destructive">{s.error}</p>}
+          {s.error && <p className="text-[11px] text-danger">{s.error}</p>}
         </div>
       ))}
       {leftover.map((a) => (
