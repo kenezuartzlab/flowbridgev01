@@ -19,8 +19,11 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
   const { address } = useAccount();
   const tokens = useMemo(() => liquidityTokens(chainId), [chainId]);
   const [venueId, setVenueId] = useState<LiquidityVenueId>("bdex-v3");
-  const venue = useMemo(() => getVenue(chainId, venueId), [chainId, venueId]);
-  if (!venue) return <Notice tone="error">Liquidity isn't available on this network.</Notice>;
+  const venue = useMemo(() => {
+    const resolved = getVenue(chainId, venueId);
+    if (!resolved) throw new Error("Liquidity isn't available on this network.");
+    return resolved;
+  }, [chainId, venueId]);
   const list = venue.kind === "v3" ? tokens.filter((t) => !isNative(t)) : tokens;
   const [a, setA] = useState(""), [b, setB] = useState("");
   const [amtA, setAmtA] = useState(""), [amtB, setAmtB] = useState("");
