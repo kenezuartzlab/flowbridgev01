@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { QrCode, X } from "lucide-react";
+import { ModalPortal } from "@/modals/ModalPortal";
 
 /** Pull an EVM address out of a raw QR payload (plain, EIP-681 or URL form). */
 export function parseAddressFromQr(raw: string): string | null {
@@ -125,7 +126,8 @@ export function QrScanButton({ onResult }: { onResult: (address: string) => void
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/85 p-3 backdrop-blur-md">
+        <ModalPortal>
+        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-background/90 p-3 backdrop-blur-md">
           <div className="fb-surface w-full max-w-[380px] p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[15px] font-black tracking-tight">Scan address</p>
@@ -173,6 +175,7 @@ export function QrScanButton({ onResult }: { onResult: (address: string) => void
             </button>
           </div>
         </div>
+        </ModalPortal>
       )}
     </>
   );

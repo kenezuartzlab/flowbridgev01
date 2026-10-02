@@ -23,6 +23,7 @@ import {
   shouldAutoOpenOnboarding,
   skipOnboarding,
 } from "@/lib/growth/onboardingState";
+import { ModalPortal } from "@/modals/ModalPortal";
 
 const CAP_ICON = {
   TRADE_BRIDGE: ArrowLeftRight,
@@ -85,8 +86,9 @@ export function OnboardingOverlay({
   if (!open) return null;
 
   return (
+    <ModalPortal>
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-background/80 p-3 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[200] flex items-end justify-center bg-background/90 p-3 backdrop-blur-sm sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-label="Welcome to FlowBridge"
@@ -218,5 +220,6 @@ export function OnboardingOverlay({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

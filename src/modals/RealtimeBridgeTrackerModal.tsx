@@ -361,6 +361,9 @@ export function RealtimeBridgeTrackerModal({
 
   // Render Stopwatch time: e.g. "14m:48s" or "00m:04s"
   const formattedTime = `${minutes.toString().padStart(2, '0')}m:${seconds.toString().padStart(2, '0')}s`;
+  const relayMinutes = Math.floor(relaySecondsLeft / 60);
+  const relaySeconds = relaySecondsLeft % 60;
+  const formattedRelayTime = `${relayMinutes.toString().padStart(2, '0')}m:${relaySeconds.toString().padStart(2, '0')}s`;
 
   // Helper mapping chains to simplified screenshot designations
   const normChain = (ch: string) => {
@@ -452,7 +455,10 @@ export function RealtimeBridgeTrackerModal({
           ) : (
             <div className="rounded-full border border-hairline-strong bg-background px-6 py-2.5 text-center shadow-sm">
               <div className="text-sm font-black text-foreground font-mono tracking-widest tabular-nums">
-                {formattedTime}
+                {relaySecondsLeft > 0 ? formattedRelayTime : formattedTime}
+              </div>
+              <div className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-muted">
+                {relaySecondsLeft > 0 ? 'Estimated relay time' : 'Elapsed time'}
               </div>
             </div>
           )}
