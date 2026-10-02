@@ -38,3 +38,5 @@
 - [ ] Mainnet promotion steps 1–12 (needs owner approval + Governance Safe signatures).
 - [ ] CaSwap → BDEX V2 existing atomic path: NOT AVAILABLE (no shared token between venues).
 - [ ] FUTURE: ROUTER V4 MIXED-VENUE EXTENSION (V2↔V3, CaSwap↔V3, native + mixed). Own design/security gate. Not implemented.
+- [ ] 0x524D…98c5 accepts ownership of Router V4 0x7965…fc61 (owner action)
+- [ ] Future: non-zero Router V4 registry activation delay (needs separate approval)
