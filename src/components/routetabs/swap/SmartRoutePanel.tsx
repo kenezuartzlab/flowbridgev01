@@ -14,6 +14,7 @@ import {
   type QuoteResult,
 } from "@/lib/swap/quoter";
 import type { Token } from "@/lib/swap/tokenRegistry";
+import { explainRoute } from "@/lib/swap/routeExplain";
 
 const DEX_OPTIONS: { id: DexPreference; label: string }[] = [
   { id: "auto", label: "Auto — Best Route" },
@@ -51,16 +52,20 @@ export function DexSelector({
   );
 }
 
-export function SmartRoutePanel({ quote, tokenOut }: { quote: QuoteResult; tokenOut: Token }) {
+export function SmartRoutePanel({ quote, tokenOut, chainId = 677, dexPref = "auto" }: { quote: QuoteResult; tokenOut: Token; chainId?: number; dexPref?: string }) {
+  const [why, setWhy] = useState(false);
+  const ex = explainRoute(quote.steps, chainId, dexPref);
+  const dexes = routeDexes(quote.steps);
   return (
     <div className="mt-1 space-y-1 rounded-lg border border-hairline p-2">
       <p className="text-[10px] font-black uppercase tracking-[0.12em] text-primary">
         Best route · {quote.steps.length} {quote.steps.length === 1 ? "step" : "steps"}
+        {quote.steps.length > 1 ? ` · ${ex.execution === "ATOMIC_V4" ? "ATOMIC — V4" : "STAGED"}` : ""}
       </p>
       {quote.steps.length > 1 && (
         <p className="text-[10.5px] font-bold text-foreground">
-          This route uses {routeDexes(quote.steps).length} {routeDexes(quote.steps).length === 1 ? "DEX" : "DEXs"} (
-          {routeDexes(quote.steps).join(" + ")}) and requires {quote.steps.length} transactions.
+          This route uses {dexes.length} {dexes.length === 1 ? "DEX" : "DEXs"} ({dexes.join(" + ")}) and requires{" "}
+          {ex.transactions} {ex.transactions === 1 ? "transaction" : "transactions"}.
         </p>
       )}
       {quote.steps.map((s, i) => (
@@ -74,7 +79,7 @@ export function SmartRoutePanel({ quote, tokenOut }: { quote: QuoteResult; token
           </span>
         </div>
       ))}
-      {quote.steps.length > 1 && (
+      {quote.steps.length > 1 && ex.execution === "STAGED" && (
         <p className="text-[10px] leading-relaxed text-muted">
           Each step is a separate wallet confirmation and is re-quoted just before you sign it. Expected
           total: {formatUnits(quote.amountOut, tokenOut.decimals)} {tokenOut.symbol}.
@@ -82,6 +87,14 @@ export function SmartRoutePanel({ quote, tokenOut }: { quote: QuoteResult; token
       )}
       {quote.steps.some((s) => s.v3Fee == null) && (
         <p className="text-[10px] text-muted">*Standard V2 pool fee, already included in the quote.</p>
+      )}
+      <button type="button" onClick={() => setWhy((w) => !w)} aria-expanded={why} className="text-[10.5px] font-bold text-primary">
+        {why ? "Hide" : "Smart AI · why this route?"}
+      </button>
+      {why && (
+        <ul className="space-y-1 text-[10.5px] leading-relaxed text-muted">
+          {ex.lines.map((l) => <li key={l}>{l}</li>)}
+        </ul>
       )}
     </div>
   );
@@ -146,9 +159,17 @@ export function NoRoutePanel({
           connect it. This is a possible connection, not a recommendation.
         </p>
       )}
-      <Link to="/liquidity" className="inline-block text-[11px] font-bold text-primary">
-        View liquidity options →
-      </Link>
+      <div className="flex flex-wrap gap-3">
+        <Link to="/liquidity" search={{ tab: "pools" }} className="inline-block text-[11px] font-bold text-primary">
+          View liquidity options →
+        </Link>
+        <Link to="/liquidity" search={{ tab: "create" }} className="inline-block text-[11px] font-bold text-primary">
+          Create Pool
+        </Link>
+        <Link to="/liquidity" search={{ tab: "add" }} className="inline-block text-[11px] font-bold text-primary">
+          Add Liquidity
+        </Link>
+      </div>
     </div>
   );
 }

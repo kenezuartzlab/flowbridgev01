@@ -1296,7 +1296,7 @@ export function UniversalSwapCard({
                 <Row label="Min received" value={`${minReceived.toFixed(6)} ${tokenOut.symbol}`} />
                 <Row label="Slippage" value={`${effectiveSlippage}%`} />
                 <Row label="Route" value={quote.symbolPath.join(" → ")} />
-                <SmartRoutePanel quote={quote} tokenOut={tokenOut} />
+                <SmartRoutePanel quote={quote} tokenOut={tokenOut} chainId={isMainnet ? 677 : 968} dexPref={dexPref} />
                 <Row label="Trading fee" value={tradingFeeLabel} />
                 <Row label="Price impact" value={priceImpactLabel} />
                 <Row label="Quote basis" value="Executable (on-chain)" />
