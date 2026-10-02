@@ -26,7 +26,7 @@ const wallet = createWalletClient({ account, chain: botTestnet, transport: http(
 const me = account.address;
 const log: { step: string; hash?: string; status?: string; detail?: unknown }[] = [];
 const now = () => Math.floor(Date.now() / 1000);
-const j = (x: unknown) => JSON.parse(JSON.stringify(x, (_, v) => (typeof v === "bigint" ? v.toString() : v)));
+const j = (x: unknown) => (x === undefined ? null : JSON.parse(JSON.stringify(x, (_, v) => (typeof v === "bigint" ? v.toString() : v))));
 
 async function send(step: string, req: any, detail?: unknown) {
   const { request } = await pub.simulateContract({ account, ...req });
