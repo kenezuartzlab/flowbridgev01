@@ -1,0 +1,282 @@
+{
+  "chainId": 968,
+  "wallet": "0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD",
+  "at": "2026-10-02T17:51:28.601Z",
+  "steps": [
+    {
+      "step": "V2 pair state before",
+      "detail": {
+        "pair": null,
+        "newPair": true
+      }
+    },
+    {
+      "step": "V2 add · exact approval",
+      "hash": "0x68f8843b4a6e6a6a4c08b72efccc92408eeeefc0ee28774474706082307990a0",
+      "status": "success",
+      "detail": {
+        "amount": "100000000000000000000"
+      }
+    },
+    {
+      "step": "BDEX V2 ADD LIQUIDITY (addLiquidityETH MSTT + tBOT)",
+      "hash": "0x94e4413e365dbef1ba52a0cecc915e6481193019c972ce26eabeae0260e10362",
+      "status": "success",
+      "detail": {
+        "amountADesired": "100000000000000000000",
+        "amountBDesired": "20000000000000000",
+        "amountAMin": "100000000000000000000",
+        "amountBMin": "20000000000000000",
+        "newPair": true,
+        "estimatedLp": "0",
+        "shareBps": 10000
+      }
+    },
+    {
+      "step": "V2 add · allowance after",
+      "detail": "0"
+    },
+    {
+      "step": "BDEX V2 LP DISCOVERY",
+      "detail": {
+        "pair": "0xea7Ac0Bd0Cc855360eeA9F499e2AEF822bdF27E9",
+        "lp": "1414213562373094048",
+        "shareBps": 9999,
+        "amount0": "99999999999999929289",
+        "amount1": "19999999999999985"
+      }
+    },
+    {
+      "step": "V2 remove · exact approval",
+      "hash": "0x3c3c0fe438aa067f77958a36aef76cad7a43706b958b613fbed906e34beaebe8",
+      "status": "success",
+      "detail": {
+        "amount": "707106781186547024"
+      }
+    },
+    {
+      "step": "BDEX V2 REMOVE LIQUIDITY (removeLiquidityETH 50%)",
+      "hash": "0xcfd6cddf022d2803382ccd85fe2f2c959b99cd86908cbd53b7add78caf82a451",
+      "status": "success",
+      "detail": {
+        "liquidity": "707106781186547024",
+        "expectedA": "49999999999999964644",
+        "expectedB": "9999999999999992",
+        "amountAMin": "49499999999999964997",
+        "amountBMin": "9899999999999992"
+      }
+    },
+    {
+      "step": "V2 remove · allowance after",
+      "detail": "0"
+    },
+    {
+      "step": "V3 enabled fee tiers (live)",
+      "detail": [
+        {
+          "fee": 500,
+          "tickSpacing": 10
+        },
+        {
+          "fee": 3000,
+          "tickSpacing": 60
+        },
+        {
+          "fee": 10000,
+          "tickSpacing": 200
+        }
+      ]
+    },
+    {
+      "step": "CREATE POOL BDEX V3 MSTT/FLOW 0.3% (1 MSTT = 1 FLOW · 1 FLOW = 1 MSTT)",
+      "hash": "0x12fb070d2ac8885181059175c6c1b1f86d823581adc876e8386ecbe2d165d223",
+      "status": "success",
+      "detail": {
+        "token0": "MSTT",
+        "token1": "FLOW",
+        "fee": 3000,
+        "sqrtPriceX96": "79228162514264337593543950336"
+      }
+    },
+    {
+      "step": "V3 pool after create",
+      "detail": {
+        "pool": "0x0936FBF0CFA51D973e15eF95950FDc98F6Eb9229",
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": 0,
+        "liquidity": "0",
+        "tickSpacing": 60
+      }
+    },
+    {
+      "step": "V3 mint token0 · exact approval",
+      "hash": "0x3eb7cb4b5fe9cd3457b72a52dadad8106120efafeeaaf9c26b5fb511e0e298d6",
+      "status": "success",
+      "detail": {
+        "amount": "10000000000000000000"
+      }
+    },
+    {
+      "step": "V3 mint token1 · exact approval",
+      "hash": "0x7bfaa05d93284c9e636bdb70e16f3305d48182e1c416f4676eb52ff988fb8123",
+      "status": "success",
+      "detail": {
+        "amount": "10000000000000000000"
+      }
+    },
+    {
+      "step": "BDEX V3 MINT",
+      "hash": "0x611cdaf63dbaf7efe74b60f1f14aaa4123a082a7c68feb06d97750bf202ec59c",
+      "status": "success",
+      "detail": {
+        "tickLower": -1200,
+        "tickUpper": 1200,
+        "expected": {
+          "amount0": "9999999999999999999",
+          "amount1": "9999999999999999999"
+        }
+      }
+    },
+    {
+      "step": "V3 mint token0 · allowance after",
+      "detail": "0"
+    },
+    {
+      "step": "V3 mint token1 · allowance after",
+      "detail": "0"
+    },
+    {
+      "step": "BDEX V3 POSITION DISCOVERY",
+      "detail": {
+        "tokenId": "10704",
+        "chainId": 968,
+        "token0": {
+          "address": "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e",
+          "symbol": "MSTT",
+          "decimals": 18
+        },
+        "token1": {
+          "address": "0xCE14Ca1CF2012F1996D5FBc7d369FA051aa641Ac",
+          "symbol": "FLOW",
+          "decimals": 18
+        },
+        "fee": 3000,
+        "liquidity": "171724994361991712238",
+        "tickLower": -1200,
+        "tickUpper": 1200,
+        "currentTick": 0,
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "pool": "0x0936FBF0CFA51D973e15eF95950FDc98F6Eb9229",
+        "status": "in-range",
+        "unclaimed0": "0",
+        "unclaimed1": "0"
+      }
+    },
+    {
+      "step": "Fee-generating swap · exact approval",
+      "hash": "0x7f01028e896f4073f164dfa39319072b81e4aa0f8a987c44beb84440bc8f9947",
+      "status": "success",
+      "detail": {
+        "amount": "1000000000000000000"
+      }
+    },
+    {
+      "step": "V3 increase token0 · exact approval",
+      "hash": "0x65ec6039b1ac2e92e750e03095d36bf9ed11e32cde7e54fa667ad95b7c82198f",
+      "status": "success",
+      "detail": {
+        "amount": "5000000000000000000"
+      }
+    },
+    {
+      "step": "V3 increase token1 · exact approval",
+      "hash": "0x59534d80430e22bdaf3ed1d8e785f0e175e6aafc20068974cca2a0ed95825f2c",
+      "status": "success",
+      "detail": {
+        "amount": "5000000000000000000"
+      }
+    },
+    {
+      "step": "Fee-generating swap 1 MSTT → FLOW (BDEX V3 SwapRouter)",
+      "hash": "0xeff1c11b779f793c0fcfc49a9b624a0ef4211f3057b45f9bf4d5d78a5c87dd34",
+      "status": "success",
+      "detail": "recovered from chain (script logging bug after mining)"
+    },
+    {
+      "step": "BDEX V3 INCREASE",
+      "hash": "0x0ee45a96025b5ab1071e5be2f8a9ef867d65391ad4a5e28a8456c8f25ca6a0cc",
+      "status": "success",
+      "detail": "recovered from chain (script logging bug after mining)"
+    },
+    {
+      "step": "Fee-generating swap · allowance after",
+      "detail": "0"
+    },
+    {
+      "step": "V3 increase token0 · allowance after",
+      "detail": "0"
+    },
+    {
+      "step": "V3 increase token1 · clear leftover approval",
+      "hash": "0xeee0c58903f62a190ebb47a8be54b0b55180e23ccabb8d306d4d760e3ed5aa35",
+      "status": "success",
+      "detail": {
+        "left": "903994287163276326"
+      }
+    },
+    {
+      "step": "V3 increase token1 · allowance after",
+      "detail": "0"
+    },
+    {
+      "step": "Unclaimed fees before collect (static collect)",
+      "detail": {
+        "unclaimed0": "2999999999999999",
+        "unclaimed1": "0"
+      }
+    },
+    {
+      "step": "BDEX V3 COLLECT (fees)",
+      "hash": "0x99061aea8e16027394aba098b9f8337b7b69ab77e7a5b90e23e51f6282d964ba",
+      "status": "success",
+      "detail": {
+        "unclaimed0": "2999999999999999",
+        "unclaimed1": "0"
+      }
+    },
+    {
+      "step": "BDEX V3 DECREASE (50%)",
+      "hash": "0x7a555b0b0d91c9c31486451b80063df776668d6d5ceeda1f29889b931bf9333c",
+      "status": "success",
+      "detail": {
+        "liquidity": "124901552005491562274"
+      }
+    },
+    {
+      "step": "BDEX V3 COLLECT (decreased amounts)",
+      "hash": "0x702d3b977f36c0158439b59841daf46f79c0e12b0dd47adf446ac658d06bf4a4",
+      "status": "success",
+      "detail": null
+    },
+    {
+      "step": "BDEX V3 DECREASE (remaining)",
+      "hash": "0x4149ef5e24f5b87c70a1db1054336b82fab9091ccd70f9697b7b79aa9a0350a3",
+      "status": "success",
+      "detail": null
+    },
+    {
+      "step": "BDEX V3 COLLECT (final)",
+      "hash": "0xb3389606deaf3d6571d85fbb3258d74d3ee19215f798375d9b23d028f9330d72",
+      "status": "success",
+      "detail": null
+    },
+    {
+      "step": "BDEX V3 BURN empty position",
+      "hash": "0xb0c6b6f40ab207799d2d4884f77d3812d8288c7029a57b4b93a611f8dfe0180d",
+      "status": "success",
+      "detail": {
+        "tokenId": "10704"
+      }
+    }
+  ]
+}
