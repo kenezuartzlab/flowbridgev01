@@ -110,7 +110,7 @@ export function ProfileEditModal({
 
   return (
     <ModalPortal>
-      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="fixed inset-0 z-[200] flex items-end justify-center bg-background/90 p-0 backdrop-blur-sm sm:items-center sm:p-4">
         <div className="fb-surface w-full max-w-md space-y-4 rounded-t-3xl p-5 sm:rounded-3xl">
           <div className="flex items-start justify-between gap-3">
             <div>

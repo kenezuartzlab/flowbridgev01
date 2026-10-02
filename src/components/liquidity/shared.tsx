@@ -107,7 +107,7 @@ export function ReviewModal({ open, title, rows, approvals, notes, onConfirm, on
   if (!open) return null;
   return (
     <ModalPortal>
-      <div className="fixed inset-0 z-[80] flex items-end justify-center bg-background/70 sm:items-center" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="fixed inset-0 z-[200] flex items-end justify-center bg-background/90 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-label={title}>
         <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-hairline bg-card p-4 sm:rounded-3xl" style={{ paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}>
           <div className="flex items-center justify-between">
             <h2 className="text-[16px] font-black">{title}</h2>

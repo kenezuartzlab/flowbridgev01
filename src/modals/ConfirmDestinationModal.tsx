@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Copy, Check, Clipboard } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { ModalPortal } from './ModalPortal';
 
 interface ConfirmDestinationModalProps {
   isOpen: boolean;
@@ -63,37 +64,39 @@ export function ConfirmDestinationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 backdrop-blur-md animate-fade-in font-sans sm:p-4">
       <div 
         id="confirm_address_modal"
-        className="bg-[#0B1521] border border-white/10 text-white rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-6 shadow-2xl relative flex flex-col space-y-5 animate-scale-up"
+        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[360px] flex-col space-y-5 overflow-y-auto overscroll-contain rounded-[20px] border border-hairline bg-card p-4 text-foreground shadow-2xl animate-scale-up sm:rounded-3xl sm:p-6"
       >
         {/* Header containing Close Button */}
         <div className="flex justify-between items-center">
-          <h3 className="text-sm font-bold text-white/95 font-mono uppercase tracking-wide">
+          <h3 className="text-sm font-bold text-foreground font-mono uppercase tracking-wide">
             Confirm transaction
           </h3>
           <button 
             onClick={onClose}
-            className="p-1.5 hover:bg-white/5 rounded-xl text-[#C0C8D0] hover:text-white transition-colors cursor-pointer"
+            aria-label="Close transaction confirmation"
+            className="p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Warning Banner block - Matching page 4 exactly */}
-        <div className="bg-[#122A26] border border-[#32FF8B]/15 rounded-xl p-3 text-left">
-          <p className="text-[13px] leading-relaxed font-semibold text-[#32FF8B]">
+        <div className="rounded-xl border border-primary/25 bg-primary/10 p-3 text-left">
+          <p className="text-[13px] leading-relaxed font-semibold text-primary">
             Please ensure the destination address below is correct before proceeding
           </p>
         </div>
 
         {/* Address Input Section */}
         <div className="space-y-2">
-          <label className="text-[12px] font-bold text-[#C5C1B9] uppercase tracking-wider font-mono block text-left">
+          <label className="text-[12px] font-bold text-muted uppercase tracking-wider font-mono block text-left">
             Destination address
           </label>
-          <div className="relative flex items-center bg-[#010C1B] rounded-xl border border-white/10 p-1 group focus-within:border-[#32FF8B]/50 transition-colors">
+          <div className="relative flex items-center bg-background rounded-xl border border-hairline p-1 group focus-within:border-primary/50 transition-colors">
             <input 
               type="text" 
               value={address}
@@ -102,7 +105,7 @@ export function ConfirmDestinationModal({
                 if (addressError) setAddressError(null);
               }}
               placeholder="0x..."
-              className="bg-transparent text-[13px] font-mono font-bold text-white w-full py-2.5 px-3 focus:outline-none placeholder:text-white/25 overflow-x-auto"
+              className="bg-transparent text-[13px] font-mono font-bold text-foreground w-full py-2.5 px-3 focus:outline-none placeholder:text-muted-soft overflow-x-auto"
             />
             
             {/* Action buttons inside input box */}
@@ -111,7 +114,7 @@ export function ConfirmDestinationModal({
                 type="button"
                 onClick={handlePaste}
                 title="Paste from clipboard"
-                className="p-1.5 bg-[#0D1C2A] text-[#C5C1B9] hover:text-[#32FF8B] rounded-lg border border-white/5 hover:border-[#32FF8B]/20 transition-all cursor-pointer active:scale-90"
+                className="p-1.5 bg-card text-muted hover:text-primary rounded-lg border border-hairline hover:border-primary/20 transition-all cursor-pointer active:scale-90"
               >
                 <Clipboard className="w-3.5 h-3.5" />
               </button>
@@ -123,7 +126,7 @@ export function ConfirmDestinationModal({
                   "p-1.5 rounded-lg border transition-all cursor-pointer active:scale-90",
                   copied 
                     ? "bg-[#32FF8B]/10 text-[#32FF8B] border-[#32FF8B]/20 animate-none" 
-                    : "bg-[#0D1C2A] text-[#C5C1B9] hover:text-[#32FF8B] border-white/5 hover:border-[#32FF8B]/20"
+                    : "bg-card text-muted hover:text-primary border-hairline hover:border-primary/20"
                 )}
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -140,11 +143,12 @@ export function ConfirmDestinationModal({
         {/* Actions - Confirm Button */}
         <button
           onClick={handleValidateAndConfirm}
-          className="w-full py-4 rounded-2xl bg-white hover:bg-white/95 text-[#010C1B] font-black text-sm uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md hover:shadow-white/10 cursor-pointer"
+          className="w-full py-4 rounded-2xl bg-primary hover:bg-primary-strong text-primary-foreground font-black text-sm uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md cursor-pointer"
         >
           Confirm
         </button>
       </div>
     </div>
+    </ModalPortal>
   );
 }

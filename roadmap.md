@@ -27,6 +27,7 @@
 - [ ] Mainnet liquidity canaries (V2 add/remove, V3 mint/increase/decrease/collect/burn, CaSwap add/remove) — need separate approval; Mainnet liquidity writes stay closed until then.
 - [ ] CA / MONEY swap rehearsals (waiting on wallet holding CA / MONEY).
 - [x] Unloaded test file: Bun-only harness picked up by vitest (environment mismatch). Renamed to v3math.bun-spec.mjs, runs via `test:bun-harness` (13/13).
+- [x] Put every selector/dialog above page chrome; correct light-theme bridge/receipt contrast; widen both mobile menus.
 
 # Router V4 Native V3 Multi-Pool Extension
 - [x] Extended V4 candidate (additive), size 21,838 / headroom 2,738, deterministic.

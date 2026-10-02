@@ -427,13 +427,20 @@ html.light .border-white\/25       { border-color: var(--fb-hairline-strong) !im
 /* Keep the green primary legible on the light backdrop */
 html.light .bg-\[\#32FF8B\]        { background-color: var(--fb-primary) !important; }
 html.light .bg-\[\#32FF8B\]:hover  { background-color: var(--fb-primary-strong) !important; }
-html.light .text-\[\#010C1B\]      { color: var(--fb-primary-foreground) !important; }
+/* Keep legacy navy button text dark in light mode. Mapping it to the light
+   theme's primary foreground made white action buttons render white-on-white. */
+html.light .text-\[\#010C1B\]      { color: #010C1B !important; }
 html.light .text-\[\#32FF8B\]      { color: var(--fb-primary) !important; }
 
 
 
 /* ---------- LIGHT MODE contrast fixes (legacy hex/utility bridge) ---------- */
 html.light .bg-\[\#030E1A\]\/40 { background-color: var(--fb-card) !important; }
+html.light .bg-\[\#030E1A\],
+html.light .bg-\[\#0B1521\] { background-color: var(--fb-card) !important; }
+html.light .bg-\[\#122A26\] { background-color: color-mix(in srgb, var(--fb-primary) 10%, var(--fb-card)) !important; }
+html.light .text-\[\#F0F7F3\],
+html.light .text-\[\#F0F7F3\]\/90 { color: var(--fb-foreground) !important; }
 html.light .text-blue-400  { color: #1D4ED8 !important; }
 html.light .text-amber-400 { color: #92400E !important; }
 html.light .text-amber-200 { color: #7C2D12 !important; }

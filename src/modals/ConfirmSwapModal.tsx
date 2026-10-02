@@ -47,20 +47,21 @@ export function ConfirmSwapModal({
 
   return (
     <ModalPortal>
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="confirm_swap_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] w-full max-h-[88dvh] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative space-y-3.5 animate-scale-up border-b-[4px] border-b-[#32FF8B]"
+        className="bg-card border border-hairline text-foreground rounded-[20px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative space-y-3.5 animate-scale-up border-b-[4px] border-b-primary"
       >
         {/* Header decoration */}
         <div className="flex justify-between items-center font-mono">
 
-          <h3 className="text-sm font-black text-white uppercase tracking-wider">
+          <h3 className="text-sm font-black text-foreground uppercase tracking-wider">
             {isBridge ? "Confirm Bridge Tx" : "Confirm swap Tx"}
           </h3>
           <button 
             onClick={onClose}
-            className="p-1.5 hover:bg-white/5 rounded-xl text-[#C5C1B9] hover:text-white transition-colors cursor-pointer"
+            aria-label="Close swap confirmation"
+            className="p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -170,7 +171,7 @@ export function ConfirmSwapModal({
         {/* Submit Button */}
         <button
           onClick={onConfirm}
-          className="w-full py-3 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-[13px] uppercase transition-all duration-200 active:scale-[0.98] shadow-md hover:shadow-[0_0_20px_rgba(50,255,139,0.3)] cursor-pointer"
+          className="w-full py-3 rounded-xl bg-primary hover:bg-primary-strong text-primary-foreground font-mono tracking-widest font-black text-[13px] uppercase transition-all duration-200 active:scale-[0.98] shadow-md fb-glow cursor-pointer"
         >
           {isBridge ? "Confirm Bridge" : "Confirm swap"}
         </button>

@@ -10,6 +10,7 @@ import { useAccount, useSendTransaction, useBalance, useSignMessage, useConnect,
 import { injected } from 'wagmi/connectors';
 import { parseEther, parseUnits, encodeFunctionData } from 'viem';
 import { getWalletSignatureErrorMessage, signMessageWithActiveWallet } from '../lib/walletVerification';
+import { ModalPortal } from './ModalPortal';
 
 // Per-coin chain routing metadata for direct EVM donations.
 // Chain IDs and USDT contracts are pinned so the "Send direct" button
@@ -717,7 +718,8 @@ export function DonateModal({
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&color=32ff8b&bgcolor=010c1b&data=${encodeURIComponent(selectedCoin.address)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="donate_modal_card"
         className="bg-[#030E1A] border border-white/10 text-[#F0F7F3] rounded-2xl sm:rounded-[28px] w-full max-w-[480px] max-h-[calc(100svh-1rem)] sm:max-h-[88vh] p-0 shadow-2xl relative flex flex-col overflow-hidden animate-scale-up"
@@ -2073,5 +2075,6 @@ export function DonateModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

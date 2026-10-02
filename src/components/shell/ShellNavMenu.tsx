@@ -6,19 +6,19 @@
  * always derived from the canonical pathname via the shared nav model, and the
  * trigger itself is never treated as a destination.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { LogIn, LogOut, Menu, X } from "lucide-react";
 import { MENU_NAV, isNavActive } from "./navModel";
 import { supabase } from "@/integrations/supabase/client";
 import { googleSignIn, logout } from "@/lib/auth";
+import { ModalPortal } from "@/modals/ModalPortal";
 
 export function ShellNavMenu({ className = "" }: { className?: string }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
-  const boxRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -60,22 +60,17 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
 
   useEffect(() => {
     if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
-    };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
   return (
-    <div className={`relative font-sans ${className}`} ref={boxRef}>
+    <div className={`relative font-sans ${className}`}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -93,12 +88,14 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
       </button>
 
       {open && (
-        <div
-          role="menu"
-          data-shell-nav="compact-drawer"
-          className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-hairline bg-card/95 backdrop-blur-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]"
-        >
-          <ul className="py-1">
+        <ModalPortal>
+        <div className="fixed inset-0 z-[200] bg-background/72 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
+        <div role="menu" data-shell-nav="compact-drawer" className="absolute bottom-0 right-0 top-0 flex w-[min(92vw,390px)] flex-col overflow-hidden border-l border-hairline bg-card shadow-2xl sm:bottom-auto sm:top-3 sm:right-3 sm:max-h-[calc(100dvh-1.5rem)] sm:rounded-3xl sm:border">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-hairline px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))]">
+            <div className="min-w-0"><p className="truncate text-base font-black text-foreground">Menu</p><p className="truncate text-[11px] font-semibold text-muted">Navigate FlowBridge</p></div>
+            <button type="button" onClick={() => setOpen(false)} aria-label="Close navigation" className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-hairline bg-background text-muted hover:text-foreground"><X className="h-4 w-4" /></button>
+          </div>
+          <ul className="flex-1 overflow-y-auto p-2">
             {MENU_NAV.map((dest) => {
               const active = isNavActive(dest, pathname);
               const { Icon } = dest;
@@ -111,7 +108,7 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
                     aria-current={active ? "page" : undefined}
                     data-nav-id={dest.id}
                     data-nav-active={active ? "true" : "false"}
-                    className={`flex items-center gap-3 px-3 py-2.5 text-[13px] font-bold transition-colors ${
+                    className={`flex min-h-[52px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors ${
                       active
                         ? "bg-primary/10 text-primary"
                         : "text-foreground hover:bg-foreground/5 hover:text-primary"
@@ -124,14 +121,14 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
               );
             })}
           </ul>
-          <div className="border-t border-hairline py-1">
+          <div className="border-t border-hairline p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             {signedIn ? (
               <button
                 type="button"
                 role="menuitem"
                 onClick={handleSignOut}
                 disabled={authBusy}
-                className="flex w-full items-center gap-3 px-3 py-2.5 text-[13px] font-bold text-foreground transition-colors hover:bg-foreground/5 hover:text-primary disabled:opacity-50"
+                className="flex min-h-[52px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold text-foreground transition-colors hover:bg-foreground/5 hover:text-primary disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="truncate">Sign out</span>
@@ -142,7 +139,7 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
                 role="menuitem"
                 onClick={handleSignIn}
                 disabled={authBusy}
-                className="flex w-full items-center gap-3 px-3 py-2.5 text-[13px] font-bold text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                className="flex min-h-[52px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
               >
                 <LogIn className="h-4 w-4" />
                 <span className="truncate">{authBusy ? "Signing in…" : "Sign in"}</span>
@@ -150,6 +147,8 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
             )}
           </div>
         </div>
+        </div>
+        </ModalPortal>
       )}
     </div>
   );

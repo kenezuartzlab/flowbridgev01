@@ -69,10 +69,10 @@ export function WaitingModal({
 
   return (
     <ModalPortal>
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="waiting_confirmation_modal"
-        className="bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] w-full max-h-[88dvh] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center justify-center space-y-3.5 text-center animate-scale-up border-b-[4px] border-b-[#32FF8B]"
+        className="bg-card border border-hairline text-foreground rounded-[20px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center justify-center space-y-3.5 text-center animate-scale-up border-b-[4px] border-b-primary"
       >
 
         {/* Close Button */}

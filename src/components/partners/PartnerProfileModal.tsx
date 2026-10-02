@@ -21,7 +21,7 @@ export function PartnerProfileModal({
   return (
     <ModalPortal>
       <div
-        className="fixed inset-0 z-[120] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+        className="fixed inset-0 z-[200] flex items-end justify-center bg-background/90 p-0 backdrop-blur-sm sm:items-center sm:p-4"
         role="dialog"
         aria-modal="true"
         aria-label={`${partner.name} profile`}
