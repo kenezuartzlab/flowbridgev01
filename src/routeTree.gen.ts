@@ -9,229 +9,104 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WalletRouteImport } from './routes/wallet'
-import { Route as TradeRouteImport } from './routes/trade'
-import { Route as StudioRouteImport } from './routes/studio'
-import { Route as StakeRouteImport } from './routes/stake'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SetsRouteImport } from './routes/sets'
-import { Route as RewardsRouteImport } from './routes/rewards'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PartnersRouteImport } from './routes/partners'
-import { Route as MultisendRouteImport } from './routes/multisend'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as MarketsRouteImport } from './routes/markets'
-import { Route as LiquidityRouteImport } from './routes/liquidity'
-import { Route as LearnRouteImport } from './routes/learn'
-import { Route as HomeRouteImport } from './routes/home'
-import { Route as GamesRouteImport } from './routes/games'
-import { Route as FortuneRouteImport } from './routes/fortune'
-import { Route as EcosurgeRouteImport } from './routes/ecosurge'
-import { Route as EarnRouteImport } from './routes/earn'
-import { Route as DocsRouteImport } from './routes/docs'
-import { Route as DiscoverRouteImport } from './routes/discover'
-import { Route as BotChainRouteImport } from './routes/bot-chain'
-import { Route as AssistantRouteImport } from './routes/assistant'
-import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as ActivityRouteImport } from './routes/activity'
-import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CampaignsIndexRouteImport } from './routes/campaigns/index'
-import { Route as CampaignsStudioRouteImport } from './routes/campaigns/studio'
-import { Route as CampaignsPartnersRouteImport } from './routes/campaigns/partners'
-import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
-import { Route as CampaignsSlugRouteImport } from './routes/campaigns/$slug'
-import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
-import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
-import { Route as ApiOpportunitiesRouteImport } from './routes/api/opportunities'
-import { Route as ApiMissionsRouteImport } from './routes/api/missions'
-import { Route as ApiHealthRouteImport } from './routes/api/health'
-import { Route as ApiConfigRouteImport } from './routes/api/config'
-import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
-import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
-import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as ActivityRouteImport } from './routes/activity'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
+import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as BotChainRouteImport } from './routes/bot-chain'
+import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as EarnRouteImport } from './routes/earn'
+import { Route as EcosurgeRouteImport } from './routes/ecosurge'
+import { Route as FortuneRouteImport } from './routes/fortune'
+import { Route as GamesRouteImport } from './routes/games'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as LearnRouteImport } from './routes/learn'
+import { Route as LiquidityRouteImport } from './routes/liquidity'
+import { Route as MarketsRouteImport } from './routes/markets'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as MultisendRouteImport } from './routes/multisend'
+import { Route as PartnersRouteImport } from './routes/partners'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as SetsRouteImport } from './routes/sets'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as StakeRouteImport } from './routes/stake'
+import { Route as StudioRouteImport } from './routes/studio'
+import { Route as TradeRouteImport } from './routes/trade'
+import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as CampaignsAnalyticsIdRouteImport } from './routes/campaigns/analytics.$id'
-import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
-import { Route as ApiUsersSocialsRouteImport } from './routes/api/users.socials'
-import { Route as ApiUsersIncentivesRouteImport } from './routes/api/users.incentives'
-import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
-import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
-import { Route as ApiStudioSessionRouteImport } from './routes/api/studio.session'
-import { Route as ApiStudioCampaignsRouteImport } from './routes/api/studio.campaigns'
-import { Route as ApiRewardsStateRouteImport } from './routes/api/rewards.state'
-import { Route as ApiRewardsConvertRouteImport } from './routes/api/rewards.convert'
-import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
-import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
-import { Route as ApiProfileParticipationRouteImport } from './routes/api/profile.participation'
-import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
-import { Route as ApiCampaignsMeRouteImport } from './routes/api/campaigns.me'
-import { Route as ApiCampaignsLeaderboardRouteImport } from './routes/api/campaigns.leaderboard'
-import { Route as ApiCampaignsAdminRouteImport } from './routes/api/campaigns.admin'
-import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-image.$'
-import { Route as ApiAssistantMemoryRouteImport } from './routes/api/assistant.memory'
-import { Route as ApiAssistantIntentRouteImport } from './routes/api/assistant.intent'
-import { Route as ApiAssistantHandoffRouteImport } from './routes/api/assistant.handoff'
-import { Route as ApiAiScenariosRouteImport } from './routes/api/ai.scenarios'
-import { Route as ApiAiFederationRouteImport } from './routes/api/ai.federation'
-import { Route as ApiAiFederatedInsightRouteImport } from './routes/api/ai.federated-insight'
-import { Route as ApiAiDeliberateRouteImport } from './routes/api/ai.deliberate'
-import { Route as ApiAiDecisionRouteImport } from './routes/api/ai.decision'
-import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
-import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
-import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
-import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
-import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/admin.mainnet-release-freeze'
-import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/admin.mainnet-prerequisites'
-import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
-import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
-import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
-import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
-import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/admin.application-materials'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
+import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
+import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
+import { Route as ApiConfigRouteImport } from './routes/api/config'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiMissionsRouteImport } from './routes/api/missions'
+import { Route as ApiOpportunitiesRouteImport } from './routes/api/opportunities'
+import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
+import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
+import { Route as CampaignsIndexRouteImport } from './routes/campaigns/index'
+import { Route as CampaignsSlugRouteImport } from './routes/campaigns/$slug'
+import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
+import { Route as CampaignsPartnersRouteImport } from './routes/campaigns/partners'
+import { Route as CampaignsStudioRouteImport } from './routes/campaigns/studio'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiStudioCampaignsIdRouteImport } from './routes/api/studio.campaigns.$id'
-import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
-import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
-import { Route as ApiPublicActivityVerifySwapRouteImport } from './routes/api/public/activity.verify-swap'
-import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public/activity.verify'
-import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
-import { Route as ApiCampaignsAdminIdRouteImport } from './routes/api/campaigns.admin.$id'
+import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/admin.application-materials'
+import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
+import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
+import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
+import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
+import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/admin.mainnet-prerequisites'
+import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/admin.mainnet-release-freeze'
+import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
+import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
+import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
+import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
+import { Route as ApiAiDecisionRouteImport } from './routes/api/ai.decision'
+import { Route as ApiAiDeliberateRouteImport } from './routes/api/ai.deliberate'
+import { Route as ApiAiFederatedInsightRouteImport } from './routes/api/ai.federated-insight'
+import { Route as ApiAiFederationRouteImport } from './routes/api/ai.federation'
+import { Route as ApiAiScenariosRouteImport } from './routes/api/ai.scenarios'
+import { Route as ApiAssistantHandoffRouteImport } from './routes/api/assistant.handoff'
+import { Route as ApiAssistantIntentRouteImport } from './routes/api/assistant.intent'
+import { Route as ApiAssistantMemoryRouteImport } from './routes/api/assistant.memory'
+import { Route as ApiBannerImageSplatRouteImport } from './routes/api/banner-image.$'
+import { Route as ApiCampaignsAdminRouteImport } from './routes/api/campaigns.admin'
+import { Route as ApiCampaignsLeaderboardRouteImport } from './routes/api/campaigns.leaderboard'
+import { Route as ApiCampaignsMeRouteImport } from './routes/api/campaigns.me'
+import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
+import { Route as ApiProfileParticipationRouteImport } from './routes/api/profile.participation'
+import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
+import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
+import { Route as ApiRewardsConvertRouteImport } from './routes/api/rewards.convert'
+import { Route as ApiRewardsStateRouteImport } from './routes/api/rewards.state'
+import { Route as ApiStudioCampaignsRouteImport } from './routes/api/studio.campaigns'
+import { Route as ApiStudioSessionRouteImport } from './routes/api/studio.session'
+import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
+import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
+import { Route as ApiUsersIncentivesRouteImport } from './routes/api/users.incentives'
+import { Route as ApiUsersSocialsRouteImport } from './routes/api/users.socials'
+import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
+import { Route as CampaignsAnalyticsIdRouteImport } from './routes/campaigns/analytics.$id'
 import { Route as ApiCampaignsSlugMetricsRouteImport } from './routes/api/campaigns.$slug.metrics'
+import { Route as ApiCampaignsAdminIdRouteImport } from './routes/api/campaigns.admin.$id'
+import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
+import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public/activity.verify'
+import { Route as ApiPublicActivityVerifySwapRouteImport } from './routes/api/public/activity.verify-swap'
+import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
+import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
+import { Route as ApiStudioCampaignsIdRouteImport } from './routes/api/studio.campaigns.$id'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiCampaignsAdminIdAnalyticsRouteImport } from './routes/api/campaigns.admin.$id.analytics'
 
-const WalletRoute = WalletRouteImport.update({
-  id: '/wallet',
-  path: '/wallet',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TradeRoute = TradeRouteImport.update({
-  id: '/trade',
-  path: '/trade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StudioRoute = StudioRouteImport.update({
-  id: '/studio',
-  path: '/studio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StakeRoute = StakeRouteImport.update({
-  id: '/stake',
-  path: '/stake',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SetsRoute = SetsRouteImport.update({
-  id: '/sets',
-  path: '/sets',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RewardsRoute = RewardsRouteImport.update({
-  id: '/rewards',
-  path: '/rewards',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PartnersRoute = PartnersRouteImport.update({
-  id: '/partners',
-  path: '/partners',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MultisendRoute = MultisendRouteImport.update({
-  id: '/multisend',
-  path: '/multisend',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketsRoute = MarketsRouteImport.update({
-  id: '/markets',
-  path: '/markets',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LiquidityRoute = LiquidityRouteImport.update({
-  id: '/liquidity',
-  path: '/liquidity',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearnRoute = LearnRouteImport.update({
-  id: '/learn',
-  path: '/learn',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HomeRoute = HomeRouteImport.update({
-  id: '/home',
-  path: '/home',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesRoute = GamesRouteImport.update({
-  id: '/games',
-  path: '/games',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FortuneRoute = FortuneRouteImport.update({
-  id: '/fortune',
-  path: '/fortune',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EcosurgeRoute = EcosurgeRouteImport.update({
-  id: '/ecosurge',
-  path: '/ecosurge',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EarnRoute = EarnRouteImport.update({
-  id: '/earn',
-  path: '/earn',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocsRoute = DocsRouteImport.update({
-  id: '/docs',
-  path: '/docs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DiscoverRoute = DiscoverRouteImport.update({
-  id: '/discover',
-  path: '/discover',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BotChainRoute = BotChainRouteImport.update({
-  id: '/bot-chain',
-  path: '/bot-chain',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AssistantRoute = AssistantRouteImport.update({
-  id: '/assistant',
-  path: '/assistant',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ArcadeflixRoute = ArcadeflixRouteImport.update({
-  id: '/arcadeflix',
-  path: '/arcadeflix',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ActivityRoute = ActivityRouteImport.update({
-  id: '/activity',
-  path: '/activity',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -239,69 +114,151 @@ const AccountRoute = AccountRouteImport.update({
   path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ActivityRoute = ActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
-  id: '/campaigns/',
-  path: '/campaigns/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignsStudioRoute = CampaignsStudioRouteImport.update({
-  id: '/campaigns/studio',
-  path: '/campaigns/studio',
+const ArcadeflixRoute = ArcadeflixRouteImport.update({
+  id: '/arcadeflix',
+  path: '/arcadeflix',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignsPartnersRoute = CampaignsPartnersRouteImport.update({
-  id: '/campaigns/partners',
-  path: '/campaigns/partners',
+const AssistantRoute = AssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignsMeRoute = CampaignsMeRouteImport.update({
-  id: '/campaigns/me',
-  path: '/campaigns/me',
+const BotChainRoute = BotChainRouteImport.update({
+  id: '/bot-chain',
+  path: '/bot-chain',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignsSlugRoute = CampaignsSlugRouteImport.update({
-  id: '/campaigns/$slug',
-  path: '/campaigns/$slug',
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTransactionsRoute = ApiTransactionsRouteImport.update({
-  id: '/api/transactions',
-  path: '/api/transactions',
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiProposalsRoute = ApiProposalsRouteImport.update({
-  id: '/api/proposals',
-  path: '/api/proposals',
+const EarnRoute = EarnRouteImport.update({
+  id: '/earn',
+  path: '/earn',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiOpportunitiesRoute = ApiOpportunitiesRouteImport.update({
-  id: '/api/opportunities',
-  path: '/api/opportunities',
+const EcosurgeRoute = EcosurgeRouteImport.update({
+  id: '/ecosurge',
+  path: '/ecosurge',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiMissionsRoute = ApiMissionsRouteImport.update({
-  id: '/api/missions',
-  path: '/api/missions',
+const FortuneRoute = FortuneRouteImport.update({
+  id: '/fortune',
+  path: '/fortune',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHealthRoute = ApiHealthRouteImport.update({
-  id: '/api/health',
-  path: '/api/health',
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiConfigRoute = ApiConfigRouteImport.update({
-  id: '/api/config',
-  path: '/api/config',
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCampaignsRoute = ApiCampaignsRouteImport.update({
-  id: '/api/campaigns',
-  path: '/api/campaigns',
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiquidityRoute = LiquidityRouteImport.update({
+  id: '/liquidity',
+  path: '/liquidity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsRoute = MarketsRouteImport.update({
+  id: '/markets',
+  path: '/markets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MultisendRoute = MultisendRouteImport.update({
+  id: '/multisend',
+  path: '/multisend',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnersRoute = PartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetsRoute = SetsRouteImport.update({
+  id: '/sets',
+  path: '/sets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StakeRoute = StakeRouteImport.update({
+  id: '/stake',
+  path: '/stake',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TradeRoute = TradeRouteImport.update({
+  id: '/trade',
+  path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WalletRoute = WalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAssistantRoute = ApiAssistantRouteImport.update({
+  id: '/api/assistant',
+  path: '/api/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBannerEventsRoute = ApiBannerEventsRouteImport.update({
@@ -309,207 +266,70 @@ const ApiBannerEventsRoute = ApiBannerEventsRouteImport.update({
   path: '/api/banner-events',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAssistantRoute = ApiAssistantRouteImport.update({
-  id: '/api/assistant',
-  path: '/api/assistant',
+const ApiCampaignsRoute = ApiCampaignsRouteImport.update({
+  id: '/api/campaigns',
+  path: '/api/campaigns',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const CampaignsAnalyticsIdRoute = CampaignsAnalyticsIdRouteImport.update({
-  id: '/campaigns/analytics/$id',
-  path: '/campaigns/analytics/$id',
+const ApiConfigRoute = ApiConfigRouteImport.update({
+  id: '/api/config',
+  path: '/api/config',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUsersSyncRoute = ApiUsersSyncRouteImport.update({
-  id: '/api/users/sync',
-  path: '/api/users/sync',
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUsersSocialsRoute = ApiUsersSocialsRouteImport.update({
-  id: '/api/users/socials',
-  path: '/api/users/socials',
+const ApiMissionsRoute = ApiMissionsRouteImport.update({
+  id: '/api/missions',
+  path: '/api/missions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUsersIncentivesRoute = ApiUsersIncentivesRouteImport.update({
-  id: '/api/users/incentives',
-  path: '/api/users/incentives',
+const ApiOpportunitiesRoute = ApiOpportunitiesRouteImport.update({
+  id: '/api/opportunities',
+  path: '/api/opportunities',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUsersClaimRoute = ApiUsersClaimRouteImport.update({
-  id: '/api/users/claim',
-  path: '/api/users/claim',
+const ApiProposalsRoute = ApiProposalsRouteImport.update({
+  id: '/api/proposals',
+  path: '/api/proposals',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUsersBindWalletRoute = ApiUsersBindWalletRouteImport.update({
-  id: '/api/users/bind-wallet',
-  path: '/api/users/bind-wallet',
+const ApiTransactionsRoute = ApiTransactionsRouteImport.update({
+  id: '/api/transactions',
+  path: '/api/transactions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiStudioSessionRoute = ApiStudioSessionRouteImport.update({
-  id: '/api/studio/session',
-  path: '/api/studio/session',
+const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
+  id: '/campaigns/',
+  path: '/campaigns/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiStudioCampaignsRoute = ApiStudioCampaignsRouteImport.update({
-  id: '/api/studio/campaigns',
-  path: '/api/studio/campaigns',
+const CampaignsSlugRoute = CampaignsSlugRouteImport.update({
+  id: '/campaigns/$slug',
+  path: '/campaigns/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiRewardsStateRoute = ApiRewardsStateRouteImport.update({
-  id: '/api/rewards/state',
-  path: '/api/rewards/state',
+const CampaignsMeRoute = CampaignsMeRouteImport.update({
+  id: '/campaigns/me',
+  path: '/campaigns/me',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiRewardsConvertRoute = ApiRewardsConvertRouteImport.update({
-  id: '/api/rewards/convert',
-  path: '/api/rewards/convert',
+const CampaignsPartnersRoute = CampaignsPartnersRouteImport.update({
+  id: '/campaigns/partners',
+  path: '/campaigns/partners',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiRewardsClaimAuthorizationRoute =
-  ApiRewardsClaimAuthorizationRouteImport.update({
-    id: '/api/rewards/claim-authorization',
-    path: '/api/rewards/claim-authorization',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicWalletLookupRoute = ApiPublicWalletLookupRouteImport.update({
-  id: '/api/public/wallet-lookup',
-  path: '/api/public/wallet-lookup',
+const CampaignsStudioRoute = CampaignsStudioRouteImport.update({
+  id: '/campaigns/studio',
+  path: '/campaigns/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiProfileParticipationRoute = ApiProfileParticipationRouteImport.update({
-  id: '/api/profile/participation',
-  path: '/api/profile/participation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
-  id: '/api/incentives/global',
-  path: '/api/incentives/global',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCampaignsMeRoute = ApiCampaignsMeRouteImport.update({
-  id: '/me',
-  path: '/me',
-  getParentRoute: () => ApiCampaignsRoute,
-} as any)
-const ApiCampaignsLeaderboardRoute = ApiCampaignsLeaderboardRouteImport.update({
-  id: '/leaderboard',
-  path: '/leaderboard',
-  getParentRoute: () => ApiCampaignsRoute,
-} as any)
-const ApiCampaignsAdminRoute = ApiCampaignsAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => ApiCampaignsRoute,
-} as any)
-const ApiBannerImageSplatRoute = ApiBannerImageSplatRouteImport.update({
-  id: '/api/banner-image/$',
-  path: '/api/banner-image/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAssistantMemoryRoute = ApiAssistantMemoryRouteImport.update({
-  id: '/memory',
-  path: '/memory',
-  getParentRoute: () => ApiAssistantRoute,
-} as any)
-const ApiAssistantIntentRoute = ApiAssistantIntentRouteImport.update({
-  id: '/intent',
-  path: '/intent',
-  getParentRoute: () => ApiAssistantRoute,
-} as any)
-const ApiAssistantHandoffRoute = ApiAssistantHandoffRouteImport.update({
-  id: '/handoff',
-  path: '/handoff',
-  getParentRoute: () => ApiAssistantRoute,
-} as any)
-const ApiAiScenariosRoute = ApiAiScenariosRouteImport.update({
-  id: '/api/ai/scenarios',
-  path: '/api/ai/scenarios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiFederationRoute = ApiAiFederationRouteImport.update({
-  id: '/api/ai/federation',
-  path: '/api/ai/federation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiFederatedInsightRoute = ApiAiFederatedInsightRouteImport.update({
-  id: '/api/ai/federated-insight',
-  path: '/api/ai/federated-insight',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiDeliberateRoute = ApiAiDeliberateRouteImport.update({
-  id: '/api/ai/deliberate',
-  path: '/api/ai/deliberate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiDecisionRoute = ApiAiDecisionRouteImport.update({
-  id: '/api/ai/decision',
-  path: '/api/ai/decision',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
-  id: '/api/admin/whoami',
-  path: '/api/admin/whoami',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminTokensRoute = ApiAdminTokensRouteImport.update({
-  id: '/api/admin/tokens',
-  path: '/api/admin/tokens',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
-  id: '/api/admin/settings',
-  path: '/api/admin/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminPartnerGovernanceRoute =
-  ApiAdminPartnerGovernanceRouteImport.update({
-    id: '/api/admin/partner-governance',
-    path: '/api/admin/partner-governance',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiAdminMainnetReleaseFreezeRoute =
-  ApiAdminMainnetReleaseFreezeRouteImport.update({
-    id: '/api/admin/mainnet-release-freeze',
-    path: '/api/admin/mainnet-release-freeze',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiAdminMainnetPrerequisitesRoute =
-  ApiAdminMainnetPrerequisitesRouteImport.update({
-    id: '/api/admin/mainnet-prerequisites',
-    path: '/api/admin/mainnet-prerequisites',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiAdminMainnetPreflightRoute =
-  ApiAdminMainnetPreflightRouteImport.update({
-    id: '/api/admin/mainnet-preflight',
-    path: '/api/admin/mainnet-preflight',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
-  id: '/api/admin/banner-upload',
-  path: '/api/admin/banner-upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminBannerStatsRoute = ApiAdminBannerStatsRouteImport.update({
-  id: '/api/admin/banner-stats',
-  path: '/api/admin/banner-stats',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminApplicationReadinessRoute =
-  ApiAdminApplicationReadinessRouteImport.update({
-    id: '/api/admin/application-readiness',
-    path: '/api/admin/application-readiness',
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiAdminApplicationMaterialsRoute =
@@ -518,41 +338,210 @@ const ApiAdminApplicationMaterialsRoute =
     path: '/api/admin/application-materials',
     getParentRoute: () => rootRouteImport,
   } as any)
-const Char91DotmcpChar93InvokeToolToolRoute =
-  Char91DotmcpChar93InvokeToolToolRouteImport.update({
-    id: '/.mcp/invoke-tool/$tool',
-    path: '/.mcp/invoke-tool/$tool',
+const ApiAdminApplicationReadinessRoute =
+  ApiAdminApplicationReadinessRouteImport.update({
+    id: '/api/admin/application-readiness',
+    path: '/api/admin/application-readiness',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
+const ApiAdminBannerStatsRoute = ApiAdminBannerStatsRouteImport.update({
+  id: '/api/admin/banner-stats',
+  path: '/api/admin/banner-stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
+  id: '/api/admin/banner-upload',
+  path: '/api/admin/banner-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminMainnetPreflightRoute =
+  ApiAdminMainnetPreflightRouteImport.update({
+    id: '/api/admin/mainnet-preflight',
+    path: '/api/admin/mainnet-preflight',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
+const ApiAdminMainnetPrerequisitesRoute =
+  ApiAdminMainnetPrerequisitesRouteImport.update({
+    id: '/api/admin/mainnet-prerequisites',
+    path: '/api/admin/mainnet-prerequisites',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminMainnetReleaseFreezeRoute =
+  ApiAdminMainnetReleaseFreezeRouteImport.update({
+    id: '/api/admin/mainnet-release-freeze',
+    path: '/api/admin/mainnet-release-freeze',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminPartnerGovernanceRoute =
+  ApiAdminPartnerGovernanceRouteImport.update({
+    id: '/api/admin/partner-governance',
+    path: '/api/admin/partner-governance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
+  id: '/api/admin/settings',
+  path: '/api/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
+const ApiAdminTokensRoute = ApiAdminTokensRouteImport.update({
+  id: '/api/admin/tokens',
+  path: '/api/admin/tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiStudioCampaignsIdRoute = ApiStudioCampaignsIdRouteImport.update({
+const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
+  id: '/api/admin/whoami',
+  path: '/api/admin/whoami',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiDecisionRoute = ApiAiDecisionRouteImport.update({
+  id: '/api/ai/decision',
+  path: '/api/ai/decision',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiDeliberateRoute = ApiAiDeliberateRouteImport.update({
+  id: '/api/ai/deliberate',
+  path: '/api/ai/deliberate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiFederatedInsightRoute = ApiAiFederatedInsightRouteImport.update({
+  id: '/api/ai/federated-insight',
+  path: '/api/ai/federated-insight',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiFederationRoute = ApiAiFederationRouteImport.update({
+  id: '/api/ai/federation',
+  path: '/api/ai/federation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiScenariosRoute = ApiAiScenariosRouteImport.update({
+  id: '/api/ai/scenarios',
+  path: '/api/ai/scenarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAssistantHandoffRoute = ApiAssistantHandoffRouteImport.update({
+  id: '/handoff',
+  path: '/handoff',
+  getParentRoute: () => ApiAssistantRoute,
+} as any)
+const ApiAssistantIntentRoute = ApiAssistantIntentRouteImport.update({
+  id: '/intent',
+  path: '/intent',
+  getParentRoute: () => ApiAssistantRoute,
+} as any)
+const ApiAssistantMemoryRoute = ApiAssistantMemoryRouteImport.update({
+  id: '/memory',
+  path: '/memory',
+  getParentRoute: () => ApiAssistantRoute,
+} as any)
+const ApiBannerImageSplatRoute = ApiBannerImageSplatRouteImport.update({
+  id: '/api/banner-image/$',
+  path: '/api/banner-image/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCampaignsAdminRoute = ApiCampaignsAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => ApiCampaignsRoute,
+} as any)
+const ApiCampaignsLeaderboardRoute = ApiCampaignsLeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => ApiCampaignsRoute,
+} as any)
+const ApiCampaignsMeRoute = ApiCampaignsMeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => ApiCampaignsRoute,
+} as any)
+const ApiIncentivesGlobalRoute = ApiIncentivesGlobalRouteImport.update({
+  id: '/api/incentives/global',
+  path: '/api/incentives/global',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProfileParticipationRoute = ApiProfileParticipationRouteImport.update({
+  id: '/api/profile/participation',
+  path: '/api/profile/participation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicWalletLookupRoute = ApiPublicWalletLookupRouteImport.update({
+  id: '/api/public/wallet-lookup',
+  path: '/api/public/wallet-lookup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRewardsClaimAuthorizationRoute =
+  ApiRewardsClaimAuthorizationRouteImport.update({
+    id: '/api/rewards/claim-authorization',
+    path: '/api/rewards/claim-authorization',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiRewardsConvertRoute = ApiRewardsConvertRouteImport.update({
+  id: '/api/rewards/convert',
+  path: '/api/rewards/convert',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRewardsStateRoute = ApiRewardsStateRouteImport.update({
+  id: '/api/rewards/state',
+  path: '/api/rewards/state',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioCampaignsRoute = ApiStudioCampaignsRouteImport.update({
+  id: '/api/studio/campaigns',
+  path: '/api/studio/campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioSessionRoute = ApiStudioSessionRouteImport.update({
+  id: '/api/studio/session',
+  path: '/api/studio/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersBindWalletRoute = ApiUsersBindWalletRouteImport.update({
+  id: '/api/users/bind-wallet',
+  path: '/api/users/bind-wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersClaimRoute = ApiUsersClaimRouteImport.update({
+  id: '/api/users/claim',
+  path: '/api/users/claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersIncentivesRoute = ApiUsersIncentivesRouteImport.update({
+  id: '/api/users/incentives',
+  path: '/api/users/incentives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersSocialsRoute = ApiUsersSocialsRouteImport.update({
+  id: '/api/users/socials',
+  path: '/api/users/socials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsersSyncRoute = ApiUsersSyncRouteImport.update({
+  id: '/api/users/sync',
+  path: '/api/users/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsAnalyticsIdRoute = CampaignsAnalyticsIdRouteImport.update({
+  id: '/campaigns/analytics/$id',
+  path: '/campaigns/analytics/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCampaignsSlugMetricsRoute = ApiCampaignsSlugMetricsRouteImport.update({
+  id: '/$slug/metrics',
+  path: '/$slug/metrics',
+  getParentRoute: () => ApiCampaignsRoute,
+} as any)
+const ApiCampaignsAdminIdRoute = ApiCampaignsAdminIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => ApiStudioCampaignsRoute,
+  getParentRoute: () => ApiCampaignsAdminRoute,
 } as any)
-const ApiPublicSiweVerifyRoute = ApiPublicSiweVerifyRouteImport.update({
-  id: '/api/public/siwe/verify',
-  path: '/api/public/siwe/verify',
-  getParentRoute: () => rootRouteImport,
+const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
+  id: '/$id/vote',
+  path: '/$id/vote',
+  getParentRoute: () => ApiProposalsRoute,
 } as any)
-const ApiPublicSiweNonceRoute = ApiPublicSiweNonceRouteImport.update({
-  id: '/api/public/siwe/nonce',
-  path: '/api/public/siwe/nonce',
+const ApiPublicActivityVerifyRoute = ApiPublicActivityVerifyRouteImport.update({
+  id: '/api/public/activity/verify',
+  path: '/api/public/activity/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicActivityVerifySwapRoute =
@@ -561,26 +550,37 @@ const ApiPublicActivityVerifySwapRoute =
     path: '/api/public/activity/verify-swap',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicActivityVerifyRoute = ApiPublicActivityVerifyRouteImport.update({
-  id: '/api/public/activity/verify',
-  path: '/api/public/activity/verify',
+const ApiPublicSiweNonceRoute = ApiPublicSiweNonceRouteImport.update({
+  id: '/api/public/siwe/nonce',
+  path: '/api/public/siwe/nonce',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiProposalsIdVoteRoute = ApiProposalsIdVoteRouteImport.update({
-  id: '/$id/vote',
-  path: '/$id/vote',
-  getParentRoute: () => ApiProposalsRoute,
+const ApiPublicSiweVerifyRoute = ApiPublicSiweVerifyRouteImport.update({
+  id: '/api/public/siwe/verify',
+  path: '/api/public/siwe/verify',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCampaignsAdminIdRoute = ApiCampaignsAdminIdRouteImport.update({
+const ApiStudioCampaignsIdRoute = ApiStudioCampaignsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => ApiCampaignsAdminRoute,
+  getParentRoute: () => ApiStudioCampaignsRoute,
 } as any)
-const ApiCampaignsSlugMetricsRoute = ApiCampaignsSlugMetricsRouteImport.update({
-  id: '/$slug/metrics',
-  path: '/$slug/metrics',
-  getParentRoute: () => ApiCampaignsRoute,
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCampaignsAdminIdAnalyticsRoute =
   ApiCampaignsAdminIdAnalyticsRouteImport.update({
     id: '/analytics',
@@ -1256,186 +1256,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/wallet': {
-      id: '/wallet'
-      path: '/wallet'
-      fullPath: '/wallet'
-      preLoaderRoute: typeof WalletRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trade': {
-      id: '/trade'
-      path: '/trade'
-      fullPath: '/trade'
-      preLoaderRoute: typeof TradeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/studio': {
-      id: '/studio'
-      path: '/studio'
-      fullPath: '/studio'
-      preLoaderRoute: typeof StudioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/stake': {
-      id: '/stake'
-      path: '/stake'
-      fullPath: '/stake'
-      preLoaderRoute: typeof StakeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sets': {
-      id: '/sets'
-      path: '/sets'
-      fullPath: '/sets'
-      preLoaderRoute: typeof SetsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rewards': {
-      id: '/rewards'
-      path: '/rewards'
-      fullPath: '/rewards'
-      preLoaderRoute: typeof RewardsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/partners': {
-      id: '/partners'
-      path: '/partners'
-      fullPath: '/partners'
-      preLoaderRoute: typeof PartnersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/multisend': {
-      id: '/multisend'
-      path: '/multisend'
-      fullPath: '/multisend'
-      preLoaderRoute: typeof MultisendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/markets': {
-      id: '/markets'
-      path: '/markets'
-      fullPath: '/markets'
-      preLoaderRoute: typeof MarketsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/liquidity': {
-      id: '/liquidity'
-      path: '/liquidity'
-      fullPath: '/liquidity'
-      preLoaderRoute: typeof LiquidityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learn': {
-      id: '/learn'
-      path: '/learn'
-      fullPath: '/learn'
-      preLoaderRoute: typeof LearnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games': {
-      id: '/games'
-      path: '/games'
-      fullPath: '/games'
-      preLoaderRoute: typeof GamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fortune': {
-      id: '/fortune'
-      path: '/fortune'
-      fullPath: '/fortune'
-      preLoaderRoute: typeof FortuneRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ecosurge': {
-      id: '/ecosurge'
-      path: '/ecosurge'
-      fullPath: '/ecosurge'
-      preLoaderRoute: typeof EcosurgeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/earn': {
-      id: '/earn'
-      path: '/earn'
-      fullPath: '/earn'
-      preLoaderRoute: typeof EarnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/docs': {
-      id: '/docs'
-      path: '/docs'
-      fullPath: '/docs'
-      preLoaderRoute: typeof DocsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/discover': {
-      id: '/discover'
-      path: '/discover'
-      fullPath: '/discover'
-      preLoaderRoute: typeof DiscoverRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bot-chain': {
-      id: '/bot-chain'
-      path: '/bot-chain'
-      fullPath: '/bot-chain'
-      preLoaderRoute: typeof BotChainRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/assistant': {
-      id: '/assistant'
-      path: '/assistant'
-      fullPath: '/assistant'
-      preLoaderRoute: typeof AssistantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/arcadeflix': {
-      id: '/arcadeflix'
-      path: '/arcadeflix'
-      fullPath: '/arcadeflix'
-      preLoaderRoute: typeof ArcadeflixRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/activity': {
-      id: '/activity'
-      path: '/activity'
-      fullPath: '/activity'
-      preLoaderRoute: typeof ActivityRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -1445,116 +1270,186 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/activity': {
+      id: '/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof ActivityRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns/': {
-      id: '/campaigns/'
-      path: '/campaigns'
-      fullPath: '/campaigns/'
-      preLoaderRoute: typeof CampaignsIndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns/studio': {
-      id: '/campaigns/studio'
-      path: '/campaigns/studio'
-      fullPath: '/campaigns/studio'
-      preLoaderRoute: typeof CampaignsStudioRouteImport
+    '/arcadeflix': {
+      id: '/arcadeflix'
+      path: '/arcadeflix'
+      fullPath: '/arcadeflix'
+      preLoaderRoute: typeof ArcadeflixRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns/partners': {
-      id: '/campaigns/partners'
-      path: '/campaigns/partners'
-      fullPath: '/campaigns/partners'
-      preLoaderRoute: typeof CampaignsPartnersRouteImport
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns/me': {
-      id: '/campaigns/me'
-      path: '/campaigns/me'
-      fullPath: '/campaigns/me'
-      preLoaderRoute: typeof CampaignsMeRouteImport
+    '/bot-chain': {
+      id: '/bot-chain'
+      path: '/bot-chain'
+      fullPath: '/bot-chain'
+      preLoaderRoute: typeof BotChainRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns/$slug': {
-      id: '/campaigns/$slug'
-      path: '/campaigns/$slug'
-      fullPath: '/campaigns/$slug'
-      preLoaderRoute: typeof CampaignsSlugRouteImport
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/transactions': {
-      id: '/api/transactions'
-      path: '/api/transactions'
-      fullPath: '/api/transactions'
-      preLoaderRoute: typeof ApiTransactionsRouteImport
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/proposals': {
-      id: '/api/proposals'
-      path: '/api/proposals'
-      fullPath: '/api/proposals'
-      preLoaderRoute: typeof ApiProposalsRouteImport
+    '/earn': {
+      id: '/earn'
+      path: '/earn'
+      fullPath: '/earn'
+      preLoaderRoute: typeof EarnRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/opportunities': {
-      id: '/api/opportunities'
-      path: '/api/opportunities'
-      fullPath: '/api/opportunities'
-      preLoaderRoute: typeof ApiOpportunitiesRouteImport
+    '/ecosurge': {
+      id: '/ecosurge'
+      path: '/ecosurge'
+      fullPath: '/ecosurge'
+      preLoaderRoute: typeof EcosurgeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/missions': {
-      id: '/api/missions'
-      path: '/api/missions'
-      fullPath: '/api/missions'
-      preLoaderRoute: typeof ApiMissionsRouteImport
+    '/fortune': {
+      id: '/fortune'
+      path: '/fortune'
+      fullPath: '/fortune'
+      preLoaderRoute: typeof FortuneRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/health': {
-      id: '/api/health'
-      path: '/api/health'
-      fullPath: '/api/health'
-      preLoaderRoute: typeof ApiHealthRouteImport
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/config': {
-      id: '/api/config'
-      path: '/api/config'
-      fullPath: '/api/config'
-      preLoaderRoute: typeof ApiConfigRouteImport
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/campaigns': {
-      id: '/api/campaigns'
-      path: '/api/campaigns'
-      fullPath: '/api/campaigns'
-      preLoaderRoute: typeof ApiCampaignsRouteImport
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/banner-events': {
-      id: '/api/banner-events'
-      path: '/api/banner-events'
-      fullPath: '/api/banner-events'
-      preLoaderRoute: typeof ApiBannerEventsRouteImport
+    '/liquidity': {
+      id: '/liquidity'
+      path: '/liquidity'
+      fullPath: '/liquidity'
+      preLoaderRoute: typeof LiquidityRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/assistant': {
-      id: '/api/assistant'
-      path: '/api/assistant'
-      fullPath: '/api/assistant'
-      preLoaderRoute: typeof ApiAssistantRouteImport
+    '/markets': {
+      id: '/markets'
+      path: '/markets'
+      fullPath: '/markets'
+      preLoaderRoute: typeof MarketsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/multisend': {
+      id: '/multisend'
+      path: '/multisend'
+      fullPath: '/multisend'
+      preLoaderRoute: typeof MultisendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partners': {
+      id: '/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof PartnersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sets': {
+      id: '/sets'
+      path: '/sets'
+      fullPath: '/sets'
+      preLoaderRoute: typeof SetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stake': {
+      id: '/stake'
+      path: '/stake'
+      fullPath: '/stake'
+      preLoaderRoute: typeof StakeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trade': {
+      id: '/trade'
+      path: '/trade'
+      fullPath: '/trade'
+      preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -1564,263 +1459,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns/analytics/$id': {
-      id: '/campaigns/analytics/$id'
-      path: '/campaigns/analytics/$id'
-      fullPath: '/campaigns/analytics/$id'
-      preLoaderRoute: typeof CampaignsAnalyticsIdRouteImport
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/users/sync': {
-      id: '/api/users/sync'
-      path: '/api/users/sync'
-      fullPath: '/api/users/sync'
-      preLoaderRoute: typeof ApiUsersSyncRouteImport
+    '/api/assistant': {
+      id: '/api/assistant'
+      path: '/api/assistant'
+      fullPath: '/api/assistant'
+      preLoaderRoute: typeof ApiAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/users/socials': {
-      id: '/api/users/socials'
-      path: '/api/users/socials'
-      fullPath: '/api/users/socials'
-      preLoaderRoute: typeof ApiUsersSocialsRouteImport
+    '/api/banner-events': {
+      id: '/api/banner-events'
+      path: '/api/banner-events'
+      fullPath: '/api/banner-events'
+      preLoaderRoute: typeof ApiBannerEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/users/incentives': {
-      id: '/api/users/incentives'
-      path: '/api/users/incentives'
-      fullPath: '/api/users/incentives'
-      preLoaderRoute: typeof ApiUsersIncentivesRouteImport
+    '/api/campaigns': {
+      id: '/api/campaigns'
+      path: '/api/campaigns'
+      fullPath: '/api/campaigns'
+      preLoaderRoute: typeof ApiCampaignsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/users/claim': {
-      id: '/api/users/claim'
-      path: '/api/users/claim'
-      fullPath: '/api/users/claim'
-      preLoaderRoute: typeof ApiUsersClaimRouteImport
+    '/api/config': {
+      id: '/api/config'
+      path: '/api/config'
+      fullPath: '/api/config'
+      preLoaderRoute: typeof ApiConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/users/bind-wallet': {
-      id: '/api/users/bind-wallet'
-      path: '/api/users/bind-wallet'
-      fullPath: '/api/users/bind-wallet'
-      preLoaderRoute: typeof ApiUsersBindWalletRouteImport
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/studio/session': {
-      id: '/api/studio/session'
-      path: '/api/studio/session'
-      fullPath: '/api/studio/session'
-      preLoaderRoute: typeof ApiStudioSessionRouteImport
+    '/api/missions': {
+      id: '/api/missions'
+      path: '/api/missions'
+      fullPath: '/api/missions'
+      preLoaderRoute: typeof ApiMissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/studio/campaigns': {
-      id: '/api/studio/campaigns'
-      path: '/api/studio/campaigns'
-      fullPath: '/api/studio/campaigns'
-      preLoaderRoute: typeof ApiStudioCampaignsRouteImport
+    '/api/opportunities': {
+      id: '/api/opportunities'
+      path: '/api/opportunities'
+      fullPath: '/api/opportunities'
+      preLoaderRoute: typeof ApiOpportunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/rewards/state': {
-      id: '/api/rewards/state'
-      path: '/api/rewards/state'
-      fullPath: '/api/rewards/state'
-      preLoaderRoute: typeof ApiRewardsStateRouteImport
+    '/api/proposals': {
+      id: '/api/proposals'
+      path: '/api/proposals'
+      fullPath: '/api/proposals'
+      preLoaderRoute: typeof ApiProposalsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/rewards/convert': {
-      id: '/api/rewards/convert'
-      path: '/api/rewards/convert'
-      fullPath: '/api/rewards/convert'
-      preLoaderRoute: typeof ApiRewardsConvertRouteImport
+    '/api/transactions': {
+      id: '/api/transactions'
+      path: '/api/transactions'
+      fullPath: '/api/transactions'
+      preLoaderRoute: typeof ApiTransactionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/rewards/claim-authorization': {
-      id: '/api/rewards/claim-authorization'
-      path: '/api/rewards/claim-authorization'
-      fullPath: '/api/rewards/claim-authorization'
-      preLoaderRoute: typeof ApiRewardsClaimAuthorizationRouteImport
+    '/campaigns/': {
+      id: '/campaigns/'
+      path: '/campaigns'
+      fullPath: '/campaigns/'
+      preLoaderRoute: typeof CampaignsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/wallet-lookup': {
-      id: '/api/public/wallet-lookup'
-      path: '/api/public/wallet-lookup'
-      fullPath: '/api/public/wallet-lookup'
-      preLoaderRoute: typeof ApiPublicWalletLookupRouteImport
+    '/campaigns/$slug': {
+      id: '/campaigns/$slug'
+      path: '/campaigns/$slug'
+      fullPath: '/campaigns/$slug'
+      preLoaderRoute: typeof CampaignsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/profile/participation': {
-      id: '/api/profile/participation'
-      path: '/api/profile/participation'
-      fullPath: '/api/profile/participation'
-      preLoaderRoute: typeof ApiProfileParticipationRouteImport
+    '/campaigns/me': {
+      id: '/campaigns/me'
+      path: '/campaigns/me'
+      fullPath: '/campaigns/me'
+      preLoaderRoute: typeof CampaignsMeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/incentives/global': {
-      id: '/api/incentives/global'
-      path: '/api/incentives/global'
-      fullPath: '/api/incentives/global'
-      preLoaderRoute: typeof ApiIncentivesGlobalRouteImport
+    '/campaigns/partners': {
+      id: '/campaigns/partners'
+      path: '/campaigns/partners'
+      fullPath: '/campaigns/partners'
+      preLoaderRoute: typeof CampaignsPartnersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/campaigns/me': {
-      id: '/api/campaigns/me'
-      path: '/me'
-      fullPath: '/api/campaigns/me'
-      preLoaderRoute: typeof ApiCampaignsMeRouteImport
-      parentRoute: typeof ApiCampaignsRoute
-    }
-    '/api/campaigns/leaderboard': {
-      id: '/api/campaigns/leaderboard'
-      path: '/leaderboard'
-      fullPath: '/api/campaigns/leaderboard'
-      preLoaderRoute: typeof ApiCampaignsLeaderboardRouteImport
-      parentRoute: typeof ApiCampaignsRoute
-    }
-    '/api/campaigns/admin': {
-      id: '/api/campaigns/admin'
-      path: '/admin'
-      fullPath: '/api/campaigns/admin'
-      preLoaderRoute: typeof ApiCampaignsAdminRouteImport
-      parentRoute: typeof ApiCampaignsRoute
-    }
-    '/api/banner-image/$': {
-      id: '/api/banner-image/$'
-      path: '/api/banner-image/$'
-      fullPath: '/api/banner-image/$'
-      preLoaderRoute: typeof ApiBannerImageSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/assistant/memory': {
-      id: '/api/assistant/memory'
-      path: '/memory'
-      fullPath: '/api/assistant/memory'
-      preLoaderRoute: typeof ApiAssistantMemoryRouteImport
-      parentRoute: typeof ApiAssistantRoute
-    }
-    '/api/assistant/intent': {
-      id: '/api/assistant/intent'
-      path: '/intent'
-      fullPath: '/api/assistant/intent'
-      preLoaderRoute: typeof ApiAssistantIntentRouteImport
-      parentRoute: typeof ApiAssistantRoute
-    }
-    '/api/assistant/handoff': {
-      id: '/api/assistant/handoff'
-      path: '/handoff'
-      fullPath: '/api/assistant/handoff'
-      preLoaderRoute: typeof ApiAssistantHandoffRouteImport
-      parentRoute: typeof ApiAssistantRoute
-    }
-    '/api/ai/scenarios': {
-      id: '/api/ai/scenarios'
-      path: '/api/ai/scenarios'
-      fullPath: '/api/ai/scenarios'
-      preLoaderRoute: typeof ApiAiScenariosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/federation': {
-      id: '/api/ai/federation'
-      path: '/api/ai/federation'
-      fullPath: '/api/ai/federation'
-      preLoaderRoute: typeof ApiAiFederationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/federated-insight': {
-      id: '/api/ai/federated-insight'
-      path: '/api/ai/federated-insight'
-      fullPath: '/api/ai/federated-insight'
-      preLoaderRoute: typeof ApiAiFederatedInsightRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/deliberate': {
-      id: '/api/ai/deliberate'
-      path: '/api/ai/deliberate'
-      fullPath: '/api/ai/deliberate'
-      preLoaderRoute: typeof ApiAiDeliberateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/decision': {
-      id: '/api/ai/decision'
-      path: '/api/ai/decision'
-      fullPath: '/api/ai/decision'
-      preLoaderRoute: typeof ApiAiDecisionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/whoami': {
-      id: '/api/admin/whoami'
-      path: '/api/admin/whoami'
-      fullPath: '/api/admin/whoami'
-      preLoaderRoute: typeof ApiAdminWhoamiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/tokens': {
-      id: '/api/admin/tokens'
-      path: '/api/admin/tokens'
-      fullPath: '/api/admin/tokens'
-      preLoaderRoute: typeof ApiAdminTokensRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/settings': {
-      id: '/api/admin/settings'
-      path: '/api/admin/settings'
-      fullPath: '/api/admin/settings'
-      preLoaderRoute: typeof ApiAdminSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/partner-governance': {
-      id: '/api/admin/partner-governance'
-      path: '/api/admin/partner-governance'
-      fullPath: '/api/admin/partner-governance'
-      preLoaderRoute: typeof ApiAdminPartnerGovernanceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/mainnet-release-freeze': {
-      id: '/api/admin/mainnet-release-freeze'
-      path: '/api/admin/mainnet-release-freeze'
-      fullPath: '/api/admin/mainnet-release-freeze'
-      preLoaderRoute: typeof ApiAdminMainnetReleaseFreezeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/mainnet-prerequisites': {
-      id: '/api/admin/mainnet-prerequisites'
-      path: '/api/admin/mainnet-prerequisites'
-      fullPath: '/api/admin/mainnet-prerequisites'
-      preLoaderRoute: typeof ApiAdminMainnetPrerequisitesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/mainnet-preflight': {
-      id: '/api/admin/mainnet-preflight'
-      path: '/api/admin/mainnet-preflight'
-      fullPath: '/api/admin/mainnet-preflight'
-      preLoaderRoute: typeof ApiAdminMainnetPreflightRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/banner-upload': {
-      id: '/api/admin/banner-upload'
-      path: '/api/admin/banner-upload'
-      fullPath: '/api/admin/banner-upload'
-      preLoaderRoute: typeof ApiAdminBannerUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/banner-stats': {
-      id: '/api/admin/banner-stats'
-      path: '/api/admin/banner-stats'
-      fullPath: '/api/admin/banner-stats'
-      preLoaderRoute: typeof ApiAdminBannerStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/application-readiness': {
-      id: '/api/admin/application-readiness'
-      path: '/api/admin/application-readiness'
-      fullPath: '/api/admin/application-readiness'
-      preLoaderRoute: typeof ApiAdminApplicationReadinessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/application-materials': {
-      id: '/api/admin/application-materials'
-      path: '/api/admin/application-materials'
-      fullPath: '/api/admin/application-materials'
-      preLoaderRoute: typeof ApiAdminApplicationMaterialsRouteImport
+    '/campaigns/studio': {
+      id: '/campaigns/studio'
+      path: '/campaigns/studio'
+      fullPath: '/campaigns/studio'
+      preLoaderRoute: typeof CampaignsStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
@@ -1830,46 +1571,291 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/api/admin/application-materials': {
+      id: '/api/admin/application-materials'
+      path: '/api/admin/application-materials'
+      fullPath: '/api/admin/application-materials'
+      preLoaderRoute: typeof ApiAdminApplicationMaterialsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+    '/api/admin/application-readiness': {
+      id: '/api/admin/application-readiness'
+      path: '/api/admin/application-readiness'
+      fullPath: '/api/admin/application-readiness'
+      preLoaderRoute: typeof ApiAdminApplicationReadinessRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+    '/api/admin/banner-stats': {
+      id: '/api/admin/banner-stats'
+      path: '/api/admin/banner-stats'
+      fullPath: '/api/admin/banner-stats'
+      preLoaderRoute: typeof ApiAdminBannerStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/studio/campaigns/$id': {
-      id: '/api/studio/campaigns/$id'
+    '/api/admin/banner-upload': {
+      id: '/api/admin/banner-upload'
+      path: '/api/admin/banner-upload'
+      fullPath: '/api/admin/banner-upload'
+      preLoaderRoute: typeof ApiAdminBannerUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/mainnet-preflight': {
+      id: '/api/admin/mainnet-preflight'
+      path: '/api/admin/mainnet-preflight'
+      fullPath: '/api/admin/mainnet-preflight'
+      preLoaderRoute: typeof ApiAdminMainnetPreflightRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/mainnet-prerequisites': {
+      id: '/api/admin/mainnet-prerequisites'
+      path: '/api/admin/mainnet-prerequisites'
+      fullPath: '/api/admin/mainnet-prerequisites'
+      preLoaderRoute: typeof ApiAdminMainnetPrerequisitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/mainnet-release-freeze': {
+      id: '/api/admin/mainnet-release-freeze'
+      path: '/api/admin/mainnet-release-freeze'
+      fullPath: '/api/admin/mainnet-release-freeze'
+      preLoaderRoute: typeof ApiAdminMainnetReleaseFreezeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/partner-governance': {
+      id: '/api/admin/partner-governance'
+      path: '/api/admin/partner-governance'
+      fullPath: '/api/admin/partner-governance'
+      preLoaderRoute: typeof ApiAdminPartnerGovernanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/settings': {
+      id: '/api/admin/settings'
+      path: '/api/admin/settings'
+      fullPath: '/api/admin/settings'
+      preLoaderRoute: typeof ApiAdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/tokens': {
+      id: '/api/admin/tokens'
+      path: '/api/admin/tokens'
+      fullPath: '/api/admin/tokens'
+      preLoaderRoute: typeof ApiAdminTokensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/whoami': {
+      id: '/api/admin/whoami'
+      path: '/api/admin/whoami'
+      fullPath: '/api/admin/whoami'
+      preLoaderRoute: typeof ApiAdminWhoamiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/decision': {
+      id: '/api/ai/decision'
+      path: '/api/ai/decision'
+      fullPath: '/api/ai/decision'
+      preLoaderRoute: typeof ApiAiDecisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/deliberate': {
+      id: '/api/ai/deliberate'
+      path: '/api/ai/deliberate'
+      fullPath: '/api/ai/deliberate'
+      preLoaderRoute: typeof ApiAiDeliberateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/federated-insight': {
+      id: '/api/ai/federated-insight'
+      path: '/api/ai/federated-insight'
+      fullPath: '/api/ai/federated-insight'
+      preLoaderRoute: typeof ApiAiFederatedInsightRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/federation': {
+      id: '/api/ai/federation'
+      path: '/api/ai/federation'
+      fullPath: '/api/ai/federation'
+      preLoaderRoute: typeof ApiAiFederationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/scenarios': {
+      id: '/api/ai/scenarios'
+      path: '/api/ai/scenarios'
+      fullPath: '/api/ai/scenarios'
+      preLoaderRoute: typeof ApiAiScenariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/assistant/handoff': {
+      id: '/api/assistant/handoff'
+      path: '/handoff'
+      fullPath: '/api/assistant/handoff'
+      preLoaderRoute: typeof ApiAssistantHandoffRouteImport
+      parentRoute: typeof ApiAssistantRoute
+    }
+    '/api/assistant/intent': {
+      id: '/api/assistant/intent'
+      path: '/intent'
+      fullPath: '/api/assistant/intent'
+      preLoaderRoute: typeof ApiAssistantIntentRouteImport
+      parentRoute: typeof ApiAssistantRoute
+    }
+    '/api/assistant/memory': {
+      id: '/api/assistant/memory'
+      path: '/memory'
+      fullPath: '/api/assistant/memory'
+      preLoaderRoute: typeof ApiAssistantMemoryRouteImport
+      parentRoute: typeof ApiAssistantRoute
+    }
+    '/api/banner-image/$': {
+      id: '/api/banner-image/$'
+      path: '/api/banner-image/$'
+      fullPath: '/api/banner-image/$'
+      preLoaderRoute: typeof ApiBannerImageSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/campaigns/admin': {
+      id: '/api/campaigns/admin'
+      path: '/admin'
+      fullPath: '/api/campaigns/admin'
+      preLoaderRoute: typeof ApiCampaignsAdminRouteImport
+      parentRoute: typeof ApiCampaignsRoute
+    }
+    '/api/campaigns/leaderboard': {
+      id: '/api/campaigns/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/api/campaigns/leaderboard'
+      preLoaderRoute: typeof ApiCampaignsLeaderboardRouteImport
+      parentRoute: typeof ApiCampaignsRoute
+    }
+    '/api/campaigns/me': {
+      id: '/api/campaigns/me'
+      path: '/me'
+      fullPath: '/api/campaigns/me'
+      preLoaderRoute: typeof ApiCampaignsMeRouteImport
+      parentRoute: typeof ApiCampaignsRoute
+    }
+    '/api/incentives/global': {
+      id: '/api/incentives/global'
+      path: '/api/incentives/global'
+      fullPath: '/api/incentives/global'
+      preLoaderRoute: typeof ApiIncentivesGlobalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/profile/participation': {
+      id: '/api/profile/participation'
+      path: '/api/profile/participation'
+      fullPath: '/api/profile/participation'
+      preLoaderRoute: typeof ApiProfileParticipationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/wallet-lookup': {
+      id: '/api/public/wallet-lookup'
+      path: '/api/public/wallet-lookup'
+      fullPath: '/api/public/wallet-lookup'
+      preLoaderRoute: typeof ApiPublicWalletLookupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rewards/claim-authorization': {
+      id: '/api/rewards/claim-authorization'
+      path: '/api/rewards/claim-authorization'
+      fullPath: '/api/rewards/claim-authorization'
+      preLoaderRoute: typeof ApiRewardsClaimAuthorizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rewards/convert': {
+      id: '/api/rewards/convert'
+      path: '/api/rewards/convert'
+      fullPath: '/api/rewards/convert'
+      preLoaderRoute: typeof ApiRewardsConvertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rewards/state': {
+      id: '/api/rewards/state'
+      path: '/api/rewards/state'
+      fullPath: '/api/rewards/state'
+      preLoaderRoute: typeof ApiRewardsStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/campaigns': {
+      id: '/api/studio/campaigns'
+      path: '/api/studio/campaigns'
+      fullPath: '/api/studio/campaigns'
+      preLoaderRoute: typeof ApiStudioCampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/session': {
+      id: '/api/studio/session'
+      path: '/api/studio/session'
+      fullPath: '/api/studio/session'
+      preLoaderRoute: typeof ApiStudioSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/bind-wallet': {
+      id: '/api/users/bind-wallet'
+      path: '/api/users/bind-wallet'
+      fullPath: '/api/users/bind-wallet'
+      preLoaderRoute: typeof ApiUsersBindWalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/claim': {
+      id: '/api/users/claim'
+      path: '/api/users/claim'
+      fullPath: '/api/users/claim'
+      preLoaderRoute: typeof ApiUsersClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/incentives': {
+      id: '/api/users/incentives'
+      path: '/api/users/incentives'
+      fullPath: '/api/users/incentives'
+      preLoaderRoute: typeof ApiUsersIncentivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/socials': {
+      id: '/api/users/socials'
+      path: '/api/users/socials'
+      fullPath: '/api/users/socials'
+      preLoaderRoute: typeof ApiUsersSocialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/sync': {
+      id: '/api/users/sync'
+      path: '/api/users/sync'
+      fullPath: '/api/users/sync'
+      preLoaderRoute: typeof ApiUsersSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/analytics/$id': {
+      id: '/campaigns/analytics/$id'
+      path: '/campaigns/analytics/$id'
+      fullPath: '/campaigns/analytics/$id'
+      preLoaderRoute: typeof CampaignsAnalyticsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/campaigns/$slug/metrics': {
+      id: '/api/campaigns/$slug/metrics'
+      path: '/$slug/metrics'
+      fullPath: '/api/campaigns/$slug/metrics'
+      preLoaderRoute: typeof ApiCampaignsSlugMetricsRouteImport
+      parentRoute: typeof ApiCampaignsRoute
+    }
+    '/api/campaigns/admin/$id': {
+      id: '/api/campaigns/admin/$id'
       path: '/$id'
-      fullPath: '/api/studio/campaigns/$id'
-      preLoaderRoute: typeof ApiStudioCampaignsIdRouteImport
-      parentRoute: typeof ApiStudioCampaignsRoute
+      fullPath: '/api/campaigns/admin/$id'
+      preLoaderRoute: typeof ApiCampaignsAdminIdRouteImport
+      parentRoute: typeof ApiCampaignsAdminRoute
     }
-    '/api/public/siwe/verify': {
-      id: '/api/public/siwe/verify'
-      path: '/api/public/siwe/verify'
-      fullPath: '/api/public/siwe/verify'
-      preLoaderRoute: typeof ApiPublicSiweVerifyRouteImport
-      parentRoute: typeof rootRouteImport
+    '/api/proposals/$id/vote': {
+      id: '/api/proposals/$id/vote'
+      path: '/$id/vote'
+      fullPath: '/api/proposals/$id/vote'
+      preLoaderRoute: typeof ApiProposalsIdVoteRouteImport
+      parentRoute: typeof ApiProposalsRoute
     }
-    '/api/public/siwe/nonce': {
-      id: '/api/public/siwe/nonce'
-      path: '/api/public/siwe/nonce'
-      fullPath: '/api/public/siwe/nonce'
-      preLoaderRoute: typeof ApiPublicSiweNonceRouteImport
+    '/api/public/activity/verify': {
+      id: '/api/public/activity/verify'
+      path: '/api/public/activity/verify'
+      fullPath: '/api/public/activity/verify'
+      preLoaderRoute: typeof ApiPublicActivityVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/activity/verify-swap': {
@@ -1879,33 +1865,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicActivityVerifySwapRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/activity/verify': {
-      id: '/api/public/activity/verify'
-      path: '/api/public/activity/verify'
-      fullPath: '/api/public/activity/verify'
-      preLoaderRoute: typeof ApiPublicActivityVerifyRouteImport
+    '/api/public/siwe/nonce': {
+      id: '/api/public/siwe/nonce'
+      path: '/api/public/siwe/nonce'
+      fullPath: '/api/public/siwe/nonce'
+      preLoaderRoute: typeof ApiPublicSiweNonceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/proposals/$id/vote': {
-      id: '/api/proposals/$id/vote'
-      path: '/$id/vote'
-      fullPath: '/api/proposals/$id/vote'
-      preLoaderRoute: typeof ApiProposalsIdVoteRouteImport
-      parentRoute: typeof ApiProposalsRoute
+    '/api/public/siwe/verify': {
+      id: '/api/public/siwe/verify'
+      path: '/api/public/siwe/verify'
+      fullPath: '/api/public/siwe/verify'
+      preLoaderRoute: typeof ApiPublicSiweVerifyRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/api/campaigns/admin/$id': {
-      id: '/api/campaigns/admin/$id'
+    '/api/studio/campaigns/$id': {
+      id: '/api/studio/campaigns/$id'
       path: '/$id'
-      fullPath: '/api/campaigns/admin/$id'
-      preLoaderRoute: typeof ApiCampaignsAdminIdRouteImport
-      parentRoute: typeof ApiCampaignsAdminRoute
+      fullPath: '/api/studio/campaigns/$id'
+      preLoaderRoute: typeof ApiStudioCampaignsIdRouteImport
+      parentRoute: typeof ApiStudioCampaignsRoute
     }
-    '/api/campaigns/$slug/metrics': {
-      id: '/api/campaigns/$slug/metrics'
-      path: '/$slug/metrics'
-      fullPath: '/api/campaigns/$slug/metrics'
-      preLoaderRoute: typeof ApiCampaignsSlugMetricsRouteImport
-      parentRoute: typeof ApiCampaignsRoute
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/campaigns/admin/$id/analytics': {
       id: '/api/campaigns/admin/$id/analytics'
