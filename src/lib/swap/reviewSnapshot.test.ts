@@ -3,7 +3,7 @@ import { createSwapReviewSnapshot, reviewChanged } from "./reviewSnapshot";
 import type { QuoteResult } from "./quoter";
 
 const quote: QuoteResult = { amountOut: 90n, symbolPath: ["BOT", "USDT"], path: ["0x0000000000000000000000000000000000000001"], steps: [{ dex: "bdex-v3", routerId: 0, router: "0x0000000000000000000000000000000000000002", path: ["0x0000000000000000000000000000000000000001", "0x0000000000000000000000000000000000000003"], symbolPath: ["BOT", "USDT"], inIsNative: true, outIsNative: false, expectedOut: 90n, v3Fee: 3000 }] };
-const make = (q = quote, fee = 1n) => createSwapReviewSnapshot({ chainId: 677, tokenIn: "0x0000000000000000000000000000000000000000", tokenOut: "0x0000000000000000000000000000000000000003", amountIn: 100n, quote: q, minimumOut: 89n, protocolFee: fee });
+const make = (q = quote, fee: bigint | string = 1n) => createSwapReviewSnapshot({ chainId: 677, tokenIn: "0x0000000000000000000000000000000000000000", tokenOut: "0x0000000000000000000000000000000000000003", amountIn: 100n, quote: q, minimumOut: 89n, protocolFee: fee });
 
 describe("swap review snapshots", () => {
   it("keeps an identical review valid", () => expect(reviewChanged(make(), make())).toBe(false));

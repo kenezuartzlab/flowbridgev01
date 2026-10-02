@@ -49,8 +49,9 @@ export function TokenPickerModal({
 
   const list = useMemo(() => {
     const all = [...curated, ...imported];
+    const unique = [...new Map(all.map((token) => [token.address.toLowerCase(), token])).values()];
     const q = query.trim().toLowerCase();
-    const filtered = all.filter((t) => {
+    const filtered = unique.filter((t) => {
       if (excludeAddress && t.address.toLowerCase() === excludeAddress.toLowerCase()) return false;
       if (!q) return true;
       return (
