@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import type { Abi, Address } from "viem";
 import { getLiquidityVenues, type V2Venue, type V3Venue } from "@/lib/liquidity/venues";
@@ -34,7 +34,7 @@ export function usePositions(chainId: number) {
 
 export function PositionsPanel({ chainId, writable, explorer, slippageBps }: { chainId: number; writable: boolean; explorer: string; slippageBps: number }) {
   const { v3, v2, err, reload, address } = usePositions(chainId);
-  const venues = getLiquidityVenues(chainId);
+  const venues = useMemo(() => getLiquidityVenues(chainId), [chainId]);
   const v3v = venues.find((v) => v.kind === "v3") as V3Venue | undefined;
   const tx = useLiquidityTx();
   const [action, setAction] = useState<{ op: LiquidityOp; rows: [string, string][]; notes?: string[] } | null>(null);
