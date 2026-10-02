@@ -32,7 +32,7 @@ describe('FlowBridge execution registry', () => {
     );
   });
 
-  it('classifies BOT Mainnet as legacy v3 with V4 promotion pending', () => {
+  it('keeps BOT Mainnet default execution on v3 after the route-scoped V4 promotion', () => {
     const t = requireFlowBridgeExecution(BOT_MAINNET_CHAIN_ID);
     expect(t.routerVersion).toBe('v3-legacy');
     expect(t.discoveryKind).toBe('router');
@@ -40,7 +40,7 @@ describe('FlowBridge execution registry', () => {
     expect(t.legacy).toBe(true);
     expect(t.v4Configured).toBe(false);
     expect(t.v4Enabled).toBe(false);
-    expect(t.promotionPending).toBe(true);
+    expect(t.promotionPending).toBe(false);
   });
 
   it('resolves V4 only on BOT Testnet 968', () => {

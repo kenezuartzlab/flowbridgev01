@@ -25,7 +25,7 @@ export function usePositions(chainId: number) {
       try {
         if (v.kind === "v3") setV3(await discoverV3Positions(v, address));
         else { const r = await discoverV2Positions(v, address); setV2((s) => ({ ...s, [v.id]: r })); }
-      } catch (e) { setErr(`${v.label}: ${(e as Error).message.slice(0, 120)}`); if (v.kind === "v3") setV3([]); else setV2((s) => ({ ...s, [v.id]: [] })); }
+      } catch { setErr(`${v.label}: Liquidity information is temporarily unavailable. Retry when the connection recovers.`); }
     }));
   }, [address, chainId]);
   useEffect(() => { void load(); }, [load]);

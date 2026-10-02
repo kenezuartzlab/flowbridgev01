@@ -60,6 +60,11 @@ import { WarningPanel } from "@/components/routetabs/WarningPanel";
 import { toFriendlyError, isNativeGasLow, lowGasMessage, lowGasSteps } from "@/lib/friendlyError";
 import { LowGasSettingsModal } from "@/modals/LowGasSettingsModal";
 import { atomicV4Target, encodeV3Path } from "@/lib/swap/atomicV4";
+import { planExecution } from "@/lib/swap/executionCapability";
+import { createSwapReviewSnapshot, reviewChanged, type SwapReviewSnapshot } from "@/lib/swap/reviewSnapshot";
+import { readRouterV4Health, routerHealthWarning, type RouterV4Health } from "@/lib/swap/routerV4Health";
+import { atomicFailureMessage, createRoutedSwapActivity, recordRoutedSwapTx } from "@/lib/swap/swapLifecycle";
+import { sanitizeFailureReason, trackTradeOperationalEvent, type TradeOperationalEventName } from "@/lib/swap/operationalTelemetry";
 
 const parseTxError = (e: unknown) => toFriendlyError(e, { action: "swap", gasSymbol: "BOT" });
 
@@ -202,6 +207,9 @@ export function UniversalSwapCard({
   const [txError, setTxError] = useState<string | null>(null);
   const [lastTx, setLastTx] = useState<`0x${string}` | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [reviewSnapshot, setReviewSnapshot] = useState<SwapReviewSnapshot | null>(null);
+  const [routerHealth, setRouterHealth] = useState<RouterV4Health | null>(null);
+  const [routerHealthFailed, setRouterHealthFailed] = useState(false);
 
   // Reset curated tokens when the NETWORK actually changes (not on remount —
   // remount must restore the session draft instead of clobbering it).
@@ -312,6 +320,23 @@ export function UniversalSwapCard({
   const nativeGasLow = !!address && isNativeGasLow(nativeGasBalance.data?.value, 18, "BOT");
   const [gasSettingsOpen, setGasSettingsOpen] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!isMainnet || !publicClient) return;
+    const check = async () => {
+      try {
+        const health = await readRouterV4Health(publicClient as any);
+        if (!cancelled) { setRouterHealth(health); setRouterHealthFailed(false); }
+      } catch {
+        if (!cancelled) { setRouterHealth(null); setRouterHealthFailed(true); }
+      }
+    };
+    void check();
+    const timer = setInterval(check, 60_000);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [isMainnet, publicClient]);
+  const healthWarning = isMainnet ? routerHealthWarning(routerHealth, routerHealthFailed) : null;
+
 
 
   // ── Allowance ─────────────────────────────────────────────────────────────
@@ -337,6 +362,7 @@ export function UniversalSwapCard({
     setQuoting(true);
     setQuoteError(null);
     const handle = setTimeout(async () => {
+      const startedAt = performance.now();
       try {
         const parsed = parseUnits(amountIn, tokenIn.decimals);
         const result = await getBestRoute(tokenIn, tokenOut, parsed, isMainnet, dexPref);
@@ -344,14 +370,18 @@ export function UniversalSwapCard({
         if (!result) {
           setQuote(null);
           setQuoteError("No liquidity route yet");
+          trackTradeOperationalEvent({ eventName: "route_unavailable", network: balanceChainId, routeType: "unknown", dex: dexPref, transactionCount: 0, durationMs: performance.now() - startedAt });
         } else {
           setQuote(result);
           setQuoteError(null);
+          const plan = planExecution(result.steps, balanceChainId);
+          trackTradeOperationalEvent({ eventName: "quote_success", network: balanceChainId, routeType: result.steps.length === 1 ? "single" : plan.execution === "ATOMIC_V4" ? "atomic_v4" : "staged", dex: [...new Set(result.steps.map((s) => s.dex))].join("+"), transactionCount: plan.execution === "ATOMIC_V4" ? 1 : result.steps.length, durationMs: performance.now() - startedAt });
         }
       } catch (e: any) {
         if (!cancelled) {
           setQuote(null);
-          setQuoteError(e?.message ?? "Quote failed");
+          setQuoteError("Liquidity information is temporarily unavailable");
+          trackTradeOperationalEvent({ eventName: "rpc_failure", network: balanceChainId, routeType: "unknown", dex: dexPref, transactionCount: 0, durationMs: performance.now() - startedAt, failureReason: e?.message });
         }
       } finally {
         if (!cancelled) setQuoting(false);
@@ -361,7 +391,7 @@ export function UniversalSwapCard({
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [amountIn, tokenIn, tokenOut, isMainnet, dexPref, quoteTick]);
+  }, [amountIn, tokenIn, tokenOut, isMainnet, dexPref, quoteTick, balanceChainId]);
 
   useEffect(() => {
     if (!amountIn || busy) return;
@@ -423,6 +453,35 @@ export function UniversalSwapCard({
 
   const minOutFor = (expected: bigint) =>
     (expected * BigInt(Math.floor((100 - effectiveSlippage) * 1000))) / 100000n;
+
+  const buildReviewSnapshot = async (candidate: QuoteResult, inputAmount: bigint) => {
+    if (!address || !publicClient) throw new Error("Wallet or provider unavailable");
+    const execution = planExecution(candidate.steps, balanceChainId);
+    const atomic = isMainnet ? atomicV4Target(candidate.steps, 677) : null;
+    let approvalCount = 0;
+    const fees: string[] = [];
+    if (atomic) {
+      const [fee] = (await publicClient.readContract({ address: atomic.router, abi: FLOW_BRIDGE_ROUTER_V4_ABI, functionName: "computeRouterFee", args: [BigInt(atomic.routerId), inputAmount, address] })) as readonly [bigint, bigint];
+      fees.push(fee.toString());
+      if (!candidate.steps[0].inIsNative) {
+        const allowance = (await publicClient.readContract({ address: candidate.steps[0].path[0], abi: ERC20_ABI, functionName: "allowance", args: [address, atomic.router] })) as bigint;
+        if (allowance < inputAmount + fee) approvalCount++;
+      }
+    } else {
+      for (let i = 0; i < candidate.steps.length; i++) {
+        const step = candidate.steps[i];
+        const stepAmount = i === 0 ? inputAmount : candidate.steps[i - 1].expectedOut;
+        const [fee] = (await publicClient.readContract({ address: flowRouter, abi: flowAbi, functionName: "computeRouterFee", args: [BigInt(step.routerId), stepAmount, address] })) as readonly [bigint, bigint];
+        fees.push(fee.toString());
+        if (!step.inIsNative) {
+          const allowance = (await publicClient.readContract({ address: step.path[0], abi: ERC20_ABI, functionName: "allowance", args: [address, flowRouter] })) as bigint;
+          if (allowance < stepAmount + fee) approvalCount++;
+        }
+      }
+    }
+    const transactionCount = (execution.execution === "ATOMIC_V4" ? 1 : candidate.steps.length) + approvalCount;
+    return createSwapReviewSnapshot({ chainId: balanceChainId, tokenIn: tokenIn.address, tokenOut: tokenOut.address, amountIn: inputAmount, quote: candidate, minimumOut: minOutFor(candidate.amountOut), protocolFee: fees.join("|"), approvalCount, transactionCount });
+  };
 
   // Execute a single SwapStep through FlowBridgeRouter v3.
   // `amountInRaw` is the net swap amount (in token-in units). The router charges a
@@ -668,6 +727,8 @@ export function UniversalSwapCard({
     setTxError(null);
     setLastTx(null);
     // Pre-flight: block if the wallet clearly can't afford network gas.
+    let atomicAttempted = false;
+    let routedActivity: ReturnType<typeof createRoutedSwapActivity> | null = null;
     try {
       const nativeRaw = (await publicClient.getBalance({ address })) ?? 0n;
       if (isNativeGasLow(nativeRaw, 18, "BOT")) {
@@ -699,6 +760,17 @@ export function UniversalSwapCard({
       const initialAmount = parseUnits(amountIn, tokenIn.decimals);
       const latestQuote = await getBestRoute(tokenIn, tokenOut, initialAmount, isMainnet, dexPref);
       if (!latestQuote) throw new Error("No live route available. Refresh and try again.");
+      const freshPlan = planExecution(latestQuote.steps, balanceChainId);
+      const freshAtomic = isMainnet ? atomicV4Target(latestQuote.steps, 677) : null;
+      if (freshAtomic && (!routerHealth || !routerHealth.ok)) throw new Error(healthWarning ?? "Router V4 health check is still running. Review again shortly.");
+      const freshSnapshot = await buildReviewSnapshot(latestQuote, initialAmount);
+      if (!reviewSnapshot || reviewChanged(reviewSnapshot, freshSnapshot)) {
+        setQuote(latestQuote);
+        setReviewSnapshot(freshSnapshot);
+        setConfirmOpen(true);
+        trackTradeOperationalEvent({ eventName: "review_invalidated", network: balanceChainId, routeType: freshPlan.execution === "ATOMIC_V4" ? "atomic_v4" : latestQuote.steps.length > 1 ? "staged" : "single", dex: [...new Set(latestQuote.steps.map((s) => s.dex))].join("+"), transactionCount: freshPlan.execution === "ATOMIC_V4" ? 1 : latestQuote.steps.length });
+        throw new Error("Route changed — please review again");
+      }
       setQuote(latestQuote);
       // V30.2B P4A.2 — revalidate the guarded FLOW/USDT route immediately before
       // signing. A changed route, pool, chain, amount or protection mode voids
@@ -818,6 +890,7 @@ export function UniversalSwapCard({
       // ATOMIC — V4: native BOT <-> BDEX V3 multi-pool in ONE Router V4 transaction.
       const atomic = isMainnet ? atomicV4Target(activeQuote.steps, 677) : null;
       if (atomic && activeQuote.steps.length > 1) {
+        atomicAttempted = true;
         const me = address as `0x${string}`;
         const encodedPath = encodeV3Path(activeQuote.steps);
         const [fee] = (await publicClient.readContract({
@@ -849,16 +922,28 @@ export function UniversalSwapCard({
           args, account: me, ...(nativeIn ? { value: initialAmount + fee } : {}),
         } as const;
         // Fresh simulation right before the signature; reverts surface here.
-        await publicClient.simulateContract(req as any);
+        try {
+          await publicClient.simulateContract(req as any);
+          trackTradeOperationalEvent({ eventName: "simulation_success", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
+        } catch (error) {
+          trackTradeOperationalEvent({ eventName: "simulation_failure", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1, failureReason: error instanceof Error ? error.message : undefined });
+          throw error;
+        }
         setBusyMsg(`ATOMIC — V4: 1 swap transaction…`);
         const tx = await writeContractAsync(req as any);
+        routedActivity = createRoutedSwapActivity({ id: `routed-swap-${Date.now()}`, chainId: 677, wallet: me, pair: `${tokenIn.symbol}/${tokenOut.symbol}`, dex: "BDEX V3", amount: `${amountIn} ${tokenIn.symbol}` });
+        recordRoutedSwapTx(routedActivity, { hash: tx, label: "Atomic Router V4 swap", phase: "confirming" });
+        trackTradeOperationalEvent({ eventName: "tx_submitted", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
         const rc = await publicClient.waitForTransactionReceipt({ hash: tx });
-        if (rc.status !== "success") throw new Error(`Transaction reverted: ${tx}`);
+        recordRoutedSwapTx(routedActivity, { hash: tx, label: "Atomic Router V4 swap", phase: rc.status === "success" ? "confirmed" : "failed" });
+        if (rc.status !== "success") throw new Error("Transaction reverted on-chain");
+        trackTradeOperationalEvent({ eventName: "tx_confirmed", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
         handoffSwapAttribution(tx);
         lastTx = tx;
       }
 
       const ranAtomic = lastTx != null;
+      if (!ranAtomic && activeQuote.steps.length > 1) routedActivity = createRoutedSwapActivity({ id: `routed-swap-${Date.now()}`, chainId: balanceChainId, wallet: address, pair: `${tokenIn.symbol}/${tokenOut.symbol}`, dex: [...new Set(activeQuote.steps.map((s) => s.dex))].join(" + "), amount: `${amountIn} ${tokenIn.symbol}` });
       for (let i = 0; !ranAtomic && i < activeQuote.steps.length; i++) {
         let step = activeQuote.steps[i];
         if (i > 0 && step.tokens) {
@@ -949,7 +1034,10 @@ export function UniversalSwapCard({
           isLastLeg && activeQuote.steps.length > 1 ? routeMinOut : undefined,
         );
         lastTx = tx;
+        if (routedActivity) recordRoutedSwapTx(routedActivity, { hash: tx, label: `Step ${i + 1}: ${stepLabel}`, phase: "confirming" });
+        trackTradeOperationalEvent({ eventName: "tx_submitted", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: activeQuote.steps.length });
         const rcpt = await publicClient.waitForTransactionReceipt({ hash: tx });
+        if (routedActivity) recordRoutedSwapTx(routedActivity, { hash: tx, label: `Step ${i + 1}: ${stepLabel}`, phase: rcpt.status === "success" ? "confirmed" : "failed" });
         if (rcpt.status === "success" && outBefore != null) {
           const outAfter = await readOutBalance(step).catch(() => null);
           if (outAfter != null) {
@@ -974,8 +1062,10 @@ export function UniversalSwapCard({
             phase: "error",
             message: `Transaction reverted on-chain (${shortHash(tx)})`,
           });
+          trackTradeOperationalEvent({ eventName: "tx_reverted", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: activeQuote.steps.length, failureReason: "transaction reverted" });
           return;
         }
+        trackTradeOperationalEvent({ eventName: "tx_confirmed", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: activeQuote.steps.length });
         handoffSwapAttribution(tx);
       }
 
@@ -1008,10 +1098,14 @@ export function UniversalSwapCard({
       }
       await allowanceRead.refetch?.();
     } catch (e: any) {
-      const msg = parseTxError(e);
+      const raw = e instanceof Error ? e.message : String(e ?? "");
+      const msg = atomicAttempted ? `${atomicFailureMessage()} ${parseTxError(e)}` : parseTxError(e);
       setTxError(msg);
       toast.error(msg, { id: swapToastId });
       onSwapPhaseChange?.({ phase: "error", message: msg });
+      const reason = sanitizeFailureReason(raw);
+      const eventName: TradeOperationalEventName = atomicAttempted && reason === "transaction_reverted" ? "tx_reverted" : reason === "user_rejected" ? "wallet_rejected" : reason === "minimum_output_failure" ? "minimum_output_failure" : reason === "allowance_failure" ? "allowance_failure" : reason === "insufficient_balance" ? "insufficient_balance" : reason === "rpc_failure" ? "rpc_failure" : "quote_stale";
+      trackTradeOperationalEvent({ eventName, network: balanceChainId, routeType: atomicAttempted ? "atomic_v4" : quote.steps.length > 1 ? "staged" : "single", dex: [...new Set(quote.steps.map((s) => s.dex))].join("+"), transactionCount: atomicAttempted ? 1 : quote.steps.length, failureReason: raw });
     } finally {
       setBusy(false);
       setBusyMsg("");
@@ -1125,12 +1219,21 @@ export function UniversalSwapCard({
     ? (Number(formatUnits(quote.amountOut, tokenOut.decimals)) * (100 - effectiveSlippage)) / 100
     : 0;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isConnected) return onConnect();
     if (!isNetworkCorrect) return onSwitchNetwork();
     if (!quote || !amountIn || parsedAmount === 0n) return;
     if (guardBlocked) return;
-    setConfirmOpen(true);
+    if (!publicClient || !address) return;
+    const plan = planExecution(quote.steps, balanceChainId);
+    if (plan.execution === "ATOMIC_V4" && healthWarning) { setTxError(healthWarning); return; }
+    try {
+      setReviewSnapshot(await buildReviewSnapshot(quote, parsedAmount));
+      setConfirmOpen(true);
+    } catch (e) {
+      setTxError("Liquidity information is temporarily unavailable. Retry when the connection recovers.");
+      trackTradeOperationalEvent({ eventName: "rpc_failure", network: balanceChainId, routeType: plan.execution === "ATOMIC_V4" ? "atomic_v4" : quote.steps.length > 1 ? "staged" : "single", dex: [...new Set(quote.steps.map((s) => s.dex))].join("+"), transactionCount: plan.execution === "ATOMIC_V4" ? 1 : quote.steps.length, failureReason: e instanceof Error ? e.message : undefined });
+    }
   };
 
   const usdValueFor = (t: Token, amt: string): string | undefined => {
@@ -1372,6 +1475,10 @@ export function UniversalSwapCard({
       )}
       <LowGasSettingsModal isOpen={gasSettingsOpen} onClose={() => setGasSettingsOpen(false)} />
 
+      {healthWarning && quote && planExecution(quote.steps, balanceChainId).execution === "ATOMIC_V4" && (
+        <WarningPanel type="warning" title="Atomic route unavailable" message={healthWarning} />
+      )}
+
       {quoteError && amountIn && parseFloat(amountIn) > 0 && !quoting && (
         quoteError === "No liquidity route yet" ? (
           <NoRoutePanel
@@ -1446,7 +1553,7 @@ export function UniversalSwapCard({
       />
       <ConfirmSwapModal
         isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
+        onClose={() => { setConfirmOpen(false); setReviewSnapshot(null); }}
         onConfirm={() => {
           setConfirmOpen(false);
           void handleSwap();
@@ -1461,6 +1568,11 @@ export function UniversalSwapCard({
         tradingFee={tradingFeeLabel}
         priceImpact={priceImpactLabel}
         platformFee={platformFeeLabel}
+        executionLabel={quote ? planExecution(quote.steps, balanceChainId).label : undefined}
+        transactionCount={reviewSnapshot?.transactionCount}
+        approvalCount={reviewSnapshot?.approvalCount}
+        dexCount={quote ? new Set(quote.steps.map((s) => s.dex)).size : undefined}
+        routeSteps={quote?.steps.map((s, i) => `${i + 1}. ${s.symbolPath[0]} → ${s.symbolPath[s.symbolPath.length - 1]} · ${s.dex}`)}
       />
     </div>
   );

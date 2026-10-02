@@ -1178,6 +1178,45 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_operational_events: {
+        Row: {
+          device_category: string
+          dex: string
+          duration_ms: number | null
+          event_name: string
+          failure_reason: string | null
+          id: string
+          network: number
+          occurred_at: string
+          route_type: string
+          transaction_count: number
+        }
+        Insert: {
+          device_category: string
+          dex?: string
+          duration_ms?: number | null
+          event_name: string
+          failure_reason?: string | null
+          id?: string
+          network: number
+          occurred_at?: string
+          route_type: string
+          transaction_count?: number
+        }
+        Update: {
+          device_category?: string
+          dex?: string
+          duration_ms?: number | null
+          event_name?: string
+          failure_reason?: string | null
+          id?: string
+          network?: number
+          occurred_at?: string
+          route_type?: string
+          transaction_count?: number
+        }
+        Relationships: []
+      }
       transactions_history: {
         Row: {
           created_at: string

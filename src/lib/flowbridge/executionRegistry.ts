@@ -8,8 +8,9 @@
  * Deployment truth (user-provided manifest, validated on-chain):
  *   BOT Testnet (968)  FlowBridgeRouterV4 0xEcd8041a0aD94992a735a5d8AEB40D3e8B4d089A
  *                      FlowBridgeRouterLens 0x1F32C2d73Ed7D2878252De3Bb4c40bD07f36db2E
- *   BOT Mainnet (677)  FlowBridgeRouter v3 (existing production deployment) —
- *                      V4 mainnet deployment DEFERRED, so v3 stays authoritative.
+ *   BOT Mainnet (677)  Router V3 remains the default execution target. The
+ *                      separately promoted V4 is enabled only by the route
+ *                      capability matrix for proven native V3 multi-pool routes.
  *   BNB chains (97/56) No FlowBridge execution contract — explicitly unconfigured.
  *
  * The official bridge stays DIRECT: V4 bridge-proxy execution is disabled
@@ -103,9 +104,8 @@ const REGISTRY: readonly FlowBridgeExecutionResolution[] = [
     bridgeProxyEnabled: false,
   },
   {
-    // TESTNET FIRST, MAINNET LATER: this is the pre-V4 production deployment,
-    // retained for backward compatibility only. It is NOT a Router V4 target
-    // and awaits a future audited V4 mainnet deployment gate.
+    // Router V3 remains authoritative for every route class not explicitly
+    // promoted through executionCapability.ts. Do not widen this entry to V4.
     configured: true,
     chainId: BOT_MAINNET_CHAIN_ID,
     chainName: 'BOT Mainnet',
@@ -116,7 +116,7 @@ const REGISTRY: readonly FlowBridgeExecutionResolution[] = [
     supportsSafeSwaps: false,
     v4Configured: false,
     v4Enabled: false,
-    promotionPending: true,
+    promotionPending: false,
     legacy: true,
     bridgeProxyEnabled: false,
   },
