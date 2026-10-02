@@ -18,6 +18,9 @@ interface ConfirmSwapModalProps {
   minimumReceived?: string;
   tradingFee?: string;
   platformFee?: string;
+  executionLabel?: string;
+  transactionCount?: number;
+  routeSteps?: string[];
   isBridge?: boolean;
   fromChain?: string;
   toChain?: string;
@@ -37,6 +40,9 @@ export function ConfirmSwapModal({
   minimumReceived,
   tradingFee = "0.30%",
   platformFee = "0.1%",
+  executionLabel,
+  transactionCount,
+  routeSteps = [],
   isBridge = false,
   fromChain = "BOT Chain",
   toChain = "BNB Chain"
@@ -116,6 +122,10 @@ export function ConfirmSwapModal({
 
         {/* Transaction Summary Card */}
         <div className="bg-[#010C1B]/80 border border-white/10 rounded-xl p-3 space-y-2 text-[12px] font-mono">
+
+          {executionLabel && <div className="flex justify-between items-center text-[#C5C1B9]"><span className="uppercase tracking-wider">Execution</span><span className="font-black text-white">{executionLabel}</span></div>}
+          {transactionCount != null && <div className="flex justify-between items-center text-[#C5C1B9]"><span className="uppercase tracking-wider">Transactions</span><span className="font-black text-white">{transactionCount}</span></div>}
+          {routeSteps.map((step) => <p key={step} className="text-[10.5px] text-[#C5C1B9]">{step}</p>)}
 
           <div className="flex justify-between items-center text-[#C5C1B9]">
             <span className="uppercase tracking-wider">Price Rate</span>
