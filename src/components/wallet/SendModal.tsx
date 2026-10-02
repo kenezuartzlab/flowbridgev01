@@ -19,6 +19,7 @@ import { TokenIcon } from "@/components/TokenIcon";
 import type { HoldingRow } from "@/lib/wallet/portfolio";
 import { toFriendlyError } from "@/lib/friendlyError";
 import { QrScanButton } from "@/components/wallet/QrScanButton";
+import { ModalPortal } from "@/modals/ModalPortal";
 
 const ERC20_TRANSFER_ABI = parseAbi([
   "function transfer(address to, uint256 value) returns (bool)",
@@ -186,7 +187,8 @@ export function SendModal({ isOpen, onClose, rows, network, onSent }: Props) {
           : "Enter details";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-3 backdrop-blur-md sm:items-center">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-background/90 p-3 backdrop-blur-md sm:items-center">
       <div className="fb-surface relative w-full max-w-[420px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[15px] font-black tracking-tight">Send</p>
@@ -378,5 +380,6 @@ export function SendModal({ isOpen, onClose, rows, network, onSent }: Props) {
         )}
       </div>
     </div>
+    </ModalPortal>
   );
 }

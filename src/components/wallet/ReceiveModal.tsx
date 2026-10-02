@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Check, Copy, Download, ExternalLink, Share2, X } from "lucide-react";
 import QRCode from "qrcode";
 import { DEFAULT_WALLET_NETWORK, findWalletNetwork } from "@/lib/wallet/networks";
+import { ModalPortal } from "@/modals/ModalPortal";
 
 interface Props {
   isOpen: boolean;
@@ -78,7 +79,8 @@ export function ReceiveModal({ isOpen, onClose, address, networkLabel, chainId }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-3 backdrop-blur-md sm:items-center">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-background/90 p-3 backdrop-blur-md sm:items-center">
       <div className="fb-surface w-full max-w-[420px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[15px] font-black tracking-tight">Receive</p>
@@ -150,5 +152,6 @@ export function ReceiveModal({ isOpen, onClose, address, networkLabel, chainId }
         </p>
       </div>
     </div>
+    </ModalPortal>
   );
 }
