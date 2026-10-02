@@ -34,8 +34,8 @@
 - [x] Old V4 forge 35/35, new 32/32, fork sims, Slither triaged.
 - [x] ABI regenerated from artifact + parity tests; legacy selectors moved to test fixture.
 - [x] Testnet candidate 0xd985…1C1E deployed, delay-activated, BOT→FLOW and FLOW→BOT atomic PASS.
-- [x] Capability matrix (ATOMIC — V4 vs STAGED) with flags OFF on all chains.
-- [ ] Mainnet promotion steps 1–12 (needs owner approval + Governance Safe signatures).
+- [x] Capability matrix (ATOMIC — V4 vs STAGED); only BOT Mainnet native BOT↔BDEX V3 multi-pool is enabled.
+- [x] Mainnet Router V4 promotion complete at 0x7965…fc61; canonical owner accepted ownership.
 - [ ] CaSwap → BDEX V2 existing atomic path: NOT AVAILABLE (no shared token between venues).
 - [ ] FUTURE: ROUTER V4 MIXED-VENUE EXTENSION (V2↔V3, CaSwap↔V3, native + mixed). Own design/security gate. Not implemented.
 - [x] 0x524D…98c5 accepted ownership of Router V4 0x7965…fc61
