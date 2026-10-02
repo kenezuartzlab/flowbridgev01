@@ -377,22 +377,23 @@ export function RealtimeBridgeTrackerModal({
 
   return (
     <ModalPortal>
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans text-white">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 font-sans text-foreground backdrop-blur-md animate-fade-in sm:p-4">
       <div 
         id="realtime_bridge_tracker"
-        className="bg-[#030E1A] border border-white/10 text-[#F0F7F3] rounded-[22px] w-full max-h-[88dvh] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col space-y-4 animate-scale-up"
+        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[340px] flex-col space-y-4 overflow-y-auto overscroll-contain rounded-[22px] border border-hairline bg-card p-4 text-foreground shadow-2xl animate-scale-up"
       >
         {/* Top Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 hover:bg-white/5 rounded-xl text-[#C5C1B9] hover:text-white transition-colors cursor-pointer"
+          aria-label="Close bridge tracker"
+          className="absolute top-4 right-4 p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header Action - Tracking Header */}
         <div className="text-center pt-2">
-          <h2 className="text-xl font-bold font-mono tracking-tight text-white mb-1">
+          <h2 className="text-xl font-bold font-mono tracking-tight text-foreground mb-1">
             Track your transaction
           </h2>
         </div>
@@ -412,7 +413,7 @@ export function RealtimeBridgeTrackerModal({
               <TokenChainPair chain={fromChain} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(trackedAmount)}</span>
+                <span className="text-[13px] font-black text-foreground block tracking-wider font-mono">{displayAmount(trackedAmount)}</span>
                 <span className="text-[11px] font-bold text-amber-400 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
               </div>
             </div>
@@ -433,7 +434,7 @@ export function RealtimeBridgeTrackerModal({
               <TokenChainPair chain={toChain} delay={200} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
-                <span className="text-[13px] font-black text-white block tracking-wider font-mono">{displayAmount(trackedAmount)}</span>
+                <span className="text-[13px] font-black text-foreground block tracking-wider font-mono">{displayAmount(trackedAmount)}</span>
                 <span className="text-[11px] font-bold text-teal-400 uppercase font-mono tracking-widest">{normChain(toChain)}</span>
               </div>
             </div>
@@ -449,8 +450,8 @@ export function RealtimeBridgeTrackerModal({
               <span className="text-sm font-black uppercase text-[#32FF8B] tracking-widest font-mono">Completed</span>
             </div>
           ) : (
-            <div className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-full text-center">
-              <div className="text-sm font-black text-white font-mono tracking-widest">
+            <div className="rounded-full border border-hairline-strong bg-background px-6 py-2.5 text-center shadow-sm">
+              <div className="text-sm font-black text-foreground font-mono tracking-widest tabular-nums">
                 {formattedTime}
               </div>
             </div>
@@ -458,10 +459,10 @@ export function RealtimeBridgeTrackerModal({
         </div>
 
         {/* Milestone Steps Timeline - Matching Screenshots Exactly with spinning loader/checkmarks */}
-        <div className="bg-[#010C1B]/80 border border-white/10 rounded-[20px] p-5 space-y-4">
+        <div className="bg-background/80 border border-hairline rounded-[20px] p-5 space-y-4">
           {/* Milestone 1 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[13px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
+            <span className="text-[13px] font-semibold text-foreground/90 font-mono tracking-normal leading-normal">
               Sent transaction from <strong className="text-amber-300 font-bold">{normChain(fromChain)}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -473,7 +474,7 @@ export function RealtimeBridgeTrackerModal({
 
           {/* Milestone 2 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[13px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
+            <span className="text-[13px] font-semibold text-foreground/90 font-mono tracking-normal leading-normal">
               Sent transaction to <strong className="text-teal-400 font-bold">{normChain(toChain)}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -485,7 +486,7 @@ export function RealtimeBridgeTrackerModal({
 
           {/* Milestone 3 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[13px] font-semibold text-[#F0F7F3]/90 font-mono tracking-normal leading-normal">
+            <span className="text-[13px] font-semibold text-foreground/90 font-mono tracking-normal leading-normal">
               Received {symbol} on <strong className="text-teal-400 font-mono font-black">{truncatedAddress}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -509,8 +510,8 @@ export function RealtimeBridgeTrackerModal({
             className={cn(
               "w-full py-3.5 rounded-xl border font-mono text-sm tracking-widest font-bold uppercase transition-all duration-150 flex items-center justify-center gap-2",
               isCompleted 
-                ? "bg-[#32FF8B] border-[#32FF8B] text-[#010C1B] hover:bg-[#1FFF7D] cursor-pointer shadow-[0_0_12px_rgba(50,255,139,0.25)]" 
-                : "bg-white/5 border-white/5 text-[#C5C1B9]/60 hover:text-white cursor-pointer"
+                ? "bg-primary border-primary text-primary-foreground hover:bg-primary-strong cursor-pointer fb-glow" 
+                : "bg-background border-hairline text-muted hover:text-foreground cursor-pointer"
             )}
           >
             <span>View Detail</span>
@@ -523,7 +524,7 @@ export function RealtimeBridgeTrackerModal({
               onReset();
               onClose();
             }}
-            className="w-full py-3 px-4 bg-[#0D1C2A] text-white hover:bg-[#112335] active:scale-98 font-mono text-[10.5px] tracking-widest uppercase font-black rounded-xl transition border border-white/10 cursor-pointer shadow-inner text-center"
+            className="w-full py-3 px-4 bg-card text-foreground hover:bg-background-elev active:scale-98 font-mono text-[10.5px] tracking-widest uppercase font-black rounded-xl transition border border-hairline cursor-pointer shadow-inner text-center"
           >
             Transfer again
           </button>

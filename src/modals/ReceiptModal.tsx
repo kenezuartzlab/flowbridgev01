@@ -71,15 +71,16 @@ export function ReceiptModal({
 
   return (
     <ModalPortal>
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="receipt_modal"
-        className={`bg-[#0D1C2A] border border-white/10 text-[#F0F7F3] rounded-[20px] w-full max-h-[88dvh] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center space-y-4 animate-scale-up border-b-[4px] ${status === 'success' ? 'border-b-[#32FF8B]' : 'border-b-red-400'}`}
+        className={`bg-card border border-hairline text-foreground rounded-[20px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center space-y-4 animate-scale-up border-b-[4px] ${status === 'success' ? 'border-b-primary' : 'border-b-danger'}`}
       >
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-3 right-3 p-1.5 hover:bg-white/5 rounded-xl text-[#C5C1B9] hover:text-white transition-colors cursor-pointer"
+          aria-label="Close transaction receipt"
+          className="absolute top-3 right-3 p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -143,7 +144,7 @@ export function ReceiptModal({
           <span className="text-[11px] font-black uppercase text-[#C5C1B9] tracking-widest leading-none font-mono">
             Final blockchain receipt
           </span>
-          <h3 className="text-[15px] font-black text-white uppercase tracking-wide font-mono">
+          <h3 className="text-[15px] font-black text-foreground uppercase tracking-wide font-mono">
             {status === 'success'
               ? (txType === 'bridge' ? 'Bridge Submitted' : 'Swap Confirmed On-Chain')
               : (txType === 'bridge' ? 'Bridge Failed On-Chain' : 'Swap Failed On-Chain')}
@@ -162,12 +163,12 @@ export function ReceiptModal({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full py-3 px-3 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] rounded-xl font-mono text-[11px] tracking-widest uppercase font-black transition-all text-center duration-150 flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-[0_0_12px_rgba(50,255,139,0.2)]"
+          className="w-full py-3 px-3 bg-primary hover:bg-primary-strong text-primary-foreground rounded-xl font-mono text-[11px] tracking-widest uppercase font-black transition-all text-center duration-150 flex flex-col items-center justify-center gap-0.5 cursor-pointer fb-glow"
         >
           <span className="opacity-85 text-[9px] font-bold">Block Explorer hash URL</span>
-          <div className="flex items-center gap-1 text-[#010C1B] truncate max-w-full">
+          <div className="flex items-center gap-1 text-primary-foreground truncate max-w-full">
             {displayHash}
-            <ExternalLink className="w-3.5 h-3.5 text-[#010C1B] shrink-0" />
+            <ExternalLink className="w-3.5 h-3.5 text-primary-foreground shrink-0" />
           </div>
         </a>
 
@@ -181,7 +182,7 @@ export function ReceiptModal({
         {/* Secondary close button */}
         <button
           onClick={onClose}
-          className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-[#C5C1B9] hover:text-white font-mono uppercase tracking-wider font-black text-[11px] transition-all border border-white/10 cursor-pointer"
+          className="w-full py-2.5 rounded-xl bg-background hover:bg-background-elev text-muted hover:text-foreground font-mono uppercase tracking-wider font-black text-[11px] transition-all border border-hairline cursor-pointer"
         >
           Close receipt
         </button>
