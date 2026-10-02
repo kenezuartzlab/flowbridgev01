@@ -6,6 +6,7 @@ import { emailSignIn, emailSignUp, getIdToken, reloadUser, requestPasswordReset,
 import { isInAppBrowser, inAppBrowserName, isTokenPocketBrowser } from '@/lib/in-app-browser';
 import { getWalletSignatureErrorMessage, hasWalletSignatureInFlight, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
 import { botMainnet } from '@/lib/wagmi';
+import { ModalPortal } from './ModalPortal';
 
 interface ConnectGuideModalProps {
   isOpen: boolean;
@@ -229,10 +230,11 @@ export function ConnectGuideModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#010C1B]/90 p-3 font-sans animate-fade-in backdrop-blur-md sm:p-4">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 font-sans animate-fade-in backdrop-blur-md sm:p-4">
       <div
         id="connect_guide_modal"
-        className="relative flex max-h-[90vh] w-full max-w-[370px] animate-scale-up flex-col gap-5 overflow-y-auto rounded-[24px] border border-white/10 border-b-[5px] border-b-[#32FF8B] bg-[#0D1C2A] p-6 text-[#F0F7F3] shadow-2xl"
+        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[370px] animate-scale-up flex-col gap-5 overflow-y-auto rounded-[24px] border border-hairline border-b-[5px] border-b-primary bg-card p-6 text-foreground shadow-2xl"
       >
         {/* Header */}
         <div className="flex justify-between items-center pb-3 border-b border-white/5 font-mono">
@@ -527,5 +529,6 @@ export function ConnectGuideModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

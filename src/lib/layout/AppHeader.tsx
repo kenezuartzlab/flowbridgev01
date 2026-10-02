@@ -15,6 +15,7 @@ import { FlowPointsPill } from '@/components/rewards/FlowPointsPill';
 import { PrimaryNav } from '@/components/shell/PrimaryNav';
 import { useShellMode } from '@/components/shell/useShellMode';
 import { PRIMARY_NAV, isNavActive } from '@/components/shell/navModel';
+import { ModalPortal } from '@/modals/ModalPortal';
 
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -94,7 +95,6 @@ export function AppHeader({
   // admin API re-verify authorization on each request.
   const [canOpenSets, setCanOpenSets] = useState(false);
   const [roadmapOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
   // V9.3 — the header measures ITSELF; the inline desktop nav is only rendered
   // when the shell genuinely has room for a single no-wrap row.
   const headerRef = useRef<HTMLElement | null>(null);
@@ -138,17 +138,12 @@ export function AppHeader({
     return () => { alive = false; };
   }, [walletAddress, isUserLoggedIn]);
 
-  // Close submenu on outside click / Escape
+  // Close menu on Escape. Backdrop clicks are handled by the portal layer.
   useEffect(() => {
     if (!menuOpen) return;
-    const onDoc = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    };
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
-    document.addEventListener('mousedown', onDoc);
     document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('mousedown', onDoc);
       document.removeEventListener('keydown', onKey);
     };
   }, [menuOpen]);
@@ -408,7 +403,7 @@ export function AppHeader({
             />
           )}
 
-          <div className="relative" ref={menuRef}>
+          <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-haspopup="menu"
@@ -426,16 +421,14 @@ export function AppHeader({
             </button>
 
             {menuOpen && (
-              <div
-                role="menu"
-                className="animate-menu-in absolute right-0 mt-2 w-56 bg-card/95 backdrop-blur-xl border border-hairline rounded-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.75)] overflow-hidden z-50"
-              >
-                <div className="px-3 py-2 border-b border-hairline">
-                  <p className="text-[10px] tracking-[0.25em] uppercase text-muted-soft font-black">
-                    Menu
-                  </p>
+              <ModalPortal>
+              <div className="fixed inset-0 z-[200] bg-background/72 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) setMenuOpen(false); }}>
+              <div role="menu" className="absolute bottom-0 right-0 top-0 flex w-[min(94vw,420px)] flex-col overflow-hidden border-l border-hairline bg-card shadow-2xl sm:bottom-auto sm:right-3 sm:top-3 sm:max-h-[calc(100dvh-1.5rem)] sm:rounded-3xl sm:border">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-hairline px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))]">
+                  <div className="min-w-0"><p className="truncate text-base font-black text-foreground">Menu</p><p className="truncate text-[11px] font-semibold text-muted">Trade, manage, and explore</p></div>
+                  <button type="button" onClick={() => setMenuOpen(false)} aria-label="Close menu" className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-hairline bg-background text-muted hover:text-foreground"><X className="h-4 w-4" /></button>
                 </div>
-                <div className="py-1 max-h-[70vh] overflow-y-auto">
+                <div className="flex-1 overflow-y-auto p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
                   {sections.map((section, si) => (
                     <div key={section.id} className={si > 0 ? "border-t border-hairline mt-1 pt-1" : ""}>
                       <p className="px-3 pt-1.5 pb-1 text-[9px] tracking-[0.22em] uppercase text-muted-soft font-black">
@@ -449,7 +442,7 @@ export function AppHeader({
                               onClick={item.onClick}
                               aria-expanded={item.children ? roadmapOpen : undefined}
                               className={cn(
-                                "w-full flex items-center gap-3 px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
+                                "w-full flex min-h-[52px] items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
                                 item.accent
                                   ? "text-primary hover:bg-primary/10"
                                   : "text-foreground hover:bg-white/5 hover:text-primary"
@@ -492,6 +485,8 @@ export function AppHeader({
                 </div>
 
               </div>
+              </div>
+              </ModalPortal>
             )}
           </div>
         </div>
