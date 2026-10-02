@@ -859,7 +859,8 @@ export function UniversalSwapCard({
         lastTx = tx;
       }
 
-      for (let i = 0; !lastTx && i < activeQuote.steps.length; i++) {
+      const ranAtomic = lastTx != null;
+      for (let i = 0; !ranAtomic && i < activeQuote.steps.length; i++) {
         let step = activeQuote.steps[i];
         if (i > 0 && step.tokens) {
           // Smart Route Engine leg: re-quote against the exact amount received
