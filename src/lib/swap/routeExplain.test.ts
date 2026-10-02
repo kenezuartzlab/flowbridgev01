@@ -32,3 +32,14 @@ describe("Smart AI route explanations", () => {
     expect(explainRoute([step("caswap", "CA", "BOT")], 677, "caswap").lines[0]).toMatch(/only routes through that venue/);
   });
 });
+
+import { stepMatchesPref } from "./quoter";
+describe("CaSwap direct regression — venue isolation", () => {
+  it("manual CaSwap accepts only CaSwap legs; manual BDEX never accepts CaSwap", () => {
+    expect(stepMatchesPref(step("caswap", "CA", "BOT"), "caswap")).toBe(true);
+    expect(stepMatchesPref(step("bdex-v3", "BOT", "USDT"), "caswap")).toBe(false);
+    expect(stepMatchesPref(step("caswap", "CA", "BOT"), "bdex-v2")).toBe(false);
+    expect(stepMatchesPref(step("caswap", "CA", "BOT"), "bdex-v3")).toBe(false);
+    expect(stepMatchesPref(step("caswap", "CA", "BOT"), "auto")).toBe(true);
+  });
+});
