@@ -60,7 +60,6 @@ import { WarningPanel } from "@/components/routetabs/WarningPanel";
 import { toFriendlyError, isNativeGasLow, lowGasMessage, lowGasSteps } from "@/lib/friendlyError";
 import { LowGasSettingsModal } from "@/modals/LowGasSettingsModal";
 import { atomicV4Target, encodeV3Path } from "@/lib/swap/atomicV4";
-import { FLOW_BRIDGE_ROUTER_V4_ABI } from "@/lib/flowbridge/routerV4Abi";
 
 const parseTxError = (e: unknown) => toFriendlyError(e, { action: "swap", gasSymbol: "BOT" });
 
