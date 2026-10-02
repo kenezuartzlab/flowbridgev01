@@ -8,13 +8,55 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
+import { LogIn, LogOut, Menu, X } from "lucide-react";
 import { MENU_NAV, isNavActive } from "./navModel";
+import { supabase } from "@/integrations/supabase/client";
+import { googleSignIn, logout } from "@/lib/auth";
 
 export function ShellNavMenu({ className = "" }: { className?: string }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [authBusy, setAuthBusy] = useState(false);
   const boxRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    void supabase.auth.getSession().then(({ data }) => {
+      if (alive) setSignedIn(!!data.session?.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(!!session?.user);
+    });
+    return () => {
+      alive = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignIn = async () => {
+    if (authBusy) return;
+    setAuthBusy(true);
+    try {
+      await googleSignIn(window.location.href);
+      setOpen(false);
+    } catch {
+      /* user cancelled or provider error — menu stays as-is */
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (authBusy) return;
+    setAuthBusy(true);
+    try {
+      await logout();
+      setOpen(false);
+    } finally {
+      setAuthBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -82,6 +124,31 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
               );
             })}
           </ul>
+          <div className="border-t border-hairline py-1">
+            {signedIn ? (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleSignOut}
+                disabled={authBusy}
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-[13px] font-bold text-foreground transition-colors hover:bg-foreground/5 hover:text-primary disabled:opacity-50"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="truncate">Sign out</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleSignIn}
+                disabled={authBusy}
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-[13px] font-bold text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+              >
+                <LogIn className="h-4 w-4" />
+                <span className="truncate">{authBusy ? "Signing in…" : "Sign in"}</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
