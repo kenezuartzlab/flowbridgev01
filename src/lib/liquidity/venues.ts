@@ -55,6 +55,8 @@ export interface V3Venue {
 export type LiquidityVenue = V2Venue | V3Venue;
 
 const V2_CAPS: VenueCapabilities = { addLiquidity: true, removeLiquidity: true, createPool: true, lpDiscovery: true, nativeBot: true, positionNft: false, collectFees: false };
+/** CaSwap router reverts addLiquidity* with "CASwapRouter: LP_NOT_ALLOWED" for non-allowlisted wallets (verified 677 + 968, 2026-10-02). */
+const CASWAP_CAPS: VenueCapabilities = { ...V2_CAPS, addLiquidity: false, createPool: false };
 const V3_CAPS: VenueCapabilities = { addLiquidity: true, removeLiquidity: true, createPool: true, lpDiscovery: true, nativeBot: false, positionNft: true, collectFees: true };
 
 export function getLiquidityVenues(chainId: number): LiquidityVenue[] {
@@ -65,7 +67,7 @@ export function getLiquidityVenues(chainId: number): LiquidityVenue[] {
   ];
   const v3 = getVerifiedV3(chainId);
   if (v3) out.push({ id: "bdex-v3", kind: "v3", label: "BDEX V3", chainId, factory: v3.factory, positionManager: v3.positionManager, wrappedNative: v3.wrappedNative, caps: V3_CAPS });
-  out.push({ id: "caswap", kind: "v2", label: "CaSwap", chainId, router: c.caSwapRouter as Address, wrappedGetter: "WBOT", caps: V2_CAPS });
+  out.push({ id: "caswap", kind: "v2", label: "CaSwap", chainId, router: c.caSwapRouter as Address, wrappedGetter: "WBOT", caps: CASWAP_CAPS });
   return out;
 }
 
@@ -79,9 +81,9 @@ export function assertVenue(requested: LiquidityVenueId, served: LiquidityVenueI
 }
 
 export const CASWAP_CAPABILITY_MATRIX = {
-  addLiquidity: "SUPPORTED",
-  removeLiquidity: "SUPPORTED",
-  createPair: "SUPPORTED",
+  addLiquidity: "NOT SUPPORTED (router allowlist — LP_NOT_ALLOWED for public wallets)",
+  removeLiquidity: "SUPPORTED for existing LP holders (removeLiquidity/removeLiquidityETH present; not rehearsed — no LP held)",
+  createPair: "NOT SUPPORTED via router (pair creation happens through the restricted addLiquidity path)",
   lpDiscovery: "SUPPORTED",
   nativeBot: "SUPPORTED (router WBOT(); addLiquidityETH/removeLiquidityETH)",
   feeRetrieval: "LP fees accrue inside reserves (no separate claim)",

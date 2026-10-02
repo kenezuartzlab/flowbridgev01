@@ -26,6 +26,7 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
   const [amtA, setAmtA] = useState("");
   const [review, setReview] = useState(false);
   const tx = useLiquidityTx();
+  const venueClosed = !(p_caps(venue));
   const tA = list.find((t) => t.address === a), tB = list.find((t) => t.address === b);
 
   useEffect(() => { if (venue.kind === "v3") enabledFeeTiers(venue).then((t) => setTiers(t.map((x) => x.fee))).catch(() => setTiers([])); }, [venueId, chainId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -111,8 +112,9 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
         </>
       )}
       {prepared && "error" in prepared && existing === null && <Notice tone="error">{prepared.error}</Notice>}
+      {venueClosed && <Notice tone="warn">{venue.label} only lets allowlisted wallets add liquidity or create pairs (the router rejects others with LP_NOT_ALLOWED). FlowBridge won't route this through another DEX. Existing CaSwap LP can still be removed under My Positions.</Notice>}
       {!writable && <Notice tone="warn">Pools can't be created on BOT Mainnet in this release. Create Pool is available on BOT Testnet.</Notice>}
-      <button type="button" disabled={!writable || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)} className="h-12 w-full rounded-2xl bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</button>
+      <button type="button" disabled={venueClosed || !writable || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)} className="h-12 w-full rounded-2xl bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</button>
       <TxProgress steps={tx.steps} leftover={tx.leftover} busy={tx.busy} explorer={explorer} onClear={(x) => void tx.clearLeftover(chainId, x)} />
       {prepared && "op" in prepared && (
         <ReviewModal open={review} title="Review · Create pool" rows={prepared.rows} approvals={prepared.op.approvals} busy={tx.busy}
@@ -122,3 +124,5 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
     </section>
   );
 }
+
+function p_caps(v: { caps: { addLiquidity: boolean; createPool: boolean } }) { return v.caps.addLiquidity && v.caps.createPool; }
