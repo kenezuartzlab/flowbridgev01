@@ -34,7 +34,7 @@ describe("V3 range validation", () => {
   it("rejects inverted range", () => expect(validateRange(600, -600, 60).ok).toBe(false));
   it("full range is aligned", () => {
     const r = fullRangeTicks(200);
-    expect(r.tickLower % 200).toBe(0);
+    expect(Math.abs(r.tickLower % 200)).toBe(0);
     expect(validateRange(r.tickLower, r.tickUpper, 200).ok).toBe(true);
   });
   it("nearestUsableTick clamps", () => expect(nearestUsableTick(887272, 60)).toBe(887220));
@@ -159,7 +159,7 @@ describe("AI Suggested range", () => {
     const r = suggestRanges(snap)!;
     expect(r.map((x) => x.profile)).toEqual(["wide", "balanced", "narrow"]);
     for (const x of r) {
-      expect(x.tickLower % 60).toBe(0);
+      expect(Math.abs(x.tickLower % 60)).toBe(0);
       expect(x.tickLower < 0 && x.tickUpper > 0).toBe(true);
       expect(x.notes.join(" ")).not.toMatch(/guaranteed profit|will earn/i);
     }
