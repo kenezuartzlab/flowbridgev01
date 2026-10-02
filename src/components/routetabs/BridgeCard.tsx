@@ -138,8 +138,8 @@ export function BridgeCard({
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4">
       {/* PEER SELECTOR — pick the counter-chain (BNB / ETH / TRX). */}
       {onPeerChange && (
-        <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-2xl p-2 flex items-center gap-1.5 font-mono">
-          <span className="text-[11px] font-black text-[#C5C1B9] uppercase tracking-widest px-2 shrink-0">Bridge with</span>
+        <div className="bg-card border border-hairline-strong rounded-2xl p-2 flex items-center gap-1.5 font-mono shadow-sm">
+          <span className="text-[11px] font-black text-muted uppercase tracking-widest px-2 shrink-0">Bridge with</span>
           <div className="grid grid-cols-3 gap-1 flex-1">
             {(['BNB', 'ETH', 'TRX'] as const).map((p) => (
               <button
@@ -150,7 +150,7 @@ export function BridgeCard({
                   'px-2 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all duration-150 active:scale-95 cursor-pointer border',
                   activePeer === p
                     ? 'bg-[#32FF8B]/15 text-[#32FF8B] border-[#32FF8B]/40 shadow-[0_0_10px_rgba(50,255,139,0.25)]'
-                    : 'bg-[#010C1B]/70 text-[#C5C1B9] border-white/10 hover:text-white hover:border-white/25'
+                    : 'bg-background text-muted border-hairline hover:text-foreground hover:border-hairline-strong'
                 )}
               >
                 {p}
@@ -222,12 +222,12 @@ export function BridgeCard({
         </div>
       )}
       {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}
-      <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-4.5 space-y-3 relative">
+      <div className="bg-card border border-hairline-strong rounded-[20px] shadow-[var(--fb-shadow-md)] p-4.5 space-y-3 relative">
 
         {/* FROM BLOCK */}
-        <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
-          <div className="flex flex-col gap-2 border-b border-white/5 pb-2 min-w-0">
-            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
+        <div className="bg-background border border-hairline p-4 rounded-xl space-y-3 font-sans shadow-inner">
+          <div className="flex flex-col gap-2 border-b border-hairline pb-2 min-w-0">
+            <span className="text-[12px] font-black text-muted uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
               <span className="shrink-0">From</span>
               <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{fromChain}</span>
             </span>
@@ -237,7 +237,7 @@ export function BridgeCard({
                   key={pct} 
                   type="button"
                   onClick={() => applyPercent(parseFloat(pct) / 100)}
-                  className="px-1 py-1 bg-[#0D1C2A] border border-white/20 rounded-lg text-[11px] text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/20 font-black tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-sm text-center min-w-0"
+                  className="px-1 py-1 bg-card border border-hairline-strong rounded-lg text-[11px] text-muted hover:text-primary hover:border-primary/30 font-black tracking-wider transition-all duration-150 active:scale-95 cursor-pointer shadow-sm text-center min-w-0"
                 >
                   {pct}
                 </button>
@@ -261,19 +261,19 @@ export function BridgeCard({
                   onAmountChange(cleaned);
                 }}
                 title={amount}
-                className={`bg-transparent text-white ${amountFontClass} font-black w-full focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[44px] font-mono overflow-x-auto whitespace-nowrap scrollbar-none transition-[font-size] duration-150`}
+                className={`bg-transparent text-foreground ${amountFontClass} font-black w-full focus:outline-none placeholder:text-muted-soft/50 leading-none h-[44px] font-mono overflow-x-auto whitespace-nowrap scrollbar-none transition-[font-size] duration-150`}
               />
               <div 
                 onClick={() => applyPercent(1)}
-                className="text-[12px] text-[#C5C1B9] font-mono mt-1.5 select-none cursor-pointer hover:text-[#32FF8B] transition-colors inline-block max-w-full truncate"
+                className="text-[12px] text-muted font-mono mt-1.5 select-none cursor-pointer hover:text-primary transition-colors inline-block max-w-full truncate"
                 title={`Use full balance: ${rawBalance} ${symbol}`}
               >
                 Balance: {balance} {symbol} <span className="text-[11px] text-[#32FF8B] font-black ml-1 uppercase hover:underline">(Max)</span>
               </div>
             </div>
-            <div className="bg-[#0D1C2A]/90 pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-white/15 font-mono">
+            <div className="bg-card pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-hairline-strong font-mono">
               <TokenIcon symbol={symbol} size={20} />
-              <span className="font-black text-[13px] text-[#FFFFFF] tracking-wide uppercase truncate">{symbol}</span>
+              <span className="font-black text-[13px] text-foreground tracking-wide uppercase truncate">{symbol}</span>
             </div>
           </div>
         </div>
@@ -283,7 +283,7 @@ export function BridgeCard({
           <button 
             type="button"
             onClick={onToggleDirection}
-            className="bg-[#0D1C2A] border border-white/25 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30 p-2 rounded-xl shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
+            className="bg-card border border-hairline-strong text-muted hover:text-primary hover:border-primary/30 p-2 rounded-xl shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
             title="Switch direction"
           >
             <ArrowDownUp className="w-4 h-4" />
@@ -291,9 +291,9 @@ export function BridgeCard({
         </div>
 
         {/* TO BLOCK */}
-        <div className="bg-[#010C1B]/75 border border-white/15 p-4 rounded-xl space-y-3 font-sans shadow-inner">
-          <div className="flex flex-col gap-2 border-b border-white/5 pb-2 min-w-0">
-            <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
+        <div className="bg-background border border-hairline p-4 rounded-xl space-y-3 font-sans shadow-inner">
+          <div className="flex flex-col gap-2 border-b border-hairline pb-2 min-w-0">
+            <span className="text-[12px] font-black text-muted uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
               <span className="shrink-0">To</span>
               <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{toChain}</span>
             </span>
@@ -301,13 +301,13 @@ export function BridgeCard({
           
           <div className="flex justify-between items-center gap-3">
             <div className="flex-1 min-w-0">
-              <div title={estimatedStr} className={`${estimatedFontClass} font-black text-white/50 leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono transition-[font-size] duration-150`}>
+              <div title={estimatedStr} className={`${estimatedFontClass} font-black text-muted-soft leading-none h-[44px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono transition-[font-size] duration-150`}>
                 {estimatedStr}
               </div>
             </div>
-            <div className="bg-[#0D1C2A]/90 pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-white/15 font-mono opacity-90">
+            <div className="bg-card pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-hairline-strong font-mono opacity-90">
                <TokenIcon symbol={symbol} size={20} />
-               <span className="font-black text-[13px] text-[#FFFFFF] tracking-wide uppercase truncate">{symbol}</span>
+               <span className="font-black text-[13px] text-foreground tracking-wide uppercase truncate">{symbol}</span>
             </div>
           </div>
         </div>
@@ -321,8 +321,8 @@ export function BridgeCard({
           className={cn(
             "w-full py-4 rounded-2xl text-sm font-black tracking-widest uppercase transition-all flex justify-center items-center gap-2 cursor-pointer",
             buttonDisabled 
-              ? "bg-white/5 text-[#C5C1B9]/45 border border-white/10 cursor-not-allowed shadow-none" 
-              : "bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] shadow-[0_0_16px_rgba(50,255,139,0.25)] hover:shadow-[0_0_24px_rgba(50,255,139,0.45)] hover:scale-[1.01] active:scale-[0.99]"
+              ? "bg-background-elev text-muted-soft border border-hairline cursor-not-allowed shadow-none" 
+              : "bg-primary hover:bg-primary-strong text-primary-foreground fb-glow hover:scale-[1.01] active:scale-[0.99]"
           )}
         >
           <span>{buttonLabel}</span>

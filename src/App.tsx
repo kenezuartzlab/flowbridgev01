@@ -2780,7 +2780,7 @@ export default function App() {
   const activeTxPrefix = bridgeSrcExplorerPrefix;
 
   return (
-    <div className={`min-h-screen bg-[#010C1B] text-white flex flex-col items-center justify-start font-sans overflow-y-auto relative py-0 md:py-6 gap-0 md:gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
+    <div className={`min-h-screen bg-background text-foreground flex flex-col items-center justify-start font-sans overflow-y-auto relative py-0 md:py-6 gap-0 md:gap-4 ${isPresentationMode ? 'presentation-mode' : ''}`}>
       <SiteLoader />
       
       {/* Background grid + ambient glow of Ecosurge specification */}
@@ -2793,7 +2793,7 @@ export default function App() {
           the site shell (and can reach full desktop navigation). */}
       <div
         data-trade-shell="true"
-        className="w-full min-h-[100dvh] md:min-h-0 md:w-full md:max-w-[900px] xl:max-w-[1180px] bg-[#010C1B] overflow-hidden flex flex-col relative z-10 md:rounded-3xl md:border md:border-hairline md:shadow-[0_24px_70px_-30px_rgba(0,0,0,0.85)]"
+        className="w-full min-h-[100dvh] md:min-h-0 md:w-full md:max-w-[900px] xl:max-w-[1180px] bg-background text-foreground overflow-hidden flex flex-col relative z-10 md:rounded-3xl md:border md:border-hairline md:shadow-[var(--fb-shadow-lg)]"
       >
 
         {(() => {
