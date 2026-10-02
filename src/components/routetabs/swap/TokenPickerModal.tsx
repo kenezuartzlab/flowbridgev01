@@ -10,6 +10,7 @@ import {
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
 import { hasAnyLiquidity } from "@/lib/swap/quoter";
 import { useAppConfig } from "@/lib/config/appConfig";
+import { ModalPortal } from "@/modals/ModalPortal";
 
 
 interface TokenPickerModalProps {
@@ -94,28 +95,30 @@ export function TokenPickerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#010C1B]/95 backdrop-blur-md animate-fade-in font-sans">
-      <div className="bg-[#0D1C2A] border border-white/10 rounded-[24px] w-full max-w-[400px] p-5 shadow-2xl flex flex-col gap-4 animate-scale-up border-b-[5px] border-b-[#32FF8B] max-h-[80vh]">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md animate-fade-in font-sans sm:p-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[400px] flex-col gap-4 overflow-hidden rounded-3xl border border-hairline border-b-[5px] border-b-primary bg-card p-5 text-foreground shadow-2xl animate-scale-up">
         <div className="flex justify-between items-center font-mono">
-          <h3 className="text-white font-black uppercase tracking-wider text-sm">
+          <h3 className="text-foreground font-black uppercase tracking-wider text-sm">
             {title}
           </h3>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-white/5 rounded-xl text-[#C5C1B9] hover:text-white transition-colors cursor-pointer"
+            aria-label="Close token selector"
+            className="p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex items-center gap-2 bg-[#010C1B] border border-white/15 rounded-xl px-3 py-2.5">
-          <Search className="w-4 h-4 text-[#C5C1B9] shrink-0" />
+        <div className="flex items-center gap-2 bg-background border border-hairline-strong rounded-xl px-3 py-2.5">
+          <Search className="w-4 h-4 text-muted shrink-0" />
           <input
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name or paste 0x address…"
-            className="bg-transparent text-white text-sm flex-1 focus:outline-none placeholder:text-[#C5C1B9]/60 font-mono"
+            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-soft font-mono"
           />
         </div>
 
@@ -140,7 +143,7 @@ export function TokenPickerModal({
 
         <div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-1.5">
           {list.length === 0 && !isUnknownAddress && (
-            <div className="text-center text-[13px] text-[#C5C1B9] py-8 font-mono">
+            <div className="text-center text-[13px] text-muted py-8 font-mono">
               No tokens match.
             </div>
           )}
@@ -149,11 +152,11 @@ export function TokenPickerModal({
               key={t.address}
               type="button"
               onClick={() => onSelect(t)}
-              className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-[#010C1B]/60 hover:bg-[#32FF8B]/5 border border-white/5 hover:border-[#32FF8B]/25 cursor-pointer transition-colors text-left"
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-background/60 hover:bg-primary/5 border border-hairline hover:border-primary/25 cursor-pointer transition-colors text-left"
             >
               <TokenIcon symbol={t.symbol} preset="md" />
               <div className="flex-1 min-w-0">
-                <div className="text-white text-sm font-black tracking-wider font-mono">
+                <div className="text-foreground text-sm font-black tracking-wider font-mono">
                   {t.symbol}
                   {t.imported && (
                     <span className="ml-2 text-[10px] text-[#32FF8B] font-bold uppercase tracking-widest">
@@ -161,7 +164,7 @@ export function TokenPickerModal({
                     </span>
                   )}
                 </div>
-                <div className="text-[12px] text-[#C5C1B9] truncate font-mono">
+                <div className="text-[12px] text-muted truncate font-mono">
                   {t.name}
                 </div>
               </div>
@@ -170,5 +173,6 @@ export function TokenPickerModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

@@ -19,5 +19,10 @@ export function ModalPortal({ children }: { children: ReactNode }) {
   }, []);
 
   if (!mounted || typeof document === 'undefined') return null;
-  return createPortal(children, document.body);
+  return createPortal(
+    <div data-modal-layer="true" className="relative z-[200] isolate">
+      {children}
+    </div>,
+    document.body,
+  );
 }
