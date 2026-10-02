@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-02",
+  "routers": { "677": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD", "968": "0xa5fa045ff3672e64a88c1ef03a9a59c0c8bc1747" },
+  "factoryFromRouter": { "677": "0x9c937EBC3748825026677e20B13b5e306494a38d (app record 0xebb8…21a2 is a different factory)", "968": "0x3e59AeEEB66CF1960d4d64451f5e79B9Da2476da" },
+  "selectorsPresent": ["addLiquidity", "addLiquidityETH", "removeLiquidity", "removeLiquidityETH", "factory", "WBOT"],
+  "addLiquidity": "NOT SUPPORTED for public wallets — 968 live attempt (approval 0x3840848c…cfa) reverted in simulation: 'CASwapRouter: LP_NOT_ALLOWED'; 677 static simulation same revert; approval cleared 0x67785263…7138",
+  "removeLiquidity": "Present in bytecode; only usable by existing LP holders; not rehearsed",
+  "createPair": "NOT SUPPORTED via router (restricted add path)",
+  "lpDiscovery": "SUPPORTED (allPairs/balanceOf/getReserves/totalSupply)",
+  "fees": "Accrue inside reserves; no separate claim"
+}
