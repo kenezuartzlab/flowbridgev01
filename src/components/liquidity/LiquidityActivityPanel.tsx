@@ -1,4 +1,4 @@
-/** Activity — liquidity operations (device-local), grouped per user operation with every tx hash. */
+/** Activity — swaps and liquidity operations, grouped per user operation with every tx hash. */
 import { useEffect, useState } from "react";
 import { KIND_LABEL, listLiquidityActivity, operationStatus, PHASE_LABEL, type LiquidityActivity } from "@/lib/liquidity/lifecycle";
 
@@ -13,7 +13,7 @@ export function LiquidityActivityPanel() {
   if (!items.length) return null;
   return (
     <section className="fb-surface p-4">
-      <p className="fb-eyebrow">Liquidity · this device</p>
+      <p className="fb-eyebrow">Trade & liquidity · this device</p>
       <div className="mt-2 space-y-2">
         {items.slice(0, 30).map((a) => {
           const s = operationStatus(a);
