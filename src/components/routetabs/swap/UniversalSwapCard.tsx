@@ -454,6 +454,35 @@ export function UniversalSwapCard({
   const minOutFor = (expected: bigint) =>
     (expected * BigInt(Math.floor((100 - effectiveSlippage) * 1000))) / 100000n;
 
+  const buildReviewSnapshot = async (candidate: QuoteResult, inputAmount: bigint) => {
+    if (!address || !publicClient) throw new Error("Wallet or provider unavailable");
+    const execution = planExecution(candidate.steps, balanceChainId);
+    const atomic = isMainnet ? atomicV4Target(candidate.steps, 677) : null;
+    let approvalCount = 0;
+    const fees: string[] = [];
+    if (atomic) {
+      const [fee] = (await publicClient.readContract({ address: atomic.router, abi: FLOW_BRIDGE_ROUTER_V4_ABI, functionName: "computeRouterFee", args: [BigInt(atomic.routerId), inputAmount, address] })) as readonly [bigint, bigint];
+      fees.push(fee.toString());
+      if (!candidate.steps[0].inIsNative) {
+        const allowance = (await publicClient.readContract({ address: candidate.steps[0].path[0], abi: ERC20_ABI, functionName: "allowance", args: [address, atomic.router] })) as bigint;
+        if (allowance < inputAmount + fee) approvalCount++;
+      }
+    } else {
+      for (let i = 0; i < candidate.steps.length; i++) {
+        const step = candidate.steps[i];
+        const stepAmount = i === 0 ? inputAmount : candidate.steps[i - 1].expectedOut;
+        const [fee] = (await publicClient.readContract({ address: flowRouter, abi: flowAbi, functionName: "computeRouterFee", args: [BigInt(step.routerId), stepAmount, address] })) as readonly [bigint, bigint];
+        fees.push(fee.toString());
+        if (!step.inIsNative) {
+          const allowance = (await publicClient.readContract({ address: step.path[0], abi: ERC20_ABI, functionName: "allowance", args: [address, flowRouter] })) as bigint;
+          if (allowance < stepAmount + fee) approvalCount++;
+        }
+      }
+    }
+    const transactionCount = (execution.execution === "ATOMIC_V4" ? 1 : candidate.steps.length) + approvalCount;
+    return createSwapReviewSnapshot({ chainId: balanceChainId, tokenIn: tokenIn.address, tokenOut: tokenOut.address, amountIn: inputAmount, quote: candidate, minimumOut: minOutFor(candidate.amountOut), protocolFee: fees.join("|"), approvalCount, transactionCount });
+  };
+
   // Execute a single SwapStep through FlowBridgeRouter v3.
   // `amountInRaw` is the net swap amount (in token-in units). The router charges a
   // configurable protocol fee ON TOP of this — for ERC20 in we approve `swapAmount + fee`,
@@ -734,11 +763,7 @@ export function UniversalSwapCard({
       const freshPlan = planExecution(latestQuote.steps, balanceChainId);
       const freshAtomic = isMainnet ? atomicV4Target(latestQuote.steps, 677) : null;
       if (freshAtomic && (!routerHealth || !routerHealth.ok)) throw new Error(healthWarning ?? "Router V4 health check is still running. Review again shortly.");
-      const feeTarget = freshAtomic?.router ?? flowRouter;
-      const feeAbi = freshAtomic ? FLOW_BRIDGE_ROUTER_V4_ABI : flowAbi;
-      const feeRouterId = BigInt(freshAtomic?.routerId ?? latestQuote.steps[0].routerId);
-      const [freshProtocolFee] = (await publicClient.readContract({ address: feeTarget, abi: feeAbi, functionName: "computeRouterFee", args: [feeRouterId, initialAmount, address] })) as readonly [bigint, bigint];
-      const freshSnapshot = createSwapReviewSnapshot({ chainId: balanceChainId, tokenIn: tokenIn.address, tokenOut: tokenOut.address, amountIn: initialAmount, quote: latestQuote, minimumOut: minOutFor(latestQuote.amountOut), protocolFee: freshProtocolFee });
+      const freshSnapshot = await buildReviewSnapshot(latestQuote, initialAmount);
       if (!reviewSnapshot || reviewChanged(reviewSnapshot, freshSnapshot)) {
         setQuote(latestQuote);
         setReviewSnapshot(freshSnapshot);
@@ -1203,11 +1228,7 @@ export function UniversalSwapCard({
     const plan = planExecution(quote.steps, balanceChainId);
     if (plan.execution === "ATOMIC_V4" && healthWarning) { setTxError(healthWarning); return; }
     try {
-      const atomic = isMainnet ? atomicV4Target(quote.steps, 677) : null;
-      const target = atomic?.router ?? flowRouter;
-      const abi = atomic ? FLOW_BRIDGE_ROUTER_V4_ABI : flowAbi;
-      const [fee] = (await publicClient.readContract({ address: target, abi, functionName: "computeRouterFee", args: [BigInt(atomic?.routerId ?? quote.steps[0].routerId), parsedAmount, address] })) as readonly [bigint, bigint];
-      setReviewSnapshot(createSwapReviewSnapshot({ chainId: balanceChainId, tokenIn: tokenIn.address, tokenOut: tokenOut.address, amountIn: parsedAmount, quote, minimumOut: minOutFor(quote.amountOut), protocolFee: fee }));
+      setReviewSnapshot(await buildReviewSnapshot(quote, parsedAmount));
       setConfirmOpen(true);
     } catch (e) {
       setTxError("Liquidity information is temporarily unavailable. Retry when the connection recovers.");
@@ -1548,7 +1569,9 @@ export function UniversalSwapCard({
         priceImpact={priceImpactLabel}
         platformFee={platformFeeLabel}
         executionLabel={quote ? planExecution(quote.steps, balanceChainId).label : undefined}
-        transactionCount={quote ? (planExecution(quote.steps, balanceChainId).execution === "ATOMIC_V4" ? 1 : quote.steps.length) : undefined}
+        transactionCount={reviewSnapshot?.transactionCount}
+        approvalCount={reviewSnapshot?.approvalCount}
+        dexCount={quote ? new Set(quote.steps.map((s) => s.dex)).size : undefined}
         routeSteps={quote?.steps.map((s, i) => `${i + 1}. ${s.symbolPath[0]} → ${s.symbolPath[s.symbolPath.length - 1]} · ${s.dex}`)}
       />
     </div>

@@ -20,6 +20,8 @@ interface ConfirmSwapModalProps {
   platformFee?: string;
   executionLabel?: string;
   transactionCount?: number;
+  approvalCount?: number;
+  dexCount?: number;
   routeSteps?: string[];
   isBridge?: boolean;
   fromChain?: string;
@@ -42,6 +44,8 @@ export function ConfirmSwapModal({
   platformFee = "0.1%",
   executionLabel,
   transactionCount,
+  approvalCount,
+  dexCount,
   routeSteps = [],
   isBridge = false,
   fromChain = "BOT Chain",
@@ -125,7 +129,10 @@ export function ConfirmSwapModal({
 
           {executionLabel && <div className="flex justify-between items-center text-[#C5C1B9]"><span className="uppercase tracking-wider">Execution</span><span className="font-black text-white">{executionLabel}</span></div>}
           {transactionCount != null && <div className="flex justify-between items-center text-[#C5C1B9]"><span className="uppercase tracking-wider">Transactions</span><span className="font-black text-white">{transactionCount}</span></div>}
+          {transactionCount != null && dexCount != null && <p className="rounded-lg bg-white/5 px-2 py-1.5 text-[10.5px] text-white">This route uses {dexCount} DEX{dexCount === 1 ? "" : "s"} and requires {transactionCount} transaction{transactionCount === 1 ? "" : "s"}.</p>}
+          {approvalCount != null && <div className="flex justify-between items-center text-[#C5C1B9]"><span className="uppercase tracking-wider">Approvals required</span><span className="font-black text-white">{approvalCount}</span></div>}
           {routeSteps.map((step) => <p key={step} className="text-[10.5px] text-[#C5C1B9]">{step}</p>)}
+          {executionLabel?.includes("STAGED") && <p className="text-[10.5px] text-amber-200">Each next stage is re-quoted after confirmation. If a later stage stops, earlier assets remain in your wallet.</p>}
 
           <div className="flex justify-between items-center text-[#C5C1B9]">
             <span className="uppercase tracking-wider">Price Rate</span>

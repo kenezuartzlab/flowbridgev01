@@ -9,6 +9,8 @@ export interface SwapReviewSnapshot {
   amountOut: string;
   minimumOut: string;
   protocolFee: string;
+  approvalCount: number;
+  transactionCount: number;
   execution: "ATOMIC_V4" | "STAGED";
   route: string;
 }
@@ -24,7 +26,9 @@ export function createSwapReviewSnapshot(input: {
   amountIn: bigint;
   quote: QuoteResult;
   minimumOut: bigint;
-  protocolFee: bigint;
+  protocolFee: bigint | string;
+  approvalCount?: number;
+  transactionCount?: number;
 }): SwapReviewSnapshot {
   return {
     chainId: input.chainId,
@@ -34,6 +38,8 @@ export function createSwapReviewSnapshot(input: {
     amountOut: input.quote.amountOut.toString(),
     minimumOut: input.minimumOut.toString(),
     protocolFee: input.protocolFee.toString(),
+    approvalCount: input.approvalCount ?? 0,
+    transactionCount: input.transactionCount ?? (planExecution(input.quote.steps, input.chainId).execution === "ATOMIC_V4" ? 1 : input.quote.steps.length),
     execution: planExecution(input.quote.steps, input.chainId).execution,
     route: routeMaterialSignature(input.quote),
   };
