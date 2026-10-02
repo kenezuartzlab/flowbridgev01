@@ -42,10 +42,10 @@
 - [ ] Future: non-zero Router V4 registry activation delay (needs separate approval)
 
 # Smart Trade + Liquidity V1 Production Rollout
-- [ ] Add privacy-safe route telemetry for quote, simulation, wallet decision, submission, receipt, and generic failures.
-- [ ] Add read-only Router V4/Lens configuration health validation and visible drift warnings without contract writes.
-- [ ] Make review snapshots invalid when route, output, minimum, fee, network, tokens, or execution class changes.
-- [ ] Prevent automatic staged fallback after a failed atomic V4 transaction and improve staged progress/recovery.
-- [ ] Preserve receipt-derived grouped Activity, RPC stale/error states, CaSwap disclosure, and Mainnet liquidity write lock.
-- [ ] Verify Mainnet positions/Earn/AI truthfulness and complete 390px production acceptance coverage.
-- [ ] Run read-only BOT Mainnet checks, full app tests, liquidity math, typecheck, and production build.
+- [x] Add privacy-safe route telemetry for quote, simulation, wallet decision, submission, receipt, and generic failures.
+- [x] Add read-only Router V4/Lens configuration health validation and visible drift warnings without contract writes.
+- [x] Make review snapshots invalid when route, output, minimum, fee, network, tokens, or execution class changes.
+- [x] Prevent automatic staged fallback after a failed atomic V4 transaction and improve staged progress/recovery.
+- [x] Preserve receipt-derived grouped Activity, RPC stale/error states, CaSwap disclosure, and Mainnet liquidity write lock.
+- [x] Verify Mainnet positions/Earn/AI truthfulness and complete 390px production acceptance coverage.
+- [x] Run read-only BOT Mainnet checks, full app tests, liquidity math, typecheck, and production build.

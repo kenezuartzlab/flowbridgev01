@@ -301,8 +301,10 @@ export function UniversalSwapCard({
     ? (nativeOutBalance.data?.value ?? 0n)
     : ((tokenOutBalanceRead.data as bigint | undefined) ?? 0n);
 
-  const inBalanceDisplay = formatUnits(inBalanceRaw, tokenIn.decimals);
-  const outBalanceDisplay = formatUnits(outBalanceRaw, tokenOut.decimals);
+  const inBalanceUnavailable = tokenIn.isNative ? nativeBalance.isError : tokenInBalanceRead.isError;
+  const outBalanceUnavailable = tokenOut.isNative ? nativeOutBalance.isError : tokenOutBalanceRead.isError;
+  const inBalanceDisplay = inBalanceUnavailable ? "Unavailable" : formatUnits(inBalanceRaw, tokenIn.decimals);
+  const outBalanceDisplay = outBalanceUnavailable ? "Unavailable" : formatUnits(outBalanceRaw, tokenOut.decimals);
 
   // Swap execution target + approval spender come from the canonical FlowBridge
   // execution registry (V4 on BOT Testnet, v3 on BOT Mainnet until V4 ships).
@@ -494,6 +496,7 @@ export function UniversalSwapCard({
     deadline: bigint,
     finalToAmountDisplay?: string,
     minOutFloor?: bigint,
+    onApprovalTx?: (hash: `0x${string}`, phase: "confirming" | "confirmed" | "failed") => void,
   ): Promise<`0x${string}`> => {
     if (!address) throw new Error("No wallet");
     const perLegMin = minOutFor(step.expectedOut);
@@ -579,7 +582,9 @@ export function UniversalSwapCard({
             args: [flowRouter, totalIn],
             gas: 80000n,
           });
+          onApprovalTx?.(approveTx, "confirming");
           const rcpt = await publicClient!.waitForTransactionReceipt({ hash: approveTx });
+          onApprovalTx?.(approveTx, rcpt.status === "success" ? "confirmed" : "failed");
           if (rcpt.status !== "success") {
             toast.error(`Approval reverted`, { id: toastId, description: shortHash(approveTx) });
             throw new Error("Approval transaction reverted on-chain");
@@ -623,7 +628,14 @@ export function UniversalSwapCard({
     // multi-hop routes and need an explicit cap).
     const FALLBACK_GAS = 500000n;
     const withBuffer = (g: bigint) => (g * 125n) / 100n;
-    const estimateOr = async (params: Record<string, unknown>) => {
+    const simulateAndEstimate = async (params: Record<string, unknown>) => {
+      try {
+        await publicClient!.simulateContract(params as Parameters<NonNullable<typeof publicClient>["simulateContract"]>[0]);
+        trackTradeOperationalEvent({ eventName: "simulation_success", network: balanceChainId, routeType: quote && quote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: quote?.steps.length ?? 1 });
+      } catch (error) {
+        trackTradeOperationalEvent({ eventName: "simulation_failure", network: balanceChainId, routeType: quote && quote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: quote?.steps.length ?? 1, failureReason: error instanceof Error ? error.message : undefined });
+        throw new Error("Transaction simulation failed. Nothing was submitted.");
+      }
       try {
         const est = await publicClient!.estimateContractGas(params as Parameters<NonNullable<typeof publicClient>["estimateContractGas"]>[0]);
         return withBuffer(est);
@@ -654,7 +666,7 @@ export function UniversalSwapCard({
             value: totalIn,
             account: address,
           }) as any;
-      const gas = await estimateOr(base);
+      const gas = await simulateAndEstimate(base);
       return await writeContractAsync({ ...base, gas });
     }
 
@@ -674,7 +686,7 @@ export function UniversalSwapCard({
             args: [routerIdBig, step.path[0], feePool, amountInRaw, minOut, step.path, to, deadline],
             account: address,
           }) as any;
-      const gas = await estimateOr(base);
+      const gas = await simulateAndEstimate(base);
       return await writeContractAsync({ ...base, gas });
     }
 
@@ -695,7 +707,7 @@ export function UniversalSwapCard({
             args: [routerIdBig, step.path[0], step.path[step.path.length - 1], feePool, amountInRaw, minOut, to, deadline],
             account: address,
           }) as any;
-      const gas = await estimateOr(base);
+      const gas = await simulateAndEstimate(base);
       return await writeContractAsync({ ...base, gas });
     }
     const base = (useSafe
@@ -713,7 +725,7 @@ export function UniversalSwapCard({
           args: [routerIdBig, amountInRaw, minOut, step.path, to, deadline],
           account: address,
         }) as any;
-    const gas = await estimateOr(base);
+    const gas = await simulateAndEstimate(base);
     return await writeContractAsync({ ...base, gas });
 
 
@@ -892,6 +904,7 @@ export function UniversalSwapCard({
       if (atomic && activeQuote.steps.length > 1) {
         atomicAttempted = true;
         const me = address as `0x${string}`;
+        routedActivity = createRoutedSwapActivity({ id: `routed-swap-${Date.now()}`, chainId: 677, wallet: me, pair: `${tokenIn.symbol}/${tokenOut.symbol}`, dex: "BDEX V3", amount: `${amountIn} ${tokenIn.symbol}` });
         const encodedPath = encodeV3Path(activeQuote.steps);
         const [fee] = (await publicClient.readContract({
           address: atomic.router, abi: FLOW_BRIDGE_ROUTER_V4_ABI, functionName: "computeRouterFee",
@@ -909,7 +922,9 @@ export function UniversalSwapCard({
             const ap = await writeContractAsync({
               address: tokenInAddr, abi: ERC20_ABI, functionName: "approve", args: [atomic.router, initialAmount + fee],
             });
+            recordRoutedSwapTx(routedActivity, { hash: ap, label: `Approve ${tokenIn.symbol}`, phase: "confirming" });
             const ar = await publicClient.waitForTransactionReceipt({ hash: ap });
+            recordRoutedSwapTx(routedActivity, { hash: ap, label: `Approve ${tokenIn.symbol}`, phase: ar.status === "success" ? "confirmed" : "failed" });
             if (ar.status !== "success") throw new Error(`Approval reverted (${shortHash(ap)})`);
           }
         }
@@ -931,7 +946,6 @@ export function UniversalSwapCard({
         }
         setBusyMsg(`ATOMIC — V4: 1 swap transaction…`);
         const tx = await writeContractAsync(req as any);
-        routedActivity = createRoutedSwapActivity({ id: `routed-swap-${Date.now()}`, chainId: 677, wallet: me, pair: `${tokenIn.symbol}/${tokenOut.symbol}`, dex: "BDEX V3", amount: `${amountIn} ${tokenIn.symbol}` });
         recordRoutedSwapTx(routedActivity, { hash: tx, label: "Atomic Router V4 swap", phase: "confirming" });
         trackTradeOperationalEvent({ eventName: "tx_submitted", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
         const rc = await publicClient.waitForTransactionReceipt({ hash: tx });
@@ -943,7 +957,7 @@ export function UniversalSwapCard({
       }
 
       const ranAtomic = lastTx != null;
-      if (!ranAtomic && activeQuote.steps.length > 1) routedActivity = createRoutedSwapActivity({ id: `routed-swap-${Date.now()}`, chainId: balanceChainId, wallet: address, pair: `${tokenIn.symbol}/${tokenOut.symbol}`, dex: [...new Set(activeQuote.steps.map((s) => s.dex))].join(" + "), amount: `${amountIn} ${tokenIn.symbol}` });
+      if (!ranAtomic) routedActivity = createRoutedSwapActivity({ id: `routed-swap-${Date.now()}`, chainId: balanceChainId, wallet: address, pair: `${tokenIn.symbol}/${tokenOut.symbol}`, dex: [...new Set(activeQuote.steps.map((s) => s.dex))].join(" + "), amount: `${amountIn} ${tokenIn.symbol}` });
       for (let i = 0; !ranAtomic && i < activeQuote.steps.length; i++) {
         let step = activeQuote.steps[i];
         if (i > 0 && step.tokens) {
@@ -1032,6 +1046,7 @@ export function UniversalSwapCard({
           deadline,
           finalToAmountDisplay,
           isLastLeg && activeQuote.steps.length > 1 ? routeMinOut : undefined,
+          (hash, phase) => routedActivity && recordRoutedSwapTx(routedActivity, { hash, label: `Approve ${step.symbolPath[0]}`, phase }),
         );
         lastTx = tx;
         if (routedActivity) recordRoutedSwapTx(routedActivity, { hash: tx, label: `Step ${i + 1}: ${stepLabel}`, phase: "confirming" });
