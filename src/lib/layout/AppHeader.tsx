@@ -4,7 +4,7 @@ import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut, SlidersHorizontal,
-  ChevronDown, LogIn, CircleUser, Send,
+  ChevronDown, LogIn, CircleUser, Send, Droplets, Sprout, BookOpen,
 } from 'lucide-react';
 
 import { cn } from '../utils';
@@ -247,10 +247,38 @@ export function AppHeader({
           show: !!onRewardsClick,
         },
         {
+          id: 'liquidity',
+          label: 'Liquidity',
+          icon: <Droplets className="w-4 h-4" />,
+          onClick: go('/liquidity'),
+          show: true,
+        },
+        {
+          id: 'earn',
+          label: 'Earn',
+          icon: <Sprout className="w-4 h-4" />,
+          onClick: go('/earn'),
+          show: true,
+        },
+        {
+          id: 'activity',
+          label: 'Activity',
+          icon: <History className="w-4 h-4" />,
+          onClick: go('/activity'),
+          show: true,
+        },
+        {
           id: 'multisend',
           label: 'MultiSend',
           icon: <Send className="w-4 h-4" />,
           onClick: go('/multisend'),
+          show: true,
+        },
+        {
+          id: 'docs',
+          label: 'Docs',
+          icon: <BookOpen className="w-4 h-4" />,
+          onClick: go('/docs'),
           show: true,
         },
         {
