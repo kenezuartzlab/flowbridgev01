@@ -73,7 +73,17 @@ describe("Smart Trade execution capability matrix", () => {
     expect(p).toMatchObject({ execution: "ATOMIC_V4", v4Function: "swapNativeToTokenV3MultiSafe", label: "ATOMIC — V4" });
     V4_ATOMIC_FLAGS[677] = saved;
   });
-  it("Mainnet stays staged until the extended V4 is promoted", () => {
-    expect(planExecution([step("bdex-v3", { inIsNative: true }), step("bdex-v3")], 677).execution).toBe("STAGED");
+  it("Mainnet (promoted) runs only native BOT <-> V3 multi-pool atomically", () => {
+    const nativeIn = planExecution([step("bdex-v3", { inIsNative: true }), step("bdex-v3")], 677);
+    expect(nativeIn.execution).toBe("ATOMIC_V4");
+    expect(nativeIn.v4Function).toBe("swapNativeToTokenV3MultiSafe");
+    const nativeOut = planExecution([step("bdex-v3"), step("bdex-v3", { outIsNative: true })], 677);
+    expect(nativeOut.v4Function).toBe("swapTokenToNativeV3MultiSafe");
+    // Every other class stays staged on Mainnet.
+    expect(planExecution([step("bdex-v3"), step("bdex-v3")], 677).execution).toBe("STAGED");
+    expect(planExecution([step("bdex-v2"), step("bdex-v3")], 677).execution).toBe("STAGED");
+    expect(planExecution([step("caswap"), step("bdex-v3")], 677).execution).toBe("STAGED");
+    // Testnet flag stays off.
+    expect(planExecution([step("bdex-v3", { inIsNative: true }), step("bdex-v3")], 968).execution).toBe("STAGED");
   });
 });

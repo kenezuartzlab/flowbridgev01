@@ -42,3 +42,18 @@ Slither (`SLITHER.txt`): 6 medium/high-class hits, all triaged — fee send to o
 
 ## CaSwap → BDEX V2 via existing swapMultiHopSafe
 Not available on BOT Mainnet: CaSwap only lists CA/caWBOT; BDEX V2 only USDT/WBOT; caWBOT ≠ WBOT, so no shared intermediate. Mixed-router V2 hop logic is proven with mocks only.
+
+## BOT Mainnet promotion (chain 677) — 2026-10-02
+Clean rebuild (with `forge-std/=lib/forge-std/src/` remapping) reproduces runtime `a42e53b1…bec41d`, 21,838 bytes; creation 22,138.
+- Router V4 `0x79653140D84B78C19354ee984f236Ec92160fc61` — tx `0x5ce8ba018be8da4c3456b3885c9df1a1b3dd16d49a57778591f55a2ff29cfbb6`, block 25,300,065. Explorer: verified.
+- Router Lens `0xb82038aC3d2df60f5B5fE06D6FDe3CFDd1B76BD0` — tx `0x87c49a8d6778bcfe7e1f45eeae7c80c7de14fc76688515ba75c3ecf71e947f0a`; `flowRouter()` = Router V4. Explorer: verified. ABI parity PASS (router + lens).
+- Treasury `0xefc1…9ea4` (contract). Activation delay 0 (constructor default, verified). Global fee 0.
+- Register BDEX V3 SwapRouter `0x0703…3929` as routerId 0, type V3, WBOT `0xD545…bd30` (active at registration): `0x7d100d894f781dc56214b53fa1919b8e8ae8248fc36f227284a7f58d5feda465`
+- BDEX V3 fee 1 bp: `0xddafc28ba16d60e57226bc66efe4706b15b035e75c5e7a5fe42f17e9aacdf10b`
+- Canary BOT→USDT(0.3%)→FLOW(1%): `0xe7308c9d3477eeef93e7b3259f0e765f00191e32eed731215cd5216a50ec2a15` — 0.01 BOT, 1,100.7074 FLOW (min 1,089.7003), fee 0.000001 BOT to treasury once, gas 240,555, 1 SwapActivity.
+- FLOW approve (exact): `0xa2a602453346fde1888f264fdf2a39820d8748da2d2408255f34e42b005b145c`
+- Canary FLOW→USDT→BOT: `0x29ddad4e53f09440e1cf22d9b74581ca69e673da504ec83a195b9dcc90279ce0` — 550.3537 FLOW, 0.004871 BOT (min 0.004822), fee 0.055035 FLOW to treasury once, gas 268,376, 1 SwapActivity.
+- After both: router BOT/WBOT/USDT/FLOW 0; router→BDEX and user→router allowances 0. Slippage probe reverts.
+- Ownership: deployed with practice wallet as temporary owner (owner-approved), `transferOwnership(0x524D…98c5)` `0x0da43ea2814a42329f9199b9d324a2cf8f84b2ebd95bfc2ad2f13bc17796e87a`. **Pending: 0x524D…98c5 (EOA) must call `acceptOwnership()`.**
+- Previous unconfigured V4 `0x3c6f…6B06` and its Lens `0x4833…205c` kept as history. Router V3 untouched.
+- Future security task: non-zero registry activation delay — pending separate approval.

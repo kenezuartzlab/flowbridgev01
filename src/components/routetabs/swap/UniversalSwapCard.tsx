@@ -59,6 +59,7 @@ import { SlippagePopover } from "./SlippagePopover";
 import { WarningPanel } from "@/components/routetabs/WarningPanel";
 import { toFriendlyError, isNativeGasLow, lowGasMessage, lowGasSteps } from "@/lib/friendlyError";
 import { LowGasSettingsModal } from "@/modals/LowGasSettingsModal";
+import { atomicV4Target, encodeV3Path } from "@/lib/swap/atomicV4";
 
 const parseTxError = (e: unknown) => toFriendlyError(e, { action: "swap", gasSymbol: "BOT" });
 
@@ -814,7 +815,51 @@ export function UniversalSwapCard({
               args: [address as `0x${string}`],
             })) as bigint);
 
-      for (let i = 0; i < activeQuote.steps.length; i++) {
+      // ATOMIC — V4: native BOT <-> BDEX V3 multi-pool in ONE Router V4 transaction.
+      const atomic = isMainnet ? atomicV4Target(activeQuote.steps, 677) : null;
+      if (atomic && activeQuote.steps.length > 1) {
+        const me = address as `0x${string}`;
+        const encodedPath = encodeV3Path(activeQuote.steps);
+        const [fee] = (await publicClient.readContract({
+          address: atomic.router, abi: FLOW_BRIDGE_ROUTER_V4_ABI, functionName: "computeRouterFee",
+          args: [BigInt(atomic.routerId), initialAmount, me],
+        })) as readonly [bigint, bigint];
+        const nativeIn = atomic.fn === "swapNativeToTokenV3MultiSafe";
+        const tokenInAddr = activeQuote.steps[0].path[0];
+        const tokenOutAddr = activeQuote.steps[activeQuote.steps.length - 1].path.slice(-1)[0];
+        if (!nativeIn) {
+          const allowance = (await publicClient.readContract({
+            address: tokenInAddr, abi: ERC20_ABI, functionName: "allowance", args: [me, atomic.router],
+          })) as bigint;
+          if (allowance < initialAmount + fee) {
+            setBusyMsg(`Approving exactly ${amountIn} ${tokenIn.symbol}…`);
+            const ap = await writeContractAsync({
+              address: tokenInAddr, abi: ERC20_ABI, functionName: "approve", args: [atomic.router, initialAmount + fee],
+            });
+            const ar = await publicClient.waitForTransactionReceipt({ hash: ap });
+            if (ar.status !== "success") throw new Error(`Approval reverted (${shortHash(ap)})`);
+          }
+        }
+        const args = [
+          BigInt(atomic.routerId), nativeIn ? tokenOutAddr : tokenInAddr, encodedPath,
+          initialAmount, routeMinOut, me, deadline, fee,
+        ] as const;
+        const req = {
+          address: atomic.router, abi: FLOW_BRIDGE_ROUTER_V4_ABI, functionName: atomic.fn,
+          args, account: me, ...(nativeIn ? { value: initialAmount + fee } : {}),
+        } as const;
+        // Fresh simulation right before the signature; reverts surface here.
+        await publicClient.simulateContract(req as any);
+        setBusyMsg(`ATOMIC — V4: 1 swap transaction…`);
+        const tx = await writeContractAsync(req as any);
+        const rc = await publicClient.waitForTransactionReceipt({ hash: tx });
+        if (rc.status !== "success") throw new Error(`Transaction reverted: ${tx}`);
+        handoffSwapAttribution(tx);
+        lastTx = tx;
+      }
+
+      const ranAtomic = lastTx != null;
+      for (let i = 0; !ranAtomic && i < activeQuote.steps.length; i++) {
         let step = activeQuote.steps[i];
         if (i > 0 && step.tokens) {
           // Smart Route Engine leg: re-quote against the exact amount received
