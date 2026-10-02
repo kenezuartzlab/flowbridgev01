@@ -20,22 +20,31 @@ export type RouteClass =
   | "caswap-v3"              // CaSwap + BDEX V3 — always staged in this revision
   | "other";
 
-/** Extended Router V4 candidate (native V3 multi-pool). Testnet only today. */
+/** Extended Router V4 (native V3 multi-pool) deployments. */
 export const NATIVE_V3_MULTI_CANDIDATE = {
+  677: {
+    // Promoted 2026-10-02; BDEX V3 = routerId 0, fee 1 bp, both Mainnet canaries PASS.
+    router: "0x79653140D84B78C19354ee984f236Ec92160fc61",
+    lens: "0xb82038aC3d2df60f5B5fE06D6FDe3CFDd1B76BD0",
+    routerId: 0,
+    runtimeSha256: "a42e53b15977c57b81fa63c575b9cb39100b873c50a523b68f02df7bd8bec41d",
+    runtimeBytes: 21838,
+  },
   968: {
     router: "0xd985B142F7d614577f08e2736C67d6b5Bcd41C1E",
+    routerId: 0,
     runtimeSha256: "a42e53b15977c57b81fa63c575b9cb39100b873c50a523b68f02df7bd8bec41d",
     runtimeBytes: 21838,
   },
 } as const;
 
 /**
- * Feature flags: app execution through the extended V4. All OFF until the
- * Mainnet promotion steps (deploy, verify, Safe ownership, activation delay,
- * canaries) are complete. Router V3 stays the production executor meanwhile.
+ * Feature flags: app execution through the extended V4. Only the proven
+ * native BOT <-> BDEX V3 multi-pool class is enabled, on BOT Mainnet only.
+ * Everything else stays on Router V3 / staged.
  */
 export const V4_ATOMIC_FLAGS: Record<number, { nativeV3Multi: boolean; tokenV3Multi: boolean; v2CrossRouter: boolean }> = {
-  677: { nativeV3Multi: false, tokenV3Multi: false, v2CrossRouter: false },
+  677: { nativeV3Multi: true, tokenV3Multi: false, v2CrossRouter: false },
   968: { nativeV3Multi: false, tokenV3Multi: false, v2CrossRouter: false },
 };
 
