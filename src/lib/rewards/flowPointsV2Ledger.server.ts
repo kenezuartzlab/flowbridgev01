@@ -181,7 +181,21 @@ export async function accrueCoreSwapPoints(input: {
 
   if (error) {
     // 23505 = the canonical activity is already in the ledger: never pay twice.
+    const { classifyPersistenceError } = await import("./rewardDiagnostics");
+    const { recordRewardDiagnostic } = await import("./rewardDiagnostics.server");
+    await recordRewardDiagnostic({
+      stage: "core_swap_ledger", outcome: classifyPersistenceError(error) ?? "PERSISTENCE_REJECTED",
+      chainId: input.chainId, txHash: input.txHash, detail: (error as any).message,
+    });
     return { award: 0, base: computed.base, reason: computed.reason, recorded: false, policy };
+  }
+  {
+    const { recordRewardDiagnostic } = await import("./rewardDiagnostics.server");
+    await recordRewardDiagnostic({
+      stage: "core_swap_ledger",
+      outcome: computed.reason === "ANTI_ABUSE_REVIEW" ? "ANTI_ABUSE_REVIEW" : "CREDITED",
+      chainId: input.chainId, txHash: input.txHash, detail: `${computed.reason} ${computed.award}`,
+    });
   }
   return {
     award: computed.award,
@@ -265,7 +279,7 @@ export async function grantReferralMilestones(input: {
   ) {
     // Attribution kept; one idempotent 0-point audit row per referee per month.
     if (referralMilestonesDue(state, granted, policy).length > 0) {
-      await supabaseAdmin.from("flow_points_ledger").insert({
+      const { error: capErr } = await supabaseAdmin.from("flow_points_ledger").insert({
         user_id: input.referrerId,
         policy_version: policy.version,
         reason: "REFERRAL_MONTHLY_CAP_REACHED",
@@ -275,6 +289,7 @@ export async function grantReferralMilestones(input: {
         activity_key: `refcap:${input.referrerId}:${input.refereeId}:${monthKey}`,
         metadata: { refereeId: input.refereeId, monthKey, policyVersion: policy.version },
       } as never);
+      if (capErr) await logLedgerError("referral_cap_ledger", capErr);
     }
     return { granted: 0, milestones: [] };
   }
@@ -293,8 +308,12 @@ export async function grantReferralMilestones(input: {
       policy_version: policy.version,
       month_key: monthKey,
     });
-    if (error) continue; // unique violation: milestone already paid
-    await supabaseAdmin.from("flow_points_ledger").insert({
+    if (error) {
+      // unique violation: milestone already paid; anything else is a real failure
+      await logLedgerError("referral_milestone_award", error);
+      continue;
+    }
+    const { error: msErr } = await supabaseAdmin.from("flow_points_ledger").insert({
       user_id: input.referrerId,
       policy_version: policy.version,
       reason: milestone.reason,
@@ -303,6 +322,7 @@ export async function grantReferralMilestones(input: {
       day_key: utcDayKey(at),
       metadata: { refereeId: input.refereeId, milestone: milestone.id, policyVersion: policy.version },
     });
+    if (msErr) await logLedgerError("referral_milestone_ledger", msErr);
     points += milestone.points;
     awarded.push(milestone.id);
   }
@@ -343,7 +363,7 @@ export async function recordReviewEntry(input: {
   metadata?: Record<string, unknown>;
 }) {
   const policy = await resolveFlowPointsV2Policy();
-  await supabaseAdmin.from("flow_points_ledger").insert({
+  const { error } = await supabaseAdmin.from("flow_points_ledger").insert({
     user_id: input.userId,
     policy_version: policy.version,
     reason: input.reason,
@@ -355,4 +375,24 @@ export async function recordReviewEntry(input: {
     day_key: utcDayKey(),
     metadata: { ...(input.metadata ?? {}), policyVersion: policy.version },
   } as never);
+  if (error) await logLedgerError("review_ledger", error, input.chainId, input.txHash);
+  else {
+    const { recordRewardDiagnostic } = await import("./rewardDiagnostics.server");
+    const kind = String((input.metadata as any)?.kind ?? "");
+    await recordRewardDiagnostic({
+      stage: "review_ledger",
+      outcome: input.reason === "PRICING_REVIEW" ? "VALUATION_UNAVAILABLE"
+        : kind === "FINALITY_PENDING" ? "RETRY_SCHEDULED" : "ANTI_ABUSE_REVIEW",
+      chainId: input.chainId, txHash: input.txHash,
+    });
+  }
+}
+
+async function logLedgerError(stage: string, error: any, chainId?: number, txHash?: string) {
+  const { classifyPersistenceError } = await import("./rewardDiagnostics");
+  const { recordRewardDiagnostic } = await import("./rewardDiagnostics.server");
+  await recordRewardDiagnostic({
+    stage, outcome: classifyPersistenceError(error) ?? "PERSISTENCE_REJECTED",
+    chainId: chainId ?? null, txHash: txHash ?? null, detail: error?.message,
+  });
 }
