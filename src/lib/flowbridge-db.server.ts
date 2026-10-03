@@ -435,7 +435,15 @@ export async function createTransactionHistory(
 
 
 
-  const { data: tx, error } = await supabaseAdmin
+  if (existingRow && pointsToEarn === 0) return existingRow;
+  const { data: tx, error } = existingRow
+    ? await supabaseAdmin
+        .from("transactions_history")
+        .update({ points_earned: pointsToEarn })
+        .eq("id", existingRow.id)
+        .select()
+        .single()
+    : await supabaseAdmin
     .from("transactions_history")
     .insert({
       user_id: userId,
