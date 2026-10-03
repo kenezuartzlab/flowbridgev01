@@ -1688,7 +1688,7 @@ export function DonateModal({
                                 "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[12px] font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer sm:w-40 shrink-0",
                                 done
                                   ? "bg-primary/15 text-primary"
-                                  : "bg-black/30 text-foreground hover:bg-primary/10 hover:text-primary"
+                                  : "bg-background-elev text-foreground hover:bg-primary/10 hover:text-primary"
                               )}
                             >
                               <span>{label}</span>
@@ -1700,7 +1700,7 @@ export function DonateModal({
                                 placeholder={savedHandle ? `@${savedHandle}` : `@your${ch === 'x' ? 'x' : ch}handle`}
                                 value={socialHandles[ch]}
                                 onChange={(e) => setSocialHandles((h) => ({ ...h, [ch]: e.target.value }))}
-                                className="flex-1 min-w-0 bg-black/40 border border-foreground/10 focus:border-primary/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[12px] font-mono text-foreground placeholder:text-foreground/30"
+                                className="flex-1 min-w-0 bg-background-elev border border-foreground/10 focus:border-primary/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[12px] font-mono text-foreground placeholder:text-foreground/30"
                               />
                               <button
                                 type="button"
