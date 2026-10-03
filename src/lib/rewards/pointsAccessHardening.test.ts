@@ -66,3 +66,14 @@ describe("reward diagnostics never swallow failures", () => {
     expect(d).not.toMatch(/a@b\.com/);
   });
 });
+
+describe("profile balance guard cannot bypass itself", () => {
+  const fix = readFileSync("drizzle/migrations/0006_fix_profile_guard_definer_bypass.sql", "utf8");
+  it("guards run as the caller, not the owner", () => {
+    expect(fix).toMatch(/prevent_protected_profile_updates\(\) SECURITY INVOKER/);
+    expect(fix).toMatch(/prevent_protected_profile_inserts\(\) SECURITY INVOKER/);
+  });
+  it("diagnostics are server-only", () => {
+    expect(fix).toMatch(/REVOKE ALL ON public\.reward_processing_events FROM anon, authenticated/);
+  });
+});
