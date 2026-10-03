@@ -156,6 +156,25 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
                 </li>
               );
             })}
+            {canOpenOps && (
+              <li>
+                <Link
+                  to="/ops"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  aria-current={isNavActive({ id: "ops", label: "Operations", to: "/ops", Icon: Activity }, pathname) ? "page" : undefined}
+                  data-nav-id="ops"
+                  className={`flex min-h-[52px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors ${
+                    pathname === "/ops"
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-foreground/5 hover:text-primary"
+                  }`}
+                >
+                  <Activity className="h-4 w-4" strokeWidth={pathname === "/ops" ? 2.6 : 2} />
+                  <span className="truncate">Operations</span>
+                </Link>
+              </li>
+            )}
           </ul>
           <div className="border-t border-hairline p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             {signedIn ? (
