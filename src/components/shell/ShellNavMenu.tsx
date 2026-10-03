@@ -34,6 +34,27 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
+  // Admin-only Operations shortcut: revealed only after the server confirms the
+  // signed-in account + connected wallet. Visibility is cosmetic — /ops and
+  // every admin API re-verify authorization on each request.
+  const [canOpenOps, setCanOpenOps] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    if (!signedIn) {
+      setCanOpenOps(false);
+      return;
+    }
+    const wallet = readPersistedWallet();
+    if (!wallet) {
+      setCanOpenOps(false);
+      return;
+    }
+    checkAdmin(wallet)
+      .then((r) => { if (alive) setCanOpenOps(!!r.isAdmin); })
+      .catch(() => { if (alive) setCanOpenOps(false); });
+    return () => { alive = false; };
+  }, [signedIn, open]);
 
   useEffect(() => {
     let alive = true;

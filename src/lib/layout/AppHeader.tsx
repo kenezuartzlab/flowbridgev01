@@ -311,6 +311,13 @@ export function AppHeader({
           onClick: go('/sets'),
           show: canOpenSets,
         },
+        {
+          id: 'ops',
+          label: 'Operations',
+          icon: <Activity className="w-4 h-4" />,
+          onClick: go('/ops'),
+          show: canOpenSets,
+        },
       ],
     },
     {
