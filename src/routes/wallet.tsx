@@ -245,7 +245,7 @@ function WalletPage() {
             </p>
             <Link
               to="/"
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-white/20 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-white/30"
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-foreground/20 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] transition-colors hover:bg-foreground/30"
             >
               <ArrowLeftRight className="h-3.5 w-3.5" />
               Swap

@@ -151,7 +151,7 @@ export function TabBanner({
     </>
   );
 
-  const cls = `relative flex min-h-[58px] w-full items-center overflow-hidden rounded-xl px-3 py-2 text-left shadow-[0_6px_18px_-14px_rgba(0,0,0,0.6)] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32FF8B]/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B] sm:min-h-[62px] sm:px-3.5 ${
+  const cls = `relative flex min-h-[58px] w-full items-center overflow-hidden rounded-xl px-3 py-2 text-left shadow-[0_6px_18px_-14px_rgba(0,0,0,0.6)] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B] sm:min-h-[62px] sm:px-3.5 ${
     href ? "cursor-pointer active:scale-[0.99]" : ""
   } ${className}`;
   const style = {

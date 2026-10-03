@@ -149,7 +149,7 @@ export function BridgeCard({
                 className={cn(
                   'px-2 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all duration-150 active:scale-95 cursor-pointer border',
                   activePeer === p
-                    ? 'bg-[#32FF8B]/15 text-[#32FF8B] border-[#32FF8B]/40 shadow-[0_0_10px_rgba(50,255,139,0.25)]'
+                    ? 'bg-primary/15 text-primary border-primary/40 shadow-[0_0_10px_rgba(50,255,139,0.25)]'
                     : 'bg-background text-muted border-hairline hover:text-foreground hover:border-hairline-strong'
                 )}
               >
@@ -167,7 +167,7 @@ export function BridgeCard({
           className={cn(
             'rounded-2xl border p-3.5 flex items-start gap-3 font-sans shadow-inner',
             tronStatus === 'ready'
-              ? 'bg-[#32FF8B]/10 border-[#32FF8B]/25 text-[#32FF8B]'
+              ? 'bg-primary/10 border-primary/25 text-primary'
               : tronStatus === 'locked'
                 ? 'bg-[#F6BA00]/10 border-[#F6BA00]/25 text-amber-200'
                 : 'bg-[#FC4447]/10 border-[#FC4447]/25 text-red-200'
@@ -178,15 +178,15 @@ export function BridgeCard({
               {tronStatus === 'ready' ? 'TronLink Connected' : tronStatus === 'locked' ? 'Unlock TronLink' : 'TronLink Not Detected'}
             </div>
             {tronStatus === 'ready' && tronAddress ? (
-              <div className="text-[12px] font-mono break-all text-white/85">
+              <div className="text-[12px] font-mono break-all text-foreground/85">
                 {tronAddress.slice(0, 10)}…{tronAddress.slice(-8)}
               </div>
             ) : tronStatus === 'locked' ? (
-              <div className="text-[12px] text-white/75 leading-relaxed">
+              <div className="text-[12px] text-foreground/75 leading-relaxed">
                 Open the TronLink extension, unlock it, and select an account. Then click Retry.
               </div>
             ) : (
-              <div className="text-[12px] text-white/75 leading-relaxed">
+              <div className="text-[12px] text-foreground/75 leading-relaxed">
                 Install the TronLink browser extension to sign Tron (TRC-20) transactions.
               </div>
             )}
@@ -196,7 +196,7 @@ export function BridgeCard({
               href="https://www.tronlink.org/"
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white text-[11px] font-black uppercase tracking-widest font-mono transition"
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-foreground/10 hover:bg-foreground/15 border border-foreground/20 text-foreground text-[11px] font-black uppercase tracking-widest font-mono transition"
             >
               Install <ExternalLink className="w-3 h-3" />
             </a>
@@ -214,14 +214,14 @@ export function BridgeCard({
             <button
               type="button"
               onClick={onConnectTron}
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#32FF8B]/15 hover:bg-[#32FF8B]/25 border border-[#32FF8B]/40 text-[#32FF8B] text-[11px] font-black uppercase tracking-widest font-mono transition"
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/15 hover:bg-primary/25 border border-primary/40 text-primary text-[11px] font-black uppercase tracking-widest font-mono transition"
             >
               Refresh
             </button>
           )}
         </div>
       )}
-      {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}
+      {/* 1. INPUT CARD BLOCK with enhanced border-foreground/20 visibility */}
       <div className="bg-card border border-hairline-strong rounded-[20px] shadow-[var(--fb-shadow-md)] p-4.5 space-y-3 relative">
 
         {/* FROM BLOCK */}
@@ -229,7 +229,7 @@ export function BridgeCard({
           <div className="flex flex-col gap-2 border-b border-hairline pb-2 min-w-0">
             <span className="text-[12px] font-black text-muted uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
               <span className="shrink-0">From</span>
-              <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{fromChain}</span>
+              <span className="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{fromChain}</span>
             </span>
             <div className="grid grid-cols-4 gap-1.5 w-full min-w-0">
               {['25%', '50%', '75%', '100%'].map((pct) => (
@@ -268,7 +268,7 @@ export function BridgeCard({
                 className="text-[12px] text-muted font-mono mt-1.5 select-none cursor-pointer hover:text-primary transition-colors inline-block max-w-full truncate"
                 title={`Use full balance: ${rawBalance} ${symbol}`}
               >
-                Balance: {balance} {symbol} <span className="text-[11px] text-[#32FF8B] font-black ml-1 uppercase hover:underline">(Max)</span>
+                Balance: {balance} {symbol} <span className="text-[11px] text-primary font-black ml-1 uppercase hover:underline">(Max)</span>
               </div>
             </div>
             <div className="bg-card pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-hairline-strong font-mono">
@@ -295,7 +295,7 @@ export function BridgeCard({
           <div className="flex flex-col gap-2 border-b border-hairline pb-2 min-w-0">
             <span className="text-[12px] font-black text-muted uppercase tracking-wider flex items-center gap-1.5 font-mono min-w-0">
               <span className="shrink-0">To</span>
-              <span className="bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{toChain}</span>
+              <span className="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded font-black text-[11px] uppercase tracking-widest truncate">{toChain}</span>
             </span>
           </div>
           
@@ -359,18 +359,18 @@ export function BridgeCard({
       )}
 
       {showReceiveBotGasOption && (
-        <label className="bg-[#0D1C2A]/70 border border-white/15 rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-[#32FF8B]/30 transition-colors font-sans">
+        <label className="bg-card/70 border border-foreground/15 rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-primary/30 transition-colors font-sans">
           <input
             type="checkbox"
             checked={receiveBotGas}
             onChange={(e) => onReceiveBotGasChange?.(e.target.checked)}
-            className="mt-0.5 w-4 h-4 accent-[#32FF8B] cursor-pointer shrink-0"
+            className="mt-0.5 w-4 h-4 accent-primary cursor-pointer shrink-0"
           />
           <div className="min-w-0 flex-1">
-            <div className="text-[13px] font-black text-white leading-snug">
+            <div className="text-[13px] font-black text-foreground leading-snug">
               Receive 0.1 BOT for Future Gas Fees
             </div>
-            <div className="text-[11px] text-[#C5C1B9] mt-1 leading-relaxed">
+            <div className="text-[11px] text-muted mt-1 leading-relaxed">
               This BOT will be used to pay gas fees for your other operations on the BOT chain, so you can use all features smoothly without worrying about insufficient gas. The equivalent amount will be deducted from your USDT transfer (based on the real-time BDEX exchange rate).
             </div>
           </div>
@@ -389,7 +389,7 @@ export function BridgeCard({
             <button
               type="button"
               onClick={onReset}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-[12px] tracking-widest uppercase font-black rounded-xl transition duration-150 active:scale-98 border border-white/10 cursor-pointer shadow-inner text-center"
+              className="w-full py-2.5 px-4 bg-foreground/5 hover:bg-foreground/10 text-foreground font-mono text-[12px] tracking-widest uppercase font-black rounded-xl transition duration-150 active:scale-98 border border-foreground/10 cursor-pointer shadow-inner text-center"
             >
               Start New Bridge
             </button>

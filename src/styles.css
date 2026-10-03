@@ -566,3 +566,11 @@ html.light {
     animation: none;
   }
 }
+
+/* Light-theme legibility for bright accent text used on status lines */
+html.light .text-amber-300 { color: #92400E !important; }
+html.light .text-red-300,
+html.light .text-red-400 { color: #B91C1C !important; }
+html.light .text-emerald-300,
+html.light .text-emerald-400,
+html.light .text-green-400 { color: #15803D !important; }

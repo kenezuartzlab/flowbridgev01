@@ -414,7 +414,7 @@ export function AppHeader({
                 "p-2 border rounded-xl cursor-pointer transition-all shadow-sm active:scale-95",
                 menuOpen
                   ? "bg-primary/15 border-primary/50 text-primary"
-                  : "bg-card border-hairline text-muted hover:text-primary hover:border-primary/30 hover:bg-white/5"
+                  : "bg-card border-hairline text-muted hover:text-primary hover:border-primary/30 hover:bg-foreground/5"
               )}
             >
               {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -445,14 +445,14 @@ export function AppHeader({
                                 "w-full flex min-h-[52px] items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] tracking-wide transition-colors cursor-pointer",
                                 item.accent
                                   ? "text-primary hover:bg-primary/10"
-                                  : "text-foreground hover:bg-white/5 hover:text-primary"
+                                  : "text-foreground hover:bg-foreground/5 hover:text-primary"
                               )}
                             >
                               <span className={cn(
                                 "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
                                 item.accent
                                   ? "bg-primary/10 border-primary/30"
-                                  : "bg-white/5 border-hairline"
+                                  : "bg-foreground/5 border-hairline"
                               )}>
                                 {item.icon}
                               </span>
@@ -468,7 +468,7 @@ export function AppHeader({
                                     <button
                                       role="menuitem"
                                       onClick={child.onClick}
-                                      className="w-full flex items-center gap-2 pl-[52px] pr-3 py-2 text-left text-[12px] text-muted hover:text-primary hover:bg-white/5 transition-colors cursor-pointer"
+                                      className="w-full flex items-center gap-2 pl-[52px] pr-3 py-2 text-left text-[12px] text-muted hover:text-primary hover:bg-foreground/5 transition-colors cursor-pointer"
                                     >
                                       <span className="w-1 h-1 rounded-full bg-current shrink-0" />
                                       <span className="font-semibold truncate">{child.label}</span>
@@ -542,7 +542,7 @@ export function AppHeader({
               onClick={handleRefresh}
               disabled={loading}
               title="Refresh verification status"
-              className="p-1 hover:bg-white/5 border border-hairline hover:border-white/20 text-muted hover:text-foreground rounded transition-all cursor-pointer disabled:opacity-50"
+              className="p-1 hover:bg-foreground/5 border border-hairline hover:border-foreground/20 text-muted hover:text-foreground rounded transition-all cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={cn("w-2.5 h-2.5", loading && "animate-spin")} />
             </button>

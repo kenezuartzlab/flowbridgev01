@@ -144,7 +144,7 @@ export function ProfileEditModal({
                 </span>
               )}
               <span className="absolute bottom-0 left-0 right-0 grid place-items-center bg-black/45 py-0.5">
-                <Camera className="h-3.5 w-3.5 text-white" />
+                <Camera className="h-3.5 w-3.5 text-foreground" />
               </span>
             </button>
             <div className="min-w-0 flex-1 space-y-1.5">

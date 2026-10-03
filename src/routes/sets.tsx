@@ -150,14 +150,14 @@ const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
 ];
 
 const cardCls =
-  "rounded-2xl border border-white/10 bg-[#0D1C2A]/70 p-4 space-y-3 font-mono text-[13px]";
-const labelCls = "text-[11px] uppercase tracking-widest text-[#C5C1B9] font-black";
+  "rounded-2xl border border-foreground/10 bg-card/70 p-4 space-y-3 font-mono text-[13px]";
+const labelCls = "text-[11px] uppercase tracking-widest text-muted font-black";
 const inputCls =
-  "w-full bg-[#010C1B] border border-white/15 rounded-xl px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-[#32FF8B]/50";
+  "w-full bg-background border border-foreground/15 rounded-xl px-3 py-2 text-foreground text-sm font-mono focus:outline-none focus:border-primary/50";
 const btnPrimary =
-  "px-4 py-2.5 rounded-xl bg-[#32FF8B] text-[#010C1B] text-[12px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#1FFF7D] transition disabled:opacity-50";
+  "px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-[12px] font-black uppercase tracking-widest cursor-pointer hover:bg-primary-strong transition disabled:opacity-50";
 const btnGhost =
-  "px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-white/10 transition disabled:opacity-50";
+  "px-3 py-2 rounded-xl bg-foreground/5 border border-foreground/10 text-foreground text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-foreground/10 transition disabled:opacity-50";
 
 // Wallet hooks in AdminPage require a WagmiProvider; without it SSR throws
 // WagmiProviderNotFoundError and the route fails to render.
@@ -212,7 +212,7 @@ function AdminPage() {
   if (!authReady || gate === null) {
     return (
       <Shell>
-        <div className="flex items-center gap-2 text-[#C5C1B9] font-mono text-sm">
+        <div className="flex items-center gap-2 text-muted font-mono text-sm">
           <Loader2 className="w-4 h-4 animate-spin" /> Checking admin access…
         </div>
       </Shell>
@@ -223,8 +223,8 @@ function AdminPage() {
   // plain not-found surface: no admin branding, no privileged shell, no data.
   if (!gate.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#010C1B] px-4 py-24 text-center font-mono text-[#C5C1B9]">
-        <p className="text-white text-lg font-black uppercase tracking-widest">404</p>
+      <div className="min-h-screen bg-background px-4 py-24 text-center font-mono text-muted">
+        <p className="text-foreground text-lg font-black uppercase tracking-widest">404</p>
         <p className="mt-2 text-[12px]">This page could not be found.</p>
         <Link to="/" className="mt-5 inline-block underline">
           Back to FlowBridge
@@ -235,14 +235,14 @@ function AdminPage() {
 
   return (
     <Shell>
-      <div className="flex items-center gap-2 text-[#32FF8B] font-mono text-[12px] font-black uppercase tracking-widest">
+      <div className="flex items-center gap-2 text-primary font-mono text-[12px] font-black uppercase tracking-widest">
         <ShieldCheck className="w-4 h-4" /> Admin verified · {user?.email}
       </div>
 
-      <nav className="space-y-2 rounded-2xl border border-white/10 bg-[#0D1C2A]/70 p-3">
+      <nav className="space-y-2 rounded-2xl border border-foreground/10 bg-card/70 p-3">
         {NAV_GROUPS.map(({ group, items }) => (
           <div key={group} className="space-y-1.5">
-            <div className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#C5C1B9]/70 font-mono">
+            <div className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-muted/70 font-mono">
               {group}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -253,8 +253,8 @@ function AdminPage() {
                   onClick={() => setTab(id)}
                   className={`px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest font-mono cursor-pointer transition ${
                     tab === id
-                      ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                      : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                      ? "bg-primary/15 border border-primary/40 text-primary"
+                      : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
                   }`}
                 >
                   {label}
@@ -291,13 +291,13 @@ function AdminPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#010C1B] px-4 py-6 sm:px-6">
+    <div className="min-h-screen bg-background px-4 py-6 sm:px-6">
       <div className="mx-auto w-full max-w-2xl space-y-4 lg:max-w-5xl">
         <header className="space-y-1">
-          <h1 className="text-white font-black tracking-widest uppercase font-mono text-lg">
+          <h1 className="text-foreground font-black tracking-widest uppercase font-mono text-lg">
             FlowBridge Sets · Control Panel
           </h1>
-          <p className="text-[#C5C1B9] text-[12px] font-mono">
+          <p className="text-muted text-[12px] font-mono">
             Control panel — tokens, logos, banners, partners, copy, links, economics and feature flags. No code edits required.
           </p>
         </header>
@@ -494,7 +494,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
           <select
             value={chain}
             onChange={(e) => setChain(e.target.value as any)}
-            className="bg-[#010C1B] border border-white/15 rounded-lg px-2 py-1 text-white text-[12px] font-mono cursor-pointer"
+            className="bg-background border border-foreground/15 rounded-lg px-2 py-1 text-foreground text-[12px] font-mono cursor-pointer"
           >
             <option value="mainnet">Mainnet</option>
             <option value="testnet">Testnet</option>
@@ -516,7 +516,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
             {checking ? "Verifying…" : "Verify on-chain"}
           </button>
           {liquidityOk === true && (
-            <span className="flex items-center gap-1 text-[#32FF8B] text-[11px] font-black uppercase tracking-widest">
+            <span className="flex items-center gap-1 text-primary text-[11px] font-black uppercase tracking-widest">
               <Check className="w-3.5 h-3.5" /> Liquidity found
             </span>
           )}
@@ -547,7 +547,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
                 <img
                   src={logoUrl}
                   alt=""
-                  className="h-9 w-9 rounded-full border border-white/10 object-contain bg-[#010C1B]"
+                  className="h-9 w-9 rounded-full border border-foreground/10 object-contain bg-background"
                 />
               ) : (
                 <TokenIcon symbol={symbol || "?"} size={36} />
@@ -591,7 +591,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
           </div>
         )}
         {notice && (
-          <div className="flex items-center gap-2 text-[#32FF8B] bg-[#32FF8B]/5 border border-[#32FF8B]/20 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2 text-primary bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
             <Check className="w-3.5 h-3.5 shrink-0" />
             <span>{notice}</span>
           </div>
@@ -610,29 +610,29 @@ function TokensPanel({ wallet }: { wallet: string }) {
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
-        {loading && <div className="text-[#C5C1B9]">Loading…</div>}
+        {loading && <div className="text-muted">Loading…</div>}
         {!loading && tokens.length === 0 && (
-          <div className="text-[#C5C1B9]">No tokens published yet.</div>
+          <div className="text-muted">No tokens published yet.</div>
         )}
         <div className="space-y-2">
           {tokens.map((t) => (
             <div
               key={t.id}
-              className="flex items-center gap-3 rounded-xl bg-[#010C1B]/60 border border-white/5 p-2.5"
+              className="flex items-center gap-3 rounded-xl bg-background/60 border border-foreground/5 p-2.5"
             >
               {t.logo_url ? (
                 <img
                   src={t.logo_url}
                   alt=""
-                  className="h-7 w-7 shrink-0 rounded-full border border-white/10 object-contain bg-[#010C1B]"
+                  className="h-7 w-7 shrink-0 rounded-full border border-foreground/10 object-contain bg-background"
                 />
               ) : (
                 <TokenIcon symbol={t.symbol} size={28} />
               )}
               <div className="flex-1 min-w-0">
-                <div className="text-white font-black tracking-wider">
+                <div className="text-foreground font-black tracking-wider">
                   {t.symbol}
-                  <span className="ml-2 text-[10px] uppercase tracking-widest text-[#C5C1B9]">
+                  <span className="ml-2 text-[10px] uppercase tracking-widest text-muted">
                     {t.chain}
                   </span>
                   {!t.liquidity_verified && (
@@ -641,7 +641,7 @@ function TokensPanel({ wallet }: { wallet: string }) {
                     </span>
                   )}
                 </div>
-                <div className="text-[11px] text-[#C5C1B9] truncate">{t.address}</div>
+                <div className="text-[11px] text-muted truncate">{t.address}</div>
               </div>
               <label className={`${btnGhost} shrink-0`} title="Replace logo">
                 <ImageIcon className="w-3.5 h-3.5" />
@@ -744,7 +744,7 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
         onChange={(e) => onChange(Number(e.target.value))}
         className={inputCls}
       />
-      {hint && <div className="text-[11px] text-[#C5C1B9]">{hint}</div>}
+      {hint && <div className="text-[11px] text-muted">{hint}</div>}
     </div>
   );
 
@@ -763,7 +763,7 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
         onChange={(e) => onChange(e.target.value)}
         className={inputCls}
       />
-      {hint && <div className="text-[11px] text-[#C5C1B9]">{hint}</div>}
+      {hint && <div className="text-[11px] text-muted">{hint}</div>}
     </div>
   );
 
@@ -773,7 +773,7 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
         setCfg({ ...cfg, social: { ...cfg.social, [k]: v } });
       return (
         <>
-          <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+          <div className="text-[11px] text-muted leading-relaxed">
             Used by the footer icons, social tasks and support links. Leave a field empty to hide it.
           </div>
           {textField("X / Twitter URL", cfg.social.x, set("x"), undefined, "https://x.com/…")}
@@ -825,8 +825,8 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
             (n) => setCfg({ ...cfg, fees: { ...cfg.fees, platformFeeBps: Math.round(n) } }),
             "10 bps = 0.1%. Keep this equal to FlowBridgeRouter's globalFeeBps.",
           )}
-          <div className="rounded-xl border border-white/10 bg-[#010C1B]/60 px-3 py-2 text-[11px] text-[#C5C1B9] leading-relaxed">
-            Currently disclosed as <span className="text-white">{feeBpsLabel(cfg.fees.platformFeeBps)}</span>.
+          <div className="rounded-xl border border-foreground/10 bg-background/60 px-3 py-2 text-[11px] text-muted leading-relaxed">
+            Currently disclosed as <span className="text-foreground">{feeBpsLabel(cfg.fees.platformFeeBps)}</span>.
             This value drives the fee row in swap details and the MAX / 25-50-75% head-room. Swap
             execution always reads the exact fee from FlowBridgeRouter on-chain, so update this
             field whenever the router's fee config changes to keep the disclosure accurate.
@@ -837,9 +837,9 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
     if (tab === "rewards") {
       return (
         <>
-          <div className="rounded-xl border border-white/10 bg-[#010C1B]/60 px-3 py-2 text-[11px] leading-relaxed text-[#C5C1B9]">
-            Active policy <span className="text-white">{cfg.rewards.policyVersion}</span> · effective{" "}
-            <span className="text-white">{cfg.rewards.v2EffectiveAt}</span>. The server is
+          <div className="rounded-xl border border-foreground/10 bg-background/60 px-3 py-2 text-[11px] leading-relaxed text-muted">
+            Active policy <span className="text-foreground">{cfg.rewards.policyVersion}</span> · effective{" "}
+            <span className="text-foreground">{cfg.rewards.v2EffectiveAt}</span>. The server is
             authoritative: FLOW Points accrue as 1 point per whole $1 of verified swap value, above
             the minimum, bounded by the daily cap. Legacy per-block and referral percentage-share
             controls are retired and kept read-only for historical audit.
@@ -948,7 +948,7 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
   return (
     <div className={cardCls}>
       {loading ? (
-        <div className="text-[#C5C1B9]">Loading settings…</div>
+        <div className="text-muted">Loading settings…</div>
       ) : (
         <>
           {body}
@@ -959,7 +959,7 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
             </div>
           )}
           {saved && (
-            <div className="flex items-center gap-2 text-[#32FF8B]">
+            <div className="flex items-center gap-2 text-primary">
               <Check className="w-3.5 h-3.5" /> Saved — live for all users.
             </div>
           )}
@@ -987,21 +987,21 @@ function Toggle({
     <button
       type="button"
       onClick={() => onChange(!value)}
-      className="w-full flex items-center justify-between gap-3 rounded-xl bg-[#010C1B]/60 border border-white/10 px-3 py-2.5 cursor-pointer text-left"
+      className="w-full flex items-center justify-between gap-3 rounded-xl bg-background/60 border border-foreground/10 px-3 py-2.5 cursor-pointer text-left"
     >
       <span>
-        <span className="block text-white text-[12px] font-black uppercase tracking-widest">
+        <span className="block text-foreground text-[12px] font-black uppercase tracking-widest">
           {label}
         </span>
-        {hint && <span className="block text-[11px] text-[#C5C1B9]">{hint}</span>}
+        {hint && <span className="block text-[11px] text-muted">{hint}</span>}
       </span>
       <span
         className={`w-10 h-5 rounded-full relative transition ${
-          value ? "bg-[#32FF8B]" : "bg-white/15"
+          value ? "bg-primary" : "bg-foreground/15"
         }`}
       >
         <span
-          className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#010C1B] transition-all ${
+          className={`absolute top-0.5 w-4 h-4 rounded-full bg-background transition-all ${
             value ? "left-[22px]" : "left-0.5"
           }`}
         />
@@ -1178,8 +1178,8 @@ function BannersPanel({ wallet }: { wallet: string }) {
               onClick={() => setSurface(key)}
               className={`px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition ${
                 surface === key
-                  ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                  : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                  ? "bg-primary/15 border border-primary/40 text-primary"
+                  : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
               }`}
             >
               {SURFACE_LABEL[key]}
@@ -1199,7 +1199,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
             }
             className={inputCls}
           />
-          <div className="text-[11px] text-[#C5C1B9]">
+          <div className="text-[11px] text-muted">
             Users can swipe, tap the dots or use ← / → keys. Auto-rotation is disabled for
             visitors who prefer reduced motion.
           </div>
@@ -1223,8 +1223,8 @@ function BannersPanel({ wallet }: { wallet: string }) {
                 onClick={() => setPreviewDevice(previewDevice === id ? null : id)}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
                   previewDevice === id
-                    ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                    : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                    ? "bg-primary/15 border border-primary/40 text-primary"
+                    : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
                 }`}
               >
                 {label}
@@ -1236,11 +1236,11 @@ function BannersPanel({ wallet }: { wallet: string }) {
         {previewDevice && (
           <div className="overflow-x-auto">
             <div
-              className="mx-auto rounded-2xl border border-white/10 bg-[#010C1B] p-3 space-y-3"
+              className="mx-auto rounded-2xl border border-foreground/10 bg-background p-3 space-y-3"
               style={{ width: previewDevice === "mobile" ? 360 : 640, maxWidth: "100%" }}
             >
               {livePreviewSlides.length === 0 ? (
-                <div className="text-[11px] text-[#C5C1B9]">
+                <div className="text-[11px] text-muted">
                   No banner is live right now for this surface (check schedules / visibility).
                 </div>
               ) : (
@@ -1249,7 +1249,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
             </div>
           </div>
         )}
-        <div className="text-[11px] text-[#C5C1B9]">
+        <div className="text-[11px] text-muted">
           Shows only slides that are live at this moment, exactly as users see them.
         </div>
       </div>
@@ -1285,13 +1285,13 @@ function BannersPanel({ wallet }: { wallet: string }) {
               <span
                 className={`px-2 py-1 rounded-lg border ${
                   live
-                    ? "border-[#32FF8B]/40 bg-[#32FF8B]/10 text-[#32FF8B]"
-                    : "border-white/15 bg-white/5 text-[#C5C1B9]"
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-foreground/15 bg-foreground/5 text-muted"
                 }`}
               >
                 {live ? "Live now" : "Not showing"}
               </span>
-              <span className="text-[#C5C1B9]">
+              <span className="text-muted">
                 {stat
                   ? `${stat.impressions} views · ${stat.clicks} clicks · ${stat.ctr.toFixed(1)}% CTR (30d)`
                   : "No engagement data yet (30d)"}
@@ -1321,7 +1321,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
             <div className="space-y-1.5">
               <div className={labelCls}>Artwork</div>
               <div className="flex items-center gap-2.5">
-                <div className="h-14 w-20 shrink-0 rounded-lg border border-white/10 bg-[#010C1B] overflow-hidden flex items-center justify-center">
+                <div className="h-14 w-20 shrink-0 rounded-lg border border-foreground/10 bg-background overflow-hidden flex items-center justify-center">
                   {slide.imageUrl ? (
                     <img
                       src={slide.imageUrl}
@@ -1331,7 +1331,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
                       }`}
                     />
                   ) : (
-                    <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+                    <ImageIcon className="w-4 h-4 text-muted" />
                   )}
                 </div>
                 <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
@@ -1367,7 +1367,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
                 onChange={(e) => patchSlide(i, { imageUrl: e.target.value })}
                 className={inputCls}
               />
-              <div className="text-[11px] text-[#C5C1B9]">PNG, JPG, WebP, GIF or SVG · max 2 MB.</div>
+              <div className="text-[11px] text-muted">PNG, JPG, WebP, GIF or SVG · max 2 MB.</div>
             </div>
 
             <div className="space-y-1">
@@ -1394,14 +1394,14 @@ function BannersPanel({ wallet }: { wallet: string }) {
             </div>
 
             {/* Scheduling */}
-            <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+            <div className="space-y-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3">
               <div className="flex items-center gap-1.5">
-                <CalendarClock className="w-3.5 h-3.5 text-[#32FF8B]" />
+                <CalendarClock className="w-3.5 h-3.5 text-primary" />
                 <span className={labelCls}>Schedule (optional)</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <div className="text-[10.5px] text-[#C5C1B9] uppercase tracking-widest">Start</div>
+                  <div className="text-[10.5px] text-muted uppercase tracking-widest">Start</div>
                   <input
                     type="datetime-local"
                     value={isoToLocalInput(slide.schedule?.startAt)}
@@ -1412,7 +1412,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-[10.5px] text-[#C5C1B9] uppercase tracking-widest">End</div>
+                  <div className="text-[10.5px] text-muted uppercase tracking-widest">End</div>
                   <input
                     type="datetime-local"
                     value={isoToLocalInput(slide.schedule?.endAt)}
@@ -1422,7 +1422,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="text-[10.5px] text-[#C5C1B9] uppercase tracking-widest">
+                <div className="text-[10.5px] text-muted uppercase tracking-widest">
                   Days of week (none selected = every day)
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -1443,8 +1443,8 @@ function BannersPanel({ wallet }: { wallet: string }) {
                         }}
                         className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
                           on
-                            ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                            : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                            ? "bg-primary/15 border border-primary/40 text-primary"
+                            : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
                         }`}
                       >
                         {d}
@@ -1497,7 +1497,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
           </div>
         )}
         {saved && (
-          <div className="flex items-center gap-2 text-[#32FF8B]">
+          <div className="flex items-center gap-2 text-primary">
             <Check className="w-3.5 h-3.5" /> Saved — live for all users.
           </div>
         )}
@@ -1521,13 +1521,13 @@ function BannersPanel({ wallet }: { wallet: string }) {
           </div>
         )}
         {!stats ? (
-          <div className="text-[#C5C1B9]">Loading analytics…</div>
+          <div className="text-muted">Loading analytics…</div>
         ) : stats.length === 0 ? (
-          <div className="text-[#C5C1B9]">No banner views recorded yet.</div>
+          <div className="text-muted">No banner views recorded yet.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[12px]">
-              <thead className="text-[10.5px] uppercase tracking-widest text-[#C5C1B9]">
+              <thead className="text-[10.5px] uppercase tracking-widest text-muted">
                 <tr>
                   <th scope="col" className="py-1.5 pr-3">Surface</th>
                   <th scope="col" className="py-1.5 pr-3">Banner</th>
@@ -1538,12 +1538,12 @@ function BannersPanel({ wallet }: { wallet: string }) {
               </thead>
               <tbody>
                 {stats.map((s) => (
-                  <tr key={`${s.surface}-${s.slideId}`} className="border-t border-white/5">
-                    <td className="py-1.5 pr-3 text-[#C5C1B9]">{s.surface}</td>
-                    <td className="py-1.5 pr-3 text-white break-all">{s.slideId}</td>
+                  <tr key={`${s.surface}-${s.slideId}`} className="border-t border-foreground/5">
+                    <td className="py-1.5 pr-3 text-muted">{s.surface}</td>
+                    <td className="py-1.5 pr-3 text-foreground break-all">{s.slideId}</td>
                     <td className="py-1.5 pr-3">{s.impressions}</td>
                     <td className="py-1.5 pr-3">{s.clicks}</td>
-                    <td className="py-1.5 text-[#32FF8B]">{s.ctr.toFixed(1)}%</td>
+                    <td className="py-1.5 text-primary">{s.ctr.toFixed(1)}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -1651,7 +1651,7 @@ function PartnersPanel({ wallet }: { wallet: string }) {
     <div className="space-y-4">
       <div className={cardCls}>
         <span className={labelCls}>Partner cards</span>
-        <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+        <div className="text-[11px] text-muted leading-relaxed">
           Cards render top-to-bottom on /partners. Mark a card “Featured” to show it as a large
           hero card with a CTA. Every card opens a profile with links, campaigns and about copy.
         </div>
@@ -1716,11 +1716,11 @@ function PartnersPanel({ wallet }: { wallet: string }) {
           <div className="space-y-1.5">
             <div className={labelCls}>Logo / artwork</div>
             <div className="flex items-center gap-2.5">
-              <div className="h-14 w-14 shrink-0 rounded-lg border border-white/10 bg-[#010C1B] overflow-hidden flex items-center justify-center">
+              <div className="h-14 w-14 shrink-0 rounded-lg border border-foreground/10 bg-background overflow-hidden flex items-center justify-center">
                 {p.imageUrl ? (
                   <img src={p.imageUrl} alt={`${p.name} logo preview`} className="h-full w-full object-cover" />
                 ) : (
-                  <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+                  <ImageIcon className="w-4 h-4 text-muted" />
                 )}
               </div>
               <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
@@ -1756,7 +1756,7 @@ function PartnersPanel({ wallet }: { wallet: string }) {
           </div>
 
           {/* Links */}
-          <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <div className="space-y-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3">
             <span className={labelCls}>Social / external links</span>
             {(p.links ?? []).map((l, li) => (
               <div key={li} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_auto] gap-2">
@@ -1796,7 +1796,7 @@ function PartnersPanel({ wallet }: { wallet: string }) {
           </div>
 
           {/* Campaigns */}
-          <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <div className="space-y-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3">
             <span className={labelCls}>Active campaigns</span>
             {(p.campaigns ?? []).map((c, ci) => (
               <div key={ci} className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2">
@@ -1858,7 +1858,7 @@ function PartnersPanel({ wallet }: { wallet: string }) {
           </div>
         )}
         {saved && (
-          <div className="flex items-center gap-2 text-[#32FF8B]">
+          <div className="flex items-center gap-2 text-primary">
             <Check className="w-3.5 h-3.5" /> Saved — live for all users.
           </div>
         )}
@@ -1971,7 +1971,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
     <div className="space-y-4">
       <div className={cardCls}>
         <span className={labelCls}>Home quick actions</span>
-        <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+        <div className="text-[11px] text-muted leading-relaxed">
           Tiles render left-to-right under the Home balance card. Pick a built-in icon, a 3D kit
           illustration, or upload your own logo. Publishing an empty list restores the defaults.
         </div>
@@ -1982,16 +1982,16 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
             .map((a) => (
               <div
                 key={a.id}
-                className="rounded-xl border border-white/10 bg-[#010C1B] p-2.5 min-h-[70px] flex flex-col justify-between"
+                className="rounded-xl border border-foreground/10 bg-background p-2.5 min-h-[70px] flex flex-col justify-between"
               >
-                <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#32FF8B]/12 text-[#32FF8B]">
+                <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/12 text-primary">
                   <ActionIcon kind={a.iconKind} name={a.icon} imageUrl={a.imageUrl} fit={a.iconFit} className={a.iconFit === "cover" ? "h-full w-full" : "h-4 w-4"} />
                 </span>
                 <span className="min-w-0">
-                  <span className="block truncate text-white text-[11px] font-black uppercase tracking-widest">
+                  <span className="block truncate text-foreground text-[11px] font-black uppercase tracking-widest">
                     {a.label}
                   </span>
-                  <span className="block truncate text-[9.5px] uppercase tracking-widest text-[#C5C1B9]">
+                  <span className="block truncate text-[9.5px] uppercase tracking-widest text-muted">
                     {a.hint}
                   </span>
                 </span>
@@ -2063,7 +2063,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
           </div>
 
           {/* Icon source */}
-          <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <div className="space-y-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3">
             <span className={labelCls}>Icon</span>
             <div className="flex flex-wrap gap-1.5">
               {(["lucide", "kit", "image"] as const).map((k) => (
@@ -2073,8 +2073,8 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
                   onClick={() => patch(i, { iconKind: k })}
                   className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
                     (a.iconKind ?? "lucide") === k
-                      ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                      : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                      ? "bg-primary/15 border border-primary/40 text-primary"
+                      : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
                   }`}
                 >
                   {k === "lucide" ? "Icon library" : k === "kit" ? "3D kit" : "Upload"}
@@ -2083,7 +2083,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
             </div>
 
             {(a.iconKind === "image" || a.iconKind === "kit") && (
-              <div className="rounded-xl border border-[#32FF8B]/25 bg-[#32FF8B]/[0.06] p-2.5">
+              <div className="rounded-xl border border-primary/25 bg-primary/[0.06] p-2.5">
                 <Toggle
                   label={
                     a.iconFit === "cover"
@@ -2107,8 +2107,8 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
                     onClick={() => patch(i, { icon: name })}
                     className={`grid place-items-center h-9 rounded-lg cursor-pointer transition ${
                       a.icon === name
-                        ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                        : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                        ? "bg-primary/15 border border-primary/40 text-primary"
+                        : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
                     }`}
                   >
                     <ActionIcon kind="lucide" name={name} className="h-4 w-4" />
@@ -2127,8 +2127,8 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
                     onClick={() => patch(i, { icon: name })}
                     className={`grid place-items-center h-9 rounded-lg cursor-pointer transition ${
                       a.icon === name
-                        ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40"
-                        : "bg-white/5 border border-white/10 hover:bg-white/10"
+                        ? "bg-primary/15 border border-primary/40"
+                        : "bg-foreground/5 border border-foreground/10 hover:bg-foreground/10"
                     }`}
                   >
                     <ActionIcon kind="kit" name={name} className="h-6 w-6" />
@@ -2143,7 +2143,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
             {a.iconKind === "image" && (
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-12 w-12 shrink-0 rounded-lg border border-white/10 bg-[#010C1B] overflow-hidden flex items-center justify-center">
+                  <div className="h-12 w-12 shrink-0 rounded-lg border border-foreground/10 bg-background overflow-hidden flex items-center justify-center">
                     {a.imageUrl ? (
                       <img
                         src={a.imageUrl}
@@ -2151,7 +2151,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
                         className={`h-full w-full ${a.iconFit === "cover" ? "object-cover" : "object-contain"}`}
                       />
                     ) : (
-                      <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+                      <ImageIcon className="w-4 h-4 text-muted" />
                     )}
                   </div>
                   <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
@@ -2192,7 +2192,7 @@ function QuickActionsPanel({ wallet }: { wallet: string }) {
         </button>
         {error && <span className="text-red-400 text-[11px]">{error}</span>}
         {saved && (
-          <span className="inline-flex items-center gap-1 text-[#32FF8B] text-[11px] font-black uppercase tracking-widest">
+          <span className="inline-flex items-center gap-1 text-primary text-[11px] font-black uppercase tracking-widest">
             <Check className="w-3.5 h-3.5" /> Published
           </span>
         )}
@@ -2346,17 +2346,17 @@ function PagesPanel({ wallet }: { wallet: string }) {
               onClick={() => setPageKey(k)}
               className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
                 pageKey === k
-                  ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                  : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                  ? "bg-primary/15 border border-primary/40 text-primary"
+                  : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
               }`}
             >
               {PAGE_TITLES[k]}
             </button>
           ))}
         </div>
-        <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+        <div className="text-[11px] text-muted leading-relaxed">
           Header copy, hero gradient, background artwork and section labels for{" "}
-          <span className="text-white">{PAGE_TITLES[pageKey]}</span>. Leave a field blank to keep the
+          <span className="text-foreground">{PAGE_TITLES[pageKey]}</span>. Leave a field blank to keep the
           built-in design.
         </div>
       </div>
@@ -2420,7 +2420,7 @@ function PagesPanel({ wallet }: { wallet: string }) {
               key={name}
               type="button"
               onClick={() => patchHero({ gradientFrom: from, gradientVia: via, gradientTo: to })}
-              className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer border border-white/10 text-white"
+              className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer border border-foreground/10 text-foreground"
               style={{ background: `linear-gradient(135deg, ${from}, ${via}, ${to})` }}
             >
               {name}
@@ -2448,7 +2448,7 @@ function PagesPanel({ wallet }: { wallet: string }) {
                 type="color"
                 value={(hero[field] as string) || "#0d9488"}
                 onChange={(e) => patchHero({ [field]: e.target.value } as any)}
-                className="h-9 w-full rounded-xl border border-white/15 bg-[#010C1B] cursor-pointer"
+                className="h-9 w-full rounded-xl border border-foreground/15 bg-background cursor-pointer"
               />
             </div>
           ))}
@@ -2459,11 +2459,11 @@ function PagesPanel({ wallet }: { wallet: string }) {
       <div className={cardCls}>
         <span className={labelCls}>Background image</span>
         <div className="flex items-center gap-2.5">
-          <div className="h-12 w-20 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-[#010C1B] flex items-center justify-center">
+          <div className="h-12 w-20 shrink-0 overflow-hidden rounded-lg border border-foreground/10 bg-background flex items-center justify-center">
             {hero.backgroundImageUrl ? (
               <img src={hero.backgroundImageUrl} alt="Background preview" className="h-full w-full object-cover" />
             ) : (
-              <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+              <ImageIcon className="w-4 h-4 text-muted" />
             )}
           </div>
           <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
@@ -2515,8 +2515,8 @@ function PagesPanel({ wallet }: { wallet: string }) {
               onClick={() => patchHero({ artworkKind: k })}
               className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
                 (hero.artworkKind ?? "none") === k
-                  ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                  : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                  ? "bg-primary/15 border border-primary/40 text-primary"
+                  : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
               }`}
             >
               {k === "kit" ? "3D kit" : k === "image" ? "Upload logo" : "None"}
@@ -2534,8 +2534,8 @@ function PagesPanel({ wallet }: { wallet: string }) {
                 onClick={() => patchHero({ artworkName: name })}
                 className={`grid place-items-center h-9 rounded-lg cursor-pointer transition ${
                   hero.artworkName === name
-                    ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40"
-                    : "bg-white/5 border border-white/10 hover:bg-white/10"
+                    ? "bg-primary/15 border border-primary/40"
+                    : "bg-foreground/5 border border-foreground/10 hover:bg-foreground/10"
                 }`}
               >
                 <ActionIcon kind="kit" name={name} className="h-6 w-6" />
@@ -2547,11 +2547,11 @@ function PagesPanel({ wallet }: { wallet: string }) {
         {hero.artworkKind === "image" && (
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-[#010C1B] flex items-center justify-center">
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-foreground/10 bg-background flex items-center justify-center">
                 {hero.artworkUrl ? (
                   <img src={hero.artworkUrl} alt="Illustration preview" className="h-full w-full object-contain" />
                 ) : (
-                  <ImageIcon className="w-4 h-4 text-[#C5C1B9]" />
+                  <ImageIcon className="w-4 h-4 text-muted" />
                 )}
               </div>
               <label className={`${btnGhost} inline-flex items-center gap-1.5`}>
@@ -2633,7 +2633,7 @@ function PagesPanel({ wallet }: { wallet: string }) {
       {iconSlots.length > 0 && (
         <div className={cardCls}>
           <span className={labelCls}>Icons & logos</span>
-          <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+          <div className="text-[11px] text-muted leading-relaxed">
             Swap the built-in artwork for a 3D kit asset, a line icon or your own upload.
           </div>
           <div className="space-y-3">
@@ -2641,7 +2641,7 @@ function PagesPanel({ wallet }: { wallet: string }) {
               const icon = page.icons?.[slot] ?? defaultPageIcon(pageKey, slot);
               const kind = icon.kind ?? "kit";
               return (
-                <div key={slot} className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div key={slot} className="space-y-2 rounded-2xl border border-foreground/10 bg-foreground/5 p-3">
                   <div className="flex items-center gap-2">
                     <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-black/30">
                       {kind !== "none" && (
@@ -2653,7 +2653,7 @@ function PagesPanel({ wallet }: { wallet: string }) {
                         />
                       )}
                     </span>
-                    <span className="text-[11px] font-black uppercase tracking-widest text-white">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-foreground">
                       {title}
                     </span>
                   </div>
@@ -2666,8 +2666,8 @@ function PagesPanel({ wallet }: { wallet: string }) {
                         onClick={() => patchIcon(slot, { kind: k })}
                         className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
                           kind === k
-                            ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]"
-                            : "bg-white/5 border border-white/10 text-[#C5C1B9] hover:text-white"
+                            ? "bg-primary/15 border border-primary/40 text-primary"
+                            : "bg-foreground/5 border border-foreground/10 text-muted hover:text-foreground"
                         }`}
                       >
                         {k === "kit" ? "3D kit" : k === "lucide" ? "Line icon" : k === "image" ? "Upload" : "None"}
@@ -2737,7 +2737,7 @@ function PagesPanel({ wallet }: { wallet: string }) {
       <div className={`${cardCls} flex flex-wrap items-center gap-2`}>
         {error && <span className="text-red-400 text-[11px]">{error}</span>}
         {saved && (
-          <span className="inline-flex items-center gap-1 text-[#32FF8B] text-[11px] font-black uppercase tracking-widest">
+          <span className="inline-flex items-center gap-1 text-primary text-[11px] font-black uppercase tracking-widest">
             <Check className="w-3.5 h-3.5" /> Published
           </span>
         )}

@@ -97,7 +97,7 @@ export function BannerRotator({
       onBlurCapture={() => setPaused(false)}
     >
       <div
-        className="grid touch-pan-y rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32FF8B]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B]"
+        className="grid touch-pan-y rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B]"
         tabIndex={0}
         aria-live="polite"
         onKeyDown={(e) => {
@@ -151,10 +151,10 @@ export function BannerRotator({
                 setIndex(i);
                 holdAutoplay();
               }}
-              className={`h-2.5 min-w-[10px] rounded-full outline-none transition-all focus-visible:ring-2 focus-visible:ring-[#32FF8B]/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B] ${
+              className={`h-2.5 min-w-[10px] rounded-full outline-none transition-all focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B] ${
                 i === active
-                  ? "w-4 bg-[#32FF8B]"
-                  : "w-2.5 bg-white/30 hover:bg-white/50"
+                  ? "w-4 bg-primary"
+                  : "w-2.5 bg-foreground/30 hover:bg-foreground/50"
               }`}
             >
               <span className="sr-only">Banner {i + 1}</span>

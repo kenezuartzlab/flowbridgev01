@@ -98,7 +98,7 @@ export function TokenPickerModal({
   return (
     <ModalPortal>
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md animate-fade-in font-sans sm:p-4">
-      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[400px] flex-col gap-4 overflow-hidden rounded-3xl border border-hairline border-b-[5px] border-b-primary bg-card p-5 text-foreground shadow-2xl animate-scale-up">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[400px] flex-col gap-3 overflow-hidden rounded-3xl border border-hairline border-b-[5px] border-b-primary bg-card p-5 text-foreground shadow-2xl animate-scale-up">
         <div className="flex justify-between items-center font-mono">
           <h3 className="text-foreground font-black uppercase tracking-wider text-sm">
             {title}
@@ -135,7 +135,7 @@ export function TokenPickerModal({
             type="button"
             disabled={importing}
             onClick={handleImport}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#32FF8B]/10 border border-[#32FF8B]/30 text-[#32FF8B] text-[13px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#32FF8B]/20 transition-colors font-mono disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 border border-primary/30 text-primary text-[13px] font-black uppercase tracking-widest cursor-pointer hover:bg-primary/20 transition-colors font-mono disabled:opacity-50"
           >
             <Plus className="w-3.5 h-3.5" />
             {importing ? "Verifying liquidity…" : "Import token"}
@@ -160,7 +160,7 @@ export function TokenPickerModal({
                 <div className="text-foreground text-sm font-black tracking-wider font-mono">
                   {t.symbol}
                   {t.imported && (
-                    <span className="ml-2 text-[10px] text-[#32FF8B] font-bold uppercase tracking-widest">
+                    <span className="ml-2 text-[10px] text-primary font-bold uppercase tracking-widest">
                       imported
                     </span>
                   )}

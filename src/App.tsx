@@ -2785,8 +2785,8 @@ export default function App() {
       
       {/* Background grid + ambient glow of Ecosurge specification */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none animate-pulse-slow" />
-      <div className="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#32FF8B]/5 blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-[-20%] right-[-10%] w-[65%] h-[65%] rounded-full bg-[#00D7B2]/5 blur-[120px] pointer-events-none" />
+      <div className="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-[-20%] right-[-10%] w-[65%] h-[65%] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
 
       {/* V9.4 — real page shell. No phone frame, no fixed device width: the
           Trade workspace widens with the viewport so the global header measures
@@ -2902,7 +2902,7 @@ export default function App() {
                     <Gift className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0 font-mono">
-                    <div className="truncate text-[10.5px] font-bold uppercase leading-tight tracking-wide text-white sm:text-[11px]">
+                    <div className="truncate text-[10.5px] font-bold uppercase leading-tight tracking-wide text-foreground sm:text-[11px]">
                       {!googleUser
                         ? "Guest Mode Active"
                         : !signedInEmailVerified
@@ -2912,7 +2912,7 @@ export default function App() {
                             : "Wallet Link Needed"
                       }
                     </div>
-                    <div className="mt-0.5 line-clamp-1 text-[9.5px] leading-snug text-[#C5C1B9] sm:text-[10px]">
+                    <div className="mt-0.5 line-clamp-1 text-[9.5px] leading-snug text-muted sm:text-[10px]">
                       {!googleUser
                         ? "Verify email to earn FLOW rewards."
                         : !signedInEmailVerified
@@ -2975,15 +2975,15 @@ export default function App() {
                   ? () => setIsConnectGuideOpen(true)
                   : undefined
               }
-              className={`flex min-h-[46px] items-center gap-2 rounded-xl border border-[#32FF8B]/25 bg-[#32FF8B]/5 px-3 py-2 ${
+              className={`flex min-h-[46px] items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 ${
                 walletLinkNotice.kind === "signin-needed" ? "cursor-pointer active:scale-[0.99]" : ""
               }`}
             >
-              <div className="min-w-0 flex-1 text-[10.5px] leading-snug text-white/90">
+              <div className="min-w-0 flex-1 text-[10.5px] leading-snug text-foreground/90">
                 {walletLinkNotice.kind === "signin-needed" ? (
                   <>
                     Sign in to{" "}
-                    <span className="font-mono text-[#32FF8B]">{walletLinkNotice.emailHint}</span> to
+                    <span className="font-mono text-primary">{walletLinkNotice.emailHint}</span> to
                     keep earning FlowPoints and referrals.
                   </>
                 ) : walletLinkNotice.kind === "mismatch" ? (
@@ -2997,7 +2997,7 @@ export default function App() {
                 )}
               </div>
               {walletLinkNotice.kind === "signin-needed" && (
-                <span className="shrink-0 rounded-lg bg-[#32FF8B] px-2 py-1 font-mono text-[9px] font-black uppercase tracking-widest text-[#010C1B]">
+                <span className="shrink-0 rounded-lg bg-primary px-2 py-1 font-mono text-[9px] font-black uppercase tracking-widest text-primary-foreground">
                   Sign in
                 </span>
               )}
@@ -3006,7 +3006,7 @@ export default function App() {
                   e.stopPropagation();
                   setWalletLinkNotice(null);
                 }}
-                className="shrink-0 rounded-lg bg-white/10 px-2 py-1 font-mono text-[9px] font-black uppercase tracking-widest text-white transition-colors hover:bg-white/15"
+                className="shrink-0 rounded-lg bg-foreground/10 px-2 py-1 font-mono text-[9px] font-black uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/15"
               >
                 Dismiss
               </button>
@@ -3027,13 +3027,13 @@ export default function App() {
                     setIsDemoMode(true);
                     setErrorMessage(null);
                   }}
-                  className="px-3 py-1.5 bg-[#F6BA00] hover:bg-[#F6BA00]/90 text-[#010C1B] rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
+                  className="px-3 py-1.5 bg-[#F6BA00] hover:bg-[#F6BA00]/90 text-ecosurge-navy rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
                 >
                   Switch to Sandbox Simulation
                 </button>
                 <button
                   onClick={() => setErrorMessage(null)}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-[#FFFFFF] rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
+                  className="px-3 py-1.5 bg-foreground/10 hover:bg-foreground/15 text-foreground rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors"
                 >
                   Dismiss
                 </button>
@@ -3047,12 +3047,12 @@ export default function App() {
               <span className="text-xs font-black uppercase tracking-widest text-amber-200 font-mono">
                 Wrong Network Detected!
               </span>
-              <p className="text-[11px] text-[#C5C1B9] leading-relaxed">
+              <p className="text-[11px] text-muted leading-relaxed">
                 Please switch to {targetChainIdForTab() === 97 || targetChainIdForTab() === 56 ? "BNB Chain" : "BOT Chain"} to proceed with Web3 operations.
               </p>
               <button
                 onClick={handleSwitchNetwork}
-                className="w-full py-2.5 bg-[#F6BA00] hover:bg-[#F6BA00]/90 text-[#010C1B] font-mono tracking-widest font-black rounded-xl text-[9px] uppercase transition-colors shadow-sm cursor-pointer"
+                className="w-full py-2.5 bg-[#F6BA00] hover:bg-[#F6BA00]/90 text-ecosurge-navy font-mono tracking-widest font-black rounded-xl text-[9px] uppercase transition-colors shadow-sm cursor-pointer"
               >
                 Switch Network Automatically
               </button>
@@ -3323,7 +3323,7 @@ export default function App() {
       <footer className="relative z-10 text-center py-5 select-none transition-opacity duration-300 flex flex-col items-center gap-2 font-mono uppercase">
         <button
           onClick={() => setIsDonateModalOpen(true)}
-          className="text-[10px] tracking-[0.05em] text-[#32FF8B] hover:text-[#1FFF7D] font-black cursor-pointer transition-colors flex items-center justify-center gap-1.5 hover:underline bg-[#32FF8B]/5 hover:bg-[#32FF8B]/10 border border-[#32FF8B]/20 py-1 px-3.5 rounded-full shadow-sm active:scale-95"
+          className="text-[10px] tracking-[0.05em] text-primary hover:text-primary font-black cursor-pointer transition-colors flex items-center justify-center gap-1.5 hover:underline bg-primary/5 hover:bg-primary/10 border border-primary/20 py-1 px-3.5 rounded-full shadow-sm active:scale-95"
           title="Support decentralized builders & request new ecosystem tools!"
         >
           <span className="inline-block animate-pulse">💖</span> Support FlowBridge & Request Features
@@ -3336,7 +3336,7 @@ export default function App() {
               rel="noreferrer"
               aria-label="FlowBridge on X"
               title="Follow FlowBridge on X"
-              className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+              className="w-7 h-7 flex items-center justify-center rounded-full border border-foreground/15 text-muted hover:text-primary hover:border-primary/60 hover:bg-primary/10 transition-all active:scale-95"
             >
               <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">
                 <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-6.98L4.66 22H1.4l8.02-9.17L1 2h7.02l4.84 6.4L18.244 2Zm-1.2 18h1.86L7.05 4H5.09l11.954 16Z" />
@@ -3350,7 +3350,7 @@ export default function App() {
               rel="noreferrer"
               aria-label="FlowBridge on Telegram"
               title="FlowBridge on Telegram"
-              className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+              className="w-7 h-7 flex items-center justify-center rounded-full border border-foreground/15 text-muted hover:text-primary hover:border-primary/60 hover:bg-primary/10 transition-all active:scale-95"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
                 <path d="M21.9 4.3 19 19.1c-.2 1-.8 1.2-1.6.8l-4.4-3.3-2.1 2c-.2.3-.5.4-.8.4l.3-4.3 8.1-7.3c.3-.3 0-.5-.5-.2L7.5 12.9 3.3 11.6c-.9-.3-.9-.9.2-1.3l17.1-6.6c.8-.3 1.5.2 1.3 1.1Z" />
@@ -3364,7 +3364,7 @@ export default function App() {
               rel="noreferrer"
               aria-label="FlowBridge on YouTube"
               title="FlowBridge on YouTube"
-              className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+              className="w-7 h-7 flex items-center justify-center rounded-full border border-foreground/15 text-muted hover:text-primary hover:border-primary/60 hover:bg-primary/10 transition-all active:scale-95"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
                 <path d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.55 3.5 12 3.5 12 3.5s-7.55 0-9.4.58A3 3 0 0 0 .5 6.2C0 8.06 0 12 0 12s0 3.94.5 5.8a3 3 0 0 0 2.1 2.12C4.45 20.5 12 20.5 12 20.5s7.55 0 9.4-.58a3 3 0 0 0 2.1-2.12C24 15.94 24 12 24 12s0-3.94-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" />
@@ -3378,7 +3378,7 @@ export default function App() {
               rel="noreferrer"
               aria-label="FlowBridge on Discord"
               title="FlowBridge on Discord"
-              className="w-7 h-7 flex items-center justify-center rounded-full border border-white/15 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/60 hover:bg-[#32FF8B]/10 transition-all active:scale-95"
+              className="w-7 h-7 flex items-center justify-center rounded-full border border-foreground/15 text-muted hover:text-primary hover:border-primary/60 hover:bg-primary/10 transition-all active:scale-95"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
                 <path d="M20.3 4.9A16 16 0 0 0 16.4 3.7l-.3.6a12 12 0 0 1 3.4 1.6 11.5 11.5 0 0 0-8.9-1 11 11 0 0 0-2.6 1A12 12 0 0 1 11.4 4.3l-.3-.6A16 16 0 0 0 7.2 4.9 17.9 17.9 0 0 0 4 17.4a15.9 15.9 0 0 0 4.8 2.4l.6-1a12 12 0 0 1-1.7-.8l.4-.3a11.4 11.4 0 0 0 9.8 0l.4.3a12 12 0 0 1-1.7.8l.6 1a15.9 15.9 0 0 0 4.8-2.4 17.9 17.9 0 0 0-3.7-12.5ZM9.7 14.6c-.9 0-1.7-.9-1.7-2s.7-2 1.7-2 1.7.9 1.7 2-.8 2-1.7 2Zm4.6 0c-.9 0-1.7-.9-1.7-2s.7-2 1.7-2 1.7.9 1.7 2-.8 2-1.7 2Z" />
@@ -3389,13 +3389,13 @@ export default function App() {
         {googleUser?.email?.toLowerCase() === 'kenezuartzlab@gmail.com' && (
           <Link
             to="/sets"
-            className="text-[9px] tracking-[0.2em] font-black text-[#32FF8B]/80 hover:text-[#32FF8B] transition-colors"
+            className="text-[9px] tracking-[0.2em] font-black text-primary/80 hover:text-primary transition-colors"
           >
             ⚙ Admin console
           </Link>
 
         )}
-        <span className="text-[9px] text-[#C5C1B9]/70 tracking-[0.2em] font-medium">
+        <span className="text-[9px] text-muted/70 tracking-[0.2em] font-medium">
           {appConfig.content.footerNote}
         </span>
 

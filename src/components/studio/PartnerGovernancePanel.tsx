@@ -18,14 +18,14 @@ import {
 import { ORG_STATUS_LABEL, REVIEW_STATE_LABEL } from "@/lib/partner/partnerTypes";
 
 const cardCls =
-  "rounded-2xl border border-white/10 bg-[#0D1C2A]/70 p-4 space-y-3 font-mono text-[13px]";
-const labelCls = "text-[11px] uppercase tracking-widest text-[#C5C1B9] font-black";
+  "rounded-2xl border border-foreground/10 bg-card/70 p-4 space-y-3 font-mono text-[13px]";
+const labelCls = "text-[11px] uppercase tracking-widest text-muted font-black";
 const btnPrimary =
-  "px-3 py-2 rounded-xl bg-[#32FF8B] text-[#010C1B] text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#1FFF7D] transition disabled:opacity-50";
+  "px-3 py-2 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-primary-strong transition disabled:opacity-50";
 const btnGhost =
-  "px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-white/10 transition disabled:opacity-50";
+  "px-3 py-2 rounded-xl bg-foreground/5 border border-foreground/10 text-foreground text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-foreground/10 transition disabled:opacity-50";
 const inputCls =
-  "w-full bg-[#010C1B] border border-white/15 rounded-xl px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-[#32FF8B]/50";
+  "w-full bg-background border border-foreground/15 rounded-xl px-3 py-2 text-foreground text-sm font-mono focus:outline-none focus:border-primary/50";
 
 const fmtDate = (ms?: number | null) =>
   ms ? new Date(ms).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "—";
@@ -121,7 +121,7 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
   if (loading) {
     return (
       <div className={cardCls}>
-        <div className="flex items-center gap-2 text-[#C5C1B9]">
+        <div className="flex items-center gap-2 text-muted">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading partner review queue…
         </div>
       </div>
@@ -132,7 +132,7 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
     <div className="space-y-4">
       <div className={cardCls}>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-[#32FF8B]">
+          <div className="flex items-center gap-2 text-primary">
             <ShieldCheck className="h-4 w-4" />
             <span className="text-[11px] font-black uppercase tracking-widest">
               {role === "super_admin" ? "Super Admin" : "Internal Operator"}
@@ -142,7 +142,7 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
             <RefreshCw className="mr-1 -mt-0.5 inline h-3.5 w-3.5" /> Refresh
           </button>
         </div>
-        <p className="text-[11px] leading-relaxed text-[#C5C1B9]">
+        <p className="text-[11px] leading-relaxed text-muted">
           Review acts on the frozen submission snapshot. Publishing materializes exactly that
           snapshot into the live campaign engine — partners can never publish, pause or end.
           {role === "internal_operator"
@@ -163,7 +163,7 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
         </div>
       ) : null}
       {notice ? (
-        <div className="flex items-start gap-2 rounded-2xl border border-[#32FF8B]/30 bg-[#32FF8B]/10 p-3 font-mono text-[12px] text-[#32FF8B]">
+        <div className="flex items-start gap-2 rounded-2xl border border-primary/30 bg-primary/10 p-3 font-mono text-[12px] text-primary">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" /> {notice}
         </div>
       ) : null}
@@ -219,17 +219,17 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
       <div className={cardCls}>
         <div className={labelCls}>Organizations</div>
         {orgs.filter((o) => !o.isSystem).length === 0 ? (
-          <p className="text-[12px] text-[#C5C1B9]">No partner organizations yet.</p>
+          <p className="text-[12px] text-muted">No partner organizations yet.</p>
         ) : (
           <div className="space-y-2">
             {orgs
               .filter((o) => !o.isSystem)
               .map((o) => (
-                <div key={o.orgId} className="rounded-xl border border-white/10 bg-[#010C1B]/60 p-3">
+                <div key={o.orgId} className="rounded-xl border border-foreground/10 bg-background/60 p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <div className="text-[13px] font-black text-white">{o.name}</div>
-                      <div className="text-[11px] text-[#C5C1B9]">
+                      <div className="text-[13px] font-black text-foreground">{o.name}</div>
+                      <div className="text-[11px] text-muted">
                         @{o.slug} · {ORG_STATUS_LABEL[o.status]} · {o.memberCount} member(s) ·{" "}
                         {o.campaignCount} campaign(s) · {o.pendingReviewCount} in review
                       </div>
@@ -277,7 +277,7 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
                         ) : null}
                       </div>
                     ) : (
-                      <span className="text-[10px] uppercase tracking-widest text-[#C5C1B9]/70">
+                      <span className="text-[10px] uppercase tracking-widest text-muted/70">
                         Super Admin only
                       </span>
                     )}
@@ -291,7 +291,7 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
                     />
                   ) : null}
                   {o.riskNotes ? (
-                    <p className="mt-2 text-[11px] text-[#C5C1B9]">Note: {o.riskNotes}</p>
+                    <p className="mt-2 text-[11px] text-muted">Note: {o.riskNotes}</p>
                   ) : null}
                 </div>
               ))}
@@ -302,12 +302,12 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
       <div className={cardCls}>
         <div className={labelCls}>Audit trail</div>
         {audit.length === 0 ? (
-          <p className="text-[12px] text-[#C5C1B9]">No privileged actions recorded yet.</p>
+          <p className="text-[12px] text-muted">No privileged actions recorded yet.</p>
         ) : (
           <ul className="space-y-1.5">
             {audit.map((a) => (
-              <li key={a.eventId} className="text-[11px] text-[#C5C1B9]">
-                <span className="text-white">{a.action}</span> · {a.objectType} {a.objectId} ·{" "}
+              <li key={a.eventId} className="text-[11px] text-muted">
+                <span className="text-foreground">{a.action}</span> · {a.objectType} {a.objectId} ·{" "}
                 {a.actorEmail ?? "internal"} ({a.actorRole}) · {fmtDate(a.createdAt)}
                 {a.reason ? ` · "${a.reason}"` : ""}
               </li>
@@ -321,9 +321,9 @@ export function PartnerGovernancePanel({ wallet }: { wallet: string }) {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-[#010C1B]/60 p-3">
-      <div className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">{label}</div>
-      <div className="text-lg font-black text-white">{value}</div>
+    <div className="rounded-xl border border-foreground/10 bg-background/60 p-3">
+      <div className="text-[10px] uppercase tracking-widest text-muted">{label}</div>
+      <div className="text-lg font-black text-foreground">{value}</div>
     </div>
   );
 }
@@ -344,7 +344,7 @@ function Section({
       {hasChildren ? (
         <div className="space-y-3">{children}</div>
       ) : (
-        <p className="text-[12px] text-[#C5C1B9]">{empty}</p>
+        <p className="text-[12px] text-muted">{empty}</p>
       )}
     </div>
   );
@@ -367,22 +367,22 @@ function CampaignReviewCard({
 }) {
   const pending = campaign.pendingRevision;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#010C1B]/60 p-3 space-y-2">
+    <div className="rounded-xl border border-foreground/10 bg-background/60 p-3 space-y-2">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <div className="text-[13px] font-black text-white">{campaign.name}</div>
-          <div className="text-[11px] text-[#C5C1B9]">
+          <div className="text-[13px] font-black text-foreground">{campaign.name}</div>
+          <div className="text-[11px] text-muted">
             {campaign.orgName} · @{campaign.slug} · {REVIEW_STATE_LABEL[campaign.reviewState]}
             {pending ? ` · revision ${pending.revision}` : ""}
           </div>
         </div>
-        <div className="text-right text-[11px] text-[#C5C1B9]">
+        <div className="text-right text-[11px] text-muted">
           <div>Budget {campaign.ptsBudget.toLocaleString()} PTS</div>
           <div>Max/wallet {campaign.maxPtsPerWallet.toLocaleString()} PTS</div>
         </div>
       </div>
 
-      <div className="grid gap-1 text-[11px] text-[#C5C1B9] sm:grid-cols-2">
+      <div className="grid gap-1 text-[11px] text-muted sm:grid-cols-2">
         <div>Submitted {fmtDate(pending?.submittedAt ?? campaign.submittedAt)}</div>
         <div>
           Window {fmtDate(campaign.startsAt)} → {fmtDate(campaign.endsAt)}
@@ -397,11 +397,11 @@ function CampaignReviewCard({
       </div>
 
       {pending?.changes?.length ? (
-        <div className="rounded-lg border border-white/10 bg-white/5 p-2">
-          <div className="text-[10px] uppercase tracking-widest text-[#C5C1B9]">
+        <div className="rounded-lg border border-foreground/10 bg-foreground/5 p-2">
+          <div className="text-[10px] uppercase tracking-widest text-muted">
             Changes in this revision
           </div>
-          <ul className="mt-1 space-y-0.5 text-[11px] text-white">
+          <ul className="mt-1 space-y-0.5 text-[11px] text-foreground">
             {pending.changes.map((c, i) => (
               <li key={i}>· {c}</li>
             ))}
@@ -410,7 +410,7 @@ function CampaignReviewCard({
       ) : null}
 
       {campaign.ruleSummary.length ? (
-        <div className="text-[11px] text-[#C5C1B9]">
+        <div className="text-[11px] text-muted">
           Verification: {campaign.ruleSummary.slice(0, 8).join(" · ")}
         </div>
       ) : null}
@@ -422,7 +422,7 @@ function CampaignReviewCard({
       ) : null}
 
       {campaign.reviewNote ? (
-        <div className="text-[11px] text-[#C5C1B9]">Last note: “{campaign.reviewNote}”</div>
+        <div className="text-[11px] text-muted">Last note: “{campaign.reviewNote}”</div>
       ) : null}
 
       {actions.length ? (

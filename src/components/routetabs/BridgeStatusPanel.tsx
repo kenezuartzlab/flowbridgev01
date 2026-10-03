@@ -101,16 +101,16 @@ function AdapterStatusBranch({
   const severity = claimCompleted ? 'info' : (status?.severity ?? 'info');
   const tone =
     severity === 'success'
-      ? 'text-[#32FF8B]'
+      ? 'text-primary'
       : severity === 'critical'
         ? 'text-red-400'
         : severity === 'warning'
           ? 'text-amber-300'
-          : 'text-[#32FF8B]';
+          : 'text-primary';
   const showRefundArea = status?.refundClaimable === true || claimCompleted;
 
   return (
-    <div className="bg-[#0D1C2A]/80 border border-white/20 rounded-2xl p-4 space-y-3 font-mono shadow-inner">
+    <div className="bg-card/80 border border-foreground/20 rounded-2xl p-4 space-y-3 font-mono shadow-inner">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
           {severity === 'success' ? (
@@ -122,7 +122,7 @@ function AdapterStatusBranch({
           ) : (
             <Loader2 className={`w-4 h-4 animate-spin shrink-0 ${tone}`} />
           )}
-          <span className="text-[12px] font-black uppercase tracking-widest text-white truncate">
+          <span className="text-[12px] font-black uppercase tracking-widest text-foreground truncate">
             {claimCompleted ? 'Refund completed' : status ? status.title : 'Checking bridge request…'}
           </span>
         </div>
@@ -130,13 +130,13 @@ function AdapterStatusBranch({
           href={`${sourceExplorerPrefix}${session.tx_hash}`}
           target="_blank"
           rel="noreferrer"
-          className="text-[11px] text-[#32FF8B] hover:underline flex items-center gap-1 shrink-0"
+          className="text-[11px] text-primary hover:underline flex items-center gap-1 shrink-0"
         >
           View <ExternalLink className="w-3 h-3" />
         </a>
       </div>
 
-      <div className="text-[11px] text-[#C5C1B9] leading-relaxed">
+      <div className="text-[11px] text-muted leading-relaxed">
         {claimCompleted
           ? 'The Adapter paid the recorded refund recipient. Verified on-chain.'
           : status
@@ -151,8 +151,8 @@ function AdapterStatusBranch({
       )}
 
       {showRefundArea && (
-        <div className="space-y-2 pt-2 border-t border-white/10">
-          <div className="text-[10px] text-[#C5C1B9]/80 break-all">
+        <div className="space-y-2 pt-2 border-t border-foreground/10">
+          <div className="text-[10px] text-muted/80 break-all">
             Refund recipient (fixed by the Adapter): {session.refund_recipient}
           </div>
           {!refundFlagOn ? (
@@ -163,7 +163,7 @@ function AdapterStatusBranch({
             <button
               type="button"
               disabled
-              className="w-full rounded-xl bg-white/10 text-[#C5C1B9] text-[12px] font-black uppercase tracking-widest py-2.5 cursor-not-allowed"
+              className="w-full rounded-xl bg-foreground/10 text-muted text-[12px] font-black uppercase tracking-widest py-2.5 cursor-not-allowed"
             >
               Refund completed
             </button>
@@ -173,7 +173,7 @@ function AdapterStatusBranch({
                 type="button"
                 onClick={claim}
                 disabled={claiming}
-                className="w-full rounded-xl bg-[#32FF8B] text-[#07131E] text-[12px] font-black uppercase tracking-widest py-2.5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full rounded-xl bg-primary text-primary-foreground text-[12px] font-black uppercase tracking-widest py-2.5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {claiming && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 {claiming ? 'Claiming…' : 'Claim refund'}
@@ -190,7 +190,7 @@ function AdapterStatusBranch({
         </div>
       )}
 
-      <div className="text-[10px] text-[#C5C1B9]/70 space-y-0.5 pt-1 border-t border-white/5">
+      <div className="text-[10px] text-muted/70 space-y-0.5 pt-1 border-t border-foreground/5">
         <div>Request #{session.gateway_nonce ?? '—'}</div>
         <div className="truncate">Adapter {session.adapter_address}</div>
         <div>
@@ -308,17 +308,17 @@ export function BridgeStatusPanel({
   const ss = (relayCountdown % 60).toString().padStart(2, '0');
 
   return (
-    <div className="bg-[#0D1C2A]/80 border border-white/20 rounded-2xl p-4 space-y-3 font-mono shadow-inner">
+    <div className="bg-card/80 border border-foreground/20 rounded-2xl p-4 space-y-3 font-mono shadow-inner">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
           {phase === 'failed' ? (
             <XCircle className="w-4 h-4 text-red-400 shrink-0" />
           ) : phase === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-[#32FF8B] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
           ) : (
-            <Loader2 className="w-4 h-4 text-[#32FF8B] animate-spin shrink-0" />
+            <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" />
           )}
-          <span className="text-[12px] font-black uppercase tracking-widest text-white truncate">
+          <span className="text-[12px] font-black uppercase tracking-widest text-foreground truncate">
             {phase === 'failed' && 'Bridge Failed'}
             {phase === 'success' && `Confirmed on ${sourceChainName(bridgeDirection)}`}
             {phase === 'confirming' && `Confirming (${confirmations}/${required})`}
@@ -330,33 +330,33 @@ export function BridgeStatusPanel({
           href={`${sourceExplorerPrefix}${txHash}`}
           target="_blank"
           rel="noreferrer"
-          className="text-[11px] text-[#32FF8B] hover:underline flex items-center gap-1 shrink-0"
+          className="text-[11px] text-primary hover:underline flex items-center gap-1 shrink-0"
         >
           View <ExternalLink className="w-3 h-3" />
         </a>
       </div>
 
       {(phase === 'confirming' || phase === 'mining' || phase === 'success') && (
-        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-foreground/5 rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#32FF8B] transition-all duration-500"
+            className="h-full bg-primary transition-all duration-500"
             style={{ width: `${phase === 'success' ? 100 : pct}%` }}
           />
         </div>
       )}
 
       {phase === 'success' && (
-        <div className="flex items-center gap-2 text-[11px] text-[#C5C1B9]">
-          <Clock className="w-3.5 h-3.5 text-[#32FF8B]" />
+        <div className="flex items-center gap-2 text-[11px] text-muted">
+          <Clock className="w-3.5 h-3.5 text-primary" />
           <span>
-            Source confirmed. USDT will arrive on <span className="text-white font-black">{destChainName(bridgeDirection)}</span>
+            Source confirmed. USDT will arrive on <span className="text-foreground font-black">{destChainName(bridgeDirection)}</span>
             {relayCountdown > 0 ? ` in ~${mm}:${ss}` : ' shortly'} via the bridge relayer.
           </span>
         </div>
       )}
 
       {phase === 'confirming' && (
-        <div className="text-[11px] text-[#C5C1B9]">
+        <div className="text-[11px] text-muted">
           Waiting for {required} block confirmations on {sourceChainName(bridgeDirection)} before the relayer picks up the transfer.
         </div>
       )}
@@ -372,7 +372,7 @@ export function BridgeStatusPanel({
           href={destExplorerPrefix}
           target="_blank"
           rel="noreferrer"
-          className="block text-center text-[11px] text-[#32FF8B] hover:underline pt-1 border-t border-white/5"
+          className="block text-center text-[11px] text-primary hover:underline pt-1 border-t border-foreground/5"
         >
           Track destination on {destChainName(bridgeDirection)} explorer →
         </a>

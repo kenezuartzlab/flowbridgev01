@@ -27,15 +27,15 @@ export function SlippagePopover({ value, onChange }: SlippagePopoverProps) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#010C1B] border border-white/15 text-[12px] font-black uppercase tracking-wider text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30 cursor-pointer transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-background border border-foreground/15 text-[12px] font-black uppercase tracking-wider text-muted hover:text-primary hover:border-primary/30 cursor-pointer transition-colors"
         title="Slippage tolerance"
       >
         <SlidersHorizontal className="w-3 h-3" />
         <span>{value}% slippage</span>
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 z-40 w-[240px] bg-[#010C1B] border border-white/15 rounded-xl p-3 shadow-2xl space-y-2.5">
-          <div className="text-[11px] font-black uppercase tracking-widest text-[#C5C1B9]">
+        <div className="absolute right-0 mt-2 z-40 w-[240px] bg-background border border-foreground/15 rounded-xl p-3 shadow-2xl space-y-2.5">
+          <div className="text-[11px] font-black uppercase tracking-widest text-muted">
             Slippage tolerance
           </div>
           <div className="flex gap-1.5">
@@ -50,8 +50,8 @@ export function SlippagePopover({ value, onChange }: SlippagePopoverProps) {
                 className={cn(
                   "flex-1 py-1.5 rounded-md text-[12px] font-black uppercase tracking-wider border transition-colors cursor-pointer",
                   value === p
-                    ? "bg-[#32FF8B]/15 text-[#32FF8B] border-[#32FF8B]/40"
-                    : "bg-transparent text-white border-white/10 hover:border-white/25",
+                    ? "bg-primary/15 text-primary border-primary/40"
+                    : "bg-transparent text-foreground border-foreground/10 hover:border-foreground/25",
                 )}
               >
                 {p}%
@@ -69,9 +69,9 @@ export function SlippagePopover({ value, onChange }: SlippagePopoverProps) {
                 const v = parseFloat(e.target.value);
                 if (!isNaN(v) && v > 0 && v <= 50) onChange(v);
               }}
-              className="w-full bg-[#0D1C2A] border border-white/15 rounded-md px-2 py-1.5 text-[13px] text-white font-mono focus:outline-none focus:border-[#32FF8B]/50"
+              className="w-full bg-card border border-foreground/15 rounded-md px-2 py-1.5 text-[13px] text-foreground font-mono focus:outline-none focus:border-primary/50"
             />
-            <span className="text-[12px] text-[#C5C1B9] font-black">%</span>
+            <span className="text-[12px] text-muted font-black">%</span>
           </div>
           {value >= 5 && (
             <div className="text-[11px] text-amber-400 font-mono">
