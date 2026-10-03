@@ -8,11 +8,26 @@
  */
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LogIn, LogOut, Menu, X } from "lucide-react";
+import { Activity, LogIn, LogOut, Menu, X } from "lucide-react";
 import { MENU_NAV, isNavActive } from "./navModel";
 import { supabase } from "@/integrations/supabase/client";
 import { googleSignIn, logout } from "@/lib/auth";
+import { checkAdmin } from "@/lib/admin/adminApi";
 import { ModalPortal } from "@/modals/ModalPortal";
+
+/** Reads the wagmi-persisted connected wallet without requiring a provider. */
+function readPersistedWallet(): string | null {
+  try {
+    const raw = window.localStorage.getItem("flowbridge.wallet");
+    if (!raw) return null;
+    const state = (JSON.parse(raw) as any)?.state;
+    const connections: [string, { accounts?: string[] }][] = state?.connections ?? [];
+    const first = connections[0]?.[1]?.accounts?.[0];
+    return typeof first === "string" && first.startsWith("0x") ? first : null;
+  } catch {
+    return null;
+  }
+}
 
 export function ShellNavMenu({ className = "" }: { className?: string }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
