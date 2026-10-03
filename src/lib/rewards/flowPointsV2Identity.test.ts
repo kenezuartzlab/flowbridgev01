@@ -27,6 +27,9 @@ vi.mock('@/integrations/supabase/client.server', () => ({
   },
 }));
 
+// Internal diagnostics are a separate side channel, not ledger writes.
+vi.mock('./rewardDiagnostics.server', () => ({ recordRewardDiagnostic: async () => {} }));
+
 vi.mock('./flowPointsV2Policy.server', () => ({
   resolveFlowPointsV2Policy: async () => ({
     version: 'v2',
