@@ -40,6 +40,7 @@ import { GREETING_STYLES, greetingVariants, type GreetingStyleId } from "@/lib/g
 export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Account — FlowBridge" },
       {
         name: "description",

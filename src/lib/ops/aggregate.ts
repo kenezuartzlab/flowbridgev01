@@ -13,6 +13,7 @@
 export interface TradeEventRow {
   occurred_at: string;
   event_name: string;
+  session_hash?: string | null;
   network: number;
   route_type: string;
   dex: string;

@@ -36,7 +36,7 @@ import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 import { JourneyCard } from "@/components/home/JourneyCard";
 import { OnboardingOverlay } from "@/components/growth/OnboardingOverlay";
 import { NotificationCenter } from "@/components/growth/NotificationCenter";
-import { AccountActivationCard } from "@/components/growth/AccountActivationCard";
+import { NextActionCard } from "@/components/growth/NextActionCard";
 import { GraduationCap } from "lucide-react";
 
 
@@ -46,6 +46,7 @@ import { GraduationCap } from "lucide-react";
 export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Home — FlowBridge" },
       {
         name: "description",
@@ -192,6 +193,8 @@ function HomePage() {
           )}
         </HeroCard>
 
+        <NextActionCard confirmedTrades={transactions.filter((t: any) => /swap/i.test(String(t?.txType ?? t?.tx_type ?? "")) && /^(success|confirmed|completed)$/i.test(String(t?.status ?? ""))).length} />
+
         {/* V16 — Flow AI proactive insights, evidence-backed and read-only */}
         <OpportunityFeed />
 
@@ -206,7 +209,6 @@ function HomePage() {
          * V28 §3 — account completion: one value message, one primary action.
          * Teaching + navigation only; it never creates a mission or a reward.
          */}
-        <AccountActivationCard />
 
         {/* V28 §6 — quiet entry to BOT Chain ecosystem discovery. */}
         <Link

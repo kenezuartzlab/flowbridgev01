@@ -33,16 +33,17 @@ describe("V27 onboarding", () => {
     expect(ONBOARDING_CAPABILITIES.length).toBeLessThanOrEqual(MAX_CAPABILITY_CHOICES);
   });
 
-  it("runs the five briefed steps in order and terminates", () => {
+  it("runs the six briefed steps in order and terminates", () => {
     expect(ONBOARDING_STEPS.map((s) => s.id)).toEqual([
       "WELCOME",
       "EXPLORE",
+      "TRADE",
       "EARN",
       "SUPPORT_BOT_CHAIN",
       "PERSONALIZE",
     ]);
     expect(nextOnboardingStepId("PERSONALIZE")).toBeNull();
-    expect(onboardingPercent("WELCOME")).toBe(20);
+    expect(onboardingPercent("WELCOME")).toBe(17);
     expect(onboardingPercent("PERSONALIZE")).toBe(100);
   });
 
