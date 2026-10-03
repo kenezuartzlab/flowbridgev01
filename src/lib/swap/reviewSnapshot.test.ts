@@ -7,7 +7,16 @@ const make = (q = quote, fee: bigint | string = 1n) => createSwapReviewSnapshot(
 
 describe("swap review snapshots", () => {
   it("keeps an identical review valid", () => expect(reviewChanged(make(), make())).toBe(false));
-  it("invalidates changed output", () => expect(reviewChanged(make(), make({ ...quote, amountOut: 89n }))).toBe(true));
+  it("invalidates changed output beyond tolerance", () => expect(reviewChanged(make(), make({ ...quote, amountOut: 89n }))).toBe(true));
+  it("tolerates tiny price drift within slippage", () => {
+    // 90n -> 8999n/100-ish drift: a few wei to ~0.5% must not bounce the user.
+    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n + 1n }))).toBe(false);
+    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n - 1n }))).toBe(false);
+    expect(reviewChanged(make(), make({ ...quote, amountOut: 9045n / 100n }))).toBe(false);
+  });
+  it("invalidates price drift beyond 0.5%", () => {
+    expect(reviewChanged(make(), make({ ...quote, amountOut: 91n }))).toBe(true);
+  });
   it("invalidates changed protocol fee", () => expect(reviewChanged(make(), make(quote, 2n))).toBe(true));
   it("invalidates changed signature count", () => {
     const a = createSwapReviewSnapshot({ chainId: 677, tokenIn: "0x0", tokenOut: "0x1", amountIn: 1n, quote, minimumOut: 1n, protocolFee: 0n, approvalCount: 0, transactionCount: 1 });
