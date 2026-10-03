@@ -64,7 +64,8 @@ import { planExecution } from "@/lib/swap/executionCapability";
 import { createSwapReviewSnapshot, reviewChanged, type SwapReviewSnapshot } from "@/lib/swap/reviewSnapshot";
 import { readRouterV4Health, routerHealthWarning, type RouterV4Health } from "@/lib/swap/routerV4Health";
 import { atomicFailureMessage, createRoutedSwapActivity, recordRoutedSwapTx } from "@/lib/swap/swapLifecycle";
-import { sanitizeFailureReason, trackTradeOperationalEvent, type TradeOperationalEventName } from "@/lib/swap/operationalTelemetry";
+import { sanitizeFailureReason, trackTradeOperationalEvent, trackLiquidityGap, type TradeOperationalEvent, type TradeOperationalEventName } from "@/lib/swap/operationalTelemetry";
+import { trackProductEvent } from "@/lib/ops/productEvents";
 
 const parseTxError = (e: unknown) => toFriendlyError(e, { action: "swap", gasSymbol: "BOT" });
 
@@ -132,6 +133,12 @@ export function UniversalSwapCard({
 
   const { address } = useAccount();
   const publicClient = usePublicClient();
+  // Ops telemetry: tag every trade event with public pair symbols only.
+  const trackTrade = (e: TradeOperationalEvent) => trackTradeOperationalEvent({ tokenIn: tokenIn.symbol, tokenOut: tokenOut.symbol, ...e });
+  const submittedAtRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (address) trackProductEvent("wallet_connected", "trade", { once: true, network: balanceChainId });
+  }, [address, balanceChainId]);
   const contracts = useMemo(() => getContracts(isMainnet), [isMainnet]);
   // Router used for the token-in ERC20 allowance check (the first step's router).
   // Recomputed after a quote arrives.
@@ -365,6 +372,7 @@ export function UniversalSwapCard({
     setQuoteError(null);
     const handle = setTimeout(async () => {
       const startedAt = performance.now();
+      trackTrade({ eventName: "quote_requested", network: balanceChainId, routeType: "unknown", dex: dexPref, transactionCount: 0 });
       try {
         const parsed = parseUnits(amountIn, tokenIn.decimals);
         const result = await getBestRoute(tokenIn, tokenOut, parsed, isMainnet, dexPref);
@@ -372,18 +380,19 @@ export function UniversalSwapCard({
         if (!result) {
           setQuote(null);
           setQuoteError("No liquidity route yet");
-          trackTradeOperationalEvent({ eventName: "route_unavailable", network: balanceChainId, routeType: "unknown", dex: dexPref, transactionCount: 0, durationMs: performance.now() - startedAt });
+          trackTrade({ eventName: "route_unavailable", network: balanceChainId, routeType: "unknown", dex: dexPref, transactionCount: 0, durationMs: performance.now() - startedAt });
+          trackLiquidityGap({ network: balanceChainId, tokenIn: tokenIn.symbol, tokenOut: tokenOut.symbol, dexPreference: dexPref, dexesChecked: dexPref === "auto" ? ["bdex-v3", "bdex-v2", "caswap"] : [dexPref], directPoolFound: false, multihopFound: false, missingConnection: null });
         } else {
           setQuote(result);
           setQuoteError(null);
           const plan = planExecution(result.steps, balanceChainId);
-          trackTradeOperationalEvent({ eventName: "quote_success", network: balanceChainId, routeType: result.steps.length === 1 ? "single" : plan.execution === "ATOMIC_V4" ? "atomic_v4" : "staged", dex: [...new Set(result.steps.map((s) => s.dex))].join("+"), transactionCount: plan.execution === "ATOMIC_V4" ? 1 : result.steps.length, durationMs: performance.now() - startedAt });
+          trackTrade({ eventName: "quote_success", network: balanceChainId, routeType: result.steps.length === 1 ? "single" : plan.execution === "ATOMIC_V4" ? "atomic_v4" : "staged", dex: [...new Set(result.steps.map((s) => s.dex))].join("+"), transactionCount: plan.execution === "ATOMIC_V4" ? 1 : result.steps.length, durationMs: performance.now() - startedAt });
         }
       } catch (e: any) {
         if (!cancelled) {
           setQuote(null);
           setQuoteError("Liquidity information is temporarily unavailable");
-          trackTradeOperationalEvent({ eventName: "rpc_failure", network: balanceChainId, routeType: "unknown", dex: dexPref, transactionCount: 0, durationMs: performance.now() - startedAt, failureReason: e?.message });
+          trackTrade({ eventName: "rpc_failure", network: balanceChainId, routeType: "unknown", dex: dexPref, transactionCount: 0, durationMs: performance.now() - startedAt, failureReason: e?.message });
         }
       } finally {
         if (!cancelled) setQuoting(false);
@@ -631,9 +640,9 @@ export function UniversalSwapCard({
     const simulateAndEstimate = async (params: Record<string, unknown>) => {
       try {
         await publicClient!.simulateContract(params as Parameters<NonNullable<typeof publicClient>["simulateContract"]>[0]);
-        trackTradeOperationalEvent({ eventName: "simulation_success", network: balanceChainId, routeType: quote && quote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: quote?.steps.length ?? 1 });
+        trackTrade({ eventName: "simulation_success", network: balanceChainId, routeType: quote && quote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: quote?.steps.length ?? 1 });
       } catch (error) {
-        trackTradeOperationalEvent({ eventName: "simulation_failure", network: balanceChainId, routeType: quote && quote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: quote?.steps.length ?? 1, failureReason: error instanceof Error ? error.message : undefined });
+        trackTrade({ eventName: "simulation_failure", network: balanceChainId, routeType: quote && quote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: quote?.steps.length ?? 1, failureReason: error instanceof Error ? error.message : undefined });
         throw new Error("Transaction simulation failed. Nothing was submitted.");
       }
       try {
@@ -738,6 +747,11 @@ export function UniversalSwapCard({
     setBusy(true);
     setTxError(null);
     setLastTx(null);
+    submittedAtRef.current = null;
+    {
+      const p = planExecution(quote.steps, balanceChainId);
+      trackTrade({ eventName: "signature_requested", network: balanceChainId, routeType: p.execution === "ATOMIC_V4" ? "atomic_v4" : quote.steps.length > 1 ? "staged" : "single", dex: [...new Set(quote.steps.map((s) => s.dex))].join("+"), transactionCount: p.execution === "ATOMIC_V4" ? 1 : quote.steps.length });
+    }
     // Pre-flight: block if the wallet clearly can't afford network gas.
     let atomicAttempted = false;
     let routedActivity: ReturnType<typeof createRoutedSwapActivity> | null = null;
@@ -780,7 +794,7 @@ export function UniversalSwapCard({
         setQuote(latestQuote);
         setReviewSnapshot(freshSnapshot);
         setConfirmOpen(true);
-        trackTradeOperationalEvent({ eventName: "review_invalidated", network: balanceChainId, routeType: freshPlan.execution === "ATOMIC_V4" ? "atomic_v4" : latestQuote.steps.length > 1 ? "staged" : "single", dex: [...new Set(latestQuote.steps.map((s) => s.dex))].join("+"), transactionCount: freshPlan.execution === "ATOMIC_V4" ? 1 : latestQuote.steps.length });
+        trackTrade({ eventName: "review_invalidated", network: balanceChainId, routeType: freshPlan.execution === "ATOMIC_V4" ? "atomic_v4" : latestQuote.steps.length > 1 ? "staged" : "single", dex: [...new Set(latestQuote.steps.map((s) => s.dex))].join("+"), transactionCount: freshPlan.execution === "ATOMIC_V4" ? 1 : latestQuote.steps.length });
         throw new Error("Route changed — please review again");
       }
       setQuote(latestQuote);
@@ -939,19 +953,20 @@ export function UniversalSwapCard({
         // Fresh simulation right before the signature; reverts surface here.
         try {
           await publicClient.simulateContract(req as any);
-          trackTradeOperationalEvent({ eventName: "simulation_success", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
+          trackTrade({ eventName: "simulation_success", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
         } catch (error) {
-          trackTradeOperationalEvent({ eventName: "simulation_failure", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1, failureReason: error instanceof Error ? error.message : undefined });
+          trackTrade({ eventName: "simulation_failure", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1, failureReason: error instanceof Error ? error.message : undefined });
           throw error;
         }
         setBusyMsg(`ATOMIC — V4: 1 swap transaction…`);
         const tx = await writeContractAsync(req as any);
         recordRoutedSwapTx(routedActivity, { hash: tx, label: "Atomic Router V4 swap", phase: "confirming" });
-        trackTradeOperationalEvent({ eventName: "tx_submitted", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
+        submittedAtRef.current = performance.now();
+        trackTrade({ eventName: "tx_submitted", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
         const rc = await publicClient.waitForTransactionReceipt({ hash: tx });
         recordRoutedSwapTx(routedActivity, { hash: tx, label: "Atomic Router V4 swap", phase: rc.status === "success" ? "confirmed" : "failed" });
         if (rc.status !== "success") throw new Error("Transaction reverted on-chain");
-        trackTradeOperationalEvent({ eventName: "tx_confirmed", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1 });
+        trackTrade({ eventName: "tx_confirmed", network: 677, routeType: "atomic_v4", dex: "bdex-v3", transactionCount: 1, flowbridgeFeeBps: 1, gasUsed: Number(rc.gasUsed), durationMs: submittedAtRef.current == null ? undefined : performance.now() - submittedAtRef.current });
         handoffSwapAttribution(tx);
         lastTx = tx;
       }
@@ -1050,7 +1065,10 @@ export function UniversalSwapCard({
         );
         lastTx = tx;
         if (routedActivity) recordRoutedSwapTx(routedActivity, { hash: tx, label: `Step ${i + 1}: ${stepLabel}`, phase: "confirming" });
-        trackTradeOperationalEvent({ eventName: "tx_submitted", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: activeQuote.steps.length });
+        if (i === 0) {
+          submittedAtRef.current = performance.now();
+          trackTrade({ eventName: "tx_submitted", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: [...new Set(activeQuote.steps.map((s) => s.dex))].join("+"), transactionCount: activeQuote.steps.length });
+        }
         const rcpt = await publicClient.waitForTransactionReceipt({ hash: tx });
         if (routedActivity) recordRoutedSwapTx(routedActivity, { hash: tx, label: `Step ${i + 1}: ${stepLabel}`, phase: rcpt.status === "success" ? "confirmed" : "failed" });
         if (rcpt.status === "success" && outBefore != null) {
@@ -1077,10 +1095,10 @@ export function UniversalSwapCard({
             phase: "error",
             message: `Transaction reverted on-chain (${shortHash(tx)})`,
           });
-          trackTradeOperationalEvent({ eventName: "tx_reverted", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: activeQuote.steps.length, failureReason: "transaction reverted" });
+          trackTrade({ eventName: "tx_reverted", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: activeQuote.steps.length, failureReason: "transaction reverted" });
           return;
         }
-        trackTradeOperationalEvent({ eventName: "tx_confirmed", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: step.dex, transactionCount: activeQuote.steps.length });
+        if (isLastLeg) trackTrade({ eventName: "tx_confirmed", network: balanceChainId, routeType: activeQuote.steps.length > 1 ? "staged" : "single", dex: [...new Set(activeQuote.steps.map((s) => s.dex))].join("+"), transactionCount: activeQuote.steps.length, gasUsed: Number(rcpt.gasUsed), durationMs: submittedAtRef.current == null ? undefined : performance.now() - submittedAtRef.current });
         handoffSwapAttribution(tx);
       }
 
@@ -1120,7 +1138,7 @@ export function UniversalSwapCard({
       onSwapPhaseChange?.({ phase: "error", message: msg });
       const reason = sanitizeFailureReason(raw);
       const eventName: TradeOperationalEventName = atomicAttempted && reason === "transaction_reverted" ? "tx_reverted" : reason === "user_rejected" ? "wallet_rejected" : reason === "minimum_output_failure" ? "minimum_output_failure" : reason === "allowance_failure" ? "allowance_failure" : reason === "insufficient_balance" ? "insufficient_balance" : reason === "rpc_failure" ? "rpc_failure" : "quote_stale";
-      trackTradeOperationalEvent({ eventName, network: balanceChainId, routeType: atomicAttempted ? "atomic_v4" : quote.steps.length > 1 ? "staged" : "single", dex: [...new Set(quote.steps.map((s) => s.dex))].join("+"), transactionCount: atomicAttempted ? 1 : quote.steps.length, failureReason: raw });
+      trackTrade({ eventName, network: balanceChainId, routeType: atomicAttempted ? "atomic_v4" : quote.steps.length > 1 ? "staged" : "single", dex: [...new Set(quote.steps.map((s) => s.dex))].join("+"), transactionCount: atomicAttempted ? 1 : quote.steps.length, failureReason: raw });
     } finally {
       setBusy(false);
       setBusyMsg("");
@@ -1245,9 +1263,10 @@ export function UniversalSwapCard({
     try {
       setReviewSnapshot(await buildReviewSnapshot(quote, parsedAmount));
       setConfirmOpen(true);
+      trackTrade({ eventName: "review_opened", network: balanceChainId, routeType: plan.execution === "ATOMIC_V4" ? "atomic_v4" : quote.steps.length > 1 ? "staged" : "single", dex: [...new Set(quote.steps.map((s) => s.dex))].join("+"), transactionCount: plan.execution === "ATOMIC_V4" ? 1 : quote.steps.length });
     } catch (e) {
       setTxError("Liquidity information is temporarily unavailable. Retry when the connection recovers.");
-      trackTradeOperationalEvent({ eventName: "rpc_failure", network: balanceChainId, routeType: plan.execution === "ATOMIC_V4" ? "atomic_v4" : quote.steps.length > 1 ? "staged" : "single", dex: [...new Set(quote.steps.map((s) => s.dex))].join("+"), transactionCount: plan.execution === "ATOMIC_V4" ? 1 : quote.steps.length, failureReason: e instanceof Error ? e.message : undefined });
+      trackTrade({ eventName: "rpc_failure", network: balanceChainId, routeType: plan.execution === "ATOMIC_V4" ? "atomic_v4" : quote.steps.length > 1 ? "staged" : "single", dex: [...new Set(quote.steps.map((s) => s.dex))].join("+"), transactionCount: plan.execution === "ATOMIC_V4" ? 1 : quote.steps.length, failureReason: e instanceof Error ? e.message : undefined });
     }
   };
 
