@@ -15,6 +15,13 @@
       "when": 1790970728486,
       "tag": "0001_create_trade_operational_events",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790994184127,
+      "tag": "0002_ops_growth_intelligence_v1",
+      "breakpoints": true
     }
   ]
 }

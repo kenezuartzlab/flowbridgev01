@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { trackProductEvent } from "@/lib/ops/productEvents";
 import { Bot } from "lucide-react";
 
 /**
@@ -12,6 +13,7 @@ export function FlowAiLauncher() {
   return (
     <Link
       to="/assistant"
+      onClick={() => trackProductEvent("ai_opened", "ai")}
       aria-label="Open Flow AI assistant"
       className="fb-glow fixed bottom-20 right-4 z-40 grid h-12 w-12 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 sm:bottom-6"
     >

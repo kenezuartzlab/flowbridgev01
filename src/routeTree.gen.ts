@@ -28,6 +28,7 @@ import { Route as LiquidityRouteImport } from './routes/liquidity'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MultisendRouteImport } from './routes/multisend'
+import { Route as OpsRouteImport } from './routes/ops'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
@@ -44,8 +45,10 @@ import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiLiquidityGapsRouteImport } from './routes/api/liquidity-gaps'
 import { Route as ApiMissionsRouteImport } from './routes/api/missions'
 import { Route as ApiOpportunitiesRouteImport } from './routes/api/opportunities'
+import { Route as ApiProductEventsRouteImport } from './routes/api/product-events'
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiTradeEventsRouteImport } from './routes/api/trade-events'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
@@ -62,6 +65,7 @@ import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.ban
 import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
 import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/admin.mainnet-prerequisites'
 import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/admin.mainnet-release-freeze'
+import { Route as ApiAdminOpsRouteImport } from './routes/api/admin.ops'
 import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
@@ -200,6 +204,11 @@ const MultisendRoute = MultisendRouteImport.update({
   path: '/multisend',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpsRoute = OpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PartnersRoute = PartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
@@ -282,6 +291,11 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLiquidityGapsRoute = ApiLiquidityGapsRouteImport.update({
+  id: '/api/liquidity-gaps',
+  path: '/api/liquidity-gaps',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMissionsRoute = ApiMissionsRouteImport.update({
   id: '/api/missions',
   path: '/api/missions',
@@ -290,6 +304,11 @@ const ApiMissionsRoute = ApiMissionsRouteImport.update({
 const ApiOpportunitiesRoute = ApiOpportunitiesRouteImport.update({
   id: '/api/opportunities',
   path: '/api/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProductEventsRoute = ApiProductEventsRouteImport.update({
+  id: '/api/product-events',
+  path: '/api/product-events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiProposalsRoute = ApiProposalsRouteImport.update({
@@ -378,6 +397,11 @@ const ApiAdminMainnetReleaseFreezeRoute =
     path: '/api/admin/mainnet-release-freeze',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminOpsRoute = ApiAdminOpsRouteImport.update({
+  id: '/api/admin/ops',
+  path: '/api/admin/ops',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminPartnerGovernanceRoute =
   ApiAdminPartnerGovernanceRouteImport.update({
     id: '/api/admin/partner-governance',
@@ -614,6 +638,7 @@ export interface FileRoutesByFullPath {
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
+  '/ops': typeof OpsRoute
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -630,8 +655,10 @@ export interface FileRoutesByFullPath {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/liquidity-gaps': typeof ApiLiquidityGapsRoute
   '/api/missions': typeof ApiMissionsRoute
   '/api/opportunities': typeof ApiOpportunitiesRoute
+  '/api/product-events': typeof ApiProductEventsRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/trade-events': typeof ApiTradeEventsRoute
   '/api/transactions': typeof ApiTransactionsRoute
@@ -648,6 +675,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
+  '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -711,6 +739,7 @@ export interface FileRoutesByTo {
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
+  '/ops': typeof OpsRoute
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -727,8 +756,10 @@ export interface FileRoutesByTo {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/liquidity-gaps': typeof ApiLiquidityGapsRoute
   '/api/missions': typeof ApiMissionsRoute
   '/api/opportunities': typeof ApiOpportunitiesRoute
+  '/api/product-events': typeof ApiProductEventsRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/trade-events': typeof ApiTradeEventsRoute
   '/api/transactions': typeof ApiTransactionsRoute
@@ -745,6 +776,7 @@ export interface FileRoutesByTo {
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
+  '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -809,6 +841,7 @@ export interface FileRoutesById {
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
+  '/ops': typeof OpsRoute
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -825,8 +858,10 @@ export interface FileRoutesById {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/liquidity-gaps': typeof ApiLiquidityGapsRoute
   '/api/missions': typeof ApiMissionsRoute
   '/api/opportunities': typeof ApiOpportunitiesRoute
+  '/api/product-events': typeof ApiProductEventsRoute
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/trade-events': typeof ApiTradeEventsRoute
   '/api/transactions': typeof ApiTransactionsRoute
@@ -843,6 +878,7 @@ export interface FileRoutesById {
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
+  '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -908,6 +944,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/mcp'
     | '/multisend'
+    | '/ops'
     | '/partners'
     | '/reset-password'
     | '/rewards'
@@ -924,8 +961,10 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/liquidity-gaps'
     | '/api/missions'
     | '/api/opportunities'
+    | '/api/product-events'
     | '/api/proposals'
     | '/api/trade-events'
     | '/api/transactions'
@@ -942,6 +981,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
     | '/api/admin/mainnet-release-freeze'
+    | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1005,6 +1045,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/mcp'
     | '/multisend'
+    | '/ops'
     | '/partners'
     | '/reset-password'
     | '/rewards'
@@ -1021,8 +1062,10 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/liquidity-gaps'
     | '/api/missions'
     | '/api/opportunities'
+    | '/api/product-events'
     | '/api/proposals'
     | '/api/trade-events'
     | '/api/transactions'
@@ -1039,6 +1082,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
     | '/api/admin/mainnet-release-freeze'
+    | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1102,6 +1146,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/mcp'
     | '/multisend'
+    | '/ops'
     | '/partners'
     | '/reset-password'
     | '/rewards'
@@ -1118,8 +1163,10 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/liquidity-gaps'
     | '/api/missions'
     | '/api/opportunities'
+    | '/api/product-events'
     | '/api/proposals'
     | '/api/trade-events'
     | '/api/transactions'
@@ -1136,6 +1183,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
     | '/api/admin/mainnet-release-freeze'
+    | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1200,6 +1248,7 @@ export interface RootRouteChildren {
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
   MultisendRoute: typeof MultisendRoute
+  OpsRoute: typeof OpsRoute
   PartnersRoute: typeof PartnersRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
@@ -1216,8 +1265,10 @@ export interface RootRouteChildren {
   ApiCampaignsRoute: typeof ApiCampaignsRouteWithChildren
   ApiConfigRoute: typeof ApiConfigRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiLiquidityGapsRoute: typeof ApiLiquidityGapsRoute
   ApiMissionsRoute: typeof ApiMissionsRoute
   ApiOpportunitiesRoute: typeof ApiOpportunitiesRoute
+  ApiProductEventsRoute: typeof ApiProductEventsRoute
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
   ApiTradeEventsRoute: typeof ApiTradeEventsRoute
   ApiTransactionsRoute: typeof ApiTransactionsRoute
@@ -1234,6 +1285,7 @@ export interface RootRouteChildren {
   ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
   ApiAdminMainnetPrerequisitesRoute: typeof ApiAdminMainnetPrerequisitesRoute
   ApiAdminMainnetReleaseFreezeRoute: typeof ApiAdminMainnetReleaseFreezeRoute
+  ApiAdminOpsRoute: typeof ApiAdminOpsRoute
   ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
@@ -1402,6 +1454,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MultisendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ops': {
+      id: '/ops'
+      path: '/ops'
+      fullPath: '/ops'
+      preLoaderRoute: typeof OpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/partners': {
       id: '/partners'
       path: '/partners'
@@ -1514,6 +1573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/liquidity-gaps': {
+      id: '/api/liquidity-gaps'
+      path: '/api/liquidity-gaps'
+      fullPath: '/api/liquidity-gaps'
+      preLoaderRoute: typeof ApiLiquidityGapsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/missions': {
       id: '/api/missions'
       path: '/api/missions'
@@ -1526,6 +1592,13 @@ declare module '@tanstack/react-router' {
       path: '/api/opportunities'
       fullPath: '/api/opportunities'
       preLoaderRoute: typeof ApiOpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/product-events': {
+      id: '/api/product-events'
+      path: '/api/product-events'
+      fullPath: '/api/product-events'
+      preLoaderRoute: typeof ApiProductEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/proposals': {
@@ -1638,6 +1711,13 @@ declare module '@tanstack/react-router' {
       path: '/api/admin/mainnet-release-freeze'
       fullPath: '/api/admin/mainnet-release-freeze'
       preLoaderRoute: typeof ApiAdminMainnetReleaseFreezeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/ops': {
+      id: '/api/admin/ops'
+      path: '/api/admin/ops'
+      fullPath: '/api/admin/ops'
+      preLoaderRoute: typeof ApiAdminOpsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/partner-governance': {
@@ -2036,6 +2116,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
   MultisendRoute: MultisendRoute,
+  OpsRoute: OpsRoute,
   PartnersRoute: PartnersRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
@@ -2053,8 +2134,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCampaignsRoute: ApiCampaignsRouteWithChildren,
   ApiConfigRoute: ApiConfigRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiLiquidityGapsRoute: ApiLiquidityGapsRoute,
   ApiMissionsRoute: ApiMissionsRoute,
   ApiOpportunitiesRoute: ApiOpportunitiesRoute,
+  ApiProductEventsRoute: ApiProductEventsRoute,
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
   ApiTradeEventsRoute: ApiTradeEventsRoute,
   ApiTransactionsRoute: ApiTransactionsRoute,
@@ -2071,6 +2154,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,
   ApiAdminMainnetPrerequisitesRoute: ApiAdminMainnetPrerequisitesRoute,
   ApiAdminMainnetReleaseFreezeRoute: ApiAdminMainnetReleaseFreezeRoute,
+  ApiAdminOpsRoute: ApiAdminOpsRoute,
   ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,

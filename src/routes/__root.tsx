@@ -7,6 +7,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -17,6 +18,7 @@ import { THEME_BOOTSTRAP } from "../lib/theme";
 import { ReturnToRedirect } from "../components/auth/ReturnToRedirect";
 import { FlowAiLauncher } from "../components/assistant/FlowAiLauncher";
 import { readPrefs, unlockPrefsFormatting } from "../lib/prefs";
+import { areaForPath, trackProductEvent } from "../lib/ops/productEvents";
 
 function NotFoundComponent() {
   return (
@@ -134,6 +136,25 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Ops V1 — aggregate, category-level journey events (no identity, no URLs with params).
+  useEffect(() => {
+    const area = areaForPath(pathname);
+    trackProductEvent("visit", "home", { once: true });
+    trackProductEvent("page_view", area);
+    if (area === "discover") trackProductEvent("explore_opened", "discover", { once: true });
+  }, [pathname]);
+  useEffect(() => {
+    let unsub: (() => void) | undefined;
+    void import("@/integrations/supabase/client").then(({ supabase }) => {
+      const { data } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "SIGNED_IN") trackProductEvent("account_signed_in", "account", { once: true });
+      });
+      unsub = () => data.subscription.unsubscribe();
+    }).catch(() => undefined);
+    return () => unsub?.();
+  }, []);
 
   // Hydrate display currency / locale preferences before any formatted value renders.
   useEffect(() => {

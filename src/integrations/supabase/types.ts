@@ -816,6 +816,48 @@ export type Database = {
           },
         ]
       }
+      liquidity_gap_observations: {
+        Row: {
+          dex_preference: string
+          dexes_checked: string[]
+          direct_pool_found: boolean | null
+          id: string
+          missing_connection: string | null
+          multihop_found: boolean | null
+          network: number
+          observed_at: string
+          session_hash: string | null
+          token_in: string
+          token_out: string
+        }
+        Insert: {
+          dex_preference: string
+          dexes_checked?: string[]
+          direct_pool_found?: boolean | null
+          id?: string
+          missing_connection?: string | null
+          multihop_found?: boolean | null
+          network: number
+          observed_at?: string
+          session_hash?: string | null
+          token_in: string
+          token_out: string
+        }
+        Update: {
+          dex_preference?: string
+          dexes_checked?: string[]
+          direct_pool_found?: boolean | null
+          id?: string
+          missing_connection?: string | null
+          multihop_found?: boolean | null
+          network?: number
+          observed_at?: string
+          session_hash?: string | null
+          token_in?: string
+          token_out?: string
+        }
+        Relationships: []
+      }
       mainnet_release_decisions: {
         Row: {
           action: string
@@ -929,6 +971,36 @@ export type Database = {
           status?: Database["public"]["Enums"]["partner_org_status"]
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      product_events: {
+        Row: {
+          area: string
+          device_category: string
+          event_name: string
+          id: string
+          network: number | null
+          occurred_at: string
+          session_hash: string | null
+        }
+        Insert: {
+          area: string
+          device_category?: string
+          event_name: string
+          id?: string
+          network?: number | null
+          occurred_at?: string
+          session_hash?: string | null
+        }
+        Update: {
+          area?: string
+          device_category?: string
+          event_name?: string
+          id?: string
+          network?: number | null
+          occurred_at?: string
+          session_hash?: string | null
         }
         Relationships: []
       }
@@ -1180,39 +1252,72 @@ export type Database = {
       }
       trade_operational_events: {
         Row: {
+          amount_bucket: string | null
+          amount_out_ratio_bps: number | null
           device_category: string
           dex: string
           duration_ms: number | null
           event_name: string
           failure_reason: string | null
+          flowbridge_fee_bps: number | null
+          gas_estimate: number | null
+          gas_used: number | null
           id: string
           network: number
           occurred_at: string
+          pool_fees_bps: number | null
+          price_impact_bps: number | null
           route_type: string
+          session_hash: string | null
+          slippage_bps: number | null
+          token_in: string | null
+          token_out: string | null
           transaction_count: number
         }
         Insert: {
+          amount_bucket?: string | null
+          amount_out_ratio_bps?: number | null
           device_category: string
           dex?: string
           duration_ms?: number | null
           event_name: string
           failure_reason?: string | null
+          flowbridge_fee_bps?: number | null
+          gas_estimate?: number | null
+          gas_used?: number | null
           id?: string
           network: number
           occurred_at?: string
+          pool_fees_bps?: number | null
+          price_impact_bps?: number | null
           route_type: string
+          session_hash?: string | null
+          slippage_bps?: number | null
+          token_in?: string | null
+          token_out?: string | null
           transaction_count?: number
         }
         Update: {
+          amount_bucket?: string | null
+          amount_out_ratio_bps?: number | null
           device_category?: string
           dex?: string
           duration_ms?: number | null
           event_name?: string
           failure_reason?: string | null
+          flowbridge_fee_bps?: number | null
+          gas_estimate?: number | null
+          gas_used?: number | null
           id?: string
           network?: number
           occurred_at?: string
+          pool_fees_bps?: number | null
+          price_impact_bps?: number | null
           route_type?: string
+          session_hash?: string | null
+          slippage_bps?: number | null
+          token_in?: string | null
+          token_out?: string | null
           transaction_count?: number
         }
         Relationships: []
