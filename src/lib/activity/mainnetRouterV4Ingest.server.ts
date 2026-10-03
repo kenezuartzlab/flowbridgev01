@@ -11,7 +11,6 @@ import {
 
 const RPC = 'https://rpc.botchain.ai';
 const NATIVE = '0x0000000000000000000000000000000000000000';
-const MAINNET_WBOT = '0xb5d6cdf0e6d6d44a0db66ae3e3e2f6c3f2b0b0b0'; // placeholder overwritten below
 
 async function rpc<T>(method: string, params: unknown[]): Promise<T | null> {
   try {
@@ -31,7 +30,7 @@ async function rpc<T>(method: string, params: unknown[]): Promise<T | null> {
 export async function mainnetTokenUsdPrice(token: string): Promise<{ price: number; decimals: number } | null> {
   const { MAINNET_CONTRACTS } = await import('@/lib/contracts');
   const t = token.toLowerCase();
-  const wbot = String(MAINNET_CONTRACTS.wbot).toLowerCase() || MAINNET_WBOT;
+  const wbot = String(MAINNET_CONTRACTS.wbot).toLowerCase();
   const priceAddr = t === NATIVE ? wbot : t;
   if (t === String(MAINNET_CONTRACTS.usdtBot).toLowerCase()) {
     const d = await tokenDecimals(t);
