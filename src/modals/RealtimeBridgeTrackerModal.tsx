@@ -383,41 +383,41 @@ export function RealtimeBridgeTrackerModal({
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 font-sans text-foreground backdrop-blur-md animate-fade-in sm:p-4">
       <div 
         id="realtime_bridge_tracker"
-        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[340px] flex-col space-y-4 overflow-y-auto overscroll-contain rounded-[22px] border border-hairline bg-card p-4 text-foreground shadow-2xl animate-scale-up"
+        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[340px] flex-col space-y-3 overflow-y-auto overscroll-contain rounded-[22px] border border-hairline bg-card p-3.5 text-foreground shadow-2xl animate-scale-up"
       >
         {/* Top Close Button */}
         <button 
           onClick={onClose}
           aria-label="Close bridge tracker"
-          className="absolute top-4 right-4 p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
+          className="absolute top-2.5 right-2.5 p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header Action - Tracking Header */}
-        <div className="text-center pt-2">
-          <h2 className="text-xl font-bold font-mono tracking-tight text-foreground mb-1">
+        <div className="text-center pr-8 pl-8">
+          <h2 className="text-base font-bold font-mono tracking-tight text-foreground">
             Track your transaction
           </h2>
         </div>
 
         {/* Central Graphic — real token/chain logos with ambient motion */}
-        <div className="relative flex justify-center py-6 min-h-[190px]">
+        <div className="relative flex justify-center py-2 min-h-[132px]">
           {/* Radial Glowing Ambient Circles */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[190px] h-[190px] bg-gradient-to-r from-teal-500/15 to-primary/10 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
-            <div className="absolute w-[150px] h-[150px] border border-slate-700/30 rounded-full" />
-            <div className="absolute w-[110px] h-[110px] border border-dashed border-teal-500/20 rounded-full animate-[spin_18s_linear_infinite]" />
+            <div className="w-[140px] h-[140px] bg-gradient-to-r from-teal-500/15 to-primary/10 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
+            <div className="absolute w-[116px] h-[116px] border border-hairline rounded-full" />
+            <div className="absolute w-[84px] h-[84px] border border-dashed border-teal-500/20 rounded-full animate-[spin_18s_linear_infinite]" />
           </div>
 
           <div className="relative flex items-start justify-between w-full px-1">
             {/* Source */}
-            <div className="flex flex-col items-center z-10 space-y-2 w-[36%] animate-fade-in">
+            <div className="flex flex-col items-center z-10 space-y-1 w-[36%] animate-fade-in">
               <TokenChainPair chain={fromChain} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
                 <span className="text-[13px] font-black text-foreground block tracking-wider font-mono">{displayAmount(trackedAmount)}</span>
-                <span className="text-[11px] font-bold text-amber-400 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
+                <span className="text-[10px] font-bold text-amber-400 uppercase font-mono tracking-widest">{normChain(fromChain)}</span>
               </div>
             </div>
 
@@ -433,7 +433,7 @@ export function RealtimeBridgeTrackerModal({
             </div>
 
             {/* Destination */}
-            <div className="flex flex-col items-center z-10 space-y-2 w-[36%] animate-fade-in" style={{ animationDelay: '150ms' }}>
+            <div className="flex flex-col items-center z-10 space-y-1 w-[36%] animate-fade-in" style={{ animationDelay: '150ms' }}>
               <TokenChainPair chain={toChain} delay={200} />
               <div className="text-center">
                 <span className="text-[14px] font-bold block">{symbol}</span>
@@ -448,12 +448,12 @@ export function RealtimeBridgeTrackerModal({
         {/* Countdown Timer or Completed Status badge in the center */}
         <div className="flex justify-center flex-col items-center">
           {isCompleted ? (
-            <div className="px-6 py-2.5 bg-primary/10 hover:bg-primary/15 border border-primary/35 rounded-full flex items-center gap-2 shadow-[0_0_12px_rgba(50,255,139,0.15)] animate-bounce-slow">
+            <div className="px-5 py-1.5 bg-primary/10 hover:bg-primary/15 border border-primary/35 rounded-full flex items-center gap-2 shadow-[0_0_12px_rgba(50,255,139,0.15)] animate-bounce-slow">
               <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
               <span className="text-sm font-black uppercase text-primary tracking-widest font-mono">Completed</span>
             </div>
           ) : (
-            <div className="rounded-full border border-hairline-strong bg-background px-6 py-2.5 text-center shadow-sm">
+            <div className="rounded-full border border-hairline-strong bg-background px-5 py-1.5 text-center shadow-sm">
               <div className="text-sm font-black text-foreground font-mono tracking-widest tabular-nums">
                 {relaySecondsLeft > 0 ? formattedRelayTime : formattedTime}
               </div>
@@ -465,10 +465,10 @@ export function RealtimeBridgeTrackerModal({
         </div>
 
         {/* Milestone Steps Timeline - Matching Screenshots Exactly with spinning loader/checkmarks */}
-        <div className="bg-background/80 border border-hairline rounded-[20px] p-5 space-y-4">
+        <div className="bg-background/80 border border-hairline rounded-2xl px-3.5 py-3 space-y-2.5">
           {/* Milestone 1 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[13px] font-semibold text-foreground/90 font-mono tracking-normal leading-normal">
+            <span className="text-[12px] font-semibold text-foreground/90 font-mono tracking-normal leading-snug">
               Sent transaction from <strong className="text-amber-300 font-bold">{normChain(fromChain)}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -480,7 +480,7 @@ export function RealtimeBridgeTrackerModal({
 
           {/* Milestone 2 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[13px] font-semibold text-foreground/90 font-mono tracking-normal leading-normal">
+            <span className="text-[12px] font-semibold text-foreground/90 font-mono tracking-normal leading-snug">
               Sent transaction to <strong className="text-teal-400 font-bold">{normChain(toChain)}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -492,7 +492,7 @@ export function RealtimeBridgeTrackerModal({
 
           {/* Milestone 3 */}
           <div className="flex items-center justify-between text-left">
-            <span className="text-[13px] font-semibold text-foreground/90 font-mono tracking-normal leading-normal">
+            <span className="text-[12px] font-semibold text-foreground/90 font-mono tracking-normal leading-snug">
               Received {symbol} on <strong className="text-teal-400 font-mono font-black">{truncatedAddress}</strong>
             </span>
             <div className="shrink-0 ml-3">
@@ -507,14 +507,14 @@ export function RealtimeBridgeTrackerModal({
 
 
         {/* Detail action and close paths */}
-        <div className="flex flex-col gap-2 pt-2">
+        <div className="flex flex-col gap-2">
           {/* View Detail on Explorer */}
           <a
             href={txHash ? `${txUrlPrefix}${txHash}` : '#'}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "w-full py-3.5 rounded-xl border font-mono text-sm tracking-widest font-bold uppercase transition-all duration-150 flex items-center justify-center gap-2",
+              "w-full py-2.5 rounded-xl border font-mono text-[13px] tracking-widest font-bold uppercase transition-all duration-150 flex items-center justify-center gap-2",
               isCompleted 
                 ? "bg-primary border-primary text-primary-foreground hover:bg-primary-strong cursor-pointer fb-glow" 
                 : "bg-background border-hairline text-muted hover:text-foreground cursor-pointer"
