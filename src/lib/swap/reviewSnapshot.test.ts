@@ -9,13 +9,13 @@ describe("swap review snapshots", () => {
   it("keeps an identical review valid", () => expect(reviewChanged(make(), make())).toBe(false));
   it("invalidates changed output beyond tolerance", () => expect(reviewChanged(make(), make({ ...quote, amountOut: 89n }))).toBe(true));
   it("tolerates tiny price drift within slippage", () => {
-    // 90n -> 8999n/100-ish drift: a few wei to ~0.5% must not bounce the user.
-    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n + 1n }))).toBe(false);
-    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n - 1n }))).toBe(false);
-    expect(reviewChanged(make(), make({ ...quote, amountOut: 9045n / 100n }))).toBe(false);
+    // Drift up to 0.5% must not bounce the user back to review.
+    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n * 10_050n / 10_000n }))).toBe(false);
+    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n * 9_950n / 10_000n }))).toBe(false);
   });
   it("invalidates price drift beyond 0.5%", () => {
-    expect(reviewChanged(make(), make({ ...quote, amountOut: 91n }))).toBe(true);
+    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n * 10_100n / 10_000n }))).toBe(true);
+    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n * 9_800n / 10_000n }))).toBe(true);
   });
   it("invalidates changed protocol fee", () => expect(reviewChanged(make(), make(quote, 2n))).toBe(true));
   it("invalidates changed signature count", () => {
