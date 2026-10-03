@@ -48,6 +48,7 @@ import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiProductEventsRouteImport } from './routes/api/product-events'
 import { Route as ApiOpportunitiesRouteImport } from './routes/api/opportunities'
 import { Route as ApiMissionsRouteImport } from './routes/api/missions'
+import { Route as ApiLiquidityGapsRouteImport } from './routes/api/liquidity-gaps'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
@@ -299,6 +300,11 @@ const ApiOpportunitiesRoute = ApiOpportunitiesRouteImport.update({
 const ApiMissionsRoute = ApiMissionsRouteImport.update({
   id: '/api/missions',
   path: '/api/missions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLiquidityGapsRoute = ApiLiquidityGapsRouteImport.update({
+  id: '/api/liquidity-gaps',
+  path: '/api/liquidity-gaps',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -636,6 +642,7 @@ export interface FileRoutesByFullPath {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/liquidity-gaps': typeof ApiLiquidityGapsRoute
   '/api/missions': typeof ApiMissionsRoute
   '/api/opportunities': typeof ApiOpportunitiesRoute
   '/api/product-events': typeof ApiProductEventsRoute
@@ -734,6 +741,7 @@ export interface FileRoutesByTo {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/liquidity-gaps': typeof ApiLiquidityGapsRoute
   '/api/missions': typeof ApiMissionsRoute
   '/api/opportunities': typeof ApiOpportunitiesRoute
   '/api/product-events': typeof ApiProductEventsRoute
@@ -833,6 +841,7 @@ export interface FileRoutesById {
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
   '/api/config': typeof ApiConfigRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/liquidity-gaps': typeof ApiLiquidityGapsRoute
   '/api/missions': typeof ApiMissionsRoute
   '/api/opportunities': typeof ApiOpportunitiesRoute
   '/api/product-events': typeof ApiProductEventsRoute
@@ -933,6 +942,7 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/liquidity-gaps'
     | '/api/missions'
     | '/api/opportunities'
     | '/api/product-events'
@@ -1031,6 +1041,7 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/liquidity-gaps'
     | '/api/missions'
     | '/api/opportunities'
     | '/api/product-events'
@@ -1129,6 +1140,7 @@ export interface FileRouteTypes {
     | '/api/campaigns'
     | '/api/config'
     | '/api/health'
+    | '/api/liquidity-gaps'
     | '/api/missions'
     | '/api/opportunities'
     | '/api/product-events'
@@ -1228,6 +1240,7 @@ export interface RootRouteChildren {
   ApiCampaignsRoute: typeof ApiCampaignsRouteWithChildren
   ApiConfigRoute: typeof ApiConfigRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiLiquidityGapsRoute: typeof ApiLiquidityGapsRoute
   ApiMissionsRoute: typeof ApiMissionsRoute
   ApiOpportunitiesRoute: typeof ApiOpportunitiesRoute
   ApiProductEventsRoute: typeof ApiProductEventsRoute
@@ -1553,6 +1566,13 @@ declare module '@tanstack/react-router' {
       path: '/api/missions'
       fullPath: '/api/missions'
       preLoaderRoute: typeof ApiMissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/liquidity-gaps': {
+      id: '/api/liquidity-gaps'
+      path: '/api/liquidity-gaps'
+      fullPath: '/api/liquidity-gaps'
+      preLoaderRoute: typeof ApiLiquidityGapsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -2073,6 +2093,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCampaignsRoute: ApiCampaignsRouteWithChildren,
   ApiConfigRoute: ApiConfigRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiLiquidityGapsRoute: ApiLiquidityGapsRoute,
   ApiMissionsRoute: ApiMissionsRoute,
   ApiOpportunitiesRoute: ApiOpportunitiesRoute,
   ApiProductEventsRoute: ApiProductEventsRoute,
