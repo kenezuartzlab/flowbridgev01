@@ -463,7 +463,7 @@ export async function createTransactionHistory(
     if (pointsToEarn > 0 && user.referred_by) {
       const { data: referrer } = await supabaseAdmin
         .from("profiles")
-        .select("id, flow_points, points_referral_activity")
+        .select("id, flow_points, points_referral_activity, wallet_address")
         .eq("referral_code", user.referred_by)
         .maybeSingle();
       if (referrer && referrer.id !== userId) {
@@ -472,6 +472,8 @@ export async function createTransactionHistory(
             refereeId: userId,
             referrerId: referrer.id,
             refereeWalletBound: !!boundWallet,
+            referrerWallet: (referrer as any).wallet_address ?? null,
+            refereeWallet: boundWallet,
           });
         } else {
           const rules = await getRewardSettings();
