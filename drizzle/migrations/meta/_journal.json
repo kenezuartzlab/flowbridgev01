@@ -22,6 +22,20 @@
       "when": 1790994184127,
       "tag": "0002_ops_growth_intelligence_v1",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791047696777,
+      "tag": "0003_allow_router_v4_swap_activity_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791047904612,
+      "tag": "0004_service_role_insert_verified_activities",
+      "breakpoints": true
     }
   ]
 }

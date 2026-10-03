@@ -320,6 +320,7 @@ export async function createTransactionHistory(
   }
 
   const normalizedTxHash = payload.txHash?.trim() || null;
+  let existingRow: any = null;
   if (normalizedTxHash) {
     const { data: existing } = await supabaseAdmin
       .from("transactions_history")
@@ -327,7 +328,23 @@ export async function createTransactionHistory(
       .eq("user_id", userId)
       .eq("tx_hash", normalizedTxHash)
       .maybeSingle();
-    if (existing) return existing;
+    if (existing) {
+      // A successful swap recorded with 0 points may be re-evaluated from
+      // on-chain evidence (e.g. finality was pending). Ledger dedup on
+      // chain+tx+logIndex guarantees a single economic result.
+      const retryable =
+        String(existing.tx_type).toUpperCase() === "SWAP" &&
+        String(existing.status).toUpperCase() === "SUCCESS" &&
+        Number(existing.points_earned ?? 0) === 0;
+      if (!retryable) return existing;
+      const { count } = await supabaseAdmin
+        .from("flow_points_ledger")
+        .select("id", { count: "exact", head: true })
+        .eq("tx_hash", normalizedTxHash.toLowerCase())
+        .in("reason", ["CORE_SWAP", "CORE_SWAP_V2", "DAILY_CAP_REACHED"]);
+      if ((count ?? 0) > 0) return existing;
+      existingRow = existing;
+    }
   }
 
   // Bridge transactions are RECORDED for the user's activity history (tied to
@@ -418,7 +435,15 @@ export async function createTransactionHistory(
 
 
 
-  const { data: tx, error } = await supabaseAdmin
+  if (existingRow && pointsToEarn === 0) return existingRow;
+  const { data: tx, error } = existingRow
+    ? await supabaseAdmin
+        .from("transactions_history")
+        .update({ points_earned: pointsToEarn })
+        .eq("id", existingRow.id)
+        .select()
+        .single()
+    : await supabaseAdmin
     .from("transactions_history")
     .insert({
       user_id: userId,
