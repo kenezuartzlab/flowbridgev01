@@ -71,12 +71,20 @@ export async function ingestMainnetRouterV4Swap(
   txHash: string,
   wallet: string,
 ): Promise<MainnetV4IngestResult> {
-  const [receipt, tx, head] = await Promise.all([
+  const [receipt, tx] = await Promise.all([
     rpc<any>('eth_getTransactionReceipt', [txHash]),
     rpc<any>('eth_getTransactionByHash', [txHash]),
-    rpc<string>('eth_blockNumber', []),
   ]);
-  if (!receipt || !tx || !head) return { status: 'NOT_FINAL', reason: 'receipt unavailable' };
+  if (!receipt || !tx) return { status: 'NOT_FINAL', reason: 'receipt unavailable' };
+  // Wait (bounded) for finality depth so a just-confirmed swap is not missed.
+  const mined = Number(BigInt(receipt.blockNumber ?? '0x0'));
+  let head: string | null = null;
+  for (let i = 0; i < 10; i++) {
+    head = await rpc<string>('eth_blockNumber', []);
+    if (head && Number(BigInt(head)) - mined + 1 >= 3) break;
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  if (!head) return { status: 'NOT_FINAL', reason: 'head unavailable' };
   const block = await rpc<any>('eth_getBlockByNumber', [receipt.blockNumber, false]);
   const result = verifyMainnetRouterV4CoreSwap(
     {
