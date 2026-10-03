@@ -14,6 +14,7 @@ export const ONBOARDING_POLICY_VERSION = "V27" as const;
 export const ONBOARDING_STEP_IDS = [
   "WELCOME",
   "EXPLORE",
+  "TRADE",
   "EARN",
   "SUPPORT_BOT_CHAIN",
   "PERSONALIZE",
@@ -99,8 +100,22 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     whyBotChain: null,
   },
   {
-    id: "EARN",
+    id: "TRADE",
     index: 2,
+    eyebrow: "Trade",
+    title: "How a Smart Trade works",
+    message: "Pick two tokens. Auto checks supported BDEX and CaSwap routes and shows you the result before anything happens.",
+    points: [
+      "ATOMIC — V4 means one swap transaction. STAGED means several transactions you approve one by one.",
+      "Your wallet always signs. Funds stay in your wallet until a transaction executes.",
+    ],
+    actionLabel: "Next",
+    href: null,
+    whyBotChain: null,
+  },
+  {
+    id: "EARN",
+    index: 3,
     eyebrow: "Earn",
     title: "How earning really works",
     message: "Learn the real ways rewards can be earned and what rules apply.",
@@ -115,7 +130,7 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
   },
   {
     id: "SUPPORT_BOT_CHAIN",
-    index: 3,
+    index: 4,
     eyebrow: "Support BOT Chain",
     title: "Why your activity matters",
     message:
@@ -131,7 +146,7 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
   },
   {
     id: "PERSONALIZE",
-    index: 4,
+    index: 5,
     eyebrow: "Personalize",
     title: "Make it yours",
     message:
