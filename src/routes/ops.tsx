@@ -70,15 +70,31 @@ function Row({ k, v }: { k: string; v: ReactNode }) {
   );
 }
 
-function Table({ cols, rows }: { cols: string[]; rows: (string | number | null | ReactNode)[][] }) {
+function Table({ cols, rows, stackOnMobile = false }: { cols: string[]; rows: (string | number | null | ReactNode)[][]; stackOnMobile?: boolean }) {
   if (rows.length === 0) return <p className="text-[12px] text-muted">No data recorded in this period.</p>;
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[480px] text-left text-[12px]">
+    <>
+      {stackOnMobile && (
+        <div className="divide-y divide-hairline sm:hidden">
+          {rows.map((row, rowIndex) => (
+            <dl key={rowIndex} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 py-2.5 first:pt-0 last:pb-0">
+              {row.map((cell, cellIndex) => (
+                <div key={cellIndex} className="contents">
+                  <dt className="min-w-0 truncate text-[11px] text-muted">{cols[cellIndex]}</dt>
+                  <dd className="min-w-0 max-w-[55vw] break-words text-right font-mono text-[11.5px] font-bold text-foreground">{cell ?? "—"}</dd>
+                </div>
+              ))}
+            </dl>
+          ))}
+        </div>
+      )}
+      <div className={`${stackOnMobile ? "hidden sm:block" : ""} max-w-full overflow-x-auto overscroll-x-contain`}>
+        <table className="w-full min-w-[480px] text-left text-[12px]">
         <thead><tr>{cols.map((c) => <th key={c} className="border-b border-hairline px-2 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider text-muted">{c}</th>)}</tr></thead>
         <tbody>{rows.map((r, i) => <tr key={i} className="border-b border-hairline last:border-0">{r.map((c, j) => <td key={j} className="px-2 py-1.5 font-mono text-foreground">{c ?? "—"}</td>)}</tr>)}</tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -135,7 +151,7 @@ function OpsPage() {
 
   const r = q.data?.report;
   return (
-    <main className="mx-auto max-w-6xl space-y-3 px-3 py-4 sm:px-5">
+    <main className={`mx-auto max-w-6xl px-3 py-4 sm:px-5 ${tab === "Trade" ? "flex h-[calc(100dvh-72px)] min-h-0 flex-col gap-3 overflow-hidden sm:block sm:h-auto sm:space-y-3 sm:overflow-visible" : "space-y-3"}`}>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="font-mono text-[10px] font-black uppercase tracking-[0.16em] text-muted">Internal · read-only</p>
@@ -223,7 +239,7 @@ function TabBody({ tab, r }: { tab: Tab; r: OpsReport }) {
       const br = (rows: OpsReport["trade"]["byDex"]) => rows.map((x) => [x.key, x.quoteRequests, x.executableQuotes, x.noRoute, x.submitted, x.confirmed, x.reverted]);
       const cols = ["Key", "Quotes", "Routes", "No route", "Submitted", "Confirmed", "Reverted"];
       return (
-        <div className={grid}>
+        <div className={`${grid} min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-4 pr-0.5 touch-pan-y sm:overflow-visible sm:pb-0 sm:pr-0`}>
           <Card title="Route success funnel" note="Confirmed = successful chain receipt only. Quotes are never counted as trades."><Funnel stages={r.trade.funnel} /></Card>
           <Card title="Outcomes" note="Cancellation is a user choice, not a technical failure.">
             {r.trade.outcomes.map((o) => <Row key={o.key} k={o.label} v={o.count} />)}
@@ -239,11 +255,11 @@ function TabBody({ tab, r }: { tab: Tab; r: OpsReport }) {
             {Object.entries(r.trade.quality).map(([k, v]) => <Row key={k} k={k.replace(/([A-Z])/g, " $1").toLowerCase()} v={v ?? "—"} />)}
           </Card>
           <div className="md:col-span-2 space-y-3">
-            <Card title="By network"><Table cols={cols} rows={br(r.trade.byNetwork)} /></Card>
-            <Card title="By pair"><Table cols={cols} rows={br(r.trade.byPair)} /></Card>
-            <Card title="By DEX"><Table cols={cols} rows={br(r.trade.byDex)} /></Card>
-            <Card title="By route type"><Table cols={cols} rows={br(r.trade.byRouteType)} /></Card>
-            <Card title="By device"><Table cols={cols} rows={br(r.trade.byDevice)} /></Card>
+            <Card title="By network"><Table cols={cols} rows={br(r.trade.byNetwork)} stackOnMobile /></Card>
+            <Card title="By pair"><Table cols={cols} rows={br(r.trade.byPair)} stackOnMobile /></Card>
+            <Card title="By DEX"><Table cols={cols} rows={br(r.trade.byDex)} stackOnMobile /></Card>
+            <Card title="By route type"><Table cols={cols} rows={br(r.trade.byRouteType)} stackOnMobile /></Card>
+            <Card title="By device"><Table cols={cols} rows={br(r.trade.byDevice)} stackOnMobile /></Card>
           </div>
         </div>
       );

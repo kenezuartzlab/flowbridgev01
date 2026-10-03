@@ -49,3 +49,6 @@
 - [x] Preserve receipt-derived grouped Activity, RPC stale/error states, CaSwap disclosure, and Mainnet liquidity write lock.
 - [x] Verify Mainnet positions/Earn/AI truthfulness and complete 390px production acceptance coverage.
 - [x] Run read-only BOT Mainnet checks, full app tests, liquidity math, typecheck, and production build.
+
+# Operations Mobile Acceptance
+- [x] Make Trade breakdown data stack vertically on phones without horizontal page drag or overlap.
