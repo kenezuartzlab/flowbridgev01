@@ -91,7 +91,7 @@ function flush() {
 }
 
 /** Record one category-level product event. `once` dedupes per page load. */
-export function trackProductEvent(eventName: ProductEventName, area: ProductArea, opts: { once?: boolean; network?: number } = {}) {
+export function trackProductEvent(eventName: ProductEventName, area: ProductArea, opts: { once?: boolean; network?: number; errorKind?: string } = {}) {
   if (typeof window === "undefined") return;
   if (!(PRODUCT_EVENT_NAMES as readonly string[]).includes(eventName)) return;
   if (opts.once) {
@@ -99,12 +99,14 @@ export function trackProductEvent(eventName: ProductEventName, area: ProductArea
     if (onceKeys.has(k)) return;
     onceKeys.add(k);
   }
+  const errorKind = opts.errorKind && /^[A-Za-z]{1,40}$/.test(opts.errorKind) ? opts.errorKind : undefined;
   queue.push({
     eventName,
     area,
     sessionHash: sessionHash(),
     deviceCategory: window.innerWidth < 768 ? "mobile" : "desktop",
     ...(opts.network ? { network: opts.network } : {}),
+    ...(errorKind ? { errorKind } : {}),
   });
   if (queue.length >= 15) return flush();
   if (!timer) timer = setTimeout(flush, 2000);
