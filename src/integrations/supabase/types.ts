@@ -1118,6 +1118,36 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_processing_events: {
+        Row: {
+          chain_id: number | null
+          detail: string | null
+          id: string
+          occurred_at: string
+          outcome: string
+          stage: string
+          tx_hash: string | null
+        }
+        Insert: {
+          chain_id?: number | null
+          detail?: string | null
+          id?: string
+          occurred_at?: string
+          outcome: string
+          stage: string
+          tx_hash?: string | null
+        }
+        Update: {
+          chain_id?: number | null
+          detail?: string | null
+          id?: string
+          occurred_at?: string
+          outcome?: string
+          stage?: string
+          tx_hash?: string | null
+        }
+        Relationships: []
+      }
       siwe_nonces: {
         Row: {
           created_at: string

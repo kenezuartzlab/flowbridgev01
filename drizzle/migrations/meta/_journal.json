@@ -36,6 +36,13 @@
       "when": 1791047904612,
       "tag": "0004_service_role_insert_verified_activities",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791048349000,
+      "tag": "0005_points_least_privilege_and_reward_diagnostics",
+      "breakpoints": true
     }
   ]
 }
