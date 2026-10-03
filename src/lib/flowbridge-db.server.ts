@@ -364,7 +364,11 @@ export async function createTransactionHistory(
       // priced server-side from the decoded tokenIn/amountIn only.
       const { ingestMainnetRouterV4Swap } = await import("@/lib/activity/mainnetRouterV4Ingest.server");
       const { recordReviewEntry } = await import("@/lib/rewards/flowPointsV2Ledger.server");
-      const ingest = await ingestMainnetRouterV4Swap(normalizedTxHash, submittedWallet);
+      // A persistence failure is already recorded as a diagnostic; the swap row
+      // stays at 0 points and remains retryable — never credited without evidence.
+      const ingest = await ingestMainnetRouterV4Swap(normalizedTxHash, submittedWallet).catch(
+        () => ({ status: "PERSISTENCE_FAILED" as const, reason: "persistence rejected" }),
+      );
       if (ingest.status === "VERIFIED" && v2Live) {
         if (ingest.verifiedUsd == null) {
           await recordReviewEntry({
@@ -388,6 +392,12 @@ export async function createTransactionHistory(
           pointsToEarn = accrual.award;
           if (!accrual.recorded) verifiedSwapUsd = 0;
         }
+      } else if (ingest.status === "REJECTED") {
+        const { recordRewardDiagnostic } = await import("@/lib/rewards/rewardDiagnostics.server");
+        await recordRewardDiagnostic({
+          stage: "v4_evidence", outcome: "PERMANENT_FAILURE",
+          chainId: BOT_MAINNET_CHAIN_ID, txHash: normalizedTxHash, detail: ingest.reason,
+        });
       } else if (ingest.status === "NOT_FINAL") {
         await recordReviewEntry({
           userId, walletAddress: submittedWallet, reason: "ANTI_ABUSE_REVIEW",
@@ -408,8 +418,10 @@ export async function createTransactionHistory(
         if (!evidence) {
           verifiedSwapUsd = 0;
           pointsToEarn = 0;
-          console.warn("[flow-points-v2] CORE_SWAP fail-closed: no canonical verified activity", {
-            txHash: normalizedTxHash,
+          const { recordRewardDiagnostic } = await import("@/lib/rewards/rewardDiagnostics.server");
+          await recordRewardDiagnostic({
+            stage: "core_swap_evidence", outcome: "CANONICAL_EVENT_MISSING",
+            chainId: verified.chainId, txHash: normalizedTxHash,
           });
         } else {
           const accrual = await accrueCoreSwapPoints({

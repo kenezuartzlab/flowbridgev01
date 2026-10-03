@@ -12,7 +12,8 @@ vi.mock('@/integrations/supabase/client.server', () => ({
   supabaseAdmin: {
     from: (table: string) => ({
       insert: (row: any) => {
-        inserted.push({ table, row });
+        // Internal diagnostics are not economic ledger writes.
+        if (table !== 'reward_processing_events') inserted.push({ table, row });
         return Promise.resolve({ error: null });
       },
       select: () => {
@@ -26,6 +27,9 @@ vi.mock('@/integrations/supabase/client.server', () => ({
     }),
   },
 }));
+
+// Internal diagnostics are a separate side channel, not ledger writes.
+vi.mock('./rewardDiagnostics.server', () => ({ recordRewardDiagnostic: async () => {} }));
 
 vi.mock('./flowPointsV2Policy.server', () => ({
   resolveFlowPointsV2Policy: async () => ({
