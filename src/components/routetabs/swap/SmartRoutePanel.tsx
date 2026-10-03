@@ -62,7 +62,12 @@ export function SmartRoutePanel({ quote, tokenOut, chainId = 677, dexPref = "aut
     <div className="mt-1 space-y-1 rounded-lg border border-hairline p-2">
       <p className="text-[10px] font-black uppercase tracking-[0.12em] text-primary">
         Best route · {quote.steps.length} {quote.steps.length === 1 ? "step" : "steps"}
-        {quote.steps.length > 1 ? ` · ${ex.execution === "ATOMIC_V4" ? "ATOMIC — V4" : "STAGED"}` : ""}
+        {` · ${ex.execution === "STAGED" ? "STAGED" : "ATOMIC — V4"}`}
+      </p>
+      <p className="text-[10px] text-muted">
+        {ex.execution === "STAGED"
+          ? `STAGED: ${ex.transactions} separate transactions, each approved by you in your wallet.`
+          : "ATOMIC: one swap transaction. It completes fully or not at all."}
       </p>
       {quote.steps.length > 1 && (
         <p className="text-[10.5px] font-bold text-foreground">
