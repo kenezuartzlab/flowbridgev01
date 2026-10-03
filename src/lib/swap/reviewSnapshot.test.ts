@@ -8,14 +8,16 @@ const make = (q = quote, fee: bigint | string = 1n) => createSwapReviewSnapshot(
 describe("swap review snapshots", () => {
   it("keeps an identical review valid", () => expect(reviewChanged(make(), make())).toBe(false));
   it("invalidates changed output beyond tolerance", () => expect(reviewChanged(make(), make({ ...quote, amountOut: 89n }))).toBe(true));
+  const bigQuote = { ...quote, amountOut: 1_000_000n };
   it("tolerates tiny price drift within slippage", () => {
     // Drift up to 0.5% must not bounce the user back to review.
-    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n * 10_050n / 10_000n }))).toBe(false);
-    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n * 9_950n / 10_000n }))).toBe(false);
+    expect(reviewChanged(make(bigQuote), make({ ...bigQuote, amountOut: 1_005_000n }))).toBe(false);
+    expect(reviewChanged(make(bigQuote), make({ ...bigQuote, amountOut: 995_000n }))).toBe(false);
+    expect(reviewChanged(make(bigQuote), make({ ...bigQuote, amountOut: 1_000_001n }))).toBe(false);
   });
   it("invalidates price drift beyond 0.5%", () => {
-    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n * 10_100n / 10_000n }))).toBe(true);
-    expect(reviewChanged(make(), make({ ...quote, amountOut: 90n * 9_800n / 10_000n }))).toBe(true);
+    expect(reviewChanged(make(bigQuote), make({ ...bigQuote, amountOut: 1_006_000n }))).toBe(true);
+    expect(reviewChanged(make(bigQuote), make({ ...bigQuote, amountOut: 990_000n }))).toBe(true);
   });
   it("invalidates changed protocol fee", () => expect(reviewChanged(make(), make(quote, 2n))).toBe(true));
   it("invalidates changed signature count", () => {
