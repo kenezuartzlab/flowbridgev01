@@ -18,6 +18,7 @@ import { Route as SetsRouteImport } from './routes/sets'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PartnersRouteImport } from './routes/partners'
+import { Route as OpsRouteImport } from './routes/ops'
 import { Route as MultisendRouteImport } from './routes/multisend'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketsRouteImport } from './routes/markets'
@@ -151,6 +152,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PartnersRoute = PartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpsRoute = OpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MultisendRoute = MultisendRouteImport.update({
@@ -632,6 +638,7 @@ export interface FileRoutesByFullPath {
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
+  '/ops': typeof OpsRoute
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -732,6 +739,7 @@ export interface FileRoutesByTo {
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
+  '/ops': typeof OpsRoute
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -833,6 +841,7 @@ export interface FileRoutesById {
   '/markets': typeof MarketsRoute
   '/mcp': typeof McpRoute
   '/multisend': typeof MultisendRoute
+  '/ops': typeof OpsRoute
   '/partners': typeof PartnersRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -935,6 +944,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/mcp'
     | '/multisend'
+    | '/ops'
     | '/partners'
     | '/reset-password'
     | '/rewards'
@@ -1035,6 +1045,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/mcp'
     | '/multisend'
+    | '/ops'
     | '/partners'
     | '/reset-password'
     | '/rewards'
@@ -1135,6 +1146,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/mcp'
     | '/multisend'
+    | '/ops'
     | '/partners'
     | '/reset-password'
     | '/rewards'
@@ -1236,6 +1248,7 @@ export interface RootRouteChildren {
   MarketsRoute: typeof MarketsRoute
   McpRoute: typeof McpRoute
   MultisendRoute: typeof MultisendRoute
+  OpsRoute: typeof OpsRoute
   PartnersRoute: typeof PartnersRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
@@ -1369,6 +1382,13 @@ declare module '@tanstack/react-router' {
       path: '/partners'
       fullPath: '/partners'
       preLoaderRoute: typeof PartnersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops': {
+      id: '/ops'
+      path: '/ops'
+      fullPath: '/ops'
+      preLoaderRoute: typeof OpsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/multisend': {
@@ -2096,6 +2116,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketsRoute: MarketsRoute,
   McpRoute: McpRoute,
   MultisendRoute: MultisendRoute,
+  OpsRoute: OpsRoute,
   PartnersRoute: PartnersRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
