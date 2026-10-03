@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { RefreshCw, ShieldAlert } from "lucide-react";
-import { useAccount } from "wagmi";
+import { useAccount, WagmiProvider } from "wagmi";
+import { wagmiConfig } from "@/lib/wagmi";
 import { getIdToken } from "@/lib/auth";
 import type { OpsReport } from "@/lib/ops/opsReport.server";
 
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/ops")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: OpsPage,
+  component: OpsRoute,
 });
 
 type PeriodKey = "today" | "7d" | "30d";
@@ -99,6 +100,16 @@ function Funnel({ stages }: { stages: { key: string; label: string; count: numbe
         </li>
       ))}
     </ol>
+  );
+}
+
+// Wallet hooks below need a WagmiProvider in this route's tree; providers are
+// per-route in this app, so without it the page throws WagmiProviderNotFoundError.
+function OpsRoute() {
+  return (
+    <WagmiProvider config={wagmiConfig}>
+      <OpsPage />
+    </WagmiProvider>
   );
 }
 
