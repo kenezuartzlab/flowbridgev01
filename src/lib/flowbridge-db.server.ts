@@ -60,26 +60,28 @@ async function rpc<T>(url: string, method: string, params: unknown[]): Promise<T
 async function verifySwapReceipt(
   txHash: string | null,
   walletAddress: string,
-): Promise<number | null> {
+): Promise<{ chainId: number; router: string } | null> {
   const hash = txHash?.trim();
   if (!hash || !/^0x[a-fA-F0-9]{64}$/.test(hash)) return null;
   const wallet = walletAddress.toLowerCase();
   const { requireFlowBridgeV4Execution } = await import("@/lib/flowbridge/executionRegistry");
+  const { MAINNET_ROUTER_V4_ADDRESS } = await import("@/lib/activity/mainnetRouterV4Evidence");
   const testnetRpc = process.env["BOT_TESTNET_RPC_URL"] ?? "";
 
-  const candidates: Array<{ chainId: number; rpcUrl: string; router: string }> = [
+  const candidates: Array<{ chainId: number; rpcUrl: string; routers: string[] }> = [
     {
       chainId: BOT_MAINNET_CHAIN_ID,
       rpcUrl: BOT_MAINNET_RPC,
-      // LEGACY v3 mainnet read only. This is explicitly NOT Router V4 evidence.
-      router: requireFlowBridgeExecution(BOT_MAINNET_CHAIN_ID).router,
+      // Canonical production Router V4 + approved legacy Router V3. One tx has
+      // exactly one target, so the two can never double-credit one swap.
+      routers: [MAINNET_ROUTER_V4_ADDRESS, requireFlowBridgeExecution(BOT_MAINNET_CHAIN_ID).router],
     },
   ];
   if (testnetRpc) {
     candidates.push({
       chainId: BOT_TESTNET_CHAIN_ID,
       rpcUrl: testnetRpc,
-      router: requireFlowBridgeV4Execution(BOT_TESTNET_CHAIN_ID).router,
+      routers: [requireFlowBridgeV4Execution(BOT_TESTNET_CHAIN_ID).router],
     });
   }
 
@@ -91,9 +93,9 @@ async function verifySwapReceipt(
     if (!receipt || !tx) continue;
     const statusOk = String(receipt.status).toLowerCase() === "0x1";
     const fromOk = String(tx.from ?? receipt.from ?? "").toLowerCase() === wallet;
-    const toOk =
-      String(tx.to ?? receipt.to ?? "").toLowerCase() === candidate.router.toLowerCase();
-    if (statusOk && fromOk && toOk) return candidate.chainId;
+    const to = String(tx.to ?? receipt.to ?? "").toLowerCase();
+    const router = candidate.routers.find((r) => r.toLowerCase() === to);
+    if (statusOk && fromOk && router) return { chainId: candidate.chainId, router: router.toLowerCase() };
   }
   return null;
 }
@@ -338,19 +340,54 @@ export async function createTransactionHistory(
   let pointsToEarn = 0;
   const v2Live = await isFlowPointsV2Live();
   if (!isBridge && isSuccessfulSwap && submittedWallet && normalizedTxHash) {
-    const verifiedChainId = await verifySwapReceipt(normalizedTxHash, submittedWallet);
-    if (verifiedChainId != null) {
+    const verified = await verifySwapReceipt(normalizedTxHash, submittedWallet);
+    const { MAINNET_ROUTER_V4_ADDRESS } = await import("@/lib/activity/mainnetRouterV4Evidence");
+    if (verified && verified.chainId === BOT_MAINNET_CHAIN_ID && verified.router === MAINNET_ROUTER_V4_ADDRESS) {
+      // Mainnet Router V4: canonical SwapActivity ingested server-side; USD
+      // priced server-side from the decoded tokenIn/amountIn only.
+      const { ingestMainnetRouterV4Swap } = await import("@/lib/activity/mainnetRouterV4Ingest.server");
+      const { recordReviewEntry } = await import("@/lib/rewards/flowPointsV2Ledger.server");
+      const ingest = await ingestMainnetRouterV4Swap(normalizedTxHash, submittedWallet);
+      if (ingest.status === "VERIFIED" && v2Live) {
+        if (ingest.verifiedUsd == null) {
+          await recordReviewEntry({
+            userId, walletAddress: submittedWallet, reason: "PRICING_REVIEW",
+            chainId: BOT_MAINNET_CHAIN_ID, txHash: normalizedTxHash,
+            metadata: { activityKey: ingest.activity.activityKey, tokenIn: ingest.activity.tokenIn },
+          });
+        } else {
+          verifiedSwapUsd = ingest.verifiedUsd;
+          const accrual = await accrueCoreSwapPoints({
+            userId,
+            walletAddress: submittedWallet,
+            verifiedUsd: verifiedSwapUsd,
+            chainId: BOT_MAINNET_CHAIN_ID,
+            txHash: normalizedTxHash,
+            sourceLogIndex: ingest.activity.logIndex,
+            verifiedActivityId: ingest.activity.activityId,
+            tokenIn: ingest.activity.tokenIn,
+            tokenOut: ingest.activity.tokenOut,
+          });
+          pointsToEarn = accrual.award;
+          if (!accrual.recorded) verifiedSwapUsd = 0;
+        }
+      } else if (ingest.status === "NOT_FINAL") {
+        await recordReviewEntry({
+          userId, walletAddress: submittedWallet, reason: "ANTI_ABUSE_REVIEW",
+          chainId: BOT_MAINNET_CHAIN_ID, txHash: normalizedTxHash,
+          metadata: { kind: "FINALITY_PENDING", detail: ingest.reason },
+        });
+      }
+    } else if (verified) {
       // V12.4B — token/amount authority is canonical on-chain evidence when the
-      // verified-activity indexer has it; the browser payload is only a legacy
-      // fallback for the historic mainnet v3 path.
+      // verified-activity indexer has it.
       const evidence = await canonicalSwapEvidence(normalizedTxHash, submittedWallet);
       verifiedSwapUsd = evidence
         ? await canonicalEvidenceUsd(evidence)
         : await estimateSwapUsd(payload.direction, payload.fromAmount);
       if (v2Live) {
-        // V12.4A/V15.3M FLOW Points V2: settlement requires a single canonical
-        // verified activity. Its activity_id is the economic identity and its
-        // receipt log index is used verbatim — no `?? 0` substitution.
+        // V2 settlement requires a single canonical verified activity; browser
+        // values never decide V2 economics.
         if (!evidence) {
           verifiedSwapUsd = 0;
           pointsToEarn = 0;
@@ -370,8 +407,6 @@ export async function createTransactionHistory(
           pointsToEarn = accrual.award;
           if (!accrual.recorded) verifiedSwapUsd = 0;
         }
-
-
       } else {
         const rules = await getRewardSettings();
         const { estimateFlowPointsForUsd } = await import("@/lib/rewards");
