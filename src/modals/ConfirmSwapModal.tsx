@@ -81,7 +81,7 @@ export function ConfirmSwapModal({
         <div className="space-y-2.5">
           {/* Pay Amount Box */}
           <div className="flex justify-between items-center gap-2 border-b border-hairline pb-1.5">
-            <span className="text-2xl font-black text-foreground tracking-tight truncate font-mono">
+            <span className="text-xl font-black text-foreground tracking-tight truncate font-mono">
               {parseFloat(fromAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
             <div className="flex items-center gap-1.5 shrink-0">
@@ -99,7 +99,7 @@ export function ConfirmSwapModal({
 
           {/* Receive Amount Box */}
           <div className="flex justify-between items-center gap-2 pt-1.5">
-            <span className="text-2xl font-black text-primary tracking-tight truncate font-mono">
+            <span className="text-xl font-black text-primary tracking-tight truncate font-mono">
               {parseFloat(toAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
             <div className="flex items-center gap-1.5 shrink-0">

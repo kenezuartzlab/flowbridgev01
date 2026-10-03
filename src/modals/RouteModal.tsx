@@ -27,7 +27,7 @@ export function RouteModal({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="route_modal"
-        className="bg-card border border-hairline text-foreground rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-6 shadow-2xl relative flex flex-col space-y-6 animate-scale-up border-b-[5px] border-b-primary"
+        className="bg-card border border-hairline text-foreground rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[360px] p-4 sm:p-5 shadow-2xl relative flex flex-col space-y-6 animate-scale-up border-b-[5px] border-b-primary"
       >
         {/* Header container */}
         <div className="flex justify-between items-center font-mono text-sm">
@@ -47,7 +47,7 @@ export function RouteModal({
         </div>
 
         {/* Route Graph Box */}
-        <div className="bg-background border border-hairline rounded-2xl p-6 flex items-center justify-between relative overflow-hidden font-mono">
+        <div className="bg-background border border-hairline rounded-2xl p-4 flex items-center justify-between relative overflow-hidden font-mono">
           
           {/* Node 1: Origin Token */}
           <div className="flex flex-col items-center gap-1.5 z-10">

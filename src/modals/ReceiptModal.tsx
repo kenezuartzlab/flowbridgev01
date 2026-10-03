@@ -74,7 +74,7 @@ export function ReceiptModal({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="receipt_modal"
-        className={`bg-card border border-hairline text-foreground rounded-[20px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center space-y-4 animate-scale-up border-b-[4px] ${status === 'success' ? 'border-b-primary' : 'border-b-danger'}`}
+        className={`bg-card border border-hairline text-foreground rounded-[20px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center space-y-3 animate-scale-up border-b-[4px] ${status === 'success' ? 'border-b-primary' : 'border-b-danger'}`}
       >
         {/* Close Button */}
         <button 
@@ -86,7 +86,7 @@ export function ReceiptModal({
         </button>
 
         {/* Hand-Crafted Premium CSS Mascot: Gold OK-Sign Coin with Sunglasses */}
-        <div className="relative w-36 h-32 flex items-center justify-center mt-2 select-none">
+        <div className="relative w-36 h-32 flex items-center justify-center -my-3 scale-[0.78] select-none">
           {/* Sparkle indicators around head */}
 
           <div className="absolute top-1 right-6 text-primary animate-pulse duration-1000">

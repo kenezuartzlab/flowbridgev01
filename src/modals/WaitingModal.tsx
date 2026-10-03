@@ -72,19 +72,19 @@ export function WaitingModal({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="waiting_confirmation_modal"
-        className="bg-card border border-hairline text-foreground rounded-[20px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center justify-center space-y-3.5 text-center animate-scale-up border-b-[4px] border-b-primary"
+        className="bg-card border border-hairline text-foreground rounded-[20px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative flex flex-col items-center justify-center space-y-3 text-center animate-scale-up border-b-[4px] border-b-primary"
       >
 
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
+          className="absolute top-2.5 right-2.5 p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Glowing Coin Swap Animation with Ecosurge theme */}
-        <div className="relative w-24 h-24 flex items-center justify-center">
+        <div className="relative w-24 h-24 flex items-center justify-center -my-1.5 scale-[0.85]">
 
           <div className="absolute inset-0 rounded-full border border-primary/15 animate-ping duration-1000" />
           <div className="absolute inset-2 rounded-full border border-accent/10 animate-[pulse_2s_infinite]" />
