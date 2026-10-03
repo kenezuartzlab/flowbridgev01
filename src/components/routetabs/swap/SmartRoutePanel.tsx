@@ -1,3 +1,4 @@
+import { trackProductEvent } from "@/lib/ops/productEvents";
 /**
  * Smart Trade V1 — route breakdown, DEX selector and "no liquidity route" guidance.
  * Everything shown here comes from live on-chain quotes/pool reads; nothing is invented.
@@ -88,7 +89,7 @@ export function SmartRoutePanel({ quote, tokenOut, chainId = 677, dexPref = "aut
       {quote.steps.some((s) => s.v3Fee == null) && (
         <p className="text-[10px] text-muted">*Standard V2 pool fee, already included in the quote.</p>
       )}
-      <button type="button" onClick={() => setWhy((w) => !w)} aria-expanded={why} className="text-[10.5px] font-bold text-primary">
+      <button type="button" onClick={() => { if (!why) trackProductEvent("route_details_viewed", "trade"); setWhy((w) => !w); }} aria-expanded={why} className="text-[10.5px] font-bold text-primary">
         {why ? "Hide" : "Smart AI · why this route?"}
       </button>
       {why && (

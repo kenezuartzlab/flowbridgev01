@@ -1,3 +1,4 @@
+import { trackActivation } from "@/lib/growth/activationAnalytics";
 import { useState } from "react";
 import { Check, Loader2, Wallet } from "lucide-react";
 import { useAccount, useConnect, useSignMessage } from "wagmi";
@@ -41,6 +42,7 @@ export function BindWalletCard({
       return;
     }
     setBusy(true);
+    trackActivation("WALLET_BINDING_STARTED");
     try {
       const token = await getIdToken();
       if (!token) throw new Error("Sign in again to bind your wallet.");
@@ -85,6 +87,7 @@ export function BindWalletCard({
         throw new Error("The server did not confirm this wallet — nothing was bound.");
       }
       setOk(`Wallet ${short(data.walletAddress)} is confirmed on your account.`);
+      trackActivation("WALLET_BOUND_OBSERVED");
       await onDone?.();
     } catch (e: any) {
       setError(e?.shortMessage ?? e?.message ?? "Network error binding wallet.");
