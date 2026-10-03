@@ -70,15 +70,31 @@ function Row({ k, v }: { k: string; v: ReactNode }) {
   );
 }
 
-function Table({ cols, rows }: { cols: string[]; rows: (string | number | null | ReactNode)[][] }) {
+function Table({ cols, rows, stackOnMobile = false }: { cols: string[]; rows: (string | number | null | ReactNode)[][]; stackOnMobile?: boolean }) {
   if (rows.length === 0) return <p className="text-[12px] text-muted">No data recorded in this period.</p>;
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[480px] text-left text-[12px]">
+    <>
+      {stackOnMobile && (
+        <div className="divide-y divide-hairline sm:hidden">
+          {rows.map((row, rowIndex) => (
+            <dl key={rowIndex} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 py-2.5 first:pt-0 last:pb-0">
+              {row.map((cell, cellIndex) => (
+                <div key={cellIndex} className="contents">
+                  <dt className="min-w-0 truncate text-[11px] text-muted">{cols[cellIndex]}</dt>
+                  <dd className="min-w-0 max-w-[55vw] break-words text-right font-mono text-[11.5px] font-bold text-foreground">{cell ?? "—"}</dd>
+                </div>
+              ))}
+            </dl>
+          ))}
+        </div>
+      )}
+      <div className={`${stackOnMobile ? "hidden sm:block" : ""} max-w-full overflow-x-auto overscroll-x-contain`}>
+        <table className="w-full min-w-[480px] text-left text-[12px]">
         <thead><tr>{cols.map((c) => <th key={c} className="border-b border-hairline px-2 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider text-muted">{c}</th>)}</tr></thead>
         <tbody>{rows.map((r, i) => <tr key={i} className="border-b border-hairline last:border-0">{r.map((c, j) => <td key={j} className="px-2 py-1.5 font-mono text-foreground">{c ?? "—"}</td>)}</tr>)}</tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -239,11 +255,11 @@ function TabBody({ tab, r }: { tab: Tab; r: OpsReport }) {
             {Object.entries(r.trade.quality).map(([k, v]) => <Row key={k} k={k.replace(/([A-Z])/g, " $1").toLowerCase()} v={v ?? "—"} />)}
           </Card>
           <div className="md:col-span-2 space-y-3">
-            <Card title="By network"><Table cols={cols} rows={br(r.trade.byNetwork)} /></Card>
-            <Card title="By pair"><Table cols={cols} rows={br(r.trade.byPair)} /></Card>
-            <Card title="By DEX"><Table cols={cols} rows={br(r.trade.byDex)} /></Card>
-            <Card title="By route type"><Table cols={cols} rows={br(r.trade.byRouteType)} /></Card>
-            <Card title="By device"><Table cols={cols} rows={br(r.trade.byDevice)} /></Card>
+            <Card title="By network"><Table cols={cols} rows={br(r.trade.byNetwork)} stackOnMobile /></Card>
+            <Card title="By pair"><Table cols={cols} rows={br(r.trade.byPair)} stackOnMobile /></Card>
+            <Card title="By DEX"><Table cols={cols} rows={br(r.trade.byDex)} stackOnMobile /></Card>
+            <Card title="By route type"><Table cols={cols} rows={br(r.trade.byRouteType)} stackOnMobile /></Card>
+            <Card title="By device"><Table cols={cols} rows={br(r.trade.byDevice)} stackOnMobile /></Card>
           </div>
         </div>
       );
