@@ -45,6 +45,50 @@ export function createSwapReviewSnapshot(input: {
   };
 }
 
-export function reviewChanged(a: SwapReviewSnapshot, b: SwapReviewSnapshot): boolean {
-  return Object.keys(a).some((key) => a[key as keyof SwapReviewSnapshot] !== b[key as keyof SwapReviewSnapshot]);
+/**
+ * Structural fields always invalidate the review when they change: the user
+ * approved a specific route, pair, fee and transaction shape, so any drift
+ * there must be re-reviewed.
+ */
+const STRUCTURAL_KEYS: (keyof SwapReviewSnapshot)[] = [
+  "chainId",
+  "tokenIn",
+  "tokenOut",
+  "amountIn",
+  "protocolFee",
+  "approvalCount",
+  "transactionCount",
+  "execution",
+  "route",
+];
+
+/**
+ * Price fields (amountOut / minimumOut) move by a few wei whenever another
+ * trade touches the pool between review and confirm. On-chain slippage
+ * protection (minimumOut) already guards the user against adverse movement,
+ * so a small drift within this tolerance must NOT bounce the user back to
+ * review — otherwise active pairs become unusable (review → confirm →
+ * rejected loops). Anything beyond the tolerance still invalidates.
+ */
+export const REVIEW_PRICE_TOLERANCE_BPS = 50n; // 0.5%
+
+function withinTolerance(a: string, b: string, toleranceBps: bigint): boolean {
+  const x = BigInt(a);
+  const y = BigInt(b);
+  if (x === y) return true;
+  if (x === 0n || y === 0n) return false;
+  const diff = x > y ? x - y : y - x;
+  const base = x > y ? x : y;
+  return diff * 10_000n <= base * toleranceBps;
+}
+
+export function reviewChanged(
+  a: SwapReviewSnapshot,
+  b: SwapReviewSnapshot,
+  toleranceBps: bigint = REVIEW_PRICE_TOLERANCE_BPS,
+): boolean {
+  if (STRUCTURAL_KEYS.some((key) => a[key] !== b[key])) return true;
+  if (!withinTolerance(a.amountOut, b.amountOut, toleranceBps)) return true;
+  if (!withinTolerance(a.minimumOut, b.minimumOut, toleranceBps)) return true;
+  return false;
 }
