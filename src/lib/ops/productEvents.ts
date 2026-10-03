@@ -20,6 +20,8 @@ export const PRODUCT_EVENT_NAMES = [
   // smart AI (category only)
   "ai_opened", "ai_route_explanation", "ai_liquidity_explanation", "ai_range_explanation",
   "ai_staking_explanation", "ai_why_no_route",
+  // reliability (error constructor name only — never message text)
+  "client_error",
 ] as const;
 export type ProductEventName = (typeof PRODUCT_EVENT_NAMES)[number];
 
@@ -35,6 +37,8 @@ export interface ProductEvent {
   sessionHash: string;
   deviceCategory: "mobile" | "desktop" | "unknown";
   network?: number;
+  /** Error constructor name only (e.g. "TypeError") — never message text. */
+  errorKind?: string;
 }
 
 const SESSION_KEY = "fb_ops_sid";
