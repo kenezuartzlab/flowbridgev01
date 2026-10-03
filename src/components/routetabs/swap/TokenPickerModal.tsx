@@ -98,7 +98,7 @@ export function TokenPickerModal({
   return (
     <ModalPortal>
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md animate-fade-in font-sans sm:p-4">
-      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[400px] flex-col gap-4 overflow-hidden rounded-3xl border border-hairline border-b-[5px] border-b-primary bg-card p-5 text-foreground shadow-2xl animate-scale-up">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[400px] flex-col gap-3 overflow-hidden rounded-3xl border border-hairline border-b-[5px] border-b-primary bg-card p-5 text-foreground shadow-2xl animate-scale-up">
         <div className="flex justify-between items-center font-mono">
           <h3 className="text-foreground font-black uppercase tracking-wider text-sm">
             {title}

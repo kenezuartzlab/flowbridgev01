@@ -68,7 +68,7 @@ export function ConfirmDestinationModal({
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 backdrop-blur-md animate-fade-in font-sans sm:p-4">
       <div 
         id="confirm_address_modal"
-        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[360px] flex-col space-y-5 overflow-y-auto overscroll-contain rounded-[20px] border border-hairline bg-card p-4 text-foreground shadow-2xl animate-scale-up sm:rounded-3xl sm:p-6"
+        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[360px] flex-col space-y-4 overflow-y-auto overscroll-contain rounded-[20px] border border-hairline bg-card p-4 text-foreground shadow-2xl animate-scale-up sm:rounded-3xl sm:p-5"
       >
         {/* Header containing Close Button */}
         <div className="flex justify-between items-center">
@@ -143,7 +143,7 @@ export function ConfirmDestinationModal({
         {/* Actions - Confirm Button */}
         <button
           onClick={handleValidateAndConfirm}
-          className="w-full py-4 rounded-2xl bg-primary hover:bg-primary-strong text-primary-foreground font-black text-sm uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md cursor-pointer"
+          className="w-full py-3 rounded-2xl bg-primary hover:bg-primary-strong text-primary-foreground font-black text-sm uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md cursor-pointer"
         >
           Confirm
         </button>

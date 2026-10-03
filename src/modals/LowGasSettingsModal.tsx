@@ -49,7 +49,7 @@ export function LowGasSettingsModal({ isOpen, onClose }: LowGasSettingsModalProp
   return (
     <ModalPortal>
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md font-sans">
-      <div className="bg-card border border-hairline text-foreground rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[420px] p-4 sm:p-6 shadow-2xl relative flex flex-col space-y-5">
+      <div className="bg-card border border-hairline text-foreground rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[420px] p-4 sm:p-5 shadow-2xl relative flex flex-col space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-bold text-foreground font-mono uppercase tracking-wide">
             Low-Gas Warning Thresholds

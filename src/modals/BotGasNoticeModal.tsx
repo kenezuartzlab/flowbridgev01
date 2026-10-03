@@ -21,7 +21,7 @@ export function BotGasNoticeModal({ isOpen, onClose, onConfirm }: BotGasNoticeMo
   return (
     <ModalPortal>
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
-      <div className="bg-card border border-hairline text-foreground rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[380px] p-4 sm:p-6 shadow-2xl relative flex flex-col space-y-5 animate-scale-up">
+      <div className="bg-card border border-hairline text-foreground rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[380px] p-4 sm:p-5 shadow-2xl relative flex flex-col space-y-4 animate-scale-up">
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-bold text-foreground/95 font-mono uppercase tracking-wide flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-[#F6BA00]" />
@@ -60,7 +60,7 @@ export function BotGasNoticeModal({ isOpen, onClose, onConfirm }: BotGasNoticeMo
           onClick={() => { if (acknowledged) { onConfirm(); onClose(); } }}
           disabled={!acknowledged}
           className={cn(
-            "w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md cursor-pointer",
+            "w-full py-3 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md cursor-pointer",
             acknowledged
               ? "bg-primary hover:bg-primary-strong text-primary-foreground shadow-[0_0_16px_rgba(50,255,139,0.25)]"
               : "bg-foreground/5 text-muted/45 border border-foreground/10 cursor-not-allowed"
