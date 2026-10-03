@@ -8,17 +8,53 @@
  */
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LogIn, LogOut, Menu, X } from "lucide-react";
+import { Activity, LogIn, LogOut, Menu, X } from "lucide-react";
 import { MENU_NAV, isNavActive } from "./navModel";
 import { supabase } from "@/integrations/supabase/client";
 import { googleSignIn, logout } from "@/lib/auth";
+import { checkAdmin } from "@/lib/admin/adminApi";
 import { ModalPortal } from "@/modals/ModalPortal";
+
+/** Reads the wagmi-persisted connected wallet without requiring a provider. */
+function readPersistedWallet(): string | null {
+  try {
+    const raw = window.localStorage.getItem("flowbridge.wallet");
+    if (!raw) return null;
+    const state = (JSON.parse(raw) as any)?.state;
+    const connections: [string, { accounts?: string[] }][] = state?.connections ?? [];
+    const first = connections[0]?.[1]?.accounts?.[0];
+    return typeof first === "string" && first.startsWith("0x") ? first : null;
+  } catch {
+    return null;
+  }
+}
 
 export function ShellNavMenu({ className = "" }: { className?: string }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
+  // Admin-only Operations shortcut: revealed only after the server confirms the
+  // signed-in account + connected wallet. Visibility is cosmetic — /ops and
+  // every admin API re-verify authorization on each request.
+  const [canOpenOps, setCanOpenOps] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    if (!signedIn) {
+      setCanOpenOps(false);
+      return;
+    }
+    const wallet = readPersistedWallet();
+    if (!wallet) {
+      setCanOpenOps(false);
+      return;
+    }
+    checkAdmin(wallet)
+      .then((r) => { if (alive) setCanOpenOps(!!r.isAdmin); })
+      .catch(() => { if (alive) setCanOpenOps(false); });
+    return () => { alive = false; };
+  }, [signedIn, open]);
 
   useEffect(() => {
     let alive = true;
@@ -120,6 +156,25 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
                 </li>
               );
             })}
+            {canOpenOps && (
+              <li>
+                <Link
+                  to="/ops"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  aria-current={isNavActive({ id: "ops", label: "Operations", to: "/ops", Icon: Activity }, pathname) ? "page" : undefined}
+                  data-nav-id="ops"
+                  className={`flex min-h-[52px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors ${
+                    pathname === "/ops"
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-foreground/5 hover:text-primary"
+                  }`}
+                >
+                  <Activity className="h-4 w-4" strokeWidth={pathname === "/ops" ? 2.6 : 2} />
+                  <span className="truncate">Operations</span>
+                </Link>
+              </li>
+            )}
           </ul>
           <div className="border-t border-hairline p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             {signedIn ? (

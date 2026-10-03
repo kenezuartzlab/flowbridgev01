@@ -3,7 +3,7 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { WalletPill } from './WalletPill';
 import {
-  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut, SlidersHorizontal,
+  History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut, SlidersHorizontal, Activity,
   ChevronDown, LogIn, CircleUser, Send, Droplets, Sprout, BookOpen,
 } from 'lucide-react';
 
@@ -309,6 +309,13 @@ export function AppHeader({
           label: 'Control panel',
           icon: <SlidersHorizontal className="w-4 h-4" />,
           onClick: go('/sets'),
+          show: canOpenSets,
+        },
+        {
+          id: 'ops',
+          label: 'Operations',
+          icon: <Activity className="w-4 h-4" />,
+          onClick: go('/ops'),
           show: canOpenSets,
         },
       ],
