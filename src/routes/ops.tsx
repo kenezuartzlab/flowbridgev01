@@ -151,7 +151,7 @@ function OpsPage() {
 
   const r = q.data?.report;
   return (
-    <main className="mx-auto max-w-6xl space-y-3 px-3 py-4 sm:px-5">
+    <main className={`mx-auto max-w-6xl px-3 py-4 sm:px-5 ${tab === "Trade" ? "flex h-[calc(100dvh-72px)] min-h-0 flex-col gap-3 overflow-hidden sm:block sm:h-auto sm:space-y-3 sm:overflow-visible" : "space-y-3"}`}>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="font-mono text-[10px] font-black uppercase tracking-[0.16em] text-muted">Internal · read-only</p>
@@ -189,7 +189,7 @@ function TabBody({ tab, r }: { tab: Tab; r: OpsReport }) {
   switch (tab) {
     case "Overview":
       return (
-        <div className={grid}>
+        <div className={`${grid} min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-4 pr-0.5 touch-pan-y sm:overflow-visible sm:pb-0 sm:pr-0`}>
           <Card title="Production">
             <Row k="Production status" v={<Badge value={r.overview.productionStatus} />} />
             <Row k="Active networks" v={r.overview.activeNetworks.join(", ")} />
