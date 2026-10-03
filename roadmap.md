@@ -52,3 +52,6 @@
 
 # Operations Mobile Acceptance
 - [x] Make Trade breakdown data stack vertically on phones without horizontal page drag or overlap.
+
+- [x] Growth Activation + Conversion V1 (code + tests)
+- [ ] Growth V1 signed-in phone acceptance (verify, bind, review, share) — waits on user
