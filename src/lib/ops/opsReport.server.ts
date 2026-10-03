@@ -165,7 +165,7 @@ export async function buildOpsReport(periodKey: PeriodKey) {
 
   const rpcProbe = (b: typeof botBlock): ProbeResult => ({ ok: b.error ? null : true, error: b.error, latencyMs: b.ms });
   const v4Status: ServiceStatus = v4Actual == null ? "UNKNOWN" : drift.drift.length ? "DEGRADED" : drift.items.some((i) => i.ok === null) ? "UNKNOWN" : "OPERATIONAL";
-  const unresolvedActivities = verified.filter((v) => v.status !== "confirmed" && v.status !== "verified").length;
+  const unresolvedActivities = verified.filter((v) => !["confirmed", "verified"].includes(v.status.toLowerCase())).length;
   const indexerStatus: ServiceStatus = verified.length === 0 ? "UNKNOWN" : unresolvedActivities > 0 ? "DEGRADED" : "OPERATIONAL";
   const services: Record<string, ServiceStatus> = {
     "Web App": "OPERATIONAL", // this report was served by the running app
@@ -193,7 +193,7 @@ export async function buildOpsReport(periodKey: PeriodKey) {
     confirmedLastHour: trades.filter((r) => r.event_name === "tx_confirmed" && within(r, hour)).length,
     revertsPrevDay: trades.filter((r) => r.event_name === "tx_reverted" && within(r, day, hour)).length,
     confirmedPrevDay: trades.filter((r) => r.event_name === "tx_confirmed" && within(r, day, hour)).length,
-    indexingFailures: verified.filter((v) => v.status === "failed" || v.status === "rejected").length,
+    indexingFailures: verified.filter((v) => ["failed", "rejected", "malformed"].includes(v.status.toLowerCase())).length,
     services,
   });
 
