@@ -530,7 +530,7 @@ export function RealtimeBridgeTrackerModal({
               onReset();
               onClose();
             }}
-            className="w-full py-3 px-4 bg-card text-foreground hover:bg-background-elev active:scale-98 font-mono text-[10.5px] tracking-widest uppercase font-black rounded-xl transition border border-hairline cursor-pointer shadow-inner text-center"
+            className="w-full py-2.5 px-4 bg-card text-foreground hover:bg-background-elev active:scale-98 font-mono text-[10.5px] tracking-widest uppercase font-black rounded-xl transition border border-hairline cursor-pointer shadow-inner text-center"
           >
             Transfer again
           </button>
