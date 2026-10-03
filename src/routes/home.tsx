@@ -193,7 +193,7 @@ function HomePage() {
           )}
         </HeroCard>
 
-        <NextActionCard confirmedTrades={transactions.filter((t: any) => t?.type === "swap" || t?.kind === "swap").length} />
+        <NextActionCard confirmedTrades={transactions.filter((t: any) => /swap/i.test(String(t?.txType ?? t?.tx_type ?? "")) && /^(success|confirmed|completed)$/i.test(String(t?.status ?? ""))).length} />
 
         {/* V16 — Flow AI proactive insights, evidence-backed and read-only */}
         <OpportunityFeed />
