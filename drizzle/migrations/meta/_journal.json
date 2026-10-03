@@ -43,6 +43,13 @@
       "when": 1791048349000,
       "tag": "0005_points_least_privilege_and_reward_diagnostics",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791048607480,
+      "tag": "0006_fix_profile_guard_definer_bypass",
+      "breakpoints": true
     }
   ]
 }
