@@ -20,6 +20,8 @@ export const PRODUCT_EVENT_NAMES = [
   // smart AI (category only)
   "ai_opened", "ai_route_explanation", "ai_liquidity_explanation", "ai_range_explanation",
   "ai_staking_explanation", "ai_why_no_route",
+  // reliability (error constructor name only — never message text)
+  "client_error",
 ] as const;
 export type ProductEventName = (typeof PRODUCT_EVENT_NAMES)[number];
 
@@ -35,6 +37,8 @@ export interface ProductEvent {
   sessionHash: string;
   deviceCategory: "mobile" | "desktop" | "unknown";
   network?: number;
+  /** Error constructor name only (e.g. "TypeError") — never message text. */
+  errorKind?: string;
 }
 
 const SESSION_KEY = "fb_ops_sid";
@@ -87,7 +91,7 @@ function flush() {
 }
 
 /** Record one category-level product event. `once` dedupes per page load. */
-export function trackProductEvent(eventName: ProductEventName, area: ProductArea, opts: { once?: boolean; network?: number } = {}) {
+export function trackProductEvent(eventName: ProductEventName, area: ProductArea, opts: { once?: boolean; network?: number; errorKind?: string } = {}) {
   if (typeof window === "undefined") return;
   if (!(PRODUCT_EVENT_NAMES as readonly string[]).includes(eventName)) return;
   if (opts.once) {
@@ -95,12 +99,14 @@ export function trackProductEvent(eventName: ProductEventName, area: ProductArea
     if (onceKeys.has(k)) return;
     onceKeys.add(k);
   }
+  const errorKind = opts.errorKind && /^[A-Za-z]{1,40}$/.test(opts.errorKind) ? opts.errorKind : undefined;
   queue.push({
     eventName,
     area,
     sessionHash: sessionHash(),
     deviceCategory: window.innerWidth < 768 ? "mobile" : "desktop",
     ...(opts.network ? { network: opts.network } : {}),
+    ...(errorKind ? { errorKind } : {}),
   });
   if (queue.length >= 15) return flush();
   if (!timer) timer = setTimeout(flush, 2000);

@@ -978,6 +978,7 @@ export type Database = {
         Row: {
           area: string
           device_category: string
+          error_kind: string | null
           event_name: string
           id: string
           network: number | null
@@ -987,6 +988,7 @@ export type Database = {
         Insert: {
           area: string
           device_category?: string
+          error_kind?: string | null
           event_name: string
           id?: string
           network?: number | null
@@ -996,6 +998,7 @@ export type Database = {
         Update: {
           area?: string
           device_category?: string
+          error_kind?: string | null
           event_name?: string
           id?: string
           network?: number | null
