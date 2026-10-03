@@ -19,3 +19,4 @@
 - The dominant Home next action is decided only in src/lib/growth/nextAction.ts; conversion/drop-off counting lives only in src/lib/ops/conversionFunnel.ts. Why: one place owns "what next" and funnel truth.
 - Indexable pages are listed only in src/lib/seo/publicPages.ts (sitemap source); private pages carry noindex. Why: private surfaces must never leak into search.
 - UX experiments are registered via src/lib/growth/experiments.ts, which rejects fee/slippage/approval/router/wallet/contract scopes at load. Why: experiments must never touch safety.
+- BOT Mainnet Router V4 reward evidence is decoded only in src/lib/activity/mainnetRouterV4Evidence.ts (pure) and ingested/priced server-side in mainnetRouterV4Ingest.server.ts; unpriceable or non-final swaps get 0-point review rows, never estimates. Why: browser values must never decide economics.

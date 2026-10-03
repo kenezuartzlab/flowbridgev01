@@ -15,13 +15,14 @@ vi.mock('@/integrations/supabase/client.server', () => ({
         inserted.push({ table, row });
         return Promise.resolve({ error: null });
       },
-      select: () => ({
-        eq: () => ({
-          eq: () => ({
-            eq: () => Promise.resolve({ data: [], error: null }),
-          }),
-        }),
-      }),
+      select: () => {
+        // Chainable read builder (eq / in / gte), resolving to no rows.
+        const q: any = Promise.resolve({ data: [], error: null });
+        q.eq = () => q;
+        q.in = () => q;
+        q.gte = () => q;
+        return q;
+      },
     }),
   },
 }));

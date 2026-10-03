@@ -16,13 +16,59 @@ export const FLOW_POINTS_V2_VERSION = "FLOW_POINTS_V2" as const;
 export const FLOW_POINTS_V2_EFFECTIVE_AT = "2026-08-20T15:00:00.000Z";
 
 export type LedgerReason =
-  | "CORE_SWAP"
+  | "CORE_SWAP_V2"
   | "DAILY_CAP_REACHED"
-  | "REFERRAL_MILESTONE_FIRST_SWAP"
-  | "REFERRAL_MILESTONE_VOLUME_100"
-  | "REFERRAL_MILESTONE_ACTIVE_DAYS_3";
+  | "REFERRAL_FIRST_QUALIFYING_SWAP"
+  | "REFERRAL_100_USD_VOLUME"
+  | "REFERRAL_3_ACTIVE_DAYS"
+  | "REFERRAL_MONTHLY_CAP_REACHED"
+  | "ANTI_ABUSE_REVIEW"
+  | "PRICING_REVIEW";
+
+/**
+ * Core-swap reasons whose `points` count toward the daily cap and referee
+ * qualified state. "CORE_SWAP" is the pre-rename historical name; both count
+ * exactly once because each ledger row has exactly one reason.
+ */
+export const CORE_SWAP_LEDGER_REASONS = ["CORE_SWAP", "CORE_SWAP_V2"] as const;
 
 export type ReferralMilestoneId = "FIRST_SWAP" | "VOLUME_100" | "ACTIVE_DAYS_3";
+
+/** Window for the rapid reverse-pair (round trip) anti-wash review signal. */
+export const ROUND_TRIP_REVIEW_WINDOW_MS = 10 * 60 * 1000;
+
+/**
+ * Anti-wash signal: the same wallet reversing a pair (A→B then B→A) within the
+ * window. A signal is not fraud — it routes the award to REVIEW (0 points until
+ * resolved); the swap itself remains valid product activity.
+ */
+export function isRapidReverseRoundTrip(
+  prior: ReadonlyArray<{ tokenIn: string; tokenOut: string; at: number }>,
+  current: { tokenIn: string; tokenOut: string; at: number },
+  windowMs: number = ROUND_TRIP_REVIEW_WINDOW_MS,
+): boolean {
+  const lc = (s: string) => String(s ?? "").toLowerCase();
+  return prior.some(
+    (p) =>
+      lc(p.tokenIn) === lc(current.tokenOut) &&
+      lc(p.tokenOut) === lc(current.tokenIn) &&
+      current.at - p.at >= 0 &&
+      current.at - p.at <= windowMs,
+  );
+}
+
+/** Same-person guard: same account OR same reward wallet is self-referral. */
+export function isSelfReferral(input: {
+  referrerId: string;
+  refereeId: string;
+  referrerWallet?: string | null;
+  refereeWallet?: string | null;
+}): boolean {
+  if (input.referrerId === input.refereeId) return true;
+  const a = input.referrerWallet?.toLowerCase();
+  const b = input.refereeWallet?.toLowerCase();
+  return !!a && !!b && a === b;
+}
 
 export interface FlowPointsV2Policy {
   version: typeof FLOW_POINTS_V2_VERSION;
@@ -94,7 +140,7 @@ export interface CoreSwapAward {
   award: number;
   /** Uncapped base, for audit/ledger metadata. */
   base: number;
-  reason: Extract<LedgerReason, "CORE_SWAP" | "DAILY_CAP_REACHED">;
+  reason: Extract<LedgerReason, "CORE_SWAP_V2" | "DAILY_CAP_REACHED">;
   /** Remaining daily headroom after this award. */
   remainingToday: number;
 }
@@ -115,7 +161,7 @@ export function coreSwapAward(
   return {
     award,
     base,
-    reason: base > 0 && award === 0 ? "DAILY_CAP_REACHED" : "CORE_SWAP",
+    reason: base > 0 && award === 0 ? "DAILY_CAP_REACHED" : "CORE_SWAP_V2",
     remainingToday: Math.max(0, headroom - award),
   };
 }
@@ -150,21 +196,21 @@ export function referralMilestonesDue(
   if (state.qualifiedSwapCount >= 1) {
     all.push({
       id: "FIRST_SWAP",
-      reason: "REFERRAL_MILESTONE_FIRST_SWAP",
+      reason: "REFERRAL_FIRST_QUALIFYING_SWAP",
       points: policy.referralMilestoneFirstSwap,
     });
   }
   if (state.qualifiedVolumeUsd >= policy.referralMilestoneVolumeUsd) {
     all.push({
       id: "VOLUME_100",
-      reason: "REFERRAL_MILESTONE_VOLUME_100",
+      reason: "REFERRAL_100_USD_VOLUME",
       points: policy.referralMilestoneVolume,
     });
   }
   if (state.qualifiedActiveDays >= policy.referralMilestoneActiveDays) {
     all.push({
       id: "ACTIVE_DAYS_3",
-      reason: "REFERRAL_MILESTONE_ACTIVE_DAYS_3",
+      reason: "REFERRAL_3_ACTIVE_DAYS",
       points: policy.referralMilestoneActiveDaysPoints,
     });
   }

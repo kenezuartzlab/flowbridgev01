@@ -12,6 +12,9 @@ import {
   DEFAULT_FLOW_POINTS_V2_POLICY,
   FLOW_POINTS_V2_VERSION,
   type FlowPointsV2Policy,
+  CORE_SWAP_LEDGER_REASONS,
+  isRapidReverseRoundTrip,
+  isSelfReferral,
   type LedgerReason,
   type ReferralMilestoneId,
   coreSwapAward,
@@ -52,7 +55,7 @@ export async function awardedCoreSwapPointsToday(walletAddress: string, dayKey: 
     .from("flow_points_ledger")
     .select("points")
     .eq("wallet_address", walletAddress)
-    .eq("reason", "CORE_SWAP")
+    .in("reason", [...CORE_SWAP_LEDGER_REASONS])
     .eq("day_key", dayKey);
   return (data ?? []).reduce((sum: number, r: any) => sum + Number(r.points ?? 0), 0);
 }
@@ -90,6 +93,9 @@ export async function accrueCoreSwapPoints(input: {
   verifiedActivityId: string;
   /** Actual canonical SwapActivity receipt log index. Required. */
   sourceLogIndex: number;
+  /** Decoded canonical tokens (anti-wash round-trip signal). */
+  tokenIn?: string;
+  tokenOut?: string;
   at?: Date;
 }): Promise<CoreSwapAccrual> {
   const policy = await resolveFlowPointsV2Policy();
@@ -102,7 +108,7 @@ export async function accrueCoreSwapPoints(input: {
     return {
       award: 0,
       base: 0,
-      reason: "CORE_SWAP",
+      reason: "CORE_SWAP_V2",
       recorded: false,
       policy,
       failClosedReason: "MISSING_VERIFIED_ACTIVITY_ID",
@@ -113,7 +119,7 @@ export async function accrueCoreSwapPoints(input: {
     return {
       award: 0,
       base: 0,
-      reason: "CORE_SWAP",
+      reason: "CORE_SWAP_V2",
       recorded: false,
       policy,
       failClosedReason: "MISSING_SOURCE_LOG_INDEX",
@@ -123,7 +129,32 @@ export async function accrueCoreSwapPoints(input: {
   const activityKey = `${input.chainId}:${input.txHash.toLowerCase()}:${logIndex}`;
 
   const alreadyToday = await awardedCoreSwapPointsToday(wallet, dayKey);
-  const computed = coreSwapAward(input.verifiedUsd, alreadyToday, policy);
+  const computed: { award: number; base: number; reason: LedgerReason } = {
+    ...coreSwapAward(input.verifiedUsd, alreadyToday, policy),
+  };
+
+  // Anti-wash: rapid reverse-pair round trip → REVIEW (0 until resolved).
+  if (input.tokenIn && input.tokenOut && computed.award > 0) {
+    const since = new Date(at.getTime() - 10 * 60 * 1000).toISOString();
+    const { data: recent } = await supabaseAdmin
+      .from("flow_points_ledger")
+      .select("metadata, created_at")
+      .eq("wallet_address", wallet)
+      .gte("created_at", since);
+    const prior = (recent ?? [])
+      .map((r: any) => ({
+        tokenIn: String(r.metadata?.tokenIn ?? ""),
+        tokenOut: String(r.metadata?.tokenOut ?? ""),
+        at: new Date(r.created_at).getTime(),
+      }))
+      .filter((p) => p.tokenIn && p.tokenOut);
+    if (
+      isRapidReverseRoundTrip(prior, { tokenIn: input.tokenIn, tokenOut: input.tokenOut, at: at.getTime() })
+    ) {
+      computed.award = 0;
+      computed.reason = "ANTI_ABUSE_REVIEW";
+    }
+  }
 
   const { error } = await supabaseAdmin.from("flow_points_ledger").insert({
     user_id: input.userId,
@@ -139,7 +170,13 @@ export async function accrueCoreSwapPoints(input: {
     activity_key: activityKey,
     wallet_address: wallet,
     day_key: dayKey,
-    metadata: { dailyCoreSwapCap: policy.dailyCoreSwapCap, alreadyAwardedToday: alreadyToday },
+    metadata: {
+      policyVersion: policy.version,
+      dailyCoreSwapCap: policy.dailyCoreSwapCap,
+      alreadyAwardedToday: alreadyToday,
+      tokenIn: input.tokenIn?.toLowerCase() ?? null,
+      tokenOut: input.tokenOut?.toLowerCase() ?? null,
+    },
   } as never);
 
   if (error) {
@@ -161,7 +198,7 @@ export async function refereeQualifiedState(userId: string) {
     .from("flow_points_ledger")
     .select("points, verified_usd, day_key")
     .eq("user_id", userId)
-    .eq("reason", "CORE_SWAP");
+    .in("reason", [...CORE_SWAP_LEDGER_REASONS]);
   const rows = (data ?? []).filter((r: any) => Number(r.points ?? 0) > 0);
   const days = new Set(rows.map((r: any) => String(r.day_key ?? "")));
   return {
@@ -179,6 +216,8 @@ export async function grantReferralMilestones(input: {
   refereeId: string;
   referrerId: string;
   refereeWalletBound: boolean;
+  referrerWallet?: string | null;
+  refereeWallet?: string | null;
   at?: Date;
 }): Promise<{ granted: number; milestones: ReferralMilestoneId[] }> {
   const policy = await resolveFlowPointsV2Policy();
@@ -190,6 +229,16 @@ export async function grantReferralMilestones(input: {
       referrerId: input.referrerId,
       refereeId: input.refereeId,
       refereeWalletBound: input.refereeWalletBound,
+    })
+  ) {
+    return { granted: 0, milestones: [] };
+  }
+  if (
+    isSelfReferral({
+      referrerId: input.referrerId,
+      refereeId: input.refereeId,
+      referrerWallet: input.referrerWallet,
+      refereeWallet: input.refereeWallet,
     })
   ) {
     return { granted: 0, milestones: [] };
@@ -214,6 +263,19 @@ export async function grantReferralMilestones(input: {
   if (
     referralMonthlyCapReached(rewardedReferees.size, rewardedReferees.has(input.refereeId), policy)
   ) {
+    // Attribution kept; one idempotent 0-point audit row per referee per month.
+    if (referralMilestonesDue(state, granted, policy).length > 0) {
+      await supabaseAdmin.from("flow_points_ledger").insert({
+        user_id: input.referrerId,
+        policy_version: policy.version,
+        reason: "REFERRAL_MONTHLY_CAP_REACHED",
+        points: 0,
+        base_points: 0,
+        day_key: utcDayKey(at),
+        activity_key: `refcap:${input.referrerId}:${input.refereeId}:${monthKey}`,
+        metadata: { refereeId: input.refereeId, monthKey, policyVersion: policy.version },
+      } as never);
+    }
     return { granted: 0, milestones: [] };
   }
 
@@ -239,7 +301,7 @@ export async function grantReferralMilestones(input: {
       points: milestone.points,
       base_points: milestone.points,
       day_key: utcDayKey(at),
-      metadata: { refereeId: input.refereeId, milestone: milestone.id },
+      metadata: { refereeId: input.refereeId, milestone: milestone.id, policyVersion: policy.version },
     });
     points += milestone.points;
     awarded.push(milestone.id);
@@ -269,4 +331,28 @@ export async function grantReferralMilestones(input: {
 export async function isFlowPointsV2Live(at: Date = new Date()): Promise<boolean> {
   const policy = await resolveFlowPointsV2Policy();
   return isFlowPointsV2Active(at, policy);
+}
+
+/** 0-point review/audit entry (pricing unavailable, finality pending, etc.). */
+export async function recordReviewEntry(input: {
+  userId: string;
+  walletAddress: string;
+  reason: Extract<LedgerReason, "PRICING_REVIEW" | "ANTI_ABUSE_REVIEW">;
+  chainId: number;
+  txHash: string;
+  metadata?: Record<string, unknown>;
+}) {
+  const policy = await resolveFlowPointsV2Policy();
+  await supabaseAdmin.from("flow_points_ledger").insert({
+    user_id: input.userId,
+    policy_version: policy.version,
+    reason: input.reason,
+    points: 0,
+    base_points: 0,
+    chain_id: input.chainId,
+    tx_hash: input.txHash.toLowerCase(),
+    wallet_address: input.walletAddress.toLowerCase(),
+    day_key: utcDayKey(),
+    metadata: { ...(input.metadata ?? {}), policyVersion: policy.version },
+  } as never);
 }
