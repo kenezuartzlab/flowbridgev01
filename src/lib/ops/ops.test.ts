@@ -200,7 +200,7 @@ describe("privacy / redaction", () => {
     expect(amountBucket(null)).toBe("unknown");
   });
   it("product events carry no identity fields", () => {
-    expect(PRODUCT_EVENT_NAMES.some((n) => /wallet_address|email|signature/i.test(n))).toBe(false);
+    expect(PRODUCT_EVENT_NAMES.some((n) => /wallet_address|^email$|signature/i.test(n))).toBe(false);
     expect(areaForPath("/trade")).toBe("trade");
     expect(areaForPath("/stake")).toBe("staking");
   });

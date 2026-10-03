@@ -136,9 +136,6 @@ export function UniversalSwapCard({
   // Ops telemetry: tag every trade event with public pair symbols only.
   const trackTrade = (e: TradeOperationalEvent) => trackTradeOperationalEvent({ tokenIn: tokenIn.symbol, tokenOut: tokenOut.symbol, ...e });
   const submittedAtRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (address) trackProductEvent("wallet_connected", "trade", { once: true, network: balanceChainId });
-  }, [address, balanceChainId]);
   const contracts = useMemo(() => getContracts(isMainnet), [isMainnet]);
   // Router used for the token-in ERC20 allowance check (the first step's router).
   // Recomputed after a quote arrives.
@@ -270,6 +267,9 @@ export function UniversalSwapCard({
   // resolve against whatever chain the wallet happens to be on (e.g. BSC),
   // which returned wrong/zero balances. Poll so post-tx balances stay accurate.
   const balanceChainId = isMainnet ? 677 : 968;
+  useEffect(() => {
+    if (address) trackProductEvent("wallet_connected", "trade", { once: true, network: balanceChainId });
+  }, [address, balanceChainId]);
   const balanceQuery = { enabled: !!address, refetchInterval: 12_000 } as const;
 
   const nativeBalance = useBalance({
