@@ -6,6 +6,8 @@
  * mark a reward, a mission step or a transaction as done.
  */
 
+import { trackProductEvent } from "@/lib/ops/productEvents";
+
 export const ACTIVATION_EVENTS = [
   "ACTIVATION_CARD_SHOWN",
   "ACTIVATION_PROMPT_SHOWN",
@@ -46,6 +48,8 @@ export function trackActivation(
     completesTransaction: false,
   };
   buffer.push(record);
+  // Category-level aggregate only — `detail` never leaves the browser.
+  trackProductEvent(event, "onboarding");
   if (buffer.length > MAX) buffer.splice(0, buffer.length - MAX);
   return record;
 }
