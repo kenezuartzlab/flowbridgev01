@@ -46,6 +46,7 @@ import { GraduationCap } from "lucide-react";
 export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Home — FlowBridge" },
       {
         name: "description",

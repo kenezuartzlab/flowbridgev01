@@ -1,3 +1,4 @@
+import { LIQUIDITY_WRITES_ENABLED } from "@/lib/liquidity/liquidityTokens";
 import { trackProductEvent } from "@/lib/ops/productEvents";
 /**
  * Smart Trade V1 — route breakdown, DEX selector and "no liquidity route" guidance.
@@ -126,6 +127,7 @@ export function NoRoutePanel({
     };
   }, [tokenIn, tokenOut, isMainnet]);
 
+  const liquidityWritesAllowed = !isMainnet && dexPref !== "caswap" && LIQUIDITY_WRITES_ENABLED[968] === true;
   const isolated = reports?.find((r) => r.connectedHubs.length === 0);
 
   return (
@@ -160,17 +162,28 @@ export function NoRoutePanel({
           connect it. This is a possible connection, not a recommendation.
         </p>
       )}
+      <p className="text-[11px] text-amber-300/80">
+        DEXs checked: {dexPref === "auto" ? DEX_OPTIONS.filter((o) => o.id !== "auto").map((o) => o.label).join(", ") : DEX_OPTIONS.find((o) => o.id === dexPref)?.label}
+      </p>
       <div className="flex flex-wrap gap-3">
+        {dexPref !== "auto" && (
+          <button type="button" onClick={onTryAuto} className="text-[11px] font-bold text-primary">Try Auto →</button>
+        )}
         <Link to="/liquidity" search={{ tab: "pools" }} className="inline-block text-[11px] font-bold text-primary">
-          View liquidity options →
+          View available liquidity →
         </Link>
-        <Link to="/liquidity" search={{ tab: "create" }} className="inline-block text-[11px] font-bold text-primary">
-          Create Pool
-        </Link>
-        <Link to="/liquidity" search={{ tab: "add" }} className="inline-block text-[11px] font-bold text-primary">
-          Add Liquidity
-        </Link>
+        <Link to="/markets" className="inline-block text-[11px] font-bold text-primary">Explore another pair →</Link>
+        <Link to="/learn" className="inline-block text-[11px] font-bold text-primary">Learn about liquidity →</Link>
+        {liquidityWritesAllowed && (
+          <>
+            <Link to="/liquidity" search={{ tab: "create" }} className="inline-block text-[11px] font-bold text-primary">Create Pool</Link>
+            <Link to="/liquidity" search={{ tab: "add" }} className="inline-block text-[11px] font-bold text-primary">Add Liquidity</Link>
+          </>
+        )}
       </div>
+      {!liquidityWritesAllowed && (
+        <p className="text-[10.5px] text-amber-300/70">Adding liquidity and creating pools are not open on Mainnet yet. CaSwap: UNAVAILABLE — LP_NOT_ALLOWED for public wallets.</p>
+      )}
     </div>
   );
 }

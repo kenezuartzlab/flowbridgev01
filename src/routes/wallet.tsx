@@ -35,6 +35,7 @@ import { useAccountData } from "@/lib/app/useAccountData";
 export const Route = createFileRoute("/wallet")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Wallet — FlowBridge" },
       {
         name: "description",

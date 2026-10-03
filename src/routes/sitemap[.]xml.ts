@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { PUBLIC_PAGES } from "@/lib/seo/publicPages";
 
 const BASE_URL = "https://flowbridge.space";
 
@@ -13,18 +14,7 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const entries: SitemapEntry[] = [
-          { path: "/", changefreq: "daily", priority: "1.0" },
-          { path: "/markets", changefreq: "hourly", priority: "0.9" },
-          { path: "/earn", changefreq: "weekly", priority: "0.8" },
-          { path: "/rewards", changefreq: "weekly", priority: "0.7" },
-          { path: "/docs", changefreq: "monthly", priority: "0.7" },
-          { path: "/bot-chain", changefreq: "monthly", priority: "0.7" },
-          { path: "/activity", changefreq: "weekly", priority: "0.5" },
-          { path: "/fortune", changefreq: "weekly", priority: "0.5" },
-          { path: "/ecosurge", changefreq: "weekly", priority: "0.5" },
-          { path: "/arcadeflix", changefreq: "weekly", priority: "0.5" },
-        ];
+        const entries: SitemapEntry[] = PUBLIC_PAGES.map((e) => ({ ...e }));
 
         const urls = entries.map((e) =>
           [

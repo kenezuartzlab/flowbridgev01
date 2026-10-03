@@ -301,6 +301,11 @@ function TabBody({ tab, r }: { tab: Tab; r: OpsReport }) {
     case "Journey":
       return (
         <div className={grid}>
+          <Card title="Conversion funnel + drop-off" note="Distinct pseudonymous sessions from specific events, never page views. User cancellation is a choice, not a failure.">
+            <div className="max-w-full overflow-x-auto"><table className="w-full text-[11px]"><thead><tr className="text-left text-muted"><th className="py-1 pr-2">Stage</th><th className="pr-2">Entered</th><th className="pr-2">Completed</th><th className="pr-2">Abandoned</th><th className="pr-2">User cancelled</th><th>Technical failure</th></tr></thead>
+            <tbody>{r.conversion.stages.map((s) => (<tr key={s.key} className="border-t border-border/50"><td className="py-1 pr-2">{s.label}</td><td>{s.entered}</td><td>{s.completed}</td><td>{s.abandoned}</td><td>{s.userCancelled}</td><td>{s.technicalFailure}</td></tr>))}</tbody></table></div>
+            {r.conversion.signals.length > 0 && <ul className="mt-2 space-y-1 text-[11px]">{r.conversion.signals.map((g, i) => <li key={i}><b>Observed:</b> {g.observedSignal} — <b>Possible action:</b> {g.possibleAction}</li>)}</ul>}
+          </Card>
           <Card title="User journey (pseudonymous sessions)" note="Distinct random browser sessions per stage. Swap and Bridge stay open without an account."><Funnel stages={r.journey} /></Card>
           <Card title="Account states (all-time, verified records)">
             <Row k="Accounts" v={r.accounts.accounts ?? "UNKNOWN"} /><Row k="Email verified" v={r.accounts.emailVerified ?? "UNKNOWN"} /><Row k="Wallet bound" v={r.accounts.walletBound ?? "UNKNOWN"} />

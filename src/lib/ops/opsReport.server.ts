@@ -2,6 +2,7 @@
  * Ops V1 — server-side report builder. READ-ONLY: chain calls are eth_call /
  * eth_getCode / eth_blockNumber only; database access is SELECT only.
  */
+import { conversionFunnel, conversionSignals, type SessionEvent } from "./conversionFunnel";
 import { createPublicClient, http, type Address, type PublicClient } from "viem";
 import { botMainnet, bscMainnet } from "@/lib/wagmi";
 import { MAINNET_CONTRACTS } from "@/lib/contracts";
@@ -88,7 +89,7 @@ export async function buildOpsReport(periodKey: PeriodKey) {
   const bnb = createPublicClient({ chain: bscMainnet, transport: http() }) as PublicClient;
 
   const [trades, products, gaps, earliest, verified, profileStats, botBlock, bnbBlock, v4Actual, v3Code, bdexV3Code, bdexV2Code, caswapCode, multisendCode, stakingCode, rewardsCode] = await Promise.all([
-    selectAll<TradeEventRow>((a, b) => supabaseAdmin.from("trade_operational_events").select("occurred_at,event_name,network,route_type,dex,transaction_count,duration_ms,failure_reason,device_category,token_in,token_out,price_impact_bps,slippage_bps,amount_out_ratio_bps,pool_fees_bps,flowbridge_fee_bps,gas_estimate,gas_used").gte("occurred_at", since).order("occurred_at", { ascending: false }).range(a, b)),
+    selectAll<TradeEventRow>((a, b) => supabaseAdmin.from("trade_operational_events").select("occurred_at,event_name,session_hash,network,route_type,dex,transaction_count,duration_ms,failure_reason,device_category,token_in,token_out,price_impact_bps,slippage_bps,amount_out_ratio_bps,pool_fees_bps,flowbridge_fee_bps,gas_estimate,gas_used").gte("occurred_at", since).order("occurred_at", { ascending: false }).range(a, b)),
     selectAll<ProductEventRow>((a, b) => supabaseAdmin.from("product_events").select("occurred_at,event_name,area,session_hash,device_category").gte("occurred_at", since).order("occurred_at", { ascending: false }).range(a, b)),
     selectAll<GapRow>((a, b) => supabaseAdmin.from("liquidity_gap_observations").select("observed_at,network,token_in,token_out,dex_preference,dexes_checked,direct_pool_found,multihop_found,missing_connection").gte("observed_at", since).order("observed_at", { ascending: false }).range(a, b)),
     Promise.all([
@@ -243,6 +244,7 @@ export async function buildOpsReport(periodKey: PeriodKey) {
     tokenDemand: tokenDemand(t, g),
     dexHealth,
     journey,
+    conversion: (() => { const c = conversionFunnel([...p, ...(t as unknown as SessionEvent[])]); return { stages: c, signals: conversionSignals(c) }; })(),
     accounts: {
       note: "All-time account states from verified records (counts only).",
       accounts: authUsers, emailVerified, walletBound: profileStats[1].count ?? null, profiles: profileStats[0].count ?? null,

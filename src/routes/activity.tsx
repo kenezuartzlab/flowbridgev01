@@ -34,6 +34,7 @@ import {
 export const Route = createFileRoute("/activity")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Activity — FlowBridge" },
       {
         name: "description",
