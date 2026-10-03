@@ -26,6 +26,7 @@ export const Route = createFileRoute("/api/product-events")({
             session_hash: e.sessionHash === "unavailable" ? null : e.sessionHash,
             device_category: e.deviceCategory,
             network: e.network ?? null,
+            error_kind: e.errorKind ?? null,
           })));
         } catch { /* analytics never blocks the product */ }
         return new Response(null, { status: 204 });

@@ -47,6 +47,11 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    try {
+      trackProductEvent("client_error", "other", {
+        errorKind: error instanceof Error ? error.name : "UnknownError",
+      });
+    } catch { /* telemetry never blocks recovery */ }
   }, [error]);
 
   return (
