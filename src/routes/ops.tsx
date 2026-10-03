@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { RefreshCw, ShieldAlert } from "lucide-react";
+import { useAccount } from "wagmi";
+import { getIdToken } from "@/lib/auth";
 import type { OpsReport } from "@/lib/ops/opsReport.server";
 
 export const Route = createFileRoute("/ops")({
@@ -23,12 +25,16 @@ type PeriodKey = "today" | "7d" | "30d";
 const TABS = ["Overview", "Router V4", "Trade", "Liquidity Gaps", "Token Demand", "DEX Health", "Journey", "Engagement", "BOT Chain", "Indexing", "Errors", "Alerts", "Growth"] as const;
 type Tab = (typeof TABS)[number];
 
-async function fetchReport(period: PeriodKey): Promise<{ status: number; report: OpsReport | null }> {
-  const { supabase } = await import("@/integrations/supabase/client");
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  const res = await fetch(`/api/admin/ops?period=${period}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-  if (!res.ok) return { status: res.status, report: null };
+async function fetchReport(period: PeriodKey, wallet: string | undefined): Promise<{ status: number; report: OpsReport | null; reason?: string }> {
+  const token = await getIdToken();
+  const h: Record<string, string> = {};
+  if (token) h.authorization = `Bearer ${token}`;
+  if (wallet) h["x-wallet-address"] = wallet;
+  const res = await fetch(`/api/admin/ops?period=${period}`, { headers: h });
+  if (!res.ok) {
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    return { status: res.status, report: null, reason: j.error };
+  }
   return { status: 200, report: (await res.json()) as OpsReport };
 }
 
@@ -99,7 +105,8 @@ function Funnel({ stages }: { stages: { key: string; label: string; count: numbe
 function OpsPage() {
   const [period, setPeriod] = useState<PeriodKey>("7d");
   const [tab, setTab] = useState<Tab>("Overview");
-  const q = useQuery({ queryKey: ["ops-report", period], queryFn: () => fetchReport(period), refetchInterval: 60_000, retry: 1 });
+  const { address } = useAccount();
+  const q = useQuery({ queryKey: ["ops-report", period, address], queryFn: () => fetchReport(period, address), refetchInterval: 60_000, retry: 1 });
 
   if (q.data && q.data.status !== 200) {
     return (
@@ -107,7 +114,8 @@ function OpsPage() {
         <div className="space-y-3">
           <ShieldAlert className="mx-auto h-8 w-8 text-muted" />
           <h1 className="text-lg font-black">Internal operations</h1>
-          <p className="text-[13px] text-muted">This page is restricted to FlowBridge operators. Sign in with an approved admin account.</p>
+          <p className="text-[13px] text-muted">This page is restricted to FlowBridge operators. Sign in with an approved admin account and connect its bound wallet.</p>
+          {q.data.reason && <p className="text-[12px] font-bold text-warning">{q.data.reason}</p>}
           <Link to="/account" className="inline-block rounded-xl bg-primary px-4 py-2 text-[12px] font-black uppercase tracking-wider text-primary-foreground">Go to account</Link>
         </div>
       </main>
