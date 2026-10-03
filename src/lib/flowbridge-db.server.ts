@@ -405,6 +405,51 @@ export async function createTransactionHistory(
           metadata: { kind: "FINALITY_PENDING", detail: ingest.reason },
         });
       }
+    } else if (verified && verified.chainId === BOT_MAINNET_CHAIN_ID) {
+      // Mainnet Router V3 (still live): ingest canonical SwapExecuted evidence
+      // server-side and price it server-side, exactly like the V4 path. One tx
+      // targets one router, so V3 and V4 can never double-credit one swap.
+      const { ingestMainnetRouterV3Swap } = await import("@/lib/activity/mainnetRouterV3Ingest.server");
+      const { recordReviewEntry } = await import("@/lib/rewards/flowPointsV2Ledger.server");
+      const ingest = await ingestMainnetRouterV3Swap(normalizedTxHash, submittedWallet).catch(
+        () => ({ status: "PERSISTENCE_FAILED" as const, reason: "persistence rejected" }),
+      );
+      if (ingest.status === "VERIFIED" && v2Live) {
+        if (ingest.verifiedUsd == null) {
+          await recordReviewEntry({
+            userId, walletAddress: submittedWallet, reason: "PRICING_REVIEW",
+            chainId: BOT_MAINNET_CHAIN_ID, txHash: normalizedTxHash,
+            metadata: { activityKey: ingest.activity.activityKey, tokenIn: ingest.activity.tokenIn },
+          });
+        } else {
+          verifiedSwapUsd = ingest.verifiedUsd;
+          const accrual = await accrueCoreSwapPoints({
+            userId,
+            walletAddress: submittedWallet,
+            verifiedUsd: verifiedSwapUsd,
+            chainId: BOT_MAINNET_CHAIN_ID,
+            txHash: normalizedTxHash,
+            sourceLogIndex: ingest.activity.logIndex,
+            verifiedActivityId: ingest.activity.activityId,
+            tokenIn: ingest.activity.tokenIn,
+            tokenOut: ingest.activity.tokenOut,
+          });
+          pointsToEarn = accrual.award;
+          if (!accrual.recorded) verifiedSwapUsd = 0;
+        }
+      } else if (ingest.status === "REJECTED") {
+        const { recordRewardDiagnostic } = await import("@/lib/rewards/rewardDiagnostics.server");
+        await recordRewardDiagnostic({
+          stage: "v3_evidence", outcome: "PERMANENT_FAILURE",
+          chainId: BOT_MAINNET_CHAIN_ID, txHash: normalizedTxHash, detail: ingest.reason,
+        });
+      } else if (ingest.status === "NOT_FINAL") {
+        await recordReviewEntry({
+          userId, walletAddress: submittedWallet, reason: "ANTI_ABUSE_REVIEW",
+          chainId: BOT_MAINNET_CHAIN_ID, txHash: normalizedTxHash,
+          metadata: { kind: "FINALITY_PENDING", detail: ingest.reason },
+        });
+      }
     } else if (verified) {
       // V12.4B — token/amount authority is canonical on-chain evidence when the
       // verified-activity indexer has it.
