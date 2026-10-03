@@ -109,7 +109,7 @@ export async function ingestMainnetRouterV4Swap(
   const a = result.activity;
 
   const occurred = a.occurredAt > 0 ? new Date(a.occurredAt * 1000) : new Date();
-  await supabaseAdmin.from('verified_activities').upsert(
+  const { error: vaError } = await supabaseAdmin.from('verified_activities').upsert(
     {
       activity_id: a.activityId,
       user_wallet: a.wallet,
@@ -129,6 +129,17 @@ export async function ingestMainnetRouterV4Swap(
     } as never,
     { onConflict: 'activity_id', ignoreDuplicates: true },
   );
+  if (vaError) {
+    const { classifyPersistenceError } = await import('@/lib/rewards/rewardDiagnostics');
+    const { recordRewardDiagnostic } = await import('@/lib/rewards/rewardDiagnostics.server');
+    const outcome = classifyPersistenceError(vaError) ?? 'PERSISTENCE_REJECTED';
+    await recordRewardDiagnostic({
+      stage: 'v4_verified_activity', outcome,
+      chainId: a.chainId, txHash: a.txHash, detail: vaError.message,
+    });
+    // A canonical record that cannot be persisted must never be priced or credited.
+    if (outcome !== 'DUPLICATE') throw new Error(`verified activity write failed: ${outcome}`);
+  }
 
   const priced = await mainnetTokenUsdPrice(a.tokenIn);
   const verifiedUsd = priced
