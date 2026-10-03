@@ -709,14 +709,64 @@ export async function getUserPointsAndReferrals(userId: string) {
   const rows = todayRows ?? [];
   const flowPointsToday = rows.reduce((s: number, r: any) => s + Number(r.points ?? 0), 0);
   const coreSwapPointsToday = rows
-    .filter((r: any) => r.reason === "CORE_SWAP")
+    .filter((r: any) => r.reason === "CORE_SWAP" || r.reason === "CORE_SWAP_V2")
     .reduce((s: number, r: any) => s + Number(r.points ?? 0), 0);
   const settings = await getRewardSettings();
   const dailyCoreSwapCap = Number(
     (settings as any)?.dailyCoreSwapCap ?? DEFAULT_FLOW_POINTS_V2_POLICY.dailyCoreSwapCap,
   );
 
+  // Referral V2 — privacy-safe per-referral progress (no email / wallet).
+  const { utcMonthKey } = await import("@/lib/rewards/flowPointsV2");
+  const referralStatuses: Array<{
+    label: string;
+    walletBound: boolean;
+    milestones: string[];
+    pointsEarned: number;
+  }> = [];
+  let rewardedReferrals = 0;
+  let rewardedReferralsThisMonth = 0;
+  if (user.referral_code) {
+    const [{ data: referees }, { data: awards }] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("id, wallet_address, created_at")
+        .eq("referred_by", user.referral_code)
+        .order("created_at", { ascending: true })
+        .limit(200),
+      supabaseAdmin
+        .from("referral_milestone_awards")
+        .select("referee_id, milestone, points, month_key")
+        .eq("referrer_id", userId),
+    ]);
+    const byReferee = new Map<string, { milestones: string[]; points: number }>();
+    const monthKey = utcMonthKey();
+    const monthSet = new Set<string>();
+    for (const a of awards ?? []) {
+      const e = byReferee.get(a.referee_id) ?? { milestones: [], points: 0 };
+      e.milestones.push(String(a.milestone));
+      e.points += Number(a.points ?? 0);
+      byReferee.set(a.referee_id, e);
+      if (a.month_key === monthKey) monthSet.add(a.referee_id);
+    }
+    rewardedReferrals = byReferee.size;
+    rewardedReferralsThisMonth = monthSet.size;
+    (referees ?? []).forEach((r: any, i: number) => {
+      const e = byReferee.get(r.id);
+      referralStatuses.push({
+        label: `Referral #${i + 1}`,
+        walletBound: !!r.wallet_address,
+        milestones: e?.milestones ?? [],
+        pointsEarned: e?.points ?? 0,
+      });
+    });
+  }
+
   return {
+    referralStatuses,
+    rewardedReferrals,
+    rewardedReferralsThisMonth,
+    referralMonthlyCap: DEFAULT_FLOW_POINTS_V2_POLICY.referralMonthlyCap,
     flowPoints: user.flow_points,
     claimedTokens: user.claimed_tokens,
     referralCode: user.referral_code,
