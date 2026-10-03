@@ -1,0 +1,1 @@
+GRANT INSERT ON public.verified_activities TO service_role;
