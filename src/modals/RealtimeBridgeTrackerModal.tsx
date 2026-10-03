@@ -119,13 +119,13 @@ function displayAmount(raw: string): string {
 function chainBadge(chain: string): { src?: string; label?: string; ring: string; bg: string } {
   const c = chain.toLowerCase();
   if (c.includes('bnb') || c.includes('bsc') || c.includes('binance'))
-    return { src: '/bnb-logo.png', ring: 'ring-amber-400/40', bg: 'bg-[#010C1B]' };
-  if (c.includes('bot')) return { src: '/bot-icon.svg', ring: 'ring-teal-400/40', bg: 'bg-[#010C1B]' };
+    return { src: '/bnb-logo.png', ring: 'ring-amber-400/40', bg: 'bg-background' };
+  if (c.includes('bot')) return { src: '/bot-icon.svg', ring: 'ring-teal-400/40', bg: 'bg-background' };
   if (c.includes('eth') || c.includes('sepolia'))
     return { label: 'Ξ', ring: 'ring-indigo-400/40', bg: 'bg-[#454A75]' };
   if (c.includes('tron') || c.includes('trx'))
     return { label: 'T', ring: 'ring-red-400/40', bg: 'bg-[#E50915]' };
-  return { label: chain.slice(0, 1).toUpperCase(), ring: 'ring-white/20', bg: 'bg-white/10' };
+  return { label: chain.slice(0, 1).toUpperCase(), ring: 'ring-foreground/20', bg: 'bg-foreground/10' };
 }
 
 /** Overlapping USDT + chain logo pair, mirroring the official BotBridge tracker. */
@@ -150,7 +150,7 @@ function TokenChainPair({ chain, delay = 0 }: { chain: string; delay?: number })
         {badge.src ? (
           <img src={badge.src} alt={chain} className="w-full h-full object-cover" loading="lazy" />
         ) : (
-          <span className="text-base font-black text-white">{badge.label}</span>
+          <span className="text-base font-black text-foreground">{badge.label}</span>
         )}
       </span>
     </div>
@@ -405,7 +405,7 @@ export function RealtimeBridgeTrackerModal({
         <div className="relative flex justify-center py-6 min-h-[190px]">
           {/* Radial Glowing Ambient Circles */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[190px] h-[190px] bg-gradient-to-r from-teal-500/15 to-[#32FF8B]/10 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
+            <div className="w-[190px] h-[190px] bg-gradient-to-r from-teal-500/15 to-primary/10 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
             <div className="absolute w-[150px] h-[150px] border border-slate-700/30 rounded-full" />
             <div className="absolute w-[110px] h-[110px] border border-dashed border-teal-500/20 rounded-full animate-[spin_18s_linear_infinite]" />
           </div>
@@ -425,9 +425,9 @@ export function RealtimeBridgeTrackerModal({
             <div className="z-10 flex flex-col items-center justify-center gap-1.5 pt-3 w-[28%]">
               <div className="flex items-center gap-1">
                 <span className={cn('text-lg font-black text-teal-400', !isCompleted && 'animate-bounce')}>↓</span>
-                <span className={cn('text-lg font-black text-[#32FF8B]', !isCompleted && 'animate-bounce')} style={{ animationDelay: '250ms' }}>↑</span>
+                <span className={cn('text-lg font-black text-primary', !isCompleted && 'animate-bounce')} style={{ animationDelay: '250ms' }}>↑</span>
               </div>
-              <span className="font-mono text-[9.5px] font-bold text-[#32FF8B]/70 uppercase tracking-widest animate-pulse">
+              <span className="font-mono text-[9.5px] font-bold text-primary/70 uppercase tracking-widest animate-pulse">
                 {isCompleted ? 'Settled' : 'Relaying'}
               </span>
             </div>
@@ -448,9 +448,9 @@ export function RealtimeBridgeTrackerModal({
         {/* Countdown Timer or Completed Status badge in the center */}
         <div className="flex justify-center flex-col items-center">
           {isCompleted ? (
-            <div className="px-6 py-2.5 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/15 border border-[#32FF8B]/35 rounded-full flex items-center gap-2 shadow-[0_0_12px_rgba(50,255,139,0.15)] animate-bounce-slow">
-              <span className="w-2 h-2 rounded-full bg-[#32FF8B] animate-ping" />
-              <span className="text-sm font-black uppercase text-[#32FF8B] tracking-widest font-mono">Completed</span>
+            <div className="px-6 py-2.5 bg-primary/10 hover:bg-primary/15 border border-primary/35 rounded-full flex items-center gap-2 shadow-[0_0_12px_rgba(50,255,139,0.15)] animate-bounce-slow">
+              <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+              <span className="text-sm font-black uppercase text-primary tracking-widest font-mono">Completed</span>
             </div>
           ) : (
             <div className="rounded-full border border-hairline-strong bg-background px-6 py-2.5 text-center shadow-sm">
@@ -473,8 +473,8 @@ export function RealtimeBridgeTrackerModal({
             </span>
             <div className="shrink-0 ml-3">
               {stage1 === 'loading' && <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />}
-              {stage1 === 'done' && <Check className="w-4.5 h-4.5 text-[#32FF8B] font-bold bg-[#32FF8B]/15 border border-[#32FF8B]/30 rounded p-0.5" />}
-              {stage1 === 'pending' && <div className="w-3.5 h-3.5 rounded-full border border-dashed border-white/25" />}
+              {stage1 === 'done' && <Check className="w-4.5 h-4.5 text-primary font-bold bg-primary/15 border border-primary/30 rounded p-0.5" />}
+              {stage1 === 'pending' && <div className="w-3.5 h-3.5 rounded-full border border-dashed border-foreground/25" />}
             </div>
           </div>
 
@@ -485,8 +485,8 @@ export function RealtimeBridgeTrackerModal({
             </span>
             <div className="shrink-0 ml-3">
               {stage2 === 'loading' && <Loader2 className="w-4 h-4 text-teal-400 animate-spin" />}
-              {stage2 === 'done' && <Check className="w-4.5 h-4.5 text-[#32FF8B] font-bold bg-[#32FF8B]/15 border border-[#32FF8B]/30 rounded p-0.5" />}
-              {stage2 === 'pending' && <div className="w-3.5 h-3.5 rounded-full border border-dashed border-white/25" />}
+              {stage2 === 'done' && <Check className="w-4.5 h-4.5 text-primary font-bold bg-primary/15 border border-primary/30 rounded p-0.5" />}
+              {stage2 === 'pending' && <div className="w-3.5 h-3.5 rounded-full border border-dashed border-foreground/25" />}
             </div>
           </div>
 
@@ -496,9 +496,9 @@ export function RealtimeBridgeTrackerModal({
               Received {symbol} on <strong className="text-teal-400 font-mono font-black">{truncatedAddress}</strong>
             </span>
             <div className="shrink-0 ml-3">
-              {stage3 === 'loading' && <Loader2 className="w-4 h-4 text-[#32FF8B] animate-spin" />}
-              {stage3 === 'done' && <Check className="w-4.5 h-4.5 text-[#32FF8B] font-bold bg-[#32FF8B]/15 border border-[#32FF8B]/30 rounded p-0.5" />}
-              {stage3 === 'pending' && <div className="w-3.5 h-3.5 rounded-full border border-dashed border-white/25" />}
+              {stage3 === 'loading' && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
+              {stage3 === 'done' && <Check className="w-4.5 h-4.5 text-primary font-bold bg-primary/15 border border-primary/30 rounded p-0.5" />}
+              {stage3 === 'pending' && <div className="w-3.5 h-3.5 rounded-full border border-dashed border-foreground/25" />}
             </div>
           </div>
         </div>

@@ -33,7 +33,7 @@ export function RouteModal({
         <div className="flex justify-between items-center font-mono text-sm">
           <div className="flex items-center gap-1.5 text-foreground">
             <h3 className="font-black uppercase tracking-wider">Algorithmic Route</h3>
-            <span className="p-0.5 bg-white/5 rounded text-[#C5C1B9] hover:text-white cursor-help">
+            <span className="p-0.5 bg-foreground/5 rounded text-muted hover:text-foreground cursor-help">
               <Info className="w-4 h-4" />
             </span>
           </div>
@@ -52,12 +52,12 @@ export function RouteModal({
           {/* Node 1: Origin Token */}
           <div className="flex flex-col items-center gap-1.5 z-10">
             <TokenIcon symbol={fromSymbol} size={36} className="hover:scale-105 transition-transform" />
-            <span className="text-[12px] font-black tracking-tight text-[#32FF8B]">100%</span>
+            <span className="text-[12px] font-black tracking-tight text-primary">100%</span>
             <span className="text-[11px] font-bold text-muted uppercase tracking-wider">{fromSymbol}</span>
           </div>
 
           {/* Dotted Connection line 1 */}
-          <div className="flex-1 h-0.5 border-b-2 border-dashed border-white/10 mx-2 relative top-[-10px]" />
+          <div className="flex-1 h-0.5 border-b-2 border-dashed border-foreground/10 mx-2 relative top-[-10px]" />
 
           {/* Node 2: Intermediary Pool */}
           <div className="flex flex-col items-center gap-1.5 z-10">
@@ -66,19 +66,19 @@ export function RouteModal({
               <TokenIcon symbol={toSymbol} size={36} className="hover:scale-105 transition-transform" />
             </div>
             
-            <span className="px-2 py-0.5 bg-[#32FF8B]/10 border border-[#32FF8B]/20 rounded-md text-[11px] font-black text-[#32FF8B] mt-1.5 uppercase shadow-inner tracking-wider">
+            <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-md text-[11px] font-black text-primary mt-1.5 uppercase shadow-inner tracking-wider">
               {isCaryPactDirect ? "V2 0.30%" : `V3 ${poolFee}`}
             </span>
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">Router</span>
+            <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-0.5">Router</span>
           </div>
 
           {/* Dotted Connection line 2 */}
-          <div className="flex-1 h-0.5 border-b-2 border-dashed border-white/10 mx-2 relative top-[-10px]" />
+          <div className="flex-1 h-0.5 border-b-2 border-dashed border-foreground/10 mx-2 relative top-[-10px]" />
 
           {/* Node 3: Target Token */}
           <div className="flex flex-col items-center gap-1.5 z-10">
             <TokenIcon symbol={toSymbol} size={36} className="hover:scale-105 transition-transform" />
-            <span className="text-[12px] font-black tracking-tight text-[#32FF8B]">100%</span>
+            <span className="text-[12px] font-black tracking-tight text-primary">100%</span>
             <span className="text-[11px] font-bold text-muted uppercase tracking-wider">{toSymbol}</span>
           </div>
         </div>
@@ -88,9 +88,9 @@ export function RouteModal({
           <p>
             The Ecosurge router dynamically bundles pooled liquidity, optimizing gas fee routing and slippage impact.
           </p>
-          <div className="p-3 bg-[#010C1B]/60 rounded-xl border border-white/5 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#32FF8B] animate-pulse shrink-0" />
-            <span className="text-[12px] font-semibold text-white/80 font-mono uppercase tracking-wide">
+          <div className="p-3 bg-background/60 rounded-xl border border-foreground/5 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
+            <span className="text-[12px] font-semibold text-foreground/80 font-mono uppercase tracking-wide">
               {isCaryPactDirect 
                 ? "Direct Bohr VM Smart Contract execution"
                 : "Optimized multi-hop cross-pool path loaded"

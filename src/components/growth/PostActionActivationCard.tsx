@@ -58,14 +58,14 @@ export function PostActionActivationCard({
   return (
     <div
       data-testid="post-action-activation"
-      className="w-full rounded-xl border border-white/10 bg-white/[0.04] p-3 text-left"
+      className="w-full rounded-xl border border-foreground/10 bg-foreground/[0.04] p-3 text-left"
     >
-      <p className="flex items-center gap-1.5 font-mono text-[9px] font-black uppercase tracking-[0.12em] text-[#C5C1B9]">
-        <ShieldCheck className="h-3 w-3 text-[#32FF8B]" />
+      <p className="flex items-center gap-1.5 font-mono text-[9px] font-black uppercase tracking-[0.12em] text-muted">
+        <ShieldCheck className="h-3 w-3 text-primary" />
         {ACTIVATION_PROMPT_COPY.eyebrow}
       </p>
-      <p className="mt-1.5 text-[12.5px] font-bold text-white">{ACTIVATION_PROMPT_COPY.title}</p>
-      <p className="mt-1 text-[11px] leading-relaxed text-[#C5C1B9]">
+      <p className="mt-1.5 text-[12.5px] font-bold text-foreground">{ACTIVATION_PROMPT_COPY.title}</p>
+      <p className="mt-1 text-[11px] leading-relaxed text-muted">
         {ACTIVATION_PROMPT_COPY.body}
       </p>
       <div className="mt-2.5 flex gap-2">
@@ -77,7 +77,7 @@ export function PostActionActivationCard({
             trackActivation("VERIFY_STARTED", { from: "POST_ACTION" });
             onClose?.();
           }}
-          className="flex min-h-[38px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#32FF8B] px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-[#010C1B]"
+          className="flex min-h-[38px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary-foreground"
         >
           {ACTIVATION_PROMPT_COPY.ctaLabel}
           <ArrowUpRight className="h-3.5 w-3.5" />
@@ -90,12 +90,12 @@ export function PostActionActivationCard({
             trackActivation("ACTIVATION_PROMPT_DECLINED");
             setHidden(true);
           }}
-          className="min-h-[38px] rounded-xl border border-white/10 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-[#C5C1B9]"
+          className="min-h-[38px] rounded-xl border border-foreground/10 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted"
         >
           {ACTIVATION_PROMPT_COPY.declineLabel}
         </button>
       </div>
-      <p className="mt-2 text-[9.5px] leading-relaxed text-[#C5C1B9]/70">
+      <p className="mt-2 text-[9.5px] leading-relaxed text-muted/70">
         {ACTIVATION_PROMPT_COPY.note}
       </p>
     </div>

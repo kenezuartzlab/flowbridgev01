@@ -215,7 +215,7 @@ function RewardsPage() {
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/25">
                   <div
-                    className="h-full rounded-full bg-white/90 transition-all duration-700"
+                    className="h-full rounded-full bg-foreground/90 transition-all duration-700"
                     style={{ width: `${level.progress * 100}%` }}
                   />
                 </div>

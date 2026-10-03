@@ -57,12 +57,12 @@ function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#010C1B] text-[#F0F7F3] font-sans">
-      <div className="w-full max-w-sm bg-[#0D1C2A] border border-white/10 rounded-2xl p-6 shadow-2xl border-b-[5px] border-b-[#32FF8B]">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background text-foreground font-sans">
+      <div className="w-full max-w-sm bg-card border border-foreground/10 rounded-2xl p-6 shadow-2xl border-b-[5px] border-b-[#32FF8B]">
         <h1 className="text-lg font-black uppercase tracking-wider mb-1 font-mono">
           {mode === 'reset' ? 'Set New Password' : 'Reset Password'}
         </h1>
-        <p className="text-xs text-[#C5C1B9] mb-5">
+        <p className="text-xs text-muted mb-5">
           {mode === 'reset'
             ? 'Choose a new password for your account.'
             : 'Enter your account email and we will send a reset link.'}
@@ -76,12 +76,12 @@ function ResetPasswordPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="bg-[#010C1B] border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#32FF8B]/50"
+              className="bg-background border border-foreground/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary/50"
             />
             <button
               type="submit"
               disabled={loading}
-              className="bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono font-black uppercase tracking-widest text-xs py-2.5 rounded-xl disabled:opacity-50"
+              className="bg-primary hover:bg-primary-strong text-primary-foreground font-mono font-black uppercase tracking-widest text-xs py-2.5 rounded-xl disabled:opacity-50"
             >
               {loading ? 'Sending…' : 'Send reset link'}
             </button>
@@ -95,7 +95,7 @@ function ResetPasswordPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="New password (min 8 chars)"
-              className="bg-[#010C1B] border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#32FF8B]/50"
+              className="bg-background border border-foreground/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary/50"
             />
             <input
               type="password"
@@ -103,24 +103,24 @@ function ResetPasswordPage() {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Confirm new password"
-              className="bg-[#010C1B] border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#32FF8B]/50"
+              className="bg-background border border-foreground/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary/50"
             />
             <button
               type="submit"
               disabled={loading}
-              className="bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono font-black uppercase tracking-widest text-xs py-2.5 rounded-xl disabled:opacity-50"
+              className="bg-primary hover:bg-primary-strong text-primary-foreground font-mono font-black uppercase tracking-widest text-xs py-2.5 rounded-xl disabled:opacity-50"
             >
               {loading ? 'Updating…' : 'Update password'}
             </button>
           </form>
         )}
 
-        {msg && <p className="mt-4 text-xs text-[#32FF8B]">{msg}</p>}
+        {msg && <p className="mt-4 text-xs text-primary">{msg}</p>}
         {err && <p className="mt-4 text-xs text-red-400">{err}</p>}
 
         <button
           onClick={() => navigate({ to: '/' })}
-          className="mt-5 text-[10px] uppercase tracking-widest font-mono text-[#C5C1B9] hover:text-white"
+          className="mt-5 text-[10px] uppercase tracking-widest font-mono text-muted hover:text-foreground"
         >
           ← Back to app
         </button>

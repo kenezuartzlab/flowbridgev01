@@ -722,54 +722,54 @@ export function DonateModal({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
       <div 
         id="donate_modal_card"
-        className="bg-[#030E1A] border border-white/10 text-[#F0F7F3] rounded-2xl sm:rounded-[28px] w-full max-w-[480px] max-h-[calc(100svh-1rem)] sm:max-h-[88vh] p-0 shadow-2xl relative flex flex-col overflow-hidden animate-scale-up"
+        className="bg-background-elev border border-foreground/10 text-foreground rounded-2xl sm:rounded-[28px] w-full max-w-[480px] max-h-[calc(100svh-1rem)] sm:max-h-[88vh] p-0 shadow-2xl relative flex flex-col overflow-hidden animate-scale-up"
       >
         {/* Dynamic Banner based on activeTab */}
         <div className={cn(
-          "p-4 sm:p-5 border-b border-white/5 relative flex justify-between items-start transition-all duration-300",
-          activeTab === 'donate' && "bg-gradient-to-r from-teal-500/20 via-[#32FF8B]/10 to-teal-900/40",
-          activeTab === 'feedback' && "bg-gradient-to-r from-blue-500/20 via-[#32FF8B]/10 to-indigo-950/40",
-          activeTab === 'incentives' && "bg-gradient-to-r from-emerald-500/20 via-[#32FF8B]/10 to-teal-950/40"
+          "p-4 sm:p-5 border-b border-foreground/5 relative flex justify-between items-start transition-all duration-300",
+          activeTab === 'donate' && "bg-gradient-to-r from-teal-500/20 via-primary/10 to-teal-900/40",
+          activeTab === 'feedback' && "bg-gradient-to-r from-blue-500/20 via-primary/10 to-indigo-950/40",
+          activeTab === 'incentives' && "bg-gradient-to-r from-emerald-500/20 via-primary/10 to-teal-950/40"
         )}>
           <div className="space-y-1">
             {activeTab === 'donate' && (
               <>
-                <div className="flex items-center gap-1.5 text-[#32FF8B]">
-                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 fill-[#32FF8B]" />
+                <div className="flex items-center gap-1.5 text-primary">
+                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 fill-primary" />
                   <span className="text-[12px] sm:text-[13px] font-mono font-black tracking-widest uppercase">Support Public Utilities</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-white font-mono tracking-tight uppercase leading-tight">
+                <h2 className="text-lg sm:text-xl font-black text-foreground font-mono tracking-tight uppercase leading-tight">
                   Fuel FlowBridge
                 </h2>
-                <p className="text-[13px] text-[#C5C1B9] max-w-[340px] leading-relaxed hidden sm:block">
+                <p className="text-[13px] text-muted max-w-[340px] leading-relaxed hidden sm:block">
                   Support our decentralized team in building advanced cross-chain indices, learning tools, & earnings scanners.
                 </p>
               </>
             )}
             {activeTab === 'feedback' && (
               <>
-                <div className="flex items-center gap-1.5 text-[#32FF8B]">
-                  <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-[#32FF8B]" />
+                <div className="flex items-center gap-1.5 text-primary">
+                  <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   <span className="text-[12px] sm:text-[13px] font-mono font-black tracking-widest uppercase">Community Voting</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-white font-mono tracking-tight uppercase leading-tight">
+                <h2 className="text-lg sm:text-xl font-black text-foreground font-mono tracking-tight uppercase leading-tight">
                   Request & Vote Tools
                 </h2>
-                <p className="text-[13px] text-[#C5C1B9] max-w-[340px] leading-relaxed hidden sm:block">
+                <p className="text-[13px] text-muted max-w-[340px] leading-relaxed hidden sm:block">
                   Propose custom tools, arbitrage bots, or indexes. Vote using free cryptographic signatures to direct our dev pipeline!
                 </p>
               </>
             )}
             {activeTab === 'incentives' && (
               <>
-                <div className="flex items-center gap-1.5 text-[#32FF8B]">
-                  <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-[#32FF8B]" />
+                <div className="flex items-center gap-1.5 text-primary">
+                  <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   <span className="text-[12px] sm:text-[13px] font-mono font-black tracking-widest uppercase">FLOW Incentive Portal</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-white font-mono tracking-tight uppercase leading-tight">
+                <h2 className="text-lg sm:text-xl font-black text-foreground font-mono tracking-tight uppercase leading-tight">
                   Rewards & Points
                 </h2>
-                <p className="text-[13px] text-[#C5C1B9] max-w-[340px] leading-relaxed hidden sm:block">
+                <p className="text-[13px] text-muted max-w-[340px] leading-relaxed hidden sm:block">
                   Claim your off-chain points as on-chain FLOW tokens, track active community milestones, and share your invitation links!
                 </p>
               </>
@@ -778,7 +778,7 @@ export function DonateModal({
           {/* Close button inside modal container */}
           <button 
             onClick={onClose}
-            className="p-1.5 hover:bg-white/10 rounded-xl text-[#C0C8D0] hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 hover:bg-foreground/10 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -787,14 +787,14 @@ export function DonateModal({
 
         {/* Modal Sub-Tabs selector */}
         {!isRewardsMode && (
-        <div className="flex border-b border-white/5 bg-[#010C1B]">
+        <div className="flex border-b border-foreground/5 bg-background">
           <button
             onClick={() => setActiveTab('donate')}
             className={cn(
                "flex-1 py-3 text-sm font-black uppercase tracking-wider font-mono transition-all border-b-2 flex items-center justify-center gap-2",
                activeTab === 'donate' 
-                 ? "border-[#32FF8B] text-[#32FF8B] bg-white/[0.02]" 
-                 : "border-transparent text-[#C5C1B9] hover:text-white hover:bg-white/[0.01]"
+                 ? "border-primary text-primary bg-foreground/[0.02]" 
+                 : "border-transparent text-muted hover:text-foreground hover:bg-foreground/[0.01]"
             )}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -806,8 +806,8 @@ export function DonateModal({
             className={cn(
                "flex-1 py-3 text-sm font-black uppercase tracking-wider font-mono transition-all border-b-2 flex items-center justify-center gap-2",
                activeTab === 'feedback' 
-                 ? "border-[#32FF8B] text-[#32FF8B] bg-white/[0.02]" 
-                 : "border-transparent text-[#C5C1B9] hover:text-white hover:bg-white/[0.01]"
+                 ? "border-primary text-primary bg-foreground/[0.02]" 
+                 : "border-transparent text-muted hover:text-foreground hover:bg-foreground/[0.01]"
             )}
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -824,17 +824,17 @@ export function DonateModal({
               {/* Crypto selector grid */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label className="text-[12px] font-bold text-[#C5C1B9] uppercase tracking-wider font-mono block">
+                  <label className="text-[12px] font-bold text-muted uppercase tracking-wider font-mono block">
                     Direct Supporter Option
                   </label>
-                  <span className="text-[10px] font-mono text-[#32FF8B] uppercase tracking-widest font-black">
+                  <span className="text-[10px] font-mono text-primary uppercase tracking-widest font-black">
                     No proposal required
                   </span>
                 </div>
                 <select
                   value={selectedCoin.id}
                   onChange={(e) => handleCoinChange(e.target.value)}
-                  className="col-span-2 bg-[#010C1B] border border-white/10 rounded-xl px-3 py-3 text-sm font-bold font-mono focus:border-[#32FF8B]/50 focus:outline-none text-white cursor-pointer w-full"
+                  className="col-span-2 bg-background border border-foreground/10 rounded-xl px-3 py-3 text-sm font-bold font-mono focus:border-primary/50 focus:outline-none text-foreground cursor-pointer w-full"
                 >
                   {COIN_CONFIGS.map(c => (
                     <option key={c.id} value={c.id}>
@@ -845,21 +845,21 @@ export function DonateModal({
               </div>
 
               {/* Amount Custom Input & Guides UI */}
-              <div className="space-y-3 bg-[#010C1B]/80 border border-white/5 rounded-2xl p-4">
+              <div className="space-y-3 bg-background/80 border border-foreground/5 rounded-2xl p-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-[12px] font-bold text-[#C5C1B9] uppercase tracking-wider font-mono">
+                  <span className="text-[12px] font-bold text-muted uppercase tracking-wider font-mono">
                     Donation Amount
                   </span>
-                  <span className="text-[12px] font-mono text-[#32FF8B] font-bold bg-[#32FF8B]/10 px-1.5 py-0.5 rounded">
+                  <span className="text-[12px] font-mono text-primary font-bold bg-primary/10 px-1.5 py-0.5 rounded">
                     Min {selectedCoin.min} {selectedCoin.symbol}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 bg-[#030E1A] border border-white/10 rounded-xl p-1.5 focus-within:border-[#32FF8B]/40 transition-all">
+                <div className="flex items-center justify-between gap-3 bg-background-elev border border-foreground/10 rounded-xl p-1.5 focus-within:border-primary/40 transition-all">
                   <button 
                     type="button"
                     onClick={() => adjustAmount(-selectedCoin.step)}
-                    className="p-2 border border-white/5 rounded-lg text-white hover:text-[#32FF8B] hover:bg-white/5 cursor-pointer active:scale-95 transition"
+                    className="p-2 border border-foreground/5 rounded-lg text-foreground hover:text-primary hover:bg-foreground/5 cursor-pointer active:scale-95 transition"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
@@ -868,7 +868,7 @@ export function DonateModal({
                     type="number"
                     value={amountStr}
                     onChange={(e) => setAmountStr(e.target.value)}
-                    className="bg-transparent border-none text-center font-bold text-lg font-mono tracking-tight text-white focus:outline-none w-full"
+                    className="bg-transparent border-none text-center font-bold text-lg font-mono tracking-tight text-foreground focus:outline-none w-full"
                     min={selectedCoin.min}
                     max={selectedCoin.max}
                     step={selectedCoin.step}
@@ -877,7 +877,7 @@ export function DonateModal({
                   <button 
                     type="button"
                     onClick={() => adjustAmount(selectedCoin.step)}
-                    className="p-2 border border-white/5 rounded-lg text-white hover:text-[#32FF8B] hover:bg-white/5 cursor-pointer active:scale-95 transition"
+                    className="p-2 border border-foreground/5 rounded-lg text-foreground hover:text-primary hover:bg-foreground/5 cursor-pointer active:scale-95 transition"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -885,7 +885,7 @@ export function DonateModal({
 
                 {/* 2 Fixed Amount option choices requested in spec */}
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px] font-extrabold text-[#C5C1B9]/70 font-mono uppercase shrink-0">
+                  <span className="text-[12px] font-extrabold text-muted/70 font-mono uppercase shrink-0">
                     Guide:
                   </span>
                   {selectedCoin.increments.map((choice, i) => (
@@ -895,8 +895,8 @@ export function DonateModal({
                       className={cn(
                         "flex-1 py-1.5 rounded-lg text-[12px] font-mono font-bold border transition-all cursor-pointer",
                         parseFloat(amountStr) === choice
-                          ? "bg-[#32FF8B]/10 border-[#32FF8B] text-[#32FF8B] shadow-inner"
-                          : "bg-[#030E1A] border-white/5 hover:border-white/15 text-[#C5C1B9] hover:text-white"
+                          ? "bg-primary/10 border-primary text-primary shadow-inner"
+                          : "bg-background-elev border-foreground/5 hover:border-foreground/15 text-muted hover:text-foreground"
                       )}
                     >
                       {choice} {selectedCoin.symbol}
@@ -906,7 +906,7 @@ export function DonateModal({
                   {/* Plus presets */}
                   <button
                     onClick={() => adjustAmount(selectedCoin.increments[1])}
-                    className="px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold bg-[#030E1A] border border-white/5 text-[#C5C1B9] hover:border-[#32FF8B]/30 hover:text-[#32FF8B] cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold bg-background-elev border border-foreground/5 text-muted hover:border-primary/30 hover:text-primary cursor-pointer"
                   >
                     +{selectedCoin.increments[1]}
                   </button>
@@ -917,15 +917,15 @@ export function DonateModal({
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* QR Generation block */}
                 {showQr && (
-                  <div className="shrink-0 flex flex-col items-center justify-center p-2 sm:p-3.5 bg-[#010C1B] border border-[#32FF8B]/15 rounded-2xl relative shadow-xl focus-within:border-teal-500/50 mx-auto sm:mx-0">
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-[#010C1B] rounded-xl flex items-center justify-center relative overflow-hidden border border-white/5">
+                  <div className="shrink-0 flex flex-col items-center justify-center p-2 sm:p-3.5 bg-background border border-primary/15 rounded-2xl relative shadow-xl focus-within:border-teal-500/50 mx-auto sm:mx-0">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-background rounded-xl flex items-center justify-center relative overflow-hidden border border-foreground/5">
                       <img 
                         src={qrUrl} 
                         alt="Donation address QR Scan code" 
                         className="w-full h-full object-contain p-1"
                       />
                     </div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#C5C1B9] mt-2 block select-none">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-muted mt-2 block select-none">
                       SCAN TO PAY WALLET
                     </span>
                   </div>
@@ -935,11 +935,11 @@ export function DonateModal({
                 <div className="flex-1 space-y-3.5 flex flex-col justify-between">
                   {/* Address indicator with copy */}
                   <div className="space-y-1.5">
-                    <span className="text-[12px] font-bold text-[#C5C1B9] uppercase tracking-wider font-mono block">
+                    <span className="text-[12px] font-bold text-muted uppercase tracking-wider font-mono block">
                       Transfer Support address
                     </span>
-                    <div className="flex items-center justify-between gap-1 bg-[#010C1B] rounded-xl border border-white/10 p-2 text-left">
-                      <div className="font-mono text-[11px] text-[#C5C1B9] truncate flex-1 leading-snug select-all py-1 px-1 pr-3 scrollbar-none overflow-x-auto">
+                    <div className="flex items-center justify-between gap-1 bg-background rounded-xl border border-foreground/10 p-2 text-left">
+                      <div className="font-mono text-[11px] text-muted truncate flex-1 leading-snug select-all py-1 px-1 pr-3 scrollbar-none overflow-x-auto">
                         {selectedCoin.address}
                       </div>
 
@@ -948,12 +948,12 @@ export function DonateModal({
                         className={cn(
                           "p-2 rounded-xl transition cursor-pointer shrink-0 border duration-150 active:scale-95",
                           copied 
-                            ? "bg-[#32FF8B]/10 text-[#32FF8B] border-[#32FF8B]/30" 
-                            : "bg-[#030E1A] text-[#C5C1B9] hover:text-[#32FF8B] border-white/5 hover:border-[#32FF8B]/20"
+                            ? "bg-primary/10 text-primary border-primary/30" 
+                            : "bg-background-elev text-muted hover:text-primary border-foreground/5 hover:border-primary/20"
                         )}
                         title="Copy address"
                       >
-                        {copied ? <Check className="w-3.5 h-3.5 text-[#32FF8B]" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
@@ -966,7 +966,7 @@ export function DonateModal({
                           <button
                             onClick={handleOnChainDonate}
                             disabled={isTxPending}
-                            className="w-full py-3 rounded-xl bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-mono tracking-widest font-black text-[10.5px] uppercase transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98"
+                            className="w-full py-3 rounded-xl bg-primary hover:bg-primary-strong text-primary-foreground font-mono tracking-widest font-black text-[10.5px] uppercase transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>{isTxPending ? 'Approving modal transaction...' : `Send direct ${amountStr} ${selectedCoin.symbol}`}</span>
@@ -983,8 +983,8 @@ export function DonateModal({
                           )}
                         </>
                       ) : (
-                        <div className="text-center p-2.5 bg-[#0D1C2A]/40 border border-[#32FF8B]/10 rounded-xl">
-                          <p className="text-[8.5px] leading-relaxed text-[#C5C1B9]/90 font-mono tracking-normal uppercase">
+                        <div className="text-center p-2.5 bg-card/40 border border-primary/10 rounded-xl">
+                          <p className="text-[8.5px] leading-relaxed text-muted/90 font-mono tracking-normal uppercase">
                             Connect your wallet to execute automatic direct transfers, or utilize any QR/custom mobile wallet above.
                           </p>
                         </div>
@@ -1002,9 +1002,9 @@ export function DonateModal({
 
               {/* Status / Confirmation banners */}
               {donationSuccessState && (
-                <div className="bg-[#122A26] border border-[#32FF8B]/30 rounded-xl p-3 text-left">
-                  <p className="text-[13px] font-semibold text-[#32FF8B] flex items-center gap-2">
-                    <Check className="w-4 h-4 shrink-0 bg-[#32FF8B]/10 border border-[#32FF8B]/30 rounded p-0.5" />
+                <div className="bg-primary/10 border border-primary/30 rounded-xl p-3 text-left">
+                  <p className="text-[13px] font-semibold text-primary flex items-center gap-2">
+                    <Check className="w-4 h-4 shrink-0 bg-primary/10 border border-primary/30 rounded p-0.5" />
                     <span>Support transfer successful! You are a legend. Thank you for empowering decentralized utilities!</span>
                   </p>
                 </div>
@@ -1016,24 +1016,24 @@ export function DonateModal({
             <div className="space-y-5">
               {/* PROCEDURE: ANYONE CAN INPUT REQUEST FIRST */}
               {pendingSuggestion === null ? (
-                <form onSubmit={handleLaunchVerification} className="space-y-3.5 bg-[#010C1B] border border-white/5 rounded-2xl p-4.5 text-left relative overflow-hidden animate-scale-up">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#32FF8B]/5 to-transparent blur-xl pointer-events-none" />
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                    <div className="flex items-center gap-1.5 text-[#32FF8B]">
-                      <MessageSquare className="w-4 h-4 text-[#32FF8B]" />
-                      <span className="text-[12px] font-mono font-black uppercase tracking-widest text-[#32FF8B]">Request New Utility / Tool</span>
+                <form onSubmit={handleLaunchVerification} className="space-y-3.5 bg-background border border-foreground/5 rounded-2xl p-4.5 text-left relative overflow-hidden animate-scale-up">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary/5 to-transparent blur-xl pointer-events-none" />
+                  <div className="flex items-center justify-between border-b border-foreground/5 pb-2">
+                    <div className="flex items-center gap-1.5 text-primary">
+                      <MessageSquare className="w-4 h-4 text-primary" />
+                      <span className="text-[12px] font-mono font-black uppercase tracking-widest text-primary">Request New Utility / Tool</span>
                     </div>
-                    <span className="text-[10px] font-mono text-[#32FF8B]/80 font-bold bg-[#32FF8B]/10 px-1.5 py-0.5 rounded tracking-widest uppercase">
+                    <span className="text-[10px] font-mono text-primary/80 font-bold bg-primary/10 px-1.5 py-0.5 rounded tracking-widest uppercase">
                       Propose FlowBridge Features
                     </span>
                   </div>
                   
-                  <p className="text-[10.5px] text-[#C5C1B9] leading-relaxed select-none">
+                  <p className="text-[10.5px] text-muted leading-relaxed select-none">
                     Describe any arbitrage bots, dashboards, custom analytics or cross-chain learning tools you would like listed on the bridge.
                   </p>
 
                   <div className="space-y-2">
-                    <label className="text-[11px] font-mono text-[#C5C1B9] uppercase font-bold block">
+                    <label className="text-[11px] font-mono text-muted uppercase font-bold block">
                       Focus Category
                     </label>
                     <div className="flex flex-wrap gap-1.5">
@@ -1050,8 +1050,8 @@ export function DonateModal({
                           className={cn(
                             "px-2.5 py-1 rounded-md border text-[11px] font-bold font-mono tracking-tight transition-all cursor-pointer flex items-center gap-1",
                             suggestionCategory === cat.id
-                              ? "bg-[#32FF8B]/10 border-[#32FF8B] text-[#32FF8B]"
-                              : "bg-[#030E1A] border-white/5 text-[#C5C1B9] hover:border-white/15 hover:text-white"
+                              ? "bg-primary/10 border-primary text-primary"
+                              : "bg-background-elev border-foreground/5 text-muted hover:border-foreground/15 hover:text-foreground"
                           )}
                         >
                           <cat.icon className="w-3 h-3 shrink-0" />
@@ -1062,7 +1062,7 @@ export function DonateModal({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-mono text-[#C5C1B9] uppercase font-bold block">
+                    <label className="text-[11px] font-mono text-muted uppercase font-bold block">
                       Describe your request / suggestion
                     </label>
                     <textarea
@@ -1070,14 +1070,14 @@ export function DonateModal({
                       onChange={(e) => setSuggestionText(e.target.value)}
                       placeholder="E.g., An arbitrage dashboard showing the price differences of key ecosystem pairs..."
                       maxLength={300}
-                      className="bg-[#030E1A] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-[#32FF8B]/50 focus:outline-none w-full h-[70px] resize-none"
+                      className="bg-background-elev border border-foreground/10 rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-foreground/20 focus:border-primary/50 focus:outline-none w-full h-[70px] resize-none"
                       required
                     />
                     <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-mono text-white/30">{300 - suggestionText.length} characters left</span>
+                      <span className="text-[11px] font-mono text-foreground/30">{300 - suggestionText.length} characters left</span>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] rounded-xl text-[12px] uppercase font-black tracking-widest font-mono duration-150 cursor-pointer active:scale-95 shadow-md shadow-[#32FF8B]/10"
+                        className="px-4 py-2 bg-primary hover:bg-primary-strong text-primary-foreground rounded-xl text-[12px] uppercase font-black tracking-widest font-mono duration-150 cursor-pointer active:scale-95 shadow-md shadow-primary/10"
                       >
                         Submit Proposal Option
                       </button>
@@ -1086,39 +1086,39 @@ export function DonateModal({
                 </form>
               ) : (
                 /* STEP 2: PROMPTED WITH DONATION & VERIFICATION IF THEY SUBMIT */
-                <div className="bg-[#010C1B] border border-[#32FF8B]/20 rounded-2xl p-5 text-left space-y-4 font-mono relative animate-scale-up">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2 px-0.5">
-                    <div className="flex items-center gap-1.5 text-[#32FF8B]">
-                      <Sparkles className="w-4 h-4 text-[#32FF8B]" />
-                      <h3 className="text-sm font-black uppercase tracking-wider text-white">Unlock & Authorize Proposal</h3>
+                <div className="bg-background border border-primary/20 rounded-2xl p-5 text-left space-y-4 font-mono relative animate-scale-up">
+                  <div className="flex items-center justify-between border-b border-foreground/5 pb-2 px-0.5">
+                    <div className="flex items-center gap-1.5 text-primary">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <h3 className="text-sm font-black uppercase tracking-wider text-foreground">Unlock & Authorize Proposal</h3>
                     </div>
-                    <span className="text-[7.5px] font-mono font-bold text-[#E2E8F0]/60 bg-white/5 px-2 py-0.5 rounded">
+                    <span className="text-[7.5px] font-mono font-bold text-muted/60 bg-foreground/5 px-2 py-0.5 rounded">
                       ID: DRAFT
                     </span>
                   </div>
 
                   {/* Preview what they are verifying */}
-                  <div className="bg-[#030E1A] border border-white/5 rounded-xl p-3 space-y-2">
+                  <div className="bg-background-elev border border-foreground/5 rounded-xl p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-[#32FF8B] bg-[#32FF8B]/10 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">
+                      <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">
                         {pendingSuggestion.category.replace('_', ' ')}
                       </span>
-                      <span className="text-[11px] text-[#C5C1B9]/50">Wallet Owner: {connectedAddress ? `${connectedAddress.slice(0, 5)}...${connectedAddress.slice(-4)}` : 'Disconnected'}</span>
+                      <span className="text-[11px] text-muted/50">Wallet Owner: {connectedAddress ? `${connectedAddress.slice(0, 5)}...${connectedAddress.slice(-4)}` : 'Disconnected'}</span>
                     </div>
-                    <p className="text-[13px] text-white/90 italic font-sans leading-relaxed">
+                    <p className="text-[13px] text-foreground/90 italic font-sans leading-relaxed">
                       "{pendingSuggestion.text}"
                     </p>
                   </div>
 
                   {/* Payment selector specifically for checkout */}
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-mono text-white/60 uppercase font-bold block">
+                    <label className="text-[11px] font-mono text-foreground/60 uppercase font-bold block">
                       Step 1: Choose Sponsor Coin & Network
                     </label>
                     <select
                       value={selectedCoin.id}
                       onChange={(e) => handleCoinChange(e.target.value)}
-                      className="bg-[#030E1A] border border-white/10 rounded-xl px-2.5 py-2 text-[10.5px] font-bold font-mono focus:border-[#32FF8B]/50 focus:outline-none text-white cursor-pointer w-full"
+                      className="bg-background-elev border border-foreground/10 rounded-xl px-2.5 py-2 text-[10.5px] font-bold font-mono focus:border-primary/50 focus:outline-none text-foreground cursor-pointer w-full"
                     >
                       {COIN_CONFIGS.map(c => (
                         <option key={c.id} value={c.id}>
@@ -1130,27 +1130,27 @@ export function DonateModal({
 
                   {/* Security checklist */}
                   <div className="space-y-2.5">
-                    <label className="text-[11px] font-mono text-white/60 uppercase font-bold block">
+                    <label className="text-[11px] font-mono text-foreground/60 uppercase font-bold block">
                       Step 2: Sign Off-Chain Protection Checklist
                     </label>
 
                     {/* Check 1: Connected address */}
-                    <div className="flex items-center justify-between p-2.5 bg-[#030E1A] border border-white/5 rounded-xl">
+                    <div className="flex items-center justify-between p-2.5 bg-background-elev border border-foreground/5 rounded-xl">
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded-full bg-[#32FF8B]/15 border border-[#32FF8B]/40 flex items-center justify-center text-[#32FF8B]">
-                          {isConnected ? <Check className="w-3 h-3" /> : <div className="w-1.5 h-1.5 bg-[#32FF8B] rounded-full animate-ping" />}
+                        <div className="w-4 h-4 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center text-primary">
+                          {isConnected ? <Check className="w-3 h-3" /> : <div className="w-1.5 h-1.5 bg-primary rounded-full animate-ping" />}
                         </div>
-                        <span className="text-[12px] font-bold text-white">Wallet Connection</span>
+                        <span className="text-[12px] font-bold text-foreground">Wallet Connection</span>
                       </div>
                       {isConnected ? (
-                        <span className="text-[8.5px] text-white/50 bg-white/5 px-1.5 py-0.5 rounded max-w-[120px] truncate">
+                        <span className="text-[8.5px] text-foreground/50 bg-foreground/5 px-1.5 py-0.5 rounded max-w-[120px] truncate">
                           {connectedAddress}
                         </span>
                       ) : (
                         <button
                           type="button"
                           onClick={() => connect({ connector: injected() })}
-                          className="px-2 py-0.5 bg-[#32FF8B] text-[#010C1B] rounded text-[8.5px] font-bold uppercase transition"
+                          className="px-2 py-0.5 bg-primary text-primary-foreground rounded text-[8.5px] font-bold uppercase transition"
                         >
                           Connect Wallet
                         </button>
@@ -1159,19 +1159,19 @@ export function DonateModal({
 
                     {/* Check 2: Cryptographic Signature Message */}
                     <div className={cn(
-                      "flex items-center justify-between p-2.5 bg-[#030E1A] rounded-xl border transition-all",
-                      hasSigned ? "border-[#32FF8B]/30" : "border-white/5"
+                      "flex items-center justify-between p-2.5 bg-background-elev rounded-xl border transition-all",
+                      hasSigned ? "border-primary/30" : "border-foreground/5"
                     )}>
                       <div className="flex items-center gap-2">
                         <div className={cn(
                           "w-4 h-4 rounded-full flex items-center justify-center",
                           hasSigned 
-                            ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]" 
-                            : "bg-white/5 border border-white/10 text-white/40"
+                            ? "bg-primary/15 border border-primary/40 text-primary" 
+                            : "bg-foreground/5 border border-foreground/10 text-foreground/40"
                         )}>
                           {hasSigned ? <Check className="w-3 h-3" /> : <span className="text-[10px]">1</span>}
                         </div>
-                        <span className="text-[12px] font-bold text-white">Sign Security Gasless Seal</span>
+                        <span className="text-[12px] font-bold text-foreground">Sign Security Gasless Seal</span>
                       </div>
                       
                       {!hasSigned ? (
@@ -1179,30 +1179,30 @@ export function DonateModal({
                           type="button"
                           disabled={!isConnected || isSigningMessage}
                           onClick={handleSignAntiSpam}
-                          className="px-2.5 py-1 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-bold text-[8.5px] uppercase rounded cursor-pointer transition disabled:opacity-40"
+                          className="px-2.5 py-1 bg-primary hover:bg-primary-strong text-primary-foreground font-bold text-[8.5px] uppercase rounded cursor-pointer transition disabled:opacity-40"
                         >
                           {isSigningMessage ? 'Signing...' : 'Seal Draft'}
                         </button>
                       ) : (
-                        <span className="text-[9.5px] text-[#32FF8B] font-bold italic">Signed Off</span>
+                        <span className="text-[9.5px] text-primary font-bold italic">Signed Off</span>
                       )}
                     </div>
 
                     {/* Check 3: Verified Support Transaction */}
                     <div className={cn(
-                      "flex items-center justify-between p-2.5 bg-[#030E1A] rounded-xl border transition-all",
-                      donationSuccessState ? "border-[#32FF8B]/30" : "border-white/5"
+                      "flex items-center justify-between p-2.5 bg-background-elev rounded-xl border transition-all",
+                      donationSuccessState ? "border-primary/30" : "border-foreground/5"
                     )}>
                       <div className="flex items-center gap-2 w-full min-w-0 flex-1">
                         <div className={cn(
                           "w-4 h-4 rounded-full flex items-center justify-center shrink-0",
                           donationSuccessState 
-                            ? "bg-[#32FF8B]/15 border border-[#32FF8B]/40 text-[#32FF8B]" 
-                            : "bg-white/5 border border-white/10 text-white/40"
+                            ? "bg-primary/15 border border-primary/40 text-primary" 
+                            : "bg-foreground/5 border border-foreground/10 text-foreground/40"
                         )}>
                           {donationSuccessState ? <Check className="w-3 h-3" /> : <span className="text-[10px]">2</span>}
                         </div>
-                        <span className="text-[12px] font-bold text-white truncate">Transfer Min support {selectedCoin.min} {selectedCoin.symbol}</span>
+                        <span className="text-[12px] font-bold text-foreground truncate">Transfer Min support {selectedCoin.min} {selectedCoin.symbol}</span>
                       </div>
 
                       {!donationSuccessState ? (
@@ -1212,7 +1212,7 @@ export function DonateModal({
                               type="button"
                               onClick={handleOnChainDonate}
                               disabled={isTxPending}
-                              className="px-2 py-1 bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] font-bold text-[8.5px] uppercase rounded cursor-pointer transition disabled:opacity-50"
+                              className="px-2 py-1 bg-primary hover:bg-primary-strong text-primary-foreground font-bold text-[8.5px] uppercase rounded cursor-pointer transition disabled:opacity-50"
                             >
                               {isTxPending ? 'Executing..' : 'Pay Direct'}
                             </button>
@@ -1223,7 +1223,7 @@ export function DonateModal({
                                 // For Non-evm we display QR code address above and let them confirm
                                 setDonationSuccessState(true);
                               }}
-                              className="px-2 py-1 border border-[#32FF8B]/35 hover:bg-[#32FF8B]/15 text-[#32FF8B] font-bold text-[8.5px] uppercase rounded cursor-pointer transition"
+                              className="px-2 py-1 border border-primary/35 hover:bg-primary/15 text-primary font-bold text-[8.5px] uppercase rounded cursor-pointer transition"
                               title="Click to self-confirm once sent from Sol/TRX/BTC external wallet"
                             >
                               Confirm Sent
@@ -1236,7 +1236,7 @@ export function DonateModal({
                               onClick={() => {
                                 setDonationSuccessState(true);
                               }}
-                              className="px-2 py-1 bg-white/10 hover:bg-white/20 text-white font-bold text-[8.5px] uppercase rounded cursor-pointer transition"
+                              className="px-2 py-1 bg-foreground/10 hover:bg-foreground/20 text-foreground font-bold text-[8.5px] uppercase rounded cursor-pointer transition"
                               title="Bypass check in Demo/Dev Mode"
                             >
                               Demo Free
@@ -1244,22 +1244,22 @@ export function DonateModal({
                           )}
                         </div>
                       ) : (
-                        <span className="text-[9.5px] text-[#32FF8B] font-bold italic leading-none">Paid</span>
+                        <span className="text-[9.5px] text-primary font-bold italic leading-none">Paid</span>
                       )}
                     </div>
                   </div>
 
                   {/* Payment instruction details area */}
                   {!donationSuccessState && (
-                    <div className="bg-[#030E1A] p-3 rounded-xl border border-white/5 text-[11px] text-[#C5C1B9] leading-relaxed space-y-1.5 text-left">
-                      <p className="font-bold text-[#32FF8B] uppercase tracking-wider text-[10px]">
+                    <div className="bg-background-elev p-3 rounded-xl border border-foreground/5 text-[11px] text-muted leading-relaxed space-y-1.5 text-left">
+                      <p className="font-bold text-primary uppercase tracking-wider text-[10px]">
                         Address for external payments:
                       </p>
-                      <div className="text-white bg-[#010C1B] p-1.5 rounded border border-white/10 select-all font-sans break-all select-all flex justify-between items-center">
+                      <div className="text-foreground bg-background p-1.5 rounded border border-foreground/10 select-all font-sans break-all select-all flex justify-between items-center">
                         <span className="font-mono text-[10px]">{selectedCoin.address}</span>
                         <button 
                           onClick={copyAddress}
-                          className="text-[10px] bg-[#030E1A] rounded px-1.5 py-0.5 hover:bg-white/5 text-slate-400 hover:text-white transition"
+                          className="text-[10px] bg-background-elev rounded px-1.5 py-0.5 hover:bg-foreground/5 text-slate-400 hover:text-foreground transition"
                         >
                           {copied ? 'Copied' : 'Copy'}
                         </button>
@@ -1281,7 +1281,7 @@ export function DonateModal({
                     <button
                       type="button"
                       onClick={() => setPendingSuggestion(null)} // Cancel and details remain in form!
-                      className="flex-1 py-3 border border-white/10 hover:bg-white/5 rounded-xl text-[12px] text-[#C5C1B9] uppercase font-bold tracking-widest transition duration-150 cursor-pointer text-center"
+                      className="flex-1 py-3 border border-foreground/10 hover:bg-foreground/5 rounded-xl text-[12px] text-muted uppercase font-bold tracking-widest transition duration-150 cursor-pointer text-center"
                     >
                       Cancel & Edit Proposal
                     </button>
@@ -1293,8 +1293,8 @@ export function DonateModal({
                       className={cn(
                         "flex-1 py-3 rounded-xl text-[12px] uppercase font-black tracking-widest duration-150 text-center relative",
                         (hasSigned && donationSuccessState)
-                          ? "bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] cursor-pointer shadow-lg active:scale-95 shadow-[#32FF8B]/10 animate-pulse"
-                          : "bg-white/5 border border-white/5 text-white/30 cursor-not-allowed"
+                          ? "bg-primary hover:bg-primary-strong text-primary-foreground cursor-pointer shadow-lg active:scale-95 shadow-primary/10 animate-pulse"
+                          : "bg-foreground/5 border border-foreground/5 text-foreground/30 cursor-not-allowed"
                       )}
                       title="Commit verified suggestions to the list"
                     >
@@ -1307,10 +1307,10 @@ export function DonateModal({
               {/* Suggestions feed */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono block text-left">
+                  <span className="text-[12px] font-black text-muted uppercase tracking-wider font-mono block text-left">
                     Requested by Community ({suggestions.length})
                   </span>
-                  <span className="text-[10px] font-mono text-[#32FF8B] animate-pulse">
+                  <span className="text-[10px] font-mono text-primary animate-pulse">
                     ⚡ Free Off-Chain Signing
                   </span>
                 </div>
@@ -1330,8 +1330,8 @@ export function DonateModal({
                       <div 
                         key={item.id} 
                         className={cn(
-                          "p-4 bg-[#010C1B]/60 border rounded-2xl flex justify-between items-start gap-3.5 hover:border-white/10 transition-colors",
-                          hasUserVoted ? "border-[#32FF8B]/25 bg-[#32FF8B]/[0.02]" : "border-white/5"
+                          "p-4 bg-background/60 border rounded-2xl flex justify-between items-start gap-3.5 hover:border-foreground/10 transition-colors",
+                          hasUserVoted ? "border-primary/25 bg-primary/[0.02]" : "border-foreground/5"
                         )}
                       >
                         <div className="space-y-1.5 text-left flex-1 min-w-0">
@@ -1340,20 +1340,20 @@ export function DonateModal({
                             <span className={cn(
                               "border rounded-full px-2 py-0.5 text-[8.5px] font-mono capitalize",
                               hasUserVoted 
-                                ? "bg-[#32FF8B]/10 border-[#32FF8B]/20 text-[#32FF8B]" 
-                                : "bg-white/5 text-white/55 border-white/5"
+                                ? "bg-primary/10 border-primary/20 text-primary" 
+                                : "bg-foreground/5 text-foreground/55 border-foreground/5"
                             )}>
                               {item.category.replace('_', ' ')}
                             </span>
-                            <span className="text-[8.5px] font-mono text-white/35">By {item.author}</span>
+                            <span className="text-[8.5px] font-mono text-foreground/35">By {item.author}</span>
                             {hasUserVoted && (
-                              <span className="text-[10px] font-mono text-[#32FF8B] bg-[#32FF8B]/10 px-1.5 rounded-full font-bold">
+                              <span className="text-[10px] font-mono text-primary bg-primary/10 px-1.5 rounded-full font-bold">
                                 Checked In
                               </span>
                             )}
                           </div>
                           {/* Text */}
-                          <p className="text-sm text-white/85 leading-relaxed font-sans font-medium break-words">
+                          <p className="text-sm text-foreground/85 leading-relaxed font-sans font-medium break-words">
                             {item.text}
                           </p>
                         </div>
@@ -1366,22 +1366,22 @@ export function DonateModal({
                           className={cn(
                             "flex flex-col items-center justify-center p-2.5 rounded-xl cursor-pointer duration-150 active:scale-95 group shrink-0 w-12 border text-center relative",
                             hasUserVoted 
-                              ? "bg-[#32FF8B]/10 border-[#32FF8B] text-[#32FF8B]" 
-                              : "bg-[#030E1A] hover:bg-white/[0.02] border-white/5 hover:border-[#32FF8B]/30 text-[#C5C1B9] hover:text-[#32FF8B]"
+                              ? "bg-primary/10 border-primary text-primary" 
+                              : "bg-background-elev hover:bg-foreground/[0.02] border-foreground/5 hover:border-primary/30 text-muted hover:text-primary"
                           )}
                           title={hasUserVoted ? "You upvoted this proposal" : "Sign with wallet to upvote"}
                         >
                           {isMining ? (
-                            <span className="text-[11px] font-mono font-bold animate-pulse text-[#32FF8B]">...</span>
+                            <span className="text-[11px] font-mono font-bold animate-pulse text-primary">...</span>
                           ) : (
                             <ThumbsUp className={cn(
                               "w-3.5 h-3.5 group-hover:scale-110 duration-150",
-                              hasUserVoted ? "text-[#32FF8B] fill-[#32FF8B]/10" : "text-slate-400 group-hover:text-[#32FF8B]"
+                              hasUserVoted ? "text-primary fill-primary/10" : "text-slate-400 group-hover:text-primary"
                             )} />
                           )}
                           <span className={cn(
                             "text-[10.5px] font-black font-mono mt-1",
-                            hasUserVoted ? "text-[#32FF8B]" : "text-[#FFFFFF] group-hover:text-[#32FF8B]"
+                            hasUserVoted ? "text-primary" : "text-foreground group-hover:text-primary"
                           )}>
                             {item.votes}
                           </span>
@@ -1397,13 +1397,13 @@ export function DonateModal({
           {activeTab === 'incentives' && (
             <div className="space-y-6">
               {!googleUser ? (
-                <div className="bg-[#0D1C2A]/40 border border-white/5 rounded-2xl p-5 sm:p-6 space-y-5">
+                <div className="bg-card/40 border border-foreground/5 rounded-2xl p-5 sm:p-6 space-y-5">
                   <div className="text-center space-y-1.5">
-                    <div className="inline-flex p-2.5 bg-[#32FF8B]/5 border border-[#32FF8B]/10 rounded-full text-[#32FF8B] mb-1">
+                    <div className="inline-flex p-2.5 bg-primary/5 border border-primary/10 rounded-full text-primary mb-1">
                       <Gift className="w-5 h-5 animate-bounce" />
                     </div>
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">FLOW Incentive Portal</h3>
-                    <p className="text-[13px] text-[#C5C1B9] max-w-sm mx-auto leading-relaxed font-mono">
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-wider font-mono">FLOW Incentive Portal</h3>
+                    <p className="text-[13px] text-muted max-w-sm mx-auto leading-relaxed font-mono">
                       Sign in to unlock off-chain FLOW rewards, generate custom referral links, track achievements, and trace tokens.
                     </p>
                   </div>
@@ -1412,44 +1412,44 @@ export function DonateModal({
                   <form onSubmit={handleLocalEmailAuth} className="space-y-3.5">
                     {authMode === 'signup' && (
                       <div className="space-y-1">
-                        <label className="text-[12px] font-mono text-[#C5C1B9] uppercase font-bold tracking-wider">Display Name</label>
+                        <label className="text-[12px] font-mono text-muted uppercase font-bold tracking-wider">Display Name</label>
                         <div className="relative">
-                          <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                          <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
                           <input 
                             type="text" 
                             placeholder="e.g. Satoshi" 
                             value={authName}
                             onChange={(e) => setAuthName(e.target.value)}
-                            className="w-full bg-[#010C1B]/80 border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-mono text-white placeholder-white/20 focus:outline-none focus:border-[#32FF8B]/50 transition-colors"
+                            className="w-full bg-background/80 border border-foreground/10 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-mono text-foreground placeholder-white/20 focus:outline-none focus:border-primary/50 transition-colors"
                           />
                         </div>
                       </div>
                     )}
 
                     <div className="space-y-1">
-                      <label className="text-[12px] font-mono text-[#C5C1B9] uppercase font-bold tracking-wider">Email Address</label>
+                      <label className="text-[12px] font-mono text-muted uppercase font-bold tracking-wider">Email Address</label>
                       <div className="relative">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
                         <input 
                           type="email" 
                           placeholder="name@example.com" 
                           value={authEmail}
                           onChange={(e) => setAuthEmail(e.target.value)}
-                          className="w-full bg-[#010C1B]/80 border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-mono text-white placeholder-white/20 focus:outline-none focus:border-[#32FF8B]/50 transition-colors"
+                          className="w-full bg-background/80 border border-foreground/10 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-mono text-foreground placeholder-white/20 focus:outline-none focus:border-primary/50 transition-colors"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[12px] font-mono text-[#C5C1B9] uppercase font-bold tracking-wider">Password</label>
+                      <label className="text-[12px] font-mono text-muted uppercase font-bold tracking-wider">Password</label>
                       <div className="relative">
-                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
                         <input 
                           type="password" 
                           placeholder="••••••••" 
                           value={authPassword}
                           onChange={(e) => setAuthPassword(e.target.value)}
-                          className="w-full bg-[#010C1B]/80 border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-mono text-white placeholder-white/20 focus:outline-none focus:border-[#32FF8B]/50 transition-colors"
+                          className="w-full bg-background/80 border border-foreground/10 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-mono text-foreground placeholder-white/20 focus:outline-none focus:border-primary/50 transition-colors"
                         />
                       </div>
                     </div>
@@ -1461,7 +1461,7 @@ export function DonateModal({
                     )}
 
                     {verificationSuccess && (
-                      <div className="p-2.5 bg-emerald-950/20 border border-emerald-500/20 text-[#32FF8B] rounded-xl text-[12px] font-mono text-center">
+                      <div className="p-2.5 bg-emerald-950/20 border border-emerald-500/20 text-primary rounded-xl text-[12px] font-mono text-center">
                         {verificationSuccess}
                       </div>
                     )}
@@ -1469,14 +1469,14 @@ export function DonateModal({
                     <button
                       type="submit"
                       disabled={authLocalLoading}
-                      className="w-full bg-[#32FF8B] hover:bg-[#1FFF7D] disabled:opacity-50 text-black rounded-xl py-2.5 text-sm font-black uppercase tracking-wider font-mono cursor-pointer transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5"
+                      className="w-full bg-primary hover:bg-primary-strong disabled:opacity-50 text-black rounded-xl py-2.5 text-sm font-black uppercase tracking-wider font-mono cursor-pointer transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5"
                     >
                       {authLocalLoading ? "Processing..." : authMode === 'signin' ? "Sign In with Email" : "Create Account & Verify"}
                     </button>
                   </form>
 
                   <div className="flex justify-between items-center px-1 font-mono text-[12px]">
-                    <span className="text-white/40">
+                    <span className="text-foreground/40">
                       {authMode === 'signin' ? "No account yet?" : "Have an account?"}
                     </span>
                     <button
@@ -1485,16 +1485,16 @@ export function DonateModal({
                         setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
                         setAuthLocalError(null);
                       }}
-                      className="text-[#32FF8B] hover:underline uppercase font-bold tracking-wider"
+                      className="text-primary hover:underline uppercase font-bold tracking-wider"
                     >
                       {authMode === 'signin' ? "Sign Up" : "Sign In"}
                     </button>
                   </div>
 
                   <div className="relative flex py-1 items-center">
-                    <div className="flex-grow border-t border-white/5"></div>
-                    <span className="flex-shrink mx-4 text-white/20 text-[11px] font-mono uppercase tracking-widest">or continue with</span>
-                    <div className="flex-grow border-t border-white/5"></div>
+                    <div className="flex-grow border-t border-foreground/5"></div>
+                    <span className="flex-shrink mx-4 text-foreground/20 text-[11px] font-mono uppercase tracking-widest">or continue with</span>
+                    <div className="flex-grow border-t border-foreground/5"></div>
                   </div>
 
                   <div>
@@ -1502,7 +1502,7 @@ export function DonateModal({
                       type="button"
                       onClick={handleLocalGoogleSignIn}
                       disabled={authLocalLoading}
-                      className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl py-2.5 text-sm font-bold font-mono cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2"
+                      className="w-full bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 text-foreground rounded-xl py-2.5 text-sm font-bold font-mono cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
                       <GoogleIcon className="w-4 h-4" />
                       Sign in with Google
@@ -1511,8 +1511,8 @@ export function DonateModal({
                 </div>
               ) : isIncentivesLoading && !incentives ? (
                 <div className="py-12 text-center space-y-2">
-                  <div className="w-6 h-6 border-2 border-[#32FF8B] border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-[12px] font-mono text-[#C5C1B9] uppercase">Synchronizing incentive ledger...</p>
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-[12px] font-mono text-muted uppercase">Synchronizing incentive ledger...</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -1528,7 +1528,7 @@ export function DonateModal({
                             Email Verification Required
                           </h4>
                           <p className="text-[10.5px] text-amber-200/80 leading-relaxed font-mono">
-                            To protect the community and prevent wash trading bots, you must verify your email address to earn FLOW points. A verification email was sent to <strong className="text-white">{googleUser.email}</strong>.
+                            To protect the community and prevent wash trading bots, you must verify your email address to earn FLOW points. A verification email was sent to <strong className="text-foreground">{googleUser.email}</strong>.
                           </p>
                         </div>
                       </div>
@@ -1540,7 +1540,7 @@ export function DonateModal({
                       )}
 
                       {verificationSuccess && (
-                        <div className="p-2 bg-emerald-950/20 border border-emerald-500/10 rounded-xl text-[#32FF8B] text-[9.5px] font-mono uppercase text-center">
+                        <div className="p-2 bg-emerald-950/20 border border-emerald-500/10 rounded-xl text-primary text-[9.5px] font-mono uppercase text-center">
                           {verificationSuccess}
                         </div>
                       )}
@@ -1550,7 +1550,7 @@ export function DonateModal({
                           type="button"
                           disabled={verificationLoading}
                           onClick={handleResendVerification}
-                          className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl py-2 text-[12px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                          className="flex-1 bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 text-foreground rounded-xl py-2 text-[12px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
                         >
                           {verificationLoading ? "Sending..." : "Resend Verification"}
                         </button>
@@ -1559,7 +1559,7 @@ export function DonateModal({
                           type="button"
                           disabled={verificationLoading}
                           onClick={handleRefreshVerification}
-                          className="flex-1 bg-[#32FF8B] hover:bg-[#1FFF7D] text-black rounded-xl py-2 text-[12px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                          className="flex-1 bg-primary hover:bg-primary-strong text-black rounded-xl py-2 text-[12px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
                         >
                           <RefreshCw className={cn("w-3.5 h-3.5", verificationLoading && "animate-spin")} />
                           Refresh Status
@@ -1577,61 +1577,61 @@ export function DonateModal({
                   {/* Balance cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Points Balance */}
-                    <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-4.5 flex flex-col justify-between relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-[#32FF8B]/[0.02] rounded-full blur-2xl pointer-events-none" />
+                    <div className="bg-background-elev border border-foreground/5 rounded-2xl p-4.5 flex flex-col justify-between relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/[0.02] rounded-full blur-2xl pointer-events-none" />
                       <div className="flex justify-between items-start mb-2">
-                        <span className="text-[12px] font-mono text-[#C5C1B9] uppercase tracking-wider font-mono">Unclaimed Points</span>
-                        <div className="p-1.5 bg-[#32FF8B]/5 rounded-lg border border-[#32FF8B]/10 text-[#32FF8B]">
+                        <span className="text-[12px] font-mono text-muted uppercase tracking-wider font-mono">Unclaimed Points</span>
+                        <div className="p-1.5 bg-primary/5 rounded-lg border border-primary/10 text-primary">
                           <Sparkles className="w-3.5 h-3.5" />
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <div className="text-3xl font-black font-mono text-[#32FF8B]">
+                        <div className="text-3xl font-black font-mono text-primary">
                           {incentives?.flowPoints?.toLocaleString() ?? 0}
                         </div>
-                        <div className="text-[11px] font-mono text-white/40 uppercase font-mono">FLOW Points</div>
+                        <div className="text-[11px] font-mono text-foreground/40 uppercase font-mono">FLOW Points</div>
                       </div>
                     </div>
 
                     {/* Claimed Tokens */}
-                    <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-4.5 flex flex-col justify-between relative overflow-hidden">
+                    <div className="bg-background-elev border border-foreground/5 rounded-2xl p-4.5 flex flex-col justify-between relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/[0.02] rounded-full blur-2xl pointer-events-none" />
                       <div className="flex justify-between items-start mb-2">
-                        <span className="text-[12px] font-mono text-[#C5C1B9] uppercase tracking-wider font-mono">Claimed Tokens</span>
+                        <span className="text-[12px] font-mono text-muted uppercase tracking-wider font-mono">Claimed Tokens</span>
                         <div className="p-1.5 bg-blue-500/5 rounded-lg border border-blue-500/10 text-blue-400">
                           <Check className="w-3.5 h-3.5" />
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <div className="text-3xl font-black font-mono text-white">
+                        <div className="text-3xl font-black font-mono text-foreground">
                           {incentives?.claimedTokens?.toLocaleString() ?? 0}
                         </div>
-                        <div className="text-[11px] font-mono text-white/40 uppercase font-mono">FLOW Tokens</div>
+                        <div className="text-[11px] font-mono text-foreground/40 uppercase font-mono">FLOW Tokens</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Points Breakdown by Source */}
-                  <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-5 space-y-3 text-left font-mono">
-                    <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-4 h-4 text-[#32FF8B]" /> Points Breakdown
+                  <div className="bg-background-elev border border-foreground/5 rounded-2xl p-5 space-y-3 text-left font-mono">
+                    <h4 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-primary" /> Points Breakdown
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="p-3 bg-[#010C1B] border border-white/5 rounded-xl">
-                        <div className="text-[10px] uppercase tracking-wider text-white/50">Own Swaps / Bridges</div>
-                        <div className="text-xl font-black text-[#32FF8B] mt-1">
+                      <div className="p-3 bg-background border border-foreground/5 rounded-xl">
+                        <div className="text-[10px] uppercase tracking-wider text-foreground/50">Own Swaps / Bridges</div>
+                        <div className="text-xl font-black text-primary mt-1">
                           {(incentives?.pointsSelf ?? 0).toLocaleString()}
                         </div>
                       </div>
-                      <div className="p-3 bg-[#010C1B] border border-white/5 rounded-xl">
-                        <div className="text-[10px] uppercase tracking-wider text-white/50">Referral Activity</div>
+                      <div className="p-3 bg-background border border-foreground/5 rounded-xl">
+                        <div className="text-[10px] uppercase tracking-wider text-foreground/50">Referral Activity</div>
                         <div className="text-xl font-black text-blue-300 mt-1">
                           {(incentives?.pointsReferralActivity ?? 0).toLocaleString()}
                         </div>
-                        <div className="text-[9.5px] text-white/40 mt-0.5">recurring from referred users</div>
+                        <div className="text-[9.5px] text-foreground/40 mt-0.5">recurring from referred users</div>
                       </div>
-                      <div className="p-3 bg-[#010C1B] border border-white/5 rounded-xl">
-                        <div className="text-[10px] uppercase tracking-wider text-white/50">Referral Sign-ups</div>
+                      <div className="p-3 bg-background border border-foreground/5 rounded-xl">
+                        <div className="text-[10px] uppercase tracking-wider text-foreground/50">Referral Sign-ups</div>
                         <div className="text-xl font-black text-amber-300 mt-1">
                           {(incentives?.pointsReferralSignup ?? 0).toLocaleString()}
                         </div>
@@ -1640,27 +1640,27 @@ export function DonateModal({
                             {incentives?.signupUnlocked ?? 0} unlocked • {incentives?.signupLocked ?? 0} locked
                           </div>
                         ) : (
-                          <div className="text-[9.5px] text-white/40 mt-0.5">all unlocked</div>
+                          <div className="text-[9.5px] text-foreground/40 mt-0.5">all unlocked</div>
                         )}
                       </div>
                     </div>
                     <div className="p-3 bg-amber-950/10 border border-amber-500/15 rounded-xl text-[11px] text-amber-200/85 leading-relaxed">
-                      Referral sign-up bonuses unlock at a rate of <strong className="text-white">1,000 FLOW per $100</strong> of your own verified swap/bridge volume.
+                      Referral sign-up bonuses unlock at a rate of <strong className="text-foreground">1,000 FLOW per $100</strong> of your own verified swap/bridge volume.
                       <div className="mt-1 text-[10.5px] text-amber-200/70">
-                        Your swap volume: <strong className="text-white">${(incentives?.totalSwapVolumeUsd ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong>
+                        Your swap volume: <strong className="text-foreground">${(incentives?.totalSwapVolumeUsd ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong>
                         {(incentives?.signupLocked ?? 0) > 0 && (
-                          <> • Trade <strong className="text-white">${incentives?.nextUnlockUsd ?? 0}</strong> more to unlock the next 1,000.</>
+                          <> • Trade <strong className="text-foreground">${incentives?.nextUnlockUsd ?? 0}</strong> more to unlock the next 1,000.</>
                         )}
                       </div>
                     </div>
                   </div>
 
                   {/* Social Follow Gate */}
-                  <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-5 space-y-3 text-left font-mono">
-                    <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Heart className="w-4 h-4 text-[#32FF8B]" /> Community Follow Required
+                  <div className="bg-background-elev border border-foreground/5 rounded-2xl p-5 space-y-3 text-left font-mono">
+                    <h4 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <Heart className="w-4 h-4 text-primary" /> Community Follow Required
                     </h4>
-                    <p className="text-[11px] text-[#C5C1B9] leading-relaxed">
+                    <p className="text-[11px] text-muted leading-relaxed">
                       Open each official channel, follow it, then enter the profile handle you used. FlowBridge checks that the profile exists before accepting it; fake handles may disqualify the claim.
                     </p>
                     <div className="space-y-2">
@@ -1677,8 +1677,8 @@ export function DonateModal({
                             className={cn(
                               "flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border p-2",
                               done
-                                ? "bg-[#32FF8B]/8 border-[#32FF8B]/30"
-                                : "bg-white/5 border-white/10"
+                                ? "bg-primary/8 border-primary/30"
+                                : "bg-foreground/5 border-foreground/10"
                             )}
                           >
                             <button
@@ -1687,8 +1687,8 @@ export function DonateModal({
                               className={cn(
                                 "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[12px] font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer sm:w-40 shrink-0",
                                 done
-                                  ? "bg-[#32FF8B]/15 text-[#32FF8B]"
-                                  : "bg-black/30 text-white hover:bg-[#32FF8B]/10 hover:text-[#32FF8B]"
+                                  ? "bg-primary/15 text-primary"
+                                  : "bg-black/30 text-foreground hover:bg-primary/10 hover:text-primary"
                               )}
                             >
                               <span>{label}</span>
@@ -1700,13 +1700,13 @@ export function DonateModal({
                                 placeholder={savedHandle ? `@${savedHandle}` : `@your${ch === 'x' ? 'x' : ch}handle`}
                                 value={socialHandles[ch]}
                                 onChange={(e) => setSocialHandles((h) => ({ ...h, [ch]: e.target.value }))}
-                                className="flex-1 min-w-0 bg-black/40 border border-white/10 focus:border-[#32FF8B]/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[12px] font-mono text-white placeholder:text-white/30"
+                                className="flex-1 min-w-0 bg-black/40 border border-foreground/10 focus:border-primary/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[12px] font-mono text-foreground placeholder:text-foreground/30"
                               />
                               <button
                                 type="button"
                                 disabled={socialBusy === ch}
                                 onClick={() => handleConfirmSocial(ch)}
-                                className="px-3 py-1.5 bg-[#32FF8B]/15 hover:bg-[#32FF8B]/25 border border-[#32FF8B]/40 text-[#32FF8B] rounded-lg text-[11px] font-black uppercase tracking-wider disabled:opacity-50 cursor-pointer shrink-0"
+                                className="px-3 py-1.5 bg-primary/15 hover:bg-primary/25 border border-primary/40 text-primary rounded-lg text-[11px] font-black uppercase tracking-wider disabled:opacity-50 cursor-pointer shrink-0"
                               >
                                 {socialBusy === ch ? '…' : done ? 'Update' : 'Verify'}
                               </button>
@@ -1722,17 +1722,17 @@ export function DonateModal({
 
 
                   {/* Cryptographic Wallet Binding Panel */}
-                  <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-5 space-y-4">
+                  <div className="bg-background-elev border border-foreground/5 rounded-2xl p-5 space-y-4">
                     <div className="flex items-start justify-between gap-3 text-left">
                       <div className="space-y-1">
-                        <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
+                        <h4 className="text-sm font-bold text-foreground uppercase tracking-wider font-mono flex items-center gap-1.5">
                           Cryptographic Wallet Binding
                         </h4>
-                        <p className="text-[12px] text-[#C5C1B9] leading-relaxed font-mono">
+                        <p className="text-[12px] text-muted leading-relaxed font-mono">
                           To record and secure your off-chain FLOW rewards, your authenticated email must be uniquely bound to your Web3 wallet address.
                         </p>
                       </div>
-                      <div className="p-1.5 bg-[#32FF8B]/5 rounded-lg border border-[#32FF8B]/10 text-[#32FF8B] shrink-0">
+                      <div className="p-1.5 bg-primary/5 rounded-lg border border-primary/10 text-primary shrink-0">
                         <UserIcon className="w-4 h-4" />
                       </div>
                     </div>
@@ -1740,15 +1740,15 @@ export function DonateModal({
                     <div className="space-y-3 font-mono">
                       {incentives?.walletAddress ? (
                         <div className="space-y-3">
-                          <div className="p-3 bg-[#010C1B] border border-white/5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
+                          <div className="p-3 bg-background border border-foreground/5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
                             <div className="space-y-1">
-                              <span className="text-[10px] text-white/40 uppercase font-bold block">Currently Bound Wallet</span>
-                              <code className="text-[12px] text-[#32FF8B] break-all">
+                              <span className="text-[10px] text-foreground/40 uppercase font-bold block">Currently Bound Wallet</span>
+                              <code className="text-[12px] text-primary break-all">
                                 {incentives.walletAddress}
                               </code>
                             </div>
                             {connectedAddress && connectedAddress.toLowerCase() === incentives.walletAddress.toLowerCase() && (
-                              <span className="px-2.5 py-1 bg-[#32FF8B]/10 border border-[#32FF8B]/20 text-[#32FF8B] rounded-lg text-[11px] font-bold uppercase shrink-0 text-center">
+                              <span className="px-2.5 py-1 bg-primary/10 border border-primary/20 text-primary rounded-lg text-[11px] font-bold uppercase shrink-0 text-center">
                                 Active Connection
                               </span>
                             )}
@@ -1757,11 +1757,11 @@ export function DonateModal({
                           {/* Binding updates / limits information */}
                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-1">
                             <div className="space-y-0.5 text-left">
-                              <p className="text-[11px] text-[#C5C1B9]/60 uppercase">
-                                Changes this month: <strong className="text-white">{incentives.bindingChangesCount || 0} / 2</strong>
+                              <p className="text-[11px] text-muted/60 uppercase">
+                                Changes this month: <strong className="text-foreground">{incentives.bindingChangesCount || 0} / 2</strong>
                               </p>
                               {incentives.lastBindingChange && (
-                                <p className="text-[10px] text-white/35">
+                                <p className="text-[10px] text-foreground/35">
                                   Last updated: {new Date(incentives.lastBindingChange).toLocaleDateString()}
                                 </p>
                               )}
@@ -1778,7 +1778,7 @@ export function DonateModal({
                                 {bindStatus.loading ? "Binding..." : "Change Binding to Connected"}
                               </button>
                             ) : (
-                              <p className="text-[11px] text-[#C5C1B9]/50 italic">
+                              <p className="text-[11px] text-muted/50 italic">
                                 {!connectedAddress ? "Connect a wallet to change binding." : "Wallet matches active connection."}
                               </p>
                             )}
@@ -1792,15 +1792,15 @@ export function DonateModal({
 
                           {connectedAddress && !showManualInput ? (
                             <div className="space-y-3">
-                              <div className="p-2.5 bg-[#010C1B] border border-white/5 rounded-xl">
-                                <span className="text-[10px] text-white/40 uppercase font-black block">Detected Wallet Address</span>
-                                <code className="text-sm text-white break-all">{connectedAddress}</code>
+                              <div className="p-2.5 bg-background border border-foreground/5 rounded-xl">
+                                <span className="text-[10px] text-foreground/40 uppercase font-black block">Detected Wallet Address</span>
+                                <code className="text-sm text-foreground break-all">{connectedAddress}</code>
                               </div>
                               <button
                                 type="button"
                                 disabled={bindStatus.loading}
                                 onClick={() => handleBindWallet(connectedAddress)}
-                                className="w-full bg-[#32FF8B] hover:bg-[#1FFF7D] text-black rounded-xl py-2.5 text-sm font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                                className="w-full bg-primary hover:bg-primary-strong text-black rounded-xl py-2.5 text-sm font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
                               >
                                 {bindStatus.loading ? "Binding Wallet..." : "Bind Detected Wallet"}
                               </button>
@@ -1808,7 +1808,7 @@ export function DonateModal({
                                 <button
                                   type="button"
                                   onClick={() => setShowManualInput(true)}
-                                  className="text-[9.5px] text-[#C5C1B9]/60 hover:text-white underline cursor-pointer"
+                                  className="text-[9.5px] text-muted/60 hover:text-foreground underline cursor-pointer"
                                 >
                                   Or enter wallet address manually
                                 </button>
@@ -1817,13 +1817,13 @@ export function DonateModal({
                           ) : (
                             <div className="space-y-3">
                               <div className="space-y-1">
-                                <label className="text-[11px] text-white/55 uppercase font-black">EVM Wallet Address (0x...)</label>
+                                <label className="text-[11px] text-foreground/55 uppercase font-black">EVM Wallet Address (0x...)</label>
                                 <input
                                   type="text"
                                   placeholder="0x..."
                                   value={manualWalletInput}
                                   onChange={(e) => setManualWalletInput(e.target.value)}
-                                  className="w-full bg-[#010C1B] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 focus:border-[#32FF8B]/50 focus:outline-none font-mono"
+                                  className="w-full bg-background border border-foreground/10 rounded-xl px-3 py-2 text-sm text-foreground placeholder-white/20 focus:border-primary/50 focus:outline-none font-mono"
                                 />
                               </div>
                               <button
@@ -1837,7 +1837,7 @@ export function DonateModal({
                                   }
                                   handleBindWallet(trimmed);
                                 }}
-                                className="w-full bg-[#32FF8B] hover:bg-[#1FFF7D] text-black rounded-xl py-2.5 text-sm font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
+                                className="w-full bg-primary hover:bg-primary-strong text-black rounded-xl py-2.5 text-sm font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
                               >
                                 {bindStatus.loading ? "Binding..." : "Bind Manual Address"}
                               </button>
@@ -1847,7 +1847,7 @@ export function DonateModal({
                                   <button
                                     type="button"
                                     onClick={() => setShowManualInput(false)}
-                                    className="text-[9.5px] text-[#C5C1B9]/60 hover:text-white underline cursor-pointer"
+                                    className="text-[9.5px] text-muted/60 hover:text-foreground underline cursor-pointer"
                                   >
                                     Use detected Web3 wallet
                                   </button>
@@ -1865,7 +1865,7 @@ export function DonateModal({
                       )}
 
                       {bindStatus.success && (
-                        <div className="p-2.5 bg-emerald-950/20 border border-emerald-500/20 text-[#32FF8B] rounded-xl text-[12px] text-center font-bold">
+                        <div className="p-2.5 bg-emerald-950/20 border border-emerald-500/20 text-primary rounded-xl text-[12px] text-center font-bold">
                           Success! Wallet address bound successfully.
                         </div>
                       )}
@@ -1886,13 +1886,13 @@ export function DonateModal({
                           ? "Accumulate at least 1,000 claimable points to claim."
                           : null;
                     return (
-                      <div className="bg-[#0D1C2A]/30 border border-white/5 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="bg-card/30 border border-foreground/5 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="space-y-1 text-center sm:text-left">
-                          <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5 justify-center sm:justify-start">
+                          <h4 className="text-sm font-bold text-foreground uppercase tracking-wider font-mono flex items-center gap-1.5 justify-center sm:justify-start">
                             Claim FLOW Tokens
                           </h4>
-                          <p className="text-[12px] text-[#C5C1B9] leading-relaxed max-w-md text-left font-mono">
-                            Claimable now: <strong className="text-[#32FF8B]">{claimable.toLocaleString()}</strong> FLOW.
+                          <p className="text-[12px] text-muted leading-relaxed max-w-md text-left font-mono">
+                            Claimable now: <strong className="text-primary">{claimable.toLocaleString()}</strong> FLOW.
                             {gateReason && <span className="block text-amber-300/85 mt-1">{gateReason}</span>}
                           </p>
                         </div>
@@ -1903,8 +1903,8 @@ export function DonateModal({
                           className={cn(
                             "w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-wider font-mono cursor-pointer transition-all duration-150 active:scale-95 text-center shrink-0 min-w-[160px]",
                             canClaim
-                              ? "bg-[#32FF8B] text-black shadow-lg shadow-[#32FF8B]/15 hover:bg-[#1FFF7D]"
-                              : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
+                              ? "bg-primary text-black shadow-lg shadow-primary/15 hover:bg-primary-strong"
+                              : "bg-foreground/5 text-foreground/30 border border-foreground/5 cursor-not-allowed"
                           )}
                         >
                           {claimStatus.loading ? (
@@ -1927,61 +1927,61 @@ export function DonateModal({
                     </div>
                   )}
                   {claimStatus.success && (
-                    <div className="p-3 bg-emerald-950/20 border border-emerald-500/20 rounded-xl text-[#32FF8B] text-[12px] font-mono uppercase text-center font-mono">
+                    <div className="p-3 bg-emerald-950/20 border border-emerald-500/20 rounded-xl text-primary text-[12px] font-mono uppercase text-center font-mono">
                       Claim processed successfully! Tokens are now claimable.
                     </div>
                   )}
 
                   {/* Cooperative progress bar */}
-                  <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-5 space-y-3.5">
+                  <div className="bg-background-elev border border-foreground/5 rounded-2xl p-5 space-y-3.5">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-left">
                       <div className="space-y-0.5">
-                        <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
+                        <h4 className="text-sm font-bold text-foreground uppercase tracking-wider font-mono flex items-center gap-1.5">
                           Liquidity Milestone Tracker
                         </h4>
-                        <p className="text-[12px] text-[#C5C1B9] font-mono">
+                        <p className="text-[12px] text-muted font-mono">
                           Cooperative community pool target to enable FLOW token swap.
                         </p>
                       </div>
                       <div className="text-left sm:text-right">
-                        <div className="text-sm font-mono font-black text-[#32FF8B]">
+                        <div className="text-sm font-mono font-black text-primary">
                           {(incentives?.globalTotalClaimed ?? 0).toLocaleString()} / 1,000,000 FLOW
                         </div>
-                        <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest font-mono">
+                        <div className="text-[10px] font-mono text-foreground/40 uppercase tracking-widest font-mono">
                           {Math.min(100, Math.floor(((incentives?.globalTotalClaimed ?? 0) / 1000000) * 100))}% Reached
                         </div>
                       </div>
                     </div>
 
                     {/* Progress slider bar */}
-                    <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5 relative">
+                    <div className="h-2 bg-foreground/5 rounded-full overflow-hidden border border-foreground/5 relative">
                       <div 
-                        className="h-full bg-gradient-to-r from-emerald-500 to-[#32FF8B] rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-emerald-500 to-primary rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, ((incentives?.globalTotalClaimed ?? 0) / 1000000) * 100)}%` }}
                       />
                     </div>
 
                     {incentives?.globalTotalClaimed && incentives.globalTotalClaimed >= 1000000 ? (
                       <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
-                        <p className="text-[12px] font-mono text-[#32FF8B] uppercase font-bold tracking-wider font-mono">
+                        <p className="text-[12px] font-mono text-primary uppercase font-bold tracking-wider font-mono">
                           🎉 LIQUIDITY UNLOCKED: FLOW Token swap is now enabled in Swap tab!
                         </p>
                       </div>
                     ) : (
-                      <p className="text-[11px] font-mono text-white/35 leading-relaxed text-left font-mono">
+                      <p className="text-[11px] font-mono text-foreground/35 leading-relaxed text-left font-mono">
                         ⚠️ FLOW token swap/trading with BOT/USDT remains locked until the cooperative community milestone of 1,000,000 claimed tokens is unlocked by all supporters combined. Invite others to bridge or swap to speed up the launch!
                       </p>
                     )}
                   </div>
 
                   {/* Referral link & QR */}
-                  <div className="bg-[#030E1A] border border-white/5 rounded-2xl p-5 space-y-4">
+                  <div className="bg-background-elev border border-foreground/5 rounded-2xl p-5 space-y-4">
                     <div className="space-y-1 text-left">
-                      <h4 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
+                      <h4 className="text-sm font-bold text-foreground uppercase tracking-wider font-mono flex items-center gap-1.5">
                         Your Ambassador Dashboard
                       </h4>
-                      <p className="text-[12px] text-[#C5C1B9] leading-relaxed font-mono">
-                        Earn a massive <strong className="text-[#32FF8B]">20% bonus</strong> from all FLOW points generated by your invitees, plus a <strong className="text-[#32FF8B]">50 pt welcome reward</strong> on their signup.
+                      <p className="text-[12px] text-muted leading-relaxed font-mono">
+                        Earn a massive <strong className="text-primary">20% bonus</strong> from all FLOW points generated by your invitees, plus a <strong className="text-primary">50 pt welcome reward</strong> on their signup.
                       </p>
                     </div>
 
@@ -1989,7 +1989,7 @@ export function DonateModal({
                       {/* Left: Input with link & statistics */}
                       <div className="w-full flex-1 space-y-3.5">
                         <div className="space-y-1.5">
-                          <label className="text-[11px] font-mono text-[#C5C1B9] uppercase block tracking-wider font-mono">
+                          <label className="text-[11px] font-mono text-muted uppercase block tracking-wider font-mono">
                             Direct Invite Link
                           </label>
                           <div className="flex gap-2">
@@ -1997,7 +1997,7 @@ export function DonateModal({
                               type="text"
                               readOnly
                               value={incentives?.referralCode ? `${window.location.origin}/?ref=${incentives.referralCode}` : ""}
-                              className="flex-1 bg-[#010C1B] border border-white/10 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none"
+                              className="flex-1 bg-background border border-foreground/10 rounded-xl px-3 py-2 text-sm font-mono text-foreground focus:outline-none"
                             />
                             <button
                               type="button"
@@ -2007,41 +2007,41 @@ export function DonateModal({
                                 setCopied(true);
                                 setTimeout(() => setCopied(false), 2000);
                               }}
-                              className="px-3 py-2 bg-[#0D1C2A] border border-white/10 rounded-xl text-sm hover:border-[#32FF8B]/30 hover:bg-white/5 transition-colors cursor-pointer font-mono"
+                              className="px-3 py-2 bg-card border border-foreground/10 rounded-xl text-sm hover:border-primary/30 hover:bg-foreground/5 transition-colors cursor-pointer font-mono"
                             >
-                              {copied ? <Check className="w-3.5 h-3.5 text-[#32FF8B]" /> : <Copy className="w-3.5 h-3.5 text-[#C5C1B9]" />}
+                              {copied ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5 text-muted" />}
                             </button>
                           </div>
                         </div>
 
                         {/* Referral stats banner */}
-                        <div className="p-3 bg-[#0D1C2A]/20 border border-white/5 rounded-xl flex items-center justify-between">
+                        <div className="p-3 bg-card/20 border border-foreground/5 rounded-xl flex items-center justify-between">
                           <div className="space-y-0.5">
-                            <div className="text-sm font-mono font-black text-white">
+                            <div className="text-sm font-mono font-black text-foreground">
                               {incentives?.inviteCount ?? 0}
                             </div>
-                            <div className="text-[10px] font-mono text-[#C5C1B9] uppercase font-mono">Successful Invites</div>
+                            <div className="text-[10px] font-mono text-muted uppercase font-mono">Successful Invites</div>
                           </div>
-                          <div className="h-6 w-px bg-white/10" />
+                          <div className="h-6 w-px bg-foreground/10" />
                           <div className="space-y-0.5">
-                            <div className="text-sm font-mono font-black text-[#32FF8B]">
+                            <div className="text-sm font-mono font-black text-primary">
                               {incentives?.referralCode ?? "---"}
                             </div>
-                            <div className="text-[10px] font-mono text-[#C5C1B9] uppercase font-mono">Your Invite Code</div>
+                            <div className="text-[10px] font-mono text-muted uppercase font-mono">Your Invite Code</div>
                           </div>
                         </div>
                       </div>
 
                       {/* Right: QR Code rendering using safe QRServer API */}
                       {incentives?.referralCode && (
-                        <div className="shrink-0 flex flex-col items-center gap-2 p-3 bg-[#010C1B] border border-white/10 rounded-2xl w-full sm:w-auto">
+                        <div className="shrink-0 flex flex-col items-center gap-2 p-3 bg-background border border-foreground/10 rounded-2xl w-full sm:w-auto">
                           <img
                             src={`https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(`${window.location.origin}/?ref=${incentives.referralCode}`)}&color=32ff8b&bgcolor=010c1b`}
                             alt="Referral Link QR Code"
-                            className="w-28 h-28 border border-[#32FF8B]/10 rounded-lg bg-[#010C1B]"
+                            className="w-28 h-28 border border-primary/10 rounded-lg bg-background"
                             referrerPolicy="no-referrer"
                           />
-                          <span className="text-[10px] font-mono text-white/40 uppercase font-black tracking-widest font-mono">
+                          <span className="text-[10px] font-mono text-foreground/40 uppercase font-black tracking-widest font-mono">
                             Scan Invite QR
                           </span>
                         </div>
@@ -2050,11 +2050,11 @@ export function DonateModal({
                   </div>
 
                   {/* Anti-exploitation summary */}
-                  <div className="bg-[#0D1C2A]/20 border border-white/5 rounded-2xl p-4.5 space-y-2 text-left">
-                    <h5 className="text-[11px] font-mono font-black uppercase text-[#32FF8B] tracking-wider font-mono">
+                  <div className="bg-card/20 border border-foreground/5 rounded-2xl p-4.5 space-y-2 text-left">
+                    <h5 className="text-[11px] font-mono font-black uppercase text-primary tracking-wider font-mono">
                       🛡️ Rewards System Policy & Protections
                     </h5>
-                    <ul className="list-disc pl-4 text-[9.5px] font-mono text-[#C5C1B9]/70 space-y-1.5 leading-relaxed font-mono">
+                    <ul className="list-disc pl-4 text-[9.5px] font-mono text-muted/70 space-y-1.5 leading-relaxed font-mono">
                       <li><strong>100% Trading Rewards</strong>: Earn 100% of your swap and bridge volume as off-chain FLOW points based on $1 equivalent (e.g. trading $250 equals 250 FLOW points).</li>
                       <li><strong>20% Ambassador Bonus</strong>: Earn 20% of all FLOW points generated recursively by your invitees (with no reduction to their own earnings).</li>
                       <li><strong>Minimum Swap/Bridge Volume</strong>: Only transactions with a minimum calculated value of $5.00 earn FLOW points.</li>
@@ -2070,7 +2070,7 @@ export function DonateModal({
         </div>
 
         {/* Dynamic Footer credits block */}
-        <div className="bg-[#010C1B] p-4.5 border-t border-white/5 text-center text-[#C5C1B9]/65 text-[11px] tracking-wide uppercase font-mono">
+        <div className="bg-background p-4.5 border-t border-foreground/5 text-center text-muted/65 text-[11px] tracking-wide uppercase font-mono">
           Decentralized Community Project • Supporting Open Learning & Growth
         </div>
       </div>

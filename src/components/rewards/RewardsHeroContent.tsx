@@ -138,8 +138,8 @@ export function RewardsHeroContent({
           to="/earn"
           className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors ${
             highlight
-              ? "bg-white/90 text-black hover:bg-white"
-              : "bg-white/20 hover:bg-white/30"
+              ? "bg-foreground/90 text-black hover:bg-foreground"
+              : "bg-foreground/20 hover:bg-foreground/30"
           }`}
         >
           {ctaText} <ArrowUpRight className="h-3 w-3" />
@@ -169,9 +169,9 @@ export function RewardsHeroContent({
             {pending ? "—" : `${formatPts(corePointsToday)} / ${formatPts(dailyCap)}`}
           </span>
         </div>
-        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/25">
+        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-foreground/25">
           <div
-            className={`h-full rounded-full bg-white transition-[width] duration-700 ${
+            className={`h-full rounded-full bg-foreground transition-[width] duration-700 ${
               pointsToday > 0 && !reduced ? "fb-pulse-once" : ""
             }`}
             style={{ width: `${Math.round(capProgress * 100)}%` }}
@@ -194,7 +194,7 @@ export function RewardsHeroContent({
           {ready ? (
             <PageIcon page="home" slot="claimable" size={24} />
           ) : (
-            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-white/25">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-foreground/25">
               <Check className="h-3.5 w-3.5" aria-hidden />
             </span>
           )}

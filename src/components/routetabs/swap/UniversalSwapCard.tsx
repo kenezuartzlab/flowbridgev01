@@ -1459,12 +1459,12 @@ export function UniversalSwapCard({
                           : `0 PTS · min ${formatUsd(rewardRules.minUsd)}`
                   }
                 />
-                <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">
+                <p className="pt-1 text-[10px] leading-relaxed text-muted/60 normal-case">
                   Amounts come straight from the routers you'll trade against, including any
                   token transfer tax (e.g. CA's temporary sell tax). Market/chart prices exclude
                   those taxes, so a chart price can look higher than your actual output.
                 </p>
-                <p className="pt-1 text-[10px] leading-relaxed text-[#C5C1B9]/60 normal-case">
+                <p className="pt-1 text-[10px] leading-relaxed text-muted/60 normal-case">
                   {rewardsActive
                     ? rewardEligible
                       ? `${formatUsd(swapUsd)} verified swap value qualifies for FLOW Points after the transaction confirms. PTS are off-chain and finalised daily.`
@@ -1519,16 +1519,16 @@ export function UniversalSwapCard({
       )}
 
       {lastTx && !txError && (
-        <div className="bg-[#32FF8B]/10 border border-[#32FF8B]/25 rounded-xl p-3 flex items-center justify-between gap-2 text-[12px] font-mono">
+        <div className="bg-primary/10 border border-primary/25 rounded-xl p-3 flex items-center justify-between gap-2 text-[12px] font-mono">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[#32FF8B] font-black uppercase tracking-widest">Swap Confirmed</span>
-            <span className="text-[#C5C1B9]">Receipt status: success</span>
+            <span className="text-primary font-black uppercase tracking-widest">Swap Confirmed</span>
+            <span className="text-muted">Receipt status: success</span>
           </div>
           <a
             href={`${txUrlPrefix}${lastTx}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2 py-1 bg-[#32FF8B]/15 hover:bg-[#32FF8B]/25 border border-[#32FF8B]/30 text-[#32FF8B] rounded-lg font-bold"
+            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/15 hover:bg-primary/25 border border-primary/30 text-primary rounded-lg font-bold"
           >
             {shortHash(lastTx)}
             <ExternalLink className="w-3 h-3" />
@@ -1646,7 +1646,7 @@ function TokenSide({
             <button
               type="button"
               onClick={onMax}
-              className="bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 active:scale-95 text-[#32FF8B] border border-[#32FF8B]/25 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase cursor-pointer shrink-0"
+              className="bg-primary/10 hover:bg-primary/20 active:scale-95 text-primary border border-primary/25 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase cursor-pointer shrink-0"
             >
               Max
             </button>
@@ -1659,7 +1659,7 @@ function TokenSide({
           {readOnly ? (
             <div className="text-3xl sm:text-4xl font-black text-foreground leading-none h-[40px] flex items-center overflow-x-auto whitespace-nowrap scrollbar-none font-mono">
               {quoting ? (
-                <Loader2 className="w-5 h-5 animate-spin text-[#C5C1B9]" />
+                <Loader2 className="w-5 h-5 animate-spin text-muted" />
               ) : amount ? (
                 parseFloat(amount).toFixed(8)
               ) : (

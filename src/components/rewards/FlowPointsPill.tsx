@@ -60,10 +60,10 @@ function resolveState({ googleUser, incentives, loading }: FlowPointsPillProps):
 }
 
 const TONES: Record<PillState["tone"], string> = {
-  muted: "text-[#C5C1B9] hover:text-[#32FF8B]",
+  muted: "text-muted hover:text-primary",
   warn: "text-amber-300 hover:text-amber-200",
-  accent: "text-[#32FF8B] hover:opacity-80",
-  hot: "text-[#32FF8B] hover:opacity-80",
+  accent: "text-primary hover:opacity-80",
+  hot: "text-primary hover:opacity-80",
 };
 
 export function FlowPointsPill(props: FlowPointsPillProps) {

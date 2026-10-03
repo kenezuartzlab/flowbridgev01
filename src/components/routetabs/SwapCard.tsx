@@ -65,17 +65,17 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
 
 
   return (
-    <div className="bg-[#010C1B]/75 border border-white/15 px-3 py-2.5 rounded-xl space-y-1.5 font-sans shadow-inner">
+    <div className="bg-background/75 border border-foreground/15 px-3 py-2.5 rounded-xl space-y-1.5 font-sans shadow-inner">
       {/* Top Row: Label and Balance */}
-      <div className="flex justify-between items-center text-[11px] font-black text-[#C5C1B9] uppercase tracking-wider font-mono">
+      <div className="flex justify-between items-center text-[11px] font-black text-muted uppercase tracking-wider font-mono">
 
         <span>{label}</span>
         <div className="flex items-center gap-1.5 font-bold">
           <span 
             onClick={!readOnly ? handleMaxClick : undefined}
             className={cn(
-              "text-[#C5C1B9] normal-case font-mono font-bold",
-              !readOnly && "cursor-pointer hover:text-[#32FF8B] transition-colors"
+              "text-muted normal-case font-mono font-bold",
+              !readOnly && "cursor-pointer hover:text-primary transition-colors"
             )}
           >
             Balance: {balance}
@@ -84,7 +84,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
             <button
               type="button"
               onClick={handleMaxClick}
-              className="bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 active:scale-95 text-[#32FF8B] border border-[#32FF8B]/25 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase transition-all duration-150 cursor-pointer shadow-none"
+              className="bg-primary/10 hover:bg-primary/20 active:scale-95 text-primary border border-primary/25 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase transition-all duration-150 cursor-pointer shadow-none"
             >
               Max
             </button>
@@ -106,7 +106,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
                 <div
                   title={display}
                   className={cn(
-                    'font-black text-white leading-none h-[40px] flex items-center truncate font-mono',
+                    'font-black text-foreground leading-none h-[40px] flex items-center truncate font-mono',
                     size,
                   )}
                 >
@@ -124,7 +124,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               value={amount}
               onChange={(e) => handleInputChange(e.target.value)}
               className={cn(
-                'bg-transparent text-white font-black w-full min-w-0 focus:outline-none placeholder:text-[#C5C1B9]/40 leading-none h-[40px] font-mono',
+                'bg-transparent text-foreground font-black w-full min-w-0 focus:outline-none placeholder:text-muted/40 leading-none h-[40px] font-mono',
                 amount.length > 16 ? 'text-xl sm:text-2xl' : amount.length > 12 ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl',
               )}
             />
@@ -132,9 +132,9 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
         </div>
 
 
-        <div className="bg-[#0D1C2A]/90 pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-white/15 font-mono max-w-[46%]">
+        <div className="bg-card/90 pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-foreground/15 font-mono max-w-[46%]">
           <TokenIcon symbol={symbol} size={20} />
-          <span className="font-black text-[13px] text-[#FFFFFF] tracking-wide uppercase truncate">{symbol}</span>
+          <span className="font-black text-[13px] text-foreground tracking-wide uppercase truncate">{symbol}</span>
         </div>
       </div>
 
@@ -146,7 +146,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => applyPercent(p)}
-              className="flex-1 py-1 rounded-lg bg-[#0D1C2A] border border-white/15 text-[10px] font-black tracking-widest uppercase text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/30 active:scale-95 transition font-mono cursor-pointer"
+              className="flex-1 py-1 rounded-lg bg-card border border-foreground/15 text-[10px] font-black tracking-widest uppercase text-muted hover:text-primary hover:border-primary/30 active:scale-95 transition font-mono cursor-pointer"
             >
               {p === 1 ? 'Max' : `${p * 100}%`}
             </button>
@@ -158,7 +158,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
 
 
       {/* Bottom Row: Estimated USD value */}
-      <div className="text-[#C5C1B9] font-medium flex items-center text-[12px] font-mono leading-none">
+      <div className="text-muted font-medium flex items-center text-[12px] font-mono leading-none">
         <span>≈ {usdValue}</span>
       </div>
 
@@ -244,10 +244,10 @@ export function SwapCard({
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4">
       {/* Aggregator selector selector */}
       {showAggregatorSelector && (
-        <div className="bg-[#0D1C2A]/60 border border-white/15 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono">
+        <div className="bg-card/60 border border-foreground/15 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono">
           <div className="flex flex-col text-left w-full sm:w-auto">
-            <span className="text-[11px] text-[#32FF8B] uppercase font-black tracking-widest">Bohr DEX Aggregator (Pro)</span>
-            <span className="text-[12px] text-white/50">Multi-routing non-custodial engine</span>
+            <span className="text-[11px] text-primary uppercase font-black tracking-widest">Bohr DEX Aggregator (Pro)</span>
+            <span className="text-[12px] text-foreground/50">Multi-routing non-custodial engine</span>
           </div>
           <PairDropdown
             value={selectedPair ?? 'BOT/USDT'}
@@ -258,8 +258,8 @@ export function SwapCard({
       )}
 
 
-      {/* 1. INPUT CARD BLOCK with enhanced border-white/20 visibility */}
-      <div className="bg-[#0D1C2A]/70 border border-white/20 rounded-[20px] shadow-2xl p-3 sm:p-3.5 relative space-y-2">
+      {/* 1. INPUT CARD BLOCK with enhanced border-foreground/20 visibility */}
+      <div className="bg-card/70 border border-foreground/20 rounded-[20px] shadow-2xl p-3 sm:p-3.5 relative space-y-2">
         <TokenInput
           label="You pay"
           amount={fromAmount}
@@ -275,7 +275,7 @@ export function SwapCard({
           <button 
             type="button"
             onClick={onToggleDirection}
-            className="bg-[#0D1C2A] border border-white/20 text-[#C5C1B9] hover:text-[#32FF8B] hover:border-[#32FF8B]/35 p-1.5 rounded-lg shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
+            className="bg-card border border-foreground/20 text-muted hover:text-primary hover:border-primary/35 p-1.5 rounded-lg shadow-lg hover:rotate-180 transition-all duration-300 active:scale-90 cursor-pointer"
             title="Switch direction"
             aria-label="Switch swap direction"
           >
@@ -303,8 +303,8 @@ export function SwapCard({
           className={cn(
             "w-full py-4 rounded-2xl text-sm font-black tracking-widest uppercase transition-all flex justify-center items-center gap-2 cursor-pointer",
             buttonDisabled 
-              ? "bg-white/5 text-[#C5C1B9]/45 border border-white/10 cursor-not-allowed shadow-none" 
-              : "bg-[#32FF8B] hover:bg-[#1FFF7D] text-[#010C1B] shadow-[0_0_16px_rgba(50,255,139,0.25)] hover:shadow-[0_0_24px_rgba(50,255,139,0.45)] hover:scale-[1.01] active:scale-[0.99]"
+              ? "bg-foreground/5 text-muted/45 border border-foreground/10 cursor-not-allowed shadow-none" 
+              : "bg-primary hover:bg-primary-strong text-primary-foreground shadow-[0_0_16px_rgba(50,255,139,0.25)] hover:shadow-[0_0_24px_rgba(50,255,139,0.45)] hover:scale-[1.01] active:scale-[0.99]"
           )}
         >
           <span>{buttonLabel}</span>
@@ -322,24 +322,24 @@ export function SwapCard({
               { label: 'Exchange Rate', value: `1 ${fromSymbol} ≈ ${(parseFloat(toAmount) / parseFloat(fromAmount)).toFixed(8)} ${toSymbol}` }
             ]}
           />
-          <p className="px-1 font-mono text-[10px] leading-relaxed text-[#C5C1B9]/60">
+          <p className="px-1 font-mono text-[10px] leading-relaxed text-muted/60">
             Quotes are live executable amounts from the on-chain routers, including CA's
             temporary sell tax. Market/chart prices (Ave.ai, CaryPact) exclude that tax, so
             they read higher than what a sell actually returns.
           </p>
           {onShowRoute && (
-            <div className="flex justify-between items-center bg-[#32FF8B]/5 border border-[#32FF8B]/15 rounded-xl px-3 py-2 text-[12px] font-bold text-[#F0F7F3] shadow-sm font-mono">
-              <span className="text-[#C5C1B9] flex items-center gap-1 uppercase tracking-wider">
+            <div className="flex justify-between items-center bg-primary/5 border border-primary/15 rounded-xl px-3 py-2 text-[12px] font-bold text-foreground shadow-sm font-mono">
+              <span className="text-muted flex items-center gap-1 uppercase tracking-wider">
                 Routing Path
               </span>
               <button 
                 type="button" 
                 onClick={onShowRoute}
-                className="text-[#32FF8B] hover:text-[#1FFF7D] hover:underline flex items-center gap-1.5 font-bold cursor-pointer transition-colors"
+                className="text-primary hover:text-primary hover:underline flex items-center gap-1.5 font-bold cursor-pointer transition-colors"
                 id="show_route_btn"
               >
                 1 on-chain route
-                <span className="text-[11px] bg-[#32FF8B]/20 text-[#32FF8B] px-1.5 py-0.5 rounded font-black shrink-0 tracking-widest">VIEW</span>
+                <span className="text-[11px] bg-primary/20 text-primary px-1.5 py-0.5 rounded font-black shrink-0 tracking-widest">VIEW</span>
               </button>
             </div>
           )}
@@ -365,7 +365,7 @@ export function SwapCard({
             <button
               type="button"
               onClick={onReset}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-[12px] tracking-widest uppercase font-black rounded-xl transition duration-150 active:scale-98 border border-white/10 cursor-pointer shadow-inner text-center"
+              className="w-full py-2.5 px-4 bg-foreground/5 hover:bg-foreground/10 text-foreground font-mono text-[12px] tracking-widest uppercase font-black rounded-xl transition duration-150 active:scale-98 border border-foreground/10 cursor-pointer shadow-inner text-center"
             >
               Start New Swap
             </button>
@@ -420,17 +420,17 @@ function PairDropdown({ value, onChange, isFlowUnlocked }: PairDropdownProps) {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="bg-[#010C1B] border border-white/10 rounded-xl px-3 py-1.5 text-sm font-black text-white focus:outline-none cursor-pointer w-full sm:w-auto uppercase flex items-center justify-between gap-2 min-w-[180px] hover:border-white/25 transition-colors"
+        className="bg-background border border-foreground/10 rounded-xl px-3 py-1.5 text-sm font-black text-foreground focus:outline-none cursor-pointer w-full sm:w-auto uppercase flex items-center justify-between gap-2 min-w-[180px] hover:border-foreground/25 transition-colors"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
         <span className="truncate">{current?.label ?? value}</span>
-        <ChevronDown className={cn('w-3.5 h-3.5 text-white/60 transition-transform shrink-0', open && 'rotate-180')} />
+        <ChevronDown className={cn('w-3.5 h-3.5 text-foreground/60 transition-transform shrink-0', open && 'rotate-180')} />
       </button>
       {open && (
         <ul
           role="listbox"
-          className="absolute z-50 mt-1.5 right-0 left-0 sm:left-auto sm:min-w-[220px] bg-[#010C1B] border border-white/15 rounded-xl shadow-2xl overflow-hidden py-1"
+          className="absolute z-50 mt-1.5 right-0 left-0 sm:left-auto sm:min-w-[220px] bg-background border border-foreground/15 rounded-xl shadow-2xl overflow-hidden py-1"
         >
           {options.map(opt => {
             const selected = opt.value === value;
@@ -446,15 +446,15 @@ function PairDropdown({ value, onChange, isFlowUnlocked }: PairDropdownProps) {
                   className={cn(
                     'w-full text-left px-3 py-2 text-[13px] font-black uppercase tracking-wider flex items-center justify-between gap-2 transition-colors',
                     opt.locked
-                      ? 'text-white/30 cursor-not-allowed'
-                      : 'text-white hover:bg-[#32FF8B]/10 hover:text-[#32FF8B] cursor-pointer'
+                      ? 'text-foreground/30 cursor-not-allowed'
+                      : 'text-foreground hover:bg-primary/10 hover:text-primary cursor-pointer'
                   )}
                   disabled={opt.locked}
                 >
                   <span className="truncate">
                     {opt.label} {opt.locked && <span className="text-[11px] ml-1">🔒</span>}
                   </span>
-                  {selected && <Check className="w-3.5 h-3.5 text-[#32FF8B] shrink-0" />}
+                  {selected && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
                 </button>
               </li>
             );

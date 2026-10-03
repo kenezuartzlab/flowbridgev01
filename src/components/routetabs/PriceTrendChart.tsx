@@ -88,11 +88,11 @@ export function PriceTrendChart({
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#010C1B] border border-white/10 rounded-xl p-2.5 shadow-2xl font-mono text-left">
-          <p className="text-[11px] text-white/50 uppercase tracking-wider font-bold">
+        <div className="bg-background border border-foreground/10 rounded-xl p-2.5 shadow-2xl font-mono text-left">
+          <p className="text-[11px] text-foreground/50 uppercase tracking-wider font-bold">
             {payload[0].payload.time}
           </p>
-          <p className="text-sm text-[#32FF8B] font-black">
+          <p className="text-sm text-primary font-black">
             ${payload[0].value.toFixed(4)}
           </p>
         </div>
@@ -102,24 +102,24 @@ export function PriceTrendChart({
   };
 
   return (
-    <div className="bg-[#0D1C2A]/40 border border-white/15 rounded-2xl p-3 sm:p-4 space-y-3 font-mono text-left relative overflow-hidden shadow-2xl">
+    <div className="bg-card/40 border border-foreground/15 rounded-2xl p-3 sm:p-4 space-y-3 font-mono text-left relative overflow-hidden shadow-2xl">
       {/* Background soft pulse effect */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-[#32FF8B]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header Info */}
       <div className="flex justify-between items-start gap-2">
         <div className="space-y-1 min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] text-[#32FF8B] uppercase font-black tracking-widest bg-[#32FF8B]/10 px-2 py-0.5 rounded border border-[#32FF8B]/20 whitespace-nowrap">
+            <span className="text-[10px] text-primary uppercase font-black tracking-widest bg-primary/10 px-2 py-0.5 rounded border border-primary/20 whitespace-nowrap">
               {pairLabel}
             </span>
-            <span className="text-[10px] text-[#C5C1B9]/60 font-medium truncate">{sourceLabel}</span>
+            <span className="text-[10px] text-muted/60 font-medium truncate">{sourceLabel}</span>
           </div>
           <div className="flex items-baseline gap-2 flex-wrap">
-            <h3 className="text-base sm:text-lg font-black text-white tracking-tight font-sans">
+            <h3 className="text-base sm:text-lg font-black text-foreground tracking-tight font-sans">
               ${basePrice.toFixed(4)}
             </h3>
-            <span className={`inline-flex items-center text-[11px] font-black ${stats.isUp ? 'text-[#32FF8B]' : 'text-rose-400'}`}>
+            <span className={`inline-flex items-center text-[11px] font-black ${stats.isUp ? 'text-primary' : 'text-rose-400'}`}>
               {stats.isUp ? <ArrowUpRight className="w-3.5 h-3.5 shrink-0" /> : <ArrowDownRight className="w-3.5 h-3.5 shrink-0" />}
               {stats.isUp ? '+' : ''}{stats.percentChange}%
             </span>
@@ -127,7 +127,7 @@ export function PriceTrendChart({
         </div>
 
         {/* Timeframe selector */}
-        <div className="flex bg-[#010C1B] border border-white/10 p-0.5 rounded-lg shrink-0">
+        <div className="flex bg-background border border-foreground/10 p-0.5 rounded-lg shrink-0">
           {(['24H', '7D', '1M'] as const).map((tf) => (
             <button
               key={tf}
@@ -135,8 +135,8 @@ export function PriceTrendChart({
               onClick={() => setTimeframe(tf)}
               className={`px-1.5 sm:px-2 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all duration-150 cursor-pointer ${
                 timeframe === tf
-                  ? 'bg-[#32FF8B] text-[#010C1B] shadow-inner'
-                  : 'text-[#C5C1B9]/60 hover:text-white hover:bg-white/5'
+                  ? 'bg-primary text-primary-foreground shadow-inner'
+                  : 'text-muted/60 hover:text-foreground hover:bg-foreground/5'
               }`}
             >
               {tf}
@@ -179,19 +179,19 @@ export function PriceTrendChart({
       </div>
 
       {/* Mini Stats Grid */}
-      <div className={`grid ${volumeLabel ? 'grid-cols-3' : 'grid-cols-2'} gap-2 bg-[#010C1B]/50 border border-white/5 rounded-xl p-2 text-[11px] text-center font-bold`}>
-        <div className="space-y-0.5 border-r border-white/5 min-w-0">
-          <span className="text-white/30 uppercase block text-[7px] font-black">Min Price</span>
-          <span className="text-[#C5C1B9] block truncate">${stats.min.toFixed(stats.min < 1 ? 5 : 3)}</span>
+      <div className={`grid ${volumeLabel ? 'grid-cols-3' : 'grid-cols-2'} gap-2 bg-background/50 border border-foreground/5 rounded-xl p-2 text-[11px] text-center font-bold`}>
+        <div className="space-y-0.5 border-r border-foreground/5 min-w-0">
+          <span className="text-foreground/30 uppercase block text-[7px] font-black">Min Price</span>
+          <span className="text-muted block truncate">${stats.min.toFixed(stats.min < 1 ? 5 : 3)}</span>
         </div>
-        <div className={`space-y-0.5 min-w-0 ${volumeLabel ? 'border-r border-white/5' : ''}`}>
-          <span className="text-white/30 uppercase block text-[7px] font-black">Max Price</span>
-          <span className="text-[#C5C1B9] block truncate">${stats.max.toFixed(stats.max < 1 ? 5 : 3)}</span>
+        <div className={`space-y-0.5 min-w-0 ${volumeLabel ? 'border-r border-foreground/5' : ''}`}>
+          <span className="text-foreground/30 uppercase block text-[7px] font-black">Max Price</span>
+          <span className="text-muted block truncate">${stats.max.toFixed(stats.max < 1 ? 5 : 3)}</span>
         </div>
         {volumeLabel && (
           <div className="space-y-0.5 min-w-0">
-            <span className="text-white/30 uppercase block text-[7px] font-black">24H Volume</span>
-            <span className="text-[#32FF8B] block truncate">{volumeLabel}</span>
+            <span className="text-foreground/30 uppercase block text-[7px] font-black">24H Volume</span>
+            <span className="text-primary block truncate">{volumeLabel}</span>
           </div>
         )}
       </div>

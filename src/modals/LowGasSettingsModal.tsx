@@ -75,7 +75,7 @@ export function LowGasSettingsModal({ isOpen, onClose }: LowGasSettingsModalProp
                 <button
                   type="button"
                   onClick={() => handleResetOne(n.symbol)}
-                  className="inline-flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-wider text-white/50 hover:text-[#32FF8B] transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-wider text-foreground/50 hover:text-primary transition-colors cursor-pointer"
                   title="Reset to default"
                 >
                   <RotateCcw className="w-3 h-3" />

@@ -65,7 +65,7 @@ export function HeroCard({
 
       <span
         aria-hidden
-        className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-white/10 blur-2xl"
+        className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-foreground/10 blur-2xl"
       />
 
       {children}

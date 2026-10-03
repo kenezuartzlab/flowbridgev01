@@ -36,15 +36,15 @@ const TYPE_STYLES: Record<NotificationType, { wrap: string; icon: string; iconCo
     titleFallback: 'Something went wrong',
   },
   info: {
-    wrap: 'bg-[#00D7B2]/10 border-[#00D7B2]/25 text-teal-200',
+    wrap: 'bg-accent/10 border-accent/25 text-teal-200',
     icon: 'Info',
-    iconColor: 'text-[#00D7B2]',
+    iconColor: 'text-accent',
     titleFallback: 'Info',
   },
   success: {
-    wrap: 'bg-[#32FF8B]/10 border-[#32FF8B]/25 text-emerald-200',
+    wrap: 'bg-primary/10 border-primary/25 text-emerald-200',
     icon: 'Check',
-    iconColor: 'text-[#32FF8B]',
+    iconColor: 'text-primary',
     titleFallback: 'Success',
   },
 };
@@ -72,15 +72,15 @@ export function WarningPanel({
       </div>
       <div className="flex-1 min-w-0">
         {title && (
-          <span className="font-bold font-mono tracking-tight text-[#FFFFFF] block mb-1 text-sm uppercase">{title}</span>
+          <span className="font-bold font-mono tracking-tight text-foreground block mb-1 text-sm uppercase">{title}</span>
         )}
         <span className="text-[13px] font-medium leading-normal block break-words">{message}</span>
 
         {steps && steps.length > 0 && (
-          <ul className="mt-2 space-y-1 text-[12.5px] leading-snug text-white/85">
+          <ul className="mt-2 space-y-1 text-[12.5px] leading-snug text-foreground/85">
             {steps.map((s, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className={cn('mt-0.5 w-4 h-4 flex items-center justify-center rounded-full text-[10px] font-black shrink-0', styles.iconColor, 'bg-white/10')}>
+                <span className={cn('mt-0.5 w-4 h-4 flex items-center justify-center rounded-full text-[10px] font-black shrink-0', styles.iconColor, 'bg-foreground/10')}>
                   {i + 1}
                 </span>
                 <span className="break-words">{s}</span>
@@ -93,7 +93,7 @@ export function WarningPanel({
           <button
             type="button"
             onClick={onAction}
-            className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 hover:bg-white/15 border border-white/15 rounded-lg text-[11.5px] font-black tracking-widest uppercase text-white cursor-pointer transition-colors"
+            className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-foreground/10 hover:bg-foreground/15 border border-foreground/15 rounded-lg text-[11.5px] font-black tracking-widest uppercase text-foreground cursor-pointer transition-colors"
           >
             <Settings className="w-3 h-3" />
             <span>{actionLabel}</span>
@@ -102,15 +102,15 @@ export function WarningPanel({
 
         {txHash && (
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5 font-mono text-[12px]">
-            <span className="text-[#C5C1B9]/50 uppercase tracking-wider font-semibold">Tx Hash:</span>
+            <span className="text-muted/50 uppercase tracking-wider font-semibold">Tx Hash:</span>
             <a
               href={txUrlPrefix ? `${txUrlPrefix}${txHash}` : '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-1 bg-[#32FF8B]/10 hover:bg-[#32FF8B]/20 border border-[#32FF8B]/25 text-[#32FF8B] rounded-lg transition-colors hover:border-[#32FF8B]/40 active:scale-95 group font-bold font-mono"
+              className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/25 text-primary rounded-lg transition-colors hover:border-primary/40 active:scale-95 group font-bold font-mono"
             >
               <span>{truncateHash(txHash)}</span>
-              <ExternalLink className="w-3 h-3 text-[#32FF8B] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+              <ExternalLink className="w-3 h-3 text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </a>
           </div>
         )}

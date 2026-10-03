@@ -125,7 +125,7 @@ export function ConfirmDestinationModal({
                 className={cn(
                   "p-1.5 rounded-lg border transition-all cursor-pointer active:scale-90",
                   copied 
-                    ? "bg-[#32FF8B]/10 text-[#32FF8B] border-[#32FF8B]/20 animate-none" 
+                    ? "bg-primary/10 text-primary border-primary/20 animate-none" 
                     : "bg-card text-muted hover:text-primary border-hairline hover:border-primary/20"
                 )}
               >

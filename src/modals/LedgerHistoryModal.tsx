@@ -46,9 +46,9 @@ export function LedgerHistoryModal({
         className="bg-card border border-hairline text-foreground rounded-[20px] sm:rounded-[24px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[400px] p-4 sm:p-5 shadow-2xl relative flex flex-col animate-scale-up border-b-[5px] border-b-primary"
       >
         {/* Header */}
-        <div className="flex justify-between items-center pb-3 border-b border-white/5 font-mono">
+        <div className="flex justify-between items-center pb-3 border-b border-foreground/5 font-mono">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="p-1.5 bg-[#32FF8B]/10 text-[#32FF8B] rounded-lg shrink-0">
+            <div className="p-1.5 bg-primary/10 text-primary rounded-lg shrink-0">
               <Database className="w-5 h-5" />
             </div>
             <div className="min-w-0">
@@ -56,7 +56,7 @@ export function LedgerHistoryModal({
                 Swap / Bridge History
               </h3>
               {email && (
-                <p className="text-[13px] text-[#00D7B2] font-semibold truncate" title={email}>
+                <p className="text-[13px] text-accent font-semibold truncate" title={email}>
                   {email}
                 </p>
               )}
@@ -98,8 +98,8 @@ export function LedgerHistoryModal({
                     <div className="flex items-center gap-1.5 font-mono">
                       <span className={`px-1.5 py-0.5 text-[11px] font-black rounded ${
                         type === 'BRIDGE'
-                          ? 'bg-[#00D7B2]/10 text-[#00D7B2] border border-[#00D7B2]/25'
-                          : 'bg-[#32FF8B]/10 text-[#32FF8B] border border-[#32FF8B]/25'
+                          ? 'bg-accent/10 text-accent border border-accent/25'
+                          : 'bg-primary/10 text-primary border border-primary/25'
                       }`}>
                         {type}
                       </span>
@@ -107,28 +107,28 @@ export function LedgerHistoryModal({
                         {formatDirection(direction)}
                       </span>
                     </div>
-                    <div className="text-[14px] text-[#C5C1B9] mt-2 flex items-center gap-1.5 font-mono">
-                      <span className="font-bold text-[#F0F7F3]">{fromAmount}</span>
-                      <ArrowRight className="w-3 h-3 text-[#32FF8B]" />
-                      <span className="font-bold text-[#F0F7F3]">{toAmount}</span>
+                    <div className="text-[14px] text-muted mt-2 flex items-center gap-1.5 font-mono">
+                      <span className="font-bold text-foreground">{fromAmount}</span>
+                      <ArrowRight className="w-3 h-3 text-primary" />
+                      <span className="font-bold text-foreground">{toAmount}</span>
                     </div>
                     {txHash && (
                       <a
                         href={`${isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}${txHash}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[#32FF8B] hover:underline font-mono text-[12px] mt-1.5 truncate max-w-[180px] inline-flex items-center gap-0.5"
+                        className="text-primary hover:underline font-mono text-[12px] mt-1.5 truncate max-w-[180px] inline-flex items-center gap-0.5"
                       >
                         Tx: {txHash.substring(0, 8)}...{txHash.substring(txHash.length - 6)}
                       </a>
                     )}
                   </div>
                   <div className="text-right shrink-0 flex flex-col items-end gap-1.5 font-mono">
-                    <span className="text-[12px] text-[#C5C1B9] block">
+                    <span className="text-[12px] text-muted block">
                       {formatTime(createdAt)}
                     </span>
-                    <div className="flex items-center gap-1 bg-[#32FF8B]/10 border border-[#32FF8B]/25 text-[#32FF8B] px-1.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider">
-                      <CheckCircle2 className="w-3 h-3 text-[#32FF8B]" />
+                    <div className="flex items-center gap-1 bg-primary/10 border border-primary/25 text-primary px-1.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider">
+                      <CheckCircle2 className="w-3 h-3 text-primary" />
                       {status}
                     </div>
                   </div>

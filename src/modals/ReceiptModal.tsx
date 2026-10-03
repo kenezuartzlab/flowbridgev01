@@ -89,59 +89,59 @@ export function ReceiptModal({
         <div className="relative w-36 h-32 flex items-center justify-center mt-2 select-none">
           {/* Sparkle indicators around head */}
 
-          <div className="absolute top-1 right-6 text-[#32FF8B] animate-pulse duration-1000">
-            <Sparkles className="w-5 h-5 fill-[#32FF8B]" />
+          <div className="absolute top-1 right-6 text-primary animate-pulse duration-1000">
+            <Sparkles className="w-5 h-5 fill-primary" />
           </div>
-          <div className="absolute bottom-5 left-4 text-[#00D7B2] animate-pulse duration-700">
+          <div className="absolute bottom-5 left-4 text-accent animate-pulse duration-700">
             <Sparkles className="w-4 h-4" />
           </div>
 
           {/* Main 3D Gold Character Coin */}
-          <div className="relative w-24 h-24 rounded-full bg-gradient-to-tr from-[#32FF8B] via-[#00D7B2] to-teal-300 border-4 border-white/20 shadow-2xl flex flex-col items-center justify-center overflow-hidden">
+          <div className="relative w-24 h-24 rounded-full bg-gradient-to-tr from-primary via-accent to-teal-300 border-4 border-foreground/20 shadow-2xl flex flex-col items-center justify-center overflow-hidden">
 
             {/* Embedded inner coin rim */}
-            <div className="absolute inset-1.5 rounded-full border-2 border-dashed border-white/20 animate-spin duration-[20s]" />
+            <div className="absolute inset-1.5 rounded-full border-2 border-dashed border-foreground/20 animate-spin duration-[20s]" />
             
             {/* Glossy lighting highlights */}
-            <div className="absolute top-0 inset-x-0 h-10 bg-white/20 rounded-full blur-sm -translate-y-5" />
+            <div className="absolute top-0 inset-x-0 h-10 bg-foreground/20 rounded-full blur-sm -translate-y-5" />
 
             {/* Cool sunglasses (retro-brutal theme) */}
             <div className="relative z-15 flex items-center justify-center gap-1.25 mt-2">
-              <div className="relative w-8 h-5.5 bg-[#010C1B] rounded-b-xl rounded-t-sm shadow-md border border-white/10 overflow-hidden flex items-end justify-center">
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent w-full h-full transform skew-x-12" />
-                <div className="text-[6px] text-[#32FF8B] font-mono select-none leading-none opacity-50 pb-1">ECO</div>
+              <div className="relative w-8 h-5.5 bg-background rounded-b-xl rounded-t-sm shadow-md border border-foreground/10 overflow-hidden flex items-end justify-center">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/10 to-transparent w-full h-full transform skew-x-12" />
+                <div className="text-[6px] text-primary font-mono select-none leading-none opacity-50 pb-1">ECO</div>
               </div>
-              <div className="w-2 h-0.5 bg-[#010C1B]" />
-              <div className="relative w-8 h-5.5 bg-[#010C1B] rounded-b-xl rounded-t-sm shadow-md border border-white/10 overflow-hidden flex items-end justify-center">
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent w-full h-full transform skew-x-12" />
-                <div className="text-[6px] text-[#32FF8B] font-mono select-none leading-none opacity-50 pb-1">ECO</div>
+              <div className="w-2 h-0.5 bg-background" />
+              <div className="relative w-8 h-5.5 bg-background rounded-b-xl rounded-t-sm shadow-md border border-foreground/10 overflow-hidden flex items-end justify-center">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/10 to-transparent w-full h-full transform skew-x-12" />
+                <div className="text-[6px] text-primary font-mono select-none leading-none opacity-50 pb-1">ECO</div>
               </div>
             </div>
 
             {/* Mischievous smile */}
-            <div className="w-7 h-3 border-b-[3px] border-[#010C1B] rounded-b-full mt-2 relative z-10" />
+            <div className="w-7 h-3 border-b-[3px] border-background rounded-b-full mt-2 relative z-10" />
 
             {/* Rose cheeks */}
-            <div className="absolute bottom-6 left-5 w-3 h-1.5 bg-[#32FF8B]/40 rounded-full blur-[1px]" />
-            <div className="absolute bottom-6 right-5 w-3 h-1.5 bg-[#32FF8B]/40 rounded-full blur-[1px]" />
+            <div className="absolute bottom-6 left-5 w-3 h-1.5 bg-primary/40 rounded-full blur-[1px]" />
+            <div className="absolute bottom-6 right-5 w-3 h-1.5 bg-primary/40 rounded-full blur-[1px]" />
           </div>
 
           {/* Golden gesture hand sign */}
           <div className="absolute -right-1 bottom-4 w-12 h-12 flex items-center justify-center">
-            <div className="bg-[#0D1C2A] text-sm p-1.5 rounded-xl border border-white/10 shadow-lg transform rotate-12 flex items-center justify-center font-bold">
+            <div className="bg-card text-sm p-1.5 rounded-xl border border-foreground/10 shadow-lg transform rotate-12 flex items-center justify-center font-bold">
               🤙
             </div>
           </div>
           
           {/* Success Check badge */}
-          <div className={`absolute -bottom-1 left-7 text-[#010C1B] p-1 rounded-full border-2 border-[#0D1C2A] shadow-md animate-bounce ${status === 'success' ? 'bg-[#32FF8B]' : 'bg-red-400'}`}>
+          <div className={`absolute -bottom-1 left-7 text-primary-foreground p-1 rounded-full border-2 border-card shadow-md animate-bounce ${status === 'success' ? 'bg-primary' : 'bg-red-400'}`}>
             {status === 'success' ? <CheckCircle className="w-5 h-5 fill-none" /> : <XCircle className="w-5 h-5 fill-none" />}
           </div>
         </div>
 
         {/* Dynamic content descriptors */}
         <div className="space-y-1 text-center font-sans">
-          <span className="text-[11px] font-black uppercase text-[#C5C1B9] tracking-widest leading-none font-mono">
+          <span className="text-[11px] font-black uppercase text-muted tracking-widest leading-none font-mono">
             Final blockchain receipt
           </span>
           <h3 className="text-[15px] font-black text-foreground uppercase tracking-wide font-mono">
@@ -149,7 +149,7 @@ export function ReceiptModal({
               ? (txType === 'bridge' ? 'Bridge Submitted' : 'Swap Confirmed On-Chain')
               : (txType === 'bridge' ? 'Bridge Failed On-Chain' : 'Swap Failed On-Chain')}
           </h3>
-          <p className="text-[12px] text-[#C5C1B9] px-2 max-w-[280px] mx-auto leading-snug">
+          <p className="text-[12px] text-muted px-2 max-w-[280px] mx-auto leading-snug">
             {status === 'success'
               ? (txType === 'bridge'
                   ? 'Your bridge transaction was sent. Please wait and track your transaction until the funds arrive on the destination chain.'
@@ -188,7 +188,7 @@ export function ReceiptModal({
         </button>
 
         {txType === 'swap' && (
-          <p className="text-[10px] text-[#C5C1B9]/60 text-center leading-snug px-2">
+          <p className="text-[10px] text-muted/60 text-center leading-snug px-2">
             A 0.1% platform fee was charged by FlowBridge for this swap.
           </p>
         )}

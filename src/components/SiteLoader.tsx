@@ -39,7 +39,7 @@ export function SiteLoader({ onDone, minDurationMs = 900 }: SiteLoaderProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#010C1B] transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background transition-opacity duration-300 ${
         phase === 'out' ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
       aria-hidden={phase !== 'in'}
@@ -47,8 +47,8 @@ export function SiteLoader({ onDone, minDurationMs = 900 }: SiteLoaderProps) {
       aria-label="Loading FlowBridge"
     >
       {/* Ambient glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-[#32FF8B]/10 blur-[120px] animate-pulse" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] h-[260px] rounded-full bg-[#00D7B2]/10 blur-[80px] animate-pulse" style={{ animationDelay: '0.4s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-primary/10 blur-[120px] animate-pulse" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] h-[260px] rounded-full bg-accent/10 blur-[80px] animate-pulse" style={{ animationDelay: '0.4s' }} />
 
       {/* Grid backdrop */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(50,255,139,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(50,255,139,0.04)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
@@ -57,11 +57,11 @@ export function SiteLoader({ onDone, minDurationMs = 900 }: SiteLoaderProps) {
       <div className="relative z-10 flex flex-col items-center gap-6">
         <div className="relative">
           {/* Rotating ring */}
-          <div className="absolute -inset-6 rounded-full border border-[#32FF8B]/25 border-t-[#32FF8B] animate-spin-slow" />
-          <div className="absolute -inset-10 rounded-full border border-[#00D7B2]/15 border-b-[#00D7B2]/60 animate-spin-reverse" />
+          <div className="absolute -inset-6 rounded-full border border-primary/25 border-t-[#32FF8B] animate-spin-slow" />
+          <div className="absolute -inset-10 rounded-full border border-accent/15 border-b-[#00D7B2]/60 animate-spin-reverse" />
 
           {/* Logo — masked reveal + pulse */}
-          <div className="relative w-[128px] h-[128px] rounded-2xl overflow-hidden bg-[#0D1C2A] border border-white/10 shadow-[0_0_40px_rgba(50,255,139,0.35)]">
+          <div className="relative w-[128px] h-[128px] rounded-2xl overflow-hidden bg-card border border-foreground/10 shadow-[0_0_40px_rgba(50,255,139,0.35)]">
             <img
               src={logo}
               alt="FlowBridge"
@@ -74,21 +74,21 @@ export function SiteLoader({ onDone, minDurationMs = 900 }: SiteLoaderProps) {
             />
             {/* Scanline sweep */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className="absolute inset-x-0 h-[40%] bg-gradient-to-b from-transparent via-[#32FF8B]/25 to-transparent animate-scan" />
+              <div className="absolute inset-x-0 h-[40%] bg-gradient-to-b from-transparent via-primary/25 to-transparent animate-scan" />
             </div>
           </div>
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <h1 className="font-mono text-white text-lg tracking-[0.35em] font-black uppercase">
-            Flow<span className="text-[#32FF8B]">Bridge</span>
+          <h1 className="font-mono text-foreground text-lg tracking-[0.35em] font-black uppercase">
+            Flow<span className="text-primary">Bridge</span>
           </h1>
           <div className="flex items-center gap-1.5 mt-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#32FF8B] animate-dot-bounce" />
-            <span className="w-1.5 h-1.5 rounded-full bg-[#32FF8B] animate-dot-bounce" style={{ animationDelay: '0.15s' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-[#32FF8B] animate-dot-bounce" style={{ animationDelay: '0.3s' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-bounce" />
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-bounce" style={{ animationDelay: '0.15s' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-bounce" style={{ animationDelay: '0.3s' }} />
           </div>
-          <p className="font-mono text-[10px] tracking-[0.3em] text-[#C5C1B9]/70 uppercase mt-1">
+          <p className="font-mono text-[10px] tracking-[0.3em] text-muted/70 uppercase mt-1">
             Routing liquidity…
           </p>
         </div>

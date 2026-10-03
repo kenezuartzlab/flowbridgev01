@@ -99,7 +99,7 @@ export function ConfirmSwapModal({
 
           {/* Receive Amount Box */}
           <div className="flex justify-between items-center gap-2 pt-1.5">
-            <span className="text-2xl font-black text-[#32FF8B] tracking-tight truncate font-mono">
+            <span className="text-2xl font-black text-primary tracking-tight truncate font-mono">
               {parseFloat(toAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
             <div className="flex items-center gap-1.5 shrink-0">
@@ -119,7 +119,7 @@ export function ConfirmSwapModal({
             </div>
             <div className="flex justify-between gap-2 text-muted">
               <span className="text-[11px] uppercase font-bold tracking-wider font-mono">Destination network</span>
-              <span className="font-bold text-[#32FF8B] uppercase font-mono text-[11px]">{toChain}</span>
+              <span className="font-bold text-primary uppercase font-mono text-[11px]">{toChain}</span>
             </div>
           </div>
         )}
@@ -138,7 +138,7 @@ export function ConfirmSwapModal({
             <span className="uppercase tracking-wider">Price Rate</span>
             <div className="flex items-center gap-1.5 font-bold text-foreground">
               <span>{priceRate}</span>
-              <RefreshCw className="w-3 h-3 text-[#32FF8B] cursor-pointer hover:text-[#1FFF7D]" />
+              <RefreshCw className="w-3 h-3 text-primary cursor-pointer hover:text-primary" />
             </div>
           </div>
 
@@ -146,7 +146,7 @@ export function ConfirmSwapModal({
             <span className="uppercase tracking-wider">Price impact</span>
             <span className={cn(
               "font-bold", 
-              parseFloat(priceImpact) > 5 ? "text-amber-400" : "text-[#32FF8B]"
+              parseFloat(priceImpact) > 5 ? "text-amber-400" : "text-primary"
             )}>
               {priceImpact}
             </span>
@@ -154,7 +154,7 @@ export function ConfirmSwapModal({
 
           <div className="flex justify-between items-center text-muted">
             <span className="uppercase tracking-wider">Slippage</span>
-            <span className="px-1.5 py-0.5 bg-[#32FF8B]/10 border border-[#32FF8B]/25 rounded text-[12px] font-black text-[#32FF8B]">
+            <span className="px-1.5 py-0.5 bg-primary/10 border border-primary/25 rounded text-[12px] font-black text-primary">
               {slippageTolerance}
             </span>
           </div>
@@ -168,13 +168,13 @@ export function ConfirmSwapModal({
 
           <div className="flex justify-between items-center text-muted">
             <span className="uppercase tracking-wider">Trading Fee</span>
-            <span className="font-bold text-[#32FF8B]">{tradingFee}</span>
+            <span className="font-bold text-primary">{tradingFee}</span>
           </div>
 
           {!isBridge && (
             <div className="flex justify-between items-center text-muted">
               <span className="uppercase tracking-wider">Platform Fee</span>
-              <span className="font-bold text-[#32FF8B]">{platformFee}</span>
+              <span className="font-bold text-primary">{platformFee}</span>
             </div>
           )}
 

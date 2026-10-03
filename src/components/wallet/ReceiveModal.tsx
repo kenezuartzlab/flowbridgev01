@@ -95,7 +95,7 @@ export function ReceiveModal({ isOpen, onClose, address, networkLabel, chainId }
         </div>
 
         <div className="fb-inset mt-4 space-y-4 rounded-3xl p-4 text-center">
-          <div className="mx-auto w-full max-w-[240px] rounded-2xl bg-white p-3">
+          <div className="mx-auto w-full max-w-[240px] rounded-2xl bg-foreground p-3">
             {qr ? (
               <img src={qr} alt={`QR code for wallet address ${address}`} className="h-auto w-full" />
             ) : (

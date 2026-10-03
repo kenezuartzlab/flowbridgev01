@@ -78,7 +78,7 @@ export function WaitingModal({
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 hover:bg-white/5 rounded-xl text-[#C5C1B9] hover:text-white transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -86,12 +86,12 @@ export function WaitingModal({
         {/* Glowing Coin Swap Animation with Ecosurge theme */}
         <div className="relative w-24 h-24 flex items-center justify-center">
 
-          <div className="absolute inset-0 rounded-full border border-[#32FF8B]/15 animate-ping duration-1000" />
-          <div className="absolute inset-2 rounded-full border border-[#00D7B2]/10 animate-[pulse_2s_infinite]" />
-          <div className="absolute inset-0 w-full h-full border-2 border-dashed border-[#32FF8B]/20 rounded-full animate-spin duration-[15s]" />
+          <div className="absolute inset-0 rounded-full border border-primary/15 animate-ping duration-1000" />
+          <div className="absolute inset-2 rounded-full border border-accent/10 animate-[pulse_2s_infinite]" />
+          <div className="absolute inset-0 w-full h-full border-2 border-dashed border-primary/20 rounded-full animate-spin duration-[15s]" />
 
           <div className="relative flex flex-col items-center justify-center">
-            <div className="relative flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-[#010C1B] to-[#0D1C2A] rounded-full border border-white/10 shadow-xl">
+            <div className="relative flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-background to-card rounded-full border border-foreground/10 shadow-xl">
               <div className="absolute top-1 right-1 z-0 animate-[bounce_2s_infinite_100ms]">
                 <TokenIcon symbol={toSymbol} size={28} />
               </div>
@@ -100,7 +100,7 @@ export function WaitingModal({
               </div>
             </div>
 
-            <div className="absolute -bottom-1 -left-1 bg-[#32FF8B] text-[#010C1B] p-1 rounded-full animate-spin duration-[6s] border border-[#32FF8B]/50 shadow-[0_0_12px_rgba(50,255,139,0.5)]">
+            <div className="absolute -bottom-1 -left-1 bg-primary text-primary-foreground p-1 rounded-full animate-spin duration-[6s] border border-primary/50 shadow-[0_0_12px_rgba(50,255,139,0.5)]">
               <RefreshCw className="w-3 h-3" />
             </div>
           </div>
@@ -108,49 +108,49 @@ export function WaitingModal({
 
         {/* Title descriptions */}
         <div className="space-y-1 font-sans w-full">
-          <h4 className="text-sm font-black text-white uppercase tracking-wider font-mono">
+          <h4 className="text-sm font-black text-foreground uppercase tracking-wider font-mono">
             Transaction Processing
           </h4>
           
-          <p className="text-[13px] font-semibold text-white/90 px-2 leading-tight">
-            Swapping <strong className="text-[#32FF8B] font-mono">{parseFloat(fromAmount || "0").toFixed(4)} {fromSymbol}</strong> for <strong className="text-[#32FF8B] font-mono">{parseFloat(toAmount || "0").toFixed(4)} {toSymbol}</strong>
+          <p className="text-[13px] font-semibold text-foreground/90 px-2 leading-tight">
+            Swapping <strong className="text-primary font-mono">{parseFloat(fromAmount || "0").toFixed(4)} {fromSymbol}</strong> for <strong className="text-primary font-mono">{parseFloat(toAmount || "0").toFixed(4)} {toSymbol}</strong>
           </p>
         </div>
 
         {/* Live Swap Milestones Indicator Panel */}
-        <div className="w-full bg-[#010C1B]/80 border border-white/5 rounded-xl p-3 space-y-2 text-left font-mono text-[11px]">
+        <div className="w-full bg-background/80 border border-foreground/5 rounded-xl p-3 space-y-2 text-left font-mono text-[11px]">
 
           {/* Sign Transaction Milestone */}
           <div className="flex items-center justify-between">
-            <span className="text-[#C5C1B9]">1. Wallet Signature approved</span>
+            <span className="text-muted">1. Wallet Signature approved</span>
             <div className="shrink-0 ml-2">
-              {subStage1 === 'loading' && <Loader2 className="w-3 h-3 text-[#32FF8B] animate-spin" />}
-              {subStage1 === 'done' && <Check className="w-3.5 h-3.5 text-[#32FF8B] bg-[#32FF8B]/10 rounded border border-[#32FF8B]/20 p-0.5" />}
+              {subStage1 === 'loading' && <Loader2 className="w-3 h-3 text-primary animate-spin" />}
+              {subStage1 === 'done' && <Check className="w-3.5 h-3.5 text-primary bg-primary/10 rounded border border-primary/20 p-0.5" />}
             </div>
           </div>
 
           {/* Broadcast Contract Transaction Milestone */}
           <div className="flex items-center justify-between">
-            <span className="text-[#C5C1B9]">2. Routing BOT Chain swap request</span>
+            <span className="text-muted">2. Routing BOT Chain swap request</span>
             <div className="shrink-0 ml-2">
               {subStage2 === 'loading' && <Loader2 className="w-3 h-3 text-amber-400 animate-spin" />}
-              {subStage2 === 'done' && <Check className="w-3.5 h-3.5 text-[#32FF8B] bg-[#32FF8B]/10 rounded border border-[#32FF8B]/20 p-0.5" />}
-              {subStage2 === 'pending' && <div className="w-2.5 h-2.5 rounded-full border border-dashed border-white/30" />}
+              {subStage2 === 'done' && <Check className="w-3.5 h-3.5 text-primary bg-primary/10 rounded border border-primary/20 p-0.5" />}
+              {subStage2 === 'pending' && <div className="w-2.5 h-2.5 rounded-full border border-dashed border-foreground/30" />}
             </div>
           </div>
 
           {/* VM Execution Validation Milestone */}
           <div className="flex items-center justify-between">
-            <span className="text-[#C5C1B9]">3. Final blockchain receipt</span>
+            <span className="text-muted">3. Final blockchain receipt</span>
             <div className="shrink-0 ml-2">
               {subStage3 === 'loading' && <Loader2 className="w-3 h-3 text-teal-400 animate-spin" />}
-              {subStage3 === 'done' && <Check className="w-3.5 h-3.5 text-[#32FF8B] bg-[#32FF8B]/10 rounded border border-[#32FF8B]/20 p-0.5" />}
-              {subStage3 === 'pending' && <div className="w-2.5 h-2.5 rounded-full border border-dashed border-white/30" />}
+              {subStage3 === 'done' && <Check className="w-3.5 h-3.5 text-primary bg-primary/10 rounded border border-primary/20 p-0.5" />}
+              {subStage3 === 'pending' && <div className="w-2.5 h-2.5 rounded-full border border-dashed border-foreground/30" />}
             </div>
           </div>
         </div>
 
-        <p className="text-[10px] text-[#C5C1B9] leading-snug uppercase tracking-wide font-mono">
+        <p className="text-[10px] text-muted leading-snug uppercase tracking-wide font-mono">
           Please do not close this window while the chain confirms final success or fail status.
         </p>
       </div>

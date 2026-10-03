@@ -32,11 +32,11 @@ export function RouteProgress({ session, onStepClick }: RouteProgressProps) {
           let icon = <span className="text-[12px] font-bold">{idx + 1}</span>;
 
           if (status === 'done') {
-            circleClasses = "bg-emerald-500 text-white shadow-sm shadow-emerald-500/20";
+            circleClasses = "bg-emerald-500 text-foreground shadow-sm shadow-emerald-500/20";
             textClasses = "text-slate-500";
             icon = <Check className="w-3.5 h-3.5" strokeWidth={3.5} />;
           } else if (status === 'submitted') {
-            circleClasses = "bg-blue-600 text-white shadow-sm shadow-blue-500/20";
+            circleClasses = "bg-blue-600 text-foreground shadow-sm shadow-blue-500/20";
             textClasses = "text-blue-600";
             icon = <Clock className="w-3.5 h-3.5" strokeWidth={3.5} />;
           } else {
@@ -45,7 +45,7 @@ export function RouteProgress({ session, onStepClick }: RouteProgressProps) {
                  (idx === 2 && session.step2.status === 'done' && session.step3.status === 'pending');
              
              if (isCurrentPending) {
-               circleClasses = "bg-blue-600 text-white shadow-sm shadow-blue-500/20";
+               circleClasses = "bg-blue-600 text-foreground shadow-sm shadow-blue-500/20";
                textClasses = "text-blue-600";
              }
           }
