@@ -189,7 +189,7 @@ function TabBody({ tab, r }: { tab: Tab; r: OpsReport }) {
   switch (tab) {
     case "Overview":
       return (
-        <div className={`${grid} min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-4 pr-0.5 touch-pan-y sm:overflow-visible sm:pb-0 sm:pr-0`}>
+        <div className={grid}>
           <Card title="Production">
             <Row k="Production status" v={<Badge value={r.overview.productionStatus} />} />
             <Row k="Active networks" v={r.overview.activeNetworks.join(", ")} />
@@ -239,7 +239,7 @@ function TabBody({ tab, r }: { tab: Tab; r: OpsReport }) {
       const br = (rows: OpsReport["trade"]["byDex"]) => rows.map((x) => [x.key, x.quoteRequests, x.executableQuotes, x.noRoute, x.submitted, x.confirmed, x.reverted]);
       const cols = ["Key", "Quotes", "Routes", "No route", "Submitted", "Confirmed", "Reverted"];
       return (
-        <div className={grid}>
+        <div className={`${grid} min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-4 pr-0.5 touch-pan-y sm:overflow-visible sm:pb-0 sm:pr-0`}>
           <Card title="Route success funnel" note="Confirmed = successful chain receipt only. Quotes are never counted as trades."><Funnel stages={r.trade.funnel} /></Card>
           <Card title="Outcomes" note="Cancellation is a user choice, not a technical failure.">
             {r.trade.outcomes.map((o) => <Row key={o.key} k={o.label} v={o.count} />)}
