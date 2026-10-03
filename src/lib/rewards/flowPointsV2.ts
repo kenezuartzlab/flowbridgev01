@@ -140,7 +140,7 @@ export interface CoreSwapAward {
   award: number;
   /** Uncapped base, for audit/ledger metadata. */
   base: number;
-  reason: Extract<LedgerReason, "CORE_SWAP" | "DAILY_CAP_REACHED">;
+  reason: Extract<LedgerReason, "CORE_SWAP_V2" | "DAILY_CAP_REACHED">;
   /** Remaining daily headroom after this award. */
   remainingToday: number;
 }
@@ -161,7 +161,7 @@ export function coreSwapAward(
   return {
     award,
     base,
-    reason: base > 0 && award === 0 ? "DAILY_CAP_REACHED" : "CORE_SWAP",
+    reason: base > 0 && award === 0 ? "DAILY_CAP_REACHED" : "CORE_SWAP_V2",
     remainingToday: Math.max(0, headroom - award),
   };
 }
@@ -196,21 +196,21 @@ export function referralMilestonesDue(
   if (state.qualifiedSwapCount >= 1) {
     all.push({
       id: "FIRST_SWAP",
-      reason: "REFERRAL_MILESTONE_FIRST_SWAP",
+      reason: "REFERRAL_FIRST_QUALIFYING_SWAP",
       points: policy.referralMilestoneFirstSwap,
     });
   }
   if (state.qualifiedVolumeUsd >= policy.referralMilestoneVolumeUsd) {
     all.push({
       id: "VOLUME_100",
-      reason: "REFERRAL_MILESTONE_VOLUME_100",
+      reason: "REFERRAL_100_USD_VOLUME",
       points: policy.referralMilestoneVolume,
     });
   }
   if (state.qualifiedActiveDays >= policy.referralMilestoneActiveDays) {
     all.push({
       id: "ACTIVE_DAYS_3",
-      reason: "REFERRAL_MILESTONE_ACTIVE_DAYS_3",
+      reason: "REFERRAL_3_ACTIVE_DAYS",
       points: policy.referralMilestoneActiveDaysPoints,
     });
   }
