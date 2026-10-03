@@ -364,7 +364,11 @@ export async function createTransactionHistory(
       // priced server-side from the decoded tokenIn/amountIn only.
       const { ingestMainnetRouterV4Swap } = await import("@/lib/activity/mainnetRouterV4Ingest.server");
       const { recordReviewEntry } = await import("@/lib/rewards/flowPointsV2Ledger.server");
-      const ingest = await ingestMainnetRouterV4Swap(normalizedTxHash, submittedWallet);
+      // A persistence failure is already recorded as a diagnostic; the swap row
+      // stays at 0 points and remains retryable — never credited without evidence.
+      const ingest = await ingestMainnetRouterV4Swap(normalizedTxHash, submittedWallet).catch(
+        () => ({ status: "PERSISTENCE_FAILED" as const, reason: "persistence rejected" }),
+      );
       if (ingest.status === "VERIFIED" && v2Live) {
         if (ingest.verifiedUsd == null) {
           await recordReviewEntry({
