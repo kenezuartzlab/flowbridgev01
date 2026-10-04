@@ -443,6 +443,9 @@ function EarnPage() {
           <div className="border-t border-hairline p-4">
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.08em] text-muted">Referral rewards</p>
             <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1.5 text-[12px]">
+              <dt className="text-muted">FLOW Points earned</dt><dd className="font-bold">{user ? formatPts(Number(incentives?.flowPoints ?? 0)) : "—"} {PTS}</dd>
+              <dt className="text-muted">FLOW currently claimable</dt><dd className="font-bold">0 · unavailable</dd>
+              <dt className="col-span-2 pb-1 text-[10.5px] leading-relaxed text-muted-soft">FLOW Points are recorded under the approved 1:1 reward policy. Mainnet claims will open after funding and historical reconciliation are verified.</dt>
               <dt className="text-muted">New user signup bonus</dt><dd className="font-bold">100 {PTS} = 100 FLOW</dd>
               <dt className="text-muted">Referrer signup bonus</dt><dd className="font-bold">+100</dd>
               <dt className="col-span-2 pt-1 text-[10.5px] font-black uppercase tracking-[0.08em] text-muted">Activity milestones</dt>
