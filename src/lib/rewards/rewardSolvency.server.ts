@@ -65,8 +65,7 @@ export async function buildRewardSolvencyReport() {
   const milestoneSupported = recon.results.reduce((s, r) => s + r.breakdown.referralMilestone, 0);
   const milestoneRecorded = allRows.filter((r) => MILESTONE_REASONS.includes(r.reason)).reduce((s, r) => s + r.points, 0);
   const signupAwarded = allRows.filter((r) => r.reason === "SIGNUP_BONUS_REFEREE" || r.reason === "REFERRAL_SIGNUP_BONUS").reduce((s, r) => s + r.points, 0);
-  const activeReferrers = new Set(allRows.filter((r) => MILESTONE_REASONS.includes(r.reason) && r.createdAt >= since30).map((r) => r.id)).size > 0
-    ? new Set([...byUser.entries()].filter(([, rows]) => rows.some((r) => MILESTONE_REASONS.includes(r.reason))).map(([u]) => u)).size : 0;
+  const activeReferrers = [...byUser.values()].filter((rows) => rows.some((r) => MILESTONE_REASONS.includes(r.reason))).length;
 
   const budget = (id: string) => (budgets.data ?? []).find((b) => b.program_id === id);
   const reservedFor = (id: string) => (reservations.data ?? []).filter((r) => r.program_id === id).reduce((s, r) => s + r.points, 0);

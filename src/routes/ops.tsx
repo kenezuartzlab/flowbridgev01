@@ -6,6 +6,7 @@ import { useAccount, WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
 import { getIdToken } from "@/lib/auth";
 import type { OpsReport } from "@/lib/ops/opsReport.server";
+import { RewardsSolvencyTab } from "@/components/ops/RewardsSolvencyTab";
 
 export const Route = createFileRoute("/ops")({
   head: () => ({
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/ops")({
 });
 
 type PeriodKey = "today" | "7d" | "30d";
-const TABS = ["Overview", "Router V4", "Trade", "Liquidity Gaps", "Token Demand", "DEX Health", "Journey", "Engagement", "BOT Chain", "Indexing", "Errors", "Alerts", "Growth"] as const;
+const TABS = ["Overview", "Router V4", "Trade", "Liquidity Gaps", "Token Demand", "DEX Health", "Journey", "Engagement", "BOT Chain", "Indexing", "Errors", "Alerts", "Growth", "Rewards"] as const;
 type Tab = (typeof TABS)[number];
 
 async function fetchReport(period: PeriodKey, wallet: string | undefined): Promise<{ status: number; report: OpsReport | null; reason?: string }> {
@@ -179,7 +180,7 @@ function OpsPage() {
 
       {q.isLoading && <p className="text-[13px] text-muted">Running live read-only checks…</p>}
       {q.isError && <p className="text-[13px] text-danger">Operations report is temporarily unavailable. Status is UNKNOWN until it loads.</p>}
-      {r && <TabBody tab={tab} r={r} />}
+      {tab === "Rewards" ? <RewardsSolvencyTab wallet={address} /> : r && <TabBody tab={tab} r={r} />}
     </main>
   );
 }
