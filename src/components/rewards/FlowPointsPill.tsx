@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Gift, Loader2, LogIn, MailWarning, Wallet, Sparkles } from "lucide-react";
-import { FLOW_TOKEN, PTS, formatPts } from "@/lib/points";
+import { Gift, Loader2, LogIn, MailWarning, Wallet } from "lucide-react";
+import { PTS, formatPts } from "@/lib/points";
 
 /**
  * P2 — compact FLOW Points (PTS) pill in the header. Purely presentational: it
@@ -41,20 +41,13 @@ function resolveState({ googleUser, incentives, loading }: FlowPointsPillProps):
   if (!incentives.walletAddress) {
     return { icon: <Wallet className="w-3 h-3" />, label: "BIND", compact: true, title: "Bind your wallet to claim rewards", tone: "warn" };
   }
-  const claimable = Number(incentives.claimableTotal ?? 0);
+  // Mainnet FLOW claims are LOCKED: the pill shows earned FLOW Points only,
+  // never "FLOW available to claim".
   const total = Number(incentives.flowPoints ?? 0);
-  if (claimable > 0) {
-    return {
-      icon: <Sparkles className="w-3 h-3" />,
-      label: `${formatPts(claimable)} ${FLOW_TOKEN}`,
-      title: `${formatPts(claimable)} ${FLOW_TOKEN} available to claim`,
-      tone: "hot",
-    };
-  }
   return {
     icon: <Gift className="w-3 h-3" />,
     label: `${formatPts(total)} ${PTS}`,
-    title: "Swap to accrue more FLOW Points",
+    title: "FLOW Points earned. Mainnet FLOW claims open after funding and reconciliation are verified.",
     tone: "accent",
   };
 }

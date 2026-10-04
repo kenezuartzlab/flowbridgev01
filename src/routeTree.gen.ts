@@ -67,6 +67,7 @@ import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/a
 import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/admin.mainnet-release-freeze'
 import { Route as ApiAdminOpsRouteImport } from './routes/api/admin.ops'
 import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
+import { Route as ApiAdminRewardsSolvencyRouteImport } from './routes/api/admin.rewards-solvency'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
@@ -408,6 +409,11 @@ const ApiAdminPartnerGovernanceRoute =
     path: '/api/admin/partner-governance',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminRewardsSolvencyRoute = ApiAdminRewardsSolvencyRouteImport.update({
+  id: '/api/admin/rewards-solvency',
+  path: '/api/admin/rewards-solvency',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
   id: '/api/admin/settings',
   path: '/api/admin/settings',
@@ -677,6 +683,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
+  '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
@@ -778,6 +785,7 @@ export interface FileRoutesByTo {
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
+  '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
@@ -880,6 +888,7 @@ export interface FileRoutesById {
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
+  '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
@@ -983,6 +992,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-release-freeze'
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
+    | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
@@ -1084,6 +1094,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-release-freeze'
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
+    | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
@@ -1185,6 +1196,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-release-freeze'
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
+    | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/whoami'
@@ -1287,6 +1299,7 @@ export interface RootRouteChildren {
   ApiAdminMainnetReleaseFreezeRoute: typeof ApiAdminMainnetReleaseFreezeRoute
   ApiAdminOpsRoute: typeof ApiAdminOpsRoute
   ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
+  ApiAdminRewardsSolvencyRoute: typeof ApiAdminRewardsSolvencyRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
   ApiAdminWhoamiRoute: typeof ApiAdminWhoamiRoute
@@ -1727,6 +1740,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminPartnerGovernanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/rewards-solvency': {
+      id: '/api/admin/rewards-solvency'
+      path: '/api/admin/rewards-solvency'
+      fullPath: '/api/admin/rewards-solvency'
+      preLoaderRoute: typeof ApiAdminRewardsSolvencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/settings': {
       id: '/api/admin/settings'
       path: '/api/admin/settings'
@@ -2156,6 +2176,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminMainnetReleaseFreezeRoute: ApiAdminMainnetReleaseFreezeRoute,
   ApiAdminOpsRoute: ApiAdminOpsRoute,
   ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
+  ApiAdminRewardsSolvencyRoute: ApiAdminRewardsSolvencyRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
   ApiAdminWhoamiRoute: ApiAdminWhoamiRoute,

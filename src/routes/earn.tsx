@@ -255,9 +255,10 @@ function EarnPage() {
                 {
                   // V12.4A §6 — this is the remaining TOKEN payout delta, in FLOW,
                   // not a second points balance.
-                  label: "Available to claim",
-                  value: loading && !incentives ? "—" : formatPts(claimable),
-                  hint: `${FLOW_TOKEN} · ${formatPts(claimedTokens)} claimed`,
+                  // Mainnet FLOW claims are LOCKED until funding + reconciliation pass.
+                  label: "FLOW claimable",
+                  value: "0",
+                  hint: `${FLOW_TOKEN} · unavailable`,
                 },
                 {
                   label: "Campaign PTS",
@@ -332,20 +333,21 @@ function EarnPage() {
               <div className="space-y-2 border-t border-hairline p-4">
                 <button
                   type="button"
-                  disabled={!canClaim || claiming}
+                  disabled
+                  aria-disabled="true"
                   onClick={() => void claim()}
                   className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:opacity-45"
                 >
                   <Gift className="h-4 w-4" aria-hidden />
-                  {claiming ? "Converting…" : `Convert ${formatPts(claimable)} ${PTS}`}
+                  Mainnet claims locked
                 </button>
                 {claimMessage && (
                   <p className="text-[11.5px] leading-relaxed text-muted">{claimMessage}</p>
                 )}
                 <p className="text-[11px] leading-relaxed text-muted-soft">
-                  Converting moves eligible PTS into your claimable FLOW balance for the bound
-                  wallet. FLOW Points earned on BOT Mainnet are a verified reward score and are not
-                  automatically convertible to FLOW tokens.
+                  FLOW Points are recorded under the approved 1:1 reward policy. Mainnet claims will
+                  open after funding and historical reconciliation are verified. Nothing can be
+                  withdrawn as FLOW yet.
                 </p>
               </div>
             </Surface>
@@ -443,6 +445,9 @@ function EarnPage() {
           <div className="border-t border-hairline p-4">
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.08em] text-muted">Referral rewards</p>
             <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1.5 text-[12px]">
+              <dt className="text-muted">FLOW Points earned</dt><dd className="font-bold">{user ? formatPts(Number(incentives?.flowPoints ?? 0)) : "—"} {PTS}</dd>
+              <dt className="text-muted">FLOW currently claimable</dt><dd className="font-bold">0 · unavailable</dd>
+              <dt className="col-span-2 pb-1 text-[10.5px] leading-relaxed text-muted-soft">FLOW Points are recorded under the approved 1:1 reward policy. Mainnet claims will open after funding and historical reconciliation are verified.</dt>
               <dt className="text-muted">New user signup bonus</dt><dd className="font-bold">100 {PTS} = 100 FLOW</dd>
               <dt className="text-muted">Referrer signup bonus</dt><dd className="font-bold">+100</dd>
               <dt className="col-span-2 pt-1 text-[10.5px] font-black uppercase tracking-[0.08em] text-muted">Activity milestones</dt>

@@ -281,8 +281,8 @@ export function FlowTokenClaimCard({
           Rewards are paid from a finite, pre-funded FLOW allocation — nothing is ever minted, and a
           claim can only pay FLOW the distributor already holds. On BOT Mainnet, rewards will be
           distributed by the budgeted epoch distributor, where each reward epoch must be funded and
-          reserved on chain before anyone can claim it. Mainnet claims stay disabled until that
-          distributor is deployed under approved governance.
+          reserved on chain before anyone can claim it. FLOW Points are recorded under the approved 1:1
+          reward policy. Mainnet claims will open after funding and historical reconciliation are verified.
         </p>
       </div>
     </Surface>
