@@ -798,6 +798,25 @@ export async function getUserPointsAndReferrals(userId: string) {
     (settings as any)?.dailyCoreSwapCap ?? DEFAULT_FLOW_POINTS_V2_POLICY.dailyCoreSwapCap,
   );
 
+  // Funded signup bonus — ledger-only (never mirrored into the profile aggregate).
+  const { data: fundRows } = await supabaseAdmin
+    .from("flow_points_ledger")
+    .select("points, reason, funding_state, metadata")
+    .eq("user_id", userId)
+    .in("reason", ["SIGNUP_BONUS_REFEREE", "REFERRAL_SIGNUP_BONUS"]);
+  const signupRows = (fundRows ?? []) as any[];
+  const signupBonusPoints = signupRows
+    .filter((r) => r.reason === "SIGNUP_BONUS_REFEREE")
+    .reduce((s, r) => s + Number(r.points ?? 0), 0);
+  const referrerSignupBonusPoints = signupRows
+    .filter((r) => r.reason === "REFERRAL_SIGNUP_BONUS")
+    .reduce((s, r) => s + Number(r.points ?? 0), 0);
+  const signupPaidReferees = new Set(
+    signupRows.filter((r) => r.reason === "REFERRAL_SIGNUP_BONUS").map((r) => String(r.metadata?.refereeId ?? "")),
+  );
+  const { getSignupProgramStatus } = await import("@/lib/rewards/signupBonus.server");
+  const signupProgram = await getSignupProgramStatus();
+
   // Referral V2 — privacy-safe per-referral progress (no email / wallet).
   const { utcMonthKey } = await import("@/lib/rewards/flowPointsV2");
   const referralStatuses: Array<{
@@ -845,25 +864,6 @@ export async function getUserPointsAndReferrals(userId: string) {
       });
     });
   }
-
-  // Funded signup bonus — ledger-only (never mirrored into the profile aggregate).
-  const { data: fundRows } = await supabaseAdmin
-    .from("flow_points_ledger")
-    .select("points, reason, funding_state, metadata")
-    .eq("user_id", userId)
-    .in("reason", ["SIGNUP_BONUS_REFEREE", "REFERRAL_SIGNUP_BONUS"]);
-  const signupRows = (fundRows ?? []) as any[];
-  const signupBonusPoints = signupRows
-    .filter((r) => r.reason === "SIGNUP_BONUS_REFEREE")
-    .reduce((s, r) => s + Number(r.points ?? 0), 0);
-  const referrerSignupBonusPoints = signupRows
-    .filter((r) => r.reason === "REFERRAL_SIGNUP_BONUS")
-    .reduce((s, r) => s + Number(r.points ?? 0), 0);
-  const signupPaidReferees = new Set(
-    signupRows.filter((r) => r.reason === "REFERRAL_SIGNUP_BONUS").map((r) => String(r.metadata?.refereeId ?? "")),
-  );
-  const { getSignupProgramStatus } = await import("@/lib/rewards/signupBonus.server");
-  const signupProgram = await getSignupProgramStatus();
 
   return {
     signupBonusPoints,
