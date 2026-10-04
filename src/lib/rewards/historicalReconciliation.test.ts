@@ -132,3 +132,19 @@ describe("solvency, funding and payout readiness", () => {
     expect(MAINNET_PROMOTION_PACKAGE).toHaveLength(11);
   });
 });
+
+describe("publish state: signup live, claims locked", async () => {
+  const fs = await import("node:fs");
+  const { isFlowConversionPolicyApprovedForChain } = await import("./flowConversionPolicy");
+  const sb = await import("./signupBonusPolicy");
+  it("keeps Mainnet conversion unapproved and the legacy claim path locked", () => {
+    expect(isFlowConversionPolicyApprovedForChain(677)).toBe(false);
+    expect(fs.readFileSync("src/routes/api/users.claim.ts", "utf8")).toContain("CLAIMS_LOCKED");
+    const earn = fs.readFileSync("src/routes/earn.tsx", "utf8");
+    expect(earn).toContain("Mainnet claims locked");
+    expect(earn).toContain("Mainnet claims will open after funding and historical reconciliation are verified.");
+  });
+  it("publishes the signup policy at the approved effective time", () => {
+    expect(JSON.stringify(sb)).toContain("2026-10-04T01:00:00");
+  });
+});
