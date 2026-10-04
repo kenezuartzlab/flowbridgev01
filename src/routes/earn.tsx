@@ -443,15 +443,25 @@ function EarnPage() {
           <div className="border-t border-hairline p-4">
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.08em] text-muted">Referral rewards</p>
             <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1.5 text-[12px]">
-              <dt className="text-muted">Signup</dt><dd className="font-bold">0 {PTS}</dd>
+              <dt className="text-muted">New user signup bonus</dt><dd className="font-bold">100 {PTS} = 100 FLOW</dd>
+              <dt className="text-muted">Referrer signup bonus</dt><dd className="font-bold">+100</dd>
+              <dt className="col-span-2 pt-1 text-[10.5px] font-black uppercase tracking-[0.08em] text-muted">Activity milestones</dt>
               <dt className="text-muted">First qualifying swap ($5+)</dt><dd className="font-bold">+15</dd>
               <dt className="text-muted">$100 cumulative volume</dt><dd className="font-bold">+35</dd>
               <dt className="text-muted">3 qualified active days</dt><dd className="font-bold">+50</dd>
-              <dt className="text-muted">Maximum per referral</dt><dd className="font-bold">100</dd>
+              <dt className="text-muted">Milestones per referral</dt><dd className="font-bold">up to 100</dd>
+              <dt className="text-muted">Possible total per referral</dt><dd className="font-bold">up to 200</dd>
               <dt className="text-muted">Rewarded referrals per month</dt><dd className="font-bold">10</dd>
             </dl>
             <p className="mt-2 text-[11px] leading-relaxed text-muted-soft">
-              Signing up or entering a code earns nothing. Milestones count only verified, confirmed swaps by the referred wallet.
+              The signup bonus is confirmed once the new account verifies its email and binds a wallet not used for a bonus before. {incentives?.signupProgram?.exhausted ? "Signup bonus allocation is currently fully allocated." : "Available while the funded FlowBridge community-growth allocation remains available."} Milestones count only verified, confirmed swaps by the referred wallet, subject to monthly caps, review and funded program limits.
+            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-soft">
+              {user && Number(incentives?.signupBonusPoints ?? 0) > 0
+                ? "Your 100 FLOW Points signup bonus is confirmed."
+                : user && incentives?.signupProgram && !incentives.signupProgram.exhausted
+                  ? "100 FLOW Points signup bonus pending — verify your email and bind a wallet. New accounts only."
+                  : null}
             </p>
           </div>
           <div className="divide-y divide-hairline border-t border-hairline">
@@ -523,7 +533,7 @@ function EarnPage() {
                       {r.milestones.includes("FIRST_SWAP") && <StatusPill tone="ok">First swap</StatusPill>}
                       {r.milestones.includes("VOLUME_100") && <StatusPill tone="ok">$100</StatusPill>}
                       {r.milestones.includes("ACTIVE_DAYS_3") && <StatusPill tone="ok">3 days</StatusPill>}
-                      <span className="font-mono text-muted">{r.pointsEarned} / 100</span>
+                      <span className="font-mono text-muted">Signup {Number(r.signupReward ?? 0)} / 100 · Milestones {r.pointsEarned} / 100</span>
                     </li>
                   ))}
                 </ul>
