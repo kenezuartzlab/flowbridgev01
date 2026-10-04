@@ -17,7 +17,20 @@ export type ReconClass =
   | "EXPLAINED_DIFFERENCE"
   | "UNEXPLAINED_POSITIVE_DIFFERENCE"
   | "UNEXPLAINED_NEGATIVE_DIFFERENCE"
-  | "INSUFFICIENT_HISTORICAL_EVIDENCE";
+  | "INSUFFICIENT_HISTORICAL_EVIDENCE"
+  /** Owner-reviewed: unsupported stored balance preserved as history, never claimable. */
+  | "REVIEWED_NONCLAIMABLE_HISTORICAL";
+
+/**
+ * Owner reconciliation decisions (gate 2026-10-04). Unsupported stored
+ * balance / milestone history stays on record but is NEVER claimable. Only an
+ * independently ledger-backed Mainnet subset may count toward entitlement.
+ */
+export interface ReviewDecision { decision: "REVIEWED_NONCLAIMABLE_HISTORICAL"; decidedAt: string; note: string }
+export const OWNER_REVIEW_DECISIONS: ReadonlyMap<string, ReviewDecision> = new Map([
+  ["532956a9-657d-489e-aa6a-5385423e9a7c", { decision: "REVIEWED_NONCLAIMABLE_HISTORICAL", decidedAt: "2026-10-04T04:26:00Z", note: "Stored 175; milestones derived from BOT Testnet referee activity; no Mainnet-backed ledger entitlement" }],
+  ["9af56470-d5bd-4e17-8e0e-fc651478878b", { decision: "REVIEWED_NONCLAIMABLE_HISTORICAL", decidedAt: "2026-10-04T04:26:00Z", note: "Stored 314; milestones without Mainnet referee evidence plus legacy referral aggregate" }],
+]);
 
 export interface ReconLedgerRow {
   id: string;
@@ -64,6 +77,8 @@ export interface ReconAccountResult {
   flags: string[];
   difference: number;
   classification: ReconClass;
+  /** Unsupported points kept as audit history; never claimable. */
+  nonclaimableHistorical: number;
 }
 
 const CORE_SWAP = new Set(["CORE_SWAP", "CORE_SWAP_V2"]);
@@ -104,6 +119,7 @@ export function milestoneSupported(
 export function reconcileAccount(
   acct: ReconAccountInput,
   evidenceByUser: Map<string, ReconLedgerRow[]>,
+  review?: ReviewDecision,
 ): ReconAccountResult {
   const b: ReconBreakdown = { coreSwap: 0, referralSignup: 0, referralMilestone: 0, validLegacy: 0, ledgerBackedAdjustments: 0 };
   const excluded: ReconExclusion[] = [];
@@ -177,7 +193,17 @@ export function reconcileAccount(
   else classification = difference > 0 ? "UNEXPLAINED_POSITIVE_DIFFERENCE" : "UNEXPLAINED_NEGATIVE_DIFFERENCE";
   if (classification !== "MATCH" && classification !== "EXPLAINED_DIFFERENCE" && difference > 0) flags.push("STORED_EXCEEDS_LEDGER");
 
-  return { userId: acct.userId, stored: acct.storedFlowPoints, authoritative, breakdown: b, pendingReview, excluded, explained, flags, difference, classification };
+  let nonclaimableHistorical = explainedAmount;
+  // An owner review closes ambiguity WITHOUT creating evidence: unsupported
+  // points become non-claimable history; the authoritative subset is unchanged.
+  if (review && classification !== "MATCH" && classification !== "EXPLAINED_DIFFERENCE") {
+    classification = "REVIEWED_NONCLAIMABLE_HISTORICAL";
+    nonclaimableHistorical = Math.max(0, acct.storedFlowPoints - authoritative);
+    pendingReview = 0;
+    explained.push(`OWNER_REVIEW:${review.decidedAt}`);
+  }
+
+  return { userId: acct.userId, stored: acct.storedFlowPoints, authoritative, breakdown: b, pendingReview, excluded, explained, flags, difference, classification, nonclaimableHistorical };
 }
 
 export interface ReconSummary {
@@ -186,15 +212,22 @@ export interface ReconSummary {
   authoritativeTotal: number;
   storedTotal: number;
   pendingReviewTotal: number;
+  nonclaimableHistoricalTotal: number;
+  /** Non-Mainnet ledger points excluded from Mainnet entitlement (audit only). */
+  testnetExcludedTotal: number;
   pass: boolean;
   results: ReconAccountResult[];
 }
 
-export function reconcileAll(accounts: ReconAccountInput[]): ReconSummary {
+export function reconcileAll(
+  accounts: ReconAccountInput[],
+  reviews: ReadonlyMap<string, ReviewDecision> = new Map(),
+): ReconSummary {
   const evidence = new Map(accounts.map((a) => [a.userId, mainnetSwapEvidence(a.ledger)]));
-  const results = accounts.map((a) => reconcileAccount(a, evidence));
+  const results = accounts.map((a) => reconcileAccount(a, evidence, reviews.get(a.userId)));
   const counts: Record<ReconClass, number> = {
     MATCH: 0, EXPLAINED_DIFFERENCE: 0, UNEXPLAINED_POSITIVE_DIFFERENCE: 0, UNEXPLAINED_NEGATIVE_DIFFERENCE: 0, INSUFFICIENT_HISTORICAL_EVIDENCE: 0,
+    REVIEWED_NONCLAIMABLE_HISTORICAL: 0,
   };
   for (const r of results) counts[r.classification]++;
   return {
@@ -203,6 +236,8 @@ export function reconcileAll(accounts: ReconAccountInput[]): ReconSummary {
     authoritativeTotal: results.reduce((s, r) => s + r.authoritative, 0),
     storedTotal: results.reduce((s, r) => s + r.stored, 0),
     pendingReviewTotal: results.reduce((s, r) => s + r.pendingReview, 0),
+    nonclaimableHistoricalTotal: results.reduce((s, r) => s + r.nonclaimableHistorical, 0),
+    testnetExcludedTotal: results.reduce((s, r) => s + r.excluded.filter((e) => e.cause.startsWith("NON_MAINNET")).reduce((t, e) => t + e.points, 0), 0),
     pass: counts.UNEXPLAINED_POSITIVE_DIFFERENCE + counts.UNEXPLAINED_NEGATIVE_DIFFERENCE + counts.INSUFFICIENT_HISTORICAL_EVIDENCE === 0,
     results,
   };

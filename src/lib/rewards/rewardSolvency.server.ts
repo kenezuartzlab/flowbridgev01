@@ -3,26 +3,28 @@
  * SELECTs and eth_call only. Never writes balances, budgets or contracts.
  */
 import { createPublicClient, http, parseAbi, type Address } from "viem";
-import { reconcileAll, mainnetSwapEvidence, MAINNET_CHAIN_ID, type ReconAccountInput, type ReconLedgerRow } from "./historicalReconciliation";
+import { reconcileAll, mainnetSwapEvidence, OWNER_REVIEW_DECISIONS, MAINNET_CHAIN_ID, type ReconAccountInput, type ReconLedgerRow } from "./historicalReconciliation";
 import {
+  APPROVED_INITIAL_BUDGETS, FUNDING_PREPARATION, TOTAL_REQUIRED_BACKING, allocateBacking, buildDraftAllocation, fundingShortfallWei,
   MAINNET_PAYOUT_AUDIT, MAINNET_PROMOTION_PACKAGE, milestoneFundingOptions, payoutContractSufficient, programSolvency,
   swapFundingOptions, type ProgramId,
 } from "./rewardFundingPlan";
 
 const DISTRIBUTOR = MAINNET_PAYOUT_AUDIT.address as Address;
-const ABI = parseAbi(["function freeBalance() view returns (uint256)", "function totalReserved() view returns (uint256)", "function paused() view returns (bool)"]);
+const ABI = parseAbi(["function freeBalance() view returns (uint256)", "function totalReserved() view returns (uint256)", "function paused() view returns (bool)", "function campaignBudget() view returns (uint256)"]);
 const MILESTONE_REASONS = ["REFERRAL_MILESTONE_FIRST_SWAP", "REFERRAL_MILESTONE_VOLUME_100", "REFERRAL_MILESTONE_ACTIVE_DAYS_3", "REFERRAL_3_ACTIVE_DAYS"];
 
 async function readDistributor() {
   try {
     const c = createPublicClient({ transport: http("https://rpc.botchain.ai") });
-    const [free, reserved, paused, block] = await Promise.all([
+    const [free, reserved, paused, block, budget] = await Promise.all([
       c.readContract({ address: DISTRIBUTOR, abi: ABI, functionName: "freeBalance" }),
       c.readContract({ address: DISTRIBUTOR, abi: ABI, functionName: "totalReserved" }),
       c.readContract({ address: DISTRIBUTOR, abi: ABI, functionName: "paused" }),
       c.getBlockNumber(),
+      c.readContract({ address: DISTRIBUTOR, abi: ABI, functionName: "campaignBudget" }),
     ]);
-    return { freeFlow: Number(free / 10n ** 18n), reservedFlow: Number(reserved / 10n ** 18n), paused, block: Number(block) };
+    return { freeFlow: Number(free / 10n ** 18n), freeWei: free.toString(), reservedFlow: Number(reserved / 10n ** 18n), campaignBudgetFlow: Number(budget / 10n ** 18n), paused, block: Number(block) };
   } catch {
     return null;
   }
@@ -54,7 +56,7 @@ export async function buildRewardSolvencyReport() {
     userId: p.id, createdAt: new Date(p.created_at).toISOString(), storedFlowPoints: p.flow_points,
     storedPointsSelf: p.points_self, storedReferralSignup: p.points_referral_signup, ledger: byUser.get(p.id) ?? [],
   }));
-  const recon = reconcileAll(accounts);
+  const recon = reconcileAll(accounts, OWNER_REVIEW_DECISIONS);
 
   const allRows = [...byUser.values()].flat();
   const mainnetSwaps = [...byUser.values()].flatMap((rows) => mainnetSwapEvidence(rows));
@@ -95,7 +97,7 @@ export async function buildRewardSolvencyReport() {
     },
     distributor: { address: DISTRIBUTOR, chainId: MAINNET_CHAIN_ID, live: chain },
     reconciliation: {
-      accounts: recon.accounts, counts: recon.counts, pass: recon.pass, pendingReviewTotal: recon.pendingReviewTotal,
+      accounts: recon.accounts, counts: recon.counts, pass: recon.pass, pendingReviewTotal: recon.pendingReviewTotal, nonclaimableHistoricalTotal: recon.nonclaimableHistoricalTotal, testnetExcludedTotal: recon.testnetExcludedTotal,
       authoritativeTotal: recon.authoritativeTotal, storedTotal: recon.storedTotal,
       // Per-account rows use opaque ids only — no email or wallet.
       flagged: recon.results.filter((r) => r.classification !== "MATCH" && r.classification !== "EXPLAINED_DIFFERENCE")
@@ -108,6 +110,22 @@ export async function buildRewardSolvencyReport() {
       }),
       milestone: milestoneFundingOptions({ qualifiedMilestonePoints30d: milestoneSupported, activeReferrers, monthlyRewardedReferralCap: 10, maxMilestonePerReferral: 100, safetyBuffer: 1 }),
     },
+    fundingPreparation: (() => {
+      const free = chain ? BigInt(chain.freeWei) : null;
+      return {
+        approvedBudgets: APPROVED_INITIAL_BUDGETS, totalRequired: TOTAL_REQUIRED_BACKING,
+        liveFreeFlow: chain?.freeFlow ?? null, liveCampaignBudgetFlow: chain?.campaignBudgetFlow ?? null,
+        additionalRequiredFlow: free == null ? null : Number(fundingShortfallWei(free) / 10n ** 18n),
+        backing: free == null ? null : allocateBacking(free),
+        budgetTx: FUNDING_PREPARATION.budgetTx, signed: false, broadcast: false,
+      };
+    })(),
+    draftAllocation: (() => {
+      const wallet = new Map((profiles.data ?? []).map((p) => [p.id, p.wallet_address]));
+      const d = buildDraftAllocation(recon.results.map((r) => ({ userId: r.userId, wallet: wallet.get(r.userId) ?? null, classification: r.classification, authoritative: r.authoritative, pendingReview: r.pendingReview })));
+      // Admin view: counts only, no wallet addresses.
+      return { status: d.status, leaves: d.leaves.length, totalPoints: d.totalPoints };
+    })(),
     payout: { sufficient: payoutContractSufficient(), capabilities: MAINNET_PAYOUT_AUDIT.capabilities, promotionPackage: MAINNET_PROMOTION_PACKAGE },
   };
 }

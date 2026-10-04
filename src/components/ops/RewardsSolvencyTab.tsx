@@ -51,6 +51,8 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
         {Object.entries(r.reconciliation.counts).map(([k, v]) => <KV key={k} k={k.replaceAll("_", " ")} v={v} />)}
         <KV k="Ledger-backed total" v={fmt(r.reconciliation.authoritativeTotal)} />
         <KV k="Pending review" v={fmt(r.reconciliation.pendingReviewTotal)} />
+        <KV k="Historical — not claimable" v={fmt(r.reconciliation.nonclaimableHistoricalTotal)} />
+        <KV k="Testnet points excluded" v={fmt(r.reconciliation.testnetExcludedTotal)} />
       </Box>
       {r.programs.map((p) => (
         <Box key={p.programId} title={p.programId.replaceAll("_", " ")}>
@@ -70,6 +72,14 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
           <p className="text-[11px] leading-snug text-muted-soft">Proposal only — nothing is funded. {r.funding[k][0]?.assumptions.join(" · ")}</p>
         </Box>
       ))}
+      <Box title="Funding preparation (unsigned)">
+        <KV k="Total required backing" v={`${fmt(r.fundingPreparation.totalRequired)} FLOW`} />
+        <KV k="Live free FLOW" v={r.fundingPreparation.liveFreeFlow == null ? "UNKNOWN" : fmt(r.fundingPreparation.liveFreeFlow)} />
+        <KV k="Additional FLOW required" v={r.fundingPreparation.additionalRequiredFlow == null ? "UNKNOWN" : fmt(r.fundingPreparation.additionalRequiredFlow)} />
+        <KV k="On-chain budget headroom" v={r.fundingPreparation.liveCampaignBudgetFlow == null ? "UNKNOWN" : `${fmt(r.fundingPreparation.liveCampaignBudgetFlow)} FLOW`} />
+        <KV k="Owner action" v={r.fundingPreparation.budgetTx.method} />
+        <KV k="Draft first allocation" v={`${r.draftAllocation.leaves} wallet(s) · ${fmt(r.draftAllocation.totalPoints)} FLOW · not published`} />
+      </Box>
       <Box title="Flagged accounts (opaque ids)">
         {r.reconciliation.flagged.length === 0 ? <p className="text-[12px] text-muted">None.</p> : r.reconciliation.flagged.map((f) => (
           <KV key={f.account} k={`${f.account} · ${f.classification.replaceAll("_", " ")}`} v={`stored ${f.stored} / ledger ${f.authoritative} / review ${f.pendingReview}`} />
