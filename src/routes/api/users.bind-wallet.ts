@@ -32,6 +32,12 @@ export const Route = createFileRoute("/api/users/bind-wallet")({
           if (!challenge.ok) return jsonResponse({ error: challenge.error }, challenge.status);
 
           const updated = await bindUserWallet(user.id, challenge.wallet);
+          try {
+            const { trySettleSignupBonus } = await import("@/lib/rewards/signupBonus.server");
+            await trySettleSignupBonus(user.id, user.emailVerified);
+          } catch {
+            /* binding succeeded; bonus settlement is retried on next sync */
+          }
           return jsonResponse({
             success: true,
             walletAddress: (updated as { wallet_address?: string } | null)?.wallet_address ?? null,

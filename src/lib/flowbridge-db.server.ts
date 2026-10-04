@@ -805,6 +805,7 @@ export async function getUserPointsAndReferrals(userId: string) {
     walletBound: boolean;
     milestones: string[];
     pointsEarned: number;
+    signupReward?: number;
   }> = [];
   let rewardedReferrals = 0;
   let rewardedReferralsThisMonth = 0;
@@ -840,16 +841,39 @@ export async function getUserPointsAndReferrals(userId: string) {
         walletBound: !!r.wallet_address,
         milestones: e?.milestones ?? [],
         pointsEarned: e?.points ?? 0,
+        signupReward: signupPaidReferees.has(r.id) ? 100 : 0,
       });
     });
   }
 
+  // Funded signup bonus — ledger-only (never mirrored into the profile aggregate).
+  const { data: fundRows } = await supabaseAdmin
+    .from("flow_points_ledger")
+    .select("points, reason, funding_state, metadata")
+    .eq("user_id", userId)
+    .in("reason", ["SIGNUP_BONUS_REFEREE", "REFERRAL_SIGNUP_BONUS"]);
+  const signupRows = (fundRows ?? []) as any[];
+  const signupBonusPoints = signupRows
+    .filter((r) => r.reason === "SIGNUP_BONUS_REFEREE")
+    .reduce((s, r) => s + Number(r.points ?? 0), 0);
+  const referrerSignupBonusPoints = signupRows
+    .filter((r) => r.reason === "REFERRAL_SIGNUP_BONUS")
+    .reduce((s, r) => s + Number(r.points ?? 0), 0);
+  const signupPaidReferees = new Set(
+    signupRows.filter((r) => r.reason === "REFERRAL_SIGNUP_BONUS").map((r) => String(r.metadata?.refereeId ?? "")),
+  );
+  const { getSignupProgramStatus } = await import("@/lib/rewards/signupBonus.server");
+  const signupProgram = await getSignupProgramStatus();
+
   return {
+    signupBonusPoints,
+    referrerSignupBonusPoints,
+    signupProgram: { remaining: signupProgram.signupRemaining, exhausted: signupProgram.signupExhausted },
     referralStatuses,
     rewardedReferrals,
     rewardedReferralsThisMonth,
     referralMonthlyCap: DEFAULT_FLOW_POINTS_V2_POLICY.referralMonthlyCap,
-    flowPoints: user.flow_points,
+    flowPoints: Number(user.flow_points ?? 0) + signupBonusPoints + referrerSignupBonusPoints,
     claimedTokens: user.claimed_tokens,
     referralCode: user.referral_code,
     referredBy: user.referred_by,
