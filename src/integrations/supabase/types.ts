@@ -758,11 +758,15 @@ export type Database = {
           chain_id: number | null
           created_at: string
           day_key: string | null
+          funding_state: string
           id: string
           metadata: Json | null
           points: number
           policy_version: string
+          program_id: string | null
           reason: string
+          referrer_id: string | null
+          reservation_id: string | null
           source_log_index: number | null
           tx_hash: string | null
           user_id: string
@@ -776,11 +780,15 @@ export type Database = {
           chain_id?: number | null
           created_at?: string
           day_key?: string | null
+          funding_state?: string
           id?: string
           metadata?: Json | null
           points?: number
           policy_version?: string
+          program_id?: string | null
           reason: string
+          referrer_id?: string | null
+          reservation_id?: string | null
           source_log_index?: number | null
           tx_hash?: string | null
           user_id: string
@@ -794,11 +802,15 @@ export type Database = {
           chain_id?: number | null
           created_at?: string
           day_key?: string | null
+          funding_state?: string
           id?: string
           metadata?: Json | null
           points?: number
           policy_version?: string
+          program_id?: string | null
           reason?: string
+          referrer_id?: string | null
+          reservation_id?: string | null
           source_log_index?: number | null
           tx_hash?: string | null
           user_id?: string
@@ -1118,6 +1130,68 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_budget_events: {
+        Row: {
+          actor_email: string
+          created_at: string
+          delta_points: number
+          event_id: string
+          program_id: string
+          reason: string
+        }
+        Insert: {
+          actor_email: string
+          created_at?: string
+          delta_points: number
+          event_id?: string
+          program_id: string
+          reason: string
+        }
+        Update: {
+          actor_email?: string
+          created_at?: string
+          delta_points?: number
+          event_id?: string
+          program_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_budget_events_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "reward_budgets"
+            referencedColumns: ["program_id"]
+          },
+        ]
+      }
+      reward_budgets: {
+        Row: {
+          funding_verified: boolean
+          program_id: string
+          reserved_points: number
+          status: string
+          total_points: number
+          updated_at: string
+        }
+        Insert: {
+          funding_verified?: boolean
+          program_id: string
+          reserved_points?: number
+          status?: string
+          total_points?: number
+          updated_at?: string
+        }
+        Update: {
+          funding_verified?: boolean
+          program_id?: string
+          reserved_points?: number
+          status?: string
+          total_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reward_processing_events: {
         Row: {
           chain_id: number | null
@@ -1147,6 +1221,51 @@ export type Database = {
           tx_hash?: string | null
         }
         Relationships: []
+      }
+      reward_reservations: {
+        Row: {
+          created_at: string
+          ledger_id: string
+          points: number
+          program_id: string
+          reservation_id: string
+          user_id: string
+          wallet_address: string | null
+        }
+        Insert: {
+          created_at?: string
+          ledger_id: string
+          points: number
+          program_id: string
+          reservation_id?: string
+          user_id: string
+          wallet_address?: string | null
+        }
+        Update: {
+          created_at?: string
+          ledger_id?: string
+          points?: number
+          program_id?: string
+          reservation_id?: string
+          user_id?: string
+          wallet_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_reservations_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: true
+            referencedRelation: "flow_points_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_reservations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "reward_budgets"
+            referencedColumns: ["program_id"]
+          },
+        ]
       }
       siwe_nonces: {
         Row: {
@@ -1565,6 +1684,17 @@ export type Database = {
           points_awarded: number
         }[]
       }
+      award_signup_bonus: {
+        Args: {
+          p_bonus?: number
+          p_pay_referrer: boolean
+          p_policy_version: string
+          p_referrer_id: string
+          p_user_id: string
+          p_wallet: string
+        }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1573,6 +1703,28 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      increase_reward_budget: {
+        Args: {
+          p_actor_email: string
+          p_delta: number
+          p_program: string
+          p_reason: string
+        }
+        Returns: {
+          funding_verified: boolean
+          program_id: string
+          reserved_points: number
+          status: string
+          total_points: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reward_budgets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       move_to_dlq: {
         Args: {
