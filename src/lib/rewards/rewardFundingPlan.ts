@@ -152,3 +152,92 @@ export const MAINNET_PROMOTION_PACKAGE = [
   "Confirm claim: receipt, Claim event, isClaimed bit, balances, totalReserved decrease",
   "Expand to all reconciled wallets",
 ] as const;
+
+// ---------------------------------------------------------------------------
+// Owner-approved initial budgets (gate 2026-10-04). Separate buckets; one FLOW
+// may back exactly one bucket. Never auto-increased.
+export const APPROVED_INITIAL_BUDGETS = {
+  SIGNUP_BONUS: 1_000_000,
+  CORE_SWAP: 3_000,
+  REFERRAL_MILESTONE: 2_000,
+} as const satisfies Partial<Record<ProgramId, number>>;
+export const TOTAL_REQUIRED_BACKING = Object.values(APPROVED_INITIAL_BUDGETS).reduce((s, v) => s + v, 0);
+
+const WEI = 10n ** 18n;
+
+/** Exact shortfall (wei) against live free balance; never negative. */
+export function fundingShortfallWei(liveFreeWei: bigint, requiredFlow: number = TOTAL_REQUIRED_BACKING): bigint {
+  const need = BigInt(requiredFlow) * WEI;
+  return liveFreeWei >= need ? 0n : need - liveFreeWei;
+}
+
+/** Bucket backing: every FLOW backs at most one bucket; fills in fixed order, fails closed. */
+export function allocateBacking(liveFreeWei: bigint, budgets: Record<string, number> = APPROVED_INITIAL_BUDGETS) {
+  let left = liveFreeWei;
+  const out: Record<string, { authorizedFlow: number; backedFlow: number; fullyBacked: boolean }> = {};
+  for (const [k, v] of Object.entries(budgets)) {
+    const need = BigInt(v) * WEI;
+    const take = left >= need ? need : left;
+    left -= take;
+    out[k] = { authorizedFlow: v, backedFlow: Number(take / WEI), fullyBacked: take === need };
+  }
+  return { buckets: out, unassignedFlow: Number(left / WEI) };
+}
+
+/**
+ * Prepared owner transactions (NOT signed, NOT broadcast). Live read at block
+ * 25,471,524: distributor holds 2,499,999 FLOW free, so no token transfer is
+ * needed; the on-chain campaignBudget is 1 FLOW (consumed by the genesis
+ * canary). Raising budget headroom to 1,005,000 requires
+ * setCampaignBudget(totalClaimed 1 + 1,005,000) from the BUDGET_MANAGER Safe.
+ */
+export const FUNDING_PREPARATION = {
+  readAtBlock: 25_471_524,
+  token: "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+  distributor: "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+  liveFreeBalanceWei: "2499999000000000000000000",
+  liveTotalReservedWei: "0",
+  liveTotalClaimedWei: "1000000000000000000",
+  liveCampaignBudgetWei: "1000000000000000000",
+  transfer: { required: false, source: "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4", amountWei: "0", reason: "Live free balance already exceeds 1,005,000 FLOW" },
+  budgetTx: {
+    safe: "0x88a4cc1f5771523baeb83daeea07d323a3ce9507",
+    safeThreshold: 2,
+    to: "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    value: "0",
+    operation: "CALL",
+    method: "setCampaignBudget(uint256)",
+    newBudgetWei: "1005001000000000000000000",
+    calldata: "0x7bc0db4600000000000000000000000000000000000000000000d4d1369fe87ea1840000",
+    estimatedGas: 35_049,
+  },
+  signed: false,
+  broadcast: false,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Draft first 1:1 allocation (NOT published). Only reconciled, Mainnet,
+// non-review, non-duplicate, ledger-backed points of a bound wallet.
+export interface DraftAllocationInput {
+  userId: string;
+  wallet: string | null;
+  classification: string;
+  authoritative: number;
+  pendingReview: number;
+}
+export interface DraftLeaf { index: number; account: string; points: number; amountWei: string }
+
+export function buildDraftAllocation(rows: DraftAllocationInput[]) {
+  const eligible = rows
+    .filter((r) => (r.classification === "MATCH" || r.classification === "EXPLAINED_DIFFERENCE") && r.pendingReview === 0 && r.authoritative > 0 && !!r.wallet)
+    .map((r) => ({ account: r.wallet!.toLowerCase(), points: Math.floor(r.authoritative) }));
+  const byWallet = new Map<string, number>();
+  for (const e of eligible) {
+    if (byWallet.has(e.account)) throw new Error("DUPLICATE_WALLET_IN_ALLOCATION");
+    byWallet.set(e.account, e.points);
+  }
+  const leaves: DraftLeaf[] = [...byWallet.entries()].sort(([a], [b]) => (a < b ? -1 : 1))
+    .map(([account, points], index) => ({ index, account, points, amountWei: (BigInt(points) * WEI).toString() }));
+  const totalPoints = leaves.reduce((s, l) => s + l.points, 0);
+  return { status: "DRAFT_NOT_PUBLISHED" as const, leaves, totalPoints, totalWei: (BigInt(totalPoints) * WEI).toString() };
+}
