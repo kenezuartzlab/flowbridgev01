@@ -1,3 +1,4 @@
+import { leafMeetsClaimMinimum } from "./claimMinimumPolicy";
 /**
  * Reward funding planning + solvency + payout readiness (pure).
  * Produces PROPOSALS only. Nothing here sets, funds or moves a budget.
@@ -227,9 +228,11 @@ export interface DraftAllocationInput {
 }
 export interface DraftLeaf { index: number; account: string; points: number; amountWei: string }
 
-export function buildDraftAllocation(rows: DraftAllocationInput[]) {
+export function buildDraftAllocation(rows: DraftAllocationInput[], opts: { epochId?: number | null } = {}) {
   const eligible = rows
     .filter((r) => (r.classification === "MATCH" || r.classification === "EXPLAINED_DIFFERENCE") && r.pendingReview === 0 && r.authoritative > 0 && !!r.wallet)
+    // Owner policy: ordinary leaves below 1,000 FLOW are excluded (contract has no on-chain minimum).
+    .filter((r) => leafMeetsClaimMinimum(opts.epochId ?? null, r.wallet!, Math.floor(r.authoritative)))
     .map((r) => ({ account: r.wallet!.toLowerCase(), points: Math.floor(r.authoritative) }));
   const byWallet = new Map<string, number>();
   for (const e of eligible) {

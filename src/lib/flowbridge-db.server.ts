@@ -814,6 +814,15 @@ export async function getUserPointsAndReferrals(userId: string) {
   const signupPaidReferees = new Set(
     signupRows.filter((r) => r.reason === "REFERRAL_SIGNUP_BONUS").map((r) => String(r.metadata?.refereeId ?? "")),
   );
+  // Claim-minimum progress: only FUNDED Mainnet (677) or funded signup-bonus ledger rows count.
+  const { data: fundedRows } = await supabaseAdmin
+    .from("flow_points_ledger")
+    .select("points, reason, chain_id")
+    .eq("user_id", userId)
+    .eq("funding_state", "FUNDED");
+  const eligibleFundedPoints = ((fundedRows ?? []) as any[])
+    .filter((r) => Number(r.chain_id) === 677 || r.reason === "SIGNUP_BONUS_REFEREE" || r.reason === "REFERRAL_SIGNUP_BONUS")
+    .reduce((s, r) => s + Math.max(0, Math.floor(Number(r.points ?? 0))), 0);
   const { getSignupProgramStatus } = await import("@/lib/rewards/signupBonus.server");
   const signupProgram = await getSignupProgramStatus();
 
@@ -867,6 +876,7 @@ export async function getUserPointsAndReferrals(userId: string) {
 
   return {
     signupBonusPoints,
+    eligibleFundedPoints,
     referrerSignupBonusPoints,
     signupProgram: { remaining: signupProgram.signupRemaining, exhausted: signupProgram.signupExhausted },
     referralStatuses,
