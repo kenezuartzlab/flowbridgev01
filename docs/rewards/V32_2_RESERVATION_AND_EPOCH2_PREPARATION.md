@@ -1,7 +1,7 @@
 # V32.2 — swap-budget reservation + first allocation round prepared (2026-10-06)
 
 No FLOW was moved by this step. The allocation root is **not published**; the claim
-window has not started. Nothing here is signed.
+window has not started. Nothing here is signed or broadcast.
 
 ## 1. Budget cap (already executed by the owner)
 
@@ -15,46 +15,59 @@ Applied with the deployed `public.reserve_reward_budget(uuid[], text, text, text
 (SECURITY DEFINER, service_role only — the browser and the owner's account cannot call it):
 
 - Program: `CORE_SWAP` (approved 3,000 FLOW budget).
-- Ledger rows funded: `9dd76b75-7073-445e-b9d8-cfc4b7b67e86` (Router V4 canary, 5 points) and
-  `306a91ff-88da-40a3-b822-21e3fe6c32a6` (Router V3 swap, 5 points), both `CORE_SWAP_V2`.
+- Ledger rows funded: `9dd76b75-7073-445e-b9d8-cfc4b7b67e86` (Router V4 canary, 5 points,
+  evidence `677:0x96942495…68dd`) and `306a91ff-88da-40a3-b822-21e3fe6c32a6` (Router V3 swap,
+  5 points, evidence `677:0xe7985c94…af6a`), both reason `CORE_SWAP_V2`.
 - Result: `outcome CONFIRMED, reserved 10, ledgerRows 2`.
 - Reservation ids `7f1e9ae0-6ee0-42d5-883d-4ecd8ea0dea5`, `699bf6db-2b3b-4679-b192-8941eab525ac`.
 - Both ledger rows now `funding_state = FUNDED`, `program_id = CORE_SWAP`.
 - `reward_budgets` CORE_SWAP: authorized 3,000 · reserved 10 · remaining 2,990.
-- Audit row written to `reward_budget_events` with actor `kenezuartzlab@gmail.com`.
+- Audit row written to `reward_budget_events` with the owner's actor email and reason.
 
 ## 3. First allocation round (prepared, unsigned)
 
-Prepared by `scripts/liquidity/v321-publish-epoch.mjs`, which rebuilds the manifest from
-the FUNDED ledger rows and verifies it against the live distributor before printing
-anything.
+Record: `contracts/production/v30-2b-rewards-canary/V32_2_PUBLISH_TX_PREPARED.json`
+(generated 2026-10-06T12:28:24Z from `src/lib/rewards/mainnetEpochDraft.ts`, the single
+source of truth for the manifest).
 
 - Distributor `0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922`, canonical FLOW
   `0xcaaB50F36252a57529AFeF651fa6B9f9281917fF`, BOT Mainnet 677.
-- Epoch **2** (on-chain `epochCount` = 1), 1 leaf: wallet
-  `0x628e237b73C5a37EF3968527563fa1a26b32BB97` (kentrosh2002), 10 FLOW.
-- Merkle root `0x21c416d3528f5f03381b2011c73622d65da31d6d31e904894f2fb34608f5ec38`.
-- Claim window 2026-10-06T12:42Z → 2026-11-05T12:42Z (24 h minimum publish delay applies).
-- Calldata `0xc013a9a500000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000006a6979a0000000000000000000000000000000000000000000000000000000006a7570200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000628e237b73c5a37ef3968527563fa1a26b32bb97000000000000000000000000000000000000000000000000000000000000000a`
-  (156 bytes, 32-byte selector `0xc013a9a5`).
-- Safe transaction fingerprint
-  `0x5b88f4d9512545f834647d548119964698d215e87e90f10e02154900c6f26344`; Safe nonce 12.
-- Required signatures: 2 of the Governance Safe owners
-  (`0x524D…98c5`, `0x145E…2B2B`, `0x0EdF…Bb85`). Treasury Safe and the Router V4
-  governance wallet are not substitutes.
-- Rebuilt manifest: `contracts/production/v30-2b-rewards-canary/V32_2_EPOCH2_MANIFEST.json`.
-- Prepared record: `contracts/production/v30-2b-rewards-canary/V32_2_EPOCH2_PUBLISH_PREPARED.json`.
+- Epoch **2** (on-chain `epochCount` = 1 at preparation), 1 leaf, index 0:
+  wallet `0x628e237b73C5a37EF3968527563FA1a26b32BB97` (kentrosh2002), **10 FLOW**
+  (`10000000000000000000` wei).
+- Merkle root `0x21c416d3a1dc9da9b7bab9d4d97668598713e5419b0d7fb3aa055705f090c860`.
+  Recomputed independently from the contract's leaf encoding
+  `keccak256(keccak256(abi.encode(chainId, distributor, epochId, index, account, amount)))`
+  and it matches exactly; with one leaf the root *is* the leaf hash, proof `[]`.
+- Claim window 2026-10-08T12:42:49Z → 2026-11-07T12:42:49Z
+  (`claimStart` 1791463369, `claimEnd` 1794055369; the contract's 24 h minimum publish
+  delay is what forces the gap).
+- Function `publishEpoch(bytes32,uint256,uint64,uint64)` — selector `0x34b7fe84`,
+  independently reproduced from the signature.
+  Calldata `0x34b7fe8421c416d3a1dc9da9b7bab9d4d97668598713e5419b0d7fb3aa055705f090c8600000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000a`
+  (as recorded in the JSON), value 0, gas estimate 139,065 (buffered 180,784 at 20 gwei).
+- Signer: the publisher wallet `0x971E7790FE6C8F77dc666Bb05D4aedA362653f94` (EOA, holds
+  `PUBLISHER_ROLE`, account nonce 2, BOT gas balance 0.046309). The contract only accepts
+  this role for publication — the Governance Safe signs budgets, not allocation rounds.
+- `signed: false`, `broadcast: false`.
 
-Pre-flight checks that passed before the data was printed: the contract is not paused,
-`epochCount` is still 1, the wallet is not already claimed, the distributor holds enough
-FLOW and `totalClaimed + totalReserved + 10 FLOW ≤ campaignBudget`.
+Pre-flight reads that passed at preparation (block 25740390): not paused, `epochCount` 1,
+campaign budget 1,005,001 with 1,005,000 remaining, distributor holds 2,499,999 FLOW,
+1 FLOW already claimed, minimum publish delay 86,400 s.
 
-## 4. Notes
+## 4. Conditions that must still hold at signing
 
-- The claim window start is derived at signing time from the chain timestamp, so a
-  different signing minute only shifts the window; the root and the 10 FLOW are fixed.
+- `epochCount` must still be 1 — the root binds epochId 2.
+- The distributor must not be paused.
+- Budget remaining must stay ≥ 10 FLOW and the FLOW balance ≥ reserved + 10 FLOW.
+- It must be broadcast **before 2026-10-07T12:42:49Z** (claimStart − 24 h), or
+  `publishEpoch` reverts. If that passes, the round is simply re-prepared.
+
+## 5. Notes
+
 - A stray function overload `reserve_reward_budget(uuid, text, jsonb)` created during
   preparation referenced columns that do not exist in `reward_reservations` and was
   never executed. It has been dropped; only the deployed array-form function remains.
-- Mainnet public claims remain **LOCKED**. This step opens nothing: only the one
-  canary wallet becomes claimable after publication and the 24 h delay.
+- Mainnet public claims remain **LOCKED**. Publication alone does not open them: after
+  this round is published, only the one canary wallet can claim, and only from
+  2026-10-08T12:42:49Z.
