@@ -16,8 +16,8 @@ const snap = (): ReconAccountInput[] => [
   ] },
   { userId: REF, createdAt: "2026-07-01T00:00:00Z", storedFlowPoints: 10, storedPointsSelf: 10, storedReferralSignup: 0, ledger: [
     row({ points: 1000, chainId: 968 }),
-    row({ reason: "CORE_SWAP_V2", points: 5, chainId: 677, evidenceKey: "0x9694:2", verifiedUsd: 5.194 }),
-    row({ reason: "CORE_SWAP_V2", points: 5, chainId: 677, evidenceKey: "0xe798:4", verifiedUsd: 5.565 }),
+    row({ reason: "CORE_SWAP_V2", points: 5, chainId: 677, evidenceKey: "0x9694:2", verifiedUsd: 5.194, createdAt: "2026-10-03T17:19:00Z" }),
+    row({ reason: "CORE_SWAP_V2", points: 5, chainId: 677, evidenceKey: "0xe798:4", verifiedUsd: 5.565, createdAt: "2026-10-04T00:22:56Z" }),
   ] },
   { userId: ANA, createdAt: "2026-07-20T00:00:00Z", storedFlowPoints: 314, storedPointsSelf: 20, storedReferralSignup: 50, ledger: [
     row({ reason: "REFERRAL_MILESTONE_FIRST_SWAP", points: 15, refereeId: OWNER }), row({ reason: "REFERRAL_MILESTONE_VOLUME_100", points: 35, refereeId: OWNER }),
