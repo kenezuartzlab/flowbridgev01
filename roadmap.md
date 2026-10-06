@@ -55,3 +55,14 @@
 
 - [x] Growth Activation + Conversion V1 (code + tests)
 - [ ] Growth V1 signed-in phone acceptance (verify, bind, review, share) — waits on user
+
+# Mainnet Rewards Activation (V32.1 / V32.2)
+- [x] Historical FLOW Points reconciliation closed (2 review accounts = nonclaimable historical, testnet points excluded).
+- [x] Budgets approved: 1,000,000 signup · 3,000 swap · 2,000 referral milestone (total 1,005,000).
+- [x] On-chain campaign budget raised to 1,005,001 FLOW (tx 0x13cdc1ee…, block 25738470).
+- [x] 10 FLOW reserved from the swap budget for the clean proof account (2 ledger rows FUNDED).
+- [x] Epoch-2 allocation prepared (10 FLOW · 1 wallet): root, calldata, fingerprint, claim window — unsigned.
+- [ ] Publish epoch 2 with 2 Governance Safe signatures — waits on the owner.
+- [ ] 10 FLOW claim canary + replay check — waits on publication.
+- [ ] Mainnet public claims stay LOCKED until the canary passes.
+
