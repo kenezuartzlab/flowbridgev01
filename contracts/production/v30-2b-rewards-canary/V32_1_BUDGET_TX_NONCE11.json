@@ -1,0 +1,45 @@
+{
+  "gate": "V32.1 — setCampaignBudget(1,005,001 FLOW) prepared at live Safe nonce 11",
+  "signed": false,
+  "broadcast": false,
+  "liveReads": {
+    "chainId": 677,
+    "block": 25735681,
+    "distributor": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "token": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
+    "distributorFlowBalanceWei": "2499999000000000000000000",
+    "campaignBudgetWei": "1000000000000000000",
+    "budgetRemainingWei": "0",
+    "totalReservedWei": "0",
+    "totalClaimedWei": "1000000000000000000",
+    "epochCount": 1,
+    "paused": false,
+    "minPublishDelaySeconds": 86400,
+    "safeHasBudgetManagerRole": true,
+    "safeThreshold": 2,
+    "safeOwners": [
+      "0x524Db06954de917025180057BCBeB36eC96A98c5",
+      "0x145E201c658706D3D2b9f35E0c51270474453B2B",
+      "0x0EdFf26415660c9d2d12320678192f1B97BEBb85"
+    ]
+  },
+  "budgetSemantics": "setCampaignBudget only overwrites the single global cumulative cap; it reverts if newBudget < totalClaimed + totalReserved, so existing claims/reservations cannot be overwritten.",
+  "safeTransaction": {
+    "safe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+    "to": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+    "value": "0",
+    "data": "0x7bc0db4600000000000000000000000000000000000000000000d4d1369fe87ea1840000",
+    "calldataRegeneratedMatches": true,
+    "calldataKeccak": "0xb590f40d2a10fd8c64d657760946e662fe0b56ea9a62314602a2165fb7fb05d8",
+    "operation": 0,
+    "safeTxGas": "0",
+    "baseGas": "0",
+    "gasPrice": "0",
+    "gasToken": "0x0000000000000000000000000000000000000000",
+    "refundReceiver": "0x0000000000000000000000000000000000000000",
+    "nonce": 11,
+    "safeTxHash": "0x017b62e466b5f195a33f9ec3b85806b49c0a04cf1693fae6785a6bfc87a27f4e",
+    "signaturesRequired": 2,
+    "signaturesCollected": 0
+  }
+}
