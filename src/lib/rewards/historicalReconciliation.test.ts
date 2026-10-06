@@ -44,7 +44,7 @@ describe("historical reconciliation", () => {
   it("classifies the production snapshot and stays BLOCKED", () => {
     const s = reconcileAll(snapshot());
     expect(s.accounts).toBe(22);
-    expect(s.counts).toEqual({ MATCH: 2, EXPLAINED_DIFFERENCE: 18, UNEXPLAINED_POSITIVE_DIFFERENCE: 0, UNEXPLAINED_NEGATIVE_DIFFERENCE: 0, INSUFFICIENT_HISTORICAL_EVIDENCE: 2 });
+    expect(s.counts).toEqual({ MATCH: 2, EXPLAINED_DIFFERENCE: 18, UNEXPLAINED_POSITIVE_DIFFERENCE: 0, UNEXPLAINED_NEGATIVE_DIFFERENCE: 0, INSUFFICIENT_HISTORICAL_EVIDENCE: 2, REVIEWED_NONCLAIMABLE_HISTORICAL: 0 });
     expect(s.pass).toBe(false);
   });
 
