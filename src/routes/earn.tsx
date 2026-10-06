@@ -54,6 +54,7 @@ import { isFlowConversionPolicyApprovedForChain } from "@/lib/rewards/flowConver
 import { FlowTokenClaimCard } from "@/components/rewards/FlowTokenClaimCard";
 import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
 import { EarnLiquidityFees } from "@/components/liquidity/EarnLiquidityFees";
+import { claimMinimumProgress } from "@/lib/rewards/claimMinimumPolicy";
 
 
 /**
@@ -331,6 +332,20 @@ function EarnPage() {
                 ))}
               </ul>
               <div className="space-y-2 border-t border-hairline p-4">
+                {(() => {
+                  const m = claimMinimumProgress(incentives?.eligibleFundedPoints);
+                  return (
+                    <div aria-label="Progress toward minimum claim">
+                      <p className="text-[12px] font-bold">{user ? m.label : `0 / 1,000 FLOW toward minimum claim`}</p>
+                      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-hairline" role="progressbar" aria-valuemin={0} aria-valuemax={m.minimum} aria-valuenow={m.current}>
+                        <div className="h-full bg-primary" style={{ width: `${Math.round(m.progress * 100)}%` }} />
+                      </div>
+                      <p className="mt-1 text-[10.5px] leading-relaxed text-muted-soft">
+                        Minimum claim is 1,000 FLOW. Only verified, funded FLOW Points count (signup and referral bonuses included). Below the minimum you keep earning.
+                      </p>
+                    </div>
+                  );
+                })()}
                 <button
                   type="button"
                   disabled
