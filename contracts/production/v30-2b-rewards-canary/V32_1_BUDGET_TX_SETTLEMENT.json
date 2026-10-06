@@ -1,0 +1,17 @@
+{
+  "gate": "V32.1 — setCampaignBudget(1,005,001 FLOW) executed",
+  "txHash": "0x13cdc1ee10bc0320508634ef6c610732dc33b915ccad0920dc1d48168970f030",
+  "block": 25738470,
+  "status": "success",
+  "executor": "0x145e201c658706d3d2b9f35e0c51270474453b2b",
+  "safe": "0x88A4CC1F5771523baeB83DaEea07D323a3ce9507",
+  "calldataMatchesPrepared": true,
+  "safeNonceAfter": 12,
+  "postReads": {
+    "campaignBudgetWei": "1005001000000000000000000",
+    "totalReservedWei": "0",
+    "totalClaimedWei": "1000000000000000000",
+    "paused": false
+  },
+  "next": "Reserve 10 FLOW from CORE_SWAP for afb08df9, publish epoch 2 allocation (publisher 0x971e…3f94, 24h min publish delay), then claim canary."
+}
