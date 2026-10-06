@@ -23,6 +23,7 @@ import {
   type PublishedEpochState,
 } from './merkleClaim';
 import { findMainnetEntitlement, type MainnetEntitlementMatch } from './mainnetEpochManifest';
+import { draftFlowLabel, findMainnetDraftEntitlement } from './mainnetEpochDraft';
 
 const READ_ABI = [
   ...MERKLE_DISTRIBUTOR_CLAIM_ABI,
@@ -67,6 +68,7 @@ export type MainnetClaimStatus =
   | 'ROOT_MISMATCH'
   | 'ALREADY_CLAIMED'
   | 'BLOCKED'
+  | 'NOT_PUBLISHED'
   | 'CLAIMABLE';
 
 export interface MainnetClaimState {
@@ -104,7 +106,17 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
   const read = useCallback(async () => {
     const entitlement = findMainnetEntitlement(BOT_MAINNET_CHAIN_ID, wallet);
     if (!entitlement) {
-      setState(IDLE);
+      // A prepared-but-unpublished round is explained, never offered as a claim.
+      const draft = findMainnetDraftEntitlement(BOT_MAINNET_CHAIN_ID, wallet);
+      setState(
+        draft
+          ? {
+              ...IDLE,
+              status: 'NOT_PUBLISHED',
+              message: `A ${draftFlowLabel(draft.draft)} FLOW allocation is prepared for this wallet. It becomes claimable once its reward round is published on BOT Mainnet.`,
+            }
+          : IDLE,
+      );
       return;
     }
     const config = getFlowRewardsChainConfig(BOT_MAINNET_CHAIN_ID);
@@ -124,6 +136,25 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
     try {
       const client = createPublicClient({ chain: botMainnet, transport: http() });
       const { epochId, index } = entitlement.leaf;
+
+      // A manifest may never be shipped ahead of its publication: an epoch id
+      // above the live epochCount means the root is not on chain yet.
+      const liveEpochCount = (await client.readContract({
+        address: distributor,
+        abi: READ_ABI,
+        functionName: 'epochCount',
+      })) as bigint;
+      if (BigInt(epochId) > liveEpochCount) {
+        setState({
+          ...IDLE,
+          status: 'NOT_PUBLISHED',
+          entitlement,
+          distributor,
+          message: 'This reward round has not been published on BOT Mainnet yet. Claiming opens once it is.',
+        });
+        return;
+      }
+
       const [paused, epochRaw, claimed, totalReserved, balance] = await Promise.all([
         client.readContract({ address: distributor, abi: READ_ABI, functionName: 'paused' }),
         client.readContract({

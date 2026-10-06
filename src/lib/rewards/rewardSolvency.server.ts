@@ -9,6 +9,7 @@ import {
   MAINNET_PAYOUT_AUDIT, MAINNET_PROMOTION_PACKAGE, milestoneFundingOptions, payoutContractSufficient, programSolvency,
   swapFundingOptions, type ProgramId,
 } from "./rewardFundingPlan";
+import { MAINNET_EPOCH_DRAFTS, draftFlowLabel } from "./mainnetEpochDraft";
 
 const DISTRIBUTOR = MAINNET_PAYOUT_AUDIT.address as Address;
 const ABI = parseAbi(["function freeBalance() view returns (uint256)", "function totalReserved() view returns (uint256)", "function paused() view returns (bool)", "function campaignBudget() view returns (uint256)"]);
@@ -126,6 +127,20 @@ export async function buildRewardSolvencyReport() {
       // Admin view: counts only, no wallet addresses.
       return { status: d.status, leaves: d.leaves.length, totalPoints: d.totalPoints };
     })(),
+    // Prepared allocation rounds: root + schedule only, never signed or broadcast here.
+    publication: MAINNET_EPOCH_DRAFTS.map((d) => ({
+      epochId: d.epochId,
+      programId: d.programId,
+      root: d.root,
+      allocationFlow: draftFlowLabel(d),
+      leaves: d.entitlements.length,
+      claimStartIso: new Date(d.claimStart * 1000).toISOString(),
+      claimEndIso: new Date(d.claimEnd * 1000).toISOString(),
+      signBeforeIso: new Date(d.signBefore * 1000).toISOString(),
+      published: d.publicationTxHash != null,
+      signed: false,
+      broadcast: false,
+    })),
     payout: { sufficient: payoutContractSufficient(), capabilities: MAINNET_PAYOUT_AUDIT.capabilities, promotionPackage: MAINNET_PROMOTION_PACKAGE },
   };
 }

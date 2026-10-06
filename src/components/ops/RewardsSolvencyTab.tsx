@@ -80,6 +80,16 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
         <KV k="Owner action" v={r.fundingPreparation.budgetTx.method} />
         <KV k="Draft first allocation" v={`${r.draftAllocation.leaves} wallet(s) · ${fmt(r.draftAllocation.totalPoints)} FLOW · not published`} />
       </Box>
+      {r.publication.map((p) => (
+        <Box key={p.epochId} title={`Allocation round #${p.epochId} (${p.programId.replaceAll("_", " ")})`}>
+          <KV k="State" v={p.published ? "PUBLISHED" : "PREPARED — NOT SIGNED"} />
+          <KV k="Root" v={`${p.root.slice(0, 10)}…`} />
+          <KV k="Allocation" v={`${p.allocationFlow} FLOW · ${p.leaves} wallet(s)`} />
+          <KV k="Claim window" v={`${p.claimStartIso.slice(0, 16)} → ${p.claimEndIso.slice(0, 16)} UTC`} />
+          <KV k="Must sign before" v={`${p.signBeforeIso.slice(0, 16)} UTC`} />
+          <KV k="Signed / broadcast by app" v={`${p.signed ? "yes" : "no"} / ${p.broadcast ? "yes" : "no"}`} />
+        </Box>
+      ))}
       <Box title="Flagged accounts (opaque ids)">
         {r.reconciliation.flagged.length === 0 ? <p className="text-[12px] text-muted">None.</p> : r.reconciliation.flagged.map((f) => (
           <KV key={f.account} k={`${f.account} · ${f.classification.replaceAll("_", " ")}`} v={`stored ${f.stored} / ledger ${f.authoritative} / review ${f.pendingReview}`} />

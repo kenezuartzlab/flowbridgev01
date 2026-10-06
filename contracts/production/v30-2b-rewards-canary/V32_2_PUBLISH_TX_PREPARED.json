@@ -1,0 +1,68 @@
+{
+  "gate": "V32.2 — funded 10 FLOW canary allocation publication (PREPARED, NOT SIGNED)",
+  "generatedAt": "2026-10-06T12:28:24.443Z",
+  "chainId": 677,
+  "from": "0x971E7790FE6C8F77dc666Bb05D4aedA362653f94",
+  "to": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+  "nonce": 2,
+  "function": "publishEpoch(bytes32,uint256,uint64,uint64)",
+  "args": {
+    "root": "0x21c416d3a1dc9da9b7bab9d4d97668598713e5419b0d7fb3aa055705f090c860",
+    "allocationWei": "10000000000000000000",
+    "claimStart": "1791463369",
+    "claimStartIso": "2026-10-08T12:42:49.000Z",
+    "claimEnd": "1794055369",
+    "claimEndIso": "2026-11-07T12:42:49.000Z"
+  },
+  "calldata": "0x34b7fe8421c416d3a1dc9da9b7bab9d4d97668598713e5419b0d7fb3aa055705f090c8600000000000000000000000000000000000000000000000008ac7230489e80000000000000000000000000000000000000000000000000000000000006ac78fc9000000000000000000000000000000000000000000000000000000006aef1cc9",
+  "calldataKeccak": "0x5578222a593545c9f9724f98f4d6c3ddb6029f722a48b5ab48b5edc6827e53fc",
+  "gas": "139065",
+  "bufferedGas": "180784",
+  "gasPriceWei": "20000000000",
+  "value": "0",
+  "signed": false,
+  "broadcast": false,
+  "sourceOfTruth": "src/lib/rewards/mainnetEpochDraft.ts",
+  "preState": {
+    "blockNumber": "25740390",
+    "campaignBudget": "1005001000000000000000000",
+    "budgetRemaining": "1005000000000000000000000",
+    "totalReserved": "0",
+    "totalClaimed": "1000000000000000000",
+    "epochCount": "1",
+    "paused": false,
+    "minPublishDelay": "86400",
+    "distributorFlowBalance": "2499999",
+    "publisherBotBalance": "0.046309"
+  },
+  "allocation": {
+    "epochId": 2,
+    "index": 0,
+    "recipient": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+    "amountWei": "10000000000000000000",
+    "amountFlow": "10",
+    "proof": [],
+    "programId": "CORE_SWAP",
+    "reservations": [
+      {
+        "ledgerId": "9dd76b75-7073-445e-b9d8-cfc4b7b67e86",
+        "points": 5,
+        "evidence": "677:0x96942495a02ef6dacf3c5c9d80a0ee84fd5d43be9a5a729be1a8de99e85e68dd"
+      },
+      {
+        "ledgerId": "306a91ff-88da-40a3-b822-21e3fe6c32a6",
+        "points": 5,
+        "evidence": "677:0xe7985c949f7a419c0ec1ad1891a7c19c23df0ecd0c82caa0abedefbc98bdaf6a"
+      }
+    ]
+  },
+  "preconditions": {
+    "mustStillHold": [
+      "epochCount must still be 1 when this is signed — the root binds epochId 2",
+      "distributor must not be paused",
+      "budgetRemaining must stay >= 10000000000000000000",
+      "FLOW balance must stay >= totalReserved + 10000000000000000000",
+      "must be signed before 2026-10-07T12:42:49.000Z (claimStart - minPublishDelay) or publishEpoch reverts"
+    ]
+  }
+}

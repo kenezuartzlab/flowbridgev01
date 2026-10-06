@@ -124,7 +124,9 @@ export function MainnetFlowClaimCard() {
           ? 'Paused'
           : claim.status === 'NO_ENTITLEMENT'
             ? 'No allocation'
-            : 'Blocked';
+            : claim.status === 'NOT_PUBLISHED'
+              ? 'Not published'
+              : 'Blocked';
 
   const manifest = claim.entitlement?.manifest ?? null;
 
