@@ -1744,6 +1744,20 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reserve_reward_budget:
+        | {
+            Args: { p_budget_id: string; p_items: Json; p_purpose: string }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_actor_email: string
+              p_ledger_ids: string[]
+              p_program: string
+              p_reason: string
+            }
+            Returns: Json
+          }
     }
     Enums: {
       campaign_review_state:
