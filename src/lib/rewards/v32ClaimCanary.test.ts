@@ -36,7 +36,7 @@ describe('V32.2 funded 10 FLOW canary allocation', () => {
     expect(draft.epochId).toBe(2);
     expect(draft.distributor).toBe('0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922');
     expect(draft.programId).toBe('CORE_SWAP');
-    expect(draft.publicationTxHash).toBeNull();
+    expect(draft.publicationTxHash).toBe('0x98cd9d8689f0cf36476f1947a4468efb1a7bfececce4c9b745b98866f9d288fe');
     expect(draft.entitlements).toHaveLength(1);
     expect(draft.entitlements[0].account).toBe(CANARY_WALLET);
     expect(draft.allocationWei).toBe(TEN_FLOW);
@@ -61,11 +61,17 @@ describe('V32.2 funded 10 FLOW canary allocation', () => {
     expect(draft.claimStart - Math.floor(new Date(draft.preparedAt).getTime() / 1000)).toBeGreaterThan(86_400);
   });
 
-  it('offers no claim before publication: the frozen manifest stays published-only', () => {
-    expect(MAINNET_EPOCH_MANIFESTS).toHaveLength(1);
-    expect(MAINNET_EPOCH_MANIFESTS[0].epochId).toBe(1);
-    expect(findMainnetEntitlement(BOT_MAINNET_CHAIN_ID, CANARY_WALLET)).toBeNull();
-    expect(findMainnetEntitlement(BOT_MAINNET_CHAIN_ID, CANARY_WALLET.toLowerCase())).toBeNull();
+  it('after publication the frozen manifest carries round #2 identical to the draft', () => {
+    expect(MAINNET_EPOCH_MANIFESTS.map((m) => m.epochId)).toEqual([1, 2]);
+    const m = findMainnetEntitlement(BOT_MAINNET_CHAIN_ID, CANARY_WALLET.toLowerCase())!;
+    expect(m.manifest.epochId).toBe(2);
+    expect(m.manifest.root).toBe(draft.root);
+    expect(m.manifest.allocationWei).toBe(draft.allocationWei);
+    expect(m.manifest.claimStart).toBe(draft.claimStart);
+    expect(m.manifest.claimEnd).toBe(draft.claimEnd);
+    expect(m.manifest.publicationTxHash).toBe(draft.publicationTxHash);
+    expect(m.manifest.entitlements).toHaveLength(1);
+    expect(m.leaf.amount).toBe('10000000000000000000');
   });
 
   it('resolves the draft case-insensitively and only on mainnet', () => {

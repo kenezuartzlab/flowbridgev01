@@ -12,8 +12,8 @@ const CANARY = '0x3d8a7fa490f9db09dd8006b74688213ace9c0164';
 
 describe('V30.2B P2E mainnet epoch manifest', () => {
   it('publishes exactly the genesis canary epoch', () => {
-    expect(MAINNET_EPOCH_MANIFESTS).toHaveLength(1);
-    expect(latestMainnetEpochId()).toBe(1);
+    expect(MAINNET_EPOCH_MANIFESTS.map((m) => m.epochId)).toEqual([1, 2]);
+    expect(latestMainnetEpochId()).toBe(2);
     const [m] = MAINNET_EPOCH_MANIFESTS;
     expect(m.chainId).toBe(BOT_MAINNET_CHAIN_ID);
     expect(m.distributor).toBe('0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922');

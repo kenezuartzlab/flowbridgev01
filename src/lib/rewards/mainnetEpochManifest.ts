@@ -54,6 +54,27 @@ export const MAINNET_EPOCH_MANIFESTS: readonly MainnetEpochManifest[] = [
       },
     ],
   },
+  {
+    chainId: BOT_MAINNET_CHAIN_ID,
+    epochId: 2,
+    campaignId: 'MAINNET_CORE_SWAP_CANARY_V2_FUNDED_10_FLOW',
+    distributor: '0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922',
+    root: '0x21c416d3a1dc9da9b7bab9d4d97668598713e5419b0d7fb3aa055705f090c860',
+    allocationWei: '10000000000000000000',
+    claimStart: 1791463369,
+    claimEnd: 1794055369,
+    publicationTxHash:
+      '0x98cd9d8689f0cf36476f1947a4468efb1a7bfececce4c9b745b98866f9d288fe',
+    entitlements: [
+      {
+        epochId: 2,
+        index: 0,
+        account: '0x628e237b73C5a37EF3968527563FA1a26b32BB97',
+        amount: '10000000000000000000',
+        proof: [],
+      },
+    ],
+  },
 ] as const;
 
 export interface MainnetEntitlementMatch {

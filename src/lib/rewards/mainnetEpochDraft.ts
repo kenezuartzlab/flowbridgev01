@@ -52,7 +52,7 @@ export const MAINNET_EPOCH_DRAFTS: readonly MainnetEpochDraft[] = [
     claimEnd: 1794055369,
     signBefore: 1791376969,
     programId: 'CORE_SWAP',
-    publicationTxHash: null,
+    publicationTxHash: '0x98cd9d8689f0cf36476f1947a4468efb1a7bfececce4c9b745b98866f9d288fe',
     preparedAt: '2026-10-06T12:24:52.415Z',
     entitlements: [
       {
