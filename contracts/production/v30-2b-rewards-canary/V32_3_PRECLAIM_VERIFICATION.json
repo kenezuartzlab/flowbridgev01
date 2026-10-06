@@ -1,0 +1,11 @@
+{
+  "gate": "V32.3 — pre-claim verification (READ-ONLY)",
+  "checkedAt": "2026-10-06T13:02:58.000Z",
+  "chainId": 677,
+  "distributor": "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
+  "publicationTx": { "hash": "0x98cd9d8689f0cf36476f1947a4468efb1a7bfececce4c9b745b98866f9d288fe", "status": "success", "block": "25741967", "events": ["EpochPublished(epochId=2, allocation=10 FLOW, claimStart=1791463369, claimEnd=1794055369)"] },
+  "state": { "epochCount": "2", "totalReserved": "10000000000000000000", "totalClaimed": "1000000000000000000", "campaignBudget": "1005001000000000000000000", "budgetRemaining": "1004990000000000000000000", "flowBalance": "2499999000000000000000000", "freeBalance": "2499989000000000000000000", "paused": false },
+  "canary": { "account": "afb08df9-5769-407a-9669-1e6bb9689f17", "wallet": "0x628e237b73C5a37EF3968527563FA1a26b32BB97", "epochId": 2, "index": 0, "amountWei": "10000000000000000000", "proof": [], "onChainLeafEqualsRoot": true, "isClaimed": false },
+  "claimWindow": { "opens": "2026-10-08T12:42:49.000Z", "closes": "2026-11-07T12:42:49.000Z", "simulationBeforeOpen": "reverts ClaimWindowNotOpen (canary, foreign wallet, and inflated amount)" },
+  "onChainWrites": "none"
+}
