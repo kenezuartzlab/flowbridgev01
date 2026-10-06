@@ -174,7 +174,7 @@ describe('P2F: network separation', () => {
 
 describe('P2F: no economic drift in the frozen manifest', () => {
   it('single epoch, single 1 FLOW leaf, allocation == leaf sum', () => {
-    expect(MAINNET_EPOCH_MANIFESTS).toHaveLength(1);
+    expect(MAINNET_EPOCH_MANIFESTS.map((m) => m.epochId)).toEqual([1, 2]);
     expect(manifest.entitlements).toHaveLength(1);
     expect(manifest.allocationWei).toBe('1000000000000000000');
     const sum = manifest.entitlements.reduce((t, e) => t + BigInt(e.amount), 0n);
