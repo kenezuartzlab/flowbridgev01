@@ -55,7 +55,7 @@ describe("owner reconciliation decisions", () => {
   it("clean proof account totals exactly 10 from the ledger", () => expect(get(REF).authoritative).toBe(10));
   it("draft allocation excludes reviewed/legacy and contains only the 10-point proof", () => {
     const wallets: Record<string, string> = { [REF]: "0x628E237B73c5A37EF3968527563fa1a26b32bB97", [OWNER]: "0x3d8a", [ANA]: "0x32a3" };
-    const d = buildDraftAllocation(s.results.map((r) => ({ ...r, wallet: wallets[r.userId] ?? "0xlegacy" + r.userId })));
+    const d = buildDraftAllocation(s.results.map((r) => ({ ...r, wallet: wallets[r.userId] ?? "0xlegacy" + r.userId })), { epochId: 2 });
     expect(d.status).toBe("DRAFT_NOT_PUBLISHED");
     expect(d.leaves).toEqual([{ index: 0, account: "0x628e237b73c5a37ef3968527563fa1a26b32bb97", points: 10, amountWei: "10000000000000000000" }]);
   });

@@ -123,7 +123,7 @@ export async function buildRewardSolvencyReport() {
     })(),
     draftAllocation: (() => {
       const wallet = new Map((profiles.data ?? []).map((p) => [p.id, p.wallet_address]));
-      const d = buildDraftAllocation(recon.results.map((r) => ({ userId: r.userId, wallet: wallet.get(r.userId) ?? null, classification: r.classification, authoritative: r.authoritative, pendingReview: r.pendingReview })));
+      const d = buildDraftAllocation(recon.results.map((r) => ({ userId: r.userId, wallet: wallet.get(r.userId) ?? null, classification: r.classification, authoritative: r.authoritative, pendingReview: r.pendingReview })), { epochId: 2 });
       // Admin view: counts only, no wallet addresses.
       return { status: d.status, leaves: d.leaves.length, totalPoints: d.totalPoints };
     })(),
