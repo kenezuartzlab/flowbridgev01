@@ -57,6 +57,13 @@
       "when": 1791074824767,
       "tag": "0007_funded_signup_bonus_program",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791249482571,
+      "tag": "0008_approved_initial_reward_budgets",
+      "breakpoints": true
     }
   ]
 }

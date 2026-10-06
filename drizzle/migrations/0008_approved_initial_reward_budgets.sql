@@ -1,0 +1,2 @@
+SELECT public.increase_reward_budget('CORE_SWAP', 3000, 'owner-approval-gate-2026-10-04', 'Owner-approved initial Core Swap budget (3,000 FLOW); backing pending on-chain budget headroom');
+SELECT public.increase_reward_budget('REFERRAL_MILESTONE', 2000, 'owner-approval-gate-2026-10-04', 'Owner-approved initial Referral Activity Milestone budget (2,000 FLOW, 30-day option)');
