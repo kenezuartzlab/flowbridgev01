@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { STALE_SETTLEMENT_MESSAGE, isSettlementStale } from "@/lib/rewards/settlementPlanner";
 import { getIdToken } from "@/lib/auth";
 import type { RewardSolvencyReport } from "@/lib/rewards/rewardSolvency.server";
 
@@ -80,22 +82,7 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
         <KV k="Owner action" v={r.fundingPreparation.budgetTx.method} />
         <KV k="Draft first allocation" v={`${r.draftAllocation.leaves} wallet(s) · ${fmt(r.draftAllocation.totalPoints)} FLOW · not published`} />
       </Box>
-      <Box title={`Next settlement batch: ${r.settlement.status === "READY_FOR_PUBLISHER_REVIEW" ? "READY FOR SIGNER REVIEW" : "NOT READY"}`}>
-        <KV k="Signer (single)" v={`${r.settlement.signer.address.slice(0, 8)}…${r.settlement.signer.address.slice(-4)}`} />
-        {r.settlement.epochId != null && <KV k="Round" v={`#${r.settlement.epochId}`} />}
-        <KV k="Payout list" v={`${r.settlement.leaves} wallet(s) · ${fmt(r.settlement.totalFlow)} FLOW`} />
-        {r.settlement.claimStartIso && <KV k="Claim window" v={`${r.settlement.claimStartIso.slice(0, 16)} → ${r.settlement.claimEndIso?.slice(0, 16)} UTC`} />}
-        {r.settlement.reason && <KV k="Waiting on" v={r.settlement.reason.replaceAll("_", " ")} />}
-        {r.settlement.checks.map((c) => <KV key={c.id} k={c.id.replaceAll("_", " ")} v={c.pass ? "PASS" : "FAIL"} />)}
-        {r.settlement.tx && (
-          <div className="space-y-1">
-            <KV k="To" v={r.settlement.tx.to} />
-            <p className="break-all font-mono text-[10px] text-muted">{r.settlement.tx.data}</p>
-            <button type="button" className="rounded-md border border-border px-2 py-1 text-[11px]" onClick={() => navigator.clipboard?.writeText(r.settlement.tx!.data)}>Copy transaction data</button>
-          </div>
-        )}
-        <p className="text-[11px] leading-snug text-muted-soft">Listed automatically from funded points. {r.settlement.signer.note}</p>
-      </Box>
+      <SettlementBox r={r} rebuild={() => q.refetch()} rebuilding={q.isFetching} />
       {r.publication.map((p) => (
         <Box key={p.epochId} title={`Allocation round #${p.epochId} (${p.programId.replaceAll("_", " ")})`}>
           <KV k="State" v={p.published ? "PUBLISHED" : "PREPARED — NOT SIGNED"} />
@@ -115,5 +102,46 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
         {r.payout.capabilities.map((c) => <KV key={c.capability} k={c.capability} v={c.supported ? "YES" : "NO"} />)}
       </Box>
     </div>
+  );
+}
+
+function SettlementBox({ r, rebuild, rebuilding }: { r: RewardSolvencyReport; rebuild: () => unknown; rebuilding: boolean }) {
+  const s = r.settlement;
+  const [reviewed, setReviewed] = useState<string | null>(s.fingerprint);
+  useEffect(() => { if (reviewed == null && s.fingerprint) setReviewed(s.fingerprint); }, [s.fingerprint, reviewed]);
+  const stale = !!s.fingerprint && isSettlementStale(reviewed, s.fingerprint);
+  const ready = s.status === "READY_FOR_PUBLISHER_REVIEW" && !stale;
+  const c = r.canary;
+  return (
+    <>
+      <Box title={`Next settlement batch: ${ready ? "READY FOR SIGNER REVIEW" : "NOT READY"}`}>
+        {s.reason && <KV k="Reason" v={s.reason.replaceAll("_", " ")} />}
+        {stale && <p className="text-[12px] font-bold text-danger">{STALE_SETTLEMENT_MESSAGE}</p>}
+        <KV k="Network" v="BOT Mainnet 677" />
+        <KV k="Distributor" v={r.distributor.address} />
+        <KV k="Publisher" v={s.publisher.address} />
+        <KV k="Publisher role" v={s.publisher.status === "PASS" ? "PASS — publish only" : s.publisher.status === "UNKNOWN" ? "UNKNOWN" : `FAIL${s.publisher.extraRoles.length ? ` (also ${s.publisher.extraRoles.join(", ")})` : ""}`} />
+        {s.epochId != null && <KV k="Round" v={`#${s.epochId}`} />}
+        <KV k="Wallets / total" v={`${s.leaves} · ${fmt(s.totalFlow)} FLOW`} />
+        {s.root && <KV k="Merkle root" v={s.root} />}
+        {s.claimStartIso && <KV k="Claim opens / expires" v={`${s.claimStartIso.slice(0, 16)} → ${s.claimEndIso?.slice(0, 16)} UTC`} />}
+        {s.programs.map((p) => <KV key={p.programId} k={`${p.programId.replaceAll("_", " ")} funds`} v={`${fmt(p.includedPoints)} of ${fmt(p.availablePoints)} available`} />)}
+        {s.liveState && <KV k="Live state" v={`round ${s.liveState.epochCount} · ${s.liveState.paused ? "PAUSED" : "active"} · bal ${fmt(s.liveState.balanceFlow)} · reserved ${fmt(s.liveState.reservedFlow)}`} />}
+        {s.checks.map((ch) => <KV key={ch.id} k={ch.id.replaceAll("_", " ")} v={ch.pass ? "PASS" : "FAIL"} />)}
+        {ready && s.tx && <p className="break-all font-mono text-[10px] text-muted">{s.tx.data}</p>}
+        <div className="flex flex-wrap gap-2 pt-1">
+          <button type="button" disabled={!ready || !s.tx} className="rounded-md border border-border px-2 py-1 text-[11px] disabled:opacity-40" onClick={() => s.tx && navigator.clipboard?.writeText(s.tx.data)}>Copy transaction data</button>
+          <button type="button" disabled={rebuilding} className="rounded-md border border-border px-2 py-1 text-[11px] disabled:opacity-40" onClick={() => rebuild()}>{rebuilding ? "Rebuilding…" : "Rebuild from live state"}</button>
+          {stale && <button type="button" className="rounded-md border border-border px-2 py-1 text-[11px]" onClick={() => setReviewed(s.fingerprint)}>Review new batch</button>}
+        </div>
+        <p className="text-[11px] leading-snug text-muted-soft">Server prepares → you review → publisher wallet opens and signs → chain confirms → app verifies. The app holds no key and never signs. Built {s.generatedAt.slice(11, 19)} UTC.</p>
+      </Box>
+      <Box title="Round #2 canary (live)">
+        <KV k="Claimed" v={c ? (c.claimed ? "YES" : "NO") : "UNKNOWN"} />
+        <KV k="Claimed amount" v={c?.claimedFlow != null ? `${c.claimedFlow} FLOW` : "—"} />
+        <KV k="Opens" v={c?.claimStartIso ? `${c.claimStartIso.slice(0, 19)} UTC` : "—"} />
+        {s.published.map((p) => <KV key={p.epochId} k={`Round #${p.epochId} verified`} v={p.complete ? "PASS" : "FAIL"} />)}
+      </Box>
+    </>
   );
 }

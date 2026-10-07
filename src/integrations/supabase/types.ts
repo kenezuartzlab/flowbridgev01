@@ -1267,6 +1267,54 @@ export type Database = {
           },
         ]
       }
+      reward_settlement_batches: {
+        Row: {
+          chain_id: number
+          claim_end: number
+          claim_start: number
+          created_at: string
+          distributor: string
+          epoch_id: number
+          fingerprint: string
+          id: string
+          leaves: Json
+          program_breakdown: Json
+          publication_verified_at: string | null
+          root: string
+          total_wei: number
+        }
+        Insert: {
+          chain_id: number
+          claim_end: number
+          claim_start: number
+          created_at?: string
+          distributor: string
+          epoch_id: number
+          fingerprint: string
+          id?: string
+          leaves: Json
+          program_breakdown?: Json
+          publication_verified_at?: string | null
+          root: string
+          total_wei: number
+        }
+        Update: {
+          chain_id?: number
+          claim_end?: number
+          claim_start?: number
+          created_at?: string
+          distributor?: string
+          epoch_id?: number
+          fingerprint?: string
+          id?: string
+          leaves?: Json
+          program_breakdown?: Json
+          publication_verified_at?: string | null
+          root?: string
+          total_wei?: number
+        }
+        Relationships: []
+      }
       siwe_nonces: {
         Row: {
           created_at: string

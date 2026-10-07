@@ -28,7 +28,8 @@ export interface MainnetEpochManifest {
   allocationWei: string;
   claimStart: number;
   claimEnd: number;
-  publicationTxHash: Hex;
+  /** Null for rounds discovered from the server after release. */
+  publicationTxHash: Hex | null;
   entitlements: readonly (MerkleClaimLeaf & { proof: readonly Hex[] })[];
 }
 

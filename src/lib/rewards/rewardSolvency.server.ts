@@ -11,30 +11,12 @@ import {
 } from "./rewardFundingPlan";
 import { MAINNET_EPOCH_DRAFTS, draftFlowLabel } from "./mainnetEpochDraft";
 import { MAINNET_EPOCH_MANIFESTS } from "./mainnetEpochManifest";
-import { prepareSettlementBatch, SETTLEMENT_SIGNER } from "./settlementPlanner";
+import { buildSettlement, readCanaryStatus } from "./settlement.server";
 
 const DISTRIBUTOR = MAINNET_PAYOUT_AUDIT.address as Address;
 const ABI = parseAbi(["function freeBalance() view returns (uint256)", "function totalReserved() view returns (uint256)", "function paused() view returns (bool)", "function campaignBudget() view returns (uint256)"]);
 const SETTLE_ABI = parseAbi(["function epochCount() view returns (uint256)", "function totalClaimed() view returns (uint256)", "function minPublishDelay() view returns (uint64)"]);
 const TOKEN_ABI = parseAbi(["function balanceOf(address) view returns (uint256)", "function token() view returns (address)"]);
-
-/** Live chain state for the settlement planner. Null if any read fails (fail closed). */
-async function readSettlementChain() {
-  try {
-    const c = createPublicClient({ transport: http("https://rpc.botchain.ai") });
-    const r = (fn: "freeBalance" | "totalReserved" | "paused" | "campaignBudget") => c.readContract({ address: DISTRIBUTOR, abi: ABI, functionName: fn });
-    const s = (fn: "epochCount" | "totalClaimed" | "minPublishDelay") => c.readContract({ address: DISTRIBUTOR, abi: SETTLE_ABI, functionName: fn });
-    const token = await c.readContract({ address: DISTRIBUTOR, abi: TOKEN_ABI, functionName: "token" });
-    const [epochCount, totalClaimed, delay, reserved, budget, paused, balance, block] = await Promise.all([
-      s("epochCount"), s("totalClaimed"), s("minPublishDelay"), r("totalReserved"), r("campaignBudget"), r("paused"),
-      c.readContract({ address: token, abi: TOKEN_ABI, functionName: "balanceOf", args: [DISTRIBUTOR] }), c.getBlock(),
-    ]);
-    return { epochCount: Number(epochCount), totalClaimedWei: totalClaimed as bigint, minPublishDelay: Number(delay), totalReservedWei: reserved as bigint,
-      campaignBudgetWei: budget as bigint, paused: paused as boolean, balanceWei: balance, nowSec: Number(block.timestamp) };
-  } catch {
-    return null;
-  }
-}
 
 const MILESTONE_REASONS = ["REFERRAL_MILESTONE_FIRST_SWAP", "REFERRAL_MILESTONE_VOLUME_100", "REFERRAL_MILESTONE_ACTIVE_DAYS_3", "REFERRAL_3_ACTIVE_DAYS"];
 
@@ -63,7 +45,6 @@ export async function buildRewardSolvencyReport() {
     supabaseAdmin.from("reward_reservations").select("program_id,points"),
     readDistributor(),
   ]);
-  const settleChainP = readSettlementChain();
   if (profiles.error || ledger.error || budgets.error) throw new Error("Reward data unavailable");
 
   const byUser = new Map<string, ReconLedgerRow[]>();
@@ -161,36 +142,18 @@ export async function buildRewardSolvencyReport() {
       claimStartIso: new Date(d.claimStart * 1000).toISOString(),
       claimEndIso: new Date(d.claimEnd * 1000).toISOString(),
       signBeforeIso: new Date(d.signBefore * 1000).toISOString(),
-      published: d.publicationTxHash != null,
+      published: d.publicationTxHash != null || MAINNET_EPOCH_MANIFESTS.some((m) => m.epochId === d.epochId && m.root === d.root),
       signed: false,
       broadcast: false,
     })),
-    settlement: await (async () => {
-      const live = await settleChainP;
-      if (!live) return { status: "BLOCKED" as const, reason: "Live payout contract state unavailable.", signer: SETTLEMENT_SIGNER, epochId: null, leaves: 0, totalFlow: 0, checks: [], tx: null, claimStartIso: null, claimEndIso: null, generatedAt: new Date().toISOString() };
-      const wallet = new Map((profiles.data ?? []).map((p) => [p.id, p.wallet_address]));
-      const allocated = new Map<string, number>();
-      for (const m of MAINNET_EPOCH_MANIFESTS) for (const e of m.entitlements) {
-        const k = String(e.account).toLowerCase();
-        allocated.set(k, (allocated.get(k) ?? 0) + Number(BigInt(e.amount) / 10n ** 18n));
-      }
-      // Only FUNDED Mainnet ledger points count; unfunded/pending stay out.
-      const funded = new Map<string, number>();
-      for (const l of ledger.data ?? []) if (l.funding_state === "FUNDED" && l.chain_id === MAINNET_CHAIN_ID) funded.set(l.user_id, (funded.get(l.user_id) ?? 0) + l.points);
-      const rows = recon.results.filter((x) => funded.has(x.userId)).map((x) => {
-        const w = wallet.get(x.userId) ?? null;
-        return { userId: x.userId, wallet: w, classification: x.classification, authoritative: Math.min(funded.get(x.userId) ?? 0, x.authoritative), pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0 };
-      });
-      const fundedAvail = rows.reduce((t, x) => t + Math.max(0, x.authoritative - x.alreadyAllocatedPoints), 0);
-      const p = prepareSettlementBatch({ rows, fundedPointsAvailable: fundedAvail, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR });
-      return {
-        status: p.status, reason: p.status === "BLOCKED" ? p.checks.filter((c) => !c.pass).map((c) => c.id).join(", ") : null,
-        signer: SETTLEMENT_SIGNER, epochId: p.epochId, leaves: p.batch?.leaves.length ?? 0,
-        totalFlow: p.batch ? Number(BigInt(p.batch.totalWei) / 10n ** 18n) : 0, root: p.batch?.root ?? null,
-        checks: p.checks, tx: p.tx, claimStartIso: new Date(p.claimStart * 1000).toISOString(), claimEndIso: new Date(p.claimEnd * 1000).toISOString(),
-        generatedAt: new Date().toISOString(),
-      };
-    })(),
+    settlement: await buildSettlement({
+      admin: supabaseAdmin,
+      recon: recon.results,
+      ledger: (ledger.data ?? []) as never,
+      wallets: new Map((profiles.data ?? []).map((p) => [p.id, p.wallet_address])),
+      budgets: (budgets.data ?? []) as never,
+    }),
+    canary: await readCanaryStatus(),
     payout: { sufficient: payoutContractSufficient(), capabilities: MAINNET_PAYOUT_AUDIT.capabilities, promotionPackage: MAINNET_PROMOTION_PACKAGE },
   };
 }

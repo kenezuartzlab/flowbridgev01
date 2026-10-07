@@ -64,6 +64,13 @@
       "when": 1791249482571,
       "tag": "0008_approved_initial_reward_budgets",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791361921040,
+      "tag": "0009_reward_settlement_batches",
+      "breakpoints": true
     }
   ]
 }
