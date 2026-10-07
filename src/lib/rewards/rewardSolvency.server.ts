@@ -18,24 +18,6 @@ const ABI = parseAbi(["function freeBalance() view returns (uint256)", "function
 const SETTLE_ABI = parseAbi(["function epochCount() view returns (uint256)", "function totalClaimed() view returns (uint256)", "function minPublishDelay() view returns (uint64)"]);
 const TOKEN_ABI = parseAbi(["function balanceOf(address) view returns (uint256)", "function token() view returns (address)"]);
 
-/** Live chain state for the settlement planner. Null if any read fails (fail closed). */
-async function readSettlementChain() {
-  try {
-    const c = createPublicClient({ transport: http("https://rpc.botchain.ai") });
-    const r = (fn: "freeBalance" | "totalReserved" | "paused" | "campaignBudget") => c.readContract({ address: DISTRIBUTOR, abi: ABI, functionName: fn });
-    const s = (fn: "epochCount" | "totalClaimed" | "minPublishDelay") => c.readContract({ address: DISTRIBUTOR, abi: SETTLE_ABI, functionName: fn });
-    const token = await c.readContract({ address: DISTRIBUTOR, abi: TOKEN_ABI, functionName: "token" });
-    const [epochCount, totalClaimed, delay, reserved, budget, paused, balance, block] = await Promise.all([
-      s("epochCount"), s("totalClaimed"), s("minPublishDelay"), r("totalReserved"), r("campaignBudget"), r("paused"),
-      c.readContract({ address: token, abi: TOKEN_ABI, functionName: "balanceOf", args: [DISTRIBUTOR] }), c.getBlock(),
-    ]);
-    return { epochCount: Number(epochCount), totalClaimedWei: totalClaimed as bigint, minPublishDelay: Number(delay), totalReservedWei: reserved as bigint,
-      campaignBudgetWei: budget as bigint, paused: paused as boolean, balanceWei: balance, nowSec: Number(block.timestamp) };
-  } catch {
-    return null;
-  }
-}
-
 const MILESTONE_REASONS = ["REFERRAL_MILESTONE_FIRST_SWAP", "REFERRAL_MILESTONE_VOLUME_100", "REFERRAL_MILESTONE_ACTIVE_DAYS_3", "REFERRAL_3_ACTIVE_DAYS"];
 
 async function readDistributor() {
