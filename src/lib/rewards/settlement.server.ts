@@ -61,7 +61,7 @@ const toBatch = (r: BatchRow): StoredBatch => ({ epochId: r.epoch_id, root: r.ro
 export async function discoverPublishedBatches(admin: Admin, liveEpochCount: number) {
   const staticIds = new Set(MAINNET_EPOCH_MANIFESTS.map((m) => m.epochId));
   const { data } = await admin.from("reward_settlement_batches").select("epoch_id,root,total_wei,claim_start,claim_end,leaves,publication_verified_at")
-    .eq("chain_id", MAINNET_CHAIN_ID).eq("distributor", DISTRIBUTOR.toLowerCase()).lte("epoch_id", liveEpochCount);
+    .eq("chain_id", MAINNET_CHAIN_ID).eq("distributor", DISTRIBUTOR.toLowerCase()).lte("epoch_id", liveEpochCount).order("epoch_id", { ascending: true });
   const out: { batch: StoredBatch; verification: ReturnType<typeof verifyPublishedRound> }[] = [];
   const chain = await readChainState();
   for (const row of (data ?? []) as unknown as BatchRow[]) {
