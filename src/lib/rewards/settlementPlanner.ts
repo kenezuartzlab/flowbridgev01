@@ -82,6 +82,8 @@ export interface SettlementInput {
   fundedPointsAvailable: number;
   /** Per-program attribution of batch points. Omit only in legacy callers/tests. */
   programs?: ProgramFunding[];
+  /** Rounds discovered from verified server-stored batches (not in the frozen manifest). */
+  knownEpochIds?: number[];
   publisherRoles?: Partial<Record<RoleName, boolean>> | null;
   chain: ChainState;
   chainId: number;
@@ -111,7 +113,9 @@ export function settlementFingerprint(i: SettlementInput): Hex {
 function buildOnce(i: SettlementInput) {
   const checks: Check[] = [];
   const add = (id: string, pass: boolean, detail: string) => checks.push({ id, pass, detail });
+  const known = new Set(i.knownEpochIds ?? []);
   const sync = discoverRounds(i.chain.epochCount);
+  sync.missingFromApp = sync.missingFromApp.filter((e) => !known.has(e));
   add("ROUNDS_IN_SYNC", sync.missingFromApp.length === 0, sync.missingFromApp.length ? `missing ${sync.missingFromApp.join(",")}` : "every on-chain round is known");
   add("NOT_PAUSED", !i.chain.paused, "distributor pause state");
   if (i.publisherRoles !== undefined) {
