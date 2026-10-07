@@ -55,7 +55,7 @@ export async function readEpoch(epochId: number) {
 
 type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 type BatchRow = { epoch_id: number; root: string; total_wei: string | number; claim_start: number; claim_end: number; leaves: StoredBatch["leaves"]; publication_verified_at: string | null };
-const toBatch = (r: BatchRow): StoredBatch => ({ epochId: r.epoch_id, root: r.root as Hex, totalWei: BigInt(String(r.total_wei).split(".")[0]).toString(), claimStart: Number(r.claim_start), claimEnd: Number(r.claim_end), leaves: r.leaves });
+const toBatch = (r: BatchRow): StoredBatch => ({ epochId: r.epoch_id, root: r.root as Hex, totalWei: BigInt(Number(r.total_wei).toLocaleString("fullwide", { useGrouping: false })).toString(), claimStart: Number(r.claim_start), claimEnd: Number(r.claim_end), leaves: r.leaves });
 
 /** Stored batches whose root is LIVE on chain (published + verified). */
 export async function discoverPublishedBatches(admin: Admin, liveEpochCount: number) {
@@ -143,7 +143,7 @@ export async function buildSettlement(args: {
   if (p.status === "READY_FOR_PUBLISHER_REVIEW" && p.batch?.root) {
     await args.admin.from("reward_settlement_batches").upsert({
       chain_id: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR.toLowerCase(), epoch_id: p.epochId, root: p.batch.root,
-      total_wei: p.batch.totalWei, claim_start: p.claimStart, claim_end: p.claimEnd, fingerprint: p.fingerprint,
+      total_wei: Number(BigInt(p.batch.totalWei) / WEI) * 1e18, claim_start: p.claimStart, claim_end: p.claimEnd, fingerprint: p.fingerprint,
       leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
       program_breakdown: programs as never,
     }, { onConflict: "chain_id,distributor,epoch_id,root", ignoreDuplicates: true });
