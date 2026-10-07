@@ -23,6 +23,14 @@ export const SETTLEMENT_AUTOMATION = Object.freeze({
   publicClaimsUnlocked: false,
 });
 
+/** Single designated publisher (owner decision: one signer for speed). Reviews and signs manually. */
+export const SETTLEMENT_SIGNER = Object.freeze({
+  mode: "SINGLE_SIGNER" as const,
+  role: "PUBLISHER_ROLE",
+  address: "0x971E" as const,
+  note: "One publisher EOA reviews the server-listed batch and signs publishEpoch in its own wallet. The app never signs.",
+});
+
 const WEI = 10n ** 18n;
 const CLAIM_WINDOW_SECONDS = 30 * 86_400;
 const START_MARGIN_SECONDS = 2 * 3_600;
