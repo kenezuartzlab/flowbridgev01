@@ -351,7 +351,7 @@ function EarnPage() {
                   disabled
                   aria-disabled="true"
                   onClick={() => void claim()}
-                  className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:opacity-45"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:border disabled:border-hairline disabled:bg-card disabled:text-muted"
                 >
                   <Gift className="h-4 w-4" aria-hidden />
                   Mainnet claims locked

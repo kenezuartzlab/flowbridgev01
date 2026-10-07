@@ -185,7 +185,7 @@ export function MainnetFlowClaimCard() {
             type="button"
             onClick={() => void submit()}
             disabled={!claim.preparation || submitting || claim.loading}
-            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:opacity-45"
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:border disabled:border-hairline disabled:bg-card disabled:text-muted"
           >
             {submitting ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
