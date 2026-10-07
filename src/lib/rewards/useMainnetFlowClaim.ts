@@ -22,7 +22,7 @@ import {
   type MerkleClaimPreparation,
   type PublishedEpochState,
 } from './merkleClaim';
-import { findMainnetEntitlement, type MainnetEntitlementMatch } from './mainnetEpochManifest';
+import { MAINNET_EPOCH_MANIFESTS, type MainnetEntitlementMatch } from './mainnetEpochManifest';
 import { draftFlowLabel, findMainnetDraftEntitlement } from './mainnetEpochDraft';
 
 const READ_ABI = [
@@ -100,23 +100,40 @@ const IDLE: MainnetClaimState = {
  * root/proof are re-verified on chain and locally below, so a wrong answer can
  * only block, never pay.
  */
-async function discoverEntitlement(wallet: string | null | undefined): Promise<MainnetEntitlementMatch | null> {
-  if (!wallet || typeof fetch === 'undefined') return null;
+async function discoverEntitlements(wallet: string | null | undefined): Promise<MainnetEntitlementMatch[]> {
+  if (!wallet || typeof fetch === 'undefined') return [];
   try {
     const res = await fetch(`/api/public/reward-rounds?wallet=${encodeURIComponent(wallet.toLowerCase())}`);
-    if (!res.ok) return null;
+    if (!res.ok) return [];
     const { rounds } = (await res.json()) as { rounds: { epochId: number; root: Hex; allocationWei: string; claimStart: number; claimEnd: number; distributor: Hex; leaf: { index: number; account: Hex; amount: string; proof: Hex[] } }[] };
-    const r = rounds?.[0];
-    if (!r) return null;
+    return (rounds ?? []).map((r) => {
     const leaf = { epochId: r.epochId, index: r.leaf.index, account: r.leaf.account, amount: r.leaf.amount };
     return {
       manifest: { chainId: BOT_MAINNET_CHAIN_ID, epochId: r.epochId, campaignId: `MAINNET_SETTLEMENT_ROUND_${r.epochId}`, distributor: r.distributor, root: r.root, allocationWei: r.allocationWei, claimStart: r.claimStart, claimEnd: r.claimEnd, publicationTxHash: null, entitlements: [{ ...leaf, proof: r.leaf.proof }] },
       leaf,
       proof: r.leaf.proof,
     };
+    });
   } catch {
-    return null;
+    return [];
   }
+}
+
+/** Every round (frozen manifest + discovered) containing the wallet, oldest first, one per epoch. */
+async function allEntitlements(wallet: string | null | undefined): Promise<MainnetEntitlementMatch[]> {
+  const out = new Map<number, MainnetEntitlementMatch>();
+  if (wallet) {
+    for (const m of MAINNET_EPOCH_MANIFESTS) {
+      if (m.chainId !== BOT_MAINNET_CHAIN_ID) continue;
+      const hit = m.entitlements.find((e) => e.account.toLowerCase() === wallet.toLowerCase());
+      if (hit) {
+        const { proof, ...leaf } = hit;
+        out.set(m.epochId, { manifest: m, leaf, proof });
+      }
+    }
+  }
+  for (const d of await discoverEntitlements(wallet)) if (!out.has(d.manifest.epochId)) out.set(d.manifest.epochId, d);
+  return [...out.values()].sort((a, b) => a.manifest.epochId - b.manifest.epochId);
 }
 
 export interface UseMainnetFlowClaim extends MainnetClaimState {
@@ -129,7 +146,8 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
   const [loading, setLoading] = useState(false);
 
   const read = useCallback(async () => {
-    const entitlement = findMainnetEntitlement(BOT_MAINNET_CHAIN_ID, wallet) ?? (await discoverEntitlement(wallet));
+    const candidates = await allEntitlements(wallet);
+    let entitlement: MainnetEntitlementMatch | undefined = candidates[candidates.length - 1];
     if (!entitlement) {
       // A prepared-but-unpublished round is explained, never offered as a claim.
       const draft = findMainnetDraftEntitlement(BOT_MAINNET_CHAIN_ID, wallet);
@@ -160,6 +178,18 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
     setLoading(true);
     try {
       const client = createPublicClient({ chain: botMainnet, transport: http() });
+      // Offer the oldest published, unclaimed round; when every round is
+      // claimed, show the newest. A wallet in several rounds is never stuck.
+      if (candidates.length > 1) {
+        const count = (await client.readContract({ address: distributor, abi: READ_ABI, functionName: 'epochCount' })) as bigint;
+        const published = candidates.filter((c) => BigInt(c.leaf.epochId) <= count);
+        const flags = await Promise.all(
+          published.map((c) =>
+            client.readContract({ address: distributor, abi: READ_ABI, functionName: 'isClaimed', args: [BigInt(c.leaf.epochId), BigInt(c.leaf.index)] }),
+          ),
+        );
+        entitlement = published.find((_, i) => !flags[i]) ?? published[published.length - 1] ?? entitlement;
+      }
       const { epochId, index } = entitlement.leaf;
 
       // A manifest may never be shipped ahead of its publication: an epoch id
