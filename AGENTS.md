@@ -24,3 +24,5 @@
 - Reward funding is reserved only through SECURITY DEFINER RPCs (award_signup_bonus, increase_reward_budget) against reward_budgets; only FUNDED ledger rows count toward 1:1 FLOW claims, and the 1:1 claim gate lives in src/lib/rewards/signupBonusPolicy.ts. Why: points equal tokens, so every point must be backed and never derived from profile aggregates.
 - Historical FLOW Points reconciliation and per-program solvency are computed only in src/lib/rewards/historicalReconciliation.ts and rewardFundingPlan.ts (pure), served admin-only via /api/admin/rewards-solvency to the /ops Rewards tab. Why: stored profile aggregates were once user-writable and must never authorize claims.
 - The Mainnet claim minimum and its single canary exception are decided only in src/lib/rewards/claimMinimumPolicy.ts, applied by buildDraftAllocation and the Earn UI. Why: the payout contract enforces no on-chain minimum.
+
+- Settlement batches are prepared only in src/lib/rewards/settlementPlanner.ts (pure, prepare-only, unsigned publishEpoch). Why: automation must never hold publisher keys or sign on-chain.
