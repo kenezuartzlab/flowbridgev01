@@ -94,6 +94,31 @@ const IDLE: MainnetClaimState = {
   explorerTxUrl: null,
 };
 
+/**
+ * Automatic round discovery: rounds published after this release are served by
+ * the server only when their stored root equals the live on-chain root. The
+ * root/proof are re-verified on chain and locally below, so a wrong answer can
+ * only block, never pay.
+ */
+async function discoverEntitlement(wallet: string | null | undefined): Promise<MainnetEntitlementMatch | null> {
+  if (!wallet || typeof fetch === 'undefined') return null;
+  try {
+    const res = await fetch(`/api/public/reward-rounds?wallet=${encodeURIComponent(wallet.toLowerCase())}`);
+    if (!res.ok) return null;
+    const { rounds } = (await res.json()) as { rounds: { epochId: number; root: Hex; allocationWei: string; claimStart: number; claimEnd: number; distributor: Hex; leaf: { index: number; account: Hex; amount: string; proof: Hex[] } }[] };
+    const r = rounds?.[0];
+    if (!r) return null;
+    const leaf = { epochId: r.epochId, index: r.leaf.index, account: r.leaf.account, amount: r.leaf.amount };
+    return {
+      manifest: { chainId: BOT_MAINNET_CHAIN_ID, epochId: r.epochId, campaignId: `MAINNET_SETTLEMENT_ROUND_${r.epochId}`, distributor: r.distributor, root: r.root, allocationWei: r.allocationWei, claimStart: r.claimStart, claimEnd: r.claimEnd, publicationTxHash: null, entitlements: [{ ...leaf, proof: r.leaf.proof }] },
+      leaf,
+      proof: r.leaf.proof,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export interface UseMainnetFlowClaim extends MainnetClaimState {
   loading: boolean;
   refresh: () => Promise<void>;
@@ -104,7 +129,7 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
   const [loading, setLoading] = useState(false);
 
   const read = useCallback(async () => {
-    const entitlement = findMainnetEntitlement(BOT_MAINNET_CHAIN_ID, wallet);
+    const entitlement = findMainnetEntitlement(BOT_MAINNET_CHAIN_ID, wallet) ?? (await discoverEntitlement(wallet));
     if (!entitlement) {
       // A prepared-but-unpublished round is explained, never offered as a claim.
       const draft = findMainnetDraftEntitlement(BOT_MAINNET_CHAIN_ID, wallet);
@@ -188,7 +213,9 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
         distributorBalance: (balance as bigint).toString(),
         totalReserved: (totalReserved as bigint).toString(),
       };
-      const explorerTxUrl = `${botMainnet.blockExplorers.default.url}/tx/${entitlement.manifest.publicationTxHash}`;
+      const explorerTxUrl = entitlement.manifest.publicationTxHash
+        ? `${botMainnet.blockExplorers.default.url}/tx/${entitlement.manifest.publicationTxHash}`
+        : `${botMainnet.blockExplorers.default.url}/address/${distributor}`;
       const base = { entitlement, epoch, alreadyClaimed: Boolean(claimed), distributor, explorerTxUrl };
 
       if (epoch.root.toLowerCase() !== entitlement.manifest.root.toLowerCase()) {
