@@ -4,7 +4,7 @@ CREATE TABLE public.reward_settlement_batches (
   distributor text NOT NULL,
   epoch_id integer NOT NULL,
   root text NOT NULL,
-  total_wei text NOT NULL,
+  total_wei numeric NOT NULL,
   claim_start bigint NOT NULL,
   claim_end bigint NOT NULL,
   fingerprint text NOT NULL,
