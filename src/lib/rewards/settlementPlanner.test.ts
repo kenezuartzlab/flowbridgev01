@@ -33,3 +33,12 @@ describe("settlement planner", () => {
   it("duplicate accounts block", () => expect(run([r(1, 1500), r(1, 1500)]).status).toBe("BLOCKED"));
   it("automation is prepare-only", () => expect(SETTLEMENT_AUTOMATION).toMatchObject({ autonomousSigning: false, newPublisherGrants: false, publicClaimsUnlocked: false }));
 });
+
+import { SETTLEMENT_SIGNER } from "./settlementPlanner";
+describe("single signer", () => {
+  it("one designated publisher, app never signs", () => {
+    expect(SETTLEMENT_SIGNER.mode).toBe("SINGLE_SIGNER");
+    expect(SETTLEMENT_SIGNER.address).toMatch(/^0x[0-9a-fA-F]{40}$/);
+    expect(SETTLEMENT_AUTOMATION.autonomousSigning).toBe(false);
+  });
+});

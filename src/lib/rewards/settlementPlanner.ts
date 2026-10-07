@@ -27,7 +27,7 @@ export const SETTLEMENT_AUTOMATION = Object.freeze({
 export const SETTLEMENT_SIGNER = Object.freeze({
   mode: "SINGLE_SIGNER" as const,
   role: "PUBLISHER_ROLE",
-  address: "0x971E" as const,
+  address: "0x971E7790Fe6c8f77Dc666bB05D4aeDa362653F94" as const,
   note: "One publisher EOA reviews the server-listed batch and signs publishEpoch in its own wallet. The app never signs.",
 });
 

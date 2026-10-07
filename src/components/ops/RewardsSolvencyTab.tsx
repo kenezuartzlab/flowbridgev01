@@ -80,6 +80,22 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
         <KV k="Owner action" v={r.fundingPreparation.budgetTx.method} />
         <KV k="Draft first allocation" v={`${r.draftAllocation.leaves} wallet(s) · ${fmt(r.draftAllocation.totalPoints)} FLOW · not published`} />
       </Box>
+      <Box title={`Next settlement batch: ${r.settlement.status === "READY_FOR_PUBLISHER_REVIEW" ? "READY FOR SIGNER REVIEW" : "NOT READY"}`}>
+        <KV k="Signer (single)" v={`${r.settlement.signer.address.slice(0, 8)}…${r.settlement.signer.address.slice(-4)}`} />
+        {r.settlement.epochId != null && <KV k="Round" v={`#${r.settlement.epochId}`} />}
+        <KV k="Payout list" v={`${r.settlement.leaves} wallet(s) · ${fmt(r.settlement.totalFlow)} FLOW`} />
+        {r.settlement.claimStartIso && <KV k="Claim window" v={`${r.settlement.claimStartIso.slice(0, 16)} → ${r.settlement.claimEndIso?.slice(0, 16)} UTC`} />}
+        {r.settlement.reason && <KV k="Waiting on" v={r.settlement.reason.replaceAll("_", " ")} />}
+        {r.settlement.checks.map((c) => <KV key={c.id} k={c.id.replaceAll("_", " ")} v={c.pass ? "PASS" : "FAIL"} />)}
+        {r.settlement.tx && (
+          <div className="space-y-1">
+            <KV k="To" v={r.settlement.tx.to} />
+            <p className="break-all font-mono text-[10px] text-muted">{r.settlement.tx.data}</p>
+            <button type="button" className="rounded-md border border-border px-2 py-1 text-[11px]" onClick={() => navigator.clipboard?.writeText(r.settlement.tx!.data)}>Copy transaction data</button>
+          </div>
+        )}
+        <p className="text-[11px] leading-snug text-muted-soft">Listed automatically from funded points. {r.settlement.signer.note}</p>
+      </Box>
       {r.publication.map((p) => (
         <Box key={p.epochId} title={`Allocation round #${p.epochId} (${p.programId.replaceAll("_", " ")})`}>
           <KV k="State" v={p.published ? "PUBLISHED" : "PREPARED — NOT SIGNED"} />
