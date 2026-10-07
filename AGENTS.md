@@ -26,3 +26,4 @@
 - The Mainnet claim minimum and its single canary exception are decided only in src/lib/rewards/claimMinimumPolicy.ts, applied by buildDraftAllocation and the Earn UI. Why: the payout contract enforces no on-chain minimum.
 
 - Settlement batches are prepared only in src/lib/rewards/settlementPlanner.ts (pure, prepare-only, unsigned publishEpoch). Why: automation must never hold publisher keys or sign on-chain.
+- Published settlement rounds after round #2 are discovered from server-stored batches (reward_settlement_batches) and served per-wallet via /api/public/reward-rounds only when the stored root equals the live on-chain root; Earn re-verifies on chain. Why: new rounds must not need a frontend release, and a wrong answer may only block, never pay.
