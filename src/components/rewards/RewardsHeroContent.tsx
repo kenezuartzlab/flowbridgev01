@@ -166,7 +166,7 @@ export function RewardsHeroContent({
             )}
           </span>
           <span className="shrink-0 tabular-nums">
-            {pending ? "—" : `${formatPts(corePointsToday)} / ${formatPts(dailyCap)}`}
+            {pending ? "—" : `Today ${formatPts(corePointsToday)} / ${formatPts(dailyCap)} cap`}
           </span>
         </div>
         <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-foreground/25">
@@ -210,7 +210,7 @@ export function RewardsHeroContent({
             </span>
             {!pending && !ready && !stateUnavailable && (canonicalClaimed ?? 0) > 0 && (
               <span className="block truncate font-mono text-[9px] uppercase tracking-[0.08em] opacity-65">
-                {formatPts(canonicalClaimed ?? 0)} {FLOW_TOKEN} claimed
+                Past: {formatPts(canonicalClaimed ?? 0)} {FLOW_TOKEN} claimed
               </span>
             )}
             {!pending && !ready && !readyToConvert && !stateUnavailable && (canonicalClaimed ?? 0) === 0 && (
