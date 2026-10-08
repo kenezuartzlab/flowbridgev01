@@ -22,7 +22,7 @@ describe('V33 settlement eligibility', () => {
 });
 
 describe('V33 claim lifecycle', () => {
-  it('public flag is OFF', () => expect(PUBLIC_MAINNET_FLOW_CLAIMS).toBe(false));
+  it('public flag is ON (V33.2)', () => expect(PUBLIC_MAINNET_FLOW_CLAIMS).toBe(true));
   it('eligible but not allocated: no claim button', () => {
     expect(claimLifecycle({ ...base, allocation: null })).toMatchObject({ state: 'ELIGIBLE_FOR_SETTLEMENT', claimButton: false, label: 'Eligible for next settlement batch' });
   });
@@ -33,7 +33,7 @@ describe('V33 claim lifecycle', () => {
   it('allocated + window open + flag ON: claim available', () => {
     expect(claimLifecycle({ ...base, publicFlag: true, allocation: alloc() })).toMatchObject({ state: 'CLAIMABLE_NOW', claimButton: true, label: 'Claim 1,500 FLOW' });
   });
-  it('public flag OFF: public claims unavailable', () => expect(claimLifecycle({ ...base, allocation: alloc() }).claimButton).toBe(false));
+  it('public flag OFF: public claims unavailable', () => expect(claimLifecycle({ ...base, publicFlag: false, allocation: alloc() }).claimButton).toBe(false));
   it('wrong wallet denied', () => expect(claimLifecycle({ ...base, publicFlag: true, allocation: alloc({ walletMatches: false }) }).claimButton).toBe(false));
   it('already claimed denied', () => expect(claimLifecycle({ ...base, publicFlag: true, allocation: alloc({ claimed: true }) })).toMatchObject({ state: 'CLAIMED', claimButton: false }));
   it('canary exception cannot leak into future rounds', () => {
@@ -46,5 +46,23 @@ describe('V33 claim lifecycle', () => {
     expect(CLAIM_WINDOW_POLICY.ownerApproved).toBe(true);
     expect(CLAIM_WINDOW_POLICY.status).toBe('APPROVED');
     expect(CLAIM_WINDOW_POLICY.currentSeconds).toBe(2_592_000);
+  });
+});
+
+describe('V33.2 public activation keeps safety', () => {
+  it('flag ON never makes sub-1,000 claimable without allocation', () => {
+    expect(claimLifecycle({ ...base, fundedEligiblePoints: 999, allocation: null })).toMatchObject({ claimButton: false });
+  });
+  it('flag ON: eligible but unallocated has no claim button', () => {
+    expect(claimLifecycle({ ...base, allocation: null }).claimButton).toBe(false);
+  });
+  it('flag ON: window closed shows allocation only', () => {
+    expect(claimLifecycle({ ...base, allocation: alloc({ claimStart: now + 100 }) }).claimButton).toBe(false);
+  });
+  it('flag ON: open window, correct wallet + proof enables claim', () => {
+    expect(claimLifecycle({ ...base, allocation: alloc() }).claimButton).toBe(true);
+  });
+  it('flag ON: invalid proof denied', () => {
+    expect(claimLifecycle({ ...base, allocation: alloc({ proofValid: false }) }).claimButton).toBe(false);
   });
 });
