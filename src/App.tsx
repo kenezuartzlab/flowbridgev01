@@ -3480,23 +3480,19 @@ export default function App() {
           isOpen={isWaitingModalOpen}
           onClose={() => setIsWaitingModalOpen(false)}
           fromAmount={
-            activeTab === 'CA/BOT' ? caAmount :
-            activeTab === 'BOT/USDT' ? (universalSwapInfo?.fromAmount ?? botAmount) :
+            activeTab !== 'BRIDGE' ? (universalSwapInfo?.fromAmount ?? '') :
             usdtAmount
           }
           fromSymbol={
-            activeTab === 'CA/BOT' ? caPaySymbol :
-            activeTab === 'BOT/USDT' ? (universalSwapInfo?.fromSymbol ?? paySymbol) :
+            activeTab !== 'BRIDGE' ? (universalSwapInfo?.fromSymbol ?? '') :
             "USDT"
           }
           toAmount={
-            activeTab === 'CA/BOT' ? getCaToBotDisplayQuote() :
-            activeTab === 'BOT/USDT' ? (universalSwapInfo?.toAmount ?? getActiveSwapQuote()) :
+            activeTab !== 'BRIDGE' ? (universalSwapInfo?.toAmount ?? '') :
             (usdtAmount ? parseFloat(calculateBridgeReceive(usdtAmount)).toFixed(6) : "0.00")
           }
           toSymbol={
-            activeTab === 'CA/BOT' ? caRecSymbol :
-            activeTab === 'BOT/USDT' ? (universalSwapInfo?.toSymbol ?? recSymbol) :
+            activeTab !== 'BRIDGE' ? (universalSwapInfo?.toSymbol ?? '') :
             "USDT"
           }
           isBridge={activeTab === 'BRIDGE'}
