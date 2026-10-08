@@ -100,11 +100,11 @@ const IDLE: MainnetClaimState = {
  * root/proof are re-verified on chain and locally below, so a wrong answer can
  * only block, never pay.
  */
-async function discoverEntitlements(wallet: string | null | undefined): Promise<MainnetEntitlementMatch[]> {
+async function discoverEntitlements(wallet: string | null | undefined): Promise<MainnetEntitlementMatch[] | null> {
   if (!wallet || typeof fetch === 'undefined') return [];
   try {
     const res = await fetch(`/api/public/reward-rounds?wallet=${encodeURIComponent(wallet.toLowerCase())}`);
-    if (!res.ok) return [];
+    if (!res.ok) return null;
     const { rounds } = (await res.json()) as { rounds: { epochId: number; root: Hex; allocationWei: string; claimStart: number; claimEnd: number; distributor: Hex; leaf: { index: number; account: Hex; amount: string; proof: Hex[] } }[] };
     return (rounds ?? []).map((r) => {
     const leaf = { epochId: r.epochId, index: r.leaf.index, account: r.leaf.account, amount: r.leaf.amount };
@@ -115,25 +115,28 @@ async function discoverEntitlements(wallet: string | null | undefined): Promise<
     };
     });
   } catch {
-    return [];
+    return null;
   }
 }
 
 /** Every round (frozen manifest + discovered) containing the wallet, oldest first, one per epoch. */
-async function allEntitlements(wallet: string | null | undefined): Promise<MainnetEntitlementMatch[]> {
+async function allEntitlements(wallet: string | null | undefined): Promise<{ list: MainnetEntitlementMatch[]; discoveryFailed: boolean }> {
   const out = new Map<number, MainnetEntitlementMatch>();
+  // Automatic discovery (indexed + on-chain historical) is primary.
+  const discovered = await discoverEntitlements(wallet);
+  for (const d of discovered ?? []) out.set(d.manifest.epochId, d);
+  // Built-in manifest: temporary compatibility fallback only, for epochs discovery did not return.
   if (wallet) {
     for (const m of MAINNET_EPOCH_MANIFESTS) {
       if (m.chainId !== BOT_MAINNET_CHAIN_ID) continue;
       const hit = m.entitlements.find((e) => e.account.toLowerCase() === wallet.toLowerCase());
-      if (hit) {
+      if (hit && !out.has(m.epochId)) {
         const { proof, ...leaf } = hit;
         out.set(m.epochId, { manifest: m, leaf, proof });
       }
     }
   }
-  for (const d of await discoverEntitlements(wallet)) if (!out.has(d.manifest.epochId)) out.set(d.manifest.epochId, d);
-  return [...out.values()].sort((a, b) => a.manifest.epochId - b.manifest.epochId);
+  return { list: [...out.values()].sort((a, b) => a.manifest.epochId - b.manifest.epochId), discoveryFailed: discovered === null };
 }
 
 export interface UseMainnetFlowClaim extends MainnetClaimState {
@@ -146,8 +149,13 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
   const [loading, setLoading] = useState(false);
 
   const read = useCallback(async () => {
-    const candidates = await allEntitlements(wallet);
+    const { list: candidates, discoveryFailed } = await allEntitlements(wallet);
     let entitlement: MainnetEntitlementMatch | undefined = candidates[candidates.length - 1];
+    if (!entitlement && discoveryFailed && wallet) {
+      // Never fabricate a proof: unavailable claim data is shown as retryable.
+      setState({ ...IDLE, status: 'READ_FAILED', message: 'CLAIM DATA UNAVAILABLE — RETRY' });
+      return;
+    }
     if (!entitlement) {
       // A prepared-but-unpublished round is explained, never offered as a claim.
       const draft = findMainnetDraftEntitlement(BOT_MAINNET_CHAIN_ID, wallet);
