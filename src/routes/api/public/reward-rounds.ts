@@ -16,10 +16,10 @@ export const Route = createFileRoute("/api/public/reward-rounds")({
           const { readChainState, discoverPublishedBatches, DISTRIBUTOR } = await import("@/lib/rewards/settlement.server");
           const live = await readChainState();
           if (!live) return new Response(JSON.stringify({ rounds: [], error: "unavailable" }), { status: 503, headers });
-          const found = await discoverPublishedBatches(supabaseAdmin, live.epochCount);
-          const rounds = found.filter((f) => f.verification.complete).flatMap(({ batch }) => {
+          const found = await discoverPublishedBatches(supabaseAdmin, live.epochCount); // indexes missing historical rounds first
+          const rounds = found.filter((f) => f.verification.complete).flatMap(({ batch, source }) => {
             const leaf = batch.leaves.find((l) => l.account.toLowerCase() === wallet);
-            return leaf ? [{ epochId: batch.epochId, root: batch.root, allocationWei: batch.totalWei, claimStart: batch.claimStart, claimEnd: batch.claimEnd, distributor: DISTRIBUTOR, leaf }] : [];
+            return leaf ? [{ epochId: batch.epochId, root: batch.root, allocationWei: batch.totalWei, claimStart: batch.claimStart, claimEnd: batch.claimEnd, distributor: DISTRIBUTOR, source, leaf }] : [];
           });
           return new Response(JSON.stringify({ rounds }), { headers });
         } catch {

@@ -8,9 +8,10 @@ import { createPublicClient, http, parseAbi, type Address, type Hex } from "viem
 import { MAINNET_PAYOUT_AUDIT, type ProgramId } from "./rewardFundingPlan";
 import { MAINNET_EPOCH_MANIFESTS } from "./mainnetEpochManifest";
 import { MAINNET_CHAIN_ID } from "./historicalReconciliation";
+import { BUILDER_SOURCE, detectRoundDrift, HISTORICAL_SOURCE, planRoundIndexSync, type ProofSource, type RoundSource } from "./historicalRoundIndex";
 import {
   auditPublisherRoles, DISTRIBUTOR_ROLES, prepareSettlementBatch, SETTLEMENT_SIGNER, verifyPublishedRound,
-  type ChainState, type ProgramFunding, type RoleName, type StoredBatch,
+  type ChainState, type OnchainEpoch, type ProgramFunding, type RoleName, type StoredBatch,
 } from "./settlementPlanner";
 
 export const DISTRIBUTOR = MAINNET_PAYOUT_AUDIT.address as Address;
@@ -57,18 +58,46 @@ type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["su
 type BatchRow = { epoch_id: number; root: string; total_wei: string | number; claim_start: number; claim_end: number; leaves: StoredBatch["leaves"]; publication_verified_at: string | null };
 const toBatch = (r: BatchRow): StoredBatch => ({ epochId: r.epoch_id, root: r.root as Hex, totalWei: BigInt(String(r.total_wei).split(".")[0]).toString(), claimStart: Number(r.claim_start), claimEnd: Number(r.claim_end), leaves: r.leaves });
 
-/** Stored batches whose root is LIVE on chain (published + verified). */
-export async function discoverPublishedBatches(admin: Admin, liveEpochCount: number) {
-  const staticIds = new Set(MAINNET_EPOCH_MANIFESTS.map((m) => m.epochId));
+/**
+ * Read-only historical indexing: every on-chain round missing a local record is
+ * indexed from chain truth + a proof source that reproduces its root. Metadata
+ * only — idempotent (unique chain+distributor+round for imports), never
+ * overwrites drift, never touches the chain.
+ */
+export async function indexHistoricalRounds(admin: Admin, liveEpochCount: number) {
   const { data } = await admin.from("reward_settlement_batches").select("epoch_id,root,total_wei,claim_start,claim_end,leaves,publication_verified_at")
+    .eq("chain_id", MAINNET_CHAIN_ID).eq("distributor", DISTRIBUTOR.toLowerCase());
+  const local = ((data ?? []) as unknown as BatchRow[]).map(toBatch);
+  const chainEpochs = new Map<number, OnchainEpoch | null>();
+  for (let id = 1; id <= liveEpochCount; id++) chainEpochs.set(id, (await readEpoch(id)) as OnchainEpoch | null);
+  const proofSources: ProofSource[] = MAINNET_EPOCH_MANIFESTS.map((m) => ({ epochId: m.epochId, root: m.root, leaves: m.entitlements.map((e) => ({ index: e.index, account: e.account, amount: e.amount, proof: e.proof })) }));
+  const actions = planRoundIndexSync({ chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, epochCount: liveEpochCount, local, chainEpochs, proofSources });
+  for (const a of actions) {
+    if (a.action !== "IMPORT") continue;
+    const r = a.record;
+    await admin.from("reward_settlement_batches").upsert({
+      chain_id: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR.toLowerCase(), epoch_id: r.epochId, root: r.root, total_wei: r.totalWei as never,
+      claim_start: r.claimStart, claim_end: r.claimEnd, fingerprint: `historical:${r.root}`, leaves: r.leaves as never,
+      program_breakdown: [] as never, source: HISTORICAL_SOURCE,
+    }, { onConflict: "chain_id,distributor,epoch_id,root", ignoreDuplicates: true });
+  }
+  return actions.map((a) => a.action === "IMPORT" ? { epochId: a.epochId, action: a.action } : a);
+}
+
+/** Indexed records (builder + historical) whose root is LIVE on chain and drift-free. */
+export async function discoverPublishedBatches(admin: Admin, liveEpochCount: number) {
+  const indexing = await indexHistoricalRounds(admin, liveEpochCount).catch(() => []);
+  const { data } = await admin.from("reward_settlement_batches").select("epoch_id,root,total_wei,claim_start,claim_end,leaves,publication_verified_at,source")
     .eq("chain_id", MAINNET_CHAIN_ID).eq("distributor", DISTRIBUTOR.toLowerCase()).lte("epoch_id", liveEpochCount).order("epoch_id", { ascending: true });
-  const out: { batch: StoredBatch; verification: ReturnType<typeof verifyPublishedRound> }[] = [];
+  const out: { batch: StoredBatch; source: RoundSource; verification: ReturnType<typeof verifyPublishedRound> }[] = [];
   const chain = await readChainState();
-  for (const row of (data ?? []) as unknown as BatchRow[]) {
-    if (staticIds.has(row.epoch_id)) continue;
+  const seen = new Set<number>();
+  for (const row of (data ?? []) as unknown as (BatchRow & { source: RoundSource })[]) {
+    if (seen.has(row.epoch_id)) continue;
     const ep = await readEpoch(row.epoch_id);
     if (!ep || ep.root.toLowerCase() !== row.root.toLowerCase()) continue; // rebuilt candidates that were never signed
     const batch = toBatch(row);
+    if (detectRoundDrift(batch, ep as OnchainEpoch).length) continue; // ROUND_METADATA_DRIFT: chain wins, never served
     const verification = verifyPublishedRound({
       batch, receiptStatus: "success", liveEpochCount, epoch: ep, paused: chain?.paused ?? true,
       balanceWei: chain?.balanceWei ?? 0n, totalReservedWei: chain?.totalReservedWei ?? 1n, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR,
@@ -77,9 +106,10 @@ export async function discoverPublishedBatches(admin: Admin, liveEpochCount: num
       await admin.from("reward_settlement_batches").update({ publication_verified_at: new Date().toISOString() })
         .eq("epoch_id", row.epoch_id).eq("root", row.root);
     }
-    out.push({ batch, verification });
+    seen.add(row.epoch_id);
+    out.push({ batch, source: row.source ?? BUILDER_SOURCE, verification });
   }
-  return out;
+  return Object.assign(out, { indexing });
 }
 
 export interface LedgerRow { user_id: string; points: number; chain_id: number | null; funding_state: string | null; program_id: string | null }
@@ -101,7 +131,8 @@ export async function buildSettlement(args: {
   // Already-allocated FLOW per wallet across every published round (static + discovered).
   const allocated = new Map<string, number>();
   const addAlloc = (acct: string, wei: string) => { const k = acct.toLowerCase(); allocated.set(k, (allocated.get(k) ?? 0) + Number(BigInt(wei) / WEI)); };
-  for (const m of MAINNET_EPOCH_MANIFESTS) for (const e of m.entitlements) addAlloc(e.account, e.amount);
+  const discoveredIds = new Set(discovered.map((d) => d.batch.epochId));
+  for (const m of MAINNET_EPOCH_MANIFESTS) if (!discoveredIds.has(m.epochId)) for (const e of m.entitlements) addAlloc(e.account, e.amount);
   for (const d of discovered) for (const l of d.batch.leaves) addAlloc(l.account, l.amount);
 
   // Only FUNDED Mainnet ledger points; per-program attribution (no cross-bucket cover).
@@ -155,7 +186,8 @@ export async function buildSettlement(args: {
     totalFlow: p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0, root: p.batch?.root ?? null,
     checks: p.checks, tx: p.tx, fingerprint: p.fingerprint, programs: programs.filter((x) => x.includedPoints > 0 || x.availablePoints > 0),
     claimStartIso: new Date(p.claimStart * 1000).toISOString(), claimEndIso: new Date(p.claimEnd * 1000).toISOString(),
-    published: discovered.map((d) => ({ epochId: d.batch.epochId, root: d.batch.root, complete: d.verification.complete, checks: d.verification.checks })),
+    published: discovered.map((d) => ({ epochId: d.batch.epochId, root: d.batch.root, source: d.source, complete: d.verification.complete, checks: d.verification.checks })),
+    indexing: discovered.indexing,
     liveState: { epochCount: live.epochCount, paused: live.paused, budgetFlow: Number(live.campaignBudgetWei / WEI), balanceFlow: Number(live.balanceWei / WEI), reservedFlow: Number(live.totalReservedWei / WEI), claimedFlow: Number(live.totalClaimedWei / WEI), blockTimeIso: new Date(live.nowSec * 1000).toISOString() },
     generatedAt,
   };
