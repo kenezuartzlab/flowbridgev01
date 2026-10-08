@@ -7,6 +7,7 @@ import { botMainnet } from '@/lib/wagmi';
 import { BOT_MAINNET_CHAIN_ID } from '@/lib/rewards/flowRewardsRegistry';
 import { MERKLE_DISTRIBUTOR_CLAIM_ABI } from '@/lib/rewards/merkleClaim';
 import { useMainnetFlowClaim } from '@/lib/rewards/useMainnetFlowClaim';
+import { trackProductEvent } from '@/lib/ops/productEvents';
 
 /**
  * FlowBridge V30.2B P2E — BOT Mainnet 677 FLOW claim surface.
@@ -77,6 +78,7 @@ export function MainnetFlowClaimCard() {
     if (!prep) return;
     setSubmitting(true);
     setError(null);
+    trackProductEvent('claim_started', 'earn');
     try {
       const eth = (globalThis as any).window?.ethereum;
       if (!eth) throw new Error('No wallet detected in this browser.');
@@ -105,6 +107,7 @@ export function MainnetFlowClaimCard() {
         params: [{ from, to: prep.distributor, data, value: '0x0' }],
       });
       setTxHash(hash);
+      trackProductEvent('claim_confirmed', 'earn');
       await claim.refresh();
     } catch (e: any) {
       setError(e?.shortMessage ?? e?.message ?? 'Claim transaction failed.');
