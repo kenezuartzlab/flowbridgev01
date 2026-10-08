@@ -2,14 +2,15 @@
  * V33 — controlled public Mainnet FLOW claims (pure).
  *
  * - PUBLIC_MAINNET_FLOW_CLAIMS is the single switch for ordinary users. It is
- *   OFF; turning it ON requires a separate owner release gate.
+ *   ON (owner-approved V33.2). It only enables the claim interface; claims still
+ *   require a published on-chain allocation, valid proof, open window and wallet.
  * - Claim lifecycle states are kept distinct: eligible is never claimable.
  * - Settlement eligibility = eligibleBackedPoints - alreadySettledPoints >= 1,000,
  *   from funded, reconciled Mainnet ledger rows only.
  */
 import { MAINNET_CLAIM_CANARY_EXCEPTION, MAINNET_MIN_CLAIM_FLOW } from './claimMinimumPolicy';
 
-export const PUBLIC_MAINNET_FLOW_CLAIMS = false as boolean;
+export const PUBLIC_MAINNET_FLOW_CLAIMS = true as boolean;
 
 /** Rounds at or below this epoch are historical; the canary exception never applies beyond it. */
 export const LAST_HISTORICAL_EPOCH = MAINNET_CLAIM_CANARY_EXCEPTION.epochId;
