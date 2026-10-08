@@ -22,6 +22,7 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { MetricStrip, StatusPill } from "@/components/ui-kit/primitives";
 import { ParticipationProfileCard } from "@/components/identity/ParticipationProfileCard";
+import { ProfileRewardProgression } from "@/components/rewards/ProfileRewardProgression";
 import { AchievementsPanel } from "@/components/identity/AchievementsPanel";
 import { ShareProfileCard } from "@/components/identity/ShareProfileCard";
 import { useParticipationProfile } from "@/lib/identity/useParticipationProfile";
@@ -202,6 +203,7 @@ function AccountPage() {
          * score, no rank, no reward and no transaction is created here.
          */}
         <ParticipationProfileCard view={participation.view} loading={participation.loading} />
+        <ProfileRewardProgression enabled={!!user} />
         <AchievementsPanel achievements={participation.achievements} />
         <ShareProfileCard
           facts={participation.facts}
