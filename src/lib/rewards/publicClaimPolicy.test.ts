@@ -42,8 +42,9 @@ describe('V33 claim lifecycle', () => {
     expect(leafMeetsClaimMinimum(3, e.wallet, e.points)).toBe(false);
     expect(leafMeetsClaimMinimum(4, e.wallet, 999)).toBe(false);
   });
-  it('claim window policy is flagged for owner decision', () => {
-    expect(CLAIM_WINDOW_POLICY.ownerApproved).toBe(false);
+  it('claim window policy is owner-approved at 30 days', () => {
+    expect(CLAIM_WINDOW_POLICY.ownerApproved).toBe(true);
+    expect(CLAIM_WINDOW_POLICY.status).toBe('APPROVED');
     expect(CLAIM_WINDOW_POLICY.currentSeconds).toBe(2_592_000);
   });
 });

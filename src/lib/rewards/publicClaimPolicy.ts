@@ -15,15 +15,15 @@ export const PUBLIC_MAINNET_FLOW_CLAIMS = false as boolean;
 export const LAST_HISTORICAL_EPOCH = MAINNET_CLAIM_CANARY_EXCEPTION.epochId;
 
 /**
- * Current claim-window behaviour: the settlement builder uses 30 days, matching
- * published rounds #1/#2. No owner-approved standard is recorded, so a new public
- * round must not be published until the owner confirms it.
+ * Owner-approved standard claim window (V33.1, 2026-10-08): 30 days.
+ * New payout rounds use claimClose = claimOpen + 30 days, matching published
+ * rounds #1/#2. Previously published rounds are unchanged.
  */
 export const CLAIM_WINDOW_POLICY = Object.freeze({
   currentSeconds: 30 * 86_400,
-  source: 'settlementPlanner CLAIM_WINDOW_SECONDS (matches rounds #1 and #2)',
-  ownerApproved: false,
-  status: 'OWNER_DECISION_REQUIRED' as const,
+  source: 'owner-approved standard (V33.1); matches rounds #1 and #2',
+  ownerApproved: true,
+  status: 'APPROVED' as const,
 });
 
 export type ClaimLifecycle =
