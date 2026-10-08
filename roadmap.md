@@ -72,3 +72,6 @@
 - [ ] 10 FLOW claim canary + replay check — waits on publication.
 - [ ] Mainnet public claims stay LOCKED until the canary passes.
 
+
+# V34 Personalized Retention + Reward Progression
+- [x] Server-derived progression, next-best-action, retention/claim notifications, route watch, AI personal answers, Earn/Profile progress, funnel events, tests; publish.
