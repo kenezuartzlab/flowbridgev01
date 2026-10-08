@@ -29,7 +29,6 @@ import { useAccountData } from "@/lib/app/useAccountData";
 import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
-import { CampaignPtsPill } from "@/components/app/CampaignPtsPill";
 import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
 import { useRewardState } from "@/lib/rewards/useRewardState";
 import { OpportunityFeed } from "@/components/home/OpportunityFeed";
@@ -143,18 +142,7 @@ function HomePage() {
         avatar={user?.photoURL ?? null}
         initial={(user?.displayName || user?.email || "G").slice(0, 1).toUpperCase()}
         actions={
-          <>
-          <CampaignPtsPill />
-          {/* V27 §9 — in-app notification centre: deep links only. */}
           <NotificationCenter />
-          <Link
-            to="/"
-            aria-label="Trade"
-            className="grid h-10 w-10 place-items-center rounded-2xl border border-hairline bg-card text-muted transition-colors hover:border-primary/40 hover:text-foreground"
-          >
-            <ArrowLeftRight className="h-4 w-4" />
-          </Link>
-          </>
         }
       />
 

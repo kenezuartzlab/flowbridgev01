@@ -42,7 +42,6 @@ import { trackBannerImpression } from './lib/banners/analytics';
 
 import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
-import { SwapCard } from './components/routetabs/SwapCard';
 import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
 import { getCuratedTokens } from './lib/swap/tokenRegistry';
 import { BridgeCard } from './components/routetabs/BridgeCard';
@@ -510,13 +509,7 @@ export default function App() {
    */
   const [activeTab, setActiveTab] = useTradeTab();
   useEffect(() => {
-    applyDefaultTradeTab(
-      session.step1.status !== 'done'
-        ? 'CA/BOT'
-        : session.step2.status !== 'done'
-          ? 'BOT/USDT'
-          : 'BRIDGE',
-    );
+    applyDefaultTradeTab('BOT/USDT');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -3059,37 +3052,6 @@ export default function App() {
             </div>
           )}
 
-          {activeTab === 'CA/BOT' && (
-            <SwapCard
-              fromSymbol={caPaySymbol}
-              toSymbol={caRecSymbol}
-              fromAmount={caAmount}
-              toAmount={getCaToBotDisplayQuote()}
-              fromUsdValue={getCaToBotDisplayUsd(true)}
-              toUsdValue={getCaToBotDisplayUsd(false)}
-              fromBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('CA') : getBalanceDisplay('BOT')}
-              toBalance={caToBotDirection === 'CA_TO_BOT' ? getBalanceDisplay('BOT') : getBalanceDisplay('CA')}
-              fromMaxAmount={caToBotDirection === 'CA_TO_BOT' ? maxSwappableDisplay(getExactBalanceAmount('CA'), 18, platformFeeBps) : maxSwappableDisplay(getExactBalanceAmount('BOT'), 18, platformFeeBps)}
-              onFromAmountChange={setCaAmount}
-              onToggleDirection={handleToggleCaBot}
-              buttonLabel={caButtonLabel}
-              buttonDisabled={caButtonDisabled}
-              onShowRoute={() => setActiveRouteModal({ from: caPaySymbol, to: caRecSymbol })}
-              onSubmit={() => {
-                if (!isConnected) return handleConnect();
-                if (!isNetworkCorrect) return handleSwitchNetwork();
-                if (caAmount) setActiveConfirmModal('CA/BOT');
-              }}
-              networkWarning={!isConnected ? "Please connect your wallet first." : undefined}
-              warningMessage={caBalanceWarning}
-              successMessage={session.step1.status === 'done' ? 'Swap transaction was successfully executed on BOT Chain.' : undefined}
-              txHash={session.step1.status === 'done' ? session.step1.tx_hash : undefined}
-              txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
-              onReset={resetStep1}
-              livePrice={getLiveBotPrice()}
-            />
-          )}
-
           {/* V15.3H §4 — bottom-nav arrival with an active prepared plan. */}
           {(activeTab === 'BOT/USDT' || activeTab === 'BRIDGE') && (
             <PreparedActionAvailableCard
@@ -3134,9 +3096,11 @@ export default function App() {
           )}
 
 
-          {activeTab === 'BOT/USDT' && (
+          {(activeTab === 'BOT/USDT' || activeTab === 'CA/BOT') && (
             <UniversalSwapCard
-              hydration={swapHydrationPlan}
+              key={activeTab}
+              pairMode={activeTab === 'CA/BOT' ? 'CA/BOT' : 'ANY'}
+              hydration={activeTab === 'BOT/USDT' ? swapHydrationPlan : null}
               isMainnet={isMainnet}
 
               isConnected={isConnected}
@@ -3175,6 +3139,14 @@ export default function App() {
                 }
               }}
               onSwapSuccess={({ fromSymbol, toSymbol, fromAmount, toAmount, txHash }) => {
+                const isCaBot =
+                  (fromSymbol === 'CA' && toSymbol === 'BOT') ||
+                  (fromSymbol === 'BOT' && toSymbol === 'CA');
+                if (isCaBot) {
+                  updateSession({
+                    step1: { ...session.step1, status: 'done', tx_hash: txHash, timestamp: Date.now() },
+                  });
+                }
                 const isBotUsdt =
                   (fromSymbol === 'BOT' && toSymbol === 'USDT') ||
                   (fromSymbol === 'USDT' && toSymbol === 'BOT');

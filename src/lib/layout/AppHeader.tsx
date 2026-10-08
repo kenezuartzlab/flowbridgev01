@@ -11,7 +11,6 @@ import { cn } from '../utils';
 import { sendVerification, reloadUser } from '../auth';
 import logoUrl from '@/assets/flowbridge-logo.png';
 import { checkAdmin } from '@/lib/admin/adminApi';
-import { FlowPointsPill } from '@/components/rewards/FlowPointsPill';
 import { PrimaryNav } from '@/components/shell/PrimaryNav';
 import { useShellMode } from '@/components/shell/useShellMode';
 import { PRIMARY_NAV, isNavActive } from '@/components/shell/navModel';
@@ -386,7 +385,6 @@ export function AppHeader({
             >
               <EnvironmentBadge isMainnet={isMainnet} />
             </button>
-            <FlowPointsPill googleUser={googleUser} incentives={incentives} loading={incentivesLoading} />
           </div>
         </div>
 

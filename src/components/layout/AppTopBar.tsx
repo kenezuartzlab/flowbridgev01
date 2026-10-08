@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Moon, Sun } from "lucide-react";
 import { useRef, type ReactNode } from "react";
-import { useTheme } from "@/lib/theme";
+import { Button } from "@/components/ui/button";
 import { PrimaryNav } from "@/components/shell/PrimaryNav";
 import { ShellNavMenu } from "@/components/shell/ShellNavMenu";
 import { useShellMode } from "@/components/shell/useShellMode";
@@ -27,7 +26,6 @@ export function AppTopBar({
   /** When provided the eyebrow becomes a button (used to cycle greetings). */
   onEyebrowClick?: () => void;
 }) {
-  const [theme, setTheme] = useTheme();
   // V9.3 — measure the actual shell row, not the browser width.
   const rowRef = useRef<HTMLDivElement | null>(null);
   const shellMode = useShellMode(rowRef);
@@ -47,20 +45,21 @@ export function AppTopBar({
         />
         <div className="min-w-0 flex-1">
           {onEyebrowClick ? (
-            <button
+            <Button
+              variant="ghost"
               type="button"
               onClick={onEyebrowClick}
               title="Tap to change greeting"
-              className="block max-w-full truncate font-mono text-[9.5px] font-black uppercase tracking-[0.16em] text-muted transition-colors hover:text-primary"
+              className="block h-auto max-w-full whitespace-normal break-words p-0 text-left font-mono text-[9.5px] font-black uppercase tracking-normal text-muted transition-colors hover:text-primary"
             >
               {eyebrow}
-            </button>
+            </Button>
           ) : (
-            <p className="truncate font-mono text-[9.5px] font-black uppercase tracking-[0.16em] text-muted">
+            <p className="break-words font-mono text-[9.5px] font-black uppercase tracking-normal text-muted">
               {eyebrow}
             </p>
           )}
-          <p className="truncate text-[15px] font-black leading-tight tracking-[-0.01em] sm:text-[17px]">
+          <p className="break-words text-[15px] font-black leading-tight tracking-normal sm:text-[17px]">
             {title}
           </p>
         </div>
@@ -72,14 +71,6 @@ export function AppTopBar({
           {/* The menu stays available at every width so tools such as MultiSend
               are reachable on desktop too, not only on compact layouts. */}
           <ShellNavMenu />
-          <button
-            type="button"
-            onClick={() => setTheme()}
-            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-            className="grid h-9 w-9 place-items-center rounded-2xl border border-hairline bg-card text-muted transition-colors hover:border-primary/40 hover:text-foreground"
-          >
-            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-          </button>
           <Link
             to="/account"
             aria-label="Account"
