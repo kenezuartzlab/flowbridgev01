@@ -10,6 +10,8 @@ import { forYouNow, resolveNextAction } from "@/lib/growth/nextAction";
 import { missionProgress } from "@/lib/growth/missionProgress";
 import { buildShareUrl, REFERRAL_NOTE } from "@/lib/growth/shareReferral";
 import { trackProductEvent } from "@/lib/ops/productEvents";
+import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
+import { RewardProgressPanel } from "@/components/rewards/RewardProgressPanel";
 
 const WHY = [
   "Trade across approved BOT ecosystem liquidity (BDEX and CaSwap)",
@@ -30,7 +32,10 @@ export function NextActionCard({ confirmedTrades }: { confirmedTrades: number })
     activeStakes: 0,
     activeCampaigns: 0,
   };
-  const next = resolveNextAction(input);
+  const legacy = resolveNextAction(input);
+  const { data: personal } = usePersonalProgress(a.signedIn);
+  const nba = a.signedIn ? personal?.nextBestAction ?? null : null;
+  const next = nba ? { id: nba.id, label: nba.label, reason: nba.reason, href: nba.destination, secondary: null } : legacy;
   const mission = useMemo(
     () => missionProgress({ explored: true, emailVerified: a.emailVerified, walletBound: a.walletBound, confirmedTrades, earnExplored: false, verifiedEcosystemActivities: 0 }),
     [a.emailVerified, a.walletBound, confirmedTrades],
@@ -49,7 +54,7 @@ export function NextActionCard({ confirmedTrades }: { confirmedTrades: number })
   return (
     <section aria-labelledby="next-action-title" className="fb-surface space-y-3 p-4" data-testid="next-action-card">
       <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">For you now</p>
-      <h2 id="next-action-title" className="text-[15px] font-bold leading-snug">{forYouNow(input)}</h2>
+      <h2 id="next-action-title" className="text-[15px] font-bold leading-snug">{nba ? nba.label : forYouNow(input)}</h2>
       <p className="text-[12px] leading-relaxed text-muted">{next.reason}</p>
 
       {next.id === "FIRST_TRADE" && (
@@ -69,7 +74,7 @@ export function NextActionCard({ confirmedTrades }: { confirmedTrades: number })
 
       <Link
         to={next.id === "FIRST_TRADE" ? "/trade" : next.href}
-        onClick={() => trackProductEvent("explore_opened", "home")}
+        onClick={() => trackProductEvent(next.id === "MAKE_ELIGIBLE_TRADE" ? "eligible_reward_activity_started" : next.id === "CLAIM_FLOW" ? "claim_started" : "explore_opened", "home")}
         className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-[13px] font-bold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {next.id === "FIRST_TRADE" ? "Find a route" : next.label} <ArrowRight aria-hidden className="h-4 w-4" />
@@ -79,6 +84,8 @@ export function NextActionCard({ confirmedTrades }: { confirmedTrades: number })
           {next.secondary.label}
         </Link>
       )}
+
+      {personal && <RewardProgressPanel p={personal.progression} area="home" />}
 
       {a.signedIn && (
         <div aria-label="Your progress" className="border-t border-hairline pt-3">

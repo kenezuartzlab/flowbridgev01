@@ -8,7 +8,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDecisionFeed } from "@/lib/ai/experience/useDecisionFeed";
 import { useRewardState } from "@/lib/rewards/useRewardState";
-import { deriveNotifications, unreadCount, visibleNotifications } from "./notifications";
+import { deriveNotifications, retentionToAppNotifications, unreadCount, visibleNotifications } from "./notifications";
+import { deriveRetentionNotifications } from "./retentionNotifications";
+import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
+import { useRouteWatchCheck } from "./useRouteWatchCheck";
 import {
   dismissNotification,
   markNotificationsSeen,
@@ -50,10 +53,23 @@ export function useNotifications() {
     setWalletBound(wallet ? wallet.met : undefined);
   }, [rewardState]);
 
-  const candidates = useMemo(
-    () => deriveNotifications({ signedIn, rewardState, decision, emailVerified, walletBound }),
-    [signedIn, rewardState, decision, emailVerified, walletBound],
-  );
+  const { data: personal } = usePersonalProgress(signedIn);
+  const watched = useRouteWatchCheck();
+  const candidates = useMemo(() => {
+    const base = deriveNotifications({ signedIn, rewardState, decision, emailVerified, walletBound });
+    const retention = retentionToAppNotifications(
+      deriveRetentionNotifications({
+        progression: signedIn ? personal?.progression ?? null : null,
+        nowSec: Math.floor(Date.now() / 1000),
+        routesNowAvailable: watched.map((w) => ({ from: w.from, to: w.to })),
+        missionNextStep: signedIn ? personal?.missionNextStep ?? null : null,
+      }),
+    );
+    const seen = new Set<string>();
+    return [...retention, ...base]
+      .filter((n) => (seen.has(n.id) ? false : (seen.add(n.id), true)))
+      .sort((a, b) => b.weight - a.weight || a.id.localeCompare(b.id));
+  }, [signedIn, rewardState, decision, emailVerified, walletBound, personal, watched]);
 
   const items = useMemo(() => visibleNotifications(candidates, state), [candidates, state]);
 

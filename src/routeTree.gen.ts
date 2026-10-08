@@ -89,6 +89,7 @@ import { Route as ApiPublicRewardRoundsRouteImport } from './routes/api/public/r
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
 import { Route as ApiRewardsConvertRouteImport } from './routes/api/rewards.convert'
+import { Route as ApiRewardsProgressionRouteImport } from './routes/api/rewards.progression'
 import { Route as ApiRewardsStateRouteImport } from './routes/api/rewards.state'
 import { Route as ApiStudioCampaignsRouteImport } from './routes/api/studio.campaigns'
 import { Route as ApiStudioSessionRouteImport } from './routes/api/studio.session'
@@ -521,6 +522,11 @@ const ApiRewardsConvertRoute = ApiRewardsConvertRouteImport.update({
   path: '/api/rewards/convert',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRewardsProgressionRoute = ApiRewardsProgressionRouteImport.update({
+  id: '/api/rewards/progression',
+  path: '/api/rewards/progression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRewardsStateRoute = ApiRewardsStateRouteImport.update({
   id: '/api/rewards/state',
   path: '/api/rewards/state',
@@ -711,6 +717,7 @@ export interface FileRoutesByFullPath {
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
+  '/api/rewards/progression': typeof ApiRewardsProgressionRoute
   '/api/rewards/state': typeof ApiRewardsStateRoute
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
@@ -814,6 +821,7 @@ export interface FileRoutesByTo {
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
+  '/api/rewards/progression': typeof ApiRewardsProgressionRoute
   '/api/rewards/state': typeof ApiRewardsStateRoute
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
@@ -918,6 +926,7 @@ export interface FileRoutesById {
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
+  '/api/rewards/progression': typeof ApiRewardsProgressionRoute
   '/api/rewards/state': typeof ApiRewardsStateRoute
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
@@ -1023,6 +1032,7 @@ export interface FileRouteTypes {
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
     | '/api/rewards/convert'
+    | '/api/rewards/progression'
     | '/api/rewards/state'
     | '/api/studio/campaigns'
     | '/api/studio/session'
@@ -1126,6 +1136,7 @@ export interface FileRouteTypes {
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
     | '/api/rewards/convert'
+    | '/api/rewards/progression'
     | '/api/rewards/state'
     | '/api/studio/campaigns'
     | '/api/studio/session'
@@ -1229,6 +1240,7 @@ export interface FileRouteTypes {
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
     | '/api/rewards/convert'
+    | '/api/rewards/progression'
     | '/api/rewards/state'
     | '/api/studio/campaigns'
     | '/api/studio/session'
@@ -1327,6 +1339,7 @@ export interface RootRouteChildren {
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiRewardsClaimAuthorizationRoute: typeof ApiRewardsClaimAuthorizationRoute
   ApiRewardsConvertRoute: typeof ApiRewardsConvertRoute
+  ApiRewardsProgressionRoute: typeof ApiRewardsProgressionRoute
   ApiRewardsStateRoute: typeof ApiRewardsStateRoute
   ApiStudioCampaignsRoute: typeof ApiStudioCampaignsRouteWithChildren
   ApiStudioSessionRoute: typeof ApiStudioSessionRoute
@@ -1907,6 +1920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRewardsConvertRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rewards/progression': {
+      id: '/api/rewards/progression'
+      path: '/api/rewards/progression'
+      fullPath: '/api/rewards/progression'
+      preLoaderRoute: typeof ApiRewardsProgressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rewards/state': {
       id: '/api/rewards/state'
       path: '/api/rewards/state'
@@ -2212,6 +2232,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiRewardsClaimAuthorizationRoute: ApiRewardsClaimAuthorizationRoute,
   ApiRewardsConvertRoute: ApiRewardsConvertRoute,
+  ApiRewardsProgressionRoute: ApiRewardsProgressionRoute,
   ApiRewardsStateRoute: ApiRewardsStateRoute,
   ApiStudioCampaignsRoute: ApiStudioCampaignsRouteWithChildren,
   ApiStudioSessionRoute: ApiStudioSessionRoute,

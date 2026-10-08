@@ -53,6 +53,8 @@ import {
 import { isFlowConversionPolicyApprovedForChain } from "@/lib/rewards/flowConversionPolicy";
 import { FlowTokenClaimCard } from "@/components/rewards/FlowTokenClaimCard";
 import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
+import { RewardProgressPanel } from "@/components/rewards/RewardProgressPanel";
+import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
 import { EarnLiquidityFees } from "@/components/liquidity/EarnLiquidityFees";
 import { claimMinimumProgress } from "@/lib/rewards/claimMinimumPolicy";
 
@@ -202,6 +204,8 @@ function EarnPage() {
     [transactions],
   );
 
+  const { data: personal } = usePersonalProgress(!!user);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppTopBar
@@ -242,6 +246,7 @@ function EarnPage() {
         {/* V30.2B P2E — BOT Mainnet 677 published-epoch claim. Wallet-keyed and
             entirely separate from the testnet authorization flow, so it does not
             depend on being signed in. */}
+        {personal && <RewardProgressPanel p={personal.progression} area="earn" detailed />}
         <MainnetFlowClaimCard />
 
         {user && (

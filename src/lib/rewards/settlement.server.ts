@@ -212,3 +212,8 @@ export async function readCanaryStatus() {
     return { epochId: 2, claimed, claimedFlow: ep ? Number(ep.claimed / WEI) : null, claimStartIso: ep ? new Date(Number(ep.claimStart) * 1000).toISOString() : null };
   } catch { return null; }
 }
+
+/** V34 — read-only claim flag for one leaf (null when the chain is unreadable). */
+export async function readIsClaimed(epochId: number, index: number): Promise<boolean | null> {
+  try { return await client().readContract({ address: DISTRIBUTOR, abi: ABI, functionName: "isClaimed", args: [BigInt(epochId), BigInt(index)] }) as boolean; } catch { return null; }
+}

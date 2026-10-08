@@ -20,6 +20,10 @@ export const PRODUCT_EVENT_NAMES = [
   // smart AI (category only)
   "ai_opened", "ai_route_explanation", "ai_liquidity_explanation", "ai_range_explanation",
   "ai_staking_explanation", "ai_why_no_route",
+  // V34 reward progression funnel (category only — never amounts or wallets)
+  "reward_progress_viewed", "earning_method_opened", "eligible_reward_activity_started",
+  "reward_threshold_25", "reward_threshold_50", "reward_threshold_75", "reward_threshold_100",
+  "settlement_eligible", "allocation_published", "claim_available", "claim_started", "claim_confirmed",
   // reliability (error constructor name only — never message text)
   "client_error",
 ] as const;

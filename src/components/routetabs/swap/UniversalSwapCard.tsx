@@ -1,3 +1,4 @@
+import { WatchRouteButton } from "@/components/growth/WatchRouteButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
@@ -1531,6 +1532,10 @@ export function UniversalSwapCard({
         ) : (
           <WarningPanel type="warning" message={quoteError} />
         )
+      )}
+
+      {quoteError === "No liquidity route yet" && amountIn && parseFloat(amountIn) > 0 && !quoting && (
+        <WatchRouteButton from={tokenIn.symbol} to={tokenOut.symbol} chainId={balanceChainId} />
       )}
 
       {txError && (

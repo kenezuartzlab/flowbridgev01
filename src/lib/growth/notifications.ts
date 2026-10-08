@@ -28,6 +28,9 @@ export const NOTIFICATION_KINDS = [
   "WALLET_BINDING_REQUIRED",
   /** V28 §11 — verification reminder. Presentation only, never urgent. */
   "ACCOUNT_SETUP_INCOMPLETE",
+  /** V34 — verified reward progression / claim / route-watch notices. */
+  "REWARD_RETENTION",
+  "ROUTE_AVAILABLE",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -42,6 +45,8 @@ export const NOTIFICATION_CATEGORY: Record<NotificationKind, NotificationCategor
   CAMPAIGN_AVAILABLE: "GROWTH",
   WALLET_BINDING_REQUIRED: "ACCOUNT",
   ACCOUNT_SETUP_INCOMPLETE: "ACCOUNT",
+  REWARD_RETENTION: "ACCOUNT",
+  ROUTE_AVAILABLE: "GROWTH",
 };
 
 /** V27 §9 — per-kind cooldown. Deliberately generous; no nagging. */
@@ -54,6 +59,8 @@ export const NOTIFICATION_COOLDOWN_MS: Record<NotificationKind, number> = {
   CAMPAIGN_AVAILABLE: 24 * 60 * 60 * 1000,
   WALLET_BINDING_REQUIRED: 24 * 60 * 60 * 1000,
   ACCOUNT_SETUP_INCOMPLETE: 3 * 24 * 60 * 60 * 1000,
+  REWARD_RETENTION: 24 * 60 * 60 * 1000,
+  ROUTE_AVAILABLE: 24 * 60 * 60 * 1000,
 };
 
 export const NOTIFICATION_SNOOZE_MS = 24 * 60 * 60 * 1000;
@@ -346,3 +353,18 @@ export const NOTIFICATION_AUTHORITY = {
   createsActionIntent: false,
   signsTransaction: false,
 } as const;
+
+/** V34 — maps verified retention notices into the shared centre (ids stay stable). */
+export function retentionToAppNotifications(
+  list: readonly import("./retentionNotifications").RetentionNotification[],
+): AppNotification[] {
+  return list.map((r) => {
+    const kind: NotificationKind = r.kind === "ROUTE_AVAILABLE" ? "ROUTE_AVAILABLE" : "REWARD_RETENTION";
+    const claim = r.kind === "CLAIM_WINDOW_OPEN" || r.kind === "CLAIM_WINDOW_CLOSING";
+    return {
+      id: `V34:${r.id}`, kind, category: NOTIFICATION_CATEGORY[kind], title: r.title, body: r.body, href: r.href,
+      ctaLabel: r.ctaLabel, status: claim ? "WAITING_FOR_USER" : "VERIFIED", weight: claim ? 95 : r.kind === "ALLOCATION_PUBLISHED" ? 85 : 40,
+      performsAction: false, createsMission: false,
+    };
+  });
+}
