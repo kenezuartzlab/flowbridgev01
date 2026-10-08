@@ -141,6 +141,7 @@ function SettlementBox({ r, rebuild, rebuilding }: { r: RewardSolvencyReport; re
         <KV k="Claimed amount" v={c?.claimedFlow != null ? `${c.claimedFlow} FLOW` : "—"} />
         <KV k="Opens" v={c?.claimStartIso ? `${c.claimStartIso.slice(0, 19)} UTC` : "—"} />
         {s.published.map((p) => <KV key={p.epochId} k={`Round #${p.epochId} verified`} v={p.complete ? "PASS" : "FAIL"} />)}
+        {(s.indexing ?? []).map((i: { epochId: number; action: string; fields?: { field: string; local: string; chain: string }[]; reason?: string }) => <KV key={`ix${i.epochId}`} k={`Round #${i.epochId} index`} v={i.action === "DRIFT" ? `ROUND_METADATA_DRIFT · ${(i.fields ?? []).map((f) => `${f.field}: local ${f.local} / chain ${f.chain}`).join("; ")}` : i.action === "UNAVAILABLE" ? `UNAVAILABLE · ${i.reason}` : i.action} />)}
       </Box>
     </>
   );
