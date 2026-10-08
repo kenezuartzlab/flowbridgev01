@@ -341,6 +341,30 @@ export const Route = createFileRoute("/api/assistant")({
         const { actor, wallet } = await resolveActor(request);
         const requestId = crypto.randomUUID();
 
+        // V34 — personal reward questions answered ONLY from the caller's own verified state.
+        {
+          const { matchProgressQuestion, answerProgressQuestion } = await import("@/lib/ai/rewardProgressAnswers");
+          const kind = matchProgressQuestion(last.content);
+          if (kind) {
+            let personal: Awaited<ReturnType<typeof import("@/lib/rewards/rewardProgression.server").resolvePersonalProgress>> | null = null;
+            if (actor.userId) {
+              try {
+                const user = await getAuthUser(request);
+                const { resolvePersonalProgress } = await import("@/lib/rewards/rewardProgression.server");
+                personal = await resolvePersonalProgress({ userId: actor.userId, emailVerified: !!user?.emailVerified });
+              } catch { personal = null; }
+            }
+            const answer = answerProgressQuestion(kind, { signedIn: !!actor.userId, progression: personal?.progression ?? null, next: personal?.nextBestAction ?? null });
+            return jsonResponse({
+              requestId, answer, mode: "INFO", plannerMode: "PERSONAL_PROGRESS", intent: null, confidence: "HIGH",
+              confidenceLabel: "Verified account state", asOf: personal?.observedAt ?? null, disclosure: null, notice: null,
+              skills: [], refused: [], degraded: personal && !personal.chainReadable ? ["chain"] : [],
+              contractVersion: ASSISTANT_RESPONSE_CONTRACT_VERSION, actionIntent: null, actionPlan: null,
+              reviewAction: null, notReadyReasons: [], proposal: null, actionSession: actionSession ?? null, preparationFailure: null,
+            });
+          }
+        }
+
         try {
           const result = await answerFlowAiQuestion({
             question: last.content,
