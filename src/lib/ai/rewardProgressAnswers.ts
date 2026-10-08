@@ -8,15 +8,25 @@ import type { NextBestAction } from "@/lib/growth/nextBestAction";
 
 export type ProgressQuestion = "ELIGIBLE" | "REMAINING" | "NOT_CLAIMABLE" | "NEXT" | "ROUND" | "WHEN" | "ROUTE";
 
+/**
+ * Patterns must require reward/points/claim context. Generic phrases like
+ * "remaining", "next step" or "route available" belong to the normal planner
+ * and must never be intercepted here.
+ */
+const REWARD_WORD = /(reward|points?|flow points?|claim|minimum|payout|settlement|earn)/i;
 const RULES: [ProgressQuestion, RegExp][] = [
   ["NOT_CLAIMABLE", /why .*(not|n't) (claimable|count)|points .*not claimable/i],
-  ["REMAINING", /how (much|many) more|until i can claim|remaining/i],
-  ["ROUND", /(included|in) (a|the)? ?payout round|am i (included|allocated)/i],
+  ["REMAINING", /how (much|many) more.*(claim|points?|flow)|until i can claim|(flow )?points? remaining|remaining (to|until|for) (the )?(claim|minimum)/i],
+  ["ROUND", /(included|in) (a|the)? ?payout round|am i (included|allocated).*(round|payout|settlement)/i],
   ["WHEN", /when can i claim|claim (open|window)/i],
   ["ELIGIBLE", /how many .*(eligible|flow points)|my (flow )?points/i],
-  ["ROUTE", /which route.*available|route .*available/i],
-  ["NEXT", /what (can|should) i do next|next step/i],
+  ["NEXT", /(what (can|should) i do next|next step).*(reward|points?|flow|claim|earn)/i],
 ];
+
+/** Generic route-availability questions are NOT progress questions. */
+export function isRewardContext(q: string): boolean {
+  return REWARD_WORD.test(q);
+}
 
 export function matchProgressQuestion(q: string): ProgressQuestion | null {
   for (const [k, re] of RULES) if (re.test(q)) return k;

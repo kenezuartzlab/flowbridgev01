@@ -113,6 +113,13 @@ describe("V34 AI personal context", () => {
     expect(matchProgressQuestion("How much more until I can claim?")).toBe("REMAINING");
     expect(matchProgressQuestion("Am I included in a payout round?")).toBe("ROUND");
   });
+  it("never intercepts ordinary trading questions", () => {
+    expect(matchProgressQuestion("Is a route available to swap 100 BOT to USDT?")).toBeNull();
+    expect(matchProgressQuestion("What's the next step to bridge my USDT?")).toBeNull();
+    expect(matchProgressQuestion("What is my remaining balance?")).toBeNull();
+    expect(matchProgressQuestion("Which route is available for CA to BOT?")).toBeNull();
+    expect(matchProgressQuestion("How much more BOT do I need for the swap?")).toBeNull();
+  });
   it("signed-out callers get no account data", () => {
     const a = answerProgressQuestion("REMAINING", { signedIn: false, progression: computeRewardProgression(base(999)), next: null });
     expect(a).not.toMatch(/999/);
