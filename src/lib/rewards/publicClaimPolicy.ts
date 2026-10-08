@@ -1,8 +1,9 @@
 /**
  * V33 — controlled public Mainnet FLOW claims (pure).
  *
- * - PUBLIC_MAINNET_FLOW_CLAIMS is the single switch for ordinary users. It is ON (V33.2);
- *   OFF; turning it ON requires a separate owner release gate.
+ * - PUBLIC_MAINNET_FLOW_CLAIMS is the single switch for ordinary users. It is
+ *   ON (owner-approved V33.2). It only enables the claim interface; claims still
+ *   require a published on-chain allocation, valid proof, open window and wallet.
  * - Claim lifecycle states are kept distinct: eligible is never claimable.
  * - Settlement eligibility = eligibleBackedPoints - alreadySettledPoints >= 1,000,
  *   from funded, reconciled Mainnet ledger rows only.
