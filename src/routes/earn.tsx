@@ -336,7 +336,7 @@ function EarnPage() {
                   const m = claimMinimumProgress(incentives?.eligibleFundedPoints);
                   return (
                     <div aria-label="Progress toward minimum claim">
-                      <p className="text-[12px] font-bold">{user ? m.label : `0 / 1,000 FLOW toward minimum claim`}</p>
+                      <p className="text-[12px] font-bold">{user ? (m.meetsMinimum ? "Eligible for next settlement batch" : m.label) : `0 / 1,000 FLOW toward minimum claim`}</p>
                       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-hairline" role="progressbar" aria-valuemin={0} aria-valuemax={m.minimum} aria-valuenow={m.current}>
                         <div className="h-full bg-primary" style={{ width: `${Math.round(m.progress * 100)}%` }} />
                       </div>

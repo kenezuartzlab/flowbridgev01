@@ -4,6 +4,7 @@
  * off-chain record of a prepared batch so its proofs can be served after the
  * publisher signs. No private key exists here; nothing is signed or broadcast.
  */
+import { CLAIM_WINDOW_POLICY, PUBLIC_MAINNET_FLOW_CLAIMS, settlementEligibility } from "./publicClaimPolicy";
 import { createPublicClient, http, parseAbi, type Address, type Hex } from "viem";
 import { MAINNET_PAYOUT_AUDIT, type ProgramId } from "./rewardFundingPlan";
 import { MAINNET_EPOCH_MANIFESTS } from "./mainnetEpochManifest";
@@ -189,6 +190,16 @@ export async function buildSettlement(args: {
     published: discovered.map((d) => ({ epochId: d.batch.epochId, root: d.batch.root, source: d.source, complete: d.verification.complete, checks: d.verification.checks })),
     indexing: discovered.indexing,
     liveState: { epochCount: live.epochCount, paused: live.paused, budgetFlow: Number(live.campaignBudgetWei / WEI), balanceFlow: Number(live.balanceWei / WEI), reservedFlow: Number(live.totalReservedWei / WEI), claimedFlow: Number(live.totalClaimedWei / WEI), blockTimeIso: new Date(live.nowSec * 1000).toISOString() },
+    readiness: {
+      ...settlementEligibility(rows.map((r) => ({ wallet: r.wallet, classification: r.classification, pendingReview: r.pendingReview, fundedPoints: r.authoritative, authoritative: r.authoritative, alreadySettledPoints: r.alreadyAllocatedPoints }))),
+      nextBatchWallets: p.batch?.leaves.length ?? 0,
+      nextBatchFlow: p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0,
+      publishedUnclaimedFlow: Number(live.totalReservedWei / WEI),
+      claimedFlow: Number(live.totalClaimedWei / WEI),
+      publicClaimsFlag: PUBLIC_MAINNET_FLOW_CLAIMS ? "ON" as const : "OFF" as const,
+      claimWindowPolicy: CLAIM_WINDOW_POLICY.status,
+      publisherReady: publisher.pass,
+    },
     generatedAt,
   };
 }
