@@ -136,6 +136,20 @@ function SettlementBox({ r, rebuild, rebuilding }: { r: RewardSolvencyReport; re
         </div>
         <p className="text-[11px] leading-snug text-muted-soft">Server prepares → you review → publisher wallet opens and signs → chain confirms → app verifies. The app holds no key and never signs. Built {s.generatedAt.slice(11, 19)} UTC.</p>
       </Box>
+      {"readiness" in s && s.readiness && (
+        <Box title="Public claims readiness">
+          <KV k="Public claims flag" v={s.readiness.publicClaimsFlag} />
+          <KV k="Eligible wallets ≥ 1,000" v={fmt(s.readiness.wallets)} />
+          <KV k="Eligible FLOW total" v={`${fmt(s.readiness.totalFlow)} FLOW`} />
+          <KV k="Next batch" v={`${s.readiness.nextBatchWallets} wallets · ${fmt(s.readiness.nextBatchFlow)} FLOW`} />
+          <KV k="Published, unclaimed" v={`${fmt(s.readiness.publishedUnclaimedFlow)} FLOW`} />
+          <KV k="Claimed" v={`${fmt(s.readiness.claimedFlow)} FLOW`} />
+          <KV k="Excluded (below min / held)" v={`${fmt(s.readiness.excludedBelowMinimumOrHeldFlow)} FLOW`} />
+          <KV k="Claim window policy" v={s.readiness.claimWindowPolicy.replaceAll("_", " ")} />
+          <KV k="Publisher ready" v={s.readiness.publisherReady ? "PASS" : "FAIL"} />
+          {s.readiness.status === "NO_PUBLIC_BATCH_REQUIRED_YET" && <p className="text-[11px] text-muted-soft">No public batch required yet.</p>}
+        </Box>
+      )}
       <Box title="Round #2 canary (live)">
         <KV k="Claimed" v={c ? (c.claimed ? "YES" : "NO") : "UNKNOWN"} />
         <KV k="Claimed amount" v={c?.claimedFlow != null ? `${c.claimedFlow} FLOW` : "—"} />
