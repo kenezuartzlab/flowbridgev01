@@ -1,0 +1,3 @@
+ALTER TABLE public.reward_settlement_batches ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'SETTLEMENT_BUILDER';
+ALTER TABLE public.reward_settlement_batches ADD CONSTRAINT reward_settlement_batches_source_chk CHECK (source IN ('SETTLEMENT_BUILDER','ON_CHAIN_HISTORICAL_IMPORT'));
+CREATE UNIQUE INDEX IF NOT EXISTS reward_settlement_batches_historical_uniq ON public.reward_settlement_batches (chain_id, distributor, epoch_id) WHERE source = 'ON_CHAIN_HISTORICAL_IMPORT';

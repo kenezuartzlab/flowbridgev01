@@ -1281,6 +1281,7 @@ export type Database = {
           program_breakdown: Json
           publication_verified_at: string | null
           root: string
+          source: string
           total_wei: number
         }
         Insert: {
@@ -1296,6 +1297,7 @@ export type Database = {
           program_breakdown?: Json
           publication_verified_at?: string | null
           root: string
+          source?: string
           total_wei: number
         }
         Update: {
@@ -1311,6 +1313,7 @@ export type Database = {
           program_breakdown?: Json
           publication_verified_at?: string | null
           root?: string
+          source?: string
           total_wei?: number
         }
         Relationships: []
