@@ -8,6 +8,7 @@ import { ConfirmSwapModal } from "@/modals/ConfirmSwapModal";
 import { toast } from "sonner";
 import { TokenIcon } from "@/components/TokenIcon";
 import { cn } from "@/lib/utils";
+import { initialSwapPair, type SwapPairMode } from "@/lib/swap/pairMode";
 import {
   ERC20_ABI,
   FLOW_BRIDGE_ROUTER_V3_ABI,
@@ -88,6 +89,7 @@ export type SwapPhase =
   | { phase: "idle" };
 
 interface UniversalSwapCardProps {
+  pairMode?: SwapPairMode;
   isMainnet: boolean;
   isConnected: boolean;
   onConnect: () => void;
@@ -117,6 +119,7 @@ interface UniversalSwapCardProps {
 }
 
 export function UniversalSwapCard({
+  pairMode = 'ANY',
   isMainnet,
   isConnected,
   onConnect,
@@ -186,15 +189,16 @@ export function UniversalSwapCard({
    */
   const draftScope: SwapDraftScope = isMainnet ? "MAINNET" : "TESTNET";
   const restoredDraft = useMemo(() => readSwapDraft(draftScope), [draftScope]);
+  const initialPair = initialSwapPair(pairMode, restoredDraft);
   const pickToken = (symbol: string | undefined, fallback: Token) =>
     (symbol ? curated.find((t) => t.symbol === symbol) : undefined) ?? fallback;
   const [tokenIn, setTokenIn] = useState<Token>(() =>
-    pickToken(restoredDraft?.tokenInSymbol, curated[0]),
+    pickToken(initialPair.tokenInSymbol, curated[0]),
   );
   const [tokenOut, setTokenOut] = useState<Token>(() =>
-    pickToken(restoredDraft?.tokenOutSymbol, curated[2]),
+    pickToken(initialPair.tokenOutSymbol, curated[2]),
   );
-  const [amountIn, setAmountIn] = useState(restoredDraft?.amount ?? "");
+  const [amountIn, setAmountIn] = useState(initialPair.amount);
   const [slippage, setSlippage] = useState(appConfig.fees.defaultSlippagePct);
 
   const [pickerOpen, setPickerOpen] = useState<"in" | "out" | null>(null);
@@ -221,23 +225,25 @@ export function UniversalSwapCard({
   useEffect(() => {
     if (scopeRef.current === draftScope) return;
     scopeRef.current = draftScope;
-    setTokenIn(curated[0]);
-    setTokenOut(curated[2]);
+    const defaults = initialSwapPair(pairMode, null);
+    setTokenIn(pickToken(defaults.tokenInSymbol, curated[0]));
+    setTokenOut(pickToken(defaults.tokenOutSymbol, curated[2]));
     setAmountIn("");
-    clearSwapDraft();
+    if (pairMode === 'ANY') clearSwapDraft();
     setQuote(null);
     setLastTx(null);
-  }, [draftScope, curated]);
+  }, [draftScope, curated, pairMode]);
 
   // Persist the draft so SPA navigation cannot erase it.
   useEffect(() => {
+    if (pairMode !== 'ANY') return;
     setSwapDraft({
       chainScope: draftScope,
       tokenInSymbol: tokenIn.symbol,
       tokenOutSymbol: tokenOut.symbol,
       amount: amountIn,
     });
-  }, [draftScope, tokenIn.symbol, tokenOut.symbol, amountIn]);
+  }, [draftScope, tokenIn.symbol, tokenOut.symbol, amountIn, pairMode]);
 
 
   /**
@@ -248,7 +254,7 @@ export function UniversalSwapCard({
    */
   const appliedHydrationRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!hydration || appliedHydrationRef.current === hydration.key) return;
+    if (pairMode !== 'ANY' || !hydration || appliedHydrationRef.current === hydration.key) return;
     const nextIn = curated.find((t) => t.symbol === hydration.tokenInSymbol);
     const nextOut = curated.find((t) => t.symbol === hydration.tokenOutSymbol);
     if (!nextIn || !nextOut || nextIn.symbol === nextOut.symbol) return;
@@ -259,7 +265,7 @@ export function UniversalSwapCard({
     setQuote(null);
     setQuoteError(null);
     onHydrationApplied?.(hydration);
-  }, [hydration, curated, onHydrationApplied]);
+  }, [hydration, curated, onHydrationApplied, pairMode]);
 
 
   // ── Balances ──────────────────────────────────────────────────────────────
@@ -1315,7 +1321,7 @@ export function UniversalSwapCard({
           amount={amountIn}
           onAmountChange={onAmountInChange}
           balanceDisplay={inBalanceDisplay}
-          onPickToken={() => setPickerOpen("in")}
+          onPickToken={pairMode === 'ANY' ? () => setPickerOpen("in") : undefined}
           onMax={onMax}
           onPercent={onPercent}
 
@@ -1353,7 +1359,7 @@ export function UniversalSwapCard({
           token={tokenOut}
           amount={amountOutDisplay}
           balanceDisplay={outBalanceDisplay}
-          onPickToken={() => setPickerOpen("out")}
+          onPickToken={pairMode === 'ANY' ? () => setPickerOpen("out") : undefined}
           readOnly
           quoting={quoting}
           usdValue={usdValueFor(tokenOut, amountOutDisplay)}
@@ -1618,7 +1624,7 @@ interface TokenSideProps {
   amount: string;
   onAmountChange?: (v: string) => void;
   balanceDisplay: string;
-  onPickToken: () => void;
+  onPickToken?: () => void;
   onMax?: () => void;
   onPercent?: (pct: number) => void;
   readOnly?: boolean;
@@ -1701,13 +1707,14 @@ function TokenSide({
         <button
           type="button"
           onClick={onPickToken}
+          disabled={!onPickToken}
           className="bg-card hover:bg-background-elev pl-1 pr-2 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-hairline-strong hover:border-primary/40 font-mono cursor-pointer transition-colors max-w-[46%]"
         >
           <TokenIcon symbol={token.symbol} size={20} />
           <span className="font-black text-[13px] text-foreground tracking-wide uppercase truncate">
             {token.symbol}
           </span>
-          <ChevronDown className="w-3 h-3 text-muted shrink-0" />
+          {onPickToken && <ChevronDown className="w-3 h-3 text-muted shrink-0" />}
         </button>
       </div>
 

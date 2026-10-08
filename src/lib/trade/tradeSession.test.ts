@@ -13,6 +13,12 @@ import {
 describe("V15.3G trade session continuity", () => {
   beforeEach(() => __resetTradeSessionForTests());
 
+  it('starts a fresh Trade visit on Any pair', () => {
+    expect(getTradeSession().tab).toBe('BOT/USDT');
+    expect(applyDefaultTradeTab('BOT/USDT')).toBe(true);
+    expect(getTradeSession().tab).toBe('BOT/USDT');
+  });
+
   it("keeps a user-chosen tab across simulated remounts", () => {
     setTradeTab("CA/BOT");
     // A remount re-runs the route-progress default; it must not win.

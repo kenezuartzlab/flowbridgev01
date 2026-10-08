@@ -1,5 +1,11 @@
 # MultiSend BOT Testnet Release
 
+# Swap and header fixes
+- [x] Share accurate Any pair routing with CA/BOT.
+- [x] Default new Trade visits to Any pair, preserving explicit choices.
+- [x] Remove header Campaign Points and reduce greeting crowding.
+- [x] Verify swap regressions and header layout without submitting trades (1,598 tests; live CA/BOT quote; clean build).
+
 - [x] Add a pinned Solidity 0.8.20 / Shanghai compiler gate.
 - [x] Generate ABI, bytecode, explorer input, hashes, and EIP-170 size evidence.
 - [x] Add fail-closed BOT Testnet preflight and read-only post-deployment verification.
