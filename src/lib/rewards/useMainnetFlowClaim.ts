@@ -11,6 +11,7 @@
  * Fail-closed: any read failure, mismatch or unknown state blocks the claim.
  * No amount, address or proof ever comes from user input.
  */
+import { LAST_HISTORICAL_EPOCH, PUBLIC_MAINNET_FLOW_CLAIMS } from './publicClaimPolicy';
 import { useCallback, useEffect, useState } from 'react';
 import { createPublicClient, http, type Hex } from 'viem';
 
@@ -286,7 +287,10 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
         nowSeconds: Math.floor(Date.now() / 1000),
       });
 
-      if (prep.claimable) {
+      if (prep.claimable && epochId > LAST_HISTORICAL_EPOCH && !PUBLIC_MAINNET_FLOW_CLAIMS) {
+        // Public flag OFF: allocation is shown, but no ordinary claim can start.
+        setState({ ...base, preparation: null, status: 'BLOCKED', message: 'Allocated on BOT Mainnet. Public FLOW claims are not open yet.' });
+      } else if (prep.claimable) {
         setState({ ...base, preparation: prep, status: 'CLAIMABLE', message: 'Your allocation is claimable now.' });
       } else {
         setState({
