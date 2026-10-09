@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound } from 'lucide-react';
-import { useAccount, useSignMessage, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useSignMessage, useChainId, useSwitchChain, useConnect } from 'wagmi';
+import { buildWalletChoices } from '@/lib/wallet/connectorChoices';
+import { WALLETCONNECT_ENABLED } from '@/lib/wallet/walletConnectFlag';
 import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, getIdToken, reloadUser, requestPasswordReset, type AppUser } from '@/lib/auth';
 import { isInAppBrowser, inAppBrowserName, isTokenPocketBrowser } from '@/lib/in-app-browser';
@@ -46,6 +48,11 @@ export function ConnectGuideModal({
   const activeChainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { signMessageAsync } = useSignMessage();
+  // V34.2A — one button per discovered wallet; WalletConnect only behind the kill switch.
+  const { connectors, connect } = useConnect();
+  const walletChoices = useMemo(() => buildWalletChoices(connectors as any, WALLETCONNECT_ENABLED), [connectors]);
+  const installedChoices = walletChoices.filter((c) => c.kind !== 'WALLETCONNECT');
+  const wcChoice = walletChoices.find((c) => c.kind === 'WALLETCONNECT');
   const [siweBusy, setSiweBusy] = useState(false);
   const siweRequestId = useRef(0);
 
@@ -299,33 +306,36 @@ export function ConnectGuideModal({
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => {
-                    onConnectWallet('injected');
-                    onClose();
-                  }}
-                  className="w-full flex items-center justify-center gap-1.5 bg-primary hover:bg-primary-strong text-primary-foreground font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
-                >
-                  <Wallet className="w-3.5 h-3.5" />
-                  {inApp ? `Connect ${inAppName ?? 'Wallet'}` : 'Connect Browser Wallet'}
-                </button>
-                {!inApp && (
+                {installedChoices.length === 0 && (
                   <button
-                    onClick={() => {
-                      onConnectWallet('walletConnect');
-                      onClose();
-                    }}
-                    className="w-full flex items-center justify-center gap-1.5 bg-background hover:bg-background-elev text-foreground border border-[#3B99FC]/40 font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
+                    onClick={() => { onConnectWallet('injected'); onClose(); }}
+                    className="w-full flex items-center justify-center gap-1.5 bg-primary hover:bg-primary-strong text-primary-foreground font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
                   >
-                    <span className="text-[#3B99FC]">◉</span>
+                    <Wallet className="w-3.5 h-3.5" />
+                    {inApp ? `Connect ${inAppName ?? 'Wallet'}` : 'Connect Browser Wallet'}
+                  </button>
+                )}
+                {installedChoices.map((choice) => (
+                  <button
+                    key={choice.connector.id}
+                    onClick={() => { connect({ connector: choice.connector as any }); onClose(); }}
+                    className="w-full flex items-center justify-center gap-1.5 bg-primary hover:bg-primary-strong text-primary-foreground font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
+                  >
+                    {choice.connector.icon ? <img src={choice.connector.icon} alt="" className="w-4 h-4 rounded" /> : <Wallet className="w-3.5 h-3.5" />}
+                    {choice.label}
+                  </button>
+                ))}
+                {wcChoice && !inApp && (
+                  <button
+                    onClick={() => { connect({ connector: wcChoice.connector as any }); onClose(); }}
+                    className="w-full flex items-center justify-center gap-1.5 bg-background hover:bg-background-elev text-foreground border border-hairline font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
+                  >
                     WalletConnect (QR / Mobile)
                   </button>
                 )}
-                {!inApp && (
-                  <p className="text-[10px] text-muted font-mono px-1 leading-relaxed">
-                    No extension? Use WalletConnect to scan a QR from your mobile wallet (Trust, MetaMask, TokenPocket, Rainbow…).
-                  </p>
-                )}
+                <p className="text-[10px] text-muted font-mono px-1 leading-relaxed">
+                  Connecting never asks you to sign, approve or pay anything.
+                </p>
               </div>
             )}
           </div>
