@@ -23,6 +23,8 @@ import { AppTopBar } from "@/components/layout/AppTopBar";
 import { MetricStrip, StatusPill } from "@/components/ui-kit/primitives";
 import { ParticipationProfileCard } from "@/components/identity/ParticipationProfileCard";
 import { ProfileRewardProgression } from "@/components/rewards/ProfileRewardProgression";
+import { BindWalletCard } from "@/components/rewards/BindWalletCard";
+import { useRewardState } from "@/lib/rewards/useRewardState";
 import { AchievementsPanel } from "@/components/identity/AchievementsPanel";
 import { ShareProfileCard } from "@/components/identity/ShareProfileCard";
 import { useParticipationProfile } from "@/lib/identity/useParticipationProfile";
@@ -69,6 +71,7 @@ const LANGUAGES = [
 
 function AccountPage() {
   const { user, authReady, incentives, transactions } = useAccountData();
+  const binding = useRewardState(!!user);
   const participation = useParticipationProfile();
   const [theme, setTheme] = useTheme();
   const [prefs, savePrefs] = usePrefs();
@@ -171,11 +174,11 @@ function AccountPage() {
           <div className="relative mt-3 flex flex-wrap items-center gap-2">
             <StatusPill tone={verified ? "ok" : "pending"}>
               <ShieldCheck className="h-3 w-3" aria-hidden />
-              {verified ? "Verified pass" : "Verification pending"}
+              {verified ? "Email verified" : "Email verification pending"}
             </StatusPill>
             <span className="text-[11.5px] text-muted">
               {verified
-                ? "Wallet binding and referral rewards unlocked."
+                ? "Email verified. Wallet binding is a separate step below."
                 : user
                   ? "Verify your email from the header banner to unlock referral rewards."
                   : "Sign in and verify your email to unlock referral rewards."}
@@ -188,6 +191,14 @@ function AccountPage() {
             </div>
           )}
         </section>
+
+        {user && (
+          <BindWalletCard
+            boundAddress={binding.rewardState?.walletAddress}
+            signedIn={!binding.loading}
+            onDone={binding.refresh}
+          />
+        )}
 
         {/* Progression — PTS (campaign/off-chain) stays distinct from FLOW. */}
         <MetricStrip
