@@ -4,9 +4,11 @@ import { useAccount, useSignMessage, useChainId, useSwitchChain, useConnect } fr
 import { buildWalletChoices } from '@/lib/wallet/connectorChoices';
 import { WALLETCONNECT_ENABLED } from '@/lib/wallet/walletConnectFlag';
 import { signInWithEthereum } from '@/lib/siwe';
-import { emailSignIn, emailSignUp, getIdToken, reloadUser, requestPasswordReset, type AppUser } from '@/lib/auth';
+import { emailSignIn, emailSignUp, reloadUser, requestPasswordReset, type AppUser } from '@/lib/auth';
+import { BindWalletCard } from '@/components/rewards/BindWalletCard';
+import { useRewardState } from '@/lib/rewards/useRewardState';
 import { isInAppBrowser, inAppBrowserName, isTokenPocketBrowser } from '@/lib/in-app-browser';
-import { getWalletSignatureErrorMessage, hasWalletSignatureInFlight, isWalletVerified, signMessageWithActiveWallet } from '@/lib/walletVerification';
+import { getWalletSignatureErrorMessage, hasWalletSignatureInFlight, signMessageWithActiveWallet } from '@/lib/walletVerification';
 import { botMainnet } from '@/lib/wagmi';
 import { ModalPortal } from './ModalPortal';
 
@@ -55,6 +57,7 @@ export function ConnectGuideModal({
   const wcChoice = walletChoices.find((c) => c.kind === 'WALLETCONNECT');
   const [siweBusy, setSiweBusy] = useState(false);
   const siweRequestId = useRef(0);
+  const { rewardState, loading: bindingLoading, refresh: refreshBinding } = useRewardState(isOpen && !!googleUser);
 
   // If the user switches wallets (or disconnects) mid-signature, wagmi's
   // in-flight signMessage promise can hang against the previous connector.
@@ -86,36 +89,6 @@ export function ConnectGuideModal({
     setMsg(null);
     setBusy(false);
   }, [isOpen]);
-
-  const bindVerifiedWalletToSignedInUser = async () => {
-    if (!connectedAddress || !isWalletVerified(connectedAddress)) return false;
-
-    const token = await getIdToken();
-    if (!token) return false;
-
-    await fetch('/api/users/sync', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({}),
-    }).catch(() => null);
-
-    const res = await fetch('/api/users/bind-wallet', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ walletAddress: connectedAddress }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data?.success) {
-      throw new Error(data?.error || 'Signed in, but the wallet link was not saved. Open Rewards, then bind wallet.');
-    }
-    return true;
-  };
 
   const handleSiwe = async () => {
     if (!connectedAddress) return;
@@ -177,14 +150,8 @@ export function ConnectGuideModal({
         setMsg(`Signed in and linked as ${result.email}.`);
         onLinked?.(user);
       } else {
-        const linkedNow = await bindVerifiedWalletToSignedInUser();
-        if (linkedNow) {
-          setMsg('Wallet verified and linked to your signed-in email.');
-          onLinked?.(await reloadUser());
-        } else {
-          setMsg('Wallet verified, but no email is linked yet. Sign in once with email below to bind this wallet.');
-          setShowEmail(true);
-        }
+        setMsg('Sign in with email below, then choose Verify & Bind wallet.');
+        setShowEmail(true);
       }
     } catch (e: any) {
       if (siweRequestId.current !== requestId) return;
@@ -216,14 +183,11 @@ export function ConnectGuideModal({
     try {
       if (mode === 'signin') {
         const user = await emailSignIn(email.trim(), password);
-        const linkedNow = await bindVerifiedWalletToSignedInUser();
-        setMsg(linkedNow ? 'Signed in and wallet linked.' : 'Signed in. Tap “Sign in with wallet” once to prove and link this wallet.');
-        if (linkedNow) onLinked?.(user);
+        setMsg('Signed in. Next, connect your wallet and choose Verify & Bind wallet.');
+        onLinked?.(user);
       } else if (mode === 'signup') {
         const user = await emailSignUp(email.trim(), password, name.trim() || email.split('@')[0]);
-        const linkedNow = await bindVerifiedWalletToSignedInUser();
-        setMsg(linkedNow ? 'Account created and wallet linked. Check your inbox to verify your email.' : 'Check your inbox to verify your email. Then sign in to link this wallet.');
-        if (linkedNow) onLinked?.(user);
+        setMsg('Check your inbox to verify your email. Then sign in and choose Verify & Bind wallet.');
       } else {
         await requestPasswordReset(email.trim());
         setMsg('Reset link sent. Check your inbox.');
@@ -250,14 +214,15 @@ export function ConnectGuideModal({
               <ShieldCheck className="w-5 h-5 shrink-0" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-foreground uppercase tracking-wider">Connect to Bridge</h3>
+              <h3 className="text-sm font-black text-foreground uppercase tracking-wider">{googleUser ? 'Bind your wallet' : 'Connect & sign in'}</h3>
               <p className="text-[11px] text-accent font-semibold leading-none mt-1 uppercase tracking-widest font-mono">
-                Wallet First · Sign-in Optional
+                {googleUser ? 'Account signed in · Wallet setup' : 'Wallet connection · Account sign-in'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close wallet setup"
             className="p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -266,11 +231,23 @@ export function ConnectGuideModal({
 
         {/* Intro */}
         <p className="text-sm text-muted leading-relaxed">
-          Just connect your wallet to start bridging — transactions are recorded automatically against your wallet address. Sign in only if you want to earn <span className="text-primary font-semibold">FlowPoints</span> and referrals.
+          {googleUser ? 'Link the wallet you control to your signed-in account with one free ownership signature. Email verification and wallet binding are separate.' : 'Connect a wallet to use FlowBridge. Sign in with Google or email to link your wallet and access account rewards.'}
         </p>
 
         <div className="flex flex-col gap-4">
+          {googleUser && (
+            <BindWalletCard
+              boundAddress={rewardState?.walletAddress}
+              signedIn={!bindingLoading}
+              framed={false}
+              onDone={async () => {
+                await refreshBinding();
+                onLinked?.(await reloadUser());
+              }}
+            />
+          )}
           {/* Step 1: Wallet (required) */}
+          {!googleUser && <>
           <div
             className={`p-3.5 rounded-xl border transition-all flex flex-col gap-2.5 ${
               isWalletConnected ? 'bg-primary/5 border-primary/25' : 'bg-background/40 border-foreground/5'
@@ -346,6 +323,7 @@ export function ConnectGuideModal({
               <ArrowRight className="w-3.5 h-3.5 rotate-90" />
             </div>
           </div>
+          </>}
 
           {/* Step 2: Sign in (optional, perks only) */}
           <div
@@ -389,16 +367,6 @@ export function ConnectGuideModal({
                     {googleUser.email}
                   </span>
                 </div>
-                {isWalletConnected && connectedAddress && (
-                  <button
-                    onClick={handleSiwe}
-                    disabled={siweBusy}
-                    className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-strong text-primary-foreground font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-wait disabled:active:scale-100"
-                  >
-                    <KeyRound className="w-3.5 h-3.5" />
-                    {siweBusy ? 'Approve in wallet…' : 'Sign wallet to link email'}
-                  </button>
-                )}
               </div>
             ) : (
               <>
@@ -535,7 +503,7 @@ export function ConnectGuideModal({
 
         {/* Footer */}
         <div className="pt-3 border-t border-foreground/5 text-center text-[11px] text-muted/60 leading-normal font-mono uppercase tracking-widest">
-          Your wallet address is your account. Email link is optional.
+          Connecting never signs. Verify & Bind never moves funds or approves tokens.
         </div>
       </div>
     </div>
