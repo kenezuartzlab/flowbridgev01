@@ -19,6 +19,15 @@ describe("V34.2A Flow AI wallet answers", () => {
     expect(matchWalletQuestion("Can I claim FLOW?")).toBe("CAN_CLAIM");
     expect(matchWalletQuestion("Swap 100 BOT to USDT")).toBeNull();
   });
+  it("matches natural binding phrasings that previously fell through", () => {
+    expect(matchWalletQuestion("How do I bind my wallet?")).toBe("WHY_BIND");
+    expect(matchWalletQuestion("Tell me about the wallet bind feature")).toBe("WHY_BIND");
+    expect(matchWalletQuestion("wallet bind")).toBe("WHY_BIND");
+    expect(matchWalletQuestion("I want to link my wallet")).toBe("WHY_BIND");
+    // Guard: ordinary trade questions must still fall through to the planner.
+    expect(matchWalletQuestion("Is a route available to swap 100 BOT to USDT?")).toBeNull();
+    expect(matchWalletQuestion("What's the next step to bridge my USDT?")).toBeNull();
+  });
   it("never guesses a wallet brand", () => {
     expect(walletFamilyLabel(undefined)).toBe(GENERIC_WALLET);
     expect(walletFamilyLabel("com.unknown")).toBe(GENERIC_WALLET);
