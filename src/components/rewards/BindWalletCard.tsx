@@ -7,6 +7,7 @@ import { buildWalletChoices } from "@/lib/wallet/connectorChoices";
 import { WALLETCONNECT_ENABLED } from "@/lib/wallet/walletConnectFlag";
 import { verifyAndBindWallet } from "@/lib/wallet/bindWallet";
 import { walletErrorMessage } from "@/lib/wallet/walletErrors";
+import { Button } from "@/components/ui/button";
 
 /**
  * Wallet binding — V34.2 Verify & Bind.
@@ -20,10 +21,12 @@ export function BindWalletCard({
   boundAddress,
   onDone,
   signedIn = true,
+  framed = true,
 }: {
   boundAddress?: string | null;
   onDone?: () => void | Promise<void>;
   signedIn?: boolean;
+  framed?: boolean;
 }) {
   const { address, isConnected } = useAccount();
   const { connectors, connect, isPending: connecting } = useConnect();
@@ -36,7 +39,7 @@ export function BindWalletCard({
   const done = !!boundAddress;
   const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
   const choices = useMemo(() => buildWalletChoices(connectors, WALLETCONNECT_ENABLED), [connectors]);
-  const sameAsBound = done && address && boundAddress!.toLowerCase() === address.toLowerCase();
+  const sameAsBound = !!boundAddress && !!address && boundAddress.toLowerCase() === address.toLowerCase();
 
   // Never carry one wallet's binding messages into another wallet.
   useEffect(() => {
@@ -80,11 +83,11 @@ export function BindWalletCard({
   };
 
   return (
-    <section id="bind-wallet" className="scroll-mt-20 rounded-2xl border border-hairline bg-card p-4">
-      <div className="flex items-center justify-between gap-2">
+    <section id="bind-wallet" className={framed ? "scroll-mt-20 rounded-lg border border-hairline bg-card p-4" : "scroll-mt-20"}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Wallet className="h-3.5 w-3.5 text-primary" />
-          <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">Wallet</h2>
+          <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">{done ? 'Your bound wallet' : 'Bind your wallet'}</h2>
         </div>
         <span
           className={`font-mono text-[10px] font-black uppercase tracking-[0.08em] ${done ? "text-success" : "text-muted"}`}
@@ -93,8 +96,7 @@ export function BindWalletCard({
         </span>
       </div>
       <p className="mt-2 text-[12px] leading-relaxed text-muted">
-        Verify your wallet to keep your rewards linked to you and unlock personalized FlowBridge
-        features.
+        {done ? 'This wallet is linked to your account.' : '1. Connect your wallet. 2. Tap Verify & Bind. 3. Confirm the free ownership signature in your wallet.'}
       </p>
 
       <div
@@ -103,10 +105,10 @@ export function BindWalletCard({
         }`}
       >
         <span className="min-w-0 font-mono text-[11.5px] font-black tracking-[0.04em]">
-          {done ? (
+          {boundAddress ? (
             <span className="flex items-center gap-1.5 text-success">
               <Check className="h-3.5 w-3.5 shrink-0" />
-              {short(boundAddress!)}
+              {short(boundAddress)}
             </span>
           ) : isConnected && address ? (
             short(address)
@@ -117,14 +119,14 @@ export function BindWalletCard({
 
         {isConnected ? (
           sameAsBound ? null : (
-            <button
+            <Button
               type="button"
               onClick={() => void bind()}
               disabled={!signedIn || busy}
-              className="grid min-h-[40px] place-items-center rounded-lg bg-primary px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-primary-foreground disabled:opacity-50"
+              className="h-auto min-h-[44px] whitespace-normal px-3 font-mono text-[10.5px] font-black uppercase"
             >
               {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? "Verify & rebind wallet" : "Verify & bind wallet"}
-            </button>
+            </Button>
           )
         ) : choices.length === 0 ? (
           <p className="text-[11.5px] text-muted">
@@ -133,7 +135,7 @@ export function BindWalletCard({
         ) : (
           <div className="flex flex-wrap gap-2">
             {choices.map((c) => (
-              <button
+              <Button
                 key={c.connector.uid ?? c.connector.id}
                 type="button"
                 onClick={() =>
@@ -143,24 +145,40 @@ export function BindWalletCard({
                   )
                 }
                 disabled={connecting}
-                className="flex min-h-[38px] items-center gap-1.5 rounded-lg bg-primary/12 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary disabled:opacity-50"
+                variant="outline"
+                className="h-auto min-h-[44px] max-w-full whitespace-normal px-3 font-mono text-[10px] font-black uppercase"
               >
                 {c.connector.icon ? <img src={c.connector.icon} alt="" className="h-4 w-4 rounded" /> : null}
                 {connecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : `Connect ${c.label}`}
-              </button>
+              </Button>
             ))}
           </div>
         )}
       </div>
 
-      <button
+      {!isConnected && (
+        <div className="mt-3 space-y-2 text-[12px] leading-relaxed text-muted">
+          <p>On a phone in Firefox, Chrome or Safari? Open this same page in your wallet app’s browser, sign in with the same account, then tap Verify & Bind. On a computer, use an installed wallet extension.</p>
+          <Button variant="outline" className="min-h-[44px] w-full whitespace-normal text-xs" onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(window.location.href);
+              setOk('Page link copied. Open it in your wallet app’s browser.');
+            } catch {
+              setError('Copy the page address from your browser and open it in your wallet app’s browser.');
+            }
+          }}>Copy page link for wallet browser</Button>
+        </div>
+      )}
+
+      <Button
         type="button"
+        variant="link"
         onClick={() => setWhy((v) => !v)}
-        className="mt-2 font-mono text-[10.5px] font-bold text-primary underline-offset-2 hover:underline"
+        className="mt-2 h-auto min-h-[40px] px-0 font-mono text-[10.5px] font-bold"
         aria-expanded={why}
       >
         Why do I need this?
-      </button>
+      </Button>
       {why ? (
         <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-[11.5px] leading-relaxed text-muted">
           <li>Proves you control this wallet.</li>
@@ -170,7 +188,7 @@ export function BindWalletCard({
         </ul>
       ) : null}
       <p className="mt-2 text-[11px] leading-relaxed text-muted-soft">
-        Connecting a wallet never asks for a signature. Wallet verification does not verify your email
+        Free signature · No gas · No funds moved · No token approvals. Wallet verification does not verify your email
         or make you reward-eligible on its own.
       </p>
 
