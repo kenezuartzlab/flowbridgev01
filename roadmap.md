@@ -1,9 +1,9 @@
 # MultiSend BOT Testnet Release
 
 # Wallet-binding accessibility
-- [ ] Show explicit Verify & Bind in the sign-in/connect dialog and Profile after email sign-in.
-- [ ] Guide regular mobile browsers without enabling WalletConnect; preserve separate connect/sign actions.
-- [ ] Verify mobile layout and wallet-binding regressions without on-chain writes.
+- [x] Show explicit Verify & Bind in the sign-in/connect dialog and Profile after email sign-in.
+- [x] Guide regular mobile browsers without enabling WalletConnect; preserve separate connect/sign actions.
+- [x] Verify signed-in Profile and dialog at 390px without overflow or page errors; 1,657 tests pass on final run, build OK; no on-chain writes. Real-wallet signatures remain untested; changes are preview-only.
 
 # Swap and header fixes
 - [x] Share accurate Any pair routing with CA/BOT.
