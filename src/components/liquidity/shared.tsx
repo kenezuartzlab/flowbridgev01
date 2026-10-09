@@ -34,7 +34,9 @@ export function TokenSelect({ label, tokens, value, onChange, exclude }: { label
       <select value={value} onChange={(e) => onChange(e.target.value)}
         className="mt-1 h-11 w-full rounded-xl border border-hairline bg-card px-3 text-[13px] font-bold">
         <option value="">Select token</option>
-        {tokens.filter((t) => t.address !== exclude).map((t) => <option key={t.address} value={t.address}>{t.symbol}</option>)}
+        {tokens
+          .filter((t, i, all) => t.address !== exclude && all.findIndex((o) => o.address.toLowerCase() === t.address.toLowerCase()) === i)
+          .map((t) => <option key={t.address} value={t.address}>{t.symbol}</option>)}
       </select>
     </label>
   );

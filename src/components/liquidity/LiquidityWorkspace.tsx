@@ -73,7 +73,7 @@ function PoolsList({ chainId }: { chainId: number }) {
         <div className="mt-3 space-y-2">
           {pools === null && <p className="text-[12px] text-muted">Reading pools…</p>}
           {pools?.length === 0 && <p className="text-[12px] text-muted">No pools could be read right now.</p>}
-          {pools?.map((p) => (
+          {pools?.filter((p, i, all) => all.findIndex((o) => o.pool.toLowerCase() === p.pool.toLowerCase()) === i).map((p) => (
             <a key={p.pool} href={`${explorer}/address/${p.pool}`} target="_blank" rel="noreferrer" className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline p-3">
               <span className="text-[13px] font-bold">{p.pair}</span>
               <span className="font-mono text-[11px] text-muted">{p.dex}{p.feeTier != null ? ` · ${(p.feeTier / 10_000).toFixed(2)}%` : ""}</span>

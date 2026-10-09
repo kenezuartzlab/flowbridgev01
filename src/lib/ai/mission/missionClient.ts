@@ -105,7 +105,10 @@ export async function compileOpportunityIntoMission(
 }
 
 export async function listMissions(): Promise<Mission[]> {
-  const res = await fetch("/api/missions", { headers: await authHeaders() });
+  const headers = await authHeaders();
+  // Signed-out visitors have no missions; skip the guaranteed 401.
+  if (!("Authorization" in (headers as Record<string, string>))) return [];
+  const res = await fetch("/api/missions", { headers });
   const json = (await res.json()) as MissionActionResponse;
   return json.missions ?? [];
 }
