@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { WagmiProvider } from "wagmi";
+import { wagmiConfig } from "@/lib/wagmi";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
@@ -58,7 +60,7 @@ export const Route = createFileRoute("/account")({
     ],
     links: [{ rel: "canonical", href: "https://flowbridge.space/account" }],
   }),
-  component: AccountPage,
+  component: () => <WagmiProvider config={wagmiConfig}><AccountPage /></WagmiProvider>,
 });
 
 const CURRENCIES = ["USD", "EUR", "PHP", "JPY", "INR"] as const;
