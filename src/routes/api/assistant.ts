@@ -296,6 +296,7 @@ export const Route = createFileRoute("/api/assistant")({
         // an error code only: no calldata, no economics, no authority.
         let actionSession: ActionSession | null = null;
         let lastFailure: PreparationFailure | null = null;
+        let walletRdns: string | null = null;
         try {
           const body = (await request.json()) as {
             messages?: { role?: string; content?: string }[];
@@ -311,6 +312,8 @@ export const Route = createFileRoute("/api/assistant")({
           productState = normalizeProductState(body.productState);
           actionSession = normalizeActionSession(body.actionSession);
           lastFailure = normalizePreparationFailure(body.preparationFailure);
+          const rawRdns = (body.connector as { rdns?: unknown } | undefined)?.rdns;
+          walletRdns = typeof rawRdns === "string" && /^[a-z0-9.\-]{3,64}$/i.test(rawRdns) ? rawRdns : null;
           const rawAddress =
             typeof body.connector?.address === "string" ? body.connector.address.toLowerCase() : null;
           connector = {
@@ -340,6 +343,37 @@ export const Route = createFileRoute("/api/assistant")({
 
         const { actor, wallet } = await resolveActor(request);
         const requestId = crypto.randomUUID();
+
+        // V34.2A — wallet-state questions: server bound wallet + browser hints, never signs/switches.
+        {
+          const { matchWalletQuestion, answerWalletQuestion } = await import("@/lib/ai/walletStateAnswers");
+          const wkind = matchWalletQuestion(last.content);
+          if (wkind) {
+            let emailVerified = false;
+            let progression = null;
+            if (actor.userId) {
+              try {
+                const user = await getAuthUser(request);
+                emailVerified = !!user?.emailVerified;
+                if (wkind === "CAN_CLAIM") {
+                  const { resolvePersonalProgress } = await import("@/lib/rewards/rewardProgression.server");
+                  progression = (await resolvePersonalProgress({ userId: actor.userId, emailVerified })).progression;
+                }
+              } catch { progression = null; }
+            }
+            const answer = answerWalletQuestion(wkind, {
+              signedIn: !!actor.userId, emailVerified, boundWallet: wallet,
+              connectedWallet: connector?.address ?? null, chainId: connector?.chainId ?? null,
+              walletRdns: walletRdns, progression,
+            });
+            return jsonResponse({
+              requestId, answer, mode: "INFO", plannerMode: "WALLET_STATE", intent: null, confidence: "HIGH",
+              confidenceLabel: "Verified account + connected wallet", asOf: new Date().toISOString(), disclosure: null, notice: null,
+              skills: [], refused: [], degraded: [], contractVersion: ASSISTANT_RESPONSE_CONTRACT_VERSION, actionIntent: null,
+              actionPlan: null, reviewAction: null, notReadyReasons: [], proposal: null, actionSession: actionSession ?? null, preparationFailure: null,
+            });
+          }
+        }
 
         // V34 — personal reward questions answered ONLY from the caller's own verified state.
         {
