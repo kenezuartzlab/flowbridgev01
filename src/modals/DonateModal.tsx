@@ -384,20 +384,18 @@ export function DonateModal({
         setBindStatus({ error: "Missing auth token." });
         return;
       }
-      const res = await fetch('/api/users/bind-wallet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ walletAddress: addressToBind })
+      const { verifyAndBindWallet } = await import('@/lib/wallet/bindWallet');
+      const r = await verifyAndBindWallet({
+        address: addressToBind,
+        userId: (googleUser as any).uid ?? (googleUser as any).id ?? '',
+        token,
+        signMessage: (message) => signMessageAsync({ message }),
       });
-      const data = await res.json();
-      if (data.success) {
+      if (r.ok) {
         setBindStatus({ success: true });
-        await fetchIncentives(); // refresh state
+        await fetchIncentives();
       } else {
-        setBindStatus({ error: data.error || "Failed to bind wallet." });
+        setBindStatus({ error: r.error });
       }
     } catch (e: any) {
       console.error("Error binding wallet:", e);

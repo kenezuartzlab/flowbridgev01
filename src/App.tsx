@@ -356,23 +356,9 @@ export default function App() {
           body: JSON.stringify({ referredByCode: sessionStorage.getItem('flowbridge_referred_by') || undefined }),
         }).catch(() => null);
 
-        const res = await fetch('/api/users/bind-wallet', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ walletAddress: normalized }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data?.success) throw new Error(data?.error || 'Wallet link could not be saved.');
-
-        if (!cancelled) {
-          setAuthError(null);
-          setWalletLinkNotice({ kind: 'linked', address: normalized });
-          fetchUserIncentivesInApp();
-          setIsConnectGuideOpen(false);
-        }
+        // V34.2: connecting never binds. Binding needs the explicit
+        // Verify & Bind signature on the Earn / Bind Wallet card.
+        if (!cancelled) fetchUserIncentivesInApp();
       } catch (err: any) {
         if (!cancelled) {
           autoBindAttemptRef.current = null;
