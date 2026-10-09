@@ -28,6 +28,17 @@ export const Route = createFileRoute("/api/users/bind-wallet")({
           if (!body?.walletAddress) {
             return jsonResponse({ error: "Missing walletAddress parameter" }, 400);
           }
+          // V34.2: the signed text must be the canonical WALLET_BINDING message
+          // for this account, wallet, nonce, domain and request origin.
+          const { validateBindingMessage } = await import("@/lib/wallet/bindingMessage");
+          const check = validateBindingMessage(body.message ?? "", {
+            userId: user.id,
+            wallet: body.walletAddress,
+            nonce: body.nonce ?? "",
+            requestOrigin: request.headers.get("origin"),
+            nowMs: Date.now(),
+          });
+          if (!check.ok) return jsonResponse({ error: check.error }, 400);
           const challenge = await verifyWalletChallenge(body);
           if (!challenge.ok) return jsonResponse({ error: challenge.error }, challenge.status);
 

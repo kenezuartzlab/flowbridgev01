@@ -25,4 +25,4 @@
 
 - Reward progression toward the claim minimum is computed only in src/lib/rewards/rewardProgression.ts (pure) and resolved caller-scoped server-side in rewardProgression.server.ts via /api/rewards/progression; the next-best-action is decided only in src/lib/growth/nextBestAction.ts from those server facts. Why: client-side progress or recommendations must never be fabricated.
 
-- Reward/claim/settlement rules live in src/lib/rewards/AGENTS.md. Why: keep root notes small.
+- Reward/claim/settlement rules live in src/lib/rewards/AGENTS.md. Why: keep root notes small.- Wallet connection choices, WalletConnect kill switch (VITE_WALLETCONNECT_ENABLED, fails closed), error normalization and the WALLET_BINDING message live only in src/lib/wallet/; binding is a separate explicit signature validated server-side for domain/origin/account/nonce. Why: connecting must never sign, and WalletConnect must never break boot.

@@ -34,8 +34,12 @@ export function usePersonalProgress(enabled: boolean) {
     if (!enabled) { setData(null); setLoading(false); return; }
     let off = false;
     setLoading(true);
-    fetchPersonalProgress().then((d) => { if (!off) setData(d); }).catch(() => undefined).finally(() => { if (!off) setLoading(false); });
-    return () => { off = true; };
+    const load = () => fetchPersonalProgress().then((d) => { if (!off) setData(d); }).catch(() => undefined).finally(() => { if (!off) setLoading(false); });
+    void load();
+    // V34.2: refresh after a successful bind without a page reload.
+    const onBound = () => { cache = null; void load(); };
+    window.addEventListener("flowbridge:wallet-bound", onBound);
+    return () => { off = true; window.removeEventListener("flowbridge:wallet-bound", onBound); };
   }, [enabled]);
   return { data, loading };
 }

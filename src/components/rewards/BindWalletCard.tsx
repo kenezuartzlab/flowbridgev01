@@ -1,18 +1,20 @@
 import { trackActivation } from "@/lib/growth/activationAnalytics";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Loader2, Wallet } from "lucide-react";
 import { useAccount, useConnect, useSignMessage } from "wagmi";
 import { getIdToken } from "@/lib/auth";
+import { buildWalletChoices } from "@/lib/wallet/connectorChoices";
+import { WALLETCONNECT_ENABLED } from "@/lib/wallet/walletConnectFlag";
+import { verifyAndBindWallet } from "@/lib/wallet/bindWallet";
+import { walletErrorMessage } from "@/lib/wallet/walletErrors";
 
 /**
- * Wallet binding task — links the connected wallet to the signed-in email so
- * FLOW can be claimed.
+ * Wallet binding — V34.2 Verify & Bind.
  *
- * V30.2B P4A.2.1: binding requires proof of ownership. The wallet must sign a
- * single-use server challenge; the server verifies the signature, enforces
- * uniqueness and rebind limits, and returns the canonical bound address. The
- * card never reports success from local state — only from that server value.
- * Typing an address by hand can no longer bind it.
+ * Connecting and binding are separate steps. Binding signs one free,
+ * human-readable ownership message (no gas, approval or transaction); the
+ * server verifies it and returns the canonical bound wallet. Success is only
+ * ever reported from that server value.
  */
 export function BindWalletCard({
   boundAddress,
@@ -29,101 +31,78 @@ export function BindWalletCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [why, setWhy] = useState(false);
 
   const done = !!boundAddress;
   const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
+  const choices = useMemo(() => buildWalletChoices(connectors, WALLETCONNECT_ENABLED), [connectors]);
+  const sameAsBound = done && address && boundAddress!.toLowerCase() === address.toLowerCase();
 
-  const bind = async () => {
+  // Never carry one wallet's binding messages into another wallet.
+  useEffect(() => {
     setError(null);
     setOk(null);
-    const candidate = (address ?? "").trim().toLowerCase();
-    if (!candidate || !/^0x[a-f0-9]{40}$/.test(candidate)) {
-      setError("Connect the wallet you want to bind — it has to sign the request itself.");
+  }, [address]);
+
+  const bind = async () => {
+    if (busy) return; // double-submit guard; the server nonce is single-use too
+    setError(null);
+    setOk(null);
+    if (!address) {
+      setError("Connect the wallet you want to bind first.");
       return;
     }
     setBusy(true);
     trackActivation("WALLET_BINDING_STARTED");
     try {
       const token = await getIdToken();
-      if (!token) throw new Error("Sign in again to bind your wallet.");
-
-      // 1. Single-use challenge from the server.
-      const nonceRes = await fetch("/api/public/siwe/nonce", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ walletAddress: candidate }),
+      const { supabase } = await import("@/integrations/supabase/client");
+      const userId = (await supabase.auth.getSession()).data.session?.user.id;
+      if (!token || !userId) throw new Error("Sign in again to bind your wallet.");
+      const r = await verifyAndBindWallet({
+        address,
+        userId,
+        token,
+        signMessage: (message) => signMessageAsync({ message }),
       });
-      const nonceData = (await nonceRes.json().catch(() => null)) as { nonce?: string; error?: string } | null;
-      if (!nonceRes.ok || !nonceData?.nonce) {
-        throw new Error(nonceData?.error ?? "Could not start wallet verification.");
+      if (!r.ok) {
+        setError(r.error);
+        return;
       }
-
-      // 2. The wallet proves ownership.
-      const message = [
-        "FlowBridge wallet binding",
-        `Wallet: ${candidate}`,
-        "Chain ID: 677",
-        `Nonce: ${nonceData.nonce}`,
-        "Signing this only proves you control this wallet. It moves no funds.",
-      ].join("\n");
-      const signature = await signMessageAsync({ message });
-
-      // 3. Server verifies, binds, and returns the canonical bound wallet.
-      const res = await fetch("/api/users/bind-wallet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          walletAddress: candidate,
-          message,
-          signature,
-          nonce: nonceData.nonce,
-        }),
-      });
-      const data = (await res.json().catch(() => null)) as
-        | { success?: boolean; walletAddress?: string | null; error?: string }
-        | null;
-      if (!res.ok || !data?.success) throw new Error(data?.error ?? "Could not bind wallet.");
-      if (!data.walletAddress || data.walletAddress.toLowerCase() !== candidate) {
-        throw new Error("The server did not confirm this wallet — nothing was bound.");
-      }
-      setOk(`Wallet ${short(data.walletAddress)} is confirmed on your account.`);
+      setOk("Wallet verified and bound.");
       trackActivation("WALLET_BOUND_OBSERVED");
       await onDone?.();
-    } catch (e: any) {
-      setError(e?.shortMessage ?? e?.message ?? "Network error binding wallet.");
+    } catch (e) {
+      setError(e instanceof Error && /Sign in/.test(e.message) ? e.message : walletErrorMessage(e, "sign"));
     } finally {
       setBusy(false);
     }
   };
-
-  const injected = connectors.find((c) => c.id === "injected") ?? connectors[0];
 
   return (
     <section id="bind-wallet" className="scroll-mt-20 rounded-2xl border border-hairline bg-card p-4">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Wallet className="h-3.5 w-3.5 text-primary" />
-          <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">Bind Wallet</h2>
+          <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">Wallet</h2>
         </div>
         <span
-          className={`font-mono text-[10px] font-black uppercase tracking-[0.08em] ${
-            done ? "text-success" : "text-muted"
-          }`}
+          className={`font-mono text-[10px] font-black uppercase tracking-[0.08em] ${done ? "text-success" : "text-muted"}`}
         >
-          {done ? "Bound" : "Required"}
+          {done ? "Verified · Bound" : isConnected ? "Connected · Not bound" : "Not connected"}
         </span>
       </div>
       <p className="mt-2 text-[12px] leading-relaxed text-muted">
-        Link the wallet you swap with to your account — required before you can claim rewards. The
-        wallet signs a one-time message to prove it is yours. No funds move.
+        Verify your wallet to keep your rewards linked to you and unlock personalized FlowBridge
+        features.
       </p>
 
       <div
-        className={`mt-3 flex flex-col gap-2 rounded-xl border p-2.5 sm:flex-row sm:items-center ${
+        className={`mt-3 flex flex-col gap-2 rounded-xl border p-2.5 ${
           done ? "border-success/30 bg-success/8" : "border-hairline bg-card-alt"
         }`}
       >
-        <span className="min-w-0 flex-1 font-mono text-[11.5px] font-black tracking-[0.04em]">
+        <span className="min-w-0 font-mono text-[11.5px] font-black tracking-[0.04em]">
           {done ? (
             <span className="flex items-center gap-1.5 text-success">
               <Check className="h-3.5 w-3.5 shrink-0" />
@@ -137,35 +116,62 @@ export function BindWalletCard({
         </span>
 
         {isConnected ? (
-          <button
-            type="button"
-            onClick={() => void bind()}
-            disabled={!signedIn || busy}
-            className="grid min-h-[38px] shrink-0 place-items-center rounded-lg bg-primary px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary-foreground disabled:opacity-50"
-          >
-            {busy ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : done ? (
-              "Sign to rebind"
-            ) : (
-              "Sign to bind"
-            )}
-          </button>
+          sameAsBound ? null : (
+            <button
+              type="button"
+              onClick={() => void bind()}
+              disabled={!signedIn || busy}
+              className="grid min-h-[40px] place-items-center rounded-lg bg-primary px-3 font-mono text-[10.5px] font-black uppercase tracking-[0.1em] text-primary-foreground disabled:opacity-50"
+            >
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? "Verify & rebind wallet" : "Verify & bind wallet"}
+            </button>
+          )
+        ) : choices.length === 0 ? (
+          <p className="text-[11.5px] text-muted">
+            No wallet found. Open FlowBridge in your wallet app's browser, or install a browser wallet.
+          </p>
         ) : (
-          <button
-            type="button"
-            onClick={() => injected && connect({ connector: injected })}
-            disabled={connecting || !injected}
-            className="grid min-h-[38px] shrink-0 place-items-center rounded-lg bg-primary/12 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary disabled:opacity-50"
-          >
-            {connecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Connect wallet"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            {choices.map((c) => (
+              <button
+                key={c.connector.uid ?? c.connector.id}
+                type="button"
+                onClick={() =>
+                  connect(
+                    { connector: c.connector },
+                    { onError: (e) => setError(walletErrorMessage(e, "connect")) },
+                  )
+                }
+                disabled={connecting}
+                className="flex min-h-[38px] items-center gap-1.5 rounded-lg bg-primary/12 px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary disabled:opacity-50"
+              >
+                {c.connector.icon ? <img src={c.connector.icon} alt="" className="h-4 w-4 rounded" /> : null}
+                {connecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : `Connect ${c.label}`}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
+      <button
+        type="button"
+        onClick={() => setWhy((v) => !v)}
+        className="mt-2 font-mono text-[10.5px] font-bold text-primary underline-offset-2 hover:underline"
+        aria-expanded={why}
+      >
+        Why do I need this?
+      </button>
+      {why ? (
+        <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-[11.5px] leading-relaxed text-muted">
+          <li>Proves you control this wallet.</li>
+          <li>Protects your rewards so only you can claim them.</li>
+          <li>Costs no gas and is not a blockchain transaction.</li>
+          <li>Does not move funds or approve tokens.</li>
+        </ul>
+      ) : null}
       <p className="mt-2 text-[11px] leading-relaxed text-muted-soft">
-        Only a wallet that can sign can be bound, so an address typed by hand cannot be linked to
-        your account. Connecting a wallet on its own never sends any transaction or approval.
+        Connecting a wallet never asks for a signature. Wallet verification does not verify your email
+        or make you reward-eligible on its own.
       </p>
 
       {error ? <p className="mt-2 font-mono text-[10.5px] text-danger">{error}</p> : null}

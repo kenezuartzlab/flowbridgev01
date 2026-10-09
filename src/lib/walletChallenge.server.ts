@@ -80,11 +80,18 @@ export async function verifyWalletChallenge(
   if (!valid) return { ok: false, status: 401, error: "Invalid signature for this wallet." };
 
   // Consume the nonce before anything is granted.
-  await supabaseAdmin
+  // V34.2: atomic consume — only the request that flips used_at wins, so a
+  // double-submit or replay racing this one cannot bind a second time.
+  const { data: consumed, error: consumeError } = await supabaseAdmin
     .from("siwe_nonces")
     .update({ used_at: new Date().toISOString() })
     .eq("id", row.id)
-    .is("used_at", null);
+    .is("used_at", null)
+    .select("id");
+  if (consumeError) return { ok: false, status: 500, error: "Could not consume challenge" };
+  if (!consumed || consumed.length === 0) {
+    return { ok: false, status: 400, error: "Challenge already used" };
+  }
 
   return { ok: true, wallet };
 }

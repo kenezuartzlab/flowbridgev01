@@ -1,6 +1,7 @@
 import { http, createConfig, createStorage } from 'wagmi';
 import { defineChain } from 'viem';
 import { injected, walletConnect } from 'wagmi/connectors';
+import { WALLETCONNECT_ENABLED } from '@/lib/wallet/walletConnectFlag';
 
 // WalletConnect / Reown project ID. Publishable identifier — safe in client
 // bundles. Override via VITE_WC_PROJECT_ID if you rotate the project.
@@ -19,7 +20,11 @@ const isInAppWebView = (): boolean => {
   return /TokenPocket|MetaMask|Trust\/|TrustWallet|CoinbaseWallet|CBWallet|imToken|SafePal|BitKeep|Bitget|OKApp|OKEx|MathWallet|Telegram|Instagram|FBAN|FBAV|FB_IAB|Line\/|MicroMessenger|TikTok|; wv\)/i.test(ua);
 };
 
-export const isWalletConnectAvailable = typeof window !== 'undefined' && !isInAppWebView();
+// V34.2: WalletConnect is opt-in behind the WALLETCONNECT_ENABLED kill switch
+// (fails closed). Its SDK is only dynamically imported by the connector when a
+// user picks it, so it is never an app boot dependency.
+export const isWalletConnectAvailable =
+  WALLETCONNECT_ENABLED && typeof window !== 'undefined' && !isInAppWebView();
 
 
 export const botMainnet = defineChain({
@@ -122,6 +127,8 @@ export const polygon = defineChain({
 });
 
 export const wagmiConfig = createConfig({
+  // EIP-6963: every installed wallet becomes its own named connector.
+  multiInjectedProviderDiscovery: true,
   chains: [botMainnet, bscMainnet, botTestnet, bscTestnet, ethereum, sepolia, polygon],
   storage: createStorage({
     key: 'flowbridge.wallet',

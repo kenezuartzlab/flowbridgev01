@@ -31,7 +31,17 @@ vi.mock("@/integrations/supabase/client.server", () => ({
       }),
       update: (patch: unknown) => {
         updates.push(patch);
-        return { eq: () => ({ is: async () => ({ error: null }) }) };
+        return {
+          eq: () => ({
+            is: () => ({
+              select: async () => {
+                if (!row || row.used_at) return { data: [], error: null };
+                row.used_at = new Date().toISOString();
+                return { data: [{ id: row.id }], error: null };
+              },
+            }),
+          }),
+        };
       },
     }),
   },
@@ -121,5 +131,17 @@ describe("P4A.2.1 wallet binding proof", () => {
       nonce: NONCE,
     });
     expect(r).toMatchObject({ ok: false, status: 400 });
+  });
+});
+
+describe("V34.2 replay / double-submit", () => {
+  it("binds once: the second submit of the same signed nonce is denied", async () => {
+    row = freshRow();
+    const signature = await account.signMessage({ message });
+    const a = verifyWalletChallenge({ walletAddress: wallet, message, signature, nonce: NONCE });
+    const first = await a;
+    const second = await verifyWalletChallenge({ walletAddress: wallet, message, signature, nonce: NONCE });
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(false);
   });
 });
