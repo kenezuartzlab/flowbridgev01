@@ -31,7 +31,17 @@ vi.mock("@/integrations/supabase/client.server", () => ({
       }),
       update: (patch: unknown) => {
         updates.push(patch);
-        return { eq: () => ({ is: async () => ({ error: null }) }) };
+        return {
+          eq: () => ({
+            is: () => ({
+              select: async () => {
+                if (!row || row.used_at) return { data: [], error: null };
+                row.used_at = new Date().toISOString();
+                return { data: [{ id: row.id }], error: null };
+              },
+            }),
+          }),
+        };
       },
     }),
   },
