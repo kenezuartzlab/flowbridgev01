@@ -19,8 +19,8 @@ export type WalletQuestion =
 
 const RULES: [WalletQuestion, RegExp][] = [
   ["BIND_GAS", /\b(bind|binding|verify|verification)\b.*\b(gas|fee|cost|free)\b|\b(gas|cost)\b.*\bbind/i],
-  ["WHY_BIND", /why (do|should|must) i (need to )?(bind|verify)( my)? wallet|what (does|is) (wallet )?binding/i],
-  ["BOUND", /is my wallet (bound|verified|linked)|(have i|did i) (bind|bound|link|verif)/i],
+  ["WHY_BIND", /why (do|should|must) i (need to )?(bind|verify)( my)? wallet|what (does|is) (wallet )?binding|how (do|can|to) i (bind|link|verify)( my)? wallet|wallet bind(ing)?( feature)?|bind(ing)? (my )?wallet|link(ing)? (my )?wallet/i],
+  ["BOUND", /is my wallet (bound|verified|linked)|(have i|did i) (bind|bound|link|verif)|wallet (bound|linked)\?/i],
   ["WHICH_WALLET", /which wallet (am i|is) (using|connected)|what wallet am i using/i],
   ["CONNECTED", /am i connected|is my wallet connected|wallet connected\?/i],
   ["CANT_TRADE", /why can'?t i (trade|swap)|why (is|does) (trading|swap) (not work|disabled|fail)/i],
