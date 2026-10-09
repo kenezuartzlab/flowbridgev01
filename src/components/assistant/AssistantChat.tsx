@@ -63,18 +63,38 @@ interface IntentProposalRef {
  * Read-only: it never prompts a connection, and the server treats these values
  * as untrusted (binding itself is a persisted account fact).
  */
-async function readConnectorHint(): Promise<{ address: string | null; chainId: number | null }> {
+/** V34.2A — rdns only when exactly ONE EIP-6963 wallet announced; else unknown (never guessed). */
+function readSoleWalletRdns(): Promise<string | null> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(null);
+    const seen = new Set<string>();
+    const onAnnounce = (e: Event) => {
+      const rdns = (e as CustomEvent)?.detail?.info?.rdns;
+      if (typeof rdns === "string") seen.add(rdns);
+    };
+    window.addEventListener("eip6963:announceProvider", onAnnounce);
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+    setTimeout(() => {
+      window.removeEventListener("eip6963:announceProvider", onAnnounce);
+      resolve(seen.size === 1 ? [...seen][0] : null);
+    }, 80);
+  });
+}
+
+async function readConnectorHint(): Promise<{ address: string | null; chainId: number | null; rdns: string | null }> {
   try {
     const eth = (globalThis as any)?.ethereum;
-    if (!eth?.request) return { address: null, chainId: null };
+    if (!eth?.request) return { address: null, chainId: null, rdns: null };
+    // Read-only calls: eth_accounts never prompts, never signs.
     const accounts: string[] = await eth.request({ method: "eth_accounts" });
     const hex: string = await eth.request({ method: "eth_chainId" });
     return {
       address: accounts?.[0] ? String(accounts[0]).toLowerCase() : null,
       chainId: Number.parseInt(hex, 16) || null,
+      rdns: await readSoleWalletRdns(),
     };
   } catch {
-    return { address: null, chainId: null };
+    return { address: null, chainId: null, rdns: null };
   }
 }
 
