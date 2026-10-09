@@ -15,6 +15,12 @@ export function LiquidityWorkspace({ initialTab = "pools" }: { initialTab?: Liqu
   const { address, isConnected } = useAccount();
   const walletChain = useChainId();
   const { connectors, connect, isPending } = useConnect();
+  // V34.2: never guess between several installed wallets — connect directly
+  // only when exactly one exists; otherwise the generic injected connector
+  // lets the browser's own wallet picker decide.
+  const installed = connectors.filter((c) => c.type !== "walletConnect");
+  const discovered = installed.filter((c) => c.id !== "injected");
+  const preferredConnector = discovered.length === 1 ? discovered[0] : installed.find((c) => c.id === "injected") ?? installed[0];
   const { switchChain } = useSwitchChain();
   const [chainId, setChainId] = useState<number>(677);
   const [tab, setTab] = useState<LiquidityTab>(initialTab);
@@ -30,7 +36,7 @@ export function LiquidityWorkspace({ initialTab = "pools" }: { initialTab?: Liqu
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Segmented value={String(chainId)} onChange={(v) => setChainId(Number(v))} options={[{ id: "677", label: "BOT Mainnet" }, { id: "968", label: "BOT Testnet" }]} />
           {!isConnected ? (
-            <button type="button" disabled={isPending || !connectors[0]} onClick={() => connectors[0] && connect({ connector: connectors[0] })}
+            <button type="button" disabled={isPending || !preferredConnector} onClick={() => preferredConnector && connect({ connector: preferredConnector })}
               className="h-10 shrink-0 rounded-xl bg-primary px-4 text-[13px] font-black text-primary-foreground">Connect wallet</button>
           ) : (
             <span className="max-w-full truncate font-mono text-[11px] text-muted">{address?.slice(0, 6)}…{address?.slice(-4)}</span>

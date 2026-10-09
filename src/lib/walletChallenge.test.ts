@@ -133,3 +133,15 @@ describe("P4A.2.1 wallet binding proof", () => {
     expect(r).toMatchObject({ ok: false, status: 400 });
   });
 });
+
+describe("V34.2 replay / double-submit", () => {
+  it("binds once: the second submit of the same signed nonce is denied", async () => {
+    row = freshRow();
+    const signature = await account.signMessage({ message });
+    const a = verifyWalletChallenge({ walletAddress: wallet, message, signature, nonce: NONCE });
+    const first = await a;
+    const second = await verifyWalletChallenge({ walletAddress: wallet, message, signature, nonce: NONCE });
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(false);
+  });
+});
