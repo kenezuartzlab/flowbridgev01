@@ -237,4 +237,29 @@ describe('P4A.2.1 terms-change guard', () => {
     }
     expect(isLockedStakingActivated()).toBe(true);
   });
+
+  it('the approved long-term canary wallet can open 90D/180D/365D; other wallets stay blocked', () => {
+    for (const id of LOCKED_PRODUCT_IDS) {
+      const canary = evaluateLockedExecution(quote30({ productId: id }), {
+        ...gates(),
+        wallet: LONG_TERM_CANARY_WALLET,
+      });
+      expect(canary.decision).toBe('EXECUTABLE');
+
+      const other = evaluateLockedExecution(quote30({ productId: id }), {
+        ...gates(),
+        wallet: '0x0000000000000000000000000000000000000001',
+      });
+      if (id === 1) {
+        expect(other.decision).toBe('EXECUTABLE');
+      } else {
+        expect(other.decision).toBe('BLOCKED');
+        expect(other.blockers.join(' ')).toContain('not approved yet');
+      }
+    }
+    // Case-insensitive match on the canary address.
+    expect(isLockedProductAuthorized(2, LONG_TERM_CANARY_WALLET.toUpperCase())).toBe(true);
+    expect(isLockedProductAuthorized(2, null)).toBe(false);
+    expect(isLockedProductAuthorized(2)).toBe(false);
+  });
 });
