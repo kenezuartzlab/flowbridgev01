@@ -8,7 +8,7 @@ import { BookOpen, Download, ExternalLink, ShieldCheck, FileText } from "lucide-
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import whitepaper from "@/assets/whitepaper.pdf.asset.json";
-import { MULTISEND_NETWORKS } from "@/lib/multisend/deployments";
+import { PRODUCTION_CONTRACTS } from "@/lib/contracts/productionRegistry";
 
 const TITLE = "Documentation — FlowBridge Whitepaper, Guides & Contracts";
 const DESC =
@@ -38,14 +38,14 @@ const GUIDES = [
 ] as const;
 
 function DocsPage() {
-  const live = MULTISEND_NETWORKS.filter((n) => n.contract);
+  const live = PRODUCTION_CONTRACTS;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppTopBar eyebrow="Docs" title="Documentation" initial="D" />
       <main className="mx-auto w-full max-w-2xl space-y-4 px-3 pt-3 sm:px-4 md:max-w-4xl md:pt-6" style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}>
         <section className="fb-surface p-4">
           <p className="fb-eyebrow flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" />Whitepaper</p>
-          <h1 className="mt-2 text-[20px] font-black leading-tight">FlowBridge Whitepaper v1.0</h1>
+          <h1 className="mt-2 text-[20px] font-black leading-tight">FlowBridge Whitepaper v1.1</h1>
           <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">The product vision, architecture, token design and roadmap behind FlowBridge.</p>
           <a href={whitepaper.url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-primary">
             <Download className="h-3.5 w-3.5" />Read the whitepaper (PDF)
@@ -68,17 +68,19 @@ function DocsPage() {
           <p className="fb-eyebrow flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" />Contracts & security</p>
           <ul className="mt-3 space-y-2">
             {live.map((n) => (
-              <li key={n.key} className="rounded-xl border border-hairline p-3">
-                <p className="text-[12.5px] font-bold">MultiSend · {n.label}{n.testnet ? " (testnet)" : ""}</p>
-                <a href={`${n.explorer}/address/${n.contract}`} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 break-all font-mono text-[11px] text-primary">
-                  {n.contract}<ExternalLink className="h-3 w-3 shrink-0" />
+              <li key={`${n.chainId}:${n.address}`} className="rounded-lg border border-hairline p-3">
+                <p className="text-[12.5px] font-bold">{n.name} · {n.network} · {n.chainId}</p>
+                <p className="mt-1 text-[11px] text-muted">{n.state} — {n.purpose}</p>
+                <a href={n.explorer} target="_blank" rel="noreferrer" className="mt-1 flex items-start gap-1 font-mono text-[11px] text-primary">
+                  <span className="min-w-0 break-all">{n.address}</span><ExternalLink className="h-3 w-3 shrink-0" />
                 </a>
+                <p className="mt-1 text-[10.5px] text-muted">{n.verification}</p>
               </li>
             ))}
           </ul>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-[12px] text-muted">
-            <li>Source published and verified on the network explorer; deployed code matches the frozen build.</li>
-            <li>Exact token approvals only — never unlimited — and no funds left in contracts after a batch.</li>
+            <li>Verification evidence is identified per contract; bytecode presence is not a security audit. External integrations are not FlowBridge-owned contracts.</li>
+            <li>Exact approvals are shown before signing. MultiSend leaves no residual funds after a successful batch; the staking vault intentionally holds locked user principal separately from rewards.</li>
             <li>Every transaction is shown for review and signed in your own wallet.</li>
           </ul>
         </section>
