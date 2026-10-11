@@ -1,17 +1,89 @@
 {
-  "gate": "V30.2B Staking V2 final fast-track — consolidated release report",
+  "gate": "V30.2B Staking V2 final fast-track \u2014 consolidated release report",
   "generatedAt": "2026-10-11T14:57:00Z",
   "mainnetWrites": 0,
   "oracle": "0x0 unchanged (fail-closed)",
-  "productionRelease": { "ref": "2bf0ed71", "liveStakeChunk": "assets/stake-BPw8HQ9d.js", "liveActiveProviderChunk": "assets/activeProvider-BCrH0b5E.js", "routes": { "/": 200, "/earn": 200, "/stake": 200, "/account": 200 } },
-  "freshChecks": { "tests": "1665/1665", "typecheck": "clean", "securityScan": "2026-10-11T14:56Z, no new findings (2 previously accepted)" },
-  "claimRemainingAgainstLiveState": {
-    "position1_Flexible": { "status": "closed", "pendingWei": "279680365296", "expectedUi": "Claim remaining reward shown" },
-    "position2_30D": { "status": "closed", "pendingWei": "0", "expectedUi": "no claim button" }
+  "productionRelease": {
+    "ref": "2bf0ed71",
+    "liveStakeChunk": "assets/stake-BPw8HQ9d.js",
+    "liveActiveProviderChunk": "assets/activeProvider-BCrH0b5E.js",
+    "routes": {
+      "/": 200,
+      "/earn": 200,
+      "/stake": 200,
+      "/account": 200
+    }
   },
-  "realMainnetEvidence": { "Flexible": "P3B settlement (position #1)", "30D": "position #2 claim 0xbcf09aa2…d1d4 block 26323903; withdraw 0x2d8a91b6…4155 block 26323952" },
-  "simulationOnly": ["90D", "180D", "365D"],
+  "freshChecks": {
+    "tests": "1665/1665",
+    "typecheck": "clean",
+    "securityScan": "2026-10-11T14:56Z, no new findings (2 previously accepted)"
+  },
+  "claimRemainingAgainstLiveState": {
+    "position1_Flexible": {
+      "status": "closed",
+      "pendingWei": "279680365296",
+      "expectedUi": "Claim remaining reward shown"
+    },
+    "position2_30D": {
+      "status": "closed",
+      "pendingWei": "0",
+      "expectedUi": "no claim button"
+    }
+  },
+  "realMainnetEvidence": {
+    "Flexible": "P3B settlement (position #1)",
+    "30D": "position #2 claim 0xbcf09aa2\u2026d1d4 block 26323903; withdraw 0x2d8a91b6\u20264155 block 26323952"
+  },
+  "simulationOnly": [
+    "90D",
+    "180D",
+    "365D"
+  ],
   "longTermCanaryPrep": "P3E_LONGTERM_CANARY_PREP.json",
-  "blockers": ["Canary wallet holds 0.00523978 BOT; 6 canary txs need ~0.02186 BOT at 20 gwei"],
-  "realDeviceRequired": ["Claim remaining reward tap on a real wallet", "WalletConnect staking/claim on a real phone"]
+  "blockers": [
+    "Canary wallet holds 0.00523978 BOT; 6 canary txs need ~0.02186 BOT at 20 gwei"
+  ],
+  "realDeviceRequired": [
+    "Claim remaining reward tap on a real wallet",
+    "WalletConnect staking/claim on a real phone"
+  ],
+  "longTermCanaryOpened": {
+    "openedAtUtc": "2026-10-11",
+    "wallet": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
+    "note": "Owner chose 100 FLOW principal per position (approved scope was 1 FLOW); executed by owner via the app UI after the canary-wallet gate lift.",
+    "positions": [
+      {
+        "id": 4,
+        "product": "90D",
+        "principalFLOW": 100,
+        "openedAt": "2026-10-11T16:11:06Z",
+        "maturityAt": "2027-01-09T16:11:06Z",
+        "genesisEndAt": "2026-12-10",
+        "genesisReservedFLOW": 5.91641095890411,
+        "floorReservedFLOW": 2.4657534246575343
+      },
+      {
+        "id": 5,
+        "product": "180D",
+        "principalFLOW": 100,
+        "openedAt": "2026-10-11T16:11:53Z",
+        "maturityAt": "2027-04-09T16:11:53Z",
+        "genesisEndAt": "2026-12-10",
+        "genesisReservedFLOW": 7.888547945205479,
+        "floorReservedFLOW": 5.917808219178082
+      },
+      {
+        "id": 6,
+        "product": "365D",
+        "principalFLOW": 100,
+        "openedAt": "2026-10-11T16:12:15Z",
+        "maturityAt": "2027-10-11T16:12:15Z",
+        "genesisEndAt": "2026-12-10",
+        "genesisReservedFLOW": 9.86068493150685,
+        "floorReservedFLOW": 15.0
+      }
+    ],
+    "status": "REAL_MATURITY_IN_PROGRESS \u2014 withdraw after each real maturity date to complete verification"
+  }
 }
