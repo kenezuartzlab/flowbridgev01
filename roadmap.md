@@ -4,7 +4,8 @@
 - [x] Refresh private application status, owner answers and reviewer materials without submission or on-chain writes.
 - [x] Verify 29 current entries (26 BOT Mainnet useful, including 13 external integrations); refresh public-safe contracts/whitepaper/BOT support information in preview.
 - [x] Validate private storage, signed downloads and anonymous API denial; 1,672 regression tests passed and automatic builds clean.
-- [ ] Confirm exact current official application form order: Google sign-in required; no submission or compliance acceptance performed.
+- [x] Use the owner's verified current 16-field form snapshot; compliance remains OWNER ACTION, with no submission.
+- [ ] Final consistency check across refreshed private materials and public previews; do not publish.
 
 # Wallet-binding accessibility
 - [x] Show explicit Verify & Bind in the sign-in/connect dialog and Profile after email sign-in.

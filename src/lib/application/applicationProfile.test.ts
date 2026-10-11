@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { APPLICATION_STATUS, COMPLIANCE_ACTION, applicationFields } from "./applicationProfile.server";
+import { APPLICATION_STATUS, COMPLIANCE_ACTION, FORM_ORDER_VERIFICATION, applicationFields } from "./applicationProfile.server";
 import { PRODUCTION_CONTRACTS } from "../contracts/productionRegistry";
 import { MAINNET_CONTRACTS } from "../contracts";
 import { NATIVE_V3_MULTI_CANDIDATE } from "../swap/executionCapability";
 import { MULTISEND_NETWORKS, isSupersededMultiSendContract } from "../multisend/deployments";
 
 describe("application policy", () => {
+  it("uses the owner-verified 16-field order without blocking on sign-in", () => {
+    expect(FORM_ORDER_VERIFICATION.verified).toBe(true);
+    expect(applicationFields({ whitepaperUrl: "" }).map((field) => field.id)).toEqual([
+      "email", "name", "highlights", "channels", "stage", "deck", "github", "demo",
+      "wallet", "assoc", "evidence", "scheme", "contactName", "contactMethod", "bd", "compliance",
+    ]);
+  });
   it("submission readiness does not imply onboarding or monitoring", () => {
     expect(APPLICATION_STATUS.application).toBe("READY TO SUBMIT");
     expect(APPLICATION_STATUS.qualification).toBe("PENDING PROGRAM ONBOARDING");

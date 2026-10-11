@@ -1,6 +1,6 @@
 // PRIVATE, read-only application readiness and canonical BOT Mainnet evidence.
 import { createPublicClient, http } from "viem";
-import { APPLICATION_STATUS, SUPPORT_POSITION, applicationFields, AWARD_CREDENTIAL, ANTI_CHEATING_NOTICE } from "./applicationProfile.server";
+import { APPLICATION_STATUS, SUPPORT_POSITION, applicationFields, AWARD_CREDENTIAL, ANTI_CHEATING_NOTICE, FORM_ORDER_VERIFICATION } from "./applicationProfile.server";
 import { PRODUCTION_CONTRACTS } from "../contracts/productionRegistry";
 import evidence from "../../../docs/private/bot-application/evidence-pack.json";
 
@@ -25,7 +25,7 @@ export async function computeReadiness() {
     integrity: ANTI_CHEATING_NOTICE,
     contracts,
     evidence,
-    formOrder: { verified: false, reason: "The current official form requires Google sign-in; confirm its field order before submission." },
+    formOrder: FORM_ORDER_VERIFICATION,
     scope: "Pre-application product evidence only; no incentive monitoring, volume, user, TVL or eligibility estimates.",
   };
 }
