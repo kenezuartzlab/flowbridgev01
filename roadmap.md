@@ -89,4 +89,4 @@
 - [x] Wallet suite twice: MODE A (OFF) 37/37, MODE B (ON) 37/37; full suite 1,664/1,664; typecheck clean.
 - [x] Verify & Bind using a WalletConnect session (one ownership signature, no gas/approval/transaction) — user PASS, wallet 0xF951…b25e.
 - [x] Security scan on the preview build after enabling WalletConnect: no new findings — only the two you had already accepted.
-- [ ] V34.2E controlled production activation (production flag ON) — only after the above passes.
+- [x] V34.2E controlled production activation — published to flowbridge.space; real-device acceptance on the live site: PASS all (user).
