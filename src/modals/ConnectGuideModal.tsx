@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound } from 'lucide-react';
+import { X, ShieldCheck, Mail, Wallet, ArrowRight, CheckCircle2, Sparkles, Lock, ChevronDown, ExternalLink, KeyRound, Loader2 } from 'lucide-react';
 import { useAccount, useSignMessage, useChainId, useSwitchChain, useConnect } from 'wagmi';
 import { buildWalletChoices } from '@/lib/wallet/connectorChoices';
 import { WALLETCONNECT_ENABLED } from '@/lib/wallet/walletConnectFlag';
+import { useWalletConnectLauncher } from '@/lib/wallet/useWalletConnectLauncher';
 import { signInWithEthereum } from '@/lib/siwe';
 import { emailSignIn, emailSignUp, reloadUser, requestPasswordReset, type AppUser } from '@/lib/auth';
 import { BindWalletCard } from '@/components/rewards/BindWalletCard';
@@ -55,6 +56,8 @@ export function ConnectGuideModal({
   const walletChoices = useMemo(() => buildWalletChoices(connectors as any, WALLETCONNECT_ENABLED), [connectors]);
   const installedChoices = walletChoices.filter((c) => c.kind !== 'WALLETCONNECT');
   const wcChoice = walletChoices.find((c) => c.kind === 'WALLETCONNECT');
+  const wc = useWalletConnectLauncher(wcChoice?.connector, isOpen && !inApp && !isWalletConnected);
+  useEffect(() => { if (isOpen) wc.reset(); }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
   const [siweBusy, setSiweBusy] = useState(false);
   const siweRequestId = useRef(0);
   const { rewardState, loading: bindingLoading, refresh: refreshBinding } = useRewardState(isOpen && !!googleUser);
@@ -303,12 +306,25 @@ export function ConnectGuideModal({
                   </button>
                 ))}
                 {wcChoice && !inApp && (
-                  <button
-                    onClick={() => { connect({ connector: wcChoice.connector as any }); onClose(); }}
-                    className="w-full flex items-center justify-center gap-1.5 bg-background hover:bg-background-elev text-foreground border border-hairline font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer"
-                  >
-                    WalletConnect (QR / Mobile)
-                  </button>
+                  <>
+                    <button
+                      onClick={() => { void wc.launch(onClose); }}
+                      disabled={wc.status === 'opening' || wc.status === 'slow'}
+                      aria-busy={wc.status === 'opening' || wc.status === 'slow'}
+                      className="w-full flex items-center justify-center gap-1.5 bg-background hover:bg-background-elev text-foreground border border-hairline font-mono tracking-widest font-black py-2.5 px-3 rounded-xl text-[12px] uppercase transition duration-150 shadow-md active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-wait"
+                    >
+                      {(wc.status === 'opening' || wc.status === 'slow') && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                      {wc.status === 'opening' || wc.status === 'slow' ? 'Opening WalletConnect…' : 'WalletConnect (QR / Mobile)'}
+                    </button>
+                    {wc.status === 'slow' && (
+                      <p role="status" className="text-[11px] text-muted px-1 leading-relaxed">
+                        Still loading — this can take a few seconds on a phone. Keep this page open.
+                      </p>
+                    )}
+                    {wc.status === 'error' && wc.error && (
+                      <p role="alert" className="text-[11px] text-danger px-1 leading-relaxed">{wc.error}</p>
+                    )}
+                  </>
                 )}
                 <p className="text-[10px] text-muted font-mono px-1 leading-relaxed">
                   Connecting never asks you to sign, approve or pay anything.
