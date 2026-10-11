@@ -87,7 +87,6 @@
 - [x] Launcher UX: dialog stays open with "Opening WalletConnect...", slow-loading hint, plain error + safe Details line, reload retry.
 - [x] WalletConnect preview QR (desktop) and deep-link (mobile) acceptance — user PASS on preview link.
 - [x] Wallet suite twice: MODE A (OFF) 37/37, MODE B (ON) 37/37; full suite 1,664/1,664; typecheck clean.
-- [ ] Verify & Bind using a WalletConnect session (one ownership signature, no gas/approval/transaction) — waits on user.
+- [x] Verify & Bind using a WalletConnect session (one ownership signature, no gas/approval/transaction) — user PASS, wallet 0xF951…b25e.
 - [x] Security scan on the preview build after enabling WalletConnect: no new findings — only the two you had already accepted.
-- [ ] Verify & Bind while connected through WalletConnect (one free ownership signature) — waits on user.
 - [ ] V34.2E controlled production activation (production flag ON) — only after the above passes.
