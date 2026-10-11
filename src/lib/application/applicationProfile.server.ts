@@ -19,6 +19,11 @@ export const APPLICATION_STATUS = {
 export const SUPPORT_POSITION = "FlowBridge is applying for Option A - DEX Liquidity Support. We are submitting the project's production deployment, technical architecture, verified contracts, on-chain evidence, ecosystem contribution and mainnet readiness for BOT Chain's evaluation. Any support level, incentive allocation, rebate, points or other program benefit will be determined by BOT Chain according to its current program rules and review process.";
 
 export const COMPLIANCE_ACTION = { actor: "OWNER", accepted: false, submitted: false } as const;
+export const FORM_ORDER_VERIFICATION = {
+  verified: true,
+  source: "Owner-verified latest BOT Chain Ecosystem Support & Incentive Program application form snapshot",
+  reason: "Exact 16-field order confirmed by the owner on 2026-10-11; no differing live fields observed. Compliance remains an OWNER ACTION; nothing submitted.",
+} as const;
 
 export const ANTI_CHEATING_NOTICE = {
   title: "BOT Chain Anti-Cheating Compliance Notice",
@@ -57,7 +62,7 @@ export interface ApplicationField {
 export const CORE_HIGHLIGHTS_ANSWER =
   "FlowBridge is a mainnet-live, non-custodial Web3 application built to make the BOT Chain ecosystem easier to use and grow. It combines trading, bridging, MultiSend, staking, verified rewards, ecosystem discovery and guided wallet interactions in one platform. FlowBridge integrates BDEX V3 and live FLOW/USDT trading on BOT Mainnet, with transparent route information, price-impact protection and explicit wallet confirmation for economic actions. FlowBridge was awarded 1st Place - EVM Deployment Track, BOT Chain Builder Challenge #1. Our goal is to deepen real BOT Chain utility, sustainable liquidity, genuine user participation and verifiable on-chain activity.";
 
-/** Copy-ready answers in stored form order; current sign-in-only form requires owner confirmation. */
+/** Copy-ready answers in the owner-verified current 16-field form order. */
 export function applicationFields(_opts: { whitepaperUrl: string }): ApplicationField[] {
   return [
     { id: "email", label: "Email", value: "flowbridgeweb3@gmail.com", status: "ready" },
@@ -101,16 +106,16 @@ export function applicationFields(_opts: { whitepaperUrl: string }): Application
     },
     {
       id: "scheme",
-      label: "Support Tier",
+      label: "Support Tier (A / B / C)",
       value: SUPPORT_POSITION,
       status: "ready",
     },
     { id: "contactName", label: "Contact Name / Alias", value: "Kenezu", status: "ready" },
     { id: "contactMethod", label: "Preferred Contact Method", value: "Telegram: @crypticmaster\nEmail: flowbridgeweb3@gmail.com", status: "ready" },
-    { id: "bd", label: "Name the BD you contact with, if you have one", value: "N/A - no assigned BOT Chain BD contact yet", status: "ready" },
+    { id: "bd", label: "Name the BD contacted with, if any", value: "N/A - no assigned BOT Chain BD contact yet", status: "ready" },
     {
       id: "compliance",
-      label: "Compliance confirmation",
+      label: "Anti-Cheating Compliance confirmation",
       value:
         "I have fully read and understood the BOTChain Ecosystem Support Program Anti-Cheating Compliance Notice.\nI confirm that FlowBridge will not engage in cheating, wash trading, Sybil activity, artificial liquidity/volume inflation or data manipulation.\nI accept BOTChain's risk-control and audit mechanisms.",
       status: "owner",

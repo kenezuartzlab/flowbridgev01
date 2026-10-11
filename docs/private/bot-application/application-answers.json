@@ -71,7 +71,7 @@
     },
     {
       "id": "scheme",
-      "label": "Support Tier",
+      "label": "Support Tier (A / B / C)",
       "value": "FlowBridge is applying for Option A - DEX Liquidity Support. We are submitting the project's production deployment, technical architecture, verified contracts, on-chain evidence, ecosystem contribution and mainnet readiness for BOT Chain's evaluation. Any support level, incentive allocation, rebate, points or other program benefit will be determined by BOT Chain according to its current program rules and review process.",
       "status": "ready"
     },
@@ -89,13 +89,13 @@
     },
     {
       "id": "bd",
-      "label": "Name the BD you contact with, if you have one",
+      "label": "Name the BD contacted with, if any",
       "value": "N/A - no assigned BOT Chain BD contact yet",
       "status": "ready"
     },
     {
       "id": "compliance",
-      "label": "Compliance confirmation",
+      "label": "Anti-Cheating Compliance confirmation",
       "value": "I have fully read and understood the BOTChain Ecosystem Support Program Anti-Cheating Compliance Notice.\nI confirm that FlowBridge will not engage in cheating, wash trading, Sybil activity, artificial liquidity/volume inflation or data manipulation.\nI accept BOTChain's risk-control and audit mechanisms.",
       "status": "owner",
       "note": "Owner must personally agree to these terms before ticking them in the form."
