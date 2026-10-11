@@ -6,12 +6,16 @@ describe("WalletConnect preview-only gate", () => {
   it("is ON on the preview host with no env flag", () => {
     expect(resolveWalletConnectEnabled(undefined, "id-preview--aa8f6129-829c-4b77-8e07-1eba517577f8.lovable.app")).toBe(true);
   });
-  it("stays OFF on every production host without explicit env", () => {
-    for (const h of ["flowbridge.space", "www.flowbridge.space", "notify.flowbridge.space", "flowbridgev01.lovable.app"])
-      expect(resolveWalletConnectEnabled(undefined, h)).toBe(false);
+  const prod = ["flowbridge.space", "www.flowbridge.space", "notify.flowbridge.space", "flowbridgev01.lovable.app"];
+  it("is ON on every production host after V34.2E activation", () => {
+    for (const h of prod) expect(resolveWalletConnectEnabled(undefined, h)).toBe(true);
   });
-  it("explicit OFF kill switch wins on preview", () => {
+  it("production switch OFF disables WalletConnect on production hosts", () => {
+    for (const h of prod) expect(resolveWalletConnectEnabled(undefined, h, false)).toBe(false);
+  });
+  it("explicit OFF kill switch wins on preview and production", () => {
     expect(resolveWalletConnectEnabled("false", "localhost:8080")).toBe(false);
+    expect(resolveWalletConnectEnabled("off", "flowbridge.space")).toBe(false);
   });
   it("is OFF during SSR (no host)", () => {
     expect(resolveWalletConnectEnabled("true", null)).toBe(false);
