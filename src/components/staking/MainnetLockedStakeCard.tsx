@@ -17,6 +17,7 @@ import {
   type LockedProductId,
 } from '@/lib/staking/mainnetLockedStaking';
 import { useMainnetLockedStake } from '@/lib/staking/useMainnetLockedStake';
+import { getActiveProvider } from '@/lib/wallet/activeProvider';
 
 /**
  * FlowBridge V30.2B P3D — BOT Mainnet 677 locked Genesis staking surface.
@@ -70,10 +71,11 @@ export function MainnetLockedStakeCard() {
 
   useEffect(() => {
     void getActiveProvider().then((eth: any) => {
-    if (!eth) return;
-    void (eth.request({ method: 'eth_accounts' }) as Promise<string[]>)
-      .then((a) => setWallet(a?.[0] ? a[0].toLowerCase() : null))
-      .catch(() => undefined);
+      if (!eth) return;
+      return (eth.request({ method: 'eth_accounts' }) as Promise<string[]>).then((a) =>
+        setWallet(a?.[0] ? a[0].toLowerCase() : null),
+      );
+    }).catch(() => undefined);
   }, []);
 
   // Changing product or amount voids any previously reviewed terms.

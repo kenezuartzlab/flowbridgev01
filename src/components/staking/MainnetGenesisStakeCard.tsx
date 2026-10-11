@@ -16,6 +16,7 @@ import {
   useMainnetGenesisStake,
 } from '@/lib/staking/useMainnetGenesisStake';
 import { STAKING_V2_PRODUCTS } from '@/lib/staking/stakingV2Matrix';
+import { getActiveProvider } from '@/lib/wallet/activeProvider';
 
 /**
  * FlowBridge V30.2B P3B — BOT Mainnet 677 Flexible Genesis staking surface.
@@ -48,11 +49,11 @@ export function MainnetGenesisStakeCard() {
   const stake = useMainnetGenesisStake(wallet);
 
   useEffect(() => {
-    const eth = (await getActiveProvider()) as any;
-    if (!eth) return;
-    eth
-      .request({ method: 'eth_accounts' })
-      .then((a: string[]) => setWallet(a?.[0] ? a[0].toLowerCase() : null))
+    void getActiveProvider()
+      .then((eth: any) => (eth ? eth.request({ method: 'eth_accounts' }) : null))
+      .then((a: string[] | null) => {
+        if (a) setWallet(a?.[0] ? a[0].toLowerCase() : null);
+      })
       .catch(() => undefined);
   }, []);
 
