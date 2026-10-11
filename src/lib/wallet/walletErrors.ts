@@ -41,3 +41,22 @@ export function classifyWalletError(e: unknown, context: "sign" | "tx" | "connec
 export function walletErrorMessage(e: unknown, context: "sign" | "tx" | "connect" = "sign"): string {
   return WALLET_ERROR_MESSAGES[classifyWalletError(e, context)];
 }
+
+/**
+ * Short, privacy-safe reason for support: error name plus a trimmed message
+ * with URIs, hex values (addresses, hashes, topics) and long tokens removed.
+ */
+export function safeErrorReason(e: unknown): string {
+  const err = (e ?? {}) as { name?: string; shortMessage?: string; message?: string; cause?: any };
+  const raw = `${err.shortMessage || err.message || err.cause?.message || ""}`;
+  const cleaned = raw
+    .replace(/wc:[^\s"']+/gi, "[uri]")
+    .replace(/[a-z]+:\/\/[^\s"']+/gi, "[url]")
+    .replace(/0x[0-9a-f]{6,}/gi, "[hex]")
+    .replace(/[A-Za-z0-9_\-]{24,}/g, "[token]")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 90);
+  const name = (err.name || "Error").replace(/[^A-Za-z0-9_]/g, "").slice(0, 40);
+  return cleaned ? `${name}: ${cleaned}` : name;
+}
