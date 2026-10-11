@@ -36,10 +36,17 @@ export function isPreviewHost(host: string): boolean {
   return false;
 }
 
-export function resolveWalletConnectEnabled(raw: unknown, host: string | null): boolean {
+/** V34.2E — production activated after real-device acceptance. Set to false to disable WalletConnect on production hosts. */
+export const PRODUCTION_WALLETCONNECT_ON = true;
+
+export function resolveWalletConnectEnabled(
+  raw: unknown,
+  host: string | null,
+  productionOn: boolean = PRODUCTION_WALLETCONNECT_ON,
+): boolean {
   if (isExplicitOff(raw)) return false;
   if (!host) return false;
-  if (PRODUCTION_HOSTS.includes(host.toLowerCase())) return parseWalletConnectFlag(raw);
+  if (PRODUCTION_HOSTS.includes(host.toLowerCase())) return productionOn || parseWalletConnectFlag(raw);
   return parseWalletConnectFlag(raw) || isPreviewHost(host);
 }
 
