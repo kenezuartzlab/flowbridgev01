@@ -69,8 +69,7 @@ export function MainnetLockedStakeCard() {
   const stake = useMainnetLockedStake(wallet, productId, principal);
 
   useEffect(() => {
-    const eth = (globalThis as { window?: { ethereum?: { request: (a: unknown) => Promise<unknown> } } })
-      .window?.ethereum;
+    void getActiveProvider().then((eth: any) => {
     if (!eth) return;
     void (eth.request({ method: 'eth_accounts' }) as Promise<string[]>)
       .then((a) => setWallet(a?.[0] ? a[0].toLowerCase() : null))
@@ -94,8 +93,7 @@ export function MainnetLockedStakeCard() {
     setError(null);
     setBusy('connect');
     try {
-      const eth = (globalThis as { window?: { ethereum?: { request: (a: unknown) => Promise<unknown> } } })
-        .window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
       setWallet(accounts?.[0] ? accounts[0].toLowerCase() : null);
@@ -111,8 +109,7 @@ export function MainnetLockedStakeCard() {
     setError(null);
     setBusy(kind + (positionId ?? ''));
     try {
-      const eth = (globalThis as { window?: { ethereum?: { request: (a: unknown) => Promise<unknown> } } })
-        .window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       // The wallet must already be connected: no economic action ever triggers
       // the connection request itself.

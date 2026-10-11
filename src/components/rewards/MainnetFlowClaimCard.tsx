@@ -50,7 +50,7 @@ export function MainnetFlowClaimCard() {
 
   // Read-only: reflect an already-connected wallet without prompting.
   useEffect(() => {
-    const eth = (globalThis as any).window?.ethereum;
+    const eth = (await getActiveProvider()) as any;
     if (!eth) return;
     eth
       .request({ method: 'eth_accounts' })
@@ -62,7 +62,7 @@ export function MainnetFlowClaimCard() {
     setError(null);
     setConnecting(true);
     try {
-      const eth = (globalThis as any).window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
       setWallet(accounts?.[0] ? accounts[0].toLowerCase() : null);
@@ -80,7 +80,7 @@ export function MainnetFlowClaimCard() {
     setError(null);
     trackProductEvent('claim_started', 'earn');
     try {
-      const eth = (globalThis as any).window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
       const from = (accounts?.[0] ?? '').toLowerCase();

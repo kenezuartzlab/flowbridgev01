@@ -48,7 +48,7 @@ export function MainnetGenesisStakeCard() {
   const stake = useMainnetGenesisStake(wallet);
 
   useEffect(() => {
-    const eth = (globalThis as any).window?.ethereum;
+    const eth = (await getActiveProvider()) as any;
     if (!eth) return;
     eth
       .request({ method: 'eth_accounts' })
@@ -89,7 +89,7 @@ export function MainnetGenesisStakeCard() {
     setError(null);
     setBusy(kind + (positionId ?? ''));
     try {
-      const eth = (globalThis as any).window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
       const from = (accounts?.[0] ?? '').toLowerCase();
@@ -145,7 +145,7 @@ export function MainnetGenesisStakeCard() {
     setError(null);
     setBusy('connect');
     try {
-      const eth = (globalThis as any).window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
       const from = (accounts?.[0] ?? '').toLowerCase();
