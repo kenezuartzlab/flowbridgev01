@@ -39,6 +39,9 @@ export default defineConfig({
           "node_modules/entities/lib/encode.js",
         ),
         entities: path.resolve(process.cwd(), "node_modules/entities"),
+        // WalletConnect needs the real EventEmitter in the browser; without this
+        // the production client build swaps "events" for an empty Node stub.
+        events: path.resolve(process.cwd(), "node_modules/events/events.js"),
       },
     },
   },
