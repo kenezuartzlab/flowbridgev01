@@ -322,7 +322,10 @@ export function ConnectGuideModal({
                       </p>
                     )}
                     {wc.status === 'error' && wc.error && (
-                      <p role="alert" className="text-[11px] text-danger px-1 leading-relaxed">{wc.error}</p>
+                      <div role="alert" className="px-1">
+                        <p className="text-[11px] text-danger leading-relaxed">{wc.error}</p>
+                        {wc.reason && <p className="mt-0.5 font-mono text-[9.5px] text-muted break-words">Details: {wc.reason}</p>}
+                      </div>
                     )}
                   </>
                 )}

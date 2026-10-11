@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useConnect } from "wagmi";
-import { classifyWalletError, WALLET_ERROR_MESSAGES } from "./walletErrors";
+import { classifyWalletError, safeErrorReason, WALLET_ERROR_MESSAGES } from "./walletErrors";
 
 /**
  * V34.2D — WalletConnect launcher with visible feedback.
@@ -18,6 +18,7 @@ export function useWalletConnectLauncher(connector: any | undefined, warm: boole
   const { connectAsync } = useConnect();
   const [status, setStatus] = useState<WcLaunchStatus>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [reason, setReason] = useState<string | null>(null);
   const runId = useRef(0);
 
   // Download the WalletConnect code ahead of the tap (no network session).
@@ -30,6 +31,7 @@ export function useWalletConnectLauncher(connector: any | undefined, warm: boole
     runId.current += 1;
     setStatus("idle");
     setError(null);
+    setReason(null);
   }, []);
 
   const launch = useCallback(
@@ -41,6 +43,7 @@ export function useWalletConnectLauncher(connector: any | undefined, warm: boole
       }
       const id = ++runId.current;
       setError(null);
+      setReason(null);
       setStatus("opening");
       const onMessage = (m: { type?: string }) => {
         if (m?.type === "display_uri" && runId.current === id) {
@@ -59,11 +62,14 @@ export function useWalletConnectLauncher(connector: any | undefined, warm: boole
       } catch (e) {
         if (runId.current !== id) return false;
         const kind = classifyWalletError(e, "connect");
-        // Category only — never session data, URIs or addresses.
-        console.warn("[walletconnect] connect failed:", kind);
+        const why = safeErrorReason(e);
+        // Sanitized only — never session data, URIs or addresses.
+        console.warn("[walletconnect] connect failed:", kind, why);
+        setReason(why);
         setStatus("error");
+        const closed = kind === "USER_REJECTED" || /request reset|modal closed|proposal expired/i.test(why);
         setError(
-          kind === "USER_REJECTED"
+          closed
             ? "WalletConnect was closed. Nothing changed — tap it again to retry."
             : WALLET_ERROR_MESSAGES.WALLETCONNECT_UNAVAILABLE,
         );
@@ -76,5 +82,5 @@ export function useWalletConnectLauncher(connector: any | undefined, warm: boole
     [connector, connectAsync],
   );
 
-  return { status, error, launch, reset };
+  return { status, error, reason, launch, reset };
 }
