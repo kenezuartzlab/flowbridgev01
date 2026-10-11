@@ -28,3 +28,4 @@
 - Reward/claim/settlement rules live in src/lib/rewards/AGENTS.md. Why: keep root notes small.
 - Wallet connection choices, WalletConnect kill switch (VITE_WALLETCONNECT_ENABLED, fails closed), error normalization and the WALLET_BINDING message live only in src/lib/wallet/; binding is a separate explicit signature validated server-side for domain/origin/account/nonce. Why: connecting must never sign, and WalletConnect must never break boot.
 - Sign-in setup and Profile reuse BindWalletCard for explicit ownership binding and canonical state refresh. Why: separate legacy linking paths cannot bypass or drift from verified binding.
+- The client build resolves `events`/`node:events` to the npm `events` polyfill via a Vite plugin in vite.config.ts. Why: the default browser stub breaks WalletConnect ("EventEmitter is not a constructor").
