@@ -1,0 +1,17 @@
+{
+  "gate": "V30.2B Staking V2 final fast-track — consolidated release report",
+  "generatedAt": "2026-10-11T14:57:00Z",
+  "mainnetWrites": 0,
+  "oracle": "0x0 unchanged (fail-closed)",
+  "productionRelease": { "ref": "2bf0ed71", "liveStakeChunk": "assets/stake-BPw8HQ9d.js", "liveActiveProviderChunk": "assets/activeProvider-BCrH0b5E.js", "routes": { "/": 200, "/earn": 200, "/stake": 200, "/account": 200 } },
+  "freshChecks": { "tests": "1665/1665", "typecheck": "clean", "securityScan": "2026-10-11T14:56Z, no new findings (2 previously accepted)" },
+  "claimRemainingAgainstLiveState": {
+    "position1_Flexible": { "status": "closed", "pendingWei": "279680365296", "expectedUi": "Claim remaining reward shown" },
+    "position2_30D": { "status": "closed", "pendingWei": "0", "expectedUi": "no claim button" }
+  },
+  "realMainnetEvidence": { "Flexible": "P3B settlement (position #1)", "30D": "position #2 claim 0xbcf09aa2…d1d4 block 26323903; withdraw 0x2d8a91b6…4155 block 26323952" },
+  "simulationOnly": ["90D", "180D", "365D"],
+  "longTermCanaryPrep": "P3E_LONGTERM_CANARY_PREP.json",
+  "blockers": ["Canary wallet holds 0.00523978 BOT; 6 canary txs need ~0.02186 BOT at 20 gwei"],
+  "realDeviceRequired": ["Claim remaining reward tap on a real wallet", "WalletConnect staking/claim on a real phone"]
+}
