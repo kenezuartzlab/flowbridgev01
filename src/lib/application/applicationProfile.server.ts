@@ -4,31 +4,21 @@
 
 export const OWNER_INPUT = "OWNER INPUT REQUIRED" as const;
 
-export const AWARD_CREDENTIAL = "1st Place — EVM Deployment Track, BOT Chain Builder Challenge #1";
+export const AWARD_CREDENTIAL = "1st Place - EVM Deployment Track, BOT Chain Builder Challenge #1";
 
-/** Dated snapshot of BOT Chain's published Scheme A rules. Never a product constant:
- *  if the official page changes, add a new snapshot and keep this one for audit. */
-export const SCHEME_A_RULES = {
-  version: "botchain-ecosystem-support/scheme-a@2026-09-29",
-  checkedAt: "2026-09-29",
-  source: "https://www.botchain.ai/en/ecosystem-support",
-  pairRule: "Project token/stablecoin or project token/BOT on BOT Chain mainnet",
-  countingRules: [
-    "Only the first transaction from a single address per trading pair in a 24-hour period is counted.",
-    "No single address may exceed 40% of daily trading volume.",
-    "Liquidity must stay at or above the tier minimum for 7 consecutive days.",
-    "Trading volume must be reached organically within a 15-day window.",
-  ],
-  tiers: [
-    { tier: 1, minLpUsd: 50_000, volume15dUsd: 125_000, txCount: 1_250, baseRewardUsd: 1_250, maxRewardUsd: 4_000 },
-    { tier: 2, minLpUsd: 200_000, volume15dUsd: 500_000, txCount: 5_000, baseRewardUsd: 5_000, maxRewardUsd: 16_000 },
-    { tier: 3, minLpUsd: 1_000_000, volume15dUsd: 2_000_000, txCount: 15_000, baseRewardUsd: 8_000, maxRewardUsd: 40_000 },
-    { tier: 4, minLpUsd: 5_000_000, volume15dUsd: 8_000_000, txCount: 50_000, baseRewardUsd: 15_000, maxRewardUsd: 160_000 },
-    { tier: 5, minLpUsd: 10_000_000, volume15dUsd: 20_000_000, txCount: 100_000, baseRewardUsd: 20_000, maxRewardUsd: 240_000 },
-  ],
-  portalDifference:
-    "The uploaded application portal states 'up to $350,000 per project' while the public page states 'maximum funding per project: $1 million'. Final submission must follow the live portal terms.",
+/** Owner-approved application position; no pre-onboarding qualification calculation. */
+export const APPLICATION_STATUS = {
+  application: "READY TO SUBMIT",
+  requestedSupport: "OPTION A - DEX LIQUIDITY SUPPORT",
+  program: "NOT YET APPROVED / MONITORING NOT YET STARTED",
+  qualification: "PENDING PROGRAM ONBOARDING",
+  monitoringWindow: "TO BE CONFIRMED BY BOT CHAIN AFTER APPROVAL",
+  activity: "SUPPORTING PROOF OF MAINNET READINESS AND GENUINE ECOSYSTEM PARTICIPATION",
 } as const;
+
+export const SUPPORT_POSITION = "FlowBridge is applying for Option A - DEX Liquidity Support. We are submitting the project's production deployment, technical architecture, verified contracts, on-chain evidence, ecosystem contribution and mainnet readiness for BOT Chain's evaluation. Any support level, incentive allocation, rebate, points or other program benefit will be determined by BOT Chain according to its current program rules and review process.";
+
+export const COMPLIANCE_ACTION = { actor: "OWNER", accepted: false, submitted: false } as const;
 
 export const ANTI_CHEATING_NOTICE = {
   title: "BOT Chain Anti-Cheating Compliance Notice",
@@ -43,25 +33,8 @@ export const ANTI_CHEATING_NOTICE = {
     "FlowBridge never creates interactions to improve program statistics. Every metric here is read from canonical BOT Mainnet records.",
 };
 
-export interface ContractEntry {
-  name: string;
-  chainId: number;
-  address: `0x${string}`;
-  state: string;
-}
-
-export const CONTRACT_REGISTRY: ContractEntry[] = [
-  { name: "FLOW Token", chainId: 677, address: "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF", state: "LIVE" },
-  { name: "FlowBridge Router v3 (live execution router)", chainId: 677, address: "0x986962de6f00d0ec571b1a34fa70aeeb445b5445", state: "LIVE" },
-  { name: "Rewards Distributor", chainId: 677, address: "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922", state: "LIVE / funded" },
-  { name: "Activity Registry", chainId: 677, address: "0x86590b7C8A2Ad9a1dAD8183Eaf627AE4B7Ff3814", state: "DEPLOYED / no new attestations authorized" },
-  { name: "Staking Reward Treasury", chainId: 677, address: "0x96552909998F3DbAf5Ff4979dc158508b3442e65", state: "LIVE / funded" },
-  { name: "Staking Controller", chainId: 677, address: "0x44b9b880C6188D8b8dbe4f68216aE28a5A1253bF", state: "LIVE" },
-  { name: "Staking Vault V2", chainId: 677, address: "0x15e7B1b4b16a43E6CE2E1f460dBE4201E9B6790D", state: "LIVE" },
-  { name: "MultiSend V1 (BOT Mainnet)", chainId: 677, address: "0xc54CAcfd96330949db0eAEd72dE930a2d06d9778", state: "LIVE / verified" },
-  { name: "MultiSend V1 (BNB Mainnet)", chainId: 56, address: "0xA861152Ca3676bcCf7B5FDAFB9eb6A57b9d32d0e", state: "LIVE / verified" },
-  { name: "BDEX V3 FLOW/USDT pool (1% fee)", chainId: 677, address: "0xDaCFc2574b6110892351Bd31afb36F95E7206162", state: "LIVE" },
-];
+// Public-safe contract identity is separate from private application answers.
+export { PRODUCTION_CONTRACTS as CONTRACT_REGISTRY } from "../contracts/productionRegistry";
 
 export const CORE_HIGHLIGHTS: string[] = [
   "Live on BOT Chain Mainnet (chain 677) at flowbridge.space.",
@@ -82,12 +55,9 @@ export interface ApplicationField {
 }
 
 export const CORE_HIGHLIGHTS_ANSWER =
-  "FlowBridge is a mainnet-live, non-custodial Web3 application built to make the BOT Chain ecosystem easier to use and grow. It combines trading, bridging, MultiSend, staking, verified rewards, ecosystem discovery and guided wallet interactions in one platform. FlowBridge integrates BDEX V3 and live FLOW/USDT trading on BOT Mainnet, with transparent route information, price-impact protection and explicit wallet confirmation for economic actions. FlowBridge was awarded 1st Place — EVM Deployment Track, BOT Chain Builder Challenge #1. Our goal is to deepen real BOT Chain utility, sustainable liquidity, genuine user participation and verifiable on-chain activity.";
+  "FlowBridge is a mainnet-live, non-custodial Web3 application built to make the BOT Chain ecosystem easier to use and grow. It combines trading, bridging, MultiSend, staking, verified rewards, ecosystem discovery and guided wallet interactions in one platform. FlowBridge integrates BDEX V3 and live FLOW/USDT trading on BOT Mainnet, with transparent route information, price-impact protection and explicit wallet confirmation for economic actions. FlowBridge was awarded 1st Place - EVM Deployment Track, BOT Chain Builder Challenge #1. Our goal is to deepen real BOT Chain utility, sustainable liquidity, genuine user participation and verifiable on-chain activity.";
 
-export const PORTAL_FUNDING_REFERENCE =
-  "Up to $350,000 equivalent/project (application portal), plus Gas rebates up to 35% and community points for approved projects.";
-
-/** Final copy-ready answers, in the updated Google Form order. */
+/** Copy-ready answers in stored form order; current sign-in-only form requires owner confirmation. */
 export function applicationFields(_opts: { whitepaperUrl: string }): ApplicationField[] {
   return [
     { id: "email", label: "Email", value: "flowbridgeweb3@gmail.com", status: "ready" },
@@ -99,7 +69,7 @@ export function applicationFields(_opts: { whitepaperUrl: string }): Application
       value: "Project Website: https://flowbridge.space\nTwitter (X): https://x.com/flowbridgeweb3\nTelegram: https://t.me/flowbridgeweb",
       status: "ready",
     },
-    { id: "stage", label: "Current Development Stage", value: "Mainnet Live", status: "ready" },
+    { id: "stage", label: "Current Development Stage", value: "MAINNET LIVE", status: "ready" },
     {
       id: "deck",
       label: "Whitepaper / Pitch Deck",
@@ -132,12 +102,12 @@ export function applicationFields(_opts: { whitepaperUrl: string }): Application
     {
       id: "scheme",
       label: "Support Tier",
-      value: "Option A — DEX Liquidity Support\n\nFlowBridge selects Option A because FLOW/USDT liquidity and trading are already live on BOT Mainnet through BDEX V3 and integrated directly into the FlowBridge trading experience. We intend to grow sustainable liquidity depth, organic trading activity and real BOT Chain participation while maintaining transparent, auditable on-chain metrics.",
+      value: SUPPORT_POSITION,
       status: "ready",
     },
     { id: "contactName", label: "Contact Name / Alias", value: "Kenezu", status: "ready" },
     { id: "contactMethod", label: "Preferred Contact Method", value: "Telegram: @crypticmaster\nEmail: flowbridgeweb3@gmail.com", status: "ready" },
-    { id: "bd", label: "Name the BD you contact with, if you have one", value: "N/A — no assigned BOT Chain BD contact yet", status: "ready" },
+    { id: "bd", label: "Name the BD you contact with, if you have one", value: "N/A - no assigned BOT Chain BD contact yet", status: "ready" },
     {
       id: "compliance",
       label: "Compliance confirmation",

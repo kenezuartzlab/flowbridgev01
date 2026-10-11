@@ -19,6 +19,7 @@ export const Route = createFileRoute("/bot-chain")({
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://flowbridge.space/bot-chain" },
       { name: "twitter:card", content: "summary_large_image" },
+      ...(awards.url.startsWith("https://") ? [{ property: "og:image", content: awards.url }, { name: "twitter:image", content: awards.url }] : []),
     ],
     links: [{ rel: "canonical", href: "https://flowbridge.space/bot-chain" }],
   }),
@@ -55,7 +56,7 @@ function BotChainPage() {
       <main className="mx-auto w-full max-w-2xl space-y-4 px-3 pt-3 sm:px-4 md:max-w-4xl md:pt-6" style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}>
         <section className="fb-surface p-4">
           <p className="fb-eyebrow flex items-center gap-1.5"><Trophy className="h-3.5 w-3.5 text-primary" />Builder Challenge #1</p>
-          <h1 className="mt-2 text-[20px] font-black leading-tight">1st Place — EVM Deployment Track</h1>
+          <h1 className="mt-2 text-[20px] font-black leading-tight">1st Place - EVM Deployment Track, BOT Chain Builder Challenge #1</h1>
           <p className="mt-1.5 text-[12.5px] text-muted">FlowBridge (@flowbridgeweb3) was awarded first place in the EVM Deployment Track of the BOT Chain Builder Challenge #1.</p>
           <img src={awards.url} alt="BOT Chain Builder Challenge #1 Project Awards — FlowBridge 1st place, EVM Deployment Track" className="mt-3 w-full rounded-xl border border-hairline" loading="lazy" />
         </section>
@@ -73,16 +74,8 @@ function BotChainPage() {
         </section>
         <section className="fb-surface p-4">
           <p className="fb-eyebrow flex items-center gap-1.5"><Info className="h-3.5 w-3.5 text-primary" />BOT ecosystem context</p>
-          <ul className="mt-2 space-y-1.5 text-[12.5px]">
-            <li className="flex gap-2"><span className="text-primary">•</span>$50M Ecosystem Support Program</li>
-            <li className="flex gap-2"><span className="text-primary">•</span>Up to $1M per project under current published program rules</li>
-            <li className="flex gap-2"><span className="text-primary">•</span>5 support dimensions</li>
-          </ul>
-          <p className="mt-3 rounded-xl border border-hairline p-3 text-[11.5px] leading-relaxed text-muted">
-            Current BOT Chain published program information — checked Sep 29, 2026. These figures describe the
-            ecosystem program itself. FlowBridge has applied for consideration and has not received ecosystem-program
-            funding; nothing on this page implies an award, grant or acceptance.
-          </p>
+          <p className="mt-2 text-[12.5px] text-muted">FlowBridge brings trading, liquidity discovery, easier wallet journeys and verifiable participation to BOT Chain through its live mainnet deployment.</p>
+          <p className="mt-3 text-[11.5px] leading-relaxed text-muted">Builder Challenge recognition is a technical achievement, not ecosystem-program approval or a guarantee of support.</p>
         </section>
       </main>
       <BottomNav />

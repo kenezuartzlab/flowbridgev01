@@ -1,5 +1,10 @@
 # MultiSend BOT Testnet Release
 
+# BOT application master refresh
+- [ ] Refresh private application status, owner answers and reviewer materials without submission or on-chain writes.
+- [ ] Verify current contract inventory and refresh public-safe contracts/whitepaper/BOT support information.
+- [ ] Validate privacy, application rules, affected tests and report actual blockers.
+
 # Wallet-binding accessibility
 - [x] Show explicit Verify & Bind in the sign-in/connect dialog and Profile after email sign-in.
 - [x] Guide regular mobile browsers without enabling WalletConnect; preserve separate connect/sign actions.

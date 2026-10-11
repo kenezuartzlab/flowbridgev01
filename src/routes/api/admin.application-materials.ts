@@ -3,16 +3,10 @@ import { createFileRoute } from "@tanstack/react-router";
 // PRIVATE: BOT Ecosystem Support application materials. Never linked from public
 // pages, sitemap or navigation. Admin-gated; returns short-lived signed URLs.
 const FILES = [
-  {
-    id: "dossier",
-    title: "Technical Documentation & BOT Support Application Dossier v1.0",
-    path: "FlowBridge_Technical_Documentation_and_BOT_Support_Application_Dossier_v1.0.pdf",
-  },
-  {
-    id: "pitch-deck",
-    title: "BOT Ecosystem Support Pitch Deck v1.0",
-    path: "FlowBridge_BOT_Ecosystem_Support_Pitch_Deck_v1.0.pdf",
-  },
+  { id: "dossier", title: "Application dossier v1.1", path: "FlowBridge_Application_Dossier_v1.1.pdf" },
+  { id: "pitch-deck", title: "BOT pitch deck v1.1", path: "FlowBridge_BOT_Pitch_Deck_v1.1.pdf" },
+  { id: "evidence-pack", title: "On-chain evidence pack v1.1", path: "FlowBridge_Onchain_Evidence_Pack_v1.1.pdf" },
+  { id: "reviewer-summary", title: "Reviewer summary v1.1", path: "FlowBridge_Reviewer_Summary_v1.1.pdf" },
 ];
 
 export const Route = createFileRoute("/api/admin/application-materials")({
@@ -34,10 +28,10 @@ export const Route = createFileRoute("/api/admin/application-materials")({
             return { id: f.id, title: f.title, url: error ? null : data.signedUrl };
           }),
         );
-        return jsonResponse(
-          { files, expiresInSeconds: expiresIn },
-          200,
-        );
+        const response = jsonResponse({ files, expiresInSeconds: expiresIn }, 200);
+        response.headers.set("cache-control", "private, no-store");
+        response.headers.set("x-robots-tag", "noindex, nofollow");
+        return response;
       },
     },
   },
