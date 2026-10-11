@@ -33,12 +33,25 @@ export const LOCKED_PRODUCT_LABELS: Readonly<Record<LockedProductId, string>> = 
 
 /**
  * Owner-authorized locked terms. Only the 30-day term is approved for public
- * execution; 90D / 180D / 365D stay blocked until they are approved separately.
+ * execution; 90D / 180D / 365D stay blocked for the public until they are
+ * approved separately.
  */
 export const AUTHORIZED_LOCKED_PRODUCT_IDS: readonly LockedProductId[] = [1];
 
-export function isLockedProductAuthorized(id: LockedProductId): boolean {
-  return AUTHORIZED_LOCKED_PRODUCT_IDS.includes(id);
+/**
+ * P3E long-term maturity canary wallet. The owner approved 1 FLOW canary
+ * deposits into 90D / 180D / 365D from this wallet only; every other wallet
+ * stays blocked on those terms until public approval.
+ */
+export const LONG_TERM_CANARY_WALLET =
+  '0x3d8a7fa490f9db09dd8006b74688213ace9c0164';
+
+export function isLockedProductAuthorized(
+  id: LockedProductId,
+  wallet?: string | null,
+): boolean {
+  if (AUTHORIZED_LOCKED_PRODUCT_IDS.includes(id)) return true;
+  return !!wallet && wallet.toLowerCase() === LONG_TERM_CANARY_WALLET;
 }
 
 /** P3D activates locked Genesis execution only when staking execution is on. */
@@ -65,6 +78,8 @@ export interface LiveLockedQuote {
 
 export interface LockedExecutionGates {
   chainId: number;
+  /** Connected wallet — the long-term canary wallet may open 90D/180D/365D. */
+  wallet?: string | null;
   vaultPaused: boolean;
   emergencyMode: boolean;
   productActive: boolean;
