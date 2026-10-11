@@ -42,6 +42,7 @@ export default defineConfig({
         // WalletConnect needs the real EventEmitter in the browser; without this
         // the production client build swaps "events" for an empty Node stub.
         events: path.resolve(process.cwd(), "node_modules/events/events.js"),
+        "node:events": path.resolve(process.cwd(), "node_modules/events/events.js"),
       },
     },
   },
