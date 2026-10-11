@@ -1,8 +1,8 @@
 {
   "gate": "V30.2B P3E — 90D/180D/365D canary preparation (unsigned)",
-  "generatedAt": "2026-10-11T14:54:41.631Z",
+  "generatedAt": "2026-10-11T15:22:29.598Z",
   "chainId": 677,
-  "liveBlock": 26328062,
+  "liveBlock": 26330285,
   "canary": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
   "live": {
     "terms": {
@@ -35,7 +35,7 @@
       }
     },
     "canaryFlow": "292660.012261598158032906",
-    "canaryBot": "0.00523978",
+    "canaryBot": "0.10523978",
     "allowanceToVault": "0",
     "genesisQuotaRemainingSeconds": 5182776,
     "gasPriceWei": "20000000000",
@@ -71,8 +71,8 @@
         "floorFlow": "0.024657534246575342"
       },
       "simulatedMaturityAfterOpenSeconds": 7776000,
-      "maturityIfOpenedNow": "2027-01-09T14:54:22.000Z",
-      "forkOpenedAt": 1791730474
+      "maturityIfOpenedNow": "2027-01-09T15:22:09.000Z",
+      "forkOpenedAt": 1791732142
     },
     {
       "product": "180D",
@@ -102,8 +102,8 @@
         "floorFlow": "0.059178082191780821"
       },
       "simulatedMaturityAfterOpenSeconds": 15552000,
-      "maturityIfOpenedNow": "2027-04-09T14:54:22.000Z",
-      "forkOpenedAt": 1791730477
+      "maturityIfOpenedNow": "2027-04-09T15:22:09.000Z",
+      "forkOpenedAt": 1791732145
     },
     {
       "product": "365D",
@@ -133,18 +133,16 @@
         "floorFlow": "0.15"
       },
       "simulatedMaturityAfterOpenSeconds": 31536000,
-      "maturityIfOpenedNow": "2027-10-11T14:54:22.000Z",
-      "forkOpenedAt": 1791730480
+      "maturityIfOpenedNow": "2027-10-11T15:22:09.000Z",
+      "forkOpenedAt": 1791732148
     }
   ],
   "genesisQuotaAfterAllThreeSeconds": 5182776,
   "totalReservationFlow": "0.470492054794520545",
   "totalGasCostBot": "0.02186416",
   "mainnetWrites": 0,
-  "decision": "BLOCKED",
-  "failures": [
-    "canary BOT covers gas for 6 txs at current gas price"
-  ],
+  "decision": "READY_FOR_SIGNING_APPROVAL",
+  "failures": [],
   "checks": [
     {
       "ok": true,
@@ -222,9 +220,9 @@
       "d": "0.470492054794520545"
     },
     {
-      "ok": false,
+      "ok": true,
       "label": "canary BOT covers gas for 6 txs at current gas price",
-      "d": "0.00523978 BOT vs 0.02186416 needed"
+      "d": "0.10523978 BOT vs 0.02186416 needed"
     }
   ]
 }
