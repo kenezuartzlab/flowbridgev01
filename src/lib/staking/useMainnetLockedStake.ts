@@ -212,6 +212,7 @@ export function useMainnetLockedStake(
       const evaluation = quote
         ? evaluateLockedExecution(quote, {
             chainId: BOT_MAINNET_CHAIN_ID,
+            wallet,
             vaultPaused: paused,
             emergencyMode: emergency,
             productActive: active,

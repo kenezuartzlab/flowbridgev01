@@ -189,14 +189,14 @@ export function MainnetLockedStakeCard() {
     <Surface id="mainnet-locked-staking">
       <SectionHeader
         title="Locked FLOW staking — Genesis terms"
-        hint="Only the 30-day term is open — 90D / 180D / 365D are not approved yet. Rate, Genesis duration and reserved rewards are read live from the contract for your wallet before anything can be signed."
+        hint="The 30-day term is open to everyone; 90D / 180D / 365D are open to the approved long-term canary wallet only. Rate, Genesis duration and reserved rewards are read live from the contract for your wallet before anything can be signed."
         badge={<StatusPill tone={executable ? 'ok' : 'warn'}>{executable ? 'Live' : 'Blocked'}</StatusPill>}
       />
 
       <div className="space-y-3 border-t border-hairline p-4">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {LOCKED_PRODUCT_IDS.map((id) => {
-            const authorized = isLockedProductAuthorized(id);
+            const authorized = isLockedProductAuthorized(id, wallet);
             return (
               <button
                 key={id}
