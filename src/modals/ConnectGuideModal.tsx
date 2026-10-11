@@ -325,6 +325,15 @@ export function ConnectGuideModal({
                       <div role="alert" className="px-1">
                         <p className="text-[11px] text-danger leading-relaxed">{wc.error}</p>
                         {wc.reason && <p className="mt-0.5 font-mono text-[9.5px] text-muted break-words">Details: {wc.reason}</p>}
+                        {wc.reason && /dynamically imported module|importing a module script/i.test(wc.reason) && (
+                          <button
+                            type="button"
+                            onClick={() => window.location.reload()}
+                            className="mt-1.5 w-full min-h-[40px] rounded-xl border border-hairline font-mono text-[11px] font-black uppercase tracking-widest text-foreground hover:border-primary/40"
+                          >
+                            Reload page and try again
+                          </button>
+                        )}
                       </div>
                     )}
                   </>

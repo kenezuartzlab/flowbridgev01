@@ -23,6 +23,9 @@ export default defineConfig({
   },
   vite: {
     plugins: [mcpPlugin()],
+    // Pre-bundle the lazily-loaded WalletConnect SDK at dev-server start so the
+    // first tap never triggers a mid-session re-optimize (stale module 504s).
+    optimizeDeps: { include: ["@walletconnect/ethereum-provider"] },
     resolve: {
       alias: {
         // Force every import of `entities` to the hoisted v4.5.0 copy.
