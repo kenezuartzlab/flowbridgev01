@@ -5,7 +5,7 @@
 - [x] Verify 29 current entries (26 BOT Mainnet useful, including 13 external integrations); refresh public-safe contracts/whitepaper/BOT support information in preview.
 - [x] Validate private storage, signed downloads and anonymous API denial; 1,672 regression tests passed and automatic builds clean.
 - [x] Use the owner's verified current 16-field form snapshot; compliance remains OWNER ACTION, with no submission.
-- [ ] Final consistency check across refreshed private materials and public previews; do not publish.
+- [x] Final consistency check: verified 16-field order, full contract coverage in all four private PDFs and whitepaper, private storage/anonymous denial, no monetary ask, 1,673 tests and automatic build OK. Corrected stale PDF blockers and moved historical submission out of public files. Public previews remain unpublished.
 
 # Wallet-binding accessibility
 - [x] Show explicit Verify & Bind in the sign-in/connect dialog and Profile after email sign-in.
