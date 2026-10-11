@@ -123,7 +123,7 @@ export function evaluateLockedExecution(
 
   const activated = gates.activated ?? isLockedStakingActivated();
   if (!activated) blockers.push('Locked staking is not activated.');
-  if (!isLockedProductAuthorized(quote.productId)) {
+  if (!isLockedProductAuthorized(quote.productId, gates.wallet)) {
     blockers.push('This locked term is not approved yet — only the 30-day term can be opened.');
   }
   if (gates.chainId !== BOT_MAINNET_CHAIN_ID) blockers.push('Switch to BOT Mainnet to stake.');
