@@ -1,0 +1,400 @@
+{
+  "gate": "V30.2B Staking V2 accelerated final release matrix",
+  "generatedAt": "2026-10-11T14:30:00Z",
+  "chainId": 677,
+  "mainnetWrites": 0,
+  "oracle": "0x0 unchanged",
+  "codeUnchanged": {
+    "vault": "71d28895d88c7847956697b0c475020a3b2913043cdaa41d282a191a8a098c70",
+    "controller": "703f5f5c70c8e1cea3b93d29076d5bc1463d4041fc89a13618fd107df33b9ad0",
+    "treasury": "42e7a42dbf6a0f642e8d9bf1038f0f4990aeed5cfb2b84eea6dcb155437e1d6b",
+    "matches": "V30_2B_R4/R5/R6_SETTLEMENT.json"
+  },
+  "realMainnetEvidence": {
+    "Flexible": "P3B (see MAINNET_V30_2B_P3B_SETTLEMENT.md)",
+    "30D": {
+      "position": 2,
+      "claimTx": "0xbcf09aa242f59f5b1ead0d592165d233880a8aadd144b771786b971ce3c0d1d4",
+      "claimBlock": 26323903,
+      "rewardFlow": "0.028767123287671233",
+      "withdrawTx": "0x2d8a91b6e1ac3ae7ffe3b07ec17c1788b316db42b76e71a4ef29bb5ca4a24155",
+      "withdrawBlock": 26323952,
+      "principalFlow": "1",
+      "receipts": "success"
+    },
+    "90D": null,
+    "180D": null,
+    "365D": null
+  },
+  "forkLifecycle": {
+    "products": {
+      "30D": {
+        "productId": 1,
+        "forkWallet": "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+        "lockSeconds": 2592000,
+        "genesisAprBps": 2700,
+        "floorBps": 800,
+        "minPrincipal": "1000000000000000000",
+        "quote": {
+          "genesisRateBps": 2700,
+          "genesisSeconds": 2592000,
+          "genesisObligation": "22191780821917808",
+          "floorRateBps": 800,
+          "floorObligation": "6575342465753424"
+        },
+        "openedAt": 1791727981,
+        "genesisEndAt": 1794319981,
+        "maturityAt": 1794319981,
+        "totalRewardsPaid": "28767123287671232",
+        "principalReturned": "1000000000000000000",
+        "postGenesis": null,
+        "notes": [],
+        "blockers": [],
+        "decision": "FULL_LIFECYCLE_PASS"
+      },
+      "90D": {
+        "productId": 2,
+        "forkWallet": "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+        "lockSeconds": 7776000,
+        "genesisAprBps": 3600,
+        "floorBps": 1000,
+        "minPrincipal": "1000000000000000000",
+        "quote": {
+          "genesisRateBps": 3600,
+          "genesisSeconds": 7776000,
+          "genesisObligation": "88767123287671232",
+          "floorRateBps": 1000,
+          "floorObligation": "24657534246575342"
+        },
+        "openedAt": 1794319986,
+        "genesisEndAt": 1802095986,
+        "maturityAt": 1802095986,
+        "totalRewardsPaid": "113424657534246574",
+        "principalReturned": "1000000000000000000",
+        "postGenesis": null,
+        "notes": [],
+        "blockers": [],
+        "decision": "FULL_LIFECYCLE_PASS"
+      },
+      "180D": {
+        "productId": 3,
+        "forkWallet": "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+        "lockSeconds": 15552000,
+        "genesisAprBps": 4800,
+        "floorBps": 1200,
+        "minPrincipal": "1000000000000000000",
+        "quote": {
+          "genesisRateBps": 4800,
+          "genesisSeconds": 7776000,
+          "genesisObligation": "118356164383561643",
+          "floorRateBps": 1200,
+          "floorObligation": "59178082191780821"
+        },
+        "openedAt": 1802095991,
+        "genesisEndAt": 1809871991,
+        "maturityAt": 1817647991,
+        "totalRewardsPaid": "177534246575342462",
+        "principalReturned": "1000000000000000000",
+        "postGenesis": {
+          "pendingAtGenesisEnd": "73972606544901064",
+          "pendingThirtyDaysPostGenesis": "83835616438356163",
+          "floorAccrualContinues": true,
+          "variableAccrualZero": true,
+          "claimAvailablePostGenesis": true,
+          "claimPaidPostGenesis": "83835616438356163"
+        },
+        "notes": [],
+        "blockers": [],
+        "decision": "FULL_LIFECYCLE_PASS"
+      },
+      "365D": {
+        "productId": 4,
+        "forkWallet": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+        "lockSeconds": 31536000,
+        "genesisAprBps": 6000,
+        "floorBps": 1500,
+        "minPrincipal": "1000000000000000000",
+        "quote": {
+          "genesisRateBps": 6000,
+          "genesisSeconds": 7776000,
+          "genesisObligation": "147945205479452054",
+          "floorRateBps": 1500,
+          "floorObligation": "150000000000000000"
+        },
+        "openedAt": 1817647997,
+        "genesisEndAt": 1825423997,
+        "maturityAt": 1849183997,
+        "totalRewardsPaid": "297945205479452053",
+        "principalReturned": "1000000000000000000",
+        "postGenesis": {
+          "pendingAtGenesisEnd": "92465758181126331",
+          "pendingThirtyDaysPostGenesis": "104794520547945205",
+          "floorAccrualContinues": true,
+          "variableAccrualZero": true,
+          "claimAvailablePostGenesis": true,
+          "claimPaidPostGenesis": "104794520547945205"
+        },
+        "notes": [],
+        "blockers": [],
+        "decision": "FULL_LIFECYCLE_PASS"
+      }
+    },
+    "checks": 185,
+    "failures": []
+  },
+  "forkFlexible": {
+    "product": "Flexible",
+    "productId": 0,
+    "positionId": "4",
+    "rewardFlow": "1.479452625570776255",
+    "expectedFlow": "1.479452054794520547",
+    "checks": [
+      {
+        "ok": true,
+        "label": "flexible open succeeds",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "flexible has no lock (maturityAt 0)",
+        "detail": "0"
+      },
+      {
+        "ok": true,
+        "label": "genesis rate 1800",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "floor 0",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30 days Genesis reward matches 18% APR simple",
+        "detail": "1.479452625570776255 vs 1.479452054794520547"
+      },
+      {
+        "ok": true,
+        "label": "immediate second claim gives nothing / reverts",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "non-owner cannot withdraw",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "withdraw at any time succeeds",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "principal fully returned",
+        "detail": "100"
+      },
+      {
+        "ok": true,
+        "label": "duplicate withdraw reverts",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "position closed",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "net wallet gain equals rewards only",
+        "detail": null
+      }
+    ],
+    "failures": []
+  },
+  "forkBoundaries": {
+    "checks": [
+      {
+        "ok": true,
+        "label": "30D: second open without new approval rejected",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30D: withdraw immediately -> PositionLocked",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30D: withdraw at maturity-2s -> PositionLocked",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30D: non-owner withdraw rejected",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30D: no variable emission (oracle 0x0)",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30D: withdraw exactly at maturity allowed",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30D: duplicate withdraw -> PositionNotOpen",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30D: earned rewards still claimable once after withdrawal",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "30D: duplicate claim -> NothingToClaim",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: second open without new approval rejected",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: withdraw immediately -> PositionLocked",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: withdraw at maturity-2s -> PositionLocked",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: non-owner withdraw rejected",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: no variable emission (oracle 0x0)",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: withdraw exactly at maturity allowed",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: duplicate withdraw -> PositionNotOpen",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: earned rewards still claimable once after withdrawal",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "90D: duplicate claim -> NothingToClaim",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: second open without new approval rejected",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: withdraw immediately -> PositionLocked",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: withdraw at maturity-2s -> PositionLocked",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: non-owner withdraw rejected",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: no variable emission (oracle 0x0)",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: withdraw exactly at maturity allowed",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: duplicate withdraw -> PositionNotOpen",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: earned rewards still claimable once after withdrawal",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "180D: duplicate claim -> NothingToClaim",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: second open without new approval rejected",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: withdraw immediately -> PositionLocked",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: withdraw at maturity-2s -> PositionLocked",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: non-owner withdraw rejected",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: no variable emission (oracle 0x0)",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: withdraw exactly at maturity allowed",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: duplicate withdraw -> PositionNotOpen",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: earned rewards still claimable once after withdrawal",
+        "detail": null
+      },
+      {
+        "ok": true,
+        "label": "365D: duplicate claim -> NothingToClaim",
+        "detail": null
+      }
+    ],
+    "failures": []
+  }
+}

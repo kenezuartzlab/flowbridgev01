@@ -8,6 +8,7 @@ import { BOT_MAINNET_CHAIN_ID } from '@/lib/rewards/flowRewardsRegistry';
 import { MERKLE_DISTRIBUTOR_CLAIM_ABI } from '@/lib/rewards/merkleClaim';
 import { useMainnetFlowClaim } from '@/lib/rewards/useMainnetFlowClaim';
 import { trackProductEvent } from '@/lib/ops/productEvents';
+import { getActiveProvider } from '@/lib/wallet/activeProvider';
 
 /**
  * FlowBridge V30.2B P2E — BOT Mainnet 677 FLOW claim surface.
@@ -50,11 +51,11 @@ export function MainnetFlowClaimCard() {
 
   // Read-only: reflect an already-connected wallet without prompting.
   useEffect(() => {
-    const eth = (globalThis as any).window?.ethereum;
-    if (!eth) return;
-    eth
-      .request({ method: 'eth_accounts' })
-      .then((a: string[]) => setWallet(a?.[0] ? a[0].toLowerCase() : null))
+    void getActiveProvider()
+      .then((eth: any) => (eth ? eth.request({ method: 'eth_accounts' }) : null))
+      .then((a: string[] | null) => {
+        if (a) setWallet(a?.[0] ? a[0].toLowerCase() : null);
+      })
       .catch(() => undefined);
   }, []);
 
@@ -62,7 +63,7 @@ export function MainnetFlowClaimCard() {
     setError(null);
     setConnecting(true);
     try {
-      const eth = (globalThis as any).window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
       setWallet(accounts?.[0] ? accounts[0].toLowerCase() : null);
@@ -80,7 +81,7 @@ export function MainnetFlowClaimCard() {
     setError(null);
     trackProductEvent('claim_started', 'earn');
     try {
-      const eth = (globalThis as any).window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
       const from = (accounts?.[0] ?? '').toLowerCase();

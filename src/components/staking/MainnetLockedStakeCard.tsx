@@ -17,6 +17,7 @@ import {
   type LockedProductId,
 } from '@/lib/staking/mainnetLockedStaking';
 import { useMainnetLockedStake } from '@/lib/staking/useMainnetLockedStake';
+import { getActiveProvider } from '@/lib/wallet/activeProvider';
 
 /**
  * FlowBridge V30.2B P3D — BOT Mainnet 677 locked Genesis staking surface.
@@ -69,12 +70,12 @@ export function MainnetLockedStakeCard() {
   const stake = useMainnetLockedStake(wallet, productId, principal);
 
   useEffect(() => {
-    const eth = (globalThis as { window?: { ethereum?: { request: (a: unknown) => Promise<unknown> } } })
-      .window?.ethereum;
-    if (!eth) return;
-    void (eth.request({ method: 'eth_accounts' }) as Promise<string[]>)
-      .then((a) => setWallet(a?.[0] ? a[0].toLowerCase() : null))
-      .catch(() => undefined);
+    void getActiveProvider().then((eth: any) => {
+      if (!eth) return;
+      return (eth.request({ method: 'eth_accounts' }) as Promise<string[]>).then((a) =>
+        setWallet(a?.[0] ? a[0].toLowerCase() : null),
+      );
+    }).catch(() => undefined);
   }, []);
 
   // Changing product or amount voids any previously reviewed terms.
@@ -94,8 +95,7 @@ export function MainnetLockedStakeCard() {
     setError(null);
     setBusy('connect');
     try {
-      const eth = (globalThis as { window?: { ethereum?: { request: (a: unknown) => Promise<unknown> } } })
-        .window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
       setWallet(accounts?.[0] ? accounts[0].toLowerCase() : null);
@@ -111,8 +111,7 @@ export function MainnetLockedStakeCard() {
     setError(null);
     setBusy(kind + (positionId ?? ''));
     try {
-      const eth = (globalThis as { window?: { ethereum?: { request: (a: unknown) => Promise<unknown> } } })
-        .window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       // The wallet must already be connected: no economic action ever triggers
       // the connection request itself.
@@ -367,7 +366,7 @@ export function MainnetLockedStakeCard() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-bold">
                   #{p.positionId} · {LOCKED_PRODUCT_LABELS[p.productId as LockedProductId] ?? `Product ${p.productId}`} ·{' '}
-                  {fmtFlow(p.principal, 4)} FLOW · {p.open ? 'Locked' : 'Closed'}
+                  {fmtFlow(p.principal, 4)} FLOW · {!p.open ? 'Closed' : p.maturityAt * 1000 > Date.now() ? 'Locked' : 'Unlocked'}
                 </span>
                 <span className="text-muted">Claimable {fmtFlow(p.pending)} FLOW</span>
               </div>
@@ -389,6 +388,20 @@ export function MainnetLockedStakeCard() {
                     className="min-h-[38px] flex-1 rounded-xl border border-hairline bg-card text-[12px] font-bold disabled:opacity-45"
                   >
                     Withdraw at maturity
+                  </button>
+                </div>
+              ) : BigInt(p.pending) > 0n ? (
+                <div className="mt-2">
+                  <p className="mb-1.5 text-[11px] text-muted-soft">
+                    Principal returned. Earned rewards are still yours — claim them separately.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void send('claim', p.positionId)}
+                    disabled={busy != null}
+                    className="min-h-[38px] w-full rounded-xl border border-hairline bg-card text-[12px] font-bold disabled:opacity-45"
+                  >
+                    Claim remaining reward
                   </button>
                 </div>
               ) : null}

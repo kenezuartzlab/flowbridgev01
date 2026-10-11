@@ -16,6 +16,7 @@ import {
   useMainnetGenesisStake,
 } from '@/lib/staking/useMainnetGenesisStake';
 import { STAKING_V2_PRODUCTS } from '@/lib/staking/stakingV2Matrix';
+import { getActiveProvider } from '@/lib/wallet/activeProvider';
 
 /**
  * FlowBridge V30.2B P3B — BOT Mainnet 677 Flexible Genesis staking surface.
@@ -48,11 +49,11 @@ export function MainnetGenesisStakeCard() {
   const stake = useMainnetGenesisStake(wallet);
 
   useEffect(() => {
-    const eth = (globalThis as any).window?.ethereum;
-    if (!eth) return;
-    eth
-      .request({ method: 'eth_accounts' })
-      .then((a: string[]) => setWallet(a?.[0] ? a[0].toLowerCase() : null))
+    void getActiveProvider()
+      .then((eth: any) => (eth ? eth.request({ method: 'eth_accounts' }) : null))
+      .then((a: string[] | null) => {
+        if (a) setWallet(a?.[0] ? a[0].toLowerCase() : null);
+      })
       .catch(() => undefined);
   }, []);
 
@@ -89,7 +90,7 @@ export function MainnetGenesisStakeCard() {
     setError(null);
     setBusy(kind + (positionId ?? ''));
     try {
-      const eth = (globalThis as any).window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
       const from = (accounts?.[0] ?? '').toLowerCase();
@@ -145,7 +146,7 @@ export function MainnetGenesisStakeCard() {
     setError(null);
     setBusy('connect');
     try {
-      const eth = (globalThis as any).window?.ethereum;
+      const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
       const from = (accounts?.[0] ?? '').toLowerCase();
@@ -319,6 +320,20 @@ export function MainnetGenesisStakeCard() {
                     className="min-h-[38px] flex-1 rounded-xl border border-hairline bg-card text-[12px] font-bold disabled:opacity-45"
                   >
                     Withdraw principal
+                  </button>
+                </div>
+              ) : BigInt(p.pending) > 0n ? (
+                <div className="mt-2">
+                  <p className="mb-1.5 text-[11px] text-muted-soft">
+                    Principal returned. Earned rewards are still yours — claim them separately.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void send('claim', p.positionId)}
+                    disabled={busy != null}
+                    className="min-h-[38px] w-full rounded-xl border border-hairline bg-card text-[12px] font-bold disabled:opacity-45"
+                  >
+                    Claim remaining reward
                   </button>
                 </div>
               ) : null}
