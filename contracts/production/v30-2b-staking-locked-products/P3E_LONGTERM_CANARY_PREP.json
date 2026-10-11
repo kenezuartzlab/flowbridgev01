@@ -1,8 +1,8 @@
 {
   "gate": "V30.2B P3E — 90D/180D/365D canary preparation (unsigned)",
-  "generatedAt": "2026-10-11T14:54:41.631Z",
+  "generatedAt": "2026-10-11T15:22:47.511Z",
   "chainId": 677,
-  "liveBlock": 26328062,
+  "liveBlock": 26330322,
   "canary": "0x3D8a7Fa490F9db09dd8006b74688213AcE9C0164",
   "live": {
     "terms": {
@@ -35,7 +35,7 @@
       }
     },
     "canaryFlow": "292660.012261598158032906",
-    "canaryBot": "0.00523978",
+    "canaryBot": "0.10523978",
     "allowanceToVault": "0",
     "genesisQuotaRemainingSeconds": 5182776,
     "gasPriceWei": "20000000000",
@@ -46,7 +46,7 @@
     {
       "product": "90D",
       "productId": 2,
-      "expectedPositionIdIfOpenedInThisOrder": 3,
+      "expectedPositionIdIfOpenedInThisOrder": 6,
       "tx1": {
         "to": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
         "data": "0x095ea7b300000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d0000000000000000000000000000000000000000000000000de0b6b3a7640000",
@@ -59,7 +59,7 @@
         "data": "0x02c6234700000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000de0b6b3a7640000",
         "value": "0",
         "description": "openPosition(2, 1 FLOW)",
-        "gasEstimate": "329423"
+        "gasEstimate": "295223"
       },
       "quote": {
         "genesisRateBps": 3600,
@@ -71,13 +71,13 @@
         "floorFlow": "0.024657534246575342"
       },
       "simulatedMaturityAfterOpenSeconds": 7776000,
-      "maturityIfOpenedNow": "2027-01-09T14:54:22.000Z",
-      "forkOpenedAt": 1791730474
+      "maturityIfOpenedNow": "2027-01-09T15:22:37.000Z",
+      "forkOpenedAt": 1791732162
     },
     {
       "product": "180D",
       "productId": 3,
-      "expectedPositionIdIfOpenedInThisOrder": 4,
+      "expectedPositionIdIfOpenedInThisOrder": 7,
       "tx1": {
         "to": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
         "data": "0x095ea7b300000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d0000000000000000000000000000000000000000000000000de0b6b3a7640000",
@@ -90,7 +90,7 @@
         "data": "0x02c6234700000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000de0b6b3a7640000",
         "value": "0",
         "description": "openPosition(3, 1 FLOW)",
-        "gasEstimate": "312342"
+        "gasEstimate": "295242"
       },
       "quote": {
         "genesisRateBps": 4800,
@@ -102,13 +102,13 @@
         "floorFlow": "0.059178082191780821"
       },
       "simulatedMaturityAfterOpenSeconds": 15552000,
-      "maturityIfOpenedNow": "2027-04-09T14:54:22.000Z",
-      "forkOpenedAt": 1791730477
+      "maturityIfOpenedNow": "2027-04-09T15:22:37.000Z",
+      "forkOpenedAt": 1791732164
     },
     {
       "product": "365D",
       "productId": 4,
-      "expectedPositionIdIfOpenedInThisOrder": 5,
+      "expectedPositionIdIfOpenedInThisOrder": 8,
       "tx1": {
         "to": "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
         "data": "0x095ea7b300000000000000000000000015e7b1b4b16a43e6ce2e1f460dbe4201e9b6790d0000000000000000000000000000000000000000000000000de0b6b3a7640000",
@@ -121,7 +121,7 @@
         "data": "0x02c6234700000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000de0b6b3a7640000",
         "value": "0",
         "description": "openPosition(4, 1 FLOW)",
-        "gasEstimate": "312342"
+        "gasEstimate": "295242"
       },
       "quote": {
         "genesisRateBps": 6000,
@@ -133,18 +133,16 @@
         "floorFlow": "0.15"
       },
       "simulatedMaturityAfterOpenSeconds": 31536000,
-      "maturityIfOpenedNow": "2027-10-11T14:54:22.000Z",
-      "forkOpenedAt": 1791730480
+      "maturityIfOpenedNow": "2027-10-11T15:22:37.000Z",
+      "forkOpenedAt": 1791732166
     }
   ],
   "genesisQuotaAfterAllThreeSeconds": 5182776,
   "totalReservationFlow": "0.470492054794520545",
-  "totalGasCostBot": "0.02186416",
+  "totalGasCostBot": "0.02049616",
   "mainnetWrites": 0,
-  "decision": "BLOCKED",
-  "failures": [
-    "canary BOT covers gas for 6 txs at current gas price"
-  ],
+  "decision": "READY_FOR_SIGNING_APPROVAL",
+  "failures": [],
   "checks": [
     {
       "ok": true,
@@ -194,7 +192,7 @@
     {
       "ok": true,
       "label": "90D fork openPosition ok",
-      "d": "gas 319643"
+      "d": "gas 285443"
     },
     {
       "ok": true,
@@ -204,7 +202,7 @@
     {
       "ok": true,
       "label": "180D fork openPosition ok",
-      "d": "gas 302562"
+      "d": "gas 285462"
     },
     {
       "ok": true,
@@ -214,7 +212,7 @@
     {
       "ok": true,
       "label": "365D fork openPosition ok",
-      "d": "gas 302562"
+      "d": "gas 285462"
     },
     {
       "ok": true,
@@ -222,9 +220,9 @@
       "d": "0.470492054794520545"
     },
     {
-      "ok": false,
+      "ok": true,
       "label": "canary BOT covers gas for 6 txs at current gas price",
-      "d": "0.00523978 BOT vs 0.02186416 needed"
+      "d": "0.10523978 BOT vs 0.02049616 needed"
     }
   ]
 }
