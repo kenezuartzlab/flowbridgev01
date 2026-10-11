@@ -321,6 +321,20 @@ export function MainnetGenesisStakeCard() {
                     Withdraw principal
                   </button>
                 </div>
+              ) : BigInt(p.pending) > 0n ? (
+                <div className="mt-2">
+                  <p className="mb-1.5 text-[11px] text-muted-soft">
+                    Principal returned. Earned rewards are still yours — claim them separately.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void send('claim', p.positionId)}
+                    disabled={busy != null}
+                    className="min-h-[38px] w-full rounded-xl border border-hairline bg-card text-[12px] font-bold disabled:opacity-45"
+                  >
+                    Claim remaining reward
+                  </button>
+                </div>
               ) : null}
             </div>
           ))}
