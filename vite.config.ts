@@ -15,6 +15,26 @@ import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 const serverEnv = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 Object.assign(process.env, serverEnv);
 
+// WalletConnect needs a real EventEmitter in the browser. Without this the
+// client build swaps "events"/"node:events" for an empty Node stub and
+// WalletConnect fails with "EventEmitter is not a constructor". Server
+// (SSR/worker) builds keep the platform module.
+const EVENTS_POLYFILL = path.resolve(process.cwd(), "node_modules/events/events.js");
+function browserEventsPolyfill() {
+  return {
+    name: "flowbridge:browser-events-polyfill",
+    enforce: "pre" as const,
+    resolveId(id: string, _importer: string | undefined, options?: { ssr?: boolean }) {
+      if (options?.ssr) return null;
+      // @ts-expect-error environment is provided by Vite 6+ plugin context
+      const envName: string | undefined = this?.environment?.name;
+      if (envName && envName !== "client") return null;
+      if (id === "events" || id === "node:events") return EVENTS_POLYFILL;
+      return null;
+    },
+  };
+}
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
@@ -22,7 +42,7 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    plugins: [mcpPlugin()],
+    plugins: [mcpPlugin(), browserEventsPolyfill()],
     // Pre-bundle the lazily-loaded WalletConnect SDK at dev-server start so the
     // first tap never triggers a mid-session re-optimize (stale module 504s).
     optimizeDeps: { include: ["@walletconnect/ethereum-provider"] },
