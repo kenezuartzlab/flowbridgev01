@@ -32,11 +32,10 @@ export const LOCKED_PRODUCT_LABELS: Readonly<Record<LockedProductId, string>> = 
 };
 
 /**
- * Owner-authorized locked terms. Only the 30-day term is approved for public
- * execution; 90D / 180D / 365D stay blocked for the public until they are
- * approved separately.
+ * Owner-authorized locked terms. Owner approved public execution of all four
+ * locked terms (2026-10-12). Every live safety gate below still applies.
  */
-export const AUTHORIZED_LOCKED_PRODUCT_IDS: readonly LockedProductId[] = [1];
+export const AUTHORIZED_LOCKED_PRODUCT_IDS: readonly LockedProductId[] = [1, 2, 3, 4];
 
 /**
  * P3E long-term maturity canary wallet. The owner approved 1 FLOW canary

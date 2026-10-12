@@ -227,41 +227,21 @@ describe('P4A.2.1 terms-change guard', () => {
     expect(lockedQuoteFingerprint(q)).not.toBe(lockedQuoteFingerprint(quote30({ floorRateBps: 801 })));
   });
 
-  it('only the owner-approved 30-day term is executable; longer terms stay blocked', () => {
+  it('all four locked terms are publicly executable for any wallet', () => {
     for (const id of LOCKED_PRODUCT_IDS) {
-      const r = evaluateLockedExecution(quote30({ productId: id }), gates());
-      if (id === 1) {
-        expect(r.decision).toBe('EXECUTABLE');
-      } else {
-        expect(r.decision).toBe('BLOCKED');
-        expect(r.blockers.join(' ')).toContain('not approved yet');
-      }
-    }
-    expect(isLockedStakingActivated()).toBe(true);
-  });
-
-  it('the approved long-term canary wallet can open 90D/180D/365D; other wallets stay blocked', () => {
-    for (const id of LOCKED_PRODUCT_IDS) {
-      const canary = evaluateLockedExecution(quote30({ productId: id }), {
-        ...gates(),
-        wallet: LONG_TERM_CANARY_WALLET,
-      });
-      expect(canary.decision).toBe('EXECUTABLE');
-
-      const other = evaluateLockedExecution(quote30({ productId: id }), {
+      const r = evaluateLockedExecution(quote30({ productId: id }), {
         ...gates(),
         wallet: '0x0000000000000000000000000000000000000001',
       });
-      if (id === 1) {
-        expect(other.decision).toBe('EXECUTABLE');
-      } else {
-        expect(other.decision).toBe('BLOCKED');
-        expect(other.blockers.join(' ')).toContain('not approved yet');
-      }
+      expect(r.decision).toBe('EXECUTABLE');
+      expect(isLockedProductAuthorized(id, null)).toBe(true);
     }
-    // Case-insensitive match on the canary address.
-    expect(isLockedProductAuthorized(2, LONG_TERM_CANARY_WALLET.toUpperCase())).toBe(true);
-    expect(isLockedProductAuthorized(2, null)).toBe(false);
-    expect(isLockedProductAuthorized(2)).toBe(false);
+    expect(isLockedStakingActivated()).toBe(true);
+    expect(LONG_TERM_CANARY_WALLET).toMatch(/^0x/);
+  });
+
+  it('public access never bypasses the reserve gate', () => {
+    const r = evaluateLockedExecution(quote30({ productId: 4 }), { ...gates(), treasuryFreeWei: 0n });
+    expect(r.decision).toBe('BLOCKED');
   });
 });
