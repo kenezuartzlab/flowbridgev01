@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Download, Copy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchApplicationMaterials, fetchApplicationReadiness, downloadApplicationFile } from "@/lib/admin/adminApi";
-import { APPLICATION_FILES } from "@/lib/application/applicationFiles";
+import { APPLICATION_FILES, EDITABLE_COPY_LABEL } from "@/lib/application/applicationFiles";
 
 type Material = { id: string; title: string; url: string | null };
 function download(name: string, body: string, type = "application/json") {
@@ -66,7 +66,8 @@ export function ApplicationWorkspace({ wallet }: { wallet: string }) {
       </>}
       <section className="space-y-3 border-b border-hairline py-4">
         <h2 className="text-base font-bold">APPLICATION FILES — LATEST MASTER REFRESH</h2>
-        <p className="text-xs text-muted">Admin-only downloads. Current v1.1 files only; no expiring links.</p>
+        <p className="text-xs text-muted">Admin-only downloads. Frozen v1.1 master refresh. PDFs are canonical; no expiring links.</p>
+        <p className="text-xs font-bold text-muted">DOCX/PPTX: {EDITABLE_COPY_LABEL}</p>
         {[...new Set(APPLICATION_FILES.map((f) => f.group))].map((group) => <div key={group} className="space-y-1">
           <p className="text-xs font-bold">{group}</p>
           <div className="flex flex-wrap gap-2">{APPLICATION_FILES.filter((f) => f.group === group).map((f) => <Button key={f.id} variant={f.id === "package-zip" ? "default" : "outline"} size="sm" disabled={busy === f.id}

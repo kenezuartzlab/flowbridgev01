@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 
 // PRIVATE: BOT Ecosystem Support application materials. Never linked from public
 // pages, sitemap or navigation. Admin-gated; returns short-lived signed URLs.
+// Serves only the frozen CANONICAL v1.1 master-refresh PDFs.
 const FILES = [
-  { id: "dossier", title: "Application dossier v1.1", path: "FlowBridge_Application_Dossier_v1.1.pdf" },
-  { id: "pitch-deck", title: "BOT pitch deck v1.1", path: "FlowBridge_BOT_Pitch_Deck_v1.1.pdf" },
-  { id: "evidence-pack", title: "On-chain evidence pack v1.1", path: "FlowBridge_Onchain_Evidence_Pack_v1.1.pdf" },
-  { id: "reviewer-summary", title: "Reviewer summary v1.1", path: "FlowBridge_Reviewer_Summary_v1.1.pdf" },
-  { id: "whitepaper", title: "Whitepaper v1.1", path: "master-refresh/FlowBridge_Whitepaper_v1.1.pdf" },
+  { id: "dossier", title: "Application dossier v1.1 (PDF)", path: "master-refresh/FlowBridge_Application_Dossier_v1.1.pdf" },
+  { id: "whitepaper", title: "Whitepaper v1.1 (PDF)", path: "master-refresh/FlowBridge_Whitepaper_v1.1.pdf" },
+  { id: "pitch-deck", title: "BOT pitch deck v1.1 (PDF)", path: "master-refresh/FlowBridge_BOT_Pitch_Deck_v1.1.pdf" },
+  { id: "evidence-pack", title: "On-chain evidence pack v1.1 (PDF)", path: "master-refresh/FlowBridge_Onchain_Evidence_Pack_v1.1.pdf" },
+  { id: "reviewer-summary", title: "Reviewer summary v1.1 (PDF)", path: "master-refresh/FlowBridge_Reviewer_Summary_v1.1.pdf" },
 ];
 
 export const Route = createFileRoute("/api/admin/application-materials")({
@@ -23,9 +24,10 @@ export const Route = createFileRoute("/api/admin/application-materials")({
         const expiresIn = 60 * 60 * 24 * 7;
         const files = await Promise.all(
           FILES.map(async (f) => {
+            const name = f.path.split("/").pop()!;
             const { data, error } = await supabaseAdmin.storage
               .from("application-materials")
-              .createSignedUrl(f.path, expiresIn, { download: f.path });
+              .createSignedUrl(f.path, expiresIn, { download: name });
             return { id: f.id, title: f.title, url: error ? null : data.signedUrl };
           }),
         );
