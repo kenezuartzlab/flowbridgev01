@@ -1,5 +1,8 @@
 # MultiSend BOT Testnet Release
 
+# Docs mobile text and Flow AI
+- [x] Wrap long contract verification hashes within their available width; floating AI is 70% opaque at rest and fully visible on interaction. Verified 360px, 390px and desktop with no horizontal overflow or page errors; automatic build OK. Preview only.
+
 # BOT application master refresh
 - [x] Refresh private application status, owner answers and reviewer materials without submission or on-chain writes.
 - [x] Verify 29 current entries (26 BOT Mainnet useful, including 13 external integrations); refresh public-safe contracts/whitepaper/BOT support information in preview.
