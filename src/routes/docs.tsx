@@ -68,7 +68,7 @@ function DocsPage() {
           <p className="fb-eyebrow flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" />Contracts & security</p>
           <ul className="mt-3 space-y-2">
             {live.map((n) => (
-              <li key={`${n.chainId}:${n.address}`} className="rounded-lg border border-hairline p-3">
+              <li key={`${n.chainId}:${n.address}`} className="min-w-0 rounded-lg border border-hairline p-3 [overflow-wrap:anywhere]">
                 <p className="text-[12.5px] font-bold">{n.name} · {n.network} · {n.chainId}</p>
                 <p className="mt-1 text-[11px] text-muted">{n.state} — {n.purpose}</p>
                 <a href={n.explorer} target="_blank" rel="noreferrer" className="mt-1 flex items-start gap-1 font-mono text-[11px] text-primary">
