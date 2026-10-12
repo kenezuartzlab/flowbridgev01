@@ -189,7 +189,7 @@ export function MainnetLockedStakeCard() {
     <Surface id="mainnet-locked-staking">
       <SectionHeader
         title="Locked FLOW staking — Genesis terms"
-        hint="The 30-day term is open to everyone; 90D / 180D / 365D are open to the approved long-term canary wallet only. Rate, Genesis duration and reserved rewards are read live from the contract for your wallet before anything can be signed."
+        hint="All locked terms (30D / 90D / 180D / 365D) are open to everyone. Principal unlocks at maturity; claims and withdrawals are separate transactions. Rate, Genesis duration and reserved rewards are read live from the contract for your wallet before anything can be signed."
         badge={<StatusPill tone={executable ? 'ok' : 'warn'}>{executable ? 'Live' : 'Blocked'}</StatusPill>}
       />
 

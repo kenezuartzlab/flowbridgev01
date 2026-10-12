@@ -349,17 +349,16 @@ export function MainnetGenesisStakeCard() {
 
       <div className="space-y-2 border-t border-hairline p-4 text-[11px] leading-relaxed text-muted">
         <p>
-          <strong className="text-foreground">Locked products.</strong> The 30-day term is open to
-          everyone and proven end-to-end on chain {BOT_MAINNET_CHAIN_ID}. 90D / 180D / 365D are in
-          long-term canary verification — open to the approved canary wallet only until real
-          maturity evidence completes.
+          <strong className="text-foreground">Locked products.</strong> 30D / 90D / 180D / 365D
+          are open to everyone on chain {BOT_MAINNET_CHAIN_ID}. Locked principal can be withdrawn
+          only at maturity. Claiming rewards and withdrawing principal are separate transactions.
         </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {STAKING_V2_PRODUCTS.filter((p) => p.lockSeconds > 0).map((p) => (
             <div key={p.id} className="rounded-xl border border-hairline bg-card/60 px-3 py-2">
               <div className="text-[12px] font-black">{p.label}</div>
               <div className="text-[10px] font-mono uppercase tracking-[0.08em] text-muted-soft">
-                {p.lockSeconds <= 30 * 86_400 ? 'Open' : 'Canary only'}
+                Open
               </div>
             </div>
           ))}
