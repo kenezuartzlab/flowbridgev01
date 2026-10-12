@@ -7,6 +7,7 @@ const FILES = [
   { id: "pitch-deck", title: "BOT pitch deck v1.1", path: "FlowBridge_BOT_Pitch_Deck_v1.1.pdf" },
   { id: "evidence-pack", title: "On-chain evidence pack v1.1", path: "FlowBridge_Onchain_Evidence_Pack_v1.1.pdf" },
   { id: "reviewer-summary", title: "Reviewer summary v1.1", path: "FlowBridge_Reviewer_Summary_v1.1.pdf" },
+  { id: "whitepaper", title: "Whitepaper v1.1", path: "master-refresh/FlowBridge_Whitepaper_v1.1.pdf" },
 ];
 
 export const Route = createFileRoute("/api/admin/application-materials")({

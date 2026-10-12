@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Download, Copy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { fetchApplicationMaterials, fetchApplicationReadiness } from "@/lib/admin/adminApi";
+import { fetchApplicationMaterials, fetchApplicationReadiness, downloadApplicationFile } from "@/lib/admin/adminApi";
+import { APPLICATION_FILES } from "@/lib/application/applicationFiles";
 
 type Material = { id: string; title: string; url: string | null };
 function download(name: string, body: string, type = "application/json") {
@@ -15,6 +16,8 @@ export function ApplicationWorkspace({ wallet }: { wallet: string }) {
   const [files, setFiles] = useState<Material[]>([]);
   const [ready, setReady] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [dlError, setDlError] = useState<string | null>(null);
   const load = useCallback(() => {
     setError(null); setReady(null);
     Promise.all([fetchApplicationMaterials(wallet), fetchApplicationReadiness(wallet)])
@@ -61,6 +64,16 @@ export function ApplicationWorkspace({ wallet }: { wallet: string }) {
           <p className="text-xs text-muted">Block {ready.block} · {ready.generatedAt}. Historical and quarantined replacements excluded from the current registry.</p>
         </section>
       </>}
+      <section className="space-y-3 border-b border-hairline py-4">
+        <h2 className="text-base font-bold">APPLICATION FILES — LATEST MASTER REFRESH</h2>
+        <p className="text-xs text-muted">Admin-only downloads. Current v1.1 files only; no expiring links.</p>
+        {[...new Set(APPLICATION_FILES.map((f) => f.group))].map((group) => <div key={group} className="space-y-1">
+          <p className="text-xs font-bold">{group}</p>
+          <div className="flex flex-wrap gap-2">{APPLICATION_FILES.filter((f) => f.group === group).map((f) => <Button key={f.id} variant={f.id === "package-zip" ? "default" : "outline"} size="sm" disabled={busy === f.id}
+            onClick={() => { setBusy(f.id); setDlError(null); downloadApplicationFile(wallet, f.id, f.path.split("/").pop()!).catch((e) => setDlError(e?.message ?? "Download failed")).finally(() => setBusy(null)); }}><Download />{f.label}</Button>)}</div>
+        </div>)}
+        {dlError && <p className="text-xs text-destructive">{dlError}</p>}
+      </section>
       <section className="space-y-3 py-4">
         <h2 className="text-base font-bold">Private reviewer materials</h2>
         <div className="flex flex-wrap gap-2">{files.map((file) => <Button key={file.id} variant="outline" size="sm" disabled={!file.url} onClick={() => { if (file.url) window.open(file.url, "_blank", "noopener,noreferrer"); }}><Download />{file.title}</Button>)}</div>

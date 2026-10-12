@@ -58,6 +58,7 @@ import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
 import { Route as CampaignsPartnersRouteImport } from './routes/campaigns/partners'
 import { Route as CampaignsStudioRouteImport } from './routes/campaigns/studio'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as ApiAdminApplicationFilesRouteImport } from './routes/api/admin.application-files'
 import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/admin.application-materials'
 import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
@@ -358,6 +359,12 @@ const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
     path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminApplicationFilesRoute =
+  ApiAdminApplicationFilesRouteImport.update({
+    id: '/api/admin/application-files',
+    path: '/api/admin/application-files',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiAdminApplicationMaterialsRoute =
@@ -686,6 +693,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -790,6 +798,7 @@ export interface FileRoutesByTo {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -895,6 +904,7 @@ export interface FileRoutesById {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
@@ -1001,6 +1011,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
@@ -1105,6 +1116,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
@@ -1209,6 +1221,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
@@ -1314,6 +1327,7 @@ export interface RootRouteChildren {
   CampaignsStudioRoute: typeof CampaignsStudioRoute
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiAdminApplicationFilesRoute: typeof ApiAdminApplicationFilesRoute
   ApiAdminApplicationMaterialsRoute: typeof ApiAdminApplicationMaterialsRoute
   ApiAdminApplicationReadinessRoute: typeof ApiAdminApplicationReadinessRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
@@ -1701,6 +1715,13 @@ declare module '@tanstack/react-router' {
       path: '/.mcp/invoke-tool/$tool'
       fullPath: '/.mcp/invoke-tool/$tool'
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/application-files': {
+      id: '/api/admin/application-files'
+      path: '/api/admin/application-files'
+      fullPath: '/api/admin/application-files'
+      preLoaderRoute: typeof ApiAdminApplicationFilesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/application-materials': {
@@ -2207,6 +2228,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsStudioRoute: CampaignsStudioRoute,
   CampaignsIndexRoute: CampaignsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiAdminApplicationFilesRoute: ApiAdminApplicationFilesRoute,
   ApiAdminApplicationMaterialsRoute: ApiAdminApplicationMaterialsRoute,
   ApiAdminApplicationReadinessRoute: ApiAdminApplicationReadinessRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
