@@ -4,7 +4,7 @@
  * time of the official launch article. Fixed in code so it can never be
  * backdated or moved through the evidence tracker.
  */
-export const OFFICIAL_LAUNCH_AT = "__LAUNCH_AT__";
+export const OFFICIAL_LAUNCH_AT = "2026-10-13T14:15:07Z";
 export const LAUNCH_ARTICLE_PATH = "/blog/flowbridge-officially-launches-on-bot-chain-mainnet";
 
 const DAY = 86_400_000;
