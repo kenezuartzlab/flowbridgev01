@@ -10,7 +10,7 @@ export function PublicFooter() {
       <div className="flex flex-wrap items-center gap-3">
         <Link to="/" className="flex items-center gap-2 font-bold text-foreground"><img src={flowbridgeLogo} alt="" className="h-6 w-6 object-contain" />FlowBridge</Link>
         <span className="border-l border-hairline pl-3">Built on BOT Chain</span>
-        <a href="https://botchain.ai" target="_blank" rel="noreferrer" aria-label="BOT Chain website"><img src={botLogo.url} alt="BOT Chain" className="h-4 w-[82px] object-contain" /></a>
+        <a href="https://botchain.ai" target="_blank" rel="noreferrer" aria-label="BOT Chain website" className="flex items-center gap-1.5 font-bold text-foreground"><span className="block h-4 w-4 overflow-hidden"><img src={botLogo.url} alt="" className="h-4 w-[82px] max-w-none" /></span>BOT Chain</a>
       </div>
       <nav aria-label="Ecosystem links" className="flex flex-wrap items-center gap-4">
         <Link to="/bot-chain" className="hover:text-primary">Ecosystem</Link>

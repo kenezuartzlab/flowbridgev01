@@ -21,7 +21,7 @@ export const Route = createFileRoute("/api/admin/launch-preparation")({
       try {
         const tracker = data ? launchTrackerSchema.parse(JSON.parse(await data.text())) : emptyLaunchTracker();
         const { default: drafts } = await import("../../../docs/private/bot-application/launch-pre-day-0.md?raw");
-        return Response.json({ tracker, drafts, revision: data ? await data.text() : null }, { headers: { "cache-control": "private, no-store", "x-robots-tag": "noindex, nofollow" } });
+        return Response.json({ tracker, drafts }, { headers: { "cache-control": "private, no-store", "x-robots-tag": "noindex, nofollow" } });
       } catch { return Response.json({ error: "Stored launch evidence failed validation; not overwritten" }, { status: 503 }); }
     },
     PUT: async ({ request }) => {
