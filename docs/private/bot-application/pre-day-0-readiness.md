@@ -47,3 +47,15 @@ Source: BOT Mainnet 677 transaction + receipt, read directly from rpc.botchain.a
 - Received: 0.123233 USDT (123233 raw, 6 decimals)
 - Not launch-window evidence.
 - Fee audit 2026-10-13 (read-only): Router V3 globalFeeBps 1 (0.01%); Router V4 globalFeeBps 0, routerFeeBps(0) 1 → effective 1 bp (0.01%). App no longer discloses a hardcoded 0.1%; confirmation shows the selected router's computeRouterFee result.
+
+## DAY 0 — OFFICIAL BOT CHAIN LAUNCH (started 2026-10-13)
+- Day 0 anchor: 2026-10-13T14:19:32Z (first confirmed HTTP 200 of the launch article; prior check ~14:17 UTC returned 404)
+- Launch article: https://flowbridge.space/blog/flowbridge-officially-launches-on-bot-chain-mainnet
+- Contracts & Security: https://flowbridge.space/docs
+- 8-day real-user window: → 2026-10-21T14:19:32Z (target ≥3 independent wallets, ≥5 genuine core interactions)
+- 30-day social window: → 2026-11-12T14:19:32Z (target ≥5 genuine X updates)
+- Branding verified live on /bot-chain desktop + 390px: header BOT Mainnet badge, footer "Built on BOT Chain", botchain.ai, scan.botchain.ai; no "Official Partner".
+- Security scan 2026-10-13T14:22:15Z: 0 unresolved critical/high (1 critical + 1 warning previously reviewed and ignored by owner).
+- Excluded from counts: pre-launch QA tx 0x2e32d9c2…a21c533 and all earlier tests.
+- X post URL + timestamp: PENDING OWNER (no X connection available to FlowBridge tooling)
+- Telegram post evidence: PENDING OWNER
