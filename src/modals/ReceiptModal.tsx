@@ -189,7 +189,7 @@ export function ReceiptModal({
 
         {txType === 'swap' && (
           <p className="text-[10px] text-muted/60 text-center leading-snug px-2">
-            A 0.1% platform fee was charged by FlowBridge for this swap.
+            The FlowBridge protocol fee shown on your confirmation screen was included in this swap.
           </p>
         )}
       </div>
