@@ -4,7 +4,8 @@
 - [x] Prepare private launch article, five social drafts and qualitative originality note; no public blog route or sitemap entry.
 - [x] Add shared official BOT network badge and public footer while retaining FlowBridge branding and mobile Flow AI.
 - [x] Add admin-gated private evidence capture/screenshots; all dates, windows and Day 8/Day 30 remain NOT STARTED.
-- [ ] Verify preview admin evidence save/readback, anonymous denial, mobile/desktop layout and targeted tests.
+- [x] Verify authenticated preview tracker save/readback, anonymous GET/PUT/POST denial, mobile/desktop branding and 136 targeted tests; automatic build clean.
+- [x] Read BOT Mainnet 677 block 26,549,206: all products active, principal custody exact, reserves solvent, oracle disabled; genuine historical receipts successful, not counted as launch evidence.
 - [ ] Production core wallet execution acceptance — owner-confirmed real-wallet flow required; no transactions authorized by this readiness task.
 
 # Docs mobile text and Flow AI
