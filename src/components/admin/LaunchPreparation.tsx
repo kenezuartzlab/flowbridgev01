@@ -1,3 +1,4 @@
+import { OFFICIAL_LAUNCH_AT, SOCIAL_WINDOW_ENDS_AT, INTERACTION_WINDOW_ENDS_AT, windowStatus } from "@/lib/application/officialLaunch";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Download, Plus, RefreshCw, Save, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,13 +44,13 @@ export function LaunchPreparation({ wallet }: { wallet: string }) {
     link.href = objectUrl; link.download = "FlowBridge_Pre_Day_0_Private_Drafts.md"; link.click(); setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   };
   return <section className="min-w-0 space-y-4 border-t border-hairline py-5">
-    <div className="flex items-start justify-between gap-2"><div><p className="fb-eyebrow">Private · owner-controlled · unpublished</p><h2 className="text-base font-bold">BOT launch / grant evidence — Pre-Day-0</h2></div><Button size="icon" variant="ghost" title="Refresh launch preparation" disabled={busy} onClick={load}><RefreshCw /></Button></div>
+    <div className="flex items-start justify-between gap-2"><div><p className="fb-eyebrow">Private · owner-controlled</p><h2 className="text-base font-bold">BOT launch / grant evidence — Day 0 started</h2></div><Button size="icon" variant="ghost" title="Refresh launch preparation" disabled={busy} onClick={load}><RefreshCw /></Button></div>
     {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
     {!tracker && !error && <p className="text-xs text-muted">Reading private launch preparation…</p>}
     {tracker && <>
-      <dl className="grid gap-3 text-xs sm:grid-cols-2">{["OFFICIAL LAUNCH DATE", "30-DAY SOCIAL WINDOW", "8-DAY USER/INTERACTION WINDOW", "DAY 8 STATUS", "DAY 30 STATUS"].map((label) => <div key={label}><dt className="font-bold">{label}</dt><dd className="mt-1 text-muted">NOT STARTED</dd></div>)}</dl>
-      <p className="text-xs text-muted">Option A: REQUESTED · Monitoring pending BOT Chain approval/onboarding · Compliance: OWNER ACTION. No submission or announcement.</p>
-      <p className="text-xs text-muted">Evidence entries are owner-supplied source records, not verified eligibility or independent-user counts. Saving evidence cannot start Day 0.</p>
+      <dl className="grid gap-3 text-xs sm:grid-cols-2">{([["OFFICIAL LAUNCH DATE", OFFICIAL_LAUNCH_AT], ["30-DAY SOCIAL WINDOW", `${OFFICIAL_LAUNCH_AT} → ${SOCIAL_WINDOW_ENDS_AT}`], ["8-DAY USER/INTERACTION WINDOW", `${OFFICIAL_LAUNCH_AT} → ${INTERACTION_WINDOW_ENDS_AT}`], ["DAY 8 STATUS", windowStatus(INTERACTION_WINDOW_ENDS_AT)], ["DAY 30 STATUS", windowStatus(SOCIAL_WINDOW_ENDS_AT)]] as const).map(([label, v]) => <div key={label}><dt className="font-bold">{label}</dt><dd className="mt-1 break-all text-muted">{v}</dd></div>)}</dl>
+      <p className="text-xs text-muted">Option A: REQUESTED · Monitoring pending BOT Chain approval/onboarding · Compliance: OWNER ACTION. Application not submitted.</p>
+      <p className="text-xs text-muted">Evidence entries are owner-supplied source records, not verified eligibility or independent-user counts. Day 0 is fixed in code and cannot be moved from here.</p>
       <h3 className="text-sm font-bold">Genuine source evidence</h3>
       <div className="grid min-w-0 gap-3 sm:grid-cols-2">
         <label className="space-y-1 text-xs">Evidence type<Select value={kind} onValueChange={(v: LaunchEvidence["kind"]) => setKind(v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{[["launch_article", "Launch article"], ["launch_x", "Official launch X post"], ["x_post", "Qualifying X candidate"], ["wallet", "Independent wallet evidence"], ["transaction", "On-chain transaction"], ["screenshot", "Screenshot"]].map(([v, label]) => <SelectItem key={v} value={v}>{label}</SelectItem>)}</SelectContent></Select></label>
@@ -63,7 +64,7 @@ export function LaunchPreparation({ wallet }: { wallet: string }) {
       <input ref={uploadRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; setBusy(true); setError(""); try { const result = await uploadLaunchScreenshot(wallet, file); setScreenshot(result.path); } catch (err) { setError(err instanceof Error ? err.message : "Screenshot upload failed"); } finally { setBusy(false); e.target.value = ""; } }} />
       <div className="flex flex-wrap gap-2"><Button size="sm" variant="outline" disabled={busy} onClick={() => uploadRef.current?.click()}><Upload />Upload private screenshot</Button><Button size="sm" disabled={busy} onClick={add}><Plus /><Save />Save evidence</Button></div>
       {screenshot && <p className="break-all text-xs text-muted">Private screenshot uploaded; save evidence to attach it.</p>}
-      {saved && <p role="status" className="text-xs text-success">Evidence saved. Launch windows remain NOT STARTED.</p>}
+      {saved && <p role="status" className="text-xs text-success">Evidence saved. Launch dates unchanged.</p>}
       {tracker.evidence.length === 0 ? <p className="text-xs text-muted">No launch-window evidence recorded.</p> : <ul className="space-y-3">{tracker.evidence.map((row) => <li key={row.id} className="min-w-0 space-y-1 border-b border-hairline pb-3 text-xs"><p className="font-bold">{row.kind.replaceAll("_", " ")} · {row.coreFunction} · Owner-supplied, pending review</p>{row.url && <a href={row.url} target="_blank" rel="noreferrer" className="break-all text-primary">{row.url}</a>}<p className="break-all text-muted">{row.timestamp || "No publication timestamp"} {row.wallet} {row.transactionHash}</p><p className="whitespace-pre-wrap break-words">{row.notes}</p>{row.screenshot && <Button size="sm" variant="outline" onClick={() => downloadLaunchScreenshot(wallet, row.screenshot).catch((e) => setError(e.message))}><Download />Private screenshot</Button>}</li>)}</ul>}
       <details className="border-t border-hairline pt-4"><summary className="cursor-pointer text-sm font-bold">Official launch article, social drafts &amp; originality note — DRAFT</summary><Button className="my-3" variant="outline" size="sm" onClick={downloadDrafts}><Download />Download private drafts</Button><div className="whitespace-pre-wrap break-words text-xs leading-relaxed text-muted [overflow-wrap:anywhere]">{drafts}</div></details>
     </>}

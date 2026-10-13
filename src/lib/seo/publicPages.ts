@@ -11,6 +11,7 @@ export const PUBLIC_PAGES = [
   { path: "/rewards", changefreq: "weekly", priority: "0.7" },
   { path: "/docs", changefreq: "monthly", priority: "0.7" },
   { path: "/bot-chain", changefreq: "monthly", priority: "0.7" },
+  { path: "/blog/flowbridge-officially-launches-on-bot-chain-mainnet", changefreq: "monthly", priority: "0.7" },
   { path: "/fortune", changefreq: "weekly", priority: "0.5" },
   { path: "/ecosurge", changefreq: "weekly", priority: "0.5" },
   { path: "/arcadeflix", changefreq: "weekly", priority: "0.5" },
