@@ -1873,7 +1873,7 @@ export function DonateModal({
                   {/* Claim Button action panel */}
                   {(() => {
                     const claimable = incentives?.claimableTotal ?? incentives?.flowPoints ?? 0;
-                    const socialsOk = !!(incentives?.socials?.youtube && incentives?.socials?.x && incentives?.socials?.telegram);
+                    const socialsOk = true; // follows are optional and never gate claims
                     const walletOk = !!incentives?.walletAddress;
                     const canClaim = !!incentives && claimable >= 1000 && socialsOk && walletOk && !claimStatus.loading;
                     const gateReason = !walletOk
