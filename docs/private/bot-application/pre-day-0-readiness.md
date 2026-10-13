@@ -57,5 +57,6 @@ Source: BOT Mainnet 677 transaction + receipt, read directly from rpc.botchain.a
 - Branding verified live on /bot-chain desktop + 390px: header BOT Mainnet badge, footer "Built on BOT Chain", botchain.ai, scan.botchain.ai; no "Official Partner".
 - Security scan 2026-10-13T14:22:15Z: 0 unresolved critical/high (1 critical + 1 warning previously reviewed and ignored by owner).
 - Excluded from counts: pre-launch QA tx 0x2e32d9c2…a21c533 and all earlier tests.
-- X post URL + timestamp: PENDING OWNER (no X connection available to FlowBridge tooling)
-- Telegram post evidence: PENDING OWNER
+- X post: https://x.com/flowbridgeweb3/status/2110028159987089860 — published 2026-10-13T15:21:00Z (11:21 PM Manila), after the Day 0 anchor; link verified reachable. Recorded in the launch evidence tracker as launch_x.
+- Telegram post: https://t.me/flowbridgeweb3/14 — published 2026-10-13T15:29:00Z (11:29 PM Manila), after the Day 0 anchor; link verified reachable. Recorded in the launch evidence tracker as telegram_post.
+- OFFICIAL BOT CHAIN LAUNCH: COMPLETE. X ANNOUNCEMENT: LIVE. TELEGRAM ANNOUNCEMENT: LIVE. 8-day and 30-day windows: ACTIVE from the unchanged Day 0 anchor. Only genuine post-Day-0 activity counts.
