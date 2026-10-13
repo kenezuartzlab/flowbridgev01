@@ -57,6 +57,9 @@ export const Route = createFileRoute("/api/studio/campaigns/$id")({
         const { requirePartner } = await import("@/lib/partner/partnerGate.server");
         const gate = await requirePartner(request);
         if (!gate.ok) return gate.response;
+        if (gate.partner.role === "partner_viewer") {
+          return jsonResponse({ error: "Viewers cannot delete campaigns." }, 403);
+        }
         const { deletePartnerDraft } = await import("@/lib/partner/partnerStudio.server");
         try {
           await deletePartnerDraft(gate.partner, params.id);
