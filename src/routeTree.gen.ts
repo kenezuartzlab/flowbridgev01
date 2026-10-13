@@ -63,6 +63,7 @@ import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/a
 import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
+import { Route as ApiAdminLaunchPreparationRouteImport } from './routes/api/admin.launch-preparation'
 import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
 import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/admin.mainnet-prerequisites'
 import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/admin.mainnet-release-freeze'
@@ -389,6 +390,12 @@ const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
   path: '/api/admin/banner-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminLaunchPreparationRoute =
+  ApiAdminLaunchPreparationRouteImport.update({
+    id: '/api/admin/launch-preparation',
+    path: '/api/admin/launch-preparation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminMainnetPreflightRoute =
   ApiAdminMainnetPreflightRouteImport.update({
     id: '/api/admin/mainnet-preflight',
@@ -698,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
@@ -803,6 +811,7 @@ export interface FileRoutesByTo {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
@@ -909,6 +918,7 @@ export interface FileRoutesById {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
@@ -1016,6 +1026,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
     | '/api/admin/mainnet-release-freeze'
@@ -1121,6 +1132,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
     | '/api/admin/mainnet-release-freeze'
@@ -1226,6 +1238,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
     | '/api/admin/mainnet-release-freeze'
@@ -1332,6 +1345,7 @@ export interface RootRouteChildren {
   ApiAdminApplicationReadinessRoute: typeof ApiAdminApplicationReadinessRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
+  ApiAdminLaunchPreparationRoute: typeof ApiAdminLaunchPreparationRoute
   ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
   ApiAdminMainnetPrerequisitesRoute: typeof ApiAdminMainnetPrerequisitesRoute
   ApiAdminMainnetReleaseFreezeRoute: typeof ApiAdminMainnetReleaseFreezeRoute
@@ -1750,6 +1764,13 @@ declare module '@tanstack/react-router' {
       path: '/api/admin/banner-upload'
       fullPath: '/api/admin/banner-upload'
       preLoaderRoute: typeof ApiAdminBannerUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/launch-preparation': {
+      id: '/api/admin/launch-preparation'
+      path: '/api/admin/launch-preparation'
+      fullPath: '/api/admin/launch-preparation'
+      preLoaderRoute: typeof ApiAdminLaunchPreparationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/mainnet-preflight': {
@@ -2233,6 +2254,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminApplicationReadinessRoute: ApiAdminApplicationReadinessRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
+  ApiAdminLaunchPreparationRoute: ApiAdminLaunchPreparationRoute,
   ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,
   ApiAdminMainnetPrerequisitesRoute: ApiAdminMainnetPrerequisitesRoute,
   ApiAdminMainnetReleaseFreezeRoute: ApiAdminMainnetReleaseFreezeRoute,

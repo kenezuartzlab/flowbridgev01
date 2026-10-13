@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import type { ReactNode } from "react";
+import { BotNetworkBadge } from "./BotNetworkBadge";
 
 /**
  * Archon-style page header: quiet round back button, oversized title with a
@@ -38,6 +39,7 @@ export function PageHeader({
               {subtitle}
             </p>
           )}
+          <div className="mt-1.5"><BotNetworkBadge /></div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">{actions}</div>
       </div>
