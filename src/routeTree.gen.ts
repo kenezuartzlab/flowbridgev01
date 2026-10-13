@@ -52,6 +52,7 @@ import { Route as ApiProductEventsRouteImport } from './routes/api/product-event
 import { Route as ApiProposalsRouteImport } from './routes/api/proposals'
 import { Route as ApiTradeEventsRouteImport } from './routes/api/trade-events'
 import { Route as ApiTransactionsRouteImport } from './routes/api/transactions'
+import { Route as BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRouteImport } from './routes/blog.flowbridge-officially-launches-on-bot-chain-mainnet'
 import { Route as CampaignsIndexRouteImport } from './routes/campaigns/index'
 import { Route as CampaignsSlugRouteImport } from './routes/campaigns/$slug'
 import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
@@ -331,6 +332,12 @@ const ApiTransactionsRoute = ApiTransactionsRouteImport.update({
   path: '/api/transactions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRoute =
+  BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRouteImport.update({
+    id: '/blog/flowbridge-officially-launches-on-bot-chain-mainnet',
+    path: '/blog/flowbridge-officially-launches-on-bot-chain-mainnet',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
   id: '/campaigns/',
   path: '/campaigns/',
@@ -694,6 +701,7 @@ export interface FileRoutesByFullPath {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/trade-events': typeof ApiTradeEventsRoute
   '/api/transactions': typeof ApiTransactionsRoute
+  '/blog/flowbridge-officially-launches-on-bot-chain-mainnet': typeof BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
   '/campaigns/partners': typeof CampaignsPartnersRoute
@@ -800,6 +808,7 @@ export interface FileRoutesByTo {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/trade-events': typeof ApiTradeEventsRoute
   '/api/transactions': typeof ApiTransactionsRoute
+  '/blog/flowbridge-officially-launches-on-bot-chain-mainnet': typeof BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
   '/campaigns/partners': typeof CampaignsPartnersRoute
@@ -907,6 +916,7 @@ export interface FileRoutesById {
   '/api/proposals': typeof ApiProposalsRouteWithChildren
   '/api/trade-events': typeof ApiTradeEventsRoute
   '/api/transactions': typeof ApiTransactionsRoute
+  '/blog/flowbridge-officially-launches-on-bot-chain-mainnet': typeof BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRoute
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
   '/campaigns/partners': typeof CampaignsPartnersRoute
@@ -1015,6 +1025,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/trade-events'
     | '/api/transactions'
+    | '/blog/flowbridge-officially-launches-on-bot-chain-mainnet'
     | '/campaigns/$slug'
     | '/campaigns/me'
     | '/campaigns/partners'
@@ -1121,6 +1132,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/trade-events'
     | '/api/transactions'
+    | '/blog/flowbridge-officially-launches-on-bot-chain-mainnet'
     | '/campaigns/$slug'
     | '/campaigns/me'
     | '/campaigns/partners'
@@ -1227,6 +1239,7 @@ export interface FileRouteTypes {
     | '/api/proposals'
     | '/api/trade-events'
     | '/api/transactions'
+    | '/blog/flowbridge-officially-launches-on-bot-chain-mainnet'
     | '/campaigns/$slug'
     | '/campaigns/me'
     | '/campaigns/partners'
@@ -1334,6 +1347,7 @@ export interface RootRouteChildren {
   ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
   ApiTradeEventsRoute: typeof ApiTradeEventsRoute
   ApiTransactionsRoute: typeof ApiTransactionsRoute
+  BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRoute: typeof BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRoute
   CampaignsSlugRoute: typeof CampaignsSlugRoute
   CampaignsMeRoute: typeof CampaignsMeRoute
   CampaignsPartnersRoute: typeof CampaignsPartnersRoute
@@ -1687,6 +1701,13 @@ declare module '@tanstack/react-router' {
       path: '/api/transactions'
       fullPath: '/api/transactions'
       preLoaderRoute: typeof ApiTransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/flowbridge-officially-launches-on-bot-chain-mainnet': {
+      id: '/blog/flowbridge-officially-launches-on-bot-chain-mainnet'
+      path: '/blog/flowbridge-officially-launches-on-bot-chain-mainnet'
+      fullPath: '/blog/flowbridge-officially-launches-on-bot-chain-mainnet'
+      preLoaderRoute: typeof BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/campaigns/': {
@@ -2243,6 +2264,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProposalsRoute: ApiProposalsRouteWithChildren,
   ApiTradeEventsRoute: ApiTradeEventsRoute,
   ApiTransactionsRoute: ApiTransactionsRoute,
+  BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRoute:
+    BlogFlowbridgeOfficiallyLaunchesOnBotChainMainnetRoute,
   CampaignsSlugRoute: CampaignsSlugRoute,
   CampaignsMeRoute: CampaignsMeRoute,
   CampaignsPartnersRoute: CampaignsPartnersRoute,

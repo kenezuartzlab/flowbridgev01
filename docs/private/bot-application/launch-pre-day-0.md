@@ -4,7 +4,7 @@ Title: FlowBridge Officially Launches on BOT Chain Mainnet
 
 Reserved slug: /blog/flowbridge-officially-launches-on-bot-chain-mainnet
 
-Status: DRAFT — NOT PUBLISHED. The opening below is announcement copy for owner-approved Day 0, not a statement that the official announcement has occurred. No qualification window has started.
+Status: PUBLISHED at Day 0 (see OFFICIAL_LAUNCH_AT). Owner instruction START OFFICIAL BOT CHAIN LAUNCH received 2026-10-13.
 
 FlowBridge has officially launched on BOT Chain Mainnet.
 
@@ -43,7 +43,7 @@ Telegram: https://t.me/flowbridgeweb
 BOT Chain: https://botchain.ai
 Explorer: https://scan.botchain.ai
 
-# Social plan — PRIVATE DRAFTS, NOT PUBLISHED
+# Social plan — OWNER POSTS ON X (Day 0 post due now)
 
 ## Day 0 — Official mainnet launch
 FlowBridge has officially launched on BOT Chain Mainnet. Trade, Bridge, MultiSend, Staking, Rewards and Flow AI bring practical tools into one non-custodial experience. Review each action and confirm in your own wallet. https://flowbridge.space https://botchain.ai
@@ -74,4 +74,4 @@ FlowBridge's distinctive work is the integration and application-specific implem
 - **Flow AI:** Guided read-only intelligence and bounded action preparation; final authorization remains human and wallet-controlled. Model providers are external; no autonomous signing claim.
 - **Ecosystem-growth model:** Real utility, education and verifiable participation, with privacy-safe operational aggregates separate from private source-based application evidence. No fabricated engagement or eligibility.
 
-Option A: REQUESTED. Monitoring pending BOT Chain approval/onboarding. Compliance: OWNER ACTION. No requested funding amount. No application submission. Official launch date, 30-day social window, 8-day user/interaction window, Day 8 and Day 30: NOT STARTED.
+Option A: REQUESTED. Monitoring pending BOT Chain approval/onboarding. Compliance: OWNER ACTION. No requested funding amount. No application submission. Official launch date set; 30-day social and 8-day interaction windows IN PROGRESS. No qualification claimed.
