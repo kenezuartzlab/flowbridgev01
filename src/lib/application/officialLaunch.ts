@@ -1,6 +1,6 @@
 /**
  * Official BOT Chain launch (Day 0). Started by the owner's explicit
- * "START OFFICIAL BOT CHAIN LAUNCH" instruction; equals the publication
+ * "START OFFICIAL BOT CHAIN LAUNCH" instruction; equals the
  * first confirmed public availability of the official launch article on
  * flowbridge.space (HTTP 200 check; a 404 check at ~14:17 UTC preceded it). Fixed in code so it can never be
  * backdated or moved through the evidence tracker.
