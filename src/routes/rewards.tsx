@@ -346,13 +346,13 @@ function RewardsPage() {
                     <CheckRow
                       done={!!incentives?.socials?.youtube}
                       label="Follow on YouTube"
-                      hint="Required before claiming"
+                      hint="Optional"
                     />
                     <CheckRow done={!!incentives?.socials?.x} label="Follow on X" hint="Optional" />
                     <CheckRow
                       done={!!incentives?.socials?.telegram}
                       label="Join Telegram"
-                      hint="Required before claiming"
+                      hint="Optional"
                     />
                     <CheckRow
                       done={(incentives?.claimableTotal ?? 0) >= claimThreshold}

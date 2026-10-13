@@ -21,14 +21,14 @@ export const Route = createFileRoute("/api/public/wallet-lookup")({
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { data } = await supabaseAdmin
             .from("profiles")
-            .select("id, email")
+            .select("email")
             .eq("wallet_address", normalized)
             .maybeSingle();
 
           if (!data) return Response.json({ bound: false });
 
           const emailHint = maskEmail(data.email ?? "");
-          return Response.json({ bound: true, userId: data.id, emailHint });
+          return Response.json({ bound: true, emailHint });
         } catch (e: any) {
           return Response.json({ error: e?.message ?? "Lookup failed" }, { status: 500 });
         }

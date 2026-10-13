@@ -66,7 +66,6 @@ export async function resolveRewardStateForUser(args: {
       ? profile.wallet_address
       : null;
 
-  const socials = incentives?.socials ?? null;
   const requirements: RewardRequirement[] = [
     {
       id: "EMAIL_VERIFIED",
