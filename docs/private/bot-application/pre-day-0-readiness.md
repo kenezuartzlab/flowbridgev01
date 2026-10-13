@@ -39,7 +39,7 @@ Official launch date, 30-day social window, 8-day user/interaction window, Day 8
 
 Source: BOT Mainnet 677 transaction + receipt, read directly from rpc.botchain.ai. Supersedes any earlier "0.01001 BOT" wording.
 
-- Tx: 0x2e32d9c2c6591964d8ba451e9fb8670966a9bd92cb5ad781a5af7aa75a21c533 (block 26,551,267, status success)
+- Tx: 0x2e32d9c2c6591964d8ba451e9fb8670966a9bd92cb5ad781a5af7aa75a21c533 (block 26,552,291, status success)
 - Wallet: 0x3d8a7fa490f9db09dd8006b74688213ace9c0164 · Router V3 0x986962de6f00d0ec571b1a34fa70aeeb445b5445
 - TX VALUE: 0.010001 BOT (10001000000000000 wei)
 - PROTOCOL FEE (router fee event, log 0): 0.000001 BOT (1000000000000 wei)
