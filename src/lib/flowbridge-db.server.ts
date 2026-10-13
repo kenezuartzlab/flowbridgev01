@@ -944,12 +944,8 @@ export async function claimFlowPoints(userId: string, emailVerified: boolean) {
   if (!emailVerified) throw new Error("Please verify your email before claiming FLOW.");
   if (!user.wallet_address) throw new Error("Bind your Web3 wallet before claiming FLOW.");
 
-  const socials = await getSocialFollows(userId);
-  if (!socials.youtube || !socials.x || !socials.telegram) {
-    throw new Error(
-      "Follow all three community channels (YouTube, X, Telegram) before claiming FLOW.",
-    );
-  }
+  // Community follows are self-reported and cannot be verified, so they are
+  // optional and never gate a FLOW claim.
 
   const b = computeClaimable(user as any, await getRewardSettings());
   if (b.claimable < b.claimThreshold) {

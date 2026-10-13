@@ -285,6 +285,10 @@ export const Route = createFileRoute("/api/assistant")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Flow AI calls a paid model: signed-in users only.
+        if (!(await getAuthUser(request))) {
+          return jsonResponse({ error: "Sign in to use Flow AI." }, 401);
+        }
         let messages: { role: "user" | "assistant"; content: string }[] = [];
         let pending: PendingPreparation | null = null;
         let prepared: PreparedHandle | null = null;

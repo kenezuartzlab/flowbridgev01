@@ -66,8 +66,6 @@ export async function resolveRewardStateForUser(args: {
       ? profile.wallet_address
       : null;
 
-  const socials = incentives?.socials ?? null;
-  const socialsMet = !!(socials?.youtube && socials?.x && socials?.telegram);
   const requirements: RewardRequirement[] = [
     {
       id: "EMAIL_VERIFIED",
@@ -80,12 +78,6 @@ export async function resolveRewardStateForUser(args: {
       label: "Bound wallet",
       met: !!walletAddress,
       hint: "Bind the wallet that will receive FLOW.",
-    },
-    {
-      id: "COMMUNITY_FOLLOWS",
-      label: "Community channels followed",
-      met: socialsMet,
-      hint: "Follow YouTube, X and Telegram.",
     },
   ];
 

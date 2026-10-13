@@ -770,7 +770,12 @@ export default function App() {
         }
         if (!googleUser) {
           setWalletLinkNotice({ kind: "signin-needed", emailHint: data.emailHint ?? "", address: normalized });
-        } else if (data.userId && data.userId !== googleUser.uid) {
+        } else if (await (async () => {
+          // Mismatch is decided from the signed-in account's own profile.
+          const { supabase } = await import("@/integrations/supabase/client");
+          const { data: me } = await supabase.from("profiles").select("wallet_address").eq("id", googleUser.uid).maybeSingle();
+          return ((me as any)?.wallet_address ?? "").toLowerCase() !== normalized;
+        })()) {
           setWalletLinkNotice({ kind: "mismatch", emailHint: data.emailHint ?? "", address: normalized });
         } else {
           setWalletLinkNotice({ kind: "linked", address: normalized });
