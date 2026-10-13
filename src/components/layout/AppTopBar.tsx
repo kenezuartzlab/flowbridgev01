@@ -5,6 +5,7 @@ import { PrimaryNav } from "@/components/shell/PrimaryNav";
 import { ShellNavMenu } from "@/components/shell/ShellNavMenu";
 import { useShellMode } from "@/components/shell/useShellMode";
 import logoUrl from "@/assets/flowbridge-logo.png";
+import { BotNetworkBadge } from "./BotNetworkBadge";
 
 /**
  * Archon-style top bar: quiet brand mark + greeting on the left, round icon
@@ -62,6 +63,7 @@ export function AppTopBar({
           <p className="break-words text-[15px] font-black leading-tight tracking-normal sm:text-[17px]">
             {title}
           </p>
+          <div className="mt-1"><BotNetworkBadge /></div>
         </div>
 
         {shellMode === "desktop" && <PrimaryNav className="shrink-0" />}

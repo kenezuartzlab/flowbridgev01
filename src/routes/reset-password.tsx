@@ -4,6 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { updatePassword, requestPasswordReset } from '@/lib/auth';
 
 export const Route = createFileRoute('/reset-password')({
+  head: () => ({ meta: [
+    { title: "Reset Password — FlowBridge" },
+    { name: "description", content: "Securely reset your FlowBridge account password." },
+    { property: "og:title", content: "Reset Password — FlowBridge" },
+    { property: "og:description", content: "Securely reset your FlowBridge account password." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex,nofollow" },
+  ] }),
   component: ResetPasswordPage,
 });
 

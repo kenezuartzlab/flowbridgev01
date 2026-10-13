@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
-import { EnvironmentBadge } from './EnvironmentBadge';
+import { BotNetworkBadge } from '@/components/layout/BotNetworkBadge';
+import { Button } from '@/components/ui/button';
 import { WalletPill } from './WalletPill';
 import {
   History, Heart, Gift, AlertTriangle, RefreshCw, CheckCircle, Video, Sun, Moon, Menu, X, LogOut, SlidersHorizontal, Activity,
@@ -378,13 +379,13 @@ export function AppHeader({
 
           </div>
           <div className="flex items-center gap-2 mt-2 min-w-0">
-            <button
+            <Button variant="ghost" size="sm"
               onClick={onToggleMainnet}
               title="Click to toggle Testnet / Mainnet"
-              className="transition-transform hover:scale-105 active:scale-95 cursor-pointer shrink-0"
+              className="h-auto shrink-0 p-0"
             >
-              <EnvironmentBadge isMainnet={isMainnet} />
-            </button>
+              <BotNetworkBadge isMainnet={isMainnet} />
+            </Button>
           </div>
         </div>
 

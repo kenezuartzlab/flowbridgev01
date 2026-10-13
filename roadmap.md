@@ -1,5 +1,12 @@
 # MultiSend BOT Testnet Release
 
+# BOT official launch — Pre-Day-0
+- [x] Prepare private launch article, five social drafts and qualitative originality note; no public blog route or sitemap entry.
+- [x] Add shared official BOT network badge and public footer while retaining FlowBridge branding and mobile Flow AI.
+- [x] Add admin-gated private evidence capture/screenshots; all dates, windows and Day 8/Day 30 remain NOT STARTED.
+- [ ] Verify preview admin evidence save/readback, anonymous denial, mobile/desktop layout and targeted tests.
+- [ ] Production core wallet execution acceptance — owner-confirmed real-wallet flow required; no transactions authorized by this readiness task.
+
 # Docs mobile text and Flow AI
 - [x] Wrap long contract verification hashes within their available width; floating AI is 70% opaque at rest and fully visible on interaction. Verified 360px, 390px and desktop with no horizontal overflow or page errors; automatic build OK. Preview only.
 

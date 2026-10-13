@@ -19,6 +19,7 @@ import { ReturnToRedirect } from "../components/auth/ReturnToRedirect";
 import { FlowAiLauncher } from "../components/assistant/FlowAiLauncher";
 import { readPrefs, unlockPrefsFormatting } from "../lib/prefs";
 import { areaForPath, trackProductEvent } from "../lib/ops/productEvents";
+import { PublicFooter } from "@/components/layout/PublicFooter";
 
 function NotFoundComponent() {
   return (
@@ -100,12 +101,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "FlowBridge" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@flowbridgeweb3" },
       { name: "twitter:title", content: "FlowBridge — Web3 Toolkit for BOT Chain" },
       { name: "twitter:description", content: "Swap, bridge, stake and earn on FlowBridge. The community Web3 toolkit for BOT Chain with cross-chain USDT transfers, verified campaigns, and AI-assisted trades." },
 
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/K37tiR3OeNSFzsIqgemgtTc7RQQ2/social-images/social-1782304268835-1000045869.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/K37tiR3OeNSFzsIqgemgtTc7RQQ2/social-images/social-1782304268835-1000045869.webp" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -188,6 +187,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ReturnToRedirect />
       <Outlet />
+      <PublicFooter />
       <FlowAiLauncher />
       <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>

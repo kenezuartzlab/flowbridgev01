@@ -4,6 +4,7 @@ import { Download, Copy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchApplicationMaterials, fetchApplicationReadiness, downloadApplicationFile } from "@/lib/admin/adminApi";
 import { APPLICATION_FILES, EDITABLE_COPY_LABEL } from "@/lib/application/applicationFiles";
+import { LaunchPreparation } from "./LaunchPreparation";
 
 type Material = { id: string; title: string; url: string | null };
 function download(name: string, body: string, type = "application/json") {
@@ -82,6 +83,7 @@ export function ApplicationWorkspace({ wallet }: { wallet: string }) {
         <Button variant="outline" size="sm" disabled={!ready} onClick={() => download(`flowbridge-evidence-${stamp}.json`, JSON.stringify(ready, null, 2))}><Download />Evidence JSON</Button>
         <p className="text-xs text-muted">Owner information complete. Compliance confirmation remains an owner action. No application has been submitted.</p>
       </section>
+      <LaunchPreparation wallet={wallet} />
     </div>
   );
 }
