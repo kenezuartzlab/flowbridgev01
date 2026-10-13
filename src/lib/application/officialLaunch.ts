@@ -1,10 +1,11 @@
 /**
  * Official BOT Chain launch (Day 0). Started by the owner's explicit
  * "START OFFICIAL BOT CHAIN LAUNCH" instruction; equals the publication
- * time of the official launch article. Fixed in code so it can never be
+ * first confirmed public availability of the official launch article on
+ * flowbridge.space (HTTP 200 check; a 404 check at ~14:17 UTC preceded it). Fixed in code so it can never be
  * backdated or moved through the evidence tracker.
  */
-export const OFFICIAL_LAUNCH_AT = "2026-10-13T14:15:07Z";
+export const OFFICIAL_LAUNCH_AT = "2026-10-13T14:19:32Z";
 export const LAUNCH_ARTICLE_PATH = "/blog/flowbridge-officially-launches-on-bot-chain-mainnet";
 
 const DAY = 86_400_000;
