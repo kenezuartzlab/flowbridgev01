@@ -823,7 +823,7 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
             "Platform fee (basis points)",
             cfg.fees.platformFeeBps,
             (n) => setCfg({ ...cfg, fees: { ...cfg.fees, platformFeeBps: Math.round(n) } }),
-            "10 bps = 0.1%. Keep this equal to FlowBridgeRouter's globalFeeBps.",
+            "1 bp = 0.01%. Head-room hint only; users always see the live per-route router fee.",
           )}
           <div className="rounded-xl border border-foreground/10 bg-background/60 px-3 py-2 text-[11px] text-muted leading-relaxed">
             Currently disclosed as <span className="text-foreground">{feeBpsLabel(cfg.fees.platformFeeBps)}</span>.

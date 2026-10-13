@@ -11,14 +11,14 @@ export interface FeeSettings {
   minBridgeUsd: number;
   /**
    * Platform fee disclosed in the UI and reserved by MAX/percentage buttons,
-   * in basis points (10 = 0.1%). Must mirror FlowBridgeRouter's globalFeeBps —
+   * in basis points (1 = 0.01%). Must mirror FlowBridgeRouter's globalFeeBps —
    * update this whenever the router's fee config changes on-chain. Execution
    * still reads the exact fee from the contract before every swap.
    */
   platformFeeBps: number;
 }
 
-/** "0.1%" style label for a fee expressed in basis points. */
+/** "0.01%" style label for a fee expressed in basis points. */
 export const feeBpsLabel = (bps: number) =>
   `${Number(((bps || 0) / 100).toFixed(4))}%`;
 
@@ -499,7 +499,7 @@ export const DEFAULT_PAGES: PagesSettings = {
 export const DEFAULT_APP_CONFIG: AppConfig = {
 
 
-  fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10, platformFeeBps: 10 },
+  fees: { defaultSlippagePct: 0.5, maxSlippagePct: 5, minBridgeUsd: 10, platformFeeBps: 1 },
   rewards: {
     // Legacy V1 fields — retained read-only for historical audit. They no longer
     // decide new accruals (FLOW Points V2 is the live policy).

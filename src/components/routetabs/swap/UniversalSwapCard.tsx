@@ -52,6 +52,7 @@ import {
 import type { SignedAttribution } from "@/lib/activity/activityHandoff";
 
 import { maxSwappableFromBalance, routerFeeOnTop } from "@/lib/swap/platformFee";
+import { buildFeeBreakdown, formatFeeBps, type FeeBreakdown } from "@/lib/swap/feeDisclosure";
 import { estimateFlowPointsForUsd, isRewardEligibleUsd } from "@/lib/rewards";
 import { useAppConfig, feeBpsLabel } from "@/lib/config/appConfig";
 import { formatBalance4 } from "@/lib/format";
@@ -178,8 +179,8 @@ export function UniversalSwapCard({
   const disclosedFeeBps = liveFeeBps ?? platformFeeBps;
   const platformFeeLabel =
     liveFeeBps !== null
-      ? `${feeBpsLabel(liveFeeBps)} · live`
-      : `${feeBpsLabel(platformFeeBps)} · rechecked before signing`;
+      ? `${formatFeeBps(liveFeeBps)} · exact route fee shown before signing`
+      : `Exact route fee shown before signing`;
   const curated = useMemo(() => getCuratedTokens(isMainnet), [isMainnet, appConfig]);
   /**
    * V15.3G §2 — the in-progress swap form is app-session state. It was local to
@@ -217,6 +218,7 @@ export function UniversalSwapCard({
   const [lastTx, setLastTx] = useState<`0x${string}` | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [reviewSnapshot, setReviewSnapshot] = useState<SwapReviewSnapshot | null>(null);
+  const [reviewFee, setReviewFee] = useState<FeeBreakdown | null>(null);
   const [routerHealth, setRouterHealth] = useState<RouterV4Health | null>(null);
   const [routerHealthFailed, setRouterHealthFailed] = useState(false);
 
@@ -478,9 +480,11 @@ export function UniversalSwapCard({
     const atomic = isMainnet ? atomicV4Target(candidate.steps, 677) : null;
     let approvalCount = 0;
     const fees: string[] = [];
+    let firstFee: { fee: bigint; bps: number } | null = null;
     if (atomic) {
-      const [fee] = (await publicClient.readContract({ address: atomic.router, abi: FLOW_BRIDGE_ROUTER_V4_ABI, functionName: "computeRouterFee", args: [BigInt(atomic.routerId), inputAmount, address] })) as readonly [bigint, bigint];
+      const [fee, bps] = (await publicClient.readContract({ address: atomic.router, abi: FLOW_BRIDGE_ROUTER_V4_ABI, functionName: "computeRouterFee", args: [BigInt(atomic.routerId), inputAmount, address] })) as readonly [bigint, bigint];
       fees.push(fee.toString());
+      firstFee = { fee, bps: Number(bps) };
       if (!candidate.steps[0].inIsNative) {
         const allowance = (await publicClient.readContract({ address: candidate.steps[0].path[0], abi: ERC20_ABI, functionName: "allowance", args: [address, atomic.router] })) as bigint;
         if (allowance < inputAmount + fee) approvalCount++;
@@ -489,14 +493,16 @@ export function UniversalSwapCard({
       for (let i = 0; i < candidate.steps.length; i++) {
         const step = candidate.steps[i];
         const stepAmount = i === 0 ? inputAmount : candidate.steps[i - 1].expectedOut;
-        const [fee] = (await publicClient.readContract({ address: flowRouter, abi: flowAbi, functionName: "computeRouterFee", args: [BigInt(step.routerId), stepAmount, address] })) as readonly [bigint, bigint];
+        const [fee, bps] = (await publicClient.readContract({ address: flowRouter, abi: flowAbi, functionName: "computeRouterFee", args: [BigInt(step.routerId), stepAmount, address] })) as readonly [bigint, bigint];
         fees.push(fee.toString());
+        if (i === 0) firstFee = { fee, bps: Number(bps) };
         if (!step.inIsNative) {
           const allowance = (await publicClient.readContract({ address: step.path[0], abi: ERC20_ABI, functionName: "allowance", args: [address, flowRouter] })) as bigint;
           if (allowance < stepAmount + fee) approvalCount++;
         }
       }
     }
+    setReviewFee(firstFee ? buildFeeBreakdown({ swapAmount: inputAmount, fee: firstFee.fee, effectiveBps: firstFee.bps, decimals: tokenIn.decimals, symbol: tokenIn.symbol }) : null);
     const transactionCount = (execution.execution === "ATOMIC_V4" ? 1 : candidate.steps.length) + approvalCount;
     return createSwapReviewSnapshot({ chainId: balanceChainId, tokenIn: tokenIn.address, tokenOut: tokenOut.address, amountIn: inputAmount, quote: candidate, minimumOut: minOutFor(candidate.amountOut), protocolFee: fees.join("|"), approvalCount, transactionCount });
   };
@@ -1160,7 +1166,7 @@ export function UniversalSwapCard({
     setQuote(null);
   };
 
-  // Largest amount the user can actually swap: the router pulls `amount + 0.1% fee`,
+  // Largest amount the user can actually swap: the router pulls `amount + route fee`,
   // and native BOT also needs gas head-room. Everything above this reverts on-chain.
   const maxSpendableRaw = (() => {
     if (!inBalanceRaw) return 0n;
@@ -1212,7 +1218,7 @@ export function UniversalSwapCard({
   // Total debited by FlowBridgeRouter = swap amount + protocol fee (charged on top).
   const totalDebit = parsedAmount + routerFeeOnTop(parsedAmount, platformFeeBps);
   const needsApproval = !tokenIn.isNative && parsedAmount > 0n && allowanceRaw < totalDebit;
-  // Not submittable when the amount + 0.1% fee (+ native gas reserve) exceeds balance.
+  // Not submittable when the amount + route fee (+ native gas reserve) exceeds balance.
   const insufficient =
     totalDebit > inBalanceRaw || (maxSpendableRaw > 0n && parsedAmount > maxSpendableRaw);
 
@@ -1613,6 +1619,7 @@ export function UniversalSwapCard({
         tradingFee={tradingFeeLabel}
         priceImpact={priceImpactLabel}
         platformFee={platformFeeLabel}
+        feeBreakdown={reviewFee}
         executionLabel={quote ? planExecution(quote.steps, balanceChainId).label : undefined}
         transactionCount={reviewSnapshot?.transactionCount}
         approvalCount={reviewSnapshot?.approvalCount}

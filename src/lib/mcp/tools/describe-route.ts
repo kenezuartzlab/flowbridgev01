@@ -31,7 +31,7 @@ export default defineTool({
       ],
       communityFeeBps: 10,
       feeNote:
-        "0.1% community fee is collected atomically inside each FlowBridgeRouter swap tx.",
+        "A route-specific protocol fee (read live via computeRouterFee; currently 1 bp on BOT Mainnet) is collected atomically inside each FlowBridgeRouter swap tx.",
     };
     return {
       content: [{ type: "text", text: JSON.stringify(route, null, 2) }],

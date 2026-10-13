@@ -31,7 +31,7 @@ export const Route = createFileRoute("/docs")({
 });
 
 const GUIDES = [
-  { title: "Trade (Swap & Bridge)", body: "Swap tokens on BOT Chain and bridge between supported networks. A 0.1% platform fee is shown before you confirm.", to: "/trade" },
+  { title: "Trade (Swap & Bridge)", body: "Swap tokens on BOT Chain and bridge between supported networks. The exact protocol fee for your selected route (currently 0.01% on BOT Mainnet) is shown before you confirm.", to: "/trade" },
   { title: "MultiSend", body: "Distribute to many wallets, consolidate many wallets into one, or run advanced batches. 0.01% fee, no funds held by the contract.", to: "/multisend" },
   { title: "Staking", body: "Lock FLOW for the approved term. Estimates are shown before you sign; nothing is guaranteed.", to: "/stake" },
   { title: "Ways to earn", body: "FLOW Points, campaigns and rewards explained in plain English.", to: "/learn" },
