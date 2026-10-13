@@ -4,12 +4,13 @@ import { parseAbi } from 'viem';
 export const COMMUNITY_FEE_RECIPIENT = "0x3d8a7fa490f9db09dd8006b74688213ace9c0164";
 
 /**
- * Minimal platform fee charged by FlowBridge on swaps / bridges.
- * 10 bps = 0.1%. The router enforces the fee on-chain (computeRouterFee /
- * computeBridgeFee); these constants are the UI disclosure of that fee.
+ * Fallback head-room only (MAX buttons before a live read). The fee a user is
+ * charged and shown is always read per route from the selected router's
+ * computeRouterFee; Router V3 and V4 are configured independently.
+ * Live BOT Mainnet (2026-10-13): V3 1 bp, V4 1 bp on routerId 0.
  */
-export const PLATFORM_FEE_BPS = 10;
-export const PLATFORM_FEE_LABEL = "0.1%";
+export const PLATFORM_FEE_BPS = 1;
+export const PLATFORM_FEE_LABEL = "0.01%";
 /** Fee amount in token units for a given input amount (display only). */
 export const platformFeeOf = (amount: number) => (amount * PLATFORM_FEE_BPS) / 10000;
 

@@ -18,6 +18,8 @@ interface ConfirmSwapModalProps {
   minimumReceived?: string;
   tradingFee?: string;
   platformFee?: string;
+  /** Exact route-specific fee read from the selected router before signing. */
+  feeBreakdown?: import("@/lib/swap/feeDisclosure").FeeBreakdown | null;
   executionLabel?: string;
   transactionCount?: number;
   approvalCount?: number;
@@ -41,7 +43,8 @@ export function ConfirmSwapModal({
   slippageTolerance = "0.50%",
   minimumReceived,
   tradingFee = "0.30%",
-  platformFee = "0.1%",
+  platformFee = "checked before signing",
+  feeBreakdown,
   executionLabel,
   transactionCount,
   approvalCount,
@@ -173,16 +176,23 @@ export function ConfirmSwapModal({
 
           {!isBridge && (
             <div className="flex justify-between items-center text-muted">
-              <span className="uppercase tracking-wider">Platform Fee</span>
-              <span className="font-bold text-primary">{platformFee}</span>
+              <span className="uppercase tracking-wider">Protocol fee</span>
+              <span className="font-bold text-primary">{feeBreakdown?.percent ?? platformFee}</span>
             </div>
+          )}
+          {!isBridge && feeBreakdown && (
+            <>
+              <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Swap amount</span><span className="font-bold text-foreground break-all text-right">{feeBreakdown.swapAmount}</span></div>
+              <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Fee amount</span><span className="font-bold text-foreground break-all text-right">{feeBreakdown.fee}</span></div>
+              <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Total</span><span className="font-black text-foreground break-all text-right">{feeBreakdown.total}</span></div>
+            </>
           )}
 
         </div>
 
         {/* Footnote disclaimer */}
         <p className="text-[11px] text-muted text-center leading-snug px-1">
-          Output is estimated. {!isBridge && `A ${platformFee} platform fee is charged by FlowBridge. `}You will receive at least <strong className="text-foreground font-mono">{minRec} {toSymbol}</strong> or the transaction will revert.
+          Output is estimated. {!isBridge && `Protocol fee: ${feeBreakdown?.percent ?? platformFee}, read from the selected router. `}You will receive at least <strong className="text-foreground font-mono">{minRec} {toSymbol}</strong> or the transaction will revert.
         </p>
 
         {/* Submit Button */}

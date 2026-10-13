@@ -53,7 +53,7 @@ function TokenInput({ label, amount, symbol, usdValue, balance, maxAmount, onCha
   };
 
   // Free typing: any amount is allowed so users can preview quotes. Amounts above
-  // the spendable maximum (balance minus the 0.1% platform fee taken on top) are
+  // the spendable maximum (balance minus the route fee taken on top) are
   // flagged below and blocked by the action button instead of being rewritten.
   const handleInputChange = (val: string) => {
     if (!onChange) return;

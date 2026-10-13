@@ -46,3 +46,4 @@ Source: BOT Mainnet 677 transaction + receipt, read directly from rpc.botchain.a
 - USER SWAP AMOUNT (WBOT deposit / pool input): 0.01 BOT (10000000000000000 wei)
 - Received: 0.123233 USDT (123233 raw, 6 decimals)
 - Not launch-window evidence.
+- Fee audit 2026-10-13 (read-only): Router V3 globalFeeBps 1 (0.01%); Router V4 globalFeeBps 0, routerFeeBps(0) 1 → effective 1 bp (0.01%). App no longer discloses a hardcoded 0.1%; confirmation shows the selected router's computeRouterFee result.
