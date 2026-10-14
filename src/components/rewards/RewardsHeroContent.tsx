@@ -14,7 +14,9 @@ import { ArrowUpRight, Check, Sparkles } from "lucide-react";
 import { PageIcon } from "@/components/layout/PageIcon";
 import { formatUsd } from "@/lib/format";
 import { FLOW_TOKEN, PTS, formatPts } from "@/lib/points";
-import type { RewardStateClient } from "@/lib/rewards/useRewardState";
+import type { RewardProgression } from "@/lib/rewards/rewardProgression";
+import { rewardPresentation } from "@/lib/rewards/rewardPresentation";
+import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
 
 export interface RewardsHeroContentProps {
   label: string;
@@ -33,7 +35,7 @@ export interface RewardsHeroContentProps {
    * of claim/convert wording: off-chain points read "ready to convert" and only
    * on-chain entitlement reads "ready to claim".
    */
-  rewardState?: RewardStateClient | null;
+  progression?: RewardProgression | null;
 }
 
 function usePrefersReducedMotion() {
@@ -87,7 +89,7 @@ export function RewardsHeroContent({
   claimableFlow,
   claimedFlow,
   volumeUsd,
-  rewardState = null,
+  progression = null,
 }: RewardsHeroContentProps) {
   const reduced = usePrefersReducedMotion();
   const shown = useCountUp(flowPoints, hasData && !reduced);
@@ -100,33 +102,17 @@ export function RewardsHeroContent({
    * V17.1B §8 — stage-accurate readiness. Without canonical state we fall back to
    * the legacy props, but we never call off-chain points "claimable".
    */
-  const canonicalClaimable = rewardState ? rewardState.claimableFlow : claimableFlow;
-  const canonicalClaimed = rewardState ? rewardState.claimedFlow : claimedFlow;
-  const stateUnavailable = rewardState ? rewardState.claimableFlow === null : false;
-  const ready = (canonicalClaimable ?? 0) > 0;
-  const readyToConvert = rewardState?.nextEconomicStep === "CONVERT_FLOW_POINTS";
-  const readinessLine = rewardState
-    ? rewardState.copy.readiness
-    : ready
-      ? `${formatPts(claimableFlow)} ${FLOW_TOKEN} ready to claim`
-      : claimedFlow > 0
-        ? "All FLOW claimed"
-        : "No FLOW ready to claim";
-  const stageEyebrow = rewardState
-    ? ready
-      ? `${FLOW_TOKEN} ready`
-      : readyToConvert
-        ? `${PTS} ready to convert`
-        : `${FLOW_TOKEN} rewards`
-    : ready
-      ? `${FLOW_TOKEN} ready`
-      : `${FLOW_TOKEN} rewards`;
-  const ctaText = ready
-    ? `Claim ${FLOW_TOKEN}`
-    : readyToConvert
-      ? `Convert ${PTS}`
-      : ctaLabel;
-  const highlight = ready || readyToConvert;
+  const { data: personal } = usePersonalProgress(hasData);
+  const p = progression ?? personal?.progression;
+  const display = rewardPresentation(p);
+  const canonicalClaimed = p?.claimedFlow ?? 0;
+  const stateUnavailable = !p;
+  const ready = (display.claimable ?? 0) > 0;
+  const readyToConvert = false;
+  const readinessLine = display.readiness;
+  const stageEyebrow = ready ? 'FLOW ready to claim' : 'Eligible points';
+  const ctaText = ready ? 'Claim FLOW' : 'Points breakdown';
+  const highlight = ready;
 
   return (
     <>
@@ -138,7 +124,7 @@ export function RewardsHeroContent({
           to="/earn"
           className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 font-mono text-[10px] font-black uppercase tracking-[0.1em] transition-colors ${
             highlight
-              ? "bg-foreground/90 text-black hover:bg-foreground"
+              ? "bg-foreground/90 text-background hover:bg-foreground"
               : "bg-foreground/20 hover:bg-foreground/30"
           }`}
         >
@@ -154,7 +140,7 @@ export function RewardsHeroContent({
 
       {/* Priority 2 + 3 — momentum and today's cap progress. */}
       <div className="relative mt-2.5">
-        <div className="flex items-center justify-between gap-2 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] opacity-85">
+        <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9.5px] font-black uppercase tracking-[0.1em] opacity-85">
           <span className="inline-flex items-center gap-1">
             {pointsToday > 0 ? (
               <>
@@ -166,7 +152,7 @@ export function RewardsHeroContent({
             )}
           </span>
           <span className="shrink-0 tabular-nums">
-            {pending ? "—" : `Today ${formatPts(corePointsToday)} / ${formatPts(dailyCap)} cap`}
+            {pending ? "—" : `Swaps ${formatPts(corePointsToday)} / ${formatPts(dailyCap)} daily limit`}
           </span>
         </div>
         <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-foreground/25">
@@ -203,10 +189,10 @@ export function RewardsHeroContent({
               {stageEyebrow}
             </span>
             <span
-              className="block truncate font-mono text-[13px] font-black tabular-nums sm:text-[14px]"
+              className="block whitespace-normal break-words font-mono text-[11px] font-black tabular-nums sm:text-[14px]"
               data-testid="reward-readiness"
             >
-              {pending ? "—" : stateUnavailable ? "Reward state unavailable" : readinessLine}
+              {pending ? "—" : readinessLine}
             </span>
             {!pending && !ready && !stateUnavailable && (canonicalClaimed ?? 0) > 0 && (
               <span className="block truncate font-mono text-[9px] uppercase tracking-[0.08em] opacity-65">
@@ -215,7 +201,7 @@ export function RewardsHeroContent({
             )}
             {!pending && !ready && !readyToConvert && !stateUnavailable && (canonicalClaimed ?? 0) === 0 && (
               <span className="block truncate font-mono text-[9px] uppercase tracking-[0.08em] opacity-65">
-                Earn more by swapping
+                Total PTS ≠ claimable FLOW
               </span>
             )}
           </span>

@@ -30,7 +30,7 @@ import {
 } from "@/components/ui-kit/primitives";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
-import { getIdToken } from "@/lib/auth";
+import { rewardPresentation } from "@/lib/rewards/rewardPresentation";
 import { formatUsd } from "@/lib/format";
 import {
   FLOW_TOKEN,
@@ -45,18 +45,11 @@ import { DEFAULT_FLOW_POINTS_V2_POLICY } from "@/lib/rewards/flowPointsV2";
 
 const FLOW_POINTS_V2_DAILY_CAP = DEFAULT_FLOW_POINTS_V2_POLICY.dailyCoreSwapCap;
 
-import {
-  FLOW_CLAIM_BLOCKED_COPY,
-  FLOW_REWARDS_CHAINS,
-  resolveFlowClaimReadiness,
-} from "@/lib/rewards/flowRewardsRegistry";
-import { isFlowConversionPolicyApprovedForChain } from "@/lib/rewards/flowConversionPolicy";
-import { FlowTokenClaimCard } from "@/components/rewards/FlowTokenClaimCard";
 import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
 import { RewardProgressPanel } from "@/components/rewards/RewardProgressPanel";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
 import { EarnLiquidityFees } from "@/components/liquidity/EarnLiquidityFees";
-import { claimMinimumProgress } from "@/lib/rewards/claimMinimumPolicy";
+
 
 
 /**
@@ -99,8 +92,6 @@ export const Route = createFileRoute("/earn")({
 function EarnPage() {
   const { user, authReady, incentives, transactions, loading, refresh } = useAccountData();
   const { campaignPointsTotal, authenticated: campaignAuthed } = useCampaignProgress();
-  const [claiming, setClaiming] = useState(false);
-  const [claimMessage, setClaimMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   /** Deep links from Home, Profile and campaign surfaces. */
@@ -117,68 +108,12 @@ function EarnPage() {
   }, []);
 
   const flowPoints = Number(incentives?.flowPoints ?? 0);
-  const claimable = Number(incentives?.claimableTotal ?? 0);
-  const claimThreshold = Number(incentives?.claimThreshold ?? 1000);
   const volumeUsd = Number(incentives?.totalSwapVolumeUsd ?? 0);
   const inviteCount = Number(incentives?.inviteCount ?? 0);
   const claimedTokens = Number(incentives?.claimedTokens ?? 0);
   const verified = Boolean(user && (user.emailVerified || user.email_verified));
   const walletBound = Boolean(incentives?.walletAddress);
-  const socialsDone = (["youtube", "x", "telegram"] as const).every(
-    (k) => !!incentives?.socials?.[k],
-  );
   const level = xpLevel(flowPoints);
-
-  const requirements = [
-    {
-      label: "Email verified",
-      done: verified,
-      hint: "Verify from the banner in the header.",
-      to: "/account",
-    },
-    {
-      label: "Wallet bound",
-      done: walletBound,
-      hint: "Bind the wallet that will receive FLOW.",
-      to: "/rewards",
-      hash: "bind",
-    },
-    {
-      label: "Community channels followed",
-      done: socialsDone,
-      hint: "YouTube, X and Telegram.",
-      to: "/rewards",
-      hash: "social",
-    },
-    {
-      label: `${formatPts(claimThreshold)} ${PTS} claimable`,
-      done: claimable >= claimThreshold,
-      hint: `You have ${formatPts(claimable)} ${PTS} claimable.`,
-      to: "/trade",
-    },
-  ];
-  const canClaim = requirements.every((r) => r.done);
-
-  const claim = async () => {
-    setClaiming(true);
-    setClaimMessage(null);
-    try {
-      const token = await getIdToken();
-      if (!token) throw new Error("Sign in again to claim.");
-      const res = await fetch("/api/users/claim", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.success) throw new Error(data?.error ?? "Claim failed.");
-      setClaimMessage(`Converted ${formatPts(claimable)} ${PTS} to claimable FLOW.`);
-      await refresh();
-    } catch (e: any) {
-      setClaimMessage(e?.message ?? "Claim failed.");
-    } finally {
-      setClaiming(false);
-    }
-  };
 
   const referralLink =
     typeof window !== "undefined" && incentives?.referralCode
@@ -204,7 +139,8 @@ function EarnPage() {
     [transactions],
   );
 
-  const { data: personal } = usePersonalProgress(!!user);
+  const { data: personal, loading: progressLoading } = usePersonalProgress(!!user);
+  const display = rewardPresentation(personal?.progression);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -236,8 +172,8 @@ function EarnPage() {
             </div>
             <p className="text-[12.5px] leading-relaxed text-muted">
               FLOW Points (PTS) are off-chain loyalty points earned from qualified swaps,
-              referrals and verified campaign tasks. They are not FLOW tokens — PTS convert to
-              claimable FLOW only once every requirement below is met.
+              funded signup and referral rewards. Campaign PTS are separate. Reaching 1,000 eligible
+              PTS qualifies for a payout round, not an immediate withdrawal.
             </p>
             <SignInButton label="Sign in" returnTo="/earn" />
           </Surface>
@@ -246,7 +182,7 @@ function EarnPage() {
         {/* V30.2B P2E — BOT Mainnet 677 published-epoch claim. Wallet-keyed and
             entirely separate from the testnet authorization flow, so it does not
             depend on being signed in. */}
-        {personal && <RewardProgressPanel p={personal.progression} area="earn" detailed />}
+        {personal ? <RewardProgressPanel p={personal.progression} area="earn" detailed /> : user && <p className="p-4 text-sm text-muted" role="status">{progressLoading ? "Checking your eligible points and payout rounds…" : "Reward eligibility is temporarily unavailable. Refresh to retry; your stored points are not a claimable balance."}</p>}
         <MainnetFlowClaimCard />
 
         {user && (
@@ -262,9 +198,9 @@ function EarnPage() {
                   // V12.4A §6 — this is the remaining TOKEN payout delta, in FLOW,
                   // not a second points balance.
                   // Mainnet FLOW claims are LOCKED until funding + reconciliation pass.
-                  label: "FLOW claimable",
-                  value: "0",
-                  hint: `${FLOW_TOKEN} · unavailable`,
+                  label: "Claimable now",
+                  value: display.claimable === null ? "—" : formatPts(display.claimable),
+                  hint: `${FLOW_TOKEN} · open payout round`,
                 },
                 {
                   label: "Campaign PTS",
@@ -303,124 +239,10 @@ function EarnPage() {
               </div>
             </Surface>
 
-            {/* Claim — the audited server flow, with the exact server requirements. */}
             <Surface id="claim">
-              <SectionHeader
-                title="Convert PTS to claimable FLOW"
-                hint="Every requirement is enforced server-side when you convert."
-              />
-              <ul className="divide-y divide-hairline border-t border-hairline">
-                {requirements.map((r) => (
-                  <li key={r.label}>
-                    <ListRow
-                      icon={
-                        r.done ? (
-                          <Check className="h-4 w-4" aria-hidden />
-                        ) : (
-                          <Circle className="h-4 w-4" aria-hidden />
-                        )
-                      }
-                      label={r.label}
-                      description={r.hint}
-                      to={r.done ? undefined : r.to}
-                      hash={r.done ? undefined : r.hash}
-                      onClick={r.done ? () => {} : undefined}
-                      trailing={
-                        r.done ? (
-                          <StatusPill tone="ok">Done</StatusPill>
-                        ) : (
-                          <StatusPill tone="pending">Todo</StatusPill>
-                        )
-                      }
-                    />
-                  </li>
-                ))}
-              </ul>
-              <div className="space-y-2 border-t border-hairline p-4">
-                {(() => {
-                  const m = claimMinimumProgress(incentives?.eligibleFundedPoints);
-                  return (
-                    <div aria-label="Progress toward minimum claim">
-                      <p className="text-[12px] font-bold">{user ? (m.meetsMinimum ? "Eligible for next settlement batch" : m.label) : `0 / 1,000 FLOW toward minimum claim`}</p>
-                      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-hairline" role="progressbar" aria-valuemin={0} aria-valuemax={m.minimum} aria-valuenow={m.current}>
-                        <div className="h-full bg-primary" style={{ width: `${Math.round(m.progress * 100)}%` }} />
-                      </div>
-                      <p className="mt-1 text-[10.5px] leading-relaxed text-muted-soft">
-                        Minimum claim is 1,000 FLOW. Only verified, funded FLOW Points count (signup and referral bonuses included). Below the minimum you keep earning.
-                      </p>
-                    </div>
-                  );
-                })()}
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  onClick={() => void claim()}
-                  className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:border disabled:border-hairline disabled:bg-card disabled:text-muted"
-                >
-                  <Gift className="h-4 w-4" aria-hidden />
-                  Mainnet claims locked
-                </button>
-                {claimMessage && (
-                  <p className="text-[11.5px] leading-relaxed text-muted">{claimMessage}</p>
-                )}
-                <p className="text-[11px] leading-relaxed text-muted-soft">
-                  FLOW Points are recorded under the approved 1:1 reward policy. Mainnet claims will
-                  open after funding and historical reconciliation are verified. Nothing can be
-                  withdrawn as FLOW yet.
-                </p>
-              </div>
+              <SectionHeader title="When can I claim?" hint={display.readiness} />
+              <p className="border-t border-hairline p-4 text-[12px] leading-relaxed text-muted">A total of 1,000 PTS does not automatically mean 1,000 FLOW is available. First reach 1,000 verified, funded Mainnet PTS not already allocated; then wait for your payout round to be published. The claim above becomes available only during its open window, for the allocated wallet. Community follows are optional, not a claim requirement.</p>
             </Surface>
-
-            {/* V12 — on-chain FLOW token distribution status. Read-only and
-                fail-closed: it states the truth about the claim contract and
-                never implies a token claim is available. */}
-            <Surface id="flow-token">
-              <SectionHeader
-                title="On-chain FLOW token claims"
-                hint="Status of the FLOW token distributor. PTS stay off-chain until this is live."
-              />
-              <ul className="divide-y divide-hairline border-t border-hairline">
-                {FLOW_REWARDS_CHAINS.map((c) => {
-                  const readiness = resolveFlowClaimReadiness(
-                    c.chainId,
-                    isFlowConversionPolicyApprovedForChain(c.chainId),
-                  );
-                  return (
-                    <li key={c.chainId}>
-                      <ListRow
-                        icon={<Coins className="h-4 w-4" aria-hidden />}
-                        label={c.label}
-                        description={
-                          readiness.ready
-                            ? "Claim contract live."
-                            : FLOW_CLAIM_BLOCKED_COPY[readiness.reason]
-                        }
-                        trailing={
-                          <StatusPill tone={readiness.ready ? "ok" : "pending"}>
-                            {readiness.ready ? "Live" : "Pending"}
-                          </StatusPill>
-                        }
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-              <p className="border-t border-hairline p-4 text-[11px] leading-relaxed text-muted-soft">
-                FLOW Points (PTS) are an off-chain balance. On BOT Testnet the distributor is
-                deployed and funded with 10,000,000 FLOW from the approved treasury, and the
-                approved testnet policy converts 1 PTS to 1 FLOW cumulatively — Campaign PTS are
-                always excluded. Claim authorizations are server-signed and short-lived; the first
-                on-chain payout is not triggered automatically. BOT Mainnet remains pending
-                promotion.
-              </p>
-            </Surface>
-
-            {/* V12.3 — the explicit, user-initiated on-chain FLOW claim. */}
-            <FlowTokenClaimCard
-              campaignPts={campaignAuthed ? campaignPointsTotal : null}
-              onClaimed={refresh}
-            />
 
             {/* V13.2 — testnet vault live and funded; read-only surface, never a quoted rate. */}
             <Link
@@ -430,7 +252,7 @@ function EarnPage() {
               <span className="min-w-0">
                 <span className="block text-[13px] font-black">FLOW staking</span>
                 <span className="block text-[11px] text-muted-soft">
-                  Testnet vault live — 100,000 FLOW pre-funded rewards, no minting, no lock-up.
+                  BOT Mainnet staking — view live terms, reserves and your positions.
                 </span>
               </span>
               <span className="shrink-0 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-muted">
@@ -459,15 +281,15 @@ function EarnPage() {
             <ListRow
               icon={<Coins className="h-4 w-4" aria-hidden />}
               label="Daily cap"
-              description={`Today: ${formatPts(Number(incentives?.coreSwapPointsToday ?? 0))} / ${formatPts(FLOW_POINTS_V2_DAILY_CAP)} core swap ${PTS} earned. The cap is per bound wallet each UTC day; swaps past it still complete and stay verified.`}
+              description={`Today: ${formatPts(Number(incentives?.coreSwapPointsToday ?? 0))} / ${formatPts(FLOW_POINTS_V2_DAILY_CAP)} core swap ${PTS} earned. This is today’s earning limit, not your claim progress. It resets each UTC day; swaps past it still complete.`}
             />
           </div>
           <div className="border-t border-hairline p-4">
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.08em] text-muted">Referral rewards</p>
             <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1.5 text-[12px]">
               <dt className="text-muted">FLOW Points earned</dt><dd className="font-bold">{user ? formatPts(Number(incentives?.flowPoints ?? 0)) : "—"} {PTS}</dd>
-              <dt className="text-muted">FLOW currently claimable</dt><dd className="font-bold">0 · unavailable</dd>
-              <dt className="col-span-2 pb-1 text-[10.5px] leading-relaxed text-muted-soft">FLOW Points are recorded under the approved 1:1 reward policy. Mainnet claims will open after funding and historical reconciliation are verified.</dt>
+              <dt className="text-muted">FLOW claimable now</dt><dd className="font-bold">{display.claimable === null ? "—" : formatPts(display.claimable)} FLOW</dd>
+              <dt className="col-span-2 pb-1 text-[10.5px] leading-relaxed text-muted-soft">Only eligible funded PTS convert 1:1 to FLOW through a published payout round. Stored totals are not withdrawable tokens.</dt>
               <dt className="text-muted">New user signup bonus</dt><dd className="font-bold">100 {PTS} = 100 FLOW</dd>
               <dt className="text-muted">Referrer signup bonus</dt><dd className="font-bold">+100</dd>
               <dt className="col-span-2 pt-1 text-[10.5px] font-black uppercase tracking-[0.08em] text-muted">Activity milestones</dt>
@@ -479,7 +301,7 @@ function EarnPage() {
               <dt className="text-muted">Rewarded referrals per month</dt><dd className="font-bold">10</dd>
             </dl>
             <p className="mt-2 text-[11px] leading-relaxed text-muted-soft">
-              The signup bonus is confirmed once the new account verifies its email and binds a wallet not used for a bonus before. {incentives?.signupProgram?.exhausted ? "Signup bonus allocation is currently fully allocated." : "Available while the funded FlowBridge community-growth allocation remains available."} Milestones count only verified, confirmed swaps by the referred wallet, subject to monthly caps, review and funded program limits.
+              For accounts created on or after October 4, 2026, the signup bonus is confirmed once the new account verifies its email and binds a wallet not used for a bonus before. {incentives?.signupProgram?.exhausted ? "Signup bonus allocation is currently fully allocated." : "Available while the funded FlowBridge community-growth allocation remains available."} Milestones count only verified, confirmed swaps by the referred wallet, subject to monthly caps, review and funded program limits.
             </p>
             <p className="mt-1 text-[11px] leading-relaxed text-muted-soft">
               {user && Number(incentives?.signupBonusPoints ?? 0) > 0

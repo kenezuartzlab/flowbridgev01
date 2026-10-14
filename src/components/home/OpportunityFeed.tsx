@@ -34,6 +34,8 @@ import {
   primaryCta,
   resolveExperience,
 } from "@/lib/ai/experience/experienceModel";
+import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
+import { rewardPresentation } from "@/lib/rewards/rewardPresentation";
 import { EvidenceChip, StatusChip } from "@/components/ai/StatusChip";
 
 const DOMAIN_ICON = {
@@ -63,10 +65,23 @@ export function OpportunityFeed() {
   const [compiling, setCompiling] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ id: string; text: string; ok: boolean } | null>(null);
 
-  const experience = useMemo(
-    () => resolveExperience({ decision, signedIn, hiddenIds: hidden }),
-    [decision, signedIn, hidden],
-  );
+  const { data: personal } = usePersonalProgress(signedIn);
+  const experience = useMemo(() => {
+    const p = personal?.progression;
+    const display = rewardPresentation(p);
+    const items = decision?.items.map((item) => {
+      if (item.domain !== 'REWARDS') return item;
+      return { ...item, title: display.readiness,
+        what: p ? `${p.earnedPoints.toLocaleString('en-US')} total PTS; ${p.availableTowardMinimum.toLocaleString('en-US')} eligible PTS toward your next payout.` : 'Reward eligibility is still being checked.',
+        whyNow: 'Total earned points are not a withdrawable FLOW balance.',
+        whatNext: (display.claimable ?? 0) > 0 ? 'Open Earn to verify the round and confirm with your wallet.' : 'Open Earn for funding, exclusions and payout-round status.',
+        actionable: (display.claimable ?? 0) > 0, blocked: !(display.claimable && display.claimable > 0),
+        blockerText: (display.claimable ?? 0) > 0 ? null : 'Claims require an eligible funded balance and a published, open payout round.',
+        supportsMission: false, reasonCodes: item.reasonCodes.filter((r) => r !== 'READY_TO_CLAIM'), facts: [],
+        surface: { label: 'Points breakdown', href: '/earn' } };
+    });
+    return resolveExperience({ decision: decision && items ? { ...decision, items } : decision, signedIn, hiddenIds: hidden });
+  }, [decision, signedIn, hidden, personal]);
 
   /**
    * V22 §11 — mark seen once so unchanged state stops repeating on later visits.
