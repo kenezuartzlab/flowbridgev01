@@ -31,6 +31,10 @@ import { formatUsd } from "@/lib/format";
 import { getIdToken, googleSignIn } from "@/lib/auth";
 import { DonateModal } from "@/modals/DonateModal";
 import { FLOW_TOKEN, PTS, XP, formatPts, xpLevel } from "@/lib/points";
+import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
+import { RewardProgressPanel } from "@/components/rewards/RewardProgressPanel";
+import { rewardPresentation } from "@/lib/rewards/rewardPresentation";
+import { Button } from "@/components/ui/button";
 
 
 
@@ -73,8 +77,6 @@ function RewardsPage() {
   const config = useAppConfig();
   const page = getPage(config, "rewards");
   const L = (slot: string, fallback: string) => pageLabel(config, "rewards", slot, fallback);
-  const [claiming, setClaiming] = useState(false);
-  const [claimMessage, setClaimMessage] = useState<string | null>(null);
   const [portalOpen, setPortalOpen] = useState(false);
 
   /** Deep-link support: #games opens Games, #social the task portal, #bind the wallet task, #portal the FLOW Incentive Portal. */
@@ -99,39 +101,8 @@ function RewardsPage() {
 
 
 
-  const claimThreshold = Number(incentives?.claimThreshold ?? 1000);
-  const claimableNow = Number(incentives?.claimableTotal ?? 0);
-  const socialsDone = (["youtube", "x", "telegram"] as const).every(
-    (k) => !!incentives?.socials?.[k],
-  );
-  const canClaim =
-    !!user &&
-    !!(user?.emailVerified || user?.email_verified) &&
-    !!incentives?.walletAddress &&
-    socialsDone &&
-    claimableNow >= claimThreshold;
-
-  const claim = async () => {
-    setClaiming(true);
-    setClaimMessage(null);
-    try {
-      const token = await getIdToken();
-      if (!token) throw new Error("Sign in again to claim.");
-      const res = await fetch("/api/users/claim", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.success) throw new Error(data?.error ?? "Claim failed.");
-      setClaimMessage(`Converted ${formatPts(claimableNow)} ${PTS} to claimable FLOW`);
-      await refresh();
-    } catch (e: any) {
-      setClaimMessage(e?.message ?? "Claim failed.");
-    } finally {
-      setClaiming(false);
-    }
-  };
-
+  const { data: personal } = usePersonalProgress(!!user);
+  const display = rewardPresentation(personal?.progression);
 
   const referralLink =
     typeof window !== "undefined" && incentives?.referralCode
@@ -230,15 +201,15 @@ function RewardsPage() {
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {/* V12.4A §6 — the remaining token payout delta, denominated in FLOW. */}
               <OverviewTile
-                label={L("available", "Available to claim")}
-                value={formatPts(incentives?.claimableTotal ?? 0)}
+                label="Claimable now"
+                value={display.claimable === null ? "—" : formatPts(display.claimable)}
                 unit={FLOW_TOKEN}
                 accent
               />
               <OverviewTile
-                label={L("pending", "Pending")}
-                value={formatPts(incentives?.signupLocked ?? 0)}
-                unit={`${PTS} locked`}
+                label="Eligible for next payout"
+                value={personal ? formatPts(personal.progression.availableTowardMinimum) : "—"}
+                unit={PTS}
               />
               <OverviewTile label="Lifetime" value={formatPts(lifetime)} unit={PTS} />
               <OverviewTile
@@ -248,8 +219,7 @@ function RewardsPage() {
               />
             </section>
             <p className="px-1 font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.08em] text-muted-soft">
-              FLOW Points ({PTS}) are off-chain campaign points — not FLOW tokens. 1 {PTS} is never
-              guaranteed to equal 1 FLOW.
+              Only verified funded Mainnet FLOW Points count: 1 eligible {PTS} = 1 FLOW. Campaign PTS and XP never convert. A published, open payout round is required.
             </p>
 
             {/* Sub tabs */}
@@ -327,104 +297,9 @@ function RewardsPage() {
                   </div>
                 </section>
 
-                {/* Claim checklist — mirrors the server-side claim requirements */}
-                <section className="rounded-2xl border border-hairline bg-card p-4">
-                  <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">
-                    Claim Checklist
-                  </h2>
-                  <ul className="mt-3 space-y-2">
-                    <CheckRow
-                      done={!!(user?.emailVerified || user?.email_verified)}
-                      label="Email verified"
-                      hint="Verify the email you signed in with"
-                    />
-                    <CheckRow
-                      done={!!incentives?.walletAddress}
-                      label="Wallet bound to email"
-                      hint="Bind the wallet you swap with"
-                    />
-                    <CheckRow
-                      done={!!incentives?.socials?.youtube}
-                      label="Follow on YouTube"
-                      hint="Optional"
-                    />
-                    <CheckRow done={!!incentives?.socials?.x} label="Follow on X" hint="Optional" />
-                    <CheckRow
-                      done={!!incentives?.socials?.telegram}
-                      label="Join Telegram"
-                      hint="Optional"
-                    />
-                    <CheckRow
-                      done={(incentives?.claimableTotal ?? 0) >= claimThreshold}
-                      label={`${claimThreshold.toLocaleString()} ${PTS} eligible to convert`}
-                      hint={`${formatPts(incentives?.claimableTotal ?? 0)} ${FLOW_TOKEN} available to claim now`}
-                    />
-                  </ul>
-
-                  {!incentives?.walletAddress && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTab("EARN");
-                        setTimeout(
-                          () => document.getElementById("bind-wallet")?.scrollIntoView({ behavior: "smooth" }),
-                          80,
-                        );
-                      }}
-                      className="mt-3 flex min-h-[44px] w-full items-center justify-between gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary"
-                    >
-                      Bind your wallet
-                      <span className="tabular-nums">0/1</span>
-                    </button>
-                  )}
-
-                  {!socialsDone && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTab("EARN");
-                        setTimeout(
-                          () => document.getElementById("social-tasks")?.scrollIntoView({ behavior: "smooth" }),
-                          80,
-                        );
-                      }}
-                      className="mt-3 flex min-h-[44px] w-full items-center justify-between gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 font-mono text-[11px] font-black uppercase tracking-[0.1em] text-primary"
-                    >
-                      Complete social tasks
-                      <span className="tabular-nums">
-                        {(["youtube", "x", "telegram"] as const).filter((k) => incentives?.socials?.[k]).length}/3
-                      </span>
-                    </button>
-                  )}
-
-
-
-                  {/* Primary claim action sits directly under the checklist */}
-                  <div className="mt-4 space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => void claim()}
-                      disabled={!canClaim || claiming}
-                      className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-primary font-mono text-[12px] font-black uppercase tracking-[0.12em] text-primary-foreground transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {claiming ? (
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Gift className="h-4 w-4" />
-                      )}
-                      {claiming
-                        ? "Claiming…"
-                        : `Convert to FLOW (${formatPts(claimableNow)} ${PTS})`}
-                    </button>
-                    <p className="text-center font-mono text-[10px] uppercase tracking-[0.08em] text-muted-soft">
-                      {claimMessage ??
-                        (canClaim
-                          ? "All requirements met — claim now"
-                          : `Complete the checklist and reach ${claimThreshold.toLocaleString()} claimable ${PTS}`)}
-                    </p>
-                  </div>
-                </section>
-
+                {personal ? <RewardProgressPanel p={personal.progression} area="flow_points" detailed /> : <p className="text-sm text-muted">Checking your eligible points and payout rounds…</p>}
+                <Button asChild className="w-full"><Link to="/earn">View payout rounds and claim FLOW</Link></Button>
+                <p className="text-[12px] text-muted">Community follows are optional and do not unlock claims.</p>
 
                 {/* Volume gate */}
                 <section className="rounded-2xl border border-hairline bg-card p-4">
@@ -435,8 +310,7 @@ function RewardsPage() {
                     </h2>
                   </div>
                   <p className="mt-2 text-[12px] leading-relaxed text-muted">
-                    Referral signup points unlock with real swap volume. Bridging is recorded in your activity for
-                    attribution but never earns points.
+                    Funded signup bonuses count after eligibility checks; referral activity milestones require verified Mainnet swaps. Bridging earns no core FLOW Points.
                   </p>
                   <div className="mt-3 flex items-baseline justify-between font-mono text-[12px]">
                     <span className="text-muted">Total swap volume</span>

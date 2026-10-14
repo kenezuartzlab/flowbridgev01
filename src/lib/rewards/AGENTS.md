@@ -1,5 +1,7 @@
 # Rewards rules
 
+- Reward balance/readiness presentation uses rewardPresentation.ts from caller-scoped RewardProgression, never legacy claimableTotal or stored aggregate subtraction. Why: earned points and published on-chain claims are different stages.
+
 - Reward-processing failures are recorded via src/lib/rewards/rewardDiagnostics(.server).ts into server-only reward_processing_events; economic ledgers are writable only by service_role and profile guard triggers run SECURITY INVOKER. Why: a silent persistence failure and a definer-owner guard bypass previously went unnoticed.
 - Reward funding is reserved only through SECURITY DEFINER RPCs (award_signup_bonus, increase_reward_budget) against reward_budgets; only FUNDED ledger rows count toward 1:1 FLOW claims, and the 1:1 claim gate lives in src/lib/rewards/signupBonusPolicy.ts. Why: points equal tokens, so every point must be backed and never derived from profile aggregates.
 - Historical FLOW Points reconciliation and per-program solvency are computed only in src/lib/rewards/historicalReconciliation.ts and rewardFundingPlan.ts (pure), served admin-only via /api/admin/rewards-solvency to the /ops Rewards tab. Why: stored profile aggregates were once user-writable and must never authorize claims.

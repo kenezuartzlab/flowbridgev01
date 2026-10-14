@@ -30,7 +30,7 @@ import { fetchBotChainMarkets, type MarketRow } from "@/lib/markets/marketFeed";
 import { formatUsd } from "@/lib/format";
 import { GrowthHubModule } from "@/components/app/GrowthHubModule";
 import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
-import { useRewardState } from "@/lib/rewards/useRewardState";
+import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
 import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 import { JourneyCard } from "@/components/home/JourneyCard";
 import { OnboardingOverlay } from "@/components/growth/OnboardingOverlay";
@@ -116,7 +116,7 @@ function HomePage() {
    * V17.1B §2/§8 — the canonical reward state is the single authority for the
    * claim/convert wording in the hero. Home never recomputes claimability.
    */
-  const { rewardState } = useRewardState(!!user);
+  const { data: personal } = usePersonalProgress(!!user);
 
   /**
    * Real verified swap volume, server-computed on the profile
@@ -165,7 +165,7 @@ function HomePage() {
             claimableFlow={claimableFlow}
             claimedFlow={claimedFlow}
             volumeUsd={volumeUsd}
-            rewardState={rewardState}
+            progression={personal?.progression}
           />
 
 
