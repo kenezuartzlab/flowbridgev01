@@ -1,8 +1,8 @@
 # MultiSend BOT Testnet Release
 
 # Clear reward eligibility and composition
-- [ ] Replace conflicting claim balances and stale locked/pending copy with caller-scoped progression on Home, Earn, Rewards and Flow AI.
-- [ ] Explain funded points, exclusions, settlement rounds and the separate daily earning cap; verify tests and mobile/desktop presentation without economic changes.
+- [x] Replace conflicting claim balances and stale locked/pending copy with caller-scoped progression on Home, Earn, Rewards and Flow AI.
+- [x] Explain funded points, exclusions, settlement rounds and the separate daily earning cap; 309 tests pass, signed-in 390px/desktop checks pass, build clean; preview only, no economic changes or transactions.
 
 # BOT official launch — Pre-Day-0
 - [x] Prepare private launch article, five social drafts and qualitative originality note; no public blog route or sitemap entry.
