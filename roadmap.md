@@ -1,5 +1,9 @@
 # MultiSend BOT Testnet Release
 
+# Clear reward eligibility and composition
+- [ ] Replace conflicting claim balances and stale locked/pending copy with caller-scoped progression on Home, Earn, Rewards and Flow AI.
+- [ ] Explain funded points, exclusions, settlement rounds and the separate daily earning cap; verify tests and mobile/desktop presentation without economic changes.
+
 # BOT official launch — Pre-Day-0
 - [x] Prepare private launch article, five social drafts and qualitative originality note; no public blog route or sitemap entry.
 - [x] Add shared official BOT network badge and public footer while retaining FlowBridge branding and mobile Flow AI.
