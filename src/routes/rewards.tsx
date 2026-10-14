@@ -28,7 +28,7 @@ import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
 
 import { formatUsd } from "@/lib/format";
-import { googleSignIn } from "@/lib/auth";
+import { getIdToken, googleSignIn } from "@/lib/auth";
 import { DonateModal } from "@/modals/DonateModal";
 import { FLOW_TOKEN, PTS, XP, formatPts, xpLevel } from "@/lib/points";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
@@ -297,7 +297,7 @@ function RewardsPage() {
                   </div>
                 </section>
 
-                {personal ? <RewardProgressPanel p={personal.progression} area="rewards" detailed /> : <p className="text-sm text-muted">Checking your eligible points and payout rounds…</p>}
+                {personal ? <RewardProgressPanel p={personal.progression} area="flow_points" detailed /> : <p className="text-sm text-muted">Checking your eligible points and payout rounds…</p>}
                 <Button asChild className="w-full"><Link to="/earn">View payout rounds and claim FLOW</Link></Button>
                 <p className="text-[12px] text-muted">Community follows are optional and do not unlock claims.</p>
 
