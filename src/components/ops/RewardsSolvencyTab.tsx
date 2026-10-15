@@ -27,9 +27,9 @@ function Box({ title, children }: { title: string; children: React.ReactNode }) 
 }
 function KV({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="flex min-w-0 items-center justify-between gap-3 border-b border-hairline py-1.5 text-[12.5px] last:border-0">
-      <span className="min-w-0 truncate text-muted">{k}</span>
-      <span className="min-w-0 truncate text-right font-mono font-bold text-foreground">{v}</span>
+    <div className="flex min-w-0 flex-col gap-0.5 border-b border-hairline py-1.5 text-[12.5px] last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <span className="min-w-0 text-muted">{k}</span>
+      <span className="min-w-0 font-mono font-bold text-foreground [overflow-wrap:anywhere] sm:text-right">{v}</span>
     </div>
   );
 }
