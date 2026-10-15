@@ -113,6 +113,37 @@ export async function discoverPublishedBatches(admin: Admin, liveEpochCount: num
   return Object.assign(out, { indexing });
 }
 
+/**
+ * V36.1 — shared, non-account-specific cache of PUBLIC chain round data
+ * (live distributor state + verified published rounds). Per-wallet claim
+ * status is never cached here. 60s TTL; concurrent callers share one fetch.
+ */
+type PublishedSnapshot = { live: ChainState | null; found: Awaited<ReturnType<typeof discoverPublishedBatches>> };
+let roundsCache: { at: number; p: Promise<PublishedSnapshot> } | null = null;
+const ROUNDS_TTL_MS = 60_000;
+export function getPublishedRoundsCached(admin: Admin): Promise<PublishedSnapshot> {
+  if (roundsCache && Date.now() - roundsCache.at < ROUNDS_TTL_MS) return roundsCache.p;
+  const p = (async () => {
+    const live = await readChainState();
+    if (!live) return { live: null, found: Object.assign([], { indexing: [] }) as any };
+    return { live, found: await discoverPublishedBatches(admin, live.epochCount) };
+  })();
+  roundsCache = { at: Date.now(), p };
+  p.then((s) => { if (!s.live) roundsCache = null; }, () => { roundsCache = null; });
+  return p;
+}
+
+/** V36.1 — verified on-chain claimed-wallet count for one round (isClaimed per leaf). */
+const claimedCountCache = new Map<number, { at: number; v: { claimed: number; total: number; unreadable: number } }>();
+export async function countRoundClaims(epochId: number, leafIndexes: number[]) {
+  const hit = claimedCountCache.get(epochId);
+  if (hit && Date.now() - hit.at < ROUNDS_TTL_MS) return hit.v;
+  const res = await Promise.all(leafIndexes.map((i) => readIsClaimed(epochId, i)));
+  const v = { claimed: res.filter((r) => r === true).length, total: res.length, unreadable: res.filter((r) => r == null).length };
+  if (!v.unreadable) claimedCountCache.set(epochId, { at: Date.now(), v });
+  return v;
+}
+
 export interface LedgerRow { user_id: string; points: number; chain_id: number | null; funding_state: string | null; program_id: string | null }
 export interface ReconRow { userId: string; classification: string; authoritative: number; pendingReview: number }
 
