@@ -856,14 +856,22 @@ export async function getUserPointsAndReferrals(userId: string) {
     const byReferee = new Map<string, { milestones: string[]; points: number }>();
     const monthKey = utcMonthKey();
     const monthSet = new Set<string>();
+    const rewardedSet = new Set(signupPaidReferees);
+    const { data: currentSignupRows } = await supabaseAdmin.from('flow_points_ledger').select('metadata')
+      .eq('user_id', userId).eq('reason', 'REFERRAL_SIGNUP_BONUS').gte('created_at', `${monthKey}-01T00:00:00.000Z`);
+    for (const row of currentSignupRows ?? []) {
+      const md = row.metadata as Record<string, unknown> | null;
+      if (typeof md?.refereeId === 'string') monthSet.add(md.refereeId);
+    }
     for (const a of awards ?? []) {
       const e = byReferee.get(a.referee_id) ?? { milestones: [], points: 0 };
       e.milestones.push(String(a.milestone));
       e.points += Number(a.points ?? 0);
       byReferee.set(a.referee_id, e);
+      rewardedSet.add(a.referee_id);
       if (a.month_key === monthKey) monthSet.add(a.referee_id);
     }
-    rewardedReferrals = byReferee.size;
+    rewardedReferrals = rewardedSet.size;
     rewardedReferralsThisMonth = monthSet.size;
     (referees ?? []).forEach((r: any, i: number) => {
       const e = byReferee.get(r.id);
