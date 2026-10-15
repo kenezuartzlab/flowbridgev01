@@ -74,6 +74,7 @@ import { Route as ApiAdminRewardsPublishVerifyRouteImport } from './routes/api/a
 import { Route as ApiAdminRewardsSolvencyRouteImport } from './routes/api/admin.rewards-solvency'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
+import { Route as ApiAdminUsersRouteImport } from './routes/api/admin.users'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAiDecisionRouteImport } from './routes/api/ai.decision'
 import { Route as ApiAiDeliberateRouteImport } from './routes/api/ai.deliberate'
@@ -454,6 +455,11 @@ const ApiAdminTokensRoute = ApiAdminTokensRouteImport.update({
   path: '/api/admin/tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
+  id: '/api/admin/users',
+  path: '/api/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
   id: '/api/admin/whoami',
   path: '/api/admin/whoami',
@@ -730,6 +736,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
+  '/api/admin/users': typeof ApiAdminUsersRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/ai/decision': typeof ApiAiDecisionRoute
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
@@ -838,6 +845,7 @@ export interface FileRoutesByTo {
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
+  '/api/admin/users': typeof ApiAdminUsersRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/ai/decision': typeof ApiAiDecisionRoute
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
@@ -947,6 +955,7 @@ export interface FileRoutesById {
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
+  '/api/admin/users': typeof ApiAdminUsersRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/ai/decision': typeof ApiAiDecisionRoute
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
@@ -1057,6 +1066,7 @@ export interface FileRouteTypes {
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
+    | '/api/admin/users'
     | '/api/admin/whoami'
     | '/api/ai/decision'
     | '/api/ai/deliberate'
@@ -1165,6 +1175,7 @@ export interface FileRouteTypes {
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
+    | '/api/admin/users'
     | '/api/admin/whoami'
     | '/api/ai/decision'
     | '/api/ai/deliberate'
@@ -1273,6 +1284,7 @@ export interface FileRouteTypes {
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
+    | '/api/admin/users'
     | '/api/admin/whoami'
     | '/api/ai/decision'
     | '/api/ai/deliberate'
@@ -1382,6 +1394,7 @@ export interface RootRouteChildren {
   ApiAdminRewardsSolvencyRoute: typeof ApiAdminRewardsSolvencyRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
+  ApiAdminUsersRoute: typeof ApiAdminUsersRoute
   ApiAdminWhoamiRoute: typeof ApiAdminWhoamiRoute
   ApiAiDecisionRoute: typeof ApiAiDecisionRoute
   ApiAiDeliberateRoute: typeof ApiAiDeliberateRoute
@@ -1871,6 +1884,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminTokensRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/users': {
+      id: '/api/admin/users'
+      path: '/api/admin/users'
+      fullPath: '/api/admin/users'
+      preLoaderRoute: typeof ApiAdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/whoami': {
       id: '/api/admin/whoami'
       path: '/api/admin/whoami'
@@ -2308,6 +2328,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminRewardsSolvencyRoute: ApiAdminRewardsSolvencyRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
+  ApiAdminUsersRoute: ApiAdminUsersRoute,
   ApiAdminWhoamiRoute: ApiAdminWhoamiRoute,
   ApiAiDecisionRoute: ApiAiDecisionRoute,
   ApiAiDeliberateRoute: ApiAiDeliberateRoute,
