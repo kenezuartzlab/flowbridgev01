@@ -104,3 +104,18 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
   });
   return { progression, nextBestAction, confirmedMainnetTrades, missionNextStep, chainReadable, observedAt: new Date().toISOString() };
 }
+
+/**
+ * V36 — the ONLY claimable-FLOW figure for Flow AI / opportunities: a live,
+ * open, unclaimed, proof-valid on-chain allocation. null = could not verify.
+ */
+export async function resolveClaimableNowFlow(userId: string): Promise<number | null> {
+  try {
+    const { buildRewardsSummary } = await import("./rewardsSummary");
+    const r = await resolvePersonalProgress({ userId, emailVerified: true });
+    const s = buildRewardsSummary({ progression: r.progression, chainReadable: r.chainReadable, nowSec: Math.floor(Date.now() / 1000) });
+    return s.blocker === "STATE_UNAVAILABLE" ? null : s.claimableNow;
+  } catch {
+    return null;
+  }
+}
