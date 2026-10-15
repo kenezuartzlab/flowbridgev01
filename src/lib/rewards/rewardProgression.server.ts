@@ -43,7 +43,8 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     for (const l of data ?? []) evidence.set(l.user_id, [...(evidence.get(l.user_id) ?? []), toRow(l)]);
   }
   const recon = reconcileAccount(
-    { userId: args.userId, createdAt: new Date(profile?.created_at ?? Date.now()).toISOString(), storedFlowPoints: Number(profile?.flow_points ?? 0), storedPointsSelf: Number(profile?.points_self ?? 0), storedReferralSignup: Number(profile?.points_referral_signup ?? 0), ledger },
+    { userId: args.userId, createdAt: new Date(profile?.created_at ?? Date.now()).toISOString(), // V36: same Total Points rule as /api/users/incentives (profile + ledger-only signup bonuses).
+    storedFlowPoints: Number(profile?.flow_points ?? 0) + ledger.filter((r) => r.reason === "SIGNUP_BONUS_REFEREE" || r.reason === "REFERRAL_SIGNUP_BONUS").reduce((t, r) => t + Number(r.points ?? 0), 0), storedPointsSelf: Number(profile?.points_self ?? 0), storedReferralSignup: Number(profile?.points_referral_signup ?? 0), ledger },
     evidence,
     OWNER_REVIEW_DECISIONS.get(args.userId),
   );
@@ -76,7 +77,8 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     reviewHeldPoints: recon.pendingReview,
     historicalNonclaimable: recon.nonclaimableHistorical,
     reconciliationOk: recon.classification === "MATCH" || recon.classification === "EXPLAINED_DIFFERENCE",
-    storedFlowPoints: Number(profile?.flow_points ?? 0),
+    // V36: same Total Points rule as /api/users/incentives (profile + ledger-only signup bonuses).
+    storedFlowPoints: Number(profile?.flow_points ?? 0) + ledger.filter((r) => r.reason === "SIGNUP_BONUS_REFEREE" || r.reason === "REFERRAL_SIGNUP_BONUS").reduce((t, r) => t + Number(r.points ?? 0), 0),
     walletBound: !!wallet,
     allocations,
     nowSec: Math.floor(Date.now() / 1000),
