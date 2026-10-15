@@ -112,3 +112,9 @@
 - [x] Verify & Bind using a WalletConnect session (one ownership signature, no gas/approval/transaction) — user PASS, wallet 0xF951…b25e.
 - [x] Security scan on the preview build after enabling WalletConnect: no new findings — only the two you had already accepted.
 - [x] V34.2E controlled production activation — published to flowbridge.space; real-device acceptance on the live site: PASS all (user).
+
+# V36.1
+- [x] Rewards speed, network badge, per-round claimed counts
+- [x] Mainnet/Testnet separation (capability matrix, testnet staking hidden + chain-checked, claim/convert endpoints reject non-BOT chains)
+- [x] Accepted-findings write-up, fresh scan, 320–430px + desktop checks, publish
+- [ ] TokenPocket real-device test — waits on owner's phone
