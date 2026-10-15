@@ -108,7 +108,7 @@ export function PublishBatchPanel({ s, rebuild, stale }: { s: S; rebuild: () => 
         <Row k="Claim opens / closes" v={s.root && s.claimStartIso ? `${s.claimStartIso.slice(0, 16)} → ${s.claimEndIso?.slice(0, 16)} UTC` : "—"} />
         <Row k="Simulation" v={s.simulation?.ran ? (s.simulation.ok ? "PASS" : "FAIL") : "not run (no publishable batch)"} />
         <Row k="Emergency pause" v={live ? (live.paused ? "PAUSED — publishing blocked" : "not paused") : "UNKNOWN"} />
-        <Row k="Queue" v={`${fmt(count("QUEUED") + count("READY"))} queued · ${fmt(count("PENDING_BELOW_MINIMUM"))} below 1,000 · ${fmt(count("REVIEW_HELD"))} held`} />
+        <Row k="Queue" v={`${fmt(count("INCLUDED"))} queued · ${fmt(count("PENDING_BELOW_MINIMUM"))} below 1,000 · ${fmt(count("REVIEW_HELD"))} held`} />
         <Row k="Signing" v={`${s.publisherConfig?.mode ?? "ONE_CLICK"} · automatic signing OFF`} />
       </div>
       {states.length > 0 && (
