@@ -154,7 +154,7 @@ function SettlementBox({ r, rebuild, rebuilding }: { r: RewardSolvencyReport; re
           <KV k="Next batch" v={`${s.readiness.nextBatchWallets} wallets · ${fmt(s.readiness.nextBatchFlow)} FLOW`} />
           <KV k="Published, unclaimed" v={`${fmt(s.readiness.publishedUnclaimedFlow)} FLOW`} />
           <KV k="Claimed" v={`${fmt(s.readiness.claimedFlow)} FLOW`} />
-          <KV k="Excluded (below min / held)" v={`${fmt(s.readiness.excludedBelowMinimumOrHeldFlow)} FLOW`} />
+          <KV k="Funded but not yet payable (wallet below 1,000 or held)" v={`${fmt(s.readiness.excludedBelowMinimumOrHeldFlow)} FLOW`} />
           <KV k="Claim window policy" v={s.readiness.claimWindowPolicy.replaceAll("_", " ")} />
           <KV k="Publisher ready" v={s.readiness.publisherReady ? "PASS" : "FAIL"} />
           {s.readiness.status === "NO_PUBLIC_BATCH_REQUIRED_YET" && <p className="text-[11px] text-muted-soft">No public batch required yet.</p>}
