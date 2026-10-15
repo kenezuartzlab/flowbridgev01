@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getIdToken } from "@/lib/auth";
 import { getActiveProvider } from "@/lib/wallet/activeProvider";
-import { publisherWalletGate, WALLET_GATE_COPY, type PublishPhase } from "@/lib/rewards/publishGate";
+import { publisherWalletGate, WALLET_GATE_COPY, retryAction, AUTONOMOUS_ACTIVATION_REQUIREMENTS, type PublishPhase } from "@/lib/rewards/publishGate";
 import type { RewardSolvencyReport } from "@/lib/rewards/rewardSolvency.server";
 
 type S = RewardSolvencyReport["settlement"];
@@ -28,6 +28,23 @@ export function PublishBatchPanel({ s, rebuild, stale }: { s: S; rebuild: () => 
   const [review, setReview] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
+  const [history, setHistory] = useState<{ object_id: string; action: string; new_value: { txHash?: string } | null; actor_email: string | null; created_at: string }[]>([]);
+  const [pending, setPending] = useState<{ epochId: number; root: string } | null>(null);
+  async function loadHistory() {
+    const r = await authed("/api/admin/rewards-publish-verify").catch(() => null);
+    const j = r ? await r.json().catch(() => null) : null;
+    if (j?.history) setHistory(j.history);
+  }
+  useEffect(() => { void loadHistory(); }, []);
+  async function recheck() {
+    if (!hash || !pending) return;
+    setMsg(null);
+    const res = await authed("/api/admin/rewards-publish-verify", { method: "POST", body: JSON.stringify({ ...pending, txHash: hash }) }).catch(() => null);
+    const j = res ? await res.json().catch(() => null) : null;
+    if (j?.phase) { setPhase(j.phase); if (j.phase === "CONFIRMED_VERIFIED") void rebuild(); }
+    else setMsg("Verification unavailable — try again shortly. Nothing is reported as published.");
+    void loadHistory();
+  }
   const ready = s.status === "READY_FOR_PUBLISHER_REVIEW" && !!s.tx;
   const states = s.walletStates ?? [];
   const count = (k: string) => states.filter((w) => w.state === k).length;
@@ -60,6 +77,7 @@ export function PublishBatchPanel({ s, rebuild, stale }: { s: S; rebuild: () => 
       setPhase(code === 4001 ? "REJECTED" : "ERROR"); return;
     }
     setHash(txHash);
+    setPending({ epochId: fresh.epochId!, root: fresh.root! });
     setPhase("BROADCAST_PENDING");
     for (let i = 0; i < 60; i++) {
       await new Promise((r) => setTimeout(r, 5000));
@@ -68,6 +86,7 @@ export function PublishBatchPanel({ s, rebuild, stale }: { s: S; rebuild: () => 
       if (j?.phase && j.phase !== "BROADCAST_PENDING") {
         setPhase(j.phase);
         if (j.phase === "CONFIRMED_VERIFIED") void rebuild();
+        void loadHistory();
         return;
       }
     }
@@ -88,6 +107,8 @@ export function PublishBatchPanel({ s, rebuild, stale }: { s: S; rebuild: () => 
         <Row k="Proofs" v={s.checks.find((c) => c.id === "PROOFS_VERIFIED")?.pass ? "all self-verified" : "—"} />
         <Row k="Claim opens / closes" v={s.root && s.claimStartIso ? `${s.claimStartIso.slice(0, 16)} → ${s.claimEndIso?.slice(0, 16)} UTC` : "—"} />
         <Row k="Simulation" v={s.simulation?.ran ? (s.simulation.ok ? "PASS" : "FAIL") : "not run (no publishable batch)"} />
+        <Row k="Emergency pause" v={live ? (live.paused ? "PAUSED — publishing blocked" : "not paused") : "UNKNOWN"} />
+        <Row k="Queue" v={`${fmt(count("QUEUED") + count("READY"))} queued · ${fmt(count("PENDING_BELOW_MINIMUM"))} below 1,000 · ${fmt(count("REVIEW_HELD"))} held`} />
         <Row k="Signing" v={`${s.publisherConfig?.mode ?? "ONE_CLICK"} · automatic signing OFF`} />
       </div>
       {states.length > 0 && (
@@ -121,7 +142,18 @@ export function PublishBatchPanel({ s, rebuild, stale }: { s: S; rebuild: () => 
       {!ready && <p className="mt-2 text-[12px] text-muted">{s.reason ? `Not publishable: ${s.reason.replaceAll("_", " ")}` : "Not publishable."}</p>}
       {msg && <p className="mt-2 text-[12px] font-bold text-danger">{msg}</p>}
       {phase !== "IDLE" && <p className="mt-2 text-[12px] font-bold">{PHASE_COPY[phase]}</p>}
+      {retryAction(phase) === "RECHECK" && <button type="button" onClick={() => void recheck()} className="mt-2 rounded-lg border border-border px-3 py-2 text-[12.5px] font-bold">Re-check transaction</button>}
+      {retryAction(phase) === "RESTART" && <button type="button" onClick={() => { setPhase("IDLE"); setHash(null); setMsg(null); }} className="mt-2 rounded-lg border border-border px-3 py-2 text-[12.5px] font-bold">Start over (rebuilds batch)</button>}
       {hash && <a className="mt-1 block break-all font-mono text-[11px] text-primary underline" href={`https://scan.botchain.ai/tx/${hash}`} target="_blank" rel="noreferrer">{hash}</a>}
+      <details className="mt-3 text-[12px]">
+        <summary className="cursor-pointer text-muted">Publish history ({history.length})</summary>
+        {history.length === 0 ? <p className="py-1 text-muted-soft">No verified publish outcomes recorded yet.</p>
+          : history.map((h, i) => <Row key={i} k={`${h.created_at.slice(0, 16)} · round ${h.object_id.split(":")[1]} · ${h.actor_email ?? "—"}`} v={h.action.replace("PUBLISH_", "").replaceAll("_", " ")} />)}
+      </details>
+      <details className="mt-2 text-[12px]">
+        <summary className="cursor-pointer text-muted">Automatic publishing — prepared, OFF</summary>
+        {AUTONOMOUS_ACTIVATION_REQUIREMENTS.map((r) => <Row key={r.id} k={r.label} v={r.met ? "MET" : "NOT MET"} />)}
+      </details>
     </section>
   );
 }
