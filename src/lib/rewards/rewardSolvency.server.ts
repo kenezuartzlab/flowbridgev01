@@ -42,7 +42,7 @@ export async function buildRewardSolvencyReport() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [profiles, ledger, budgets, reservations, chain] = await Promise.all([
     supabaseAdmin.from("profiles").select("id,created_at,flow_points,points_self,points_referral_signup,claimed_tokens,wallet_address").limit(10000),
-    supabaseAdmin.from("flow_points_ledger").select("id,user_id,reason,points,chain_id,created_at,activity_key,tx_hash,source_log_index,verified_usd,day_key,metadata,reservation_id,funding_state,program_id").limit(50000),
+    supabaseAdmin.from("flow_points_ledger").select("id,user_id,reason,points,chain_id,created_at,activity_key,tx_hash,source_log_index,verified_usd,day_key,metadata,reservation_id,funding_state,program_id,policy_version,wallet_address").limit(50000),
     supabaseAdmin.from("reward_budgets").select("program_id,total_points,reserved_points,status,funding_verified"),
     supabaseAdmin.from("reward_reservations").select("program_id,points"),
     readDistributor(),
@@ -180,6 +180,7 @@ export async function buildRewardSolvencyReport() {
       ledger: (ledger.data ?? []) as never,
       wallets: new Map((profiles.data ?? []).map((p) => [p.id, p.wallet_address])),
       budgets: (budgets.data ?? []) as never,
+      profiles: new Map((profiles.data ?? []).map((p) => [p.id, { createdAt: p.created_at ? new Date(p.created_at).toISOString() : null, wallet: p.wallet_address }])),
     }),
     canary: await readCanaryStatus(),
     payout: { sufficient: payoutContractSufficient(), capabilities: MAINNET_PAYOUT_AUDIT.capabilities, promotionPackage: MAINNET_PROMOTION_PACKAGE },

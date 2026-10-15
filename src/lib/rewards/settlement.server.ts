@@ -8,6 +8,9 @@ import { CLAIM_WINDOW_POLICY, PUBLIC_MAINNET_FLOW_CLAIMS, settlementEligibility 
 import { createPublicClient, http, parseAbi, type Address, type Hex } from "viem";
 import { MAINNET_PAYOUT_AUDIT, type ProgramId } from "./rewardFundingPlan";
 import { MAINNET_EPOCH_MANIFESTS } from "./mainnetEpochManifest";
+import { publisherLimitChecks } from "./publishGate";
+import { PUBLISHER_CONFIG } from "./settlementQueue";
+import { attributeSignupAward, SIGNUP_REASONS, type SignupAttribution } from "./signupAttribution";
 import { MAINNET_CHAIN_ID } from "./historicalReconciliation";
 import { BUILDER_SOURCE, detectRoundDrift, HISTORICAL_SOURCE, planRoundIndexSync, type ProofSource, type RoundSource } from "./historicalRoundIndex";
 import {
@@ -144,14 +147,15 @@ export async function countRoundClaims(epochId: number, leafIndexes: number[]) {
   return v;
 }
 
-export interface LedgerRow { user_id: string; points: number; chain_id: number | null; funding_state: string | null; program_id: string | null }
+export interface LedgerRow { user_id: string; points: number; chain_id: number | null; funding_state: string | null; program_id: string | null; reason?: string; policy_version?: string | null; reservation_id?: string | null; wallet_address?: string | null; metadata?: unknown }
 export interface ReconRow { userId: string; classification: string; authoritative: number; pendingReview: number }
 
 const PROGRAMS: ProgramId[] = ["CORE_SWAP", "REFERRAL_MILESTONE", "SIGNUP_BONUS"];
 
 export async function buildSettlement(args: {
   admin: Admin; recon: ReconRow[]; ledger: LedgerRow[]; wallets: Map<string, string | null>;
-  budgets: { program_id: string; total_points: number }[];
+  budgets: { program_id: string; total_points: number; funding_verified?: boolean }[];
+  profiles?: Map<string, { createdAt: string | null; wallet: string | null }>;
 }) {
   const [live, roles] = await Promise.all([readChainState(), readPublisherRoles()]);
   const publisher = { address: SETTLEMENT_SIGNER.address, ...auditPublisherRoles(roles) };
@@ -167,10 +171,14 @@ export async function buildSettlement(args: {
   for (const m of MAINNET_EPOCH_MANIFESTS) if (!discoveredIds.has(m.epochId)) for (const e of m.entitlements) addAlloc(e.account, e.amount);
   for (const d of discovered) for (const l of d.batch.leaves) addAlloc(l.account, l.amount);
 
+  // V36.3A — signup awards carry no chain id; attribute only after full provenance + funding verification.
+  const signup = await reconcileSignupAwards(args);
+  const effChain = (l: LedgerRow, i: number) => (signup.mainnetIdx.has(i) ? MAINNET_CHAIN_ID : l.chain_id);
+
   // Only FUNDED Mainnet ledger points; per-program attribution (no cross-bucket cover).
   const fundedBy = new Map<string, Map<ProgramId, number>>();
-  for (const l of args.ledger) {
-    if (l.funding_state !== "FUNDED" || l.chain_id !== MAINNET_CHAIN_ID) continue;
+  for (const [i, l] of args.ledger.entries()) {
+    if (l.funding_state !== "FUNDED" || effChain(l, i) !== MAINNET_CHAIN_ID) continue;
     const prog = (PROGRAMS.includes(l.program_id as ProgramId) ? l.program_id : "OTHER") as ProgramId;
     const m = fundedBy.get(l.user_id) ?? new Map<ProgramId, number>();
     m.set(prog, (m.get(prog) ?? 0) + l.points);
@@ -203,7 +211,37 @@ export async function buildSettlement(args: {
 
   const p = prepareSettlementBatch({ rows, fundedPointsAvailable: fundedAvail, programs, publisherRoles: roles, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
 
-  if (p.status === "READY_FOR_PUBLISHER_REVIEW" && p.batch?.root) {
+  // V36.3A — batch/day limits + exact eth_call simulation from the publisher.
+  const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
+  const { data: recent } = await args.admin.from("reward_settlement_batches").select("total_wei,publication_verified_at")
+    .eq("chain_id", MAINNET_CHAIN_ID).gte("publication_verified_at", dayAgo);
+  const flowPublishedLast24h = ((recent ?? []) as { total_wei: string | number }[]).reduce((t, r) => t + Number(BigInt(String(r.total_wei).split(".")[0]) / WEI), 0);
+  const batchFlow = p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0;
+  const limits = publisherLimitChecks({ wallets: p.batch?.leaves.length ?? 0, totalFlow: batchFlow, flowPublishedLast24h });
+  let simulation: { ran: boolean; ok: boolean; detail: string } = { ran: false, ok: false, detail: "no publishable transaction" };
+  if (p.tx) {
+    try {
+      await client().call({ account: SETTLEMENT_SIGNER.address, to: DISTRIBUTOR, data: p.tx.data as Hex });
+      simulation = { ran: true, ok: true, detail: "publishEpoch eth_call from the publisher succeeds against live state" };
+    } catch (e) {
+      simulation = { ran: true, ok: false, detail: String((e as Error).message ?? e).split("\n")[0].slice(0, 200) };
+    }
+  }
+  const checks = [...p.checks, ...limits, ...(p.tx ? [{ id: "SIMULATION", pass: simulation.ok, detail: simulation.detail }] : [])];
+  const publishable = p.status === "READY_FOR_PUBLISHER_REVIEW" && limits.every((c) => c.pass) && simulation.ok;
+  const includedSet = new Set((p.batch?.leaves ?? []).map((l) => l.account.toLowerCase()));
+  const opaque = (id: string) => `acct-${id.slice(0, 8)}`;
+  const walletStates = rows.map((r) => {
+    const delta = Math.max(0, Math.floor(r.authoritative) - Math.floor(r.alreadyAllocatedPoints));
+    const state = r.wallet && includedSet.has(r.wallet.toLowerCase()) ? "INCLUDED"
+      : r.pendingReview > 0 ? "REVIEW_HELD"
+      : r.classification !== "MATCH" && r.classification !== "EXPLAINED_DIFFERENCE" ? "REJECTED_HISTORICAL"
+      : !r.wallet ? "PENDING_NO_WALLET"
+      : delta < 1000 ? "PENDING_BELOW_MINIMUM" : "PENDING_LIMITS";
+    return { account: opaque(r.userId), state, fundedPoints: Math.floor(r.authoritative), alreadySettled: Math.floor(r.alreadyAllocatedPoints), delta };
+  });
+
+  if (publishable && p.batch?.root) {
     await args.admin.from("reward_settlement_batches").upsert({
       chain_id: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR.toLowerCase(), epoch_id: p.epochId, root: p.batch.root,
       total_wei: p.batch.totalWei as never, claim_start: p.claimStart, claim_end: p.claimEnd, fingerprint: p.fingerprint,
@@ -213,10 +251,14 @@ export async function buildSettlement(args: {
   }
 
   return {
-    status: p.status, reason: p.reason, signer: SETTLEMENT_SIGNER, publisher,
+    status: publishable ? p.status : "BLOCKED" as const,
+    reason: publishable ? null : p.reason ?? checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
+    simulation, limits, flowPublishedLast24h, walletStates, signupReconciliation: signup.report,
+    publisherConfig: { mode: PUBLISHER_CONFIG.mode, autonomousSigning: PUBLISHER_CONFIG.autonomousSigning, maxWalletsPerEpoch: PUBLISHER_CONFIG.maxWalletsPerEpoch, maxFlowPerEpoch: PUBLISHER_CONFIG.maxFlowPerEpoch, maxFlowPerDay: PUBLISHER_CONFIG.maxFlowPerDay },
+    signer: SETTLEMENT_SIGNER, publisher,
     epochId: p.epochId, leaves: p.batch?.leaves.length ?? 0,
     totalFlow: p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0, root: p.batch?.root ?? null,
-    checks: p.checks, tx: p.tx, fingerprint: p.fingerprint, programs: programs.filter((x) => x.includedPoints > 0 || x.availablePoints > 0),
+    checks, tx: publishable ? p.tx : null, fingerprint: p.fingerprint, programs: programs.filter((x) => x.includedPoints > 0 || x.availablePoints > 0),
     claimStartIso: new Date(p.claimStart * 1000).toISOString(), claimEndIso: new Date(p.claimEnd * 1000).toISOString(),
     published: discovered.map((d) => ({ epochId: d.batch.epochId, root: d.batch.root, source: d.source, complete: d.verification.complete, checks: d.verification.checks })),
     indexing: discovered.indexing,
@@ -247,4 +289,48 @@ export async function readCanaryStatus() {
 /** V34 — read-only claim flag for one leaf (null when the chain is unreadable). */
 export async function readIsClaimed(epochId: number, index: number): Promise<boolean | null> {
   try { return await client().readContract({ address: DISTRIBUTOR, abi: ABI, functionName: "isClaimed", args: [BigInt(epochId), BigInt(index)] }) as boolean; } catch { return null; }
+}
+
+/** V36.3A — read-only signup award provenance reconciliation (no ledger writes). */
+async function reconcileSignupAwards(args: {
+  admin: Admin; ledger: LedgerRow[]; wallets: Map<string, string | null>;
+  budgets: { program_id: string; funding_verified?: boolean }[]; profiles?: Map<string, { createdAt: string | null; wallet: string | null }>;
+}) {
+  const mainnetIdx = new Set<number>();
+  const idx = args.ledger.map((l, i) => [l, i] as const).filter(([l]) => l.program_id === "SIGNUP_BONUS" && (SIGNUP_REASONS as readonly string[]).includes(l.reason ?? ""));
+  const fundingVerified = !!args.budgets.find((b) => b.program_id === "SIGNUP_BONUS")?.funding_verified;
+  const refereeOf = (l: LedgerRow) => l.reason === "SIGNUP_BONUS_REFEREE" ? l.user_id : String((l.metadata as Record<string, unknown> | null)?.refereeId ?? "");
+  const walletCount = new Map<string, number>();
+  for (const l of args.ledger) if (l.reason === "SIGNUP_BONUS_REFEREE" && l.wallet_address) walletCount.set(l.wallet_address.toLowerCase(), (walletCount.get(l.wallet_address.toLowerCase()) ?? 0) + 1);
+  const refereeWallet = new Map<string, string | null>();
+  for (const l of args.ledger) if (l.reason === "SIGNUP_BONUS_REFEREE") refereeWallet.set(l.user_id, l.wallet_address?.toLowerCase() ?? null);
+  const emailOk = new Map<string, boolean>();
+  for (const id of new Set(idx.map(([l]) => refereeOf(l)).filter(Boolean))) {
+    try { const { data } = await args.admin.auth.admin.getUserById(id); emailOk.set(id, !!data.user?.email_confirmed_at); } catch { emailOk.set(id, false); }
+  }
+  const byState = new Map<SignupAttribution, { rows: number; points: number }>();
+  for (const [l, i] of idx) {
+    const ref = refereeOf(l);
+    const rw = refereeWallet.get(ref) ?? null;
+    const a = attributeSignupAward({
+      reason: l.reason ?? "", programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state, policyVersion: l.policy_version ?? null,
+      reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null,
+      refereeCreatedAt: args.profiles?.get(ref)?.createdAt ?? null, refereeEmailVerified: emailOk.get(ref) ?? false,
+      recipientBoundWallet: args.wallets.get(l.user_id) ?? null, refereeWalletAwardCount: rw ? walletCount.get(rw) ?? 0 : 0,
+      programFundingVerified: fundingVerified,
+    });
+    if (a === "MAINNET_SIGNUP_ALLOCATION") mainnetIdx.add(i);
+    const s = byState.get(a) ?? { rows: 0, points: 0 }; s.rows++; s.points += l.points; byState.set(a, s);
+  }
+  return {
+    mainnetIdx,
+    report: {
+      rootCause: "award_signup_bonus() records SIGNUP_BONUS ledger rows without a chain id, so Mainnet settlement never counted them.",
+      programFundingVerified: fundingVerified,
+      totalRows: idx.length,
+      totalPoints: idx.reduce((t, [l]) => t + l.points, 0),
+      countedAsMainnet: [...mainnetIdx].reduce((t, i) => t + args.ledger[i].points, 0),
+      states: [...byState.entries()].map(([state, v]) => ({ state, ...v })),
+    },
+  };
 }
