@@ -70,6 +70,7 @@ import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/a
 import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/admin.mainnet-release-freeze'
 import { Route as ApiAdminOpsRouteImport } from './routes/api/admin.ops'
 import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
+import { Route as ApiAdminRewardsPublishVerifyRouteImport } from './routes/api/admin.rewards-publish-verify'
 import { Route as ApiAdminRewardsSolvencyRouteImport } from './routes/api/admin.rewards-solvency'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
@@ -432,6 +433,12 @@ const ApiAdminPartnerGovernanceRoute =
     path: '/api/admin/partner-governance',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminRewardsPublishVerifyRoute =
+  ApiAdminRewardsPublishVerifyRouteImport.update({
+    id: '/api/admin/rewards-publish-verify',
+    path: '/api/admin/rewards-publish-verify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminRewardsSolvencyRoute = ApiAdminRewardsSolvencyRouteImport.update({
   id: '/api/admin/rewards-solvency',
   path: '/api/admin/rewards-solvency',
@@ -719,6 +726,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
+  '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -826,6 +834,7 @@ export interface FileRoutesByTo {
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
+  '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -934,6 +943,7 @@ export interface FileRoutesById {
   '/api/admin/mainnet-release-freeze': typeof ApiAdminMainnetReleaseFreezeRoute
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
+  '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
@@ -1043,6 +1053,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-release-freeze'
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
+    | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1150,6 +1161,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-release-freeze'
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
+    | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1257,6 +1269,7 @@ export interface FileRouteTypes {
     | '/api/admin/mainnet-release-freeze'
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
+    | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
     | '/api/admin/tokens'
@@ -1365,6 +1378,7 @@ export interface RootRouteChildren {
   ApiAdminMainnetReleaseFreezeRoute: typeof ApiAdminMainnetReleaseFreezeRoute
   ApiAdminOpsRoute: typeof ApiAdminOpsRoute
   ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
+  ApiAdminRewardsPublishVerifyRoute: typeof ApiAdminRewardsPublishVerifyRoute
   ApiAdminRewardsSolvencyRoute: typeof ApiAdminRewardsSolvencyRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
@@ -1829,6 +1843,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminPartnerGovernanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/rewards-publish-verify': {
+      id: '/api/admin/rewards-publish-verify'
+      path: '/api/admin/rewards-publish-verify'
+      fullPath: '/api/admin/rewards-publish-verify'
+      preLoaderRoute: typeof ApiAdminRewardsPublishVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/rewards-solvency': {
       id: '/api/admin/rewards-solvency'
       path: '/api/admin/rewards-solvency'
@@ -2283,6 +2304,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminMainnetReleaseFreezeRoute: ApiAdminMainnetReleaseFreezeRoute,
   ApiAdminOpsRoute: ApiAdminOpsRoute,
   ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
+  ApiAdminRewardsPublishVerifyRoute: ApiAdminRewardsPublishVerifyRoute,
   ApiAdminRewardsSolvencyRoute: ApiAdminRewardsSolvencyRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
