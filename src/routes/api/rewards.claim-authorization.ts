@@ -16,6 +16,10 @@ export const Route = createFileRoute("/api/rewards/claim-authorization")({
 
         const body = await request.json().catch(() => ({} as any));
         const chainId = Number.isInteger(body?.chainId) ? Number(body.chainId) : null;
+        const { isFeatureAllowed } = await import("@/lib/network/environmentCapabilities");
+        if (chainId !== null && !isFeatureAllowed("FLOW_TOKEN_CLAIM", chainId)) {
+          return jsonResponse({ error: "FLOW claims are only available on BOT Mainnet or BOT Testnet.", code: "ENVIRONMENT_NOT_SUPPORTED" }, 400);
+        }
 
         try {
           const result = await authorizeFlowTokenClaim({
