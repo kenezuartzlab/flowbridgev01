@@ -101,15 +101,25 @@ export async function buildRewardSolvencyReport() {
       : { mainnet: "LOCKED" as const, reason: "Public Mainnet claims are switched off." },
     rounds: await (async () => {
       const nowSec = Math.floor(Date.now() / 1000);
-      const out: { epochId: number; status: PayoutRoundStatus; leaves: number; totalFlow: number; claimStartIso: string | null; claimEndIso: string | null; source: string }[] = [];
+      const out: { epochId: number; status: PayoutRoundStatus; leaves: number; claimedWallets: number | null; totalFlow: number; claimStartIso: string | null; claimEndIso: string | null; source: string }[] = [];
       try {
+        const { countRoundClaims } = await import("./settlement.server");
         const { data } = await supabaseAdmin.from("reward_settlement_batches").select("epoch_id,total_wei,claim_start,claim_end,leaves,publication_verified_at,source").eq("chain_id", MAINNET_CHAIN_ID).order("epoch_id");
-        for (const b of data ?? []) {
+        const rows = data ?? [];
+        // V36.1: verified on-chain isClaimed per leaf; null when any read fails (never guessed).
+        const counts = await Promise.all(rows.map(async (b) => {
+          const ls = Array.isArray(b.leaves) ? (b.leaves as any[]) : [];
+          if (!b.publication_verified_at || !ls.length) return null;
+          const c = await countRoundClaims(b.epoch_id, ls.map((l, i) => Number(l?.index ?? i))).catch(() => null);
+          return c && !c.unreadable ? c.claimed : null;
+        }));
+        rows.forEach((b, i) => {
           const leaves = Array.isArray(b.leaves) ? b.leaves.length : 0;
-          out.push({ epochId: b.epoch_id, leaves, totalFlow: Number(BigInt(String(b.total_wei).split(".")[0]) / 10n ** 18n), source: b.source,
+          const claimedLeaves = counts[i];
+          out.push({ epochId: b.epoch_id, leaves, claimedWallets: claimedLeaves, totalFlow: Number(BigInt(String(b.total_wei).split(".")[0]) / 10n ** 18n), source: b.source,
             claimStartIso: b.claim_start ? new Date(Number(b.claim_start) * 1000).toISOString() : null, claimEndIso: b.claim_end ? new Date(Number(b.claim_end) * 1000).toISOString() : null,
-            status: payoutRoundStatus({ epochId: b.epoch_id, publishedOnChain: !!b.publication_verified_at, claimStart: Number(b.claim_start), claimEnd: Number(b.claim_end), leaves, claimedLeaves: null, nowSec }) });
-        }
+            status: payoutRoundStatus({ epochId: b.epoch_id, publishedOnChain: !!b.publication_verified_at, claimStart: Number(b.claim_start), claimEnd: Number(b.claim_end), leaves, claimedLeaves, nowSec }) });
+        });
       } catch { /* report without rounds */ }
       return out;
     })(),

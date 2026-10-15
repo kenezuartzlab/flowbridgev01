@@ -53,19 +53,21 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
   let chainReadable = true;
   if (wallet) {
     try {
-      const { readChainState, discoverPublishedBatches, readIsClaimed } = await import("./settlement.server");
-      const live = await readChainState();
+      // V36.1: public round data comes from a shared 60s cache; this wallet's
+      // own isClaimed status is always read fresh, in parallel.
+      const { getPublishedRoundsCached, readIsClaimed } = await import("./settlement.server");
+      const { live, found } = await getPublishedRoundsCached(supabaseAdmin);
       if (!live) chainReadable = false;
       else {
-        const found = await discoverPublishedBatches(supabaseAdmin, live.epochCount);
-        for (const { batch, verification } of found) {
-          if (!verification.complete) continue;
-          const leaf = batch.leaves.find((l) => l.account.toLowerCase() === wallet);
-          if (!leaf) continue;
-          const claimed = await readIsClaimed(batch.epochId, leaf.index);
-          if (claimed == null) { chainReadable = false; continue; }
-          allocations.push({ epochId: batch.epochId, amountFlow: Number(BigInt(leaf.amount) / WEI), walletMatches: true, proofValid: true, onChain: true, claimed, claimStart: batch.claimStart, claimEnd: batch.claimEnd });
-        }
+        const mine = found.filter((f) => f.verification.complete)
+          .map(({ batch }) => ({ batch, leaf: batch.leaves.find((l) => l.account.toLowerCase() === wallet) }))
+          .filter((x) => !!x.leaf);
+        const claims = await Promise.all(mine.map(({ batch, leaf }) => readIsClaimed(batch.epochId, leaf!.index)));
+        mine.forEach(({ batch, leaf }, i) => {
+          const claimed = claims[i];
+          if (claimed == null) { chainReadable = false; return; }
+          allocations.push({ epochId: batch.epochId, amountFlow: Number(BigInt(leaf!.amount) / WEI), walletMatches: true, proofValid: true, onChain: true, claimed, claimStart: batch.claimStart, claimEnd: batch.claimEnd });
+        });
       }
     } catch { chainReadable = false; }
   }
