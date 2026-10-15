@@ -58,7 +58,7 @@ export const Route = createFileRoute("/api/admin/rewards-publish-verify")({
             const { data: prior } = await supabaseAdmin.from("admin_audit_events").select("event_id").eq("object_type", "reward_round")
               .eq("object_id", `677:${row.epoch_id}`).eq("action", `PUBLISH_${phase}`).contains("new_value", { txHash: body.txHash!.toLowerCase() }).limit(1);
             if (!prior?.length) {
-              await supabaseAdmin.from("admin_audit_events").insert({ actor_user_id: gate.userId ?? null, actor_email: gate.email, actor_role: gate.role,
+              await supabaseAdmin.from("admin_audit_events").insert({ actor_user_id: gate.admin.userId, actor_email: gate.admin.email, actor_role: gate.admin.role,
                 object_type: "reward_round", object_id: `677:${row.epoch_id}`, action: `PUBLISH_${phase}`,
                 new_value: { txHash: body.txHash!.toLowerCase(), root: row.root, block: receipt?.blockNumber?.toString() ?? null }, reason: "publisher verification" } as never);
             }
