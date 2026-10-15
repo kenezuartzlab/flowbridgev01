@@ -120,7 +120,10 @@
 - [ ] TokenPocket real-device test — waits on owner's phone
 
 # V36.2 TokenPocket acceptance
-- [ ] Verify staking, account composition and all nine referral eligibility states with read-only evidence.
-- [ ] Remove legacy conversion claims, unify summary and clarify referral conditions.
-- [ ] Fix mobile overlap/truncation and collapse advanced reward explanations.
-- [ ] Run accounting/regression/security and signed-in mobile checks; publish scoped fixes and verify production.
+- [x] Verify all five active unpaused staking products, 800 historical + 200 signup PTS, nine signup dates/email/wallet/award records; 0 claimable and 1 claimed verified.
+- [x] Remove legacy 2,023 conversion claim, use verified summary in assistant/Profile; explain old signup exclusion and recorded referral awards.
+- [x] Reserve a bottom-nav slot for mobile AI; wrap account metrics and collapse advanced reward details; signed-in 320/384/430/1280 checks passed.
+- [x] Full 1,724 regression tests, automatic build/type validation and fresh backend scan passed with only previously accepted findings.
+- [ ] Production release verification — publish requested next; live deployment must be confirmed.
+- [ ] Funded signup chain classification mismatch — 200 FUNDED points have null chain IDs and are excluded by existing Mainnet progression; requires separate accounting-policy decision, not changed in V36.2.
+- [ ] Actual TokenPocket device acceptance — unavailable without owner's phone.
