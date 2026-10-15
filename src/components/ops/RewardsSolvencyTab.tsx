@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { STALE_SETTLEMENT_MESSAGE, isSettlementStale } from "@/lib/rewards/settlementPlanner";
 import { getIdToken } from "@/lib/auth";
+import { PublishBatchPanel } from "./PublishBatchPanel";
 import type { RewardSolvencyReport } from "@/lib/rewards/rewardSolvency.server";
 
 async function load(wallet?: string): Promise<RewardSolvencyReport> {
@@ -90,7 +91,7 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
         <KV k="Owner action" v={r.fundingPreparation.budgetTx.method} />
         <KV k="Draft first allocation" v={`${r.draftAllocation.leaves} wallet(s) · ${fmt(r.draftAllocation.totalPoints)} FLOW · not published`} />
       </Box>
-      <SettlementBox r={r} rebuild={() => q.refetch()} rebuilding={q.isFetching} />
+      <SettlementBox r={r} rebuild={() => q.refetch() as never} rebuilding={q.isFetching} />
       {r.publication.map((p) => (
         <Box key={p.epochId} title={`Allocation round #${p.epochId} (${p.programId.replaceAll("_", " ")})`}>
           <KV k="State" v={p.published ? "PUBLISHED" : "PREPARED — NOT SIGNED"} />
@@ -113,7 +114,7 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
   );
 }
 
-function SettlementBox({ r, rebuild, rebuilding }: { r: RewardSolvencyReport; rebuild: () => unknown; rebuilding: boolean }) {
+function SettlementBox({ r, rebuild, rebuilding }: { r: RewardSolvencyReport; rebuild: () => Promise<{ data?: RewardSolvencyReport }>; rebuilding: boolean }) {
   const s = r.settlement;
   const [reviewed, setReviewed] = useState<string | null>(s.fingerprint);
   useEffect(() => { if (reviewed == null && s.fingerprint) setReviewed(s.fingerprint); }, [s.fingerprint, reviewed]);
@@ -122,6 +123,7 @@ function SettlementBox({ r, rebuild, rebuilding }: { r: RewardSolvencyReport; re
   const c = r.canary;
   return (
     <>
+      <PublishBatchPanel s={s} rebuild={rebuild} stale={stale} />
       <Box title={`Next settlement batch: ${ready ? "READY FOR SIGNER REVIEW" : "NOT READY"}`}>
         {s.reason && <KV k="Reason" v={s.reason.replaceAll("_", " ")} />}
         {stale && <p className="text-[12px] font-bold text-danger">{STALE_SETTLEMENT_MESSAGE}</p>}
