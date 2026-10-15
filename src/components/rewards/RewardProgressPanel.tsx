@@ -45,7 +45,7 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
         <div className="h-full rounded-full bg-primary motion-safe:transition-[width]" style={{ width: `${p.percent}%` }} />
       </div>
       <p className="text-[12px] font-semibold">{p.lifecycleLabel}</p>
-      <p className="text-[12px] leading-relaxed text-muted">Your total of {f(p.earnedPoints)} PTS is not your withdrawable balance. Only verified, funded BOT Mainnet points count toward the 1,000 FLOW minimum.</p>
+      <p className="text-[12px] leading-relaxed text-muted">Your total FLOW Points are not your withdrawable balance. Only verified, funded BOT Mainnet points count toward the 1,000 FLOW minimum.</p>
       {a && !a.claimed && <p className="text-[11.5px] text-muted">Round #{a.epochId}: {f(a.amountFlow)} FLOW · window {d(a.claimStart)} – {d(a.claimEnd)}</p>}
 
       <div>

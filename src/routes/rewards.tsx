@@ -213,8 +213,8 @@ function RewardsPage() {
               />
               <OverviewTile label="Lifetime" value={formatPts(lifetime)} unit={PTS} />
               <OverviewTile
-                label="Converted"
-                value={(incentives?.claimedTokens ?? 0).toLocaleString()}
+                label="FLOW claimed on-chain"
+                value={personal ? personal.progression.claimedFlow.toLocaleString("en-US") : "—"}
                 unit="FLOW"
               />
             </section>
