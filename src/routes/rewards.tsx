@@ -399,9 +399,9 @@ function RewardsPage() {
                 <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <StatCard
                     Icon={Repeat}
-                    label="From Swaps"
+                    label="Stored self Points"
                     value={incentives?.pointsSelf ?? 0}
-                    note="Swap activity only"
+                    note="Historical total, not eligible FLOW"
                   />
                   <StatCard
                     Icon={Users}
@@ -412,13 +412,13 @@ function RewardsPage() {
                   <StatCard
                     Icon={Gift}
                     label="Referral Signups"
-                    value={incentives?.pointsReferralSignup ?? 0}
-                    note={
-                      (incentives?.signupLocked ?? 0) > 0 ? `${incentives.signupLocked} locked` : "Unlocked"
-                    }
+                    value={incentives?.referrerSignupBonusPoints ?? 0}
+                    note="Recorded signup awards, not claimable FLOW"
                   />
                 </section>
 
+                {personal && <RewardProgressPanel p={personal.progression} area="flow_points" />}
+                <Button asChild variant="outline" className="w-full"><Link to="/earn" hash="referrals">View each referral's reward status</Link></Button>
                 {incentives?.referralCode ? (
                   <section className="rounded-2xl border border-hairline bg-card p-4">
                     <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.1em]">

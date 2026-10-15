@@ -51,6 +51,8 @@ export interface ProgressionInput {
 }
 
 export interface RewardProgression {
+  /** Recorded display composition, not entitlement; categories here are disjoint. */
+  recordedComposition?: { storedHistory: number; ownSignup: number; referralSignup: number };
   minimum: number;
   earnedPoints: number;
   eligibleFundedFlow: number;

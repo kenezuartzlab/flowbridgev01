@@ -110,7 +110,6 @@ function EarnPage() {
   const flowPoints = Number(incentives?.flowPoints ?? 0);
   const volumeUsd = Number(incentives?.totalSwapVolumeUsd ?? 0);
   const inviteCount = Number(incentives?.inviteCount ?? 0);
-  const claimedTokens = Number(incentives?.claimedTokens ?? 0);
   const verified = Boolean(user && (user.emailVerified || user.email_verified));
   const walletBound = Boolean(incentives?.walletAddress);
   const level = xpLevel(flowPoints);
@@ -232,8 +231,8 @@ function EarnPage() {
                   <Fact label="Swap volume" value={volumeUsd > 0 ? formatUsd(volumeUsd) : "—"} />
                   <Fact label="Referred users" value={inviteCount.toLocaleString("en-US")} />
                   <Fact
-                    label="Converted to FLOW"
-                    value={claimedTokens > 0 ? formatPts(claimedTokens) : "—"}
+                    label="FLOW claimed on-chain"
+                    value={personal?.chainReadable ? `${formatPts(personal.progression.claimedFlow)} FLOW` : "—"}
                   />
                 </div>
               </div>
@@ -290,7 +289,7 @@ function EarnPage() {
               <dt className="text-muted">FLOW Points earned</dt><dd className="font-bold">{user ? formatPts(Number(incentives?.flowPoints ?? 0)) : "—"} {PTS}</dd>
               <dt className="text-muted">FLOW claimable now</dt><dd className="font-bold">{display.claimable === null ? "—" : formatPts(display.claimable)} FLOW</dd>
               <dt className="col-span-2 pb-1 text-[10.5px] leading-relaxed text-muted-soft">Only eligible funded PTS convert 1:1 to FLOW through a published payout round. Stored totals are not withdrawable tokens.</dt>
-              <dt className="text-muted">New user signup bonus</dt><dd className="font-bold">100 {PTS} = 100 FLOW</dd>
+              <dt className="text-muted">New user signup bonus</dt><dd className="font-bold">100 {PTS}</dd>
               <dt className="text-muted">Referrer signup bonus</dt><dd className="font-bold">+100</dd>
               <dt className="col-span-2 pt-1 text-[10.5px] font-black uppercase tracking-[0.08em] text-muted">Activity milestones</dt>
               <dt className="text-muted">First qualifying swap ($5+)</dt><dd className="font-bold">+15</dd>
@@ -304,11 +303,7 @@ function EarnPage() {
               For accounts created on or after October 4, 2026, the signup bonus is confirmed once the new account verifies its email and binds a wallet not used for a bonus before. {incentives?.signupProgram?.exhausted ? "Signup bonus allocation is currently fully allocated." : "Available while the funded FlowBridge community-growth allocation remains available."} Milestones count only verified, confirmed swaps by the referred wallet, subject to monthly caps, review and funded program limits.
             </p>
             <p className="mt-1 text-[11px] leading-relaxed text-muted-soft">
-              {user && Number(incentives?.signupBonusPoints ?? 0) > 0
-                ? "Your 100 FLOW Points signup bonus is confirmed."
-                : user && incentives?.signupProgram && !incentives.signupProgram.exhausted
-                  ? "100 FLOW Points signup bonus pending — verify your email and bind a wallet. New accounts only."
-                  : null}
+              {user ? incentives?.signupExplanation : null}
             </p>
           </div>
           <div className="divide-y divide-hairline border-t border-hairline">
@@ -381,6 +376,8 @@ function EarnPage() {
                       {r.milestones.includes("VOLUME_100") && <StatusPill tone="ok">$100</StatusPill>}
                       {r.milestones.includes("ACTIVE_DAYS_3") && <StatusPill tone="ok">3 days</StatusPill>}
                       <span className="font-mono text-muted">Signup {Number(r.signupReward ?? 0)} / 100 · Milestones {r.pointsEarned} / 100</span>
+                      <p className="w-full break-words leading-relaxed text-muted">{r.signupExplanation}</p>
+                      <details className="w-full text-muted"><summary className="cursor-pointer">Milestone conditions</summary><p className="mt-1 leading-relaxed">{r.milestoneExplanation}</p></details>
                     </li>
                   ))}
                 </ul>

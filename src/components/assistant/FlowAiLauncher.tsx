@@ -15,7 +15,7 @@ export function FlowAiLauncher() {
       to="/assistant"
       onClick={() => trackProductEvent("ai_opened", "ai")}
       aria-label="Open Flow AI assistant"
-      className="fb-glow fixed bottom-[calc(70px+16px+min(env(safe-area-inset-bottom,0px),10px))] right-4 z-40 grid h-12 w-12 place-items-center rounded-2xl bg-primary text-primary-foreground opacity-70 shadow-lg transition-[transform,opacity] hover:scale-105 hover:opacity-100 focus-visible:opacity-100 active:opacity-100 sm:bottom-6"
+      className="fb-glow fixed bottom-[calc(7px+min(env(safe-area-inset-bottom,0px),10px))] right-2 z-40 grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground opacity-70 shadow-lg transition-[transform,opacity] hover:scale-105 hover:opacity-100 focus-visible:opacity-100 active:opacity-100 md:bottom-6 md:right-4 md:h-12 md:w-12"
     >
       <Bot className="h-5 w-5" />
     </Link>

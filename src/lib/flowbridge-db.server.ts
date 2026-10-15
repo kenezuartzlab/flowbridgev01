@@ -825,6 +825,7 @@ export async function getUserPointsAndReferrals(userId: string) {
     .reduce((s, r) => s + Math.max(0, Math.floor(Number(r.points ?? 0))), 0);
   const { getSignupProgramStatus } = await import("@/lib/rewards/signupBonus.server");
   const signupProgram = await getSignupProgramStatus();
+  const { signupPresentation } = await import('@/lib/rewards/referralPresentation');
 
   // Referral V2 — privacy-safe per-referral progress (no email / wallet).
   const { utcMonthKey } = await import("@/lib/rewards/flowPointsV2");
@@ -834,6 +835,8 @@ export async function getUserPointsAndReferrals(userId: string) {
     milestones: string[];
     pointsEarned: number;
     signupReward?: number;
+    signupExplanation: string;
+    milestoneExplanation: string;
   }> = [];
   let rewardedReferrals = 0;
   let rewardedReferralsThisMonth = 0;
@@ -853,14 +856,22 @@ export async function getUserPointsAndReferrals(userId: string) {
     const byReferee = new Map<string, { milestones: string[]; points: number }>();
     const monthKey = utcMonthKey();
     const monthSet = new Set<string>();
+    const rewardedSet = new Set(signupPaidReferees);
+    const { data: currentSignupRows } = await supabaseAdmin.from('flow_points_ledger').select('metadata')
+      .eq('user_id', userId).eq('reason', 'REFERRAL_SIGNUP_BONUS').gte('created_at', `${monthKey}-01T00:00:00.000Z`);
+    for (const row of currentSignupRows ?? []) {
+      const md = row.metadata as Record<string, unknown> | null;
+      if (typeof md?.refereeId === 'string') monthSet.add(md.refereeId);
+    }
     for (const a of awards ?? []) {
       const e = byReferee.get(a.referee_id) ?? { milestones: [], points: 0 };
       e.milestones.push(String(a.milestone));
       e.points += Number(a.points ?? 0);
       byReferee.set(a.referee_id, e);
+      rewardedSet.add(a.referee_id);
       if (a.month_key === monthKey) monthSet.add(a.referee_id);
     }
-    rewardedReferrals = byReferee.size;
+    rewardedReferrals = rewardedSet.size;
     rewardedReferralsThisMonth = monthSet.size;
     (referees ?? []).forEach((r: any, i: number) => {
       const e = byReferee.get(r.id);
@@ -870,12 +881,18 @@ export async function getUserPointsAndReferrals(userId: string) {
         milestones: e?.milestones ?? [],
         pointsEarned: e?.points ?? 0,
         signupReward: signupPaidReferees.has(r.id) ? 100 : 0,
+        signupExplanation: signupPresentation(String(r.created_at), signupPaidReferees.has(r.id) ? 100 : 0, !!r.wallet_address),
+        milestoneExplanation: e?.points
+          ? `${e.points} historical milestone PTS recorded. Historical badges do not prove funded Mainnet eligibility; only reconciled Mainnet evidence counts.`
+          : 'No milestone award recorded. Requires a qualifying Mainnet swap, $100 verified Mainnet volume or 3 qualifying UTC days, with funding and review checks.',
       });
     });
   }
 
   return {
     signupBonusPoints,
+    signupExplanation: signupPresentation(String(user.created_at), signupBonusPoints, !!user.wallet_address),
+    pointsComposition: { storedHistory: Number(user.flow_points ?? 0), signupAwards: signupBonusPoints, referrerSignupAwards: referrerSignupBonusPoints },
     eligibleFundedPoints,
     referrerSignupBonusPoints,
     signupProgram: { remaining: signupProgram.signupRemaining, exhausted: signupProgram.signupExhausted },

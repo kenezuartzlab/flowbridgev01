@@ -27,7 +27,7 @@ export function BottomNav() {
           boxShadow: "0 -8px 24px -18px rgba(0,0,0,0.8)",
         }}
       >
-        <ul className="mx-auto flex max-w-md items-stretch px-1 py-1">
+        <ul className="mx-auto flex max-w-md items-stretch pl-1 pr-14 py-1">
           {PRIMARY_NAV.map((dest) => {
             const { Icon, primary: center } = dest;
             const active = isNavActive(dest, pathname);

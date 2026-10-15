@@ -84,6 +84,11 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     allocations,
     nowSec: Math.floor(Date.now() / 1000),
   });
+  progression.recordedComposition = {
+    storedHistory: Number(profile?.flow_points ?? 0),
+    ownSignup: ledger.filter((r) => r.reason === 'SIGNUP_BONUS_REFEREE').reduce((s, r) => s + r.points, 0),
+    referralSignup: ledger.filter((r) => r.reason === 'REFERRAL_SIGNUP_BONUS').reduce((s, r) => s + r.points, 0),
+  };
 
   let missionNextStep: PersonalProgress["missionNextStep"] = null;
   try {
