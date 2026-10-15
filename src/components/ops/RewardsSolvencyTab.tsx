@@ -27,9 +27,9 @@ function Box({ title, children }: { title: string; children: React.ReactNode }) 
 }
 function KV({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="flex min-w-0 items-center justify-between gap-3 border-b border-hairline py-1.5 text-[12.5px] last:border-0">
-      <span className="min-w-0 truncate text-muted">{k}</span>
-      <span className="min-w-0 truncate text-right font-mono font-bold text-foreground">{v}</span>
+    <div className="flex min-w-0 flex-col gap-0.5 border-b border-hairline py-1.5 text-[12.5px] last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <span className="min-w-0 text-muted">{k}</span>
+      <span className="min-w-0 font-mono font-bold text-foreground [overflow-wrap:anywhere] sm:text-right">{v}</span>
     </div>
   );
 }
@@ -154,7 +154,7 @@ function SettlementBox({ r, rebuild, rebuilding }: { r: RewardSolvencyReport; re
           <KV k="Next batch" v={`${s.readiness.nextBatchWallets} wallets · ${fmt(s.readiness.nextBatchFlow)} FLOW`} />
           <KV k="Published, unclaimed" v={`${fmt(s.readiness.publishedUnclaimedFlow)} FLOW`} />
           <KV k="Claimed" v={`${fmt(s.readiness.claimedFlow)} FLOW`} />
-          <KV k="Excluded (below min / held)" v={`${fmt(s.readiness.excludedBelowMinimumOrHeldFlow)} FLOW`} />
+          <KV k="Funded but not yet payable (wallet below 1,000 or held)" v={`${fmt(s.readiness.excludedBelowMinimumOrHeldFlow)} FLOW`} />
           <KV k="Claim window policy" v={s.readiness.claimWindowPolicy.replaceAll("_", " ")} />
           <KV k="Publisher ready" v={s.readiness.publisherReady ? "PASS" : "FAIL"} />
           {s.readiness.status === "NO_PUBLIC_BATCH_REQUIRED_YET" && <p className="text-[11px] text-muted-soft">No public batch required yet.</p>}

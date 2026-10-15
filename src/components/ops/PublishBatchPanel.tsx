@@ -99,12 +99,12 @@ export function PublishBatchPanel({ s, rebuild, stale }: { s: S; rebuild: () => 
       <div className="mt-3 grid min-w-0 gap-x-6 gap-y-1 text-[12.5px] sm:grid-cols-2">
         <Row k="Eligible wallets in batch" v={fmt(s.leaves)} />
         <Row k="Verified funded FLOW" v={`${fmt(s.totalFlow)} FLOW`} />
-        <Row k="Reserve coverage" v={live ? `${fmt(live.balanceFlow)} balance · ${fmt(live.reservedFlow)} reserved · ${fmt(freeAfter)} free after` : "UNKNOWN"} />
+        <Row k="Payout contract FLOW (on-chain)" v={live ? `${fmt(live.balanceFlow)} balance · ${fmt(live.reservedFlow)} reserved on-chain · ${fmt(freeAfter)} unreserved after this batch` : "UNKNOWN"} />
         <Row k="Batch limits" v={`${fmt(s.leaves)}/${fmt(s.publisherConfig?.maxWalletsPerEpoch)} wallets · ${fmt(s.totalFlow)}/${fmt(s.publisherConfig?.maxFlowPerEpoch)} FLOW`} />
         <Row k="Daily limit (24h)" v={`${fmt((s.flowPublishedLast24h ?? 0) + s.totalFlow)}/${fmt(s.publisherConfig?.maxFlowPerDay)} FLOW`} />
         <Row k="Pending / review-held / rejected" v={`${count("PENDING_BELOW_MINIMUM") + count("PENDING_NO_WALLET") + count("PENDING_LIMITS")} / ${count("REVIEW_HELD")} / ${count("REJECTED_HISTORICAL")}`} />
         <Row k="Merkle root" v={s.root ?? "—"} />
-        <Row k="Proofs" v={s.checks.find((c) => c.id === "PROOFS_VERIFIED")?.pass ? "all self-verified" : "—"} />
+        <Row k="Merkle proofs" v={s.checks.find((c) => c.id === "PROOFS_VERIFIED")?.pass ? "every proof re-verified against the root" : "none — no batch built"} />
         <Row k="Claim opens / closes" v={s.root && s.claimStartIso ? `${s.claimStartIso.slice(0, 16)} → ${s.claimEndIso?.slice(0, 16)} UTC` : "—"} />
         <Row k="Simulation" v={s.simulation?.ran ? (s.simulation.ok ? "PASS" : "FAIL") : "not run (no publishable batch)"} />
         <Row k="Emergency pause" v={live ? (live.paused ? "PAUSED — publishing blocked" : "not paused") : "UNKNOWN"} />
@@ -160,9 +160,9 @@ export function PublishBatchPanel({ s, rebuild, stale }: { s: S; rebuild: () => 
 
 function Row({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="flex min-w-0 items-center justify-between gap-3 border-b border-hairline py-1.5 last:border-0">
+    <div className="flex min-w-0 flex-col gap-0.5 border-b border-hairline py-1.5 last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <span className="min-w-0 text-muted">{k}</span>
-      <span className="min-w-0 break-all text-right font-mono font-bold text-foreground">{v}</span>
+      <span className="min-w-0 break-words font-mono font-bold text-foreground [overflow-wrap:anywhere] sm:text-right">{v}</span>
     </div>
   );
 }
