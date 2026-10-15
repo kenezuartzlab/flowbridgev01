@@ -110,7 +110,7 @@ export function RewardsHeroContent({
   const ready = (display.claimable ?? 0) > 0;
   const readyToConvert = false;
   const readinessLine = display.readiness;
-  const stageEyebrow = ready ? 'FLOW ready to claim' : 'Eligible points';
+  const stageEyebrow = ready ? 'FLOW available to claim' : 'Toward next FLOW batch';
   const ctaText = ready ? 'Claim FLOW' : 'Points breakdown';
   const highlight = ready;
 
@@ -152,7 +152,7 @@ export function RewardsHeroContent({
             )}
           </span>
           <span className="shrink-0 tabular-nums">
-            {pending ? "—" : `Swaps ${formatPts(corePointsToday)} / ${formatPts(dailyCap)} daily limit`}
+            {pending ? "—" : `Daily Points ${formatPts(corePointsToday)} / ${formatPts(dailyCap)}`}
           </span>
         </div>
         <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-foreground/25">
