@@ -44,10 +44,10 @@ export function usePersonalProgress(enabled: boolean) {
     if (!enabled) { setData(null); setLoading(false); return; }
     let off = false;
     setLoading(true);
-    const load = () => fetchPersonalProgress().then((d) => { if (!off) setData(d); }).catch(() => undefined).finally(() => { if (!off) setLoading(false); });
+    const load = (fresh = false) => fetchPersonalProgress(fresh).then((d) => { if (!off) setData(d); }).catch(() => undefined).finally(() => { if (!off) setLoading(false); });
     void load();
-    // V34.2: refresh after a successful bind without a page reload.
-    const onBound = () => { cache = null; void load(); };
+    // V34.2: refresh after a successful bind without a page reload (bypasses server cache).
+    const onBound = () => { cache = null; void load(true); };
     window.addEventListener("flowbridge:wallet-bound", onBound);
     return () => { off = true; window.removeEventListener("flowbridge:wallet-bound", onBound); };
   }, [enabled]);
