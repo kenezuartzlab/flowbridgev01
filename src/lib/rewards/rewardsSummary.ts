@@ -111,19 +111,19 @@ export function buildRewardsSummary(i: SummaryInput): RewardsSummary {
   let stage: TimelineStage;
   if (claimableNow > 0) {
     blocker = "CLAIM_OPEN"; stage = "CLAIM_OPEN";
-    message = `${fmt(claimableNow)} FLOW available to claim. Claim in your connected wallet.`;
+    message = `${fmt(claimableNow)} FLOW is ready. Claim with your connected wallet.`;
   } else if (stale) {
     blocker = "STATE_UNAVAILABLE"; stage = "EARNED";
     message = "Reward status could not be verified. Try again; no claim amount is being assumed.";
   } else if (awaitingSettlement > 0) {
     blocker = "AWAITING_OPEN"; stage = "PUBLISHED";
-    message = `Your allocation is published. Claiming opens on ${fmtDate(unclaimed!.claimStart)}.`;
+    message = `Reward published; claim opens at ${fmtDate(unclaimed!.claimStart)}.`;
   } else if (unclaimed && i.nowSec > unclaimed.claimEnd) {
     blocker = "ROUND_EXPIRED"; stage = "PUBLISHED";
     message = `The claim window for round #${unclaimed.epochId} closed on ${fmtDate(unclaimed.claimEnd)}.`;
   } else if (p.settlementReady) {
     blocker = "AWAITING_PUBLICATION"; stage = "QUEUED";
-    message = "You qualify for the next settlement. The reward batch has not been published on-chain yet.";
+    message = "You qualify for the next payout batch. Automatic settlement is being prepared. No wallet action needed yet.";
   } else if (eligible >= p.minimum && i.walletBound === false) {
     blocker = "NO_WALLET"; stage = "FUNDED";
     message = "Bind a verified wallet so your eligible FLOW can be included in a settlement batch.";
