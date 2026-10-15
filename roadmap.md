@@ -118,3 +118,9 @@
 - [x] Mainnet/Testnet separation (capability matrix, testnet staking hidden + chain-checked, claim/convert endpoints reject non-BOT chains)
 - [x] Accepted-findings write-up, fresh scan, 320–430px + desktop checks, publish
 - [ ] TokenPocket real-device test — waits on owner's phone
+
+# V36.2 TokenPocket acceptance
+- [ ] Verify staking, account composition and all nine referral eligibility states with read-only evidence.
+- [ ] Remove legacy conversion claims, unify summary and clarify referral conditions.
+- [ ] Fix mobile overlap/truncation and collapse advanced reward explanations.
+- [ ] Run accounting/regression/security and signed-in mobile checks; publish scoped fixes and verify production.

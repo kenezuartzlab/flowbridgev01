@@ -232,8 +232,8 @@ export function MainnetFlowClaimCard() {
           Mainnet rewards are paid only from an epoch that was already funded and reserved on chain
           before publication — nothing is minted, and a claim can never exceed its published leaf.
           The proof is checked against the distributor's live root in your browser before your wallet
-          is asked to sign, and the contract checks it again. Staking execution on BOT Mainnet stays
-          inactive.
+          is asked to sign, and the contract checks it again. BOT Mainnet Staking V2 is public;
+          staking rewards are separate from FLOW Points. Deposits remain subject to live safety checks.
         </p>
       </div>
     </Surface>

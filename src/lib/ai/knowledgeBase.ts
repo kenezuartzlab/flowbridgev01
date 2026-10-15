@@ -122,7 +122,7 @@ export const FLOW_AI_KNOWLEDGE: readonly KnowledgeFact[] = [
     relation: "distinguishes",
     value: { flowPoints: "swap volume", campaignPts: "campaign tasks", xp: "engagement levels" },
     statement:
-      "FLOW Points come from swap volume and convert to FLOW token; Campaign PTS are earned from partner campaign tasks and are excluded from FLOW conversion; XP tracks engagement levels only.",
+      "FLOW Points record swap and referral activity, not withdrawable tokens. Only funded, reconciled Mainnet points with a published, open, wallet-eligible allocation are claimable FLOW. Campaign PTS and XP never convert to FLOW.",
     validFrom: "2026-08-10T00:00:00.000Z",
     freshnessClass: "SLOW",
     keywords: ["pts", "xp", "campaign", "difference", "convert", "flow"],
@@ -139,7 +139,7 @@ export const FLOW_AI_KNOWLEDGE: readonly KnowledgeFact[] = [
       conversion: "1 FLOW Point = 1 FLOW, cumulative, Campaign PTS excluded",
     },
     statement:
-      "On BOT Testnet (968) FLOW claims are live: FlowToken 0xCE14Ca…41Ac and FlowRewardsDistributor 0x559605…2b34, converting 1 FLOW Point to 1 FLOW cumulatively. BOT Mainnet claims are pending promotion.",
+      "BOT Mainnet claims use funded published rounds; claimable FLOW must come from the caller's verified live rewards summary, never legacy converted counters. BOT Testnet claim contracts are separate and do not establish Mainnet entitlement. Public Mainnet Staking V2 supports Flexible, 30D, 90D, 180D and 365D, subject to live safety gates; variable rewards are disabled.",
     validFrom: "2026-08-21T00:00:00.000Z",
     freshnessClass: "SLOW",
     keywords: ["claim", "flow token", "distributor", "testnet", "mainnet", "conversion"],

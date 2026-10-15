@@ -48,18 +48,23 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
       <p className="text-[12px] leading-relaxed text-muted">Your total FLOW Points are not your withdrawable balance. Only verified, funded BOT Mainnet points count toward the 1,000 FLOW minimum.</p>
       {a && !a.claimed && <p className="text-[11.5px] text-muted">Round #{a.epochId}: {f(a.amountFlow)} FLOW · window {d(a.claimStart)} – {d(a.claimEnd)}</p>}
 
-      <div>
-        <p className="mb-1 text-[10px] font-black uppercase tracking-[0.14em] text-muted">How you can progress</p>
+      <details>
+        <summary className="cursor-pointer text-[11.5px] font-semibold">How you earn and qualify</summary>
         <ul className="space-y-1 text-[11.5px]">
           <li><Link to="/trade" onClick={() => trackProductEvent("earning_method_opened", area)} className="font-semibold text-primary underline-offset-2 hover:underline">Eligible swaps</Link> — verified BOT Mainnet swaps of ${DEFAULT_REWARD_RULES.minUsd}+ through FlowBridge earn {DEFAULT_REWARD_RULES.pointsPerBlock} point per whole ${DEFAULT_REWARD_RULES.usdBlock} verified, up to the daily Points cap.</li>
           <li><span className="font-semibold">Signup bonus</span> — {SIGNUP_BONUS_POINTS} PTS for you and {REFERRER_SIGNUP_BONUS_POINTS} PTS for your referrer, for accounts created from {SIGNUP_BONUS_EFFECTIVE_AT.slice(0, 10)} after email verification and a first-time wallet bind (policy {SIGNUP_BONUS_POLICY_VERSION}), while the funded budget lasts.</li>
           <li className="text-muted">Staking rewards are paid by the staking contract and are never added to FLOW Points.</li>
           <li><Link to="/account" onClick={() => trackProductEvent("earning_method_opened", area)} className="font-semibold text-primary underline-offset-2 hover:underline">Referral milestones</Link> — funded, only after your referee's verified Mainnet activity.</li>
         </ul>
-      </div>
+      </details>
 
       {detailed && (
         <details className="border-t border-hairline pt-3"><summary className="cursor-pointer text-[11.5px] font-semibold">Points breakdown</summary>
+        {p.recordedComposition && <div className="mt-3 text-[12px] leading-relaxed">
+          <p className="font-semibold">Recorded total: {f(p.earnedPoints)} PTS</p>
+          <p>{f(p.recordedComposition.storedHistory)} stored historical PTS + {f(p.recordedComposition.ownSignup)} own signup PTS + {f(p.recordedComposition.referralSignup)} referral signup PTS.</p>
+          <p className="mt-1 text-muted">This explains the displayed total, not a ledger-verified Mainnet entitlement. The checks below are separate and must not be added to it. Funded signup awards without a qualifying Mainnet chain classification are not included in the current eligibility summary.</p>
+        </div>}
         <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-hairline pt-3 text-[11.5px]">
           {(Object.keys(SOURCE_LABEL) as (keyof typeof SOURCE_LABEL)[]).filter((k) => p.sources[k] > 0).map((k) => (
             <div key={k} className="contents"><dt className="text-muted">{SOURCE_LABEL[k]}</dt><dd className="text-right tabular-nums">{f(p.sources[k])}</dd></div>
@@ -69,7 +74,7 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
           <dt className="text-muted">Held for review · blocks settlement</dt><dd className="text-right tabular-nums">{f(p.reviewHeld)} PTS</dd>
           <dt className="text-muted">Testnet · excluded</dt><dd className="text-right tabular-nums">{f(p.testnetExcluded)} PTS</dd>
           <dt className="text-muted">Nonclaimable history · excluded</dt><dd className="text-right tabular-nums">{f(p.historicalNonclaimable)} PTS</dd>
-          <dt className="text-muted">Already allocated to rounds</dt><dd className="text-right tabular-nums">−{f(p.settledFlow)} PTS</dd>
+          <dt className="text-muted">Allocated to published rounds</dt><dd className="text-right tabular-nums">{f(p.settledFlow)} FLOW</dd>
           <dt className="font-semibold">Toward next payout</dt><dd className="text-right font-semibold tabular-nums">{f(p.availableTowardMinimum)} PTS</dd>
           <dt className="text-muted">FLOW already claimed</dt><dd className="text-right tabular-nums">{f(p.claimedFlow)} FLOW</dd>
           <dt className="text-muted">Published, awaiting opening</dt><dd className="text-right tabular-nums">{f(s.awaitingSettlement)} FLOW</dd>
@@ -81,13 +86,13 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
         </p>
       )}
       {detailed && (
-        <ol className="space-y-1 border-t border-hairline pt-3 text-[11.5px]" aria-label="Reward timeline">
+        <details className="border-t border-hairline pt-3"><summary className="cursor-pointer text-[11.5px] font-semibold">Payout stages and conditions</summary><ol className="mt-2 space-y-1 text-[11.5px]" aria-label="Reward timeline">
           {TIMELINE.map((t, i) => (
             <li key={t.stage} className={i <= stageIdx ? "font-semibold" : "text-muted"} aria-current={i === stageIdx ? "step" : undefined}>
               {i <= stageIdx ? "●" : "○"} {t.label} — <span className="font-normal">{t.explain}</span>
             </li>
           ))}
-        </ol>
+        </ol></details>
       )}
       {detailed && <ol className="space-y-2 border-t border-hairline pt-3 text-[12px] leading-relaxed">
         <li><strong>1. Earn and qualify.</strong> Reach 1,000 eligible funded PTS, verify your email and bind your wallet. Pending funding, review-held points, Testnet, unsupported history, Campaign PTS and XP do not qualify.</li>

@@ -1,5 +1,6 @@
 /** V34 — verified reward progression on Profile. No email, wallet or evidence shown. */
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
+import { rewardPresentation } from '@/lib/rewards/rewardPresentation';
 
 const f = (n: number) => Math.floor(n).toLocaleString("en-US");
 
@@ -7,12 +8,14 @@ export function ProfileRewardProgression({ enabled }: { enabled: boolean }) {
   const { data } = usePersonalProgress(enabled);
   if (!data) return null;
   const p = data.progression;
+  const s = rewardPresentation(p).summary;
+  if (!s) return null;
   const rows: [string, number][] = [
-    ["FLOW Points earned", p.earnedPoints],
-    ["Eligible funded FLOW", p.eligibleFundedFlow],
-    ["Remaining to 1,000", p.remainingToMinimum],
-    ["Settled FLOW", p.settledFlow],
-    ["Claimed FLOW", p.claimedFlow],
+    ["Recorded FLOW Points", s.totalPts],
+    ["Eligible toward next payout", s.eligibleFundedUnallocated],
+    ["Awaiting funding Points", s.pendingFunding],
+    ["Claimable FLOW now", s.claimableNow],
+    ["Claimed FLOW on-chain", s.claimedLifetime],
   ];
   return (
     <section aria-labelledby="profile-rp" className="fb-surface p-4" data-testid="profile-reward-progression">
@@ -22,7 +25,7 @@ export function ProfileRewardProgression({ enabled }: { enabled: boolean }) {
           <div key={k} className="contents"><dt className="text-muted">{k}</dt><dd className="text-right font-semibold tabular-nums">{f(v)}</dd></div>
         ))}
       </dl>
-      <p className="mt-2 text-[11px] text-muted">{p.lifecycleLabel}</p>
+      <p className="mt-2 text-[11px] text-muted">{s.message}</p>
     </section>
   );
 }

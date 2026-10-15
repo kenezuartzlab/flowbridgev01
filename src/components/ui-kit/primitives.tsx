@@ -77,7 +77,7 @@ export function SectionHeader({
     <div className="flex items-start justify-between gap-3 px-4 py-3">
       <div className="min-w-0">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <h2 className="truncate text-[14px] font-black tracking-[-0.01em]">{title}</h2>
+          <h2 className="break-words text-[14px] font-black">{title}</h2>
           {badge}
         </div>
         {hint && <p className="mt-0.5 text-[11.5px] leading-snug text-muted">{hint}</p>}
@@ -139,14 +139,14 @@ export function MetricStrip({ items, className = "" }: { items: Metric[]; classN
       } ${className}`}
     >
       {items.map((m) => (
-        <div key={m.label} className="px-3 py-3 text-center sm:px-4">
+        <div key={m.label} className="min-w-0 px-2 py-3 text-center sm:px-4">
           <dd className="font-mono text-[18px] font-black leading-none tabular-nums sm:text-[20px]">
             {m.value}
           </dd>
-          <dt className="mt-1 truncate text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted">
+          <dt className="mt-1 break-words text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted">
             {m.label}
           </dt>
-          {m.hint && <p className="mt-0.5 truncate text-[10px] text-muted-soft">{m.hint}</p>}
+          {m.hint && <p className="mt-0.5 break-words text-[10px] text-muted-soft">{m.hint}</p>}
         </div>
       ))}
     </dl>
