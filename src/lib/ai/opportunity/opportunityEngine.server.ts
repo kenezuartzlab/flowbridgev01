@@ -37,9 +37,12 @@ async function resolveRewards(actor: FlowAiActor, now: Date): Promise<Opportunit
   try {
     const { getUserPointsAndReferrals } = await import("@/lib/flowbridge-db.server");
     const inc: any = await getUserPointsAndReferrals(actor.userId);
+    // V36: claimable comes only from a live open on-chain allocation.
+    const { resolveClaimableNowFlow } = await import("@/lib/rewards/rewardProgression.server");
+    const claimableNow = await resolveClaimableNowFlow(actor.userId);
     return buildRewardOpportunities(
       {
-        claimableFlow: num(inc?.claimableTotal),
+        claimableFlow: claimableNow,
         flowPoints: num(inc?.flowPoints),
         flowPointsToday: num(inc?.flowPointsToday),
         dailyCoreSwapCap: num(inc?.dailyCoreSwapCap),
@@ -54,7 +57,7 @@ async function resolveRewards(actor: FlowAiActor, now: Date): Promise<Opportunit
             observedAt: now.toISOString(),
             value: {
               flowPoints: num(inc?.flowPoints),
-              claimableFlow: num(inc?.claimableTotal),
+              claimableFlow: claimableNow,
               claimedFlow: num(inc?.claimedTokens),
               pointsToday: num(inc?.flowPointsToday),
               dailyCoreSwapCap: num(inc?.dailyCoreSwapCap),

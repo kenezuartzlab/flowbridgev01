@@ -179,7 +179,8 @@ async function loadAccountEvidence(actor: FlowAiActor): Promise<EvidenceItem[]> 
         value: {
           flowPoints: claim.cumulativePoints,
           claimedFlow: claim.alreadyClaimedFlow,
-          claimableFlow: claim.claimableFlow,
+          claimableFlow: null,
+          claimableNote: "Claimable FLOW is only reported from a live, open on-chain payout allocation; see the Rewards page.",
           totalSwapVolumeUsd: Number(points.totalSwapVolumeUsd ?? 0),
           flowPointsToday: Number(points.flowPointsToday ?? 0),
           coreSwapPointsToday: capUsed,
@@ -188,7 +189,7 @@ async function loadAccountEvidence(actor: FlowAiActor): Promise<EvidenceItem[]> 
           inviteCount: points.inviteCount,
           walletAddress: points.walletAddress,
         },
-        excerpt: `FLOW Points ${claim.cumulativePoints}, claimed ${claim.alreadyClaimedFlow} FLOW, claimable ${claim.claimableFlow} FLOW, $${formatUsdAmount(Number(points.totalSwapVolumeUsd ?? 0))} lifetime swap volume. ${claim.conversionNote}`,
+        excerpt: `FLOW Points ${claim.cumulativePoints}, claimed ${claim.alreadyClaimedFlow} FLOW, $${formatUsdAmount(Number(points.totalSwapVolumeUsd ?? 0))} lifetime swap volume. ${claim.conversionNote}`,
       },
       {
         id: "db.account.recent",
@@ -384,24 +385,9 @@ export async function answerFlowAiQuestion(input: {
    */
   let canonicalClaimableFlow: number | null = null;
   if (input.actor.userId && /\bclaim\b/i.test(input.question)) {
-    const fromEvidence = (
-      accountEvidence.find((e) => e.id === "db.account.points")?.value as
-        | { claimableFlow?: number | null }
-        | undefined
-    )?.claimableFlow;
-    if (typeof fromEvidence === "number") canonicalClaimableFlow = fromEvidence;
-    else {
-      try {
-        const { getUserPointsAndReferrals } = await import("@/lib/flowbridge-db.server");
-        const ledger: any = await getUserPointsAndReferrals(input.actor.userId);
-        canonicalClaimableFlow = computeClaimable({
-          cumulativeFlowPoints: Number(ledger?.flowPoints ?? 0),
-          claimedFlow: Number(ledger?.claimedTokens ?? 0),
-        }).claimableFlow;
-      } catch {
-        canonicalClaimableFlow = null;
-      }
-    }
+    // V36: never derive claimable FLOW from points minus claimed.
+    const { resolveClaimableNowFlow } = await import("@/lib/rewards/rewardProgression.server");
+    canonicalClaimableFlow = await resolveClaimableNowFlow(input.actor.userId);
   }
 
   // V15.2 §3 — deterministic candidate extraction. Only signed-in actors get a

@@ -99,9 +99,9 @@ export function buildRewardOpportunities(
         type: "CLAIM_FLOW",
         subject: "distributor",
         actorScope: "AUTHENTICATED_USER",
-        title: `${flowLabel(state.claimableFlow)} FLOW ready to claim`,
+        title: `${flowLabel(state.claimableFlow)} FLOW available to claim`,
         reason:
-          "Your server ledger balance has an unclaimed FLOW payout. You sign the claim in your own wallet.",
+          "Your published payout allocation is open and unclaimed. You sign the claim in your own wallet.",
         priority: "HIGH",
         reasonCodes: ["CLAIMABLE_VALUE"],
         provenance: state.provenance,

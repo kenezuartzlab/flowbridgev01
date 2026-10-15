@@ -15,7 +15,7 @@ describe('claim display uses published entitlement, not stored points', () => {
   });
   it('shows the actual open, unclaimed allocation', () => {
     const p = computeRewardProgression({ ...base, allocations: [{ epochId: 3, amountFlow: 1250, walletMatches: true, proofValid: true, onChain: true, claimed: false, claimStart: now - 10, claimEnd: now + 10 }] });
-    expect(rewardPresentation(p).claimable).toBe(1250);
+    expect(rewardPresentation(p, now).claimable).toBe(1250);
   });
   it('unavailable progression is not a zero balance', () => {
     expect(rewardPresentation(null).claimable).toBeNull();

@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import type { RewardProgression } from "@/lib/rewards/rewardProgression";
 import { trackProductEvent, type ProductArea } from "@/lib/ops/productEvents";
+import { buildRewardsSummary, TIMELINE, BLOCKER_LABEL } from "@/lib/rewards/rewardsSummary";
 
 const f = (n: number) => Math.floor(n).toLocaleString("en-US");
 const d = (s: number) => new Date(s * 1000).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC";
@@ -22,11 +23,20 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
   }, [p, area]);
 
   const a = p.allocation;
+  const s = buildRewardsSummary({ progression: p, nowSec: Math.floor(Date.now() / 1000) });
+  const stageIdx = TIMELINE.findIndex((t) => t.stage === s.stage);
   return (
     <section aria-labelledby={`rp-${area}`} className="fb-surface space-y-3 p-4" data-testid="reward-progress">
-      <p id={`rp-${area}`} className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">Eligible points toward your next payout</p>
+      <div className="rounded-xl border border-hairline p-3" data-testid="claim-now-card">
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted">FLOW available to claim</p>
+        <p className="text-[22px] font-bold tabular-nums">{f(s.claimableNow)} FLOW</p>
+        <p className="text-[12px] leading-relaxed" role="status">{s.message}</p>
+        {s.claimableNow === 0 && <p className="mt-1 text-[11px] font-semibold text-muted">Blocked by: {BLOCKER_LABEL[s.blocker]}</p>}
+        {s.claimableNow > 0 && <Link to="/earn" className="mt-2 inline-flex min-h-[40px] items-center rounded-full bg-primary px-4 text-[12px] font-bold text-primary-foreground">Claim in wallet</Link>}
+      </div>
+      <p id={`rp-${area}`} className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">Eligible toward next FLOW batch</p>
       <div>
-        <p className="text-[18px] font-bold tabular-nums">{f(p.availableTowardMinimum)} / {f(p.minimum)} eligible PTS</p>
+        <p className="text-[18px] font-bold tabular-nums">{f(p.availableTowardMinimum)} / {f(p.minimum)} FLOW</p>
         <p className="text-[12px] text-muted">1 eligible funded PTS = 1 FLOW. {p.remainingToMinimum > 0 ? `${f(p.remainingToMinimum)} more eligible PTS needed.` : "Minimum reached; a published payout round is still required."}</p>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted/20" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={p.percent} aria-label="Progress toward 1,000 FLOW">
@@ -45,7 +55,8 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
       </div>
 
       {detailed && (
-        <dl className="grid grid-cols-2 gap-x-3 gap-y-1 border-t border-hairline pt-3 text-[11.5px]">
+        <details className="border-t border-hairline pt-3"><summary className="cursor-pointer text-[11.5px] font-semibold">Points breakdown</summary>
+        <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-hairline pt-3 text-[11.5px]">
           {(Object.keys(SOURCE_LABEL) as (keyof typeof SOURCE_LABEL)[]).filter((k) => p.sources[k] > 0).map((k) => (
             <div key={k} className="contents"><dt className="text-muted">{SOURCE_LABEL[k]}</dt><dd className="text-right tabular-nums">{f(p.sources[k])}</dd></div>
           ))}
@@ -57,12 +68,22 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
           <dt className="text-muted">Already allocated to rounds</dt><dd className="text-right tabular-nums">−{f(p.settledFlow)} PTS</dd>
           <dt className="font-semibold">Toward next payout</dt><dd className="text-right font-semibold tabular-nums">{f(p.availableTowardMinimum)} PTS</dd>
           <dt className="text-muted">FLOW already claimed</dt><dd className="text-right tabular-nums">{f(p.claimedFlow)} FLOW</dd>
-        </dl>
+          <dt className="text-muted">Published, awaiting opening</dt><dd className="text-right tabular-nums">{f(s.awaitingSettlement)} FLOW</dd>
+        </dl></details>
       )}
       {detailed && (
         <p className="text-[11px] leading-relaxed text-muted">
           Computation: verified funded Mainnet PTS − points already allocated to payout rounds = points toward your next payout (never below zero). Source rows show funded ledger totals before verification; exclusions and review categories may overlap, so do not add them together.
         </p>
+      )}
+      {detailed && (
+        <ol className="space-y-1 border-t border-hairline pt-3 text-[11.5px]" aria-label="Reward timeline">
+          {TIMELINE.map((t, i) => (
+            <li key={t.stage} className={i <= stageIdx ? "font-semibold" : "text-muted"} aria-current={i === stageIdx ? "step" : undefined}>
+              {i <= stageIdx ? "●" : "○"} {t.label} — <span className="font-normal">{t.explain}</span>
+            </li>
+          ))}
+        </ol>
       )}
       {detailed && <ol className="space-y-2 border-t border-hairline pt-3 text-[12px] leading-relaxed">
         <li><strong>1. Earn and qualify.</strong> Reach 1,000 eligible funded PTS, verify your email and bind your wallet. Pending funding, review-held points, Testnet, unsupported history, Campaign PTS and XP do not qualify.</li>
