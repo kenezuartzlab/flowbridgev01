@@ -4,6 +4,8 @@ import { ArrowLeft, Coins, ShieldCheck } from "lucide-react";
 
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SafeAreaPage, SectionHeader, Surface } from "@/components/ui-kit/primitives";
+import { BOT_TESTNET, setSelectedChainId, useNetworkSession } from "@/lib/network/networkSession";
+import { isFeatureAllowed } from "@/lib/network/environmentCapabilities";
 import { FlowStakingPreviewCard } from "@/components/staking/FlowStakingPreviewCard";
 import { StakingV2PreviewCard } from "@/components/staking/StakingV2PreviewCard";
 import { MainnetGenesisStakeCard } from "@/components/staking/MainnetGenesisStakeCard";
@@ -110,6 +112,7 @@ function StakePage() {
     };
   }, []);
 
+  const showTestnetTools = isFeatureAllowed("TESTNET_STAKING_LIFECYCLE", useNetworkSession().selectedChainId);
   return (
     <>
       <SafeAreaPage>
@@ -130,6 +133,7 @@ function StakePage() {
         <MainnetLockedStakeCard />
 
 
+        {showTestnetTools ? (
         <FlowStakingPreviewCard
           flowPoints={Number(incentives?.flowPoints ?? 0)}
           campaignPts={authenticated ? campaignPointsTotal : null}
@@ -138,6 +142,15 @@ function StakePage() {
           missionHandoffFailure={failure}
           missionNote={failureCopy ?? handoff?.note ?? null}
         />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setSelectedChainId(BOT_TESTNET, "USER")}
+            className="w-full rounded-xl border border-hairline px-3 py-2 text-left text-[11px] text-muted-soft"
+          >
+            BOT Testnet practice staking is hidden on Mainnet. Switch to BOT Testnet to use it.
+          </button>
+        )}
 
         <StakingV2PreviewCard />
 
