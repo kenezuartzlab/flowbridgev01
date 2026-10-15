@@ -277,6 +277,10 @@ export function FlowStakingPreviewCard({
         const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
         const from = accounts?.[0];
         if (!from) throw new Error("No wallet account");
+        const liveChain = parseInt(String(await eth.request({ method: "eth_chainId" })), 16);
+        if (liveChain !== BOT_TESTNET_CHAIN_ID) {
+          throw new Error("This testnet tool only sends on BOT Testnet. Switch your wallet to BOT Testnet first.");
+        }
         const hash: string = await eth.request({
           method: "eth_sendTransaction",
           params: [{ from, to, data }],

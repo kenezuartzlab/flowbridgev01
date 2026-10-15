@@ -34,6 +34,12 @@ export const Route = createFileRoute("/api/rewards/convert")({
           );
         }
 
+        {
+          const { isFeatureAllowed } = await import("@/lib/network/environmentCapabilities");
+          if (typeof body?.chainId === "number" && !isFeatureAllowed("REWARD_CONVERSION", body.chainId)) {
+            return jsonResponse({ error: "Conversion is only available on BOT networks.", code: "ENVIRONMENT_NOT_SUPPORTED" }, 400);
+          }
+        }
         try {
           const { resolveRewardStateForUser } = await import("@/lib/rewards/rewardState.server");
           const state = await resolveRewardStateForUser({
