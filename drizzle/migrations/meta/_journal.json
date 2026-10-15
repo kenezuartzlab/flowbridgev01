@@ -78,6 +78,13 @@
       "when": 1791435276879,
       "tag": "0010_reward_round_index_source",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792057031997,
+      "tag": "0011_app_admins_disabled",
+      "breakpoints": true
     }
   ]
 }

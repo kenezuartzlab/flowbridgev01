@@ -57,6 +57,7 @@ import { TokenIcon } from "@/components/TokenIcon";
 import { CampaignStudioWorkspace } from "@/components/campaigns/CampaignStudioWorkspace";
 import { PartnerGovernancePanel } from "@/components/studio/PartnerGovernancePanel";
 import { ApplicationWorkspace } from "@/components/admin/ApplicationWorkspace";
+import { AdminUsersPanel } from "@/components/admin/AdminUsersPanel";
 
 const SECTIONS = [
   "tokens",
@@ -72,6 +73,7 @@ const SECTIONS = [
   "campaigns",
   "governance",
   "application",
+  "admins",
 ] as const;
 
 export const Route = createFileRoute("/sets")({
@@ -110,7 +112,8 @@ type Tab =
   | "content"
   | "campaigns"
   | "governance"
-  | "application";
+  | "application"
+  | "admins";
 
 /** Grouped navigation so the panel reads like a real control panel. */
 const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
@@ -122,7 +125,7 @@ const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
       ["pages", "Pages & Heroes"],
     ],
   },
-  { group: "Private", items: [["application", "BOT Application"]] },
+  { group: "Private", items: [["application", "BOT Application"], ["admins", "Admins & Operators"]] },
   {
     group: "Marketing",
     items: [
@@ -279,6 +282,8 @@ function AdminPage() {
         <CampaignStudioWorkspace embedded />
       ) : tab === "application" ? (
         <ApplicationWorkspace wallet={wallet!} />
+      ) : tab === "admins" ? (
+        <AdminUsersPanel wallet={wallet!} />
       ) : tab === "governance" ? (
         <PartnerGovernancePanel wallet={wallet!} />
       ) : (

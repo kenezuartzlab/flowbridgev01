@@ -30,10 +30,10 @@ export async function requireAdmin(request: Request): Promise<AdminGateResult> {
   const email = user.email.toLowerCase();
   const { data: adminRow } = await supabaseAdmin
     .from("app_admins")
-    .select("email,role")
+    .select("email,role,disabled")
     .eq("email", email)
     .maybeSingle();
-  if (!adminRow) return { ok: false, response: jsonResponse({ error: "Forbidden" }, 403) };
+  if (!adminRow || (adminRow as any).disabled) return { ok: false, response: jsonResponse({ error: "Forbidden" }, 403) };
 
   const { data: profile } = await supabaseAdmin
     .from("profiles")
