@@ -5,6 +5,16 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/admin/rewards-publish-verify")({
   server: {
     handlers: {
+      GET: async ({ request }) => {
+        const { requireAdmin } = await import("@/lib/admin/adminGate.server");
+        const { jsonResponse } = await import("@/lib/api-auth.server");
+        const gate = await requireAdmin(request);
+        if (!gate.ok) return gate.response;
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data } = await supabaseAdmin.from("admin_audit_events").select("object_id,action,new_value,actor_email,created_at")
+          .eq("object_type", "reward_round").order("created_at", { ascending: false }).limit(20);
+        return jsonResponse({ history: data ?? [] });
+      },
       POST: async ({ request }) => {
         const { requireAdmin } = await import("@/lib/admin/adminGate.server");
         const { jsonResponse } = await import("@/lib/api-auth.server");
@@ -42,7 +52,18 @@ export const Route = createFileRoute("/api/admin/rewards-publish-verify")({
             await supabaseAdmin.from("reward_settlement_batches").update({ publication_verified_at: new Date().toISOString() })
               .eq("epoch_id", row.epoch_id).eq("root", row.root).is("publication_verified_at", null);
           }
-          return jsonResponse({ phase: phaseFromVerification(status, v.complete), block: receipt?.blockNumber?.toString() ?? null, checks: v.checks });
+          const phase = phaseFromVerification(status, v.complete);
+          const { AUDITED_PHASES } = await import("@/lib/rewards/publishGate");
+          if (AUDITED_PHASES.includes(phase)) {
+            const { data: prior } = await supabaseAdmin.from("admin_audit_events").select("event_id").eq("object_type", "reward_round")
+              .eq("object_id", `677:${row.epoch_id}`).eq("action", `PUBLISH_${phase}`).contains("new_value", { txHash: body.txHash!.toLowerCase() }).limit(1);
+            if (!prior?.length) {
+              await supabaseAdmin.from("admin_audit_events").insert({ actor_user_id: gate.userId ?? null, actor_email: gate.email, actor_role: gate.role,
+                object_type: "reward_round", object_id: `677:${row.epoch_id}`, action: `PUBLISH_${phase}`,
+                new_value: { txHash: body.txHash!.toLowerCase(), root: row.root, block: receipt?.blockNumber?.toString() ?? null }, reason: "publisher verification" } as never);
+            }
+          }
+          return jsonResponse({ phase, block: receipt?.blockNumber?.toString() ?? null, checks: v.checks });
         } catch {
           return jsonResponse({ phase: "ERROR", detail: "Verification temporarily unavailable." }, 503);
         }
