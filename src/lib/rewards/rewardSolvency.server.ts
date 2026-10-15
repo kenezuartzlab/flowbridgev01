@@ -11,6 +11,8 @@ import {
 } from "./rewardFundingPlan";
 import { MAINNET_EPOCH_DRAFTS, draftFlowLabel } from "./mainnetEpochDraft";
 import { MAINNET_EPOCH_MANIFESTS } from "./mainnetEpochManifest";
+import { payoutRoundStatus, type PayoutRoundStatus } from "./payoutRoundStatus";
+import { PUBLIC_MAINNET_FLOW_CLAIMS } from "./publicClaimPolicy";
 import { buildSettlement, readCanaryStatus } from "./settlement.server";
 
 const DISTRIBUTOR = MAINNET_PAYOUT_AUDIT.address as Address;
@@ -94,7 +96,23 @@ export async function buildRewardSolvencyReport() {
 
   return {
     generatedAt: new Date().toISOString(),
-    claims: { mainnet: "LOCKED" as const, reason: "Mainnet claims open only after funding and historical reconciliation are verified." },
+    claims: PUBLIC_MAINNET_FLOW_CLAIMS
+      ? { mainnet: "PUBLIC" as const, reason: "Public claims are on. Users can claim only a published, open, funded allocation for their bound wallet; each new round still needs authorized publisher signing." }
+      : { mainnet: "LOCKED" as const, reason: "Public Mainnet claims are switched off." },
+    rounds: await (async () => {
+      const nowSec = Math.floor(Date.now() / 1000);
+      const out: { epochId: number; status: PayoutRoundStatus; leaves: number; totalFlow: number; claimStartIso: string | null; claimEndIso: string | null; source: string }[] = [];
+      try {
+        const { data } = await supabaseAdmin.from("reward_settlement_batches").select("epoch_id,total_wei,claim_start,claim_end,leaves,publication_verified_at,source").eq("chain_id", MAINNET_CHAIN_ID).order("epoch_id");
+        for (const b of data ?? []) {
+          const leaves = Array.isArray(b.leaves) ? b.leaves.length : 0;
+          out.push({ epochId: b.epoch_id, leaves, totalFlow: Number(BigInt(String(b.total_wei).split(".")[0]) / 10n ** 18n), source: b.source,
+            claimStartIso: b.claim_start ? new Date(Number(b.claim_start) * 1000).toISOString() : null, claimEndIso: b.claim_end ? new Date(Number(b.claim_end) * 1000).toISOString() : null,
+            status: payoutRoundStatus({ epochId: b.epoch_id, publishedOnChain: !!b.publication_verified_at, claimStart: Number(b.claim_start), claimEnd: Number(b.claim_end), leaves, claimedLeaves: null, nowSec }) });
+        }
+      } catch { /* report without rounds */ }
+      return out;
+    })(),
     programs,
     signup: {
       authorized: signupRow.authorizedBudget, reserved: signupRow.reserved, awarded: signupAwarded,

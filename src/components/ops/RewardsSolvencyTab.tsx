@@ -47,6 +47,14 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
         <KV k="Free FLOW (on-chain)" v={r.distributor.live ? fmt(r.distributor.live.freeFlow) : "UNKNOWN"} />
         <KV k="Reserved FLOW (on-chain)" v={r.distributor.live ? fmt(r.distributor.live.reservedFlow) : "UNKNOWN"} />
       </Box>
+      <Box title="Payout rounds">
+        <p className="text-[11.5px] leading-snug text-muted-soft">Prepared → Awaiting signature → Published → Claim open → Claimed / Expired. Publishing a round needs the authorized publisher's single signature; this page never signs.</p>
+        <KV k="Next batch (draft)" v={`${r.draftAllocation.status} · ${fmt(r.draftAllocation.leaves)} wallets · ${fmt(r.draftAllocation.totalPoints)} FLOW`} />
+        {(r.rounds ?? []).length === 0 && <p className="text-[12px] text-muted">No stored payout rounds.</p>}
+        {(r.rounds ?? []).map((x) => (
+          <KV key={x.epochId} k={`Round #${x.epochId} · ${fmt(x.leaves)} wallets · ${fmt(x.totalFlow)} FLOW`} v={x.status.replace("_", " ")} />
+        ))}
+      </Box>
       <Box title="Historical reconciliation">
         <KV k="Status" v={r.reconciliation.pass ? "PASS" : "BLOCKED"} />
         <KV k="Accounts audited" v={r.reconciliation.accounts} />

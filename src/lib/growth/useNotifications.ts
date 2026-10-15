@@ -11,6 +11,7 @@ import { useRewardState } from "@/lib/rewards/useRewardState";
 import { deriveNotifications, retentionToAppNotifications, unreadCount, visibleNotifications } from "./notifications";
 import { deriveRetentionNotifications } from "./retentionNotifications";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
+import { rewardPresentation } from "@/lib/rewards/rewardPresentation";
 import { useRouteWatchCheck } from "./useRouteWatchCheck";
 import {
   dismissNotification,
@@ -56,7 +57,10 @@ export function useNotifications() {
   const { data: personal } = usePersonalProgress(signedIn);
   const watched = useRouteWatchCheck();
   const candidates = useMemo(() => {
-    const base = deriveNotifications({ signedIn, rewardState, decision, emailVerified, walletBound });
+    // V36: a claim notification needs a live, open on-chain allocation from the shared summary.
+    const claimNow = rewardPresentation(personal?.progression).claimable ?? 0;
+    const base = deriveNotifications({ signedIn, rewardState, decision, emailVerified, walletBound })
+      .filter((n) => !n.id.startsWith("FLOW_READY_TO_CLAIM") || claimNow > 0);
     const retention = retentionToAppNotifications(
       deriveRetentionNotifications({
         progression: signedIn ? personal?.progression ?? null : null,

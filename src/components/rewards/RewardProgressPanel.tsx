@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import type { RewardProgression } from "@/lib/rewards/rewardProgression";
 import { trackProductEvent, type ProductArea } from "@/lib/ops/productEvents";
+import { DEFAULT_REWARD_RULES } from "@/lib/rewards";
+import { SIGNUP_BONUS_POINTS, REFERRER_SIGNUP_BONUS_POINTS, SIGNUP_BONUS_EFFECTIVE_AT, SIGNUP_BONUS_POLICY_VERSION } from "@/lib/rewards/signupBonusPolicy";
 import { buildRewardsSummary, TIMELINE, BLOCKER_LABEL } from "@/lib/rewards/rewardsSummary";
 
 const f = (n: number) => Math.floor(n).toLocaleString("en-US");
@@ -43,13 +45,15 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
         <div className="h-full rounded-full bg-primary motion-safe:transition-[width]" style={{ width: `${p.percent}%` }} />
       </div>
       <p className="text-[12px] font-semibold">{p.lifecycleLabel}</p>
-      <p className="text-[12px] leading-relaxed text-muted">Your total of {f(p.earnedPoints)} PTS is not your withdrawable balance. Only verified, funded BOT Mainnet points count toward the 1,000 FLOW minimum.</p>
+      <p className="text-[12px] leading-relaxed text-muted">Your total FLOW Points are not your withdrawable balance. Only verified, funded BOT Mainnet points count toward the 1,000 FLOW minimum.</p>
       {a && !a.claimed && <p className="text-[11.5px] text-muted">Round #{a.epochId}: {f(a.amountFlow)} FLOW · window {d(a.claimStart)} – {d(a.claimEnd)}</p>}
 
       <div>
         <p className="mb-1 text-[10px] font-black uppercase tracking-[0.14em] text-muted">How you can progress</p>
         <ul className="space-y-1 text-[11.5px]">
-          <li><Link to="/trade" onClick={() => trackProductEvent("earning_method_opened", area)} className="font-semibold text-primary underline-offset-2 hover:underline">Eligible swaps</Link> — verified BOT Mainnet swaps of $5+ through FlowBridge earn 1 point per $1.</li>
+          <li><Link to="/trade" onClick={() => trackProductEvent("earning_method_opened", area)} className="font-semibold text-primary underline-offset-2 hover:underline">Eligible swaps</Link> — verified BOT Mainnet swaps of ${DEFAULT_REWARD_RULES.minUsd}+ through FlowBridge earn {DEFAULT_REWARD_RULES.pointsPerBlock} point per whole ${DEFAULT_REWARD_RULES.usdBlock} verified, up to the daily Points cap.</li>
+          <li><span className="font-semibold">Signup bonus</span> — {SIGNUP_BONUS_POINTS} PTS for you and {REFERRER_SIGNUP_BONUS_POINTS} PTS for your referrer, for accounts created from {SIGNUP_BONUS_EFFECTIVE_AT.slice(0, 10)} after email verification and a first-time wallet bind (policy {SIGNUP_BONUS_POLICY_VERSION}), while the funded budget lasts.</li>
+          <li className="text-muted">Staking rewards are paid by the staking contract and are never added to FLOW Points.</li>
           <li><Link to="/account" onClick={() => trackProductEvent("earning_method_opened", area)} className="font-semibold text-primary underline-offset-2 hover:underline">Referral milestones</Link> — funded, only after your referee's verified Mainnet activity.</li>
         </ul>
       </div>
