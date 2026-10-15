@@ -58,7 +58,7 @@ async function resolveRewards(actor: FlowAiActor, now: Date): Promise<Opportunit
             value: {
               flowPoints: num(inc?.flowPoints),
               claimableFlow: claimableNow,
-              claimedFlow: num(inc?.claimedTokens),
+              claimedFlow: null,
               pointsToday: num(inc?.flowPointsToday),
               dailyCoreSwapCap: num(inc?.dailyCoreSwapCap),
             },

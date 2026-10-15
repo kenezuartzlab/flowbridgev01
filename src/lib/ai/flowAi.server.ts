@@ -154,10 +154,10 @@ async function loadAccountEvidence(actor: FlowAiActor): Promise<EvidenceItem[]> 
       getTransactionHistory(actor.userId),
     ]);
     const observedAt = new Date().toISOString();
-    const claim = computeClaimable({
-      cumulativeFlowPoints: Number(points.flowPoints ?? 0),
-      claimedFlow: Number(points.claimedTokens ?? 0),
-    });
+    const { resolvePersonalProgress } = await import('@/lib/rewards/rewardProgression.server');
+    const { buildRewardsSummary } = await import('@/lib/rewards/rewardsSummary');
+    const progress = await resolvePersonalProgress({ userId: actor.userId, emailVerified: true });
+    const summary = buildRewardsSummary({ progression: progress.progression, chainReadable: progress.chainReadable, nowSec: Math.floor(Date.now() / 1000) });
     const recent = history.slice(0, 5).map((t: any) => ({
       type: t.tx_type,
       hash: t.tx_hash,
@@ -177,9 +177,11 @@ async function loadAccountEvidence(actor: FlowAiActor): Promise<EvidenceItem[]> 
         freshness: "REALTIME",
         observedAt,
         value: {
-          flowPoints: claim.cumulativePoints,
-          claimedFlow: claim.alreadyClaimedFlow,
-          claimableFlow: null,
+          flowPoints: summary.totalPts,
+          claimedFlow: progress.chainReadable ? summary.claimedLifetime : null,
+          claimableFlow: summary.stale ? null : summary.claimableNow,
+          eligibleFundedPoints: summary.eligibleFundedUnallocated,
+          pendingFundingPoints: summary.pendingFunding,
           claimableNote: "Claimable FLOW is only reported from a live, open on-chain payout allocation; see the Rewards page.",
           totalSwapVolumeUsd: Number(points.totalSwapVolumeUsd ?? 0),
           flowPointsToday: Number(points.flowPointsToday ?? 0),
@@ -189,7 +191,7 @@ async function loadAccountEvidence(actor: FlowAiActor): Promise<EvidenceItem[]> 
           inviteCount: points.inviteCount,
           walletAddress: points.walletAddress,
         },
-        excerpt: `FLOW Points ${claim.cumulativePoints}, claimed ${claim.alreadyClaimedFlow} FLOW, $${formatUsdAmount(Number(points.totalSwapVolumeUsd ?? 0))} lifetime swap volume. ${claim.conversionNote}`,
+        excerpt: `Recorded ${summary.totalPts} PTS. ${summary.message} Claimed on-chain: ${progress.chainReadable ? summary.claimedLifetime : 'unverified'} FLOW.`,
       },
       {
         id: "db.account.recent",

@@ -2694,7 +2694,7 @@ export default function App() {
     if (symbol === 'USDT') return getBalanceDisplay('USDT_BOT');
     if (symbol === 'CA') return getBalanceDisplay('CA');
     if (symbol === 'FLOW') {
-      return googleUser ? `${incentives?.claimedTokens ?? 0} FLOW` : "0 FLOW";
+      return "—"; // Legacy conversion counters are not live ERC-20 wallet balances.
     }
     return "0.00";
   };
