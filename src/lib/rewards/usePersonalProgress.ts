@@ -15,12 +15,22 @@ export interface PersonalProgressClient {
 let cache: { at: number; token: string; data: PersonalProgressClient | null } | null = null;
 const TTL = 60_000;
 
-export async function fetchPersonalProgress(): Promise<PersonalProgressClient | null> {
+let inflight: { token: string; p: Promise<PersonalProgressClient | null> } | null = null;
+
+export async function fetchPersonalProgress(fresh = false): Promise<PersonalProgressClient | null> {
   const { supabase } = await import("@/integrations/supabase/client");
   const token = (await supabase.auth.getSession()).data.session?.access_token;
   if (!token) return null;
-  if (cache && cache.token === token && Date.now() - cache.at < TTL) return cache.data;
-  const res = await fetch("/api/rewards/progression", { headers: { Authorization: `Bearer ${token}` } });
+  if (!fresh && cache && cache.token === token && Date.now() - cache.at < TTL) return cache.data;
+  // V36.1: dedupe concurrent callers (Home, Earn, Flow AI) into one request.
+  if (!fresh && inflight && inflight.token === token) return inflight.p;
+  const p = doFetch(token, fresh);
+  inflight = { token, p };
+  try { return await p; } finally { if (inflight?.p === p) inflight = null; }
+}
+
+async function doFetch(token: string, fresh: boolean): Promise<PersonalProgressClient | null> {
+  const res = await fetch(`/api/rewards/progression${fresh ? "?fresh=1" : ""}`, { headers: { Authorization: `Bearer ${token}` } });
   const json: any = res.ok ? await res.json().catch(() => null) : null;
   const data = json?.progression ? (json as PersonalProgressClient) : null;
   cache = { at: Date.now(), token, data };
