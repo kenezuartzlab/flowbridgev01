@@ -47,3 +47,29 @@ export function phaseFromVerification(receipt: "success" | "reverted" | null, co
   if (receipt === "reverted") return "REVERTED";
   return complete ? "CONFIRMED_VERIFIED" : "CONFIRMED_MISMATCH";
 }
+
+/** Phases the operator may retry from. A pending broadcast is re-checked, never re-sent. */
+export function retryAction(phase: PublishPhase): "RESTART" | "RECHECK" | null {
+  if (phase === "REJECTED" || phase === "ERROR" || phase === "REVERTED") return "RESTART";
+  if (phase === "BROADCAST_PENDING" || phase === "CONFIRMED_MISMATCH") return "RECHECK";
+  return null;
+}
+
+/** Audit events are written only for observed outcomes, never for intent. */
+export const AUDITED_PHASES: readonly PublishPhase[] = ["CONFIRMED_VERIFIED", "CONFIRMED_MISMATCH", "REVERTED", "ERROR"];
+
+/**
+ * V36.3B — restricted automatic publishing is PREPARED, not active. Each
+ * requirement must be separately approved and evidenced; none is met in code.
+ */
+export const AUTONOMOUS_ACTIVATION_REQUIREMENTS = Object.freeze([
+  { id: "DEDICATED_SIGNER", label: "Dedicated publish-only signer in a secure signing service (no app-held key)", met: false },
+  { id: "ONCHAIN_ROLE", label: "Owner grants that signer the publisher role on chain (owner transaction)", met: false },
+  { id: "SPEND_LIMITS", label: "Per-batch 250,000 / per-day 500,000 FLOW limits enforced by the signer as well as the app", met: false },
+  { id: "EMERGENCY_STOP", label: "Owner pause and kill switch tested on the signer path", met: false },
+  { id: "OWNER_APPROVAL", label: "Separate written owner approval to switch autonomousSigning on", met: false },
+] as const);
+
+export function autonomousSigningAllowed(cfg: { autonomousSigning: boolean }): boolean {
+  return cfg.autonomousSigning === true && AUTONOMOUS_ACTIVATION_REQUIREMENTS.every((r) => r.met);
+}
