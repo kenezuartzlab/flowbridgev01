@@ -1,0 +1,1 @@
+ALTER TABLE public.app_admins ADD COLUMN IF NOT EXISTS disabled boolean NOT NULL DEFAULT false;

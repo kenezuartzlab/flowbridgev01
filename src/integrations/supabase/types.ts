@@ -221,16 +221,19 @@ export type Database = {
       app_admins: {
         Row: {
           created_at: string
+          disabled: boolean
           email: string
           role: string
         }
         Insert: {
           created_at?: string
+          disabled?: boolean
           email: string
           role?: string
         }
         Update: {
           created_at?: string
+          disabled?: boolean
           email?: string
           role?: string
         }
