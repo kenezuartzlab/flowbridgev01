@@ -81,9 +81,9 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
         </dl></details>
       )}
       {detailed && (
-        <p className="text-[11px] leading-relaxed text-muted">
+        <details className="text-[11px] leading-relaxed text-muted"><summary className="cursor-pointer font-semibold">Calculation details</summary><p className="mt-2">
           Computation: verified funded Mainnet PTS − points already allocated to payout rounds = points toward your next payout (never below zero). Source rows show funded ledger totals before verification; exclusions and review categories may overlap, so do not add them together.
-        </p>
+        </p></details>
       )}
       {detailed && (
         <details className="border-t border-hairline pt-3"><summary className="cursor-pointer text-[11.5px] font-semibold">Payout stages and conditions</summary><ol className="mt-2 space-y-1 text-[11.5px]" aria-label="Reward timeline">
@@ -94,11 +94,11 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
           ))}
         </ol></details>
       )}
-      {detailed && <ol className="space-y-2 border-t border-hairline pt-3 text-[12px] leading-relaxed">
+      {detailed && <details className="border-t border-hairline pt-3"><summary className="cursor-pointer text-[11.5px] font-semibold">When can I claim?</summary><ol className="mt-2 space-y-2 text-[12px] leading-relaxed">
         <li><strong>1. Earn and qualify.</strong> Reach 1,000 eligible funded PTS, verify your email and bind your wallet. Pending funding, review-held points, Testnet, unsupported history, Campaign PTS and XP do not qualify.</li>
         <li><strong>2. Wait for publication.</strong> A reviewer must publish your allocation in a payout round. Reaching the minimum alone does not unlock a claim; no payout date is promised.</li>
         <li><strong>3. Claim during the window.</strong> Once your published round is open and its live checks pass, claim FLOW with your allocated wallet. New rounds have a 30-day claim window. Your wallet confirms the transaction.</li>
-      </ol>}
+      </ol></details>}
     </section>
   );
 }
