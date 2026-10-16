@@ -113,6 +113,13 @@
       "when": 1792167510153,
       "tag": "0015_v367_referral_window_30d",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792167552674,
+      "tag": "0016_v367_revoke_referral_table_access",
+      "breakpoints": true
     }
   ]
 }
