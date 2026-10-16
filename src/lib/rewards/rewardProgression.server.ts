@@ -77,7 +77,7 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
   const signupMainnet = await attributeOwnSignupRows(supabaseAdmin, ledgerData ?? [], wallet);
   const excludedIds = new Set(recon.excluded.map((r) => r.rowId));
   const progression = computeRewardProgression({
-    ledger: ledger.map((r) => ({ points: r.points, excluded: excludedIds.has(r.id) || ((r.reason === 'SIGNUP_BONUS_REFEREE' || r.reason === 'REFERRAL_SIGNUP_BONUS') && !signupMainnet.has(r.id)), chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
+    ledger: ledger.map((r) => ({ points: r.points, excluded: (r.chainId === MAINNET_CHAIN_ID || r.chainId == null) && (excludedIds.has(r.id) || ((r.reason === 'SIGNUP_BONUS_REFEREE' || r.reason === 'REFERRAL_SIGNUP_BONUS') && !signupMainnet.has(r.id))), chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
     reconciledPoints: recon.authoritative,
     reviewHeldPoints: recon.pendingReview,
     historicalNonclaimable: recon.nonclaimableHistorical,

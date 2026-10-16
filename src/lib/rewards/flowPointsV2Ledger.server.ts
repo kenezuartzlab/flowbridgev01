@@ -170,6 +170,8 @@ export async function accrueCoreSwapPoints(input: {
     verified_activity_id: activityId,
     activity_key: activityKey,
     wallet_address: wallet,
+    program_id: 'CORE_SWAP',
+    funding_state: computed.reason === 'ANTI_ABUSE_REVIEW' ? 'REVIEW' : 'UNFUNDED',
     day_key: dayKey,
     metadata: {
       policyVersion: policy.version,
@@ -324,7 +326,7 @@ export async function grantReferralMilestones(input: {
       day_key: utcDayKey(at),
       metadata: { refereeId: input.refereeId, milestone: milestone.id, policyVersion: policy.version },
     });
-    if (msErr) await logLedgerError("referral_milestone_ledger", msErr);
+    if (msErr) { await logLedgerError("referral_milestone_ledger", msErr); continue; }
     points += milestone.points;
     awarded.push(milestone.id);
   }

@@ -896,6 +896,7 @@ export async function getUserPointsAndReferrals(userId: string) {
       const { count } = refereeWallet ? await supabaseAdmin.from('flow_points_ledger')
         .select('id', { count: 'exact', head: true }).eq('reason', 'SIGNUP_BONUS_REFEREE').ilike('wallet_address', refereeWallet) : { count: 0 };
       const state = attributeSignupAward({
+        points: award.points,
         reason: award.reason, programId: award.program_id, chainId: award.chain_id,
         fundingState: award.funding_state, policyVersion: award.policy_version,
         reservationId: award.reservation_id, ledgerWallet: award.wallet_address,
