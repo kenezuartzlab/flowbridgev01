@@ -513,8 +513,8 @@ export function AppHeader({
 
       {referralAppliedCode && !googleUser && (
         <div className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 bg-primary/10 border-t border-primary/25 text-primary text-[11px] font-mono font-bold tracking-wider">
-          <Gift className="w-3 h-3" />
-          <span>Referral applied: <span className="text-foreground">{referralAppliedCode}</span> — sign in to earn +50 FLOW for you & referrer.</span>
+          <Gift className="h-3 w-3 shrink-0" />
+          <span className="min-w-0 break-words">Referral applied: <span className="break-all text-foreground">{referralAppliedCode}</span> — sign in to check signup Points eligibility in FLOW Rewards. Points are not claimable FLOW.</span>
         </div>
       )}
 
