@@ -17,8 +17,9 @@ export function RewardPolicyDetails() {
             <dt>{f(p.referralMilestoneActiveDays)} qualifying UTC days</dt><dd>{f(p.referralMilestoneActiveDaysPoints)} PTS</dd>
             <dt>Milestone limit per referral</dt><dd>{f(p.referralMaxPerReferredUser)} PTS</dd>
             <dt>Rewarded milestone referrals / month</dt><dd>{f(p.referralMonthlyCap)}</dd>
+            <dt>Rewarded signup referrals / month</dt><dd>{f(p.signupMonthlyCap)}</dd>
           </dl>
-          <p>Signup monthly limits are enforced by the signup program; milestone limits above come from its current activity policy. Rewards require canonical evidence, verification, review clearance and confirmed funding. Budget reservations are not paid FLOW.</p>
+          <p>Signup and milestone monthly caps are checked against recorded rewards by the program. Rewards require canonical evidence, verification, review clearance and confirmed funding. Budget reservations are not paid FLOW.</p>
           <p>Historical rewards are preserved, not retroactively converted. Campaign PTS and XP never automatically convert to FLOW. Bridging does not earn core FLOW Points. Staking rewards are separate and paid by the staking contracts.</p>
         </div>
       </details>
