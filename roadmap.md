@@ -3,9 +3,10 @@
 # V36.6 Final rewards enforcement
 - [x] Reconcile account and programs with ledger evidence; preserve historical and wallet-mismatch exclusions. Account composition: 300 funded, 625 pending, 150 historical held, 25 unsupported stored; 1 claimed and 1,031 Testnet excluded.
 - [x] Strengthen policy, caps, atomic milestone persistence and settlement reservation/read-error gates; add invariant regressions. No funding settings changed.
-- [ ] Validate signed-in mobile/desktop, full regressions and fresh security scan.
+- [x] Validate signed-in Rewards at 320/384/430/1280px with no overflow or runtime errors, 1,757 regressions and automatic build OK; fresh available security checks show no new findings (external connector scan unavailable).
 - [ ] Publish only after mandatory gates pass and verify actual production; funding remains blocked without independent unencumbered backing evidence.
 - [ ] Release gate: concurrency database rollback tests and real Ops wallet-connected review remain unverified; independent backing/approved updated funding plan and TokenPocket device evidence are unavailable. Do not publish or authorize funding on incomplete evidence.
+- [x] Read aggregate Ops readiness through existing admin gate: zero qualified wallets, Round #3 blocked; original two recipient mismatches retained plus one linked referrer award excluded because its referee changed wallet (10 qualifying awards/1,000 PTS; 3 excluded/300 PTS). Signup funding unchanged; current Core Swap 1,119 earned/10 reserved/1,109 pending, milestones 350 recorded require evidence/holds review.
 
 # V36.4 Unified Rewards portal
 - [x] Replace every legacy incentive portal entry with shared verified rewards and referral views; preserve historical balances.
