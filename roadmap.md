@@ -1,10 +1,11 @@
 # MultiSend BOT Testnet Release
 
 # V36.6 Final rewards enforcement
-- [ ] Reconcile account and all programs with ledger evidence; preserve historical and wallet-mismatch exclusions.
-- [ ] Strengthen existing policy, funding and settlement gates and add invariant regressions.
+- [x] Reconcile account and programs with ledger evidence; preserve historical and wallet-mismatch exclusions. Account composition: 300 funded, 625 pending, 150 historical held, 25 unsupported stored; 1 claimed and 1,031 Testnet excluded.
+- [x] Strengthen policy, caps, atomic milestone persistence and settlement reservation/read-error gates; add invariant regressions. No funding settings changed.
 - [ ] Validate signed-in mobile/desktop, full regressions and fresh security scan.
 - [ ] Publish only after mandatory gates pass and verify actual production; funding remains blocked without independent unencumbered backing evidence.
+- [ ] Release gate: concurrency database rollback tests and real Ops wallet-connected review remain unverified; independent backing/approved updated funding plan and TokenPocket device evidence are unavailable. Do not publish or authorize funding on incomplete evidence.
 
 # V36.4 Unified Rewards portal
 - [x] Replace every legacy incentive portal entry with shared verified rewards and referral views; preserve historical balances.

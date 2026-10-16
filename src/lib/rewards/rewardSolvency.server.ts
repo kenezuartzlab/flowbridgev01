@@ -135,7 +135,7 @@ export async function buildRewardSolvencyReport() {
       authoritativeTotal: recon.authoritativeTotal, storedTotal: recon.storedTotal,
       // Per-account rows use opaque ids only — no email or wallet.
       flagged: recon.results.filter((r) => r.classification !== "MATCH" && r.classification !== "EXPLAINED_DIFFERENCE")
-        .map((r) => ({ account: r.userId.slice(0, 8), stored: r.stored, authoritative: r.authoritative, pendingReview: r.pendingReview, classification: r.classification, flags: r.flags })),
+        .map((r, index) => ({ account: `Account ${index + 1}`, stored: r.stored, authoritative: r.authoritative, pendingReview: r.pendingReview, classification: r.classification, flags: r.flags.map((f) => f.split(':')[0]) })),
     },
     funding: {
       swap: swapFundingOptions({

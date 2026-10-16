@@ -243,7 +243,7 @@ export async function buildSettlement(args: {
   const checks = [...p.checks, ...limits, ...(p.tx ? [{ id: "SIMULATION", pass: simulation.ok, detail: simulation.detail }] : [])];
   const publishable = p.status === "READY_FOR_PUBLISHER_REVIEW" && limits.every((c) => c.pass) && simulation.ok;
   const includedSet = new Set((p.batch?.leaves ?? []).map((l) => l.account.toLowerCase()));
-  const opaque = (id: string) => `acct-${id.slice(0, 8)}`;
+  const opaque = (id: string) => `Account ${rows.findIndex((r) => r.userId === id) + 1}`;
   const walletStates = rows.map((r) => {
     const delta = Math.max(0, Math.floor(r.authoritative) - Math.floor(r.alreadyAllocatedPoints));
     const state = r.wallet && includedSet.has(r.wallet.toLowerCase()) ? "INCLUDED"
@@ -332,6 +332,7 @@ async function reconcileSignupAwards(args: {
       reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null,
       refereeCreatedAt: args.profiles?.get(ref)?.createdAt ?? null, refereeEmailVerified: emailOk.get(ref) ?? false,
       recipientBoundWallet: args.wallets.get(l.user_id) ?? null, refereeWalletAwardCount: rw ? walletCount.get(rw) ?? 0 : 0,
+      refereeWalletMatches: !!rw && args.wallets.get(ref)?.toLowerCase() === rw,
       programFundingVerified: fundingVerified,
     });
     if (a === "MAINNET_SIGNUP_ALLOCATION") mainnetIdx.add(i);

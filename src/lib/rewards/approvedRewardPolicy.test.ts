@@ -34,5 +34,6 @@ describe('V36.6 approved policy invariants', () => {
     expect(attributeSignupAward({ ...facts, refereeCreatedAt: 'invalid' })).toBe('ACCOUNT_BEFORE_PROGRAM');
     expect(attributeSignupAward({ ...facts, points: 50 })).toBe('WRONG_AMOUNT');
     expect(attributeSignupAward({ ...facts, recipientBoundWallet: '0xdef' })).toBe('WALLET_MISMATCH');
+    expect(attributeSignupAward({ ...facts, refereeWalletMatches: false })).toBe('WALLET_MISMATCH');
   });
 });
