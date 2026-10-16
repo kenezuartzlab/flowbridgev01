@@ -218,15 +218,9 @@ export async function ensureProfile(userId: string, email: string, referredByCod
 
   // Profile is normally created by the auth trigger; this is a fallback.
   const newCode = generateReferralCode();
-  let finalReferredBy: string | null = null;
-  if (referredByCode) {
-    const { data: ref } = await supabaseAdmin
-      .from("profiles")
-      .select("id, flow_points, points_referral_signup, referral_code")
-      .eq("referral_code", referredByCode)
-      .maybeSingle();
-    if (ref) finalReferredBy = referredByCode;
-  }
+  // V36.7: the relationship is bound only by linkReferralIfMissing (atomic RPC).
+  const finalReferredBy: string | null = null;
+  void referredByCode;
   const { data: created } = await supabaseAdmin
     .from("profiles")
     .insert({ id: userId, email, referral_code: newCode, referred_by: finalReferredBy })
@@ -256,37 +250,24 @@ export async function ensureProfile(userId: string, email: string, referredByCod
 }
 
 
+/**
+ * V36.7 — permanent referral attribution. The atomic `bind_referral_v367`
+ * RPC decides: first valid attribution wins for a genuinely new account,
+ * requires verified email or a signed wallet binding, rejects self/recycled
+ * identities and never overwrites an established referrer. Every attempt is
+ * written to the attribution audit log. No points are granted here.
+ */
 export async function linkReferralIfMissing(userId: string, referredByCode?: string) {
-  if (!referredByCode) return;
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("id, referred_by, referral_code")
-    .eq("id", userId)
-    .maybeSingle();
-  if (!profile || profile.referred_by) return;
-  if (profile.referral_code === referredByCode) return;
+  const code = normalizeReferralCode(referredByCode);
+  if (!code) return { outcome: "NONE" as const };
+  const { data, error } = await (supabaseAdmin as any).rpc("bind_referral_v367", { p_user: userId, p_code: code });
+  if (error) return { outcome: "PENDING" as const, reason: "UNAVAILABLE" };
+  return data as { outcome: string; reason?: string };
+}
 
-  const { data: ref } = await supabaseAdmin
-    .from("profiles")
-    .select("id, flow_points, points_referral_signup")
-    .eq("referral_code", referredByCode)
-    .maybeSingle();
-  if (!ref) return;
-
-  await supabaseAdmin
-    .from("profiles")
-    .update({ referred_by: referredByCode })
-    .eq("id", userId);
-  // V2: binding a relationship is not an economic milestone.
-  if (!(await isFlowPointsV2Live())) {
-    await supabaseAdmin
-      .from("profiles")
-      .update({
-        flow_points: (ref.flow_points ?? 0) + 50,
-        points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
-      })
-      .eq("id", ref.id);
-  }
+export function normalizeReferralCode(code?: string | null): string | null {
+  const c = (code ?? "").trim().toUpperCase();
+  return /^FB-[A-Z0-9]{5}$/.test(c) ? c : null;
 }
 
 
