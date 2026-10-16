@@ -24,6 +24,7 @@ export const Route = createFileRoute("/api/users/bind-wallet")({
             message?: string;
             signature?: string;
             nonce?: string;
+            referredByCode?: string;
           };
           if (!body?.walletAddress) {
             return jsonResponse({ error: "Missing walletAddress parameter" }, 400);
@@ -43,6 +44,14 @@ export const Route = createFileRoute("/api/users/bind-wallet")({
           if (!challenge.ok) return jsonResponse({ error: challenge.error }, challenge.status);
 
           const updated = await bindUserWallet(user.id, challenge.wallet);
+          // V36.7: a signed wallet binding is an ownership proof for a pending referral.
+          let referral: unknown = null;
+          try {
+            const { linkReferralIfMissing } = await import("@/lib/flowbridge-db.server");
+            referral = await linkReferralIfMissing(user.id, body.referredByCode);
+          } catch {
+            /* attribution retried on next sync */
+          }
           try {
             const { trySettleSignupBonus } = await import("@/lib/rewards/signupBonus.server");
             await trySettleSignupBonus(user.id, user.emailVerified);
@@ -53,6 +62,7 @@ export const Route = createFileRoute("/api/users/bind-wallet")({
             success: true,
             walletAddress: (updated as { wallet_address?: string } | null)?.wallet_address ?? null,
             user: updated,
+            referral,
           });
         } catch (e: any) {
           return jsonResponse({ error: e.message ?? "Failed to bind wallet address" }, 400);

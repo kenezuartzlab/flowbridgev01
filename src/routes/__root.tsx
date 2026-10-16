@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
 import { THEME_BOOTSTRAP } from "../lib/theme";
 import { ReturnToRedirect } from "../components/auth/ReturnToRedirect";
+import { AuthDialog } from "../components/auth/AuthDialog";
 import { FlowAiLauncher } from "../components/assistant/FlowAiLauncher";
 import { readPrefs, unlockPrefsFormatting } from "../lib/prefs";
 import { areaForPath, trackProductEvent } from "../lib/ops/productEvents";
@@ -186,6 +187,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ReturnToRedirect />
+      <AuthDialog />
       <Outlet />
       <PublicFooter />
       <FlowAiLauncher />

@@ -83,7 +83,9 @@ import { captureActivityIntent, isActivityIntentEnabled } from './lib/activity/a
 import { BridgeStatusPanel } from './components/routetabs/BridgeStatusPanel';
 import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
-import { initAuth, googleSignIn, logout as googleLogout, getIdToken } from './lib/auth';
+import { captureReferralFromUrl, getPendingReferralCode, settlePendingReferral } from './lib/referrals/pendingReferral';
+import { openAuthDialog } from './components/auth/authDialogEvents';
+import { initAuth, logout as googleLogout, getIdToken } from './lib/auth';
 import { useTheme } from './lib/theme';
 import { LogOut, Database, Gift } from 'lucide-react';
 import { cn } from './lib/utils';
@@ -159,18 +161,12 @@ export default function App() {
   // in the header so signup visitors get visible assurance the code applied.
   const [referralAppliedCode, setReferralAppliedCode] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
-    try { return sessionStorage.getItem('flowbridge_referred_by'); } catch { return null; }
+    try { return getPendingReferralCode() ?? null; } catch { return null; }
   });
 
   // Initialize Auth listener on start and capture referral parameter
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const refCode = params.get('ref');
-    if (refCode) {
-      sessionStorage.setItem('flowbridge_referred_by', refCode);
-      setReferralAppliedCode(refCode);
-      console.log("Captured referral code from invitation URL:", refCode);
-    }
+    void captureReferralFromUrl().then((code) => { if (code) setReferralAppliedCode(code); });
 
 
     const unsubscribe = initAuth(
@@ -228,7 +224,7 @@ export default function App() {
       const token = await getEffectiveIdToken();
       if (!token) return;
       
-      const referredByCode = sessionStorage.getItem('flowbridge_referred_by') || undefined;
+      const referredByCode = getPendingReferralCode();
       
       const response = await fetch('/api/users/sync', {
         method: 'POST',
@@ -242,9 +238,7 @@ export default function App() {
         const data = await response.json();
         console.log("Logged in profile synchronized:", data.user);
         
-        if (referredByCode) {
-          sessionStorage.removeItem('flowbridge_referred_by');
-        }
+        settlePendingReferral(data.referral);
         
         fetchDbTransactions(token);
         fetchUserIncentivesInApp();
@@ -353,8 +347,8 @@ export default function App() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({ referredByCode: sessionStorage.getItem('flowbridge_referred_by') || undefined }),
-        }).catch(() => null);
+          body: JSON.stringify({ referredByCode: getPendingReferralCode() }),
+        }).then(async (r) => { if (r.ok) settlePendingReferral((await r.json().catch(() => null))?.referral); }).catch(() => null);
 
         // V34.2: connecting never binds. Binding needs the explicit
         // Verify & Bind signature on the Earn / Bind Wallet card.
@@ -371,22 +365,8 @@ export default function App() {
   }, [googleUser, address, isConnected, walletLinkNotice]);
 
   const handleGoogleSignIn = async () => {
-    setIsAuthLoading(true);
-    setAuthError(null);
-    try {
-      const res = await googleSignIn(window.location.href);
-      if (res) {
-        setGoogleUser(res.user);
-      }
-    } catch (err: any) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setAuthError(err.message || 'Google Auth failed');
-      }
-    } finally {
-      setIsAuthLoading(false);
-    }
+    openAuthDialog(getPendingReferralCode() ? 'signup' : 'signin', window.location.href);
   };
-
   const handleSandboxSignIn = () => {
     setGoogleUser({
       uid: 'sandbox-explorer',

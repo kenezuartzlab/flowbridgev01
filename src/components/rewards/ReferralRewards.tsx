@@ -19,17 +19,27 @@ export function ReferralRewards({ incentives }: { incentives: any }) {
     catch { setNotice('Sharing cancelled. Your link is still available.'); }
   };
   const rows: any[] = incentives?.referralStatuses ?? [];
+  const funnel = incentives?.referralFunnel as null | { totalInvited: number; signedUp: number; identityVerified: number; walletBound: number; rewardQualified: number; awaitingFunding: number; fundedEligible: number; excluded: Array<{ reason: string; count: number }> };
   const known = rows.filter(r => r.qualificationVerified === true).length;
   return <section id="referrals" className="space-y-4 border-t border-hairline py-5" data-testid="referral-rewards">
     <h2 className="text-lg font-bold">Your referrals</h2>
+    <p className="text-sm">Referred by: <strong className="font-mono">{incentives?.referredBy ?? 'No referrer'}</strong>{incentives?.referredBy && <span className="text-xs text-muted"> · permanent</span>}</p>
     <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {[
+      {(funnel ? [
+        ['Total invited', funnel.totalInvited],
+        ['Signed up', funnel.signedUp],
+        ['Identity verified', funnel.identityVerified],
+        ['Wallet bound', funnel.walletBound],
+        ['Reward qualified', funnel.rewardQualified],
+        ['Awaiting funding', funnel.awaitingFunding],
+        ['Funded & eligible', funnel.fundedEligible],
+        ['Excluded', funnel.excluded.reduce((a, e) => a + e.count, 0)],
+      ] : [
         ['Total referrals', incentives?.inviteCount ?? '—'],
         ['Qualified signup referrals', rows.some(r => typeof r.qualificationVerified === 'boolean') ? known : 'Not verified'],
-        ['With recorded rewards', incentives?.rewardedReferrals ?? '—'],
-        ['Pending checks / funding', rows.filter(r => !r.qualificationVerified || r.awaitingFunding).length],
-      ].map(([label,value]) => <div key={String(label)} className="min-w-0"><dt className="text-xs text-muted">{label}</dt><dd className="break-words text-lg font-bold tabular-nums">{value}</dd></div>)}
+      ]).map(([label,value]) => <div key={String(label)} className="min-w-0"><dt className="text-xs text-muted">{label}</dt><dd className="break-words text-lg font-bold tabular-nums">{value}</dd></div>)}
     </dl>
+    {funnel?.excluded?.length ? <ul className="space-y-1 text-xs text-muted">{funnel.excluded.map(e => <li key={e.reason}>Excluded ({e.count}): {e.reason}</li>)}</ul> : null}
     {link ? <>
       <p className="text-sm">Referral code: <strong className="break-all font-mono">{incentives.referralCode}</strong></p>
       <p className="select-all break-all text-sm text-muted">{link}</p>
@@ -46,6 +56,6 @@ export function ReferralRewards({ incentives }: { incentives: any }) {
       </li>)}</ul>
       {!rows.length && <p className="mt-3 text-sm text-muted">No referral history recorded.</p>}
     </details>
-    <p className="text-xs leading-relaxed text-muted">Recorded awards are not paid FLOW. Qualified signup referrals have verified award provenance; payout eligibility still comes from your funded, reconciled rewards summary. No recursive percentage rewards are promised.</p>
+    <p className="text-xs leading-relaxed text-muted">Recorded awards are not paid FLOW. Qualified signup referrals have verified award provenance; payout eligibility still comes from your funded, reconciled rewards summary. A permanent referral relationship does not by itself mean a reward is earned, funded or claimable. No recursive percentage rewards are promised.</p>
   </section>;
 }

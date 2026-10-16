@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { LogIn, Wallet } from "lucide-react";
-import { googleSignIn } from "@/lib/auth";
+import { openAuthDialog } from "@/components/auth/authDialogEvents";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
-import { rememberReturnTo, sanitizeReturnTo } from "@/lib/authReturn";
+import { sanitizeReturnTo } from "@/lib/authReturn";
 import { detectLinkedWallet, signInWithLinkedWallet, type LinkedWallet } from "@/lib/walletLink";
 
 /**
@@ -45,9 +45,7 @@ export function SignInButton({
     setLoading(true);
     setError(null);
     try {
-      const target = sanitizeReturnTo(returnTo);
-      rememberReturnTo(target);
-      await googleSignIn(target);
+      openAuthDialog("signin", sanitizeReturnTo(returnTo));
     } catch (err: any) {
       setError(err?.message || "Sign-in failed. Please try again.");
     } finally {
@@ -62,7 +60,7 @@ export function SignInButton({
     try {
       const res = await signInWithLinkedWallet(linked.address);
       if (res.status === "needs_binding") {
-        setError("This wallet is not linked to an account yet — sign in with Google to bind it.");
+        setError("This wallet is not linked to an account yet — sign in with email or Google, then bind it.");
         setLinked(null);
       }
     } catch (err: any) {
@@ -104,7 +102,7 @@ export function SignInButton({
             className={`${base} border border-hairline text-foreground hover:border-primary/40`}
           >
             <GoogleIcon className="h-4 w-4" />
-            {loading ? "Opening…" : "Use Google instead"}
+            {loading ? "Opening…" : "Other sign-in options"}
           </button>
         </>
       ) : (

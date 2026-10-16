@@ -218,15 +218,9 @@ export async function ensureProfile(userId: string, email: string, referredByCod
 
   // Profile is normally created by the auth trigger; this is a fallback.
   const newCode = generateReferralCode();
-  let finalReferredBy: string | null = null;
-  if (referredByCode) {
-    const { data: ref } = await supabaseAdmin
-      .from("profiles")
-      .select("id, flow_points, points_referral_signup, referral_code")
-      .eq("referral_code", referredByCode)
-      .maybeSingle();
-    if (ref) finalReferredBy = referredByCode;
-  }
+  // V36.7: the relationship is bound only by linkReferralIfMissing (atomic RPC).
+  const finalReferredBy: string | null = null;
+  void referredByCode;
   const { data: created } = await supabaseAdmin
     .from("profiles")
     .insert({ id: userId, email, referral_code: newCode, referred_by: finalReferredBy })
@@ -256,37 +250,24 @@ export async function ensureProfile(userId: string, email: string, referredByCod
 }
 
 
+/**
+ * V36.7 — permanent referral attribution. The atomic `bind_referral_v367`
+ * RPC decides: first valid attribution wins for a genuinely new account,
+ * requires verified email or a signed wallet binding, rejects self/recycled
+ * identities and never overwrites an established referrer. Every attempt is
+ * written to the attribution audit log. No points are granted here.
+ */
 export async function linkReferralIfMissing(userId: string, referredByCode?: string) {
-  if (!referredByCode) return;
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("id, referred_by, referral_code")
-    .eq("id", userId)
-    .maybeSingle();
-  if (!profile || profile.referred_by) return;
-  if (profile.referral_code === referredByCode) return;
+  const code = normalizeReferralCode(referredByCode);
+  if (!code) return { outcome: "NONE" as const };
+  const { data, error } = await (supabaseAdmin as any).rpc("bind_referral_v367", { p_user: userId, p_code: code });
+  if (error) return { outcome: "PENDING" as const, reason: "UNAVAILABLE" };
+  return data as { outcome: string; reason?: string };
+}
 
-  const { data: ref } = await supabaseAdmin
-    .from("profiles")
-    .select("id, flow_points, points_referral_signup")
-    .eq("referral_code", referredByCode)
-    .maybeSingle();
-  if (!ref) return;
-
-  await supabaseAdmin
-    .from("profiles")
-    .update({ referred_by: referredByCode })
-    .eq("id", userId);
-  // V2: binding a relationship is not an economic milestone.
-  if (!(await isFlowPointsV2Live())) {
-    await supabaseAdmin
-      .from("profiles")
-      .update({
-        flow_points: (ref.flow_points ?? 0) + 50,
-        points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
-      })
-      .eq("id", ref.id);
-  }
+export function normalizeReferralCode(code?: string | null): string | null {
+  const c = (code ?? "").trim().toUpperCase();
+  return /^FB-[A-Z0-9]{5}$/.test(c) ? c : null;
 }
 
 
@@ -845,6 +826,7 @@ export async function getUserPointsAndReferrals(userId: string) {
   }> = [];
   let rewardedReferrals = 0;
   let rewardedReferralsThisMonth = 0;
+  let referralFunnel: import('@/lib/referrals/referralFunnel').ReferralFunnel | null = null;
   if (user.referral_code) {
     const [{ data: referees }, { data: awards }] = await Promise.all([
       supabaseAdmin
@@ -913,6 +895,22 @@ export async function getUserPointsAndReferrals(userId: string) {
           : `Recorded award not qualified: ${state.toLowerCase().replaceAll('_', ' ')}.`,
       });
     }));
+    const verifiedById = new Map<string, boolean>();
+    await Promise.all((referees ?? []).map(async (r: any) => {
+      const { data } = await supabaseAdmin.auth.admin.getUserById(r.id).catch(() => ({ data: null as any }));
+      verifiedById.set(r.id, !!data?.user?.email_confirmed_at);
+    }));
+    const { buildReferralFunnel } = await import('@/lib/referrals/referralFunnel');
+    referralFunnel = buildReferralFunnel((referees ?? []).map((r: any) => {
+      const q = qualification.get(r.id);
+      return {
+        emailVerified: verifiedById.get(r.id) ?? false,
+        walletBound: !!r.wallet_address,
+        qualified: q?.verified ?? false,
+        awaitingFunding: q?.funding ?? false,
+        exclusionReason: q && !q.verified && !q.funding ? q.reason.split(':')[0] : null,
+      };
+    }));
     (referees ?? []).forEach((r: any, i: number) => {
       const e = byReferee.get(r.id);
       const q = qualification.get(r.id);
@@ -942,6 +940,7 @@ export async function getUserPointsAndReferrals(userId: string) {
     referrerSignupBonusPoints,
     signupProgram: { remaining: signupProgram.signupRemaining, exhausted: signupProgram.signupExhausted },
     referralStatuses,
+    referralFunnel,
     rewardedReferrals,
     rewardedReferralsThisMonth,
     referralMonthlyCap: DEFAULT_FLOW_POINTS_V2_POLICY.referralMonthlyCap,

@@ -99,6 +99,13 @@
       "when": 1792160397750,
       "tag": "0013_reward_v366_atomic_milestone",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792164953692,
+      "tag": "0014_v367_permanent_referrals",
+      "breakpoints": true
     }
   ]
 }

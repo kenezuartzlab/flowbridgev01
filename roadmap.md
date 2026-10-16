@@ -1,5 +1,11 @@
 # MultiSend BOT Testnet Release
 
+# V36.7 Easy authentication & permanent referrals
+- [x] One sign-in window: Email (password, sign-in link, reset), Google (hidden in wallet browsers with explanation), Wallet; separate Sign up / Sign in.
+- [x] Server-validated referral capture kept 30 days on device; binds only after verified email or signed wallet binding; first valid wins, immutable, audited; existing accounts (>7 days), self and recycled wallets rejected.
+- [x] Referral dashboard funnel (counts only, no emails/wallets); 1,761 tests, build OK, 384px dialog check.
+- [ ] Live sign-up/OAuth/TokenPocket end-to-end runs, concurrent database tests, fresh security scan, production publish — not yet done.
+
 # V36.6 Final rewards enforcement
 - [x] Reconcile account and programs with ledger evidence; preserve historical and wallet-mismatch exclusions. Account composition: 300 funded, 625 pending, 150 historical held, 25 unsupported stored; 1 claimed and 1,031 Testnet excluded.
 - [x] Strengthen policy, caps, atomic milestone persistence and settlement reservation/read-error gates; add invariant regressions. No funding settings changed.
