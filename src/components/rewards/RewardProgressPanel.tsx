@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import type { RewardProgression } from "@/lib/rewards/rewardProgression";
 import { trackProductEvent, type ProductArea } from "@/lib/ops/productEvents";
-import { DEFAULT_REWARD_RULES } from "@/lib/rewards";
+import { RewardPolicyDetails } from './RewardPolicyDetails';
 import { SIGNUP_BONUS_POINTS, REFERRER_SIGNUP_BONUS_POINTS, SIGNUP_BONUS_EFFECTIVE_AT, SIGNUP_BONUS_POLICY_VERSION } from "@/lib/rewards/signupBonusPolicy";
 import { buildRewardsSummary, TIMELINE, BLOCKER_LABEL } from "@/lib/rewards/rewardsSummary";
 
@@ -48,22 +48,14 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
       <p className="text-[12px] leading-relaxed text-muted">Your total FLOW Points are not your withdrawable balance. Only verified, funded BOT Mainnet points count toward the 1,000 FLOW minimum.</p>
       {a && !a.claimed && <p className="text-[11.5px] text-muted">Round #{a.epochId}: {f(a.amountFlow)} FLOW · window {d(a.claimStart)} – {d(a.claimEnd)}</p>}
 
-      <details>
-        <summary className="cursor-pointer text-[11.5px] font-semibold">How you earn and qualify</summary>
-        <ul className="space-y-1 text-[11.5px]">
-          <li><Link to="/trade" onClick={() => trackProductEvent("earning_method_opened", area)} className="font-semibold text-primary underline-offset-2 hover:underline">Eligible swaps</Link> — verified BOT Mainnet swaps of ${DEFAULT_REWARD_RULES.minUsd}+ through FlowBridge earn {DEFAULT_REWARD_RULES.pointsPerBlock} point per whole ${DEFAULT_REWARD_RULES.usdBlock} verified, up to the daily Points cap.</li>
-          <li><span className="font-semibold">Signup bonus</span> — {SIGNUP_BONUS_POINTS} PTS for you and {REFERRER_SIGNUP_BONUS_POINTS} PTS for your referrer, for accounts created from {SIGNUP_BONUS_EFFECTIVE_AT.slice(0, 10)} after email verification and a first-time wallet bind (policy {SIGNUP_BONUS_POLICY_VERSION}), while the funded budget lasts.</li>
-          <li className="text-muted">Staking rewards are paid by the staking contract and are never added to FLOW Points.</li>
-          <li><Link to="/account" onClick={() => trackProductEvent("earning_method_opened", area)} className="font-semibold text-primary underline-offset-2 hover:underline">Referral milestones</Link> — funded, only after your referee's verified Mainnet activity.</li>
-        </ul>
-      </details>
+      <details><summary className="cursor-pointer text-sm font-semibold">Approved earning policy</summary><RewardPolicyDetails /></details>
 
       {detailed && (
         <details className="border-t border-hairline pt-3"><summary className="cursor-pointer text-[11.5px] font-semibold">Points breakdown</summary>
         {p.recordedComposition && <div className="mt-3 text-[12px] leading-relaxed">
           <p className="font-semibold">Recorded total: {f(p.earnedPoints)} PTS</p>
           <p>{f(p.recordedComposition.storedHistory)} stored historical PTS + {f(p.recordedComposition.ownSignup)} own signup PTS + {f(p.recordedComposition.referralSignup)} referral signup PTS.</p>
-          <p className="mt-1 text-muted">This explains the displayed total, not a ledger-verified Mainnet entitlement. The checks below are separate and must not be added to it. Funded signup awards without a qualifying Mainnet chain classification are not included in the current eligibility summary.</p>
+          <p className="mt-1 text-muted">This explains the displayed total, not a ledger-verified Mainnet entitlement. The checks below are separate and must not be added to it. Signup awards count only when their policy, account, wallet and confirmed backing pass the canonical Mainnet checks.</p>
         </div>}
         <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-hairline pt-3 text-[11.5px]">
           {(Object.keys(SOURCE_LABEL) as (keyof typeof SOURCE_LABEL)[]).filter((k) => p.sources[k] > 0).map((k) => (

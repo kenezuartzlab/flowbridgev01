@@ -48,6 +48,8 @@ const FLOW_POINTS_V2_DAILY_CAP = DEFAULT_FLOW_POINTS_V2_POLICY.dailyCoreSwapCap;
 import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
 import { RewardProgressPanel } from "@/components/rewards/RewardProgressPanel";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
+import { RewardPolicyDetails } from '@/components/rewards/RewardPolicyDetails';
+import { ReferralRewards } from '@/components/rewards/ReferralRewards';
 import { EarnLiquidityFees } from "@/components/liquidity/EarnLiquidityFees";
 
 
@@ -190,7 +192,7 @@ function EarnPage() {
               items={[
                 {
                   label: `FLOW Points`,
-                  value: loading && !incentives ? "—" : formatPts(flowPoints),
+                  value: loading && !incentives ? "—" : personal ? formatPts(personal.progression.earnedPoints) : "—",
                   hint: PTS,
                 },
                 {
@@ -262,138 +264,8 @@ function EarnPage() {
         )}
 
 
-        {/* How earning works — sourced from the shared points rules, not copy. */}
-        <Surface id="how">
-          <SectionHeader
-            title="How you earn"
-            hint={`FLOW Points V2: verified swaps from $${SWAP_MIN_QUALIFYING_USD} grow your ${PTS}. Amounts are decided server-side from canonical on-chain evidence.`}
-          />
-          <div className="divide-y divide-hairline border-t border-hairline">
-            <ListRow
-              icon={<Sparkles className="h-4 w-4" aria-hidden />}
-              label="Verified swaps"
-              description={`1 ${PTS} per whole $1 of verified swap value, counted once per canonical on-chain activity. Swaps below $${SWAP_MIN_QUALIFYING_USD} still complete but earn no ${PTS}.`}
-              to="/trade"
-            />
-          </div>
-          <div className="divide-y divide-hairline border-t border-hairline">
-            <ListRow
-              icon={<Coins className="h-4 w-4" aria-hidden />}
-              label="Daily cap"
-              description={`Today: ${formatPts(Number(incentives?.coreSwapPointsToday ?? 0))} / ${formatPts(FLOW_POINTS_V2_DAILY_CAP)} core swap ${PTS} earned. This is today’s earning limit, not your claim progress. It resets each UTC day; swaps past it still complete.`}
-            />
-          </div>
-          <div className="border-t border-hairline p-4">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.08em] text-muted">Referral rewards</p>
-            <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1.5 text-[12px]">
-              <dt className="text-muted">FLOW Points earned</dt><dd className="font-bold">{user ? formatPts(Number(incentives?.flowPoints ?? 0)) : "—"} {PTS}</dd>
-              <dt className="text-muted">FLOW claimable now</dt><dd className="font-bold">{display.claimable === null ? "—" : formatPts(display.claimable)} FLOW</dd>
-              <dt className="col-span-2 pb-1 text-[10.5px] leading-relaxed text-muted-soft">Only eligible funded PTS convert 1:1 to FLOW through a published payout round. Stored totals are not withdrawable tokens.</dt>
-              <dt className="text-muted">New user signup bonus</dt><dd className="font-bold">100 {PTS}</dd>
-              <dt className="text-muted">Referrer signup bonus</dt><dd className="font-bold">+100</dd>
-              <dt className="col-span-2 pt-1 text-[10.5px] font-black uppercase tracking-[0.08em] text-muted">Activity milestones</dt>
-              <dt className="text-muted">First qualifying swap ($5+)</dt><dd className="font-bold">+15</dd>
-              <dt className="text-muted">$100 cumulative volume</dt><dd className="font-bold">+35</dd>
-              <dt className="text-muted">3 qualified active days</dt><dd className="font-bold">+50</dd>
-              <dt className="text-muted">Milestones per referral</dt><dd className="font-bold">up to 100</dd>
-              <dt className="text-muted">Possible total per referral</dt><dd className="font-bold">up to 200</dd>
-              <dt className="text-muted">Rewarded referrals per month</dt><dd className="font-bold">10</dd>
-            </dl>
-            <p className="mt-2 text-[11px] leading-relaxed text-muted-soft">
-              For accounts created on or after October 4, 2026, the signup bonus is confirmed once the new account verifies its email and binds a wallet not used for a bonus before. {incentives?.signupProgram?.exhausted ? "Signup bonus allocation is currently fully allocated." : "Available while the funded FlowBridge community-growth allocation remains available."} Milestones count only verified, confirmed swaps by the referred wallet, subject to monthly caps, review and funded program limits.
-            </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-muted-soft">
-              {user ? incentives?.signupExplanation : null}
-            </p>
-          </div>
-          <div className="divide-y divide-hairline border-t border-hairline">
-            <ListRow
-              icon={<Trophy className="h-4 w-4" aria-hidden />}
-              label="Campaign tasks"
-              description="Verified on-chain tasks award Campaign PTS, tracked separately from FLOW Points. Bridging earns no core FLOW Points."
-              to="/campaigns"
-            />
-          </div>
-        </Surface>
-
-        {/* Referral summary — management stays on the referral console. */}
-        {user && (
-          <Surface id="referrals">
-            <SectionHeader
-              title="Your referral link"
-              hint={`${inviteCount.toLocaleString("en-US")} signed up with your code.`}
-              action={
-                <Link
-                  to="/rewards"
-                  hash="referrals"
-                  className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-hairline px-3 text-[11px] font-bold text-muted transition-colors hover:border-primary/40 hover:text-foreground"
-                >
-                  Manage <ArrowUpRight className="h-3 w-3" aria-hidden />
-                </Link>
-              }
-            />
-            <div className="border-t border-hairline p-4">
-              {referralLink ? (
-                <button
-                  type="button"
-                  onClick={() => void copyReferral()}
-                  className="flex w-full items-center gap-2 rounded-xl border border-hairline bg-card-alt px-3 py-2.5 text-left transition-colors hover:border-primary/40"
-                >
-                  <Link2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                  <span className="min-w-0 flex-1 truncate font-mono text-[11px]">
-                    {referralLink}
-                  </span>
-                  <StatusPill tone={copied ? "ok" : "neutral"}>
-                    {copied ? "Copied" : "Copy"}
-                  </StatusPill>
-                </button>
-              ) : (
-                <p className="text-[12px] text-muted">
-                  Your referral code appears here once your profile finishes syncing.
-                </p>
-              )}
-              <div className="mt-3 grid grid-cols-2 gap-2 text-[11.5px]">
-                <div className="rounded-xl border border-hairline p-2.5">
-                  <p className="text-muted">Referred users</p>
-                  <p className="text-[15px] font-black">{inviteCount.toLocaleString("en-US")}</p>
-                </div>
-                <div className="rounded-xl border border-hairline p-2.5">
-                  <p className="text-muted">Rewarded referrals</p>
-                  <p className="text-[15px] font-black">{Number(incentives?.rewardedReferrals ?? 0)}</p>
-                  <p className="text-[10.5px] text-muted-soft">
-                    {Number(incentives?.rewardedReferralsThisMonth ?? 0)} / {Number(incentives?.referralMonthlyCap ?? 10)} this month
-                  </p>
-                </div>
-              </div>
-              {Array.isArray(incentives?.referralStatuses) && incentives.referralStatuses.length > 0 && (
-                <ul className="mt-3 divide-y divide-hairline rounded-xl border border-hairline">
-                  {incentives.referralStatuses.slice(0, 20).map((r: any) => (
-                    <li key={r.label} className="flex flex-wrap items-center gap-1.5 px-3 py-2 text-[11px]">
-                      <span className="mr-auto font-bold">{r.label}</span>
-                      <StatusPill tone="neutral">Signed up</StatusPill>
-                      {r.walletBound && <StatusPill tone="neutral">Wallet bound</StatusPill>}
-                      {r.milestones.includes("FIRST_SWAP") && <StatusPill tone="ok">First swap</StatusPill>}
-                      {r.milestones.includes("VOLUME_100") && <StatusPill tone="ok">$100</StatusPill>}
-                      {r.milestones.includes("ACTIVE_DAYS_3") && <StatusPill tone="ok">3 days</StatusPill>}
-                      <span className="font-mono text-muted">Signup {Number(r.signupReward ?? 0)} / 100 · Milestones {r.pointsEarned} / 100</span>
-                      <p className="w-full break-words leading-relaxed text-muted">{r.signupExplanation}</p>
-                      <details className="w-full text-muted"><summary className="cursor-pointer">Milestone conditions</summary><p className="mt-1 leading-relaxed">{r.milestoneExplanation}</p></details>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {!walletBound && (
-                <Link
-                  to="/rewards"
-                  hash="bind"
-                  className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary"
-                >
-                  <Wallet className="h-3.5 w-3.5" aria-hidden /> Bind a wallet to unlock rewards
-                </Link>
-              )}
-            </div>
-          </Surface>
-        )}
+        <RewardPolicyDetails />
+        {user && <ReferralRewards incentives={incentives} />}
 
         {/* Recent point-earning activity — Activity remains the evidence surface. */}
         {user && (
