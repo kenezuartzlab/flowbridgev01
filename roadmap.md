@@ -1,8 +1,8 @@
 # MultiSend BOT Testnet Release
 
 # V36.4 Unified Rewards portal
-- [ ] Replace every legacy incentive portal entry with shared verified rewards and referral views; preserve historical balances.
-- [ ] Display authoritative approved policy, referral evidence and claim blockers without financial changes.
+- [x] Replace every legacy incentive portal entry with shared verified rewards and referral views; preserve historical balances.
+- [x] Display authoritative approved policy, referral evidence and claim blockers without financial changes.
 - [ ] Verify signed-in balances, mobile/desktop, regression and security; publish and confirm live corrections.
 
 # Clear reward eligibility and composition
