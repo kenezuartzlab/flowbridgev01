@@ -110,6 +110,7 @@ import { Route as ApiCampaignsAdminIdRouteImport } from './routes/api/campaigns.
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public/activity.verify'
 import { Route as ApiPublicActivityVerifySwapRouteImport } from './routes/api/public/activity.verify-swap'
+import { Route as ApiPublicReferralValidateRouteImport } from './routes/api/public/referral.validate'
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
 import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
 import { Route as ApiStudioCampaignsIdRouteImport } from './routes/api/studio.campaigns.$id'
@@ -638,6 +639,12 @@ const ApiPublicActivityVerifySwapRoute =
     path: '/api/public/activity/verify-swap',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicReferralValidateRoute =
+  ApiPublicReferralValidateRouteImport.update({
+    id: '/api/public/referral/validate',
+    path: '/api/public/referral/validate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSiweNonceRoute = ApiPublicSiweNonceRouteImport.update({
   id: '/api/public/siwe/nonce',
   path: '/api/public/siwe/nonce',
@@ -778,6 +785,7 @@ export interface FileRoutesByFullPath {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/api/studio/campaigns/$id': typeof ApiStudioCampaignsIdRoute
@@ -888,6 +896,7 @@ export interface FileRoutesByTo {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/api/studio/campaigns/$id': typeof ApiStudioCampaignsIdRoute
@@ -999,6 +1008,7 @@ export interface FileRoutesById {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
   '/api/studio/campaigns/$id': typeof ApiStudioCampaignsIdRoute
@@ -1111,6 +1121,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/api/studio/campaigns/$id'
@@ -1221,6 +1232,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/api/studio/campaigns/$id'
@@ -1331,6 +1343,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
     | '/api/studio/campaigns/$id'
@@ -1433,6 +1446,7 @@ export interface RootRouteChildren {
   CampaignsAnalyticsIdRoute: typeof CampaignsAnalyticsIdRoute
   ApiPublicActivityVerifyRoute: typeof ApiPublicActivityVerifyRoute
   ApiPublicActivityVerifySwapRoute: typeof ApiPublicActivityVerifySwapRoute
+  ApiPublicReferralValidateRoute: typeof ApiPublicReferralValidateRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
   ApiPublicSiweVerifyRoute: typeof ApiPublicSiweVerifyRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -2149,6 +2163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicActivityVerifySwapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/referral/validate': {
+      id: '/api/public/referral/validate'
+      path: '/api/public/referral/validate'
+      fullPath: '/api/public/referral/validate'
+      preLoaderRoute: typeof ApiPublicReferralValidateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/siwe/nonce': {
       id: '/api/public/siwe/nonce'
       path: '/api/public/siwe/nonce'
@@ -2375,6 +2396,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsAnalyticsIdRoute: CampaignsAnalyticsIdRoute,
   ApiPublicActivityVerifyRoute: ApiPublicActivityVerifyRoute,
   ApiPublicActivityVerifySwapRoute: ApiPublicActivityVerifySwapRoute,
+  ApiPublicReferralValidateRoute: ApiPublicReferralValidateRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,
   ApiPublicSiweVerifyRoute: ApiPublicSiweVerifyRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
