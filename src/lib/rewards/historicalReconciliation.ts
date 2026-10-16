@@ -84,6 +84,8 @@ export interface ReconAccountResult {
 const CORE_SWAP = new Set(["CORE_SWAP", "CORE_SWAP_V2"]);
 const SIGNUP = new Set(["SIGNUP_BONUS_REFEREE", "REFERRAL_SIGNUP_BONUS"]);
 const MILESTONE: Record<string, "FIRST_SWAP" | "VOLUME_100" | "ACTIVE_DAYS_3"> = {
+  REFERRAL_FIRST_QUALIFYING_SWAP: "FIRST_SWAP",
+  REFERRAL_100_USD_VOLUME: "VOLUME_100",
   REFERRAL_MILESTONE_FIRST_SWAP: "FIRST_SWAP",
   REFERRAL_MILESTONE_VOLUME_100: "VOLUME_100",
   REFERRAL_MILESTONE_ACTIVE_DAYS_3: "ACTIVE_DAYS_3",
@@ -133,6 +135,11 @@ export function reconcileAccount(
 
   for (const r of acct.ledger) {
     if (r.points === 0) continue;
+    // The reviewed historical hold is row-scoped, never lifted by later referee activity.
+    if (review && MILESTONE[r.reason] && r.createdAt <= review.decidedAt) {
+      excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: "OWNER_REVIEWED_HISTORICAL_HOLD" });
+      continue;
+    }
     if (CORE_SWAP.has(r.reason)) {
       if (ownIds.has(r.id)) b.coreSwap += r.points;
       else excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: r.chainId === MAINNET_CHAIN_ID ? "DUPLICATE_EVIDENCE" : `NON_MAINNET_CHAIN_${r.chainId ?? "NULL"}` });

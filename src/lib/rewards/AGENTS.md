@@ -1,4 +1,5 @@
 # Rewards rules
+- Existing approved policy versions are validated by approvedRewardPolicy.ts; policy drift fails closed, and reviewed historical milestones are excluded by row/date in historicalReconciliation.ts. Why: later activity must never silently restore a historical hold or change economics under the same version.
 
 - Reward balance/readiness presentation uses rewardPresentation.ts from caller-scoped RewardProgression, never legacy claimableTotal or stored aggregate subtraction. Why: earned points and published on-chain claims are different stages.
 

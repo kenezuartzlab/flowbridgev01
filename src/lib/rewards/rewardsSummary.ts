@@ -100,11 +100,11 @@ export function buildRewardsSummary(i: SummaryInput): RewardsSummary {
   }
   const a = validAllocs(p)[0] ?? null;
   const unclaimed = a && !a.claimed ? a : null;
-  const open = !!unclaimed && i.nowSec >= unclaimed.claimStart && i.nowSec <= unclaimed.claimEnd;
-  const claimableNow = open && p.claimButton && p.lifecycle === "CLAIMABLE_NOW" ? Math.floor(unclaimed!.amountFlow) : 0;
+  const stale = i.chainReadable === false;
+  const open = !stale && !!unclaimed && i.nowSec >= unclaimed.claimStart && i.nowSec <= unclaimed.claimEnd;
+  const claimableNow = open && unclaimed && p.claimButton && p.lifecycle === "CLAIMABLE_NOW" ? Math.floor(unclaimed.amountFlow) : 0;
   const awaitingSettlement = unclaimed && !claimableNow && i.nowSec < unclaimed.claimStart ? Math.floor(unclaimed.amountFlow) : 0;
   const eligible = p.availableTowardMinimum;
-  const stale = i.chainReadable === false;
 
   let blocker: RewardBlocker;
   let message: string;
@@ -117,7 +117,7 @@ export function buildRewardsSummary(i: SummaryInput): RewardsSummary {
     message = "Reward status could not be verified. Try again; no claim amount is being assumed.";
   } else if (awaitingSettlement > 0) {
     blocker = "AWAITING_OPEN"; stage = "PUBLISHED";
-    message = `Reward published; claim opens at ${fmtDate(unclaimed!.claimStart)}.`;
+    message = `Reward published; claim opens at ${fmtDate(unclaimed?.claimStart ?? 0)}.`;
   } else if (unclaimed && i.nowSec > unclaimed.claimEnd) {
     blocker = "ROUND_EXPIRED"; stage = "PUBLISHED";
     message = `The claim window for round #${unclaimed.epochId} closed on ${fmtDate(unclaimed.claimEnd)}.`;

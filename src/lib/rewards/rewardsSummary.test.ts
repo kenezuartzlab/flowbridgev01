@@ -53,7 +53,8 @@ describe("V36 rewards summary", () => {
   });
   it("RPC down → unavailable, never a false 0 balance claim", () => {
     const s = buildRewardsSummary({ progression: prog({ funded: 1200, allocs: [alloc({})] }), chainReadable: false, nowSec: now });
-    expect(s.blocker).toBe("CLAIM_OPEN"); // verified allocation still wins
+    expect(s.blocker).toBe("STATE_UNAVAILABLE");
+    expect(s.claimableNow).toBe(0);
     const s2 = buildRewardsSummary({ progression: null, nowSec: now });
     expect(s2.blocker).toBe("STATE_UNAVAILABLE"); expect(s2.stale).toBe(true);
   });

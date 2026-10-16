@@ -43,7 +43,7 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     for (const l of data ?? []) evidence.set(l.user_id, [...(evidence.get(l.user_id) ?? []), toRow(l)]);
   }
   const recon = reconcileAccount(
-    { userId: args.userId, createdAt: new Date(profile?.created_at ?? Date.now()).toISOString(), storedFlowPoints: Number(profile?.flow_points ?? 0), storedPointsSelf: Number(profile?.points_self ?? 0), storedReferralSignup: Number(profile?.points_referral_signup ?? 0), ledger },
+    { userId: args.userId, createdAt: new Date(profile?.created_at ?? Date.now()).toISOString(), storedFlowPoints: Number(profile?.flow_points ?? 0) + ledger.filter((r) => r.reason === "SIGNUP_BONUS_REFEREE" || r.reason === "REFERRAL_SIGNUP_BONUS").reduce((s, r) => s + r.points, 0), storedPointsSelf: Number(profile?.points_self ?? 0), storedReferralSignup: Number(profile?.points_referral_signup ?? 0), ledger },
     evidence,
     OWNER_REVIEW_DECISIONS.get(args.userId),
   );
@@ -62,11 +62,11 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
         const mine = found.filter((f) => f.verification.complete)
           .map(({ batch }) => ({ batch, leaf: batch.leaves.find((l) => l.account.toLowerCase() === wallet) }))
           .filter((x) => !!x.leaf);
-        const claims = await Promise.all(mine.map(({ batch, leaf }) => readIsClaimed(batch.epochId, leaf!.index)));
+        const claims = await Promise.all(mine.map(({ batch, leaf }) => leaf ? readIsClaimed(batch.epochId, leaf.index) : Promise.resolve(null)));
         mine.forEach(({ batch, leaf }, i) => {
           const claimed = claims[i];
-          if (claimed == null) { chainReadable = false; return; }
-          allocations.push({ epochId: batch.epochId, amountFlow: Number(BigInt(leaf!.amount) / WEI), walletMatches: true, proofValid: true, onChain: true, claimed, claimStart: batch.claimStart, claimEnd: batch.claimEnd });
+          if (claimed == null || !leaf) { chainReadable = false; return; }
+          allocations.push({ epochId: batch.epochId, amountFlow: Number(BigInt(leaf.amount) / WEI), walletMatches: true, proofValid: true, onChain: true, claimed, claimStart: batch.claimStart, claimEnd: batch.claimEnd });
         });
       }
     } catch { chainReadable = false; }
@@ -75,8 +75,9 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
   // V36.5: signup rows carry no chain id; count them as BOT Mainnet ONLY when
   // the canonical attributeSignupAward() proves provenance + verified funding.
   const signupMainnet = await attributeOwnSignupRows(supabaseAdmin, ledgerData ?? [], wallet);
+  const excludedIds = new Set(recon.excluded.map((r) => r.rowId));
   const progression = computeRewardProgression({
-    ledger: ledger.map((r) => ({ points: r.points, chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
+    ledger: ledger.map((r) => ({ points: r.points, excluded: excludedIds.has(r.id) || ((r.reason === 'SIGNUP_BONUS_REFEREE' || r.reason === 'REFERRAL_SIGNUP_BONUS') && !signupMainnet.has(r.id)), chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
     reconciledPoints: recon.authoritative,
     reviewHeldPoints: recon.pendingReview,
     historicalNonclaimable: recon.nonclaimableHistorical,
@@ -92,6 +93,8 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     ownSignup: ledger.filter((r) => r.reason === 'SIGNUP_BONUS_REFEREE').reduce((s, r) => s + r.points, 0),
     referralSignup: ledger.filter((r) => r.reason === 'REFERRAL_SIGNUP_BONUS').reduce((s, r) => s + r.points, 0),
   };
+  const historicalHeld = recon.excluded.filter((r) => r.cause === 'OWNER_REVIEWED_HISTORICAL_HOLD').reduce((s, r) => s + r.points, 0);
+  progression.reconciliationEvidence = { coreSwap: recon.breakdown.coreSwap, historicalHeld, unsupportedStored: Math.max(0, recon.nonclaimableHistorical - historicalHeld) };
 
   let missionNextStep: PersonalProgress["missionNextStep"] = null;
   try {
@@ -160,6 +163,7 @@ async function attributeOwnSignupRows(admin: any, rows: any[], boundWallet: stri
     for (const l of signup) {
       const ref = refereeOf(l); const rw = refWallet.get(ref) ?? null;
       const a = attributeSignupAward({
+        points: l.points,
         reason: l.reason, programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state, policyVersion: l.policy_version ?? null,
         reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null, refereeCreatedAt: created.get(ref) ?? null,
         refereeEmailVerified: email.get(ref) ?? false, recipientBoundWallet: boundWallet, refereeWalletAwardCount: rw ? counts.get(rw) ?? 0 : 0,

@@ -16,6 +16,7 @@ export type ProgressThreshold = (typeof PROGRESS_THRESHOLDS)[number];
 export type EarningSource = "CORE_SWAP" | "SIGNUP_BONUS" | "REFERRAL_MILESTONE" | "OTHER";
 
 export interface ProgressionLedgerRow {
+  excluded?: boolean;
   points: number;
   chainId: number | null;
   fundingState: string | null;
@@ -53,6 +54,7 @@ export interface ProgressionInput {
 export interface RewardProgression {
   /** Recorded display composition, not entitlement; categories here are disjoint. */
   recordedComposition?: { storedHistory: number; ownSignup: number; referralSignup: number };
+  reconciliationEvidence?: { coreSwap: number; historicalHeld: number; unsupportedStored: number };
   minimum: number;
   earnedPoints: number;
   eligibleFundedFlow: number;
@@ -91,6 +93,7 @@ export function computeRewardProgression(i: ProgressionInput): RewardProgression
   for (const r of i.ledger) {
     const p = Math.floor(Number(r.points) || 0);
     if (p <= 0) continue;
+    if (r.excluded) continue;
     // V36.5: chain-less unfunded program rows (e.g. referral milestones) await
     // funding; they are not Testnet. They still never count toward the minimum.
     if (r.chainId == null && r.fundingState !== "FUNDED") { pendingUnfunded += p; continue; }

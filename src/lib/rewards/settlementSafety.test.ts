@@ -17,6 +17,10 @@ const run = (rows: ReturnType<typeof r>[], o: Record<string, unknown> = {}) =>
 const leaves = (s: ReturnType<typeof run>) => (s.batch?.leaves ?? []).map((l) => BigInt(l.amount) / W);
 
 describe("settlement safety gate", () => {
+  it('refuses an otherwise valid batch on the wrong network or distributor', () => {
+    expect(run([r(1, 1500)], { programs: prog(1500), chainId: 968 }).tx).toBeNull();
+    expect(run([r(1, 1500)], { programs: prog(1500), distributor: w(999) }).tx).toBeNull();
+  });
   it("999 and 999.99 excluded; 1,000 and 1,001 eligible", () => {
     expect(leaves(run([r(1, 999), r(2, 999.99)]))).toEqual([]);
     expect(leaves(run([r(1, 1000), r(2, 1001)], { programs: prog(2001) }))).toEqual([1000n, 1001n]);

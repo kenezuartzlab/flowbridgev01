@@ -41,6 +41,13 @@ function snapshot(): ReconAccountInput[] {
 }
 
 describe("historical reconciliation", () => {
+  it('preserves the reviewed 150 milestone hold even when later Mainnet evidence exists', () => {
+    const account = snapshot()[0];
+    if (!account) throw new Error('missing snapshot');
+    const r = reconcileAccount(account, new Map([[REF, [row({ points: 100, chainId: 677, verifiedUsd: 100, createdAt: '2026-08-19T00:00:00Z' })]]]), { decision: 'REVIEWED_NONCLAIMABLE_HISTORICAL', decidedAt: '2026-10-04T04:26:00Z', note: 'preserve hold' });
+    expect(r.breakdown.referralMilestone).toBe(0);
+    expect(r.excluded.filter((e) => e.cause === 'OWNER_REVIEWED_HISTORICAL_HOLD').reduce((s, e) => s + e.points, 0)).toBe(150);
+  });
   it("classifies the production snapshot and stays BLOCKED", () => {
     const s = reconcileAll(snapshot());
     expect(s.accounts).toBe(22);

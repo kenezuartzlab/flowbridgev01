@@ -8,6 +8,7 @@
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getRewardSettings } from "@/lib/appConfig.server";
+import { validateApprovedRewardPolicy } from './approvedRewardPolicy';
 import {
   DEFAULT_FLOW_POINTS_V2_POLICY,
   FLOW_POINTS_V2_VERSION,
@@ -31,7 +32,7 @@ export async function resolveFlowPointsV2Policy(): Promise<FlowPointsV2Policy> {
   const s: any = await getRewardSettings();
   const d = DEFAULT_FLOW_POINTS_V2_POLICY;
   const n = (v: any, f: number) => (Number.isFinite(Number(v)) ? Number(v) : f);
-  return {
+  return validateApprovedRewardPolicy({
     version: FLOW_POINTS_V2_VERSION,
     effectiveAt: typeof s?.v2EffectiveAt === "string" && s.v2EffectiveAt ? s.v2EffectiveAt : d.effectiveAt,
     minSwapUsd: n(s?.minSwapUsd, d.minSwapUsd),
@@ -46,7 +47,7 @@ export async function resolveFlowPointsV2Policy(): Promise<FlowPointsV2Policy> {
     ),
     referralMaxPerReferredUser: n(s?.referralMaxPerReferredUser, d.referralMaxPerReferredUser),
     referralMonthlyCap: n(s?.referralMonthlyCap, d.referralMonthlyCap),
-  };
+  });
 }
 
 /** Sum of core-swap points already granted to a bound wallet for a UTC day. */
@@ -212,6 +213,7 @@ export async function refereeQualifiedState(userId: string) {
     .from("flow_points_ledger")
     .select("points, verified_usd, day_key")
     .eq("user_id", userId)
+    .eq("chain_id", 677)
     .in("reason", [...CORE_SWAP_LEDGER_REASONS]);
   const rows = (data ?? []).filter((r: any) => Number(r.points ?? 0) > 0);
   const days = new Set(rows.map((r: any) => String(r.day_key ?? "")));
