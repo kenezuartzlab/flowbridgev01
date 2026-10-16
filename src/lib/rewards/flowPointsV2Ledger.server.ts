@@ -304,48 +304,17 @@ export async function grantReferralMilestones(input: {
   const awarded: ReferralMilestoneId[] = [];
   let points = 0;
   for (const milestone of due) {
-    const { error } = await supabaseAdmin.from("referral_milestone_awards").insert({
-      referrer_id: input.referrerId,
-      referee_id: input.refereeId,
-      milestone: milestone.id,
-      points: milestone.points,
-      policy_version: policy.version,
-      month_key: monthKey,
+    const { data, error } = await supabaseAdmin.rpc('award_referral_milestone_v366', {
+      p_referrer: input.referrerId, p_referee: input.refereeId, p_milestone: milestone.id,
+      p_month: monthKey, p_day: utcDayKey(at),
     });
     if (error) {
       // unique violation: milestone already paid; anything else is a real failure
       await logLedgerError("referral_milestone_award", error);
       continue;
     }
-    const { error: msErr } = await supabaseAdmin.from("flow_points_ledger").insert({
-      user_id: input.referrerId,
-      policy_version: policy.version,
-      reason: milestone.reason,
-      points: milestone.points,
-      base_points: milestone.points,
-      day_key: utcDayKey(at),
-      metadata: { refereeId: input.refereeId, milestone: milestone.id, policyVersion: policy.version },
-    });
-    if (msErr) { await logLedgerError("referral_milestone_ledger", msErr); continue; }
-    points += milestone.points;
-    awarded.push(milestone.id);
-  }
-
-  if (points > 0) {
-    const { data: referrer } = await supabaseAdmin
-      .from("profiles")
-      .select("id, flow_points, points_referral_activity")
-      .eq("id", input.referrerId)
-      .maybeSingle();
-    if (referrer) {
-      await supabaseAdmin
-        .from("profiles")
-        .update({
-          points_referral_activity: Number(referrer.points_referral_activity ?? 0) + points,
-          flow_points: Number(referrer.flow_points ?? 0) + points,
-        })
-        .eq("id", referrer.id);
-    }
+    const result = data as { granted?: number } | null;
+    if (result?.granted === milestone.points) { points += milestone.points; awarded.push(milestone.id); }
   }
 
   return { granted: points, milestones: awarded };
