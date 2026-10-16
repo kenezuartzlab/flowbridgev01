@@ -365,6 +365,9 @@ export default function App() {
   }, [googleUser, address, isConnected, walletLinkNotice]);
 
   const handleGoogleSignIn = async () => {
+    openAuthDialog(getPendingReferralCode() ? 'signup' : 'signin', window.location.href);
+  };
+  const _legacyGoogleSignIn = async () => {
     setIsAuthLoading(true);
     setAuthError(null);
     try {

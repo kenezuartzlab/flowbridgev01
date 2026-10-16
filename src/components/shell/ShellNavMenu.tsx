@@ -11,7 +11,8 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Activity, LogIn, LogOut, Menu, X } from "lucide-react";
 import { MENU_NAV, isNavActive } from "./navModel";
 import { supabase } from "@/integrations/supabase/client";
-import { googleSignIn, logout } from "@/lib/auth";
+import { logout } from "@/lib/auth";
+import { openAuthDialog } from "@/components/auth/authDialogEvents";
 import { checkAdmin } from "@/lib/admin/adminApi";
 import { ModalPortal } from "@/modals/ModalPortal";
 
@@ -74,7 +75,7 @@ export function ShellNavMenu({ className = "" }: { className?: string }) {
     if (authBusy) return;
     setAuthBusy(true);
     try {
-      await googleSignIn(window.location.href);
+      openAuthDialog('signin', window.location.href);
       setOpen(false);
     } catch {
       /* user cancelled or provider error — menu stays as-is */
