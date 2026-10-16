@@ -3,7 +3,8 @@
 # V36.4 Unified Rewards portal
 - [x] Replace every legacy incentive portal entry with shared verified rewards and referral views; preserve historical balances.
 - [x] Display authoritative approved policy, referral evidence and claim blockers without financial changes.
-- [ ] Confirm production deployment: signed-in preview, 320/390/430px and desktop checks, 1,747 regressions and security checks passed; publishing requested, but the first production read still served the old portal. Real TokenPocket device verification unavailable.
+- [x] Verify existing release serves unified Rewards on production /rewards, legacy hashes and menu modal; fresh authenticated browser, 320/390/430px and desktop, referral QR and 1,747 regressions passed. Service-worker control absent; initial stale production observation no longer reproduces.
+- [ ] Publish and verify the remaining stale +50 FLOW referral-banner correction; record production bundle/deployment evidence. Real TokenPocket device verification unavailable.
 
 # Clear reward eligibility and composition
 - [x] Replace conflicting claim balances and stale locked/pending copy with caller-scoped progression on Home, Earn, Rewards and Flow AI.
