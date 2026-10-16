@@ -1100,6 +1100,63 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_attribution_events: {
+        Row: {
+          created_at: string
+          id: string
+          outcome: string
+          proof: string | null
+          reason: string | null
+          referrer_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          outcome: string
+          proof?: string | null
+          reason?: string | null
+          referrer_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          outcome?: string
+          proof?: string | null
+          reason?: string | null
+          referrer_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_attributions: {
+        Row: {
+          attributed_at: string
+          proof: string
+          referral_code: string
+          referrer_id: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          attributed_at?: string
+          proof: string
+          referral_code: string
+          referrer_id: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          attributed_at?: string
+          proof?: string
+          referral_code?: string
+          referrer_id?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       referral_milestone_awards: {
         Row: {
           created_at: string
@@ -1757,6 +1814,10 @@ export type Database = {
           p_user_id: string
           p_wallet: string
         }
+        Returns: Json
+      }
+      bind_referral_v367: {
+        Args: { p_code: string; p_user: string }
         Returns: Json
       }
       delete_email: {
