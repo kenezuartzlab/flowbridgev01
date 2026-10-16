@@ -91,6 +91,9 @@ export function computeRewardProgression(i: ProgressionInput): RewardProgression
   for (const r of i.ledger) {
     const p = Math.floor(Number(r.points) || 0);
     if (p <= 0) continue;
+    // V36.5: chain-less unfunded program rows (e.g. referral milestones) await
+    // funding; they are not Testnet. They still never count toward the minimum.
+    if (r.chainId == null && r.fundingState !== "FUNDED") { pendingUnfunded += p; continue; }
     if (r.chainId !== MAINNET_CHAIN_ID) { testnet += p; continue; }
     if (r.fundingState !== "FUNDED") { pendingUnfunded += p; continue; }
     funded += p;
