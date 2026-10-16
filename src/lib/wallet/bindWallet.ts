@@ -6,6 +6,7 @@
  */
 import { BINDING_TTL_MS, buildBindingMessage } from "./bindingMessage";
 import { walletErrorMessage } from "./walletErrors";
+import { getPendingReferralCode, settlePendingReferral } from "@/lib/referrals/pendingReferral";
 
 export const WALLET_BOUND_EVENT = "flowbridge:wallet-bound";
 
@@ -44,9 +45,10 @@ export async function verifyAndBindWallet(opts: {
   const res = await fetch("/api/users/bind-wallet", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${opts.token}` },
-    body: JSON.stringify({ walletAddress: wallet, message, signature, nonce: nonceData.nonce }),
+    body: JSON.stringify({ walletAddress: wallet, message, signature, nonce: nonceData.nonce, referredByCode: getPendingReferralCode() }),
   }).catch(() => null);
-  const data = (await res?.json().catch(() => null)) as { success?: boolean; walletAddress?: string | null; error?: string } | null;
+  const data = (await res?.json().catch(() => null)) as { success?: boolean; walletAddress?: string | null; error?: string; referral?: { outcome?: string } } | null;
+  if (data?.success) settlePendingReferral(data.referral);
   if (!res?.ok || !data?.success) return { ok: false, error: data?.error ?? "Could not bind wallet." };
   if (!data.walletAddress || data.walletAddress.toLowerCase() !== wallet)
     return { ok: false, error: "The server did not confirm this wallet — nothing was bound." };
