@@ -147,3 +147,7 @@
 - [ ] Production release verification — publish requested next; live deployment must be confirmed.
 - [ ] Funded signup chain classification mismatch — 200 FUNDED points have null chain IDs and are excluded by existing Mainnet progression; requires separate accounting-policy decision, not changed in V36.2.
 - [ ] Actual TokenPocket device acceptance — unavailable without owner's phone.
+
+# V36.7 Easy Authentication & Permanent Referrals
+- [x] Email/Google/Wallet sign-in options, permanent first-valid referral, legacy +50 removed, 30-day attribution window, referral tables locked to server; published and verified live.
+- [ ] Real inbox (confirm, magic link, reset), real Google account and TokenPocket device acceptance — waits on owner.

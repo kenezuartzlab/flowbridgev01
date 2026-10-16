@@ -227,25 +227,8 @@ export async function ensureProfile(userId: string, email: string, referredByCod
     .select()
     .single();
 
-  // V12.4A — FLOW Points V2 disables the legacy +50 signup credit for NEW
-  // accruals. The relationship is still bound; referral value now comes from
-  // idempotent milestones once the referred user actually swaps.
-  if (finalReferredBy && !(await isFlowPointsV2Live())) {
-    const { data: ref } = await supabaseAdmin
-      .from("profiles")
-      .select("id, flow_points, points_referral_signup")
-      .eq("referral_code", finalReferredBy)
-      .maybeSingle();
-    if (ref) {
-      await supabaseAdmin
-        .from("profiles")
-        .update({
-          flow_points: (ref.flow_points ?? 0) + 50,
-          points_referral_signup: (ref.points_referral_signup ?? 0) + 50,
-        })
-        .eq("id", ref.id);
-    }
-  }
+  // V36.7 — the obsolete +50 referral signup credit is permanently removed.
+  // No flag can restore it; historical +50 awards remain as stored records.
   return created;
 }
 
