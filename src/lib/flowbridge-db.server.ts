@@ -826,6 +826,7 @@ export async function getUserPointsAndReferrals(userId: string) {
   }> = [];
   let rewardedReferrals = 0;
   let rewardedReferralsThisMonth = 0;
+  let referralFunnel: import('@/lib/referrals/referralFunnel').ReferralFunnel | null = null;
   if (user.referral_code) {
     const [{ data: referees }, { data: awards }] = await Promise.all([
       supabaseAdmin
@@ -894,6 +895,22 @@ export async function getUserPointsAndReferrals(userId: string) {
           : `Recorded award not qualified: ${state.toLowerCase().replaceAll('_', ' ')}.`,
       });
     }));
+    const verifiedById = new Map<string, boolean>();
+    await Promise.all((referees ?? []).map(async (r: any) => {
+      const { data } = await supabaseAdmin.auth.admin.getUserById(r.id).catch(() => ({ data: null as any }));
+      verifiedById.set(r.id, !!data?.user?.email_confirmed_at);
+    }));
+    const { buildReferralFunnel } = await import('@/lib/referrals/referralFunnel');
+    referralFunnel = buildReferralFunnel((referees ?? []).map((r: any) => {
+      const q = qualification.get(r.id);
+      return {
+        emailVerified: verifiedById.get(r.id) ?? false,
+        walletBound: !!r.wallet_address,
+        qualified: q?.verified ?? false,
+        awaitingFunding: q?.funding ?? false,
+        exclusionReason: q && !q.verified && !q.funding ? q.reason.split(':')[0] : null,
+      };
+    }));
     (referees ?? []).forEach((r: any, i: number) => {
       const e = byReferee.get(r.id);
       const q = qualification.get(r.id);
@@ -923,6 +940,7 @@ export async function getUserPointsAndReferrals(userId: string) {
     referrerSignupBonusPoints,
     signupProgram: { remaining: signupProgram.signupRemaining, exhausted: signupProgram.signupExhausted },
     referralStatuses,
+    referralFunnel,
     rewardedReferrals,
     rewardedReferralsThisMonth,
     referralMonthlyCap: DEFAULT_FLOW_POINTS_V2_POLICY.referralMonthlyCap,
