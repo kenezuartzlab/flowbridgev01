@@ -225,8 +225,9 @@ export async function buildSettlement(args: {
 
   // V36.3A — batch/day limits + exact eth_call simulation from the publisher.
   const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
-  const { data: recent } = await args.admin.from("reward_settlement_batches").select("total_wei,publication_verified_at")
+  const { data: recent, error: recentError } = await args.admin.from("reward_settlement_batches").select("total_wei,publication_verified_at")
     .eq("chain_id", MAINNET_CHAIN_ID).gte("publication_verified_at", dayAgo);
+  if (recentError) throw new Error('PUBLICATION_LIMIT_STATE_UNAVAILABLE');
   const flowPublishedLast24h = ((recent ?? []) as { total_wei: string | number }[]).reduce((t, r) => t + Number(BigInt(String(r.total_wei).split(".")[0]) / WEI), 0);
   const batchFlow = p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0;
   const limits = publisherLimitChecks({ wallets: p.batch?.leaves.length ?? 0, totalFlow: batchFlow, flowPublishedLast24h });
@@ -254,12 +255,13 @@ export async function buildSettlement(args: {
   });
 
   if (publishable && p.batch?.root) {
-    await args.admin.from("reward_settlement_batches").upsert({
+    const { error: saveError } = await args.admin.from("reward_settlement_batches").upsert({
       chain_id: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR.toLowerCase(), epoch_id: p.epochId, root: p.batch.root,
       total_wei: p.batch.totalWei as never, claim_start: p.claimStart, claim_end: p.claimEnd, fingerprint: p.fingerprint,
       leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
       program_breakdown: programs as never,
     }, { onConflict: "chain_id,distributor,epoch_id,root", ignoreDuplicates: true });
+    if (saveError) throw new Error('PREPARED_BATCH_PERSISTENCE_FAILED');
   }
 
   return {

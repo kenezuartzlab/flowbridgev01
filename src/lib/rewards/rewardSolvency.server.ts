@@ -47,7 +47,7 @@ export async function buildRewardSolvencyReport() {
     supabaseAdmin.from("reward_reservations").select("program_id,points"),
     readDistributor(),
   ]);
-  if (profiles.error || ledger.error || budgets.error) throw new Error("Reward data unavailable");
+  if (profiles.error || ledger.error || budgets.error || reservations.error) throw new Error("Reward data unavailable");
 
   const byUser = new Map<string, ReconLedgerRow[]>();
   for (const l of ledger.data ?? []) {
