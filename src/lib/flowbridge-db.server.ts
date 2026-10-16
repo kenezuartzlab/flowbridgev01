@@ -826,6 +826,8 @@ export async function getUserPointsAndReferrals(userId: string) {
   const { getSignupProgramStatus } = await import("@/lib/rewards/signupBonus.server");
   const signupProgram = await getSignupProgramStatus();
   const { signupPresentation } = await import('@/lib/rewards/referralPresentation');
+  const { resolveFlowPointsV2Policy } = await import('@/lib/rewards/flowPointsV2Ledger.server');
+  const referralPolicy = await resolveFlowPointsV2Policy();
 
   // Referral V2 — privacy-safe per-referral progress (no email / wallet).
   const { utcMonthKey } = await import("@/lib/rewards/flowPointsV2");
@@ -837,6 +839,9 @@ export async function getUserPointsAndReferrals(userId: string) {
     signupReward?: number;
     signupExplanation: string;
     milestoneExplanation: string;
+    qualificationVerified?: boolean;
+    awaitingFunding?: boolean;
+    eligibilityReason?: string;
   }> = [];
   let rewardedReferrals = 0;
   let rewardedReferralsThisMonth = 0;
@@ -873,18 +878,57 @@ export async function getUserPointsAndReferrals(userId: string) {
     }
     rewardedReferrals = rewardedSet.size;
     rewardedReferralsThisMonth = monthSet.size;
+    const { attributeSignupAward } = await import('@/lib/rewards/signupAttribution');
+    const { data: signupBudget } = await supabaseAdmin.from('reward_budgets').select('funding_verified').eq('program_id', 'SIGNUP_BONUS').maybeSingle();
+    const { data: awardEvidence } = await supabaseAdmin.from('flow_points_ledger')
+      .select('reason,program_id,chain_id,funding_state,policy_version,reservation_id,wallet_address,metadata,points')
+      .eq('user_id', userId).eq('reason', 'REFERRAL_SIGNUP_BONUS');
+    // Caller-owned award provenance only; never return identities, emails or wallets.
+    const qualification = new Map<string, { verified: boolean; funding: boolean; reason: string }>();
+    await Promise.all((referees ?? []).map(async (r: any) => {
+      const award = (awardEvidence ?? []).find((a: any) => a.metadata?.refereeId === r.id);
+      if (!award) return;
+      const [{ data: authUser }, { data: ownAwards }] = await Promise.all([
+        supabaseAdmin.auth.admin.getUserById(r.id),
+        supabaseAdmin.from('flow_points_ledger').select('wallet_address').eq('user_id', r.id).eq('reason', 'SIGNUP_BONUS_REFEREE'),
+      ]);
+      const refereeWallet = ownAwards?.[0]?.wallet_address;
+      const { count } = refereeWallet ? await supabaseAdmin.from('flow_points_ledger')
+        .select('id', { count: 'exact', head: true }).eq('reason', 'SIGNUP_BONUS_REFEREE').ilike('wallet_address', refereeWallet) : { count: 0 };
+      const state = attributeSignupAward({
+        reason: award.reason, programId: award.program_id, chainId: award.chain_id,
+        fundingState: award.funding_state, policyVersion: award.policy_version,
+        reservationId: award.reservation_id, ledgerWallet: award.wallet_address,
+        refereeCreatedAt: String(r.created_at), refereeEmailVerified: !!authUser?.user?.email_confirmed_at,
+        recipientBoundWallet: user.wallet_address, refereeWalletAwardCount: count ?? 0,
+        programFundingVerified: signupBudget?.funding_verified === true,
+      });
+      const walletStillMatches = !!r.wallet_address && !!refereeWallet && r.wallet_address.toLowerCase() === refereeWallet.toLowerCase();
+      const verified = state === 'MAINNET_SIGNUP_ALLOCATION' && walletStillMatches;
+      qualification.set(r.id, {
+        verified, funding: state === 'AWAITING_FUNDING_CONFIRMATION' || state === 'NOT_FUNDED',
+        reason: verified ? 'Signup award provenance and funding verified. A reconciled minimum and published open payout round are still required; no FLOW has been paid by this check.'
+          : !walletStillMatches ? 'Recorded signup award excluded: the referee’s current bound wallet does not match the original bonus wallet.'
+          : `Recorded award not qualified: ${state.toLowerCase().replaceAll('_', ' ')}.`,
+      });
+    }));
     (referees ?? []).forEach((r: any, i: number) => {
       const e = byReferee.get(r.id);
+      const q = qualification.get(r.id);
+      const recordedSignup = (awardEvidence ?? []).filter((a: any) => a.metadata?.refereeId === r.id).reduce((sum, a) => sum + Number(a.points ?? 0), 0);
       referralStatuses.push({
         label: `Referral #${i + 1}`,
         walletBound: !!r.wallet_address,
         milestones: e?.milestones ?? [],
         pointsEarned: e?.points ?? 0,
-        signupReward: signupPaidReferees.has(r.id) ? 100 : 0,
-        signupExplanation: signupPresentation(String(r.created_at), signupPaidReferees.has(r.id) ? 100 : 0, !!r.wallet_address),
+        signupReward: recordedSignup,
+        signupExplanation: signupPresentation(String(r.created_at), recordedSignup, !!r.wallet_address),
+        qualificationVerified: q?.verified ?? false,
+        awaitingFunding: q?.funding ?? false,
+        eligibilityReason: q?.reason ?? signupPresentation(String(r.created_at), 0, !!r.wallet_address),
         milestoneExplanation: e?.points
           ? `${e.points} historical milestone PTS recorded. Historical badges do not prove funded Mainnet eligibility; only reconciled Mainnet evidence counts.`
-          : 'No milestone award recorded. Requires a qualifying Mainnet swap, $100 verified Mainnet volume or 3 qualifying UTC days, with funding and review checks.',
+          : `No milestone award recorded. Requires a qualifying Mainnet swap of $${referralPolicy.minSwapUsd}+, $${referralPolicy.referralMilestoneVolumeUsd} verified Mainnet volume or ${referralPolicy.referralMilestoneActiveDays} qualifying UTC days, with funding and review checks.`,
       });
     });
   }
