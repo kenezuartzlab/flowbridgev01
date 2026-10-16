@@ -85,7 +85,7 @@ import { WarningPanel } from './components/routetabs/WarningPanel';
 import { getLocalSession, saveLocalSession, RouteSession } from './store/routeSession';
 import { captureReferralFromUrl, getPendingReferralCode, settlePendingReferral } from './lib/referrals/pendingReferral';
 import { openAuthDialog } from './components/auth/authDialogEvents';
-import { initAuth, googleSignIn, logout as googleLogout, getIdToken } from './lib/auth';
+import { initAuth, logout as googleLogout, getIdToken } from './lib/auth';
 import { useTheme } from './lib/theme';
 import { LogOut, Database, Gift } from 'lucide-react';
 import { cn } from './lib/utils';
@@ -367,23 +367,6 @@ export default function App() {
   const handleGoogleSignIn = async () => {
     openAuthDialog(getPendingReferralCode() ? 'signup' : 'signin', window.location.href);
   };
-  const _legacyGoogleSignIn = async () => {
-    setIsAuthLoading(true);
-    setAuthError(null);
-    try {
-      const res = await googleSignIn(window.location.href);
-      if (res) {
-        setGoogleUser(res.user);
-      }
-    } catch (err: any) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setAuthError(err.message || 'Google Auth failed');
-      }
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
   const handleSandboxSignIn = () => {
     setGoogleUser({
       uid: 'sandbox-explorer',
