@@ -39,6 +39,7 @@ export interface SignupAwardFacts {
   refereeEmailVerified: boolean;
   /** Wallet currently bound to the award recipient's profile. */
   recipientBoundWallet: string | null;
+  refereeWalletMatches?: boolean;
   /** How many SIGNUP_BONUS_REFEREE awards share the referee wallet. */
   refereeWalletAwardCount: number;
   programFundingVerified: boolean;
@@ -55,6 +56,7 @@ export function attributeSignupAward(f: SignupAwardFacts): SignupAttribution {
   if (!f.refereeEmailVerified) return "EMAIL_NOT_VERIFIED";
   if (!f.recipientBoundWallet) return "WALLET_NOT_BOUND";
   if (!f.ledgerWallet || f.ledgerWallet.toLowerCase() !== f.recipientBoundWallet.toLowerCase()) return "WALLET_MISMATCH";
+  if (f.refereeWalletMatches === false) return 'WALLET_MISMATCH';
   if (f.refereeWalletAwardCount !== 1) return "DUPLICATE_WALLET";
   // Provenance verified — still excluded until backing is independently confirmed.
   if (!f.programFundingVerified) return "AWAITING_FUNDING_CONFIRMATION";

@@ -1738,6 +1738,16 @@ export type Database = {
           points_awarded: number
         }[]
       }
+      award_referral_milestone_v366: {
+        Args: {
+          p_day: string
+          p_milestone: string
+          p_month: string
+          p_referee: string
+          p_referrer: string
+        }
+        Returns: Json
+      }
       award_signup_bonus: {
         Args: {
           p_bonus?: number

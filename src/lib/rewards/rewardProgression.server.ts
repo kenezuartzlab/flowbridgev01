@@ -77,7 +77,7 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
   const signupMainnet = await attributeOwnSignupRows(supabaseAdmin, ledgerData ?? [], wallet);
   const excludedIds = new Set(recon.excluded.map((r) => r.rowId));
   const progression = computeRewardProgression({
-    ledger: ledger.map((r) => ({ points: r.points, excluded: excludedIds.has(r.id) || ((r.reason === 'SIGNUP_BONUS_REFEREE' || r.reason === 'REFERRAL_SIGNUP_BONUS') && !signupMainnet.has(r.id)), chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
+    ledger: ledger.map((r) => ({ points: r.points, excluded: (r.chainId === MAINNET_CHAIN_ID || r.chainId == null) && (excludedIds.has(r.id) || ((r.reason === 'SIGNUP_BONUS_REFEREE' || r.reason === 'REFERRAL_SIGNUP_BONUS') && !signupMainnet.has(r.id))), chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
     reconciledPoints: recon.authoritative,
     reviewHeldPoints: recon.pendingReview,
     historicalNonclaimable: recon.nonclaimableHistorical,
@@ -145,7 +145,7 @@ async function attributeOwnSignupRows(admin: any, rows: any[], boundWallet: stri
     const refIds = [...new Set(signup.map(refereeOf).filter(Boolean))];
     const [{ data: budget }, { data: refProfiles }, { data: refAwards }] = await Promise.all([
       admin.from("reward_budgets").select("funding_verified").eq("program_id", "SIGNUP_BONUS").maybeSingle(),
-      admin.from("profiles").select("id,created_at").in("id", refIds),
+      admin.from("profiles").select("id,created_at,wallet_address").in("id", refIds),
       admin.from("flow_points_ledger").select("user_id,wallet_address").eq("reason", "SIGNUP_BONUS_REFEREE").in("user_id", refIds),
     ]);
     const refWallet = new Map<string, string | null>((refAwards ?? []).map((r: any) => [r.user_id, r.wallet_address?.toLowerCase() ?? null]));
@@ -156,6 +156,7 @@ async function attributeOwnSignupRows(admin: any, rows: any[], boundWallet: stri
       for (const r of data ?? []) { const w = String(r.wallet_address).toLowerCase(); counts.set(w, (counts.get(w) ?? 0) + 1); }
     }
     const created = new Map<string, string>((refProfiles ?? []).map((p: any) => [p.id, new Date(p.created_at).toISOString()]));
+    const boundByReferee = new Map<string, string>((refProfiles ?? []).map((p: any) => [p.id, String(p.wallet_address ?? '').toLowerCase()]));
     const email = new Map<string, boolean>();
     await Promise.all(refIds.map(async (id) => {
       try { const { data } = await admin.auth.admin.getUserById(id); email.set(id, !!data.user?.email_confirmed_at); } catch { email.set(id, false); }
@@ -167,6 +168,7 @@ async function attributeOwnSignupRows(admin: any, rows: any[], boundWallet: stri
         reason: l.reason, programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state, policyVersion: l.policy_version ?? null,
         reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null, refereeCreatedAt: created.get(ref) ?? null,
         refereeEmailVerified: email.get(ref) ?? false, recipientBoundWallet: boundWallet, refereeWalletAwardCount: rw ? counts.get(rw) ?? 0 : 0,
+        refereeWalletMatches: !!rw && boundByReferee.get(ref) === rw,
         programFundingVerified: !!budget?.funding_verified,
       });
       if (a === "MAINNET_SIGNUP_ALLOCATION") out.add(l.id);

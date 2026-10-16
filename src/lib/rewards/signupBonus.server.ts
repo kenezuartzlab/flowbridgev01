@@ -12,6 +12,8 @@ import {
 import { DEFAULT_FLOW_POINTS_V2_POLICY, utcMonthKey } from "./flowPointsV2";
 
 export async function trySettleSignupBonus(userId: string, emailVerified: boolean) {
+  const verified = await supabaseAdmin.auth.admin.getUserById(userId);
+  if (verified.error || !verified.data.user?.email_confirmed_at || !emailVerified) return { outcome: 'PENDING' as const, blockers: ['EMAIL_UNVERIFIED'] };
   const { data: p } = await supabaseAdmin
     .from("profiles")
     .select("id, wallet_address, referred_by, referral_code, created_at")

@@ -51,7 +51,7 @@ const sameWallet = (a?: string | null, b?: string | null) =>
 
 export function evaluateSignupEligibility(i: SignupEligibilityInput): SignupEligibility {
   const blockers: SignupEligibility["blockers"] = [];
-  if (Date.parse(i.accountCreatedAt) < Date.parse(SIGNUP_BONUS_EFFECTIVE_AT)) blockers.push("BEFORE_EFFECTIVE_AT");
+  if (!Number.isFinite(Date.parse(i.accountCreatedAt)) || Date.parse(i.accountCreatedAt) < Date.parse(SIGNUP_BONUS_EFFECTIVE_AT)) blockers.push("BEFORE_EFFECTIVE_AT");
   if (!i.emailVerified) blockers.push("EMAIL_UNVERIFIED");
   if (!i.wallet) blockers.push("NO_WALLET");
   if (i.alreadyBonusedAccount) blockers.push("DUPLICATE_ACCOUNT");

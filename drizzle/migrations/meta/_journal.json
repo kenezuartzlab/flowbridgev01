@@ -85,6 +85,20 @@
       "when": 1792057031997,
       "tag": "0011_app_admins_disabled",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792160306759,
+      "tag": "0012_reward_v366_concurrency_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792160397750,
+      "tag": "0013_reward_v366_atomic_milestone",
+      "breakpoints": true
     }
   ]
 }

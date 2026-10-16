@@ -47,7 +47,7 @@ export async function buildRewardSolvencyReport() {
     supabaseAdmin.from("reward_reservations").select("program_id,points"),
     readDistributor(),
   ]);
-  if (profiles.error || ledger.error || budgets.error) throw new Error("Reward data unavailable");
+  if (profiles.error || ledger.error || budgets.error || reservations.error) throw new Error("Reward data unavailable");
 
   const byUser = new Map<string, ReconLedgerRow[]>();
   for (const l of ledger.data ?? []) {
@@ -135,7 +135,7 @@ export async function buildRewardSolvencyReport() {
       authoritativeTotal: recon.authoritativeTotal, storedTotal: recon.storedTotal,
       // Per-account rows use opaque ids only — no email or wallet.
       flagged: recon.results.filter((r) => r.classification !== "MATCH" && r.classification !== "EXPLAINED_DIFFERENCE")
-        .map((r) => ({ account: r.userId.slice(0, 8), stored: r.stored, authoritative: r.authoritative, pendingReview: r.pendingReview, classification: r.classification, flags: r.flags })),
+        .map((r, index) => ({ account: `Account ${index + 1}`, stored: r.stored, authoritative: r.authoritative, pendingReview: r.pendingReview, classification: r.classification, flags: r.flags.map((f) => f.split(':')[0]) })),
     },
     funding: {
       swap: swapFundingOptions({

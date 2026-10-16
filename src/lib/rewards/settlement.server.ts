@@ -225,8 +225,9 @@ export async function buildSettlement(args: {
 
   // V36.3A — batch/day limits + exact eth_call simulation from the publisher.
   const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
-  const { data: recent } = await args.admin.from("reward_settlement_batches").select("total_wei,publication_verified_at")
+  const { data: recent, error: recentError } = await args.admin.from("reward_settlement_batches").select("total_wei,publication_verified_at")
     .eq("chain_id", MAINNET_CHAIN_ID).gte("publication_verified_at", dayAgo);
+  if (recentError) throw new Error('PUBLICATION_LIMIT_STATE_UNAVAILABLE');
   const flowPublishedLast24h = ((recent ?? []) as { total_wei: string | number }[]).reduce((t, r) => t + Number(BigInt(String(r.total_wei).split(".")[0]) / WEI), 0);
   const batchFlow = p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0;
   const limits = publisherLimitChecks({ wallets: p.batch?.leaves.length ?? 0, totalFlow: batchFlow, flowPublishedLast24h });
@@ -242,7 +243,7 @@ export async function buildSettlement(args: {
   const checks = [...p.checks, ...limits, ...(p.tx ? [{ id: "SIMULATION", pass: simulation.ok, detail: simulation.detail }] : [])];
   const publishable = p.status === "READY_FOR_PUBLISHER_REVIEW" && limits.every((c) => c.pass) && simulation.ok;
   const includedSet = new Set((p.batch?.leaves ?? []).map((l) => l.account.toLowerCase()));
-  const opaque = (id: string) => `acct-${id.slice(0, 8)}`;
+  const opaque = (id: string) => `Account ${rows.findIndex((r) => r.userId === id) + 1}`;
   const walletStates = rows.map((r) => {
     const delta = Math.max(0, Math.floor(r.authoritative) - Math.floor(r.alreadyAllocatedPoints));
     const state = r.wallet && includedSet.has(r.wallet.toLowerCase()) ? "INCLUDED"
@@ -254,12 +255,13 @@ export async function buildSettlement(args: {
   });
 
   if (publishable && p.batch?.root) {
-    await args.admin.from("reward_settlement_batches").upsert({
+    const { error: saveError } = await args.admin.from("reward_settlement_batches").upsert({
       chain_id: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR.toLowerCase(), epoch_id: p.epochId, root: p.batch.root,
       total_wei: p.batch.totalWei as never, claim_start: p.claimStart, claim_end: p.claimEnd, fingerprint: p.fingerprint,
       leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
       program_breakdown: programs as never,
     }, { onConflict: "chain_id,distributor,epoch_id,root", ignoreDuplicates: true });
+    if (saveError) throw new Error('PREPARED_BATCH_PERSISTENCE_FAILED');
   }
 
   return {
@@ -330,6 +332,7 @@ async function reconcileSignupAwards(args: {
       reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null,
       refereeCreatedAt: args.profiles?.get(ref)?.createdAt ?? null, refereeEmailVerified: emailOk.get(ref) ?? false,
       recipientBoundWallet: args.wallets.get(l.user_id) ?? null, refereeWalletAwardCount: rw ? walletCount.get(rw) ?? 0 : 0,
+      refereeWalletMatches: !!rw && args.wallets.get(ref)?.toLowerCase() === rw,
       programFundingVerified: fundingVerified,
     });
     if (a === "MAINNET_SIGNUP_ALLOCATION") mainnetIdx.add(i);
