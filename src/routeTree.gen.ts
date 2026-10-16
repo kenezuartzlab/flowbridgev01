@@ -90,6 +90,7 @@ import { Route as ApiCampaignsLeaderboardRouteImport } from './routes/api/campai
 import { Route as ApiCampaignsMeRouteImport } from './routes/api/campaigns.me'
 import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives.global'
 import { Route as ApiProfileParticipationRouteImport } from './routes/api/profile.participation'
+import { Route as ApiPublicRewardPolicyRouteImport } from './routes/api/public/reward-policy'
 import { Route as ApiPublicRewardRoundsRouteImport } from './routes/api/public/reward-rounds'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
@@ -535,6 +536,11 @@ const ApiProfileParticipationRoute = ApiProfileParticipationRouteImport.update({
   path: '/api/profile/participation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRewardPolicyRoute = ApiPublicRewardPolicyRouteImport.update({
+  id: '/api/public/reward-policy',
+  path: '/api/public/reward-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRewardRoundsRoute = ApiPublicRewardRoundsRouteImport.update({
   id: '/api/public/reward-rounds',
   path: '/api/public/reward-rounds',
@@ -752,6 +758,7 @@ export interface FileRoutesByFullPath {
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/profile/participation': typeof ApiProfileParticipationRoute
+  '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -861,6 +868,7 @@ export interface FileRoutesByTo {
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/profile/participation': typeof ApiProfileParticipationRoute
+  '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -971,6 +979,7 @@ export interface FileRoutesById {
   '/api/campaigns/me': typeof ApiCampaignsMeRoute
   '/api/incentives/global': typeof ApiIncentivesGlobalRoute
   '/api/profile/participation': typeof ApiProfileParticipationRoute
+  '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -1082,6 +1091,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/me'
     | '/api/incentives/global'
     | '/api/profile/participation'
+    | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
@@ -1191,6 +1201,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/me'
     | '/api/incentives/global'
     | '/api/profile/participation'
+    | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
@@ -1300,6 +1311,7 @@ export interface FileRouteTypes {
     | '/api/campaigns/me'
     | '/api/incentives/global'
     | '/api/profile/participation'
+    | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
     | '/api/public/wallet-lookup'
     | '/api/rewards/claim-authorization'
@@ -1404,6 +1416,7 @@ export interface RootRouteChildren {
   ApiBannerImageSplatRoute: typeof ApiBannerImageSplatRoute
   ApiIncentivesGlobalRoute: typeof ApiIncentivesGlobalRoute
   ApiProfileParticipationRoute: typeof ApiProfileParticipationRoute
+  ApiPublicRewardPolicyRoute: typeof ApiPublicRewardPolicyRoute
   ApiPublicRewardRoundsRoute: typeof ApiPublicRewardRoundsRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiRewardsClaimAuthorizationRoute: typeof ApiRewardsClaimAuthorizationRoute
@@ -1996,6 +2009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProfileParticipationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/reward-policy': {
+      id: '/api/public/reward-policy'
+      path: '/api/public/reward-policy'
+      fullPath: '/api/public/reward-policy'
+      preLoaderRoute: typeof ApiPublicRewardPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/reward-rounds': {
       id: '/api/public/reward-rounds'
       path: '/api/public/reward-rounds'
@@ -2338,6 +2358,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBannerImageSplatRoute: ApiBannerImageSplatRoute,
   ApiIncentivesGlobalRoute: ApiIncentivesGlobalRoute,
   ApiProfileParticipationRoute: ApiProfileParticipationRoute,
+  ApiPublicRewardPolicyRoute: ApiPublicRewardPolicyRoute,
   ApiPublicRewardRoundsRoute: ApiPublicRewardRoundsRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiRewardsClaimAuthorizationRoute: ApiRewardsClaimAuthorizationRoute,
