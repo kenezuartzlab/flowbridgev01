@@ -1,5 +1,11 @@
 # MultiSend BOT Testnet Release
 
+# V36.6 Final rewards enforcement
+- [ ] Reconcile account and all programs with ledger evidence; preserve historical and wallet-mismatch exclusions.
+- [ ] Strengthen existing policy, funding and settlement gates and add invariant regressions.
+- [ ] Validate signed-in mobile/desktop, full regressions and fresh security scan.
+- [ ] Publish only after mandatory gates pass and verify actual production; funding remains blocked without independent unencumbered backing evidence.
+
 # V36.4 Unified Rewards portal
 - [x] Replace every legacy incentive portal entry with shared verified rewards and referral views; preserve historical balances.
 - [x] Display authoritative approved policy, referral evidence and claim blockers without financial changes.

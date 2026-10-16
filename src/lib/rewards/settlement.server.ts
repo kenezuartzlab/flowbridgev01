@@ -147,7 +147,7 @@ export async function countRoundClaims(epochId: number, leafIndexes: number[]) {
   return v;
 }
 
-export interface LedgerRow { user_id: string; points: number; chain_id: number | null; funding_state: string | null; program_id: string | null; reason?: string; policy_version?: string | null; reservation_id?: string | null; wallet_address?: string | null; metadata?: unknown }
+export interface LedgerRow { id?: string; user_id: string; points: number; chain_id: number | null; funding_state: string | null; program_id: string | null; reason?: string; policy_version?: string | null; reservation_id?: string | null; wallet_address?: string | null; metadata?: unknown }
 export interface ReconRow { userId: string; classification: string; authoritative: number; pendingReview: number }
 
 const PROGRAMS: ProgramId[] = ["CORE_SWAP", "REFERRAL_MILESTONE", "SIGNUP_BONUS"];
@@ -170,6 +170,8 @@ export async function buildSettlement(args: {
   const discoveredIds = new Set(discovered.map((d) => d.batch.epochId));
   for (const m of MAINNET_EPOCH_MANIFESTS) if (!discoveredIds.has(m.epochId)) for (const e of m.entitlements) addAlloc(e.account, e.amount);
   for (const d of discovered) for (const l of d.batch.leaves) addAlloc(l.account, l.amount);
+  // Unsigned candidates are not allocations: count only live on-chain rounds.
+  // Rebuilding a prepared candidate must not consume itself or strand its points.
 
   // V36.3A — signup awards carry no chain id; attribute only after full provenance + funding verification.
   const signup = await reconcileSignupAwards(args);
@@ -177,8 +179,17 @@ export async function buildSettlement(args: {
 
   // Only FUNDED Mainnet ledger points; per-program attribution (no cross-bucket cover).
   const fundedBy = new Map<string, Map<ProgramId, number>>();
+  const { validRewardReservation } = await import('./approvedRewardPolicy');
+  const { data: reservations, error: reservationError } = await args.admin.from('reward_reservations').select('reservation_id,ledger_id,user_id,wallet_address,points,program_id');
+  if (reservationError) throw new Error('REWARD_RESERVATIONS_UNAVAILABLE');
+  const reservationById = new Map((reservations ?? []).map((r) => [r.reservation_id, r]));
   for (const [i, l] of args.ledger.entries()) {
     if (l.funding_state !== "FUNDED" || effChain(l, i) !== MAINNET_CHAIN_ID) continue;
+    if ((SIGNUP_REASONS as readonly string[]).includes(l.reason ?? '') && !signup.mainnetIdx.has(i)) continue;
+    const reservation = l.reservation_id ? reservationById.get(l.reservation_id) : null;
+    if (!l.id || !validRewardReservation({ ledgerId: l.id, userId: l.user_id, wallet: l.wallet_address ?? null, points: l.points, program: l.program_id,
+      reservation: reservation ? { ledgerId: reservation.ledger_id, userId: reservation.user_id, wallet: reservation.wallet_address, points: reservation.points, program: reservation.program_id } : null })) continue;
+    if (!l.wallet_address || l.wallet_address.toLowerCase() !== args.wallets.get(l.user_id)?.toLowerCase()) continue;
     const prog = (PROGRAMS.includes(l.program_id as ProgramId) ? l.program_id : "OTHER") as ProgramId;
     const m = fundedBy.get(l.user_id) ?? new Map<ProgramId, number>();
     m.set(prog, (m.get(prog) ?? 0) + l.points);
@@ -198,7 +209,8 @@ export async function buildSettlement(args: {
   for (const r of rows) {
     let prior = Math.floor(r.alreadyAllocatedPoints);
     let delta = Math.max(0, Math.floor(r.authoritative) - prior);
-    const by = fundedBy.get(r.userId)!;
+    const by = fundedBy.get(r.userId);
+    if (!by) continue;
     for (const p of [...PROGRAMS, "OTHER" as ProgramId]) {
       let v = Math.floor(by.get(p) ?? 0);
       const pr = Math.min(prior, v); prior -= pr; v -= pr; usedBefore.set(p, (usedBefore.get(p) ?? 0) + pr);
@@ -313,6 +325,7 @@ async function reconcileSignupAwards(args: {
     const ref = refereeOf(l);
     const rw = refereeWallet.get(ref) ?? null;
     const a = attributeSignupAward({
+      points: l.points,
       reason: l.reason ?? "", programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state, policyVersion: l.policy_version ?? null,
       reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null,
       refereeCreatedAt: args.profiles?.get(ref)?.createdAt ?? null, refereeEmailVerified: emailOk.get(ref) ?? false,

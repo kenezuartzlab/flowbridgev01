@@ -15,6 +15,7 @@ export type SignupAttribution =
   | "AWAITING_FUNDING_CONFIRMATION"
   | "NOT_SIGNUP_PROGRAM"
   | "WRONG_POLICY_VERSION"
+  | "WRONG_AMOUNT"
   | "ACCOUNT_BEFORE_PROGRAM"
   | "EMAIL_NOT_VERIFIED"
   | "WALLET_NOT_BOUND"
@@ -25,6 +26,7 @@ export type SignupAttribution =
   | "HAS_OTHER_CHAIN";
 
 export interface SignupAwardFacts {
+  points?: number;
   reason: string;
   programId: string | null;
   chainId: number | null;
@@ -46,9 +48,10 @@ export function attributeSignupAward(f: SignupAwardFacts): SignupAttribution {
   if (f.programId !== "SIGNUP_BONUS" || !(SIGNUP_REASONS as readonly string[]).includes(f.reason)) return "NOT_SIGNUP_PROGRAM";
   if (f.chainId != null && f.chainId !== 677) return "HAS_OTHER_CHAIN";
   if (f.policyVersion !== SIGNUP_BONUS_POLICY_VERSION) return "WRONG_POLICY_VERSION";
+  if (f.points !== undefined && f.points !== 100) return "WRONG_AMOUNT";
   if (f.fundingState !== "FUNDED") return "NOT_FUNDED";
   if (!f.reservationId) return "NO_RESERVATION";
-  if (!f.refereeCreatedAt || Date.parse(f.refereeCreatedAt) < Date.parse(SIGNUP_BONUS_EFFECTIVE_AT)) return "ACCOUNT_BEFORE_PROGRAM";
+  if (!f.refereeCreatedAt || !Number.isFinite(Date.parse(f.refereeCreatedAt)) || Date.parse(f.refereeCreatedAt) < Date.parse(SIGNUP_BONUS_EFFECTIVE_AT)) return "ACCOUNT_BEFORE_PROGRAM";
   if (!f.refereeEmailVerified) return "EMAIL_NOT_VERIFIED";
   if (!f.recipientBoundWallet) return "WALLET_NOT_BOUND";
   if (!f.ledgerWallet || f.ledgerWallet.toLowerCase() !== f.recipientBoundWallet.toLowerCase()) return "WALLET_MISMATCH";

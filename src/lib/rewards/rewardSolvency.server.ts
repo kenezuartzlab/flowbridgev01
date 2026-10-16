@@ -20,7 +20,7 @@ const ABI = parseAbi(["function freeBalance() view returns (uint256)", "function
 const SETTLE_ABI = parseAbi(["function epochCount() view returns (uint256)", "function totalClaimed() view returns (uint256)", "function minPublishDelay() view returns (uint64)"]);
 const TOKEN_ABI = parseAbi(["function balanceOf(address) view returns (uint256)", "function token() view returns (address)"]);
 
-const MILESTONE_REASONS = ["REFERRAL_MILESTONE_FIRST_SWAP", "REFERRAL_MILESTONE_VOLUME_100", "REFERRAL_MILESTONE_ACTIVE_DAYS_3", "REFERRAL_3_ACTIVE_DAYS"];
+const MILESTONE_REASONS = ["REFERRAL_FIRST_QUALIFYING_SWAP", "REFERRAL_100_USD_VOLUME", "REFERRAL_MILESTONE_FIRST_SWAP", "REFERRAL_MILESTONE_VOLUME_100", "REFERRAL_MILESTONE_ACTIVE_DAYS_3", "REFERRAL_3_ACTIVE_DAYS"];
 
 async function readDistributor() {
   try {
@@ -61,7 +61,7 @@ export async function buildRewardSolvencyReport() {
     byUser.set(l.user_id, [...(byUser.get(l.user_id) ?? []), r]);
   }
   const accounts: ReconAccountInput[] = (profiles.data ?? []).map((p) => ({
-    userId: p.id, createdAt: new Date(p.created_at).toISOString(), storedFlowPoints: p.flow_points,
+    userId: p.id, createdAt: new Date(p.created_at).toISOString(), storedFlowPoints: p.flow_points + (byUser.get(p.id) ?? []).filter((r) => r.reason === 'SIGNUP_BONUS_REFEREE' || r.reason === 'REFERRAL_SIGNUP_BONUS').reduce((s, r) => s + r.points, 0),
     storedPointsSelf: p.points_self, storedReferralSignup: p.points_referral_signup, ledger: byUser.get(p.id) ?? [],
   }));
   const recon = reconcileAll(accounts, OWNER_REVIEW_DECISIONS);
@@ -89,7 +89,7 @@ export async function buildRewardSolvencyReport() {
   const signupRow = row("SIGNUP_BONUS", signupAwarded, 0);
   const programs = [
     signupRow,
-    row("CORE_SWAP", swapEarned, swapEarned),
+    row("CORE_SWAP", swapEarned, mainnetSwaps.filter((r) => r.fundingState !== 'FUNDED').reduce((s, r) => s + r.points, 0)),
     row("REFERRAL_MILESTONE", milestoneRecorded, milestoneRecorded),
     programSolvency({ programId: "OTHER", authorizedBudget: 0, backingVerified: false, reserved: 0, earned: 0, claimed: 0, unfunded: 0 }),
   ];

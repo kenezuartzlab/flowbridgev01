@@ -10,6 +10,8 @@ import { encodeFunctionData, getAddress, keccak256, toHex, type Hex } from "viem
 import { buildPayoutBatch, discoverRounds, type PayoutBatch } from "./payoutBatch";
 import type { DraftAllocationInput, ProgramId } from "./rewardFundingPlan";
 import { MAINNET_MIN_CLAIM_FLOW } from "./claimMinimumPolicy";
+import { MAINNET_CHAIN_ID } from './historicalReconciliation';
+import { MAINNET_PAYOUT_AUDIT } from './rewardFundingPlan';
 import { hashPair, merkleClaimLeafHash, verifyMerkleProof } from "./merkleClaim";
 
 export const PUBLISH_EPOCH_ABI = [{
@@ -113,6 +115,7 @@ export function settlementFingerprint(i: SettlementInput): Hex {
 function buildOnce(i: SettlementInput) {
   const checks: Check[] = [];
   const add = (id: string, pass: boolean, detail: string) => checks.push({ id, pass, detail });
+  add('MAINNET_CONTEXT', i.chainId === MAINNET_CHAIN_ID && i.distributor.toLowerCase() === MAINNET_PAYOUT_AUDIT.address.toLowerCase(), 'canonical BOT Mainnet distributor only');
   const known = new Set(i.knownEpochIds ?? []);
   const sync = discoverRounds(i.chain.epochCount);
   sync.missingFromApp = sync.missingFromApp.filter((e) => !known.has(e));

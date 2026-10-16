@@ -57,6 +57,7 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
           <p>{f(p.recordedComposition.storedHistory)} stored historical PTS + {f(p.recordedComposition.ownSignup)} own signup PTS + {f(p.recordedComposition.referralSignup)} referral signup PTS.</p>
           <p className="mt-1 text-muted">This explains the displayed total, not a ledger-verified Mainnet entitlement. The checks below are separate and must not be added to it. Signup awards count only when their policy, account, wallet and confirmed backing pass the canonical Mainnet checks.</p>
         </div>}
+        {p.reconciliationEvidence && <p className="mt-2 text-[12px] leading-relaxed text-muted">Ledger-verified Mainnet swaps: {f(p.reconciliationEvidence.coreSwap)} PTS. Historical held milestones: {f(p.reconciliationEvidence.historicalHeld)} PTS. Stored history without qualifying ledger evidence: {f(p.reconciliationEvidence.unsupportedStored)} PTS. Held and unsupported history remain excluded.</p>}
         <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-hairline pt-3 text-[11.5px]">
           {(Object.keys(SOURCE_LABEL) as (keyof typeof SOURCE_LABEL)[]).filter((k) => p.sources[k] > 0).map((k) => (
             <div key={k} className="contents"><dt className="text-muted">{SOURCE_LABEL[k]}</dt><dd className="text-right tabular-nums">{f(p.sources[k])}</dd></div>
