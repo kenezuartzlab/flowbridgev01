@@ -11,14 +11,14 @@ export const Route = createFileRoute("/api/users/sync")({
         try {
           const body = (await request.json().catch(() => ({}))) as { referredByCode?: string };
           const profile = await ensureProfile(user.id, user.email, body.referredByCode);
-          await linkReferralIfMissing(user.id, body.referredByCode);
+          const referral = await linkReferralIfMissing(user.id, body.referredByCode);
           try {
             const { trySettleSignupBonus } = await import("@/lib/rewards/signupBonus.server");
             await trySettleSignupBonus(user.id, user.emailVerified);
           } catch {
             /* diagnostics recorded; retried on next sync */
           }
-          return jsonResponse({ success: true, user: profile });
+          return jsonResponse({ success: true, user: profile, referral });
         } catch (e: any) {
           return jsonResponse({ error: e.message ?? "Failed to sync user profile" }, 500);
         }
