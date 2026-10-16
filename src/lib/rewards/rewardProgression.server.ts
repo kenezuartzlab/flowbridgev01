@@ -30,7 +30,7 @@ export interface PersonalProgress {
 
 export async function resolvePersonalProgress(args: { userId: string; emailVerified: boolean }): Promise<PersonalProgress> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const cols = "id,user_id,reason,points,chain_id,created_at,activity_key,tx_hash,source_log_index,verified_usd,day_key,metadata,reservation_id,funding_state,program_id";
+  const cols = "id,user_id,reason,points,policy_version,wallet_address,chain_id,created_at,activity_key,tx_hash,source_log_index,verified_usd,day_key,metadata,reservation_id,funding_state,program_id";
   const [{ data: profile }, { data: ledgerData }] = await Promise.all([
     supabaseAdmin.from("profiles").select("id,created_at,flow_points,points_self,points_referral_signup,wallet_address").eq("id", args.userId).maybeSingle(),
     supabaseAdmin.from("flow_points_ledger").select(cols).eq("user_id", args.userId).limit(5000),
@@ -72,8 +72,11 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     } catch { chainReadable = false; }
   }
 
+  // V36.5: signup rows carry no chain id; count them as BOT Mainnet ONLY when
+  // the canonical attributeSignupAward() proves provenance + verified funding.
+  const signupMainnet = await attributeOwnSignupRows(supabaseAdmin, ledgerData ?? [], wallet);
   const progression = computeRewardProgression({
-    ledger: ledger.map((r) => ({ points: r.points, chainId: r.chainId, fundingState: r.fundingState, programId: r.programId })),
+    ledger: ledger.map((r) => ({ points: r.points, chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
     reconciledPoints: recon.authoritative,
     reviewHeldPoints: recon.pendingReview,
     historicalNonclaimable: recon.nonclaimableHistorical,
@@ -126,4 +129,44 @@ export async function resolveClaimableNowFlow(userId: string): Promise<number | 
   } catch {
     return null;
   }
+}
+
+/** V36.5 — caller-scoped signup attribution via the canonical rule (read-only). */
+async function attributeOwnSignupRows(admin: any, rows: any[], boundWallet: string | null): Promise<Set<string>> {
+  const out = new Set<string>();
+  const { attributeSignupAward, SIGNUP_REASONS } = await import("./signupAttribution");
+  const signup = rows.filter((l) => l.program_id === "SIGNUP_BONUS" && (SIGNUP_REASONS as readonly string[]).includes(l.reason));
+  if (!signup.length) return out;
+  try {
+    const refereeOf = (l: any) => l.reason === "SIGNUP_BONUS_REFEREE" ? l.user_id : String(l.metadata?.refereeId ?? "");
+    const refIds = [...new Set(signup.map(refereeOf).filter(Boolean))];
+    const [{ data: budget }, { data: refProfiles }, { data: refAwards }] = await Promise.all([
+      admin.from("reward_budgets").select("funding_verified").eq("program_id", "SIGNUP_BONUS").maybeSingle(),
+      admin.from("profiles").select("id,created_at").in("id", refIds),
+      admin.from("flow_points_ledger").select("user_id,wallet_address").eq("reason", "SIGNUP_BONUS_REFEREE").in("user_id", refIds),
+    ]);
+    const refWallet = new Map<string, string | null>((refAwards ?? []).map((r: any) => [r.user_id, r.wallet_address?.toLowerCase() ?? null]));
+    const wallets = [...new Set([...refWallet.values()].filter(Boolean))] as string[];
+    const counts = new Map<string, number>();
+    if (wallets.length) {
+      const { data } = await admin.from("flow_points_ledger").select("wallet_address").eq("reason", "SIGNUP_BONUS_REFEREE").in("wallet_address", wallets);
+      for (const r of data ?? []) { const w = String(r.wallet_address).toLowerCase(); counts.set(w, (counts.get(w) ?? 0) + 1); }
+    }
+    const created = new Map<string, string>((refProfiles ?? []).map((p: any) => [p.id, new Date(p.created_at).toISOString()]));
+    const email = new Map<string, boolean>();
+    await Promise.all(refIds.map(async (id) => {
+      try { const { data } = await admin.auth.admin.getUserById(id); email.set(id, !!data.user?.email_confirmed_at); } catch { email.set(id, false); }
+    }));
+    for (const l of signup) {
+      const ref = refereeOf(l); const rw = refWallet.get(ref) ?? null;
+      const a = attributeSignupAward({
+        reason: l.reason, programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state, policyVersion: l.policy_version ?? null,
+        reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null, refereeCreatedAt: created.get(ref) ?? null,
+        refereeEmailVerified: email.get(ref) ?? false, recipientBoundWallet: boundWallet, refereeWalletAwardCount: rw ? counts.get(rw) ?? 0 : 0,
+        programFundingVerified: !!budget?.funding_verified,
+      });
+      if (a === "MAINNET_SIGNUP_ALLOCATION") out.add(l.id);
+    }
+  } catch { /* fail closed: nothing counts */ }
+  return out;
 }
