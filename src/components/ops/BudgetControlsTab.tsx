@@ -103,14 +103,14 @@ export function BudgetControlsTab({ wallet }: { wallet: string | undefined }) {
   const executeOnChain = async (a: Adjustment) => {
     setBusy(`exec-${a.id}`);
     try {
-      const prep = await api(wallet, "prepare-tx", { id: a.id });
+      const prep = await api(wallet!, "prepare-tx", { id: a.id });
       if (!prep.ok) throw new Error(prep.error ?? "Cannot prepare transaction");
       const tx = prep.tx;
       // Simulate first (eth_call) — fails before the wallet prompt if the role is missing.
       await publicClient!.call({ account: wallet as `0x${string}`, to: tx.to, data: tx.data, value: 0n });
       const hash = await sendTransactionAsync({ to: tx.to, data: tx.data, value: 0n, chainId: 677 });
       toast.success(`Transaction sent: ${hash.slice(0, 12)}… — verifying receipt`);
-      const conf = await api(wallet, "confirm", { id: a.id, txHash: hash });
+      const conf = await api(wallet!, "confirm", { id: a.id, txHash: hash });
       if (conf?.checks) setLastChecks(conf.checks);
       if (!conf?.ok) toast.error(conf?.error ?? "Verification failed — do NOT resend; use Re-check.");
       else toast.success("Budget updated and verified on-chain");
