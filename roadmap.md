@@ -1,3 +1,8 @@
+# V36.9A Core Swap funding preparation — read-only
+- [ ] Reconcile Mainnet vs Testnet, missing program labels, canonical receipts, wallet/policy/exclusion/reservation evidence and historical allocations.
+- [ ] Verify the executed 1M ceiling and unencumbered backing without repeating any transaction; calculate exact funding proposal and post-funding Round #3 eligibility.
+- [ ] Verify shared balance presentation and batching/publisher safeguards; return privacy-safe account-category reconciliation and outstanding approvals. No funding writes, batch persistence, signatures or publication authorized.
+
 # V36.7.1 Publisher confirmation hotfix
 - [x] Bound-wallet header, exact receipt/call/event checks, canonical confirmations, durable epoch attempt lock, atomic confirmation/audit, refresh recovery; no signing or chain writes.
 - [x] Targeted receipt/recovery/auth tests; full regression; fresh available scan; isolated exact-schema atomic + 8-client concurrency tests; fork eth_call (no transactions); signed-in simulated-wallet Ops at 320/390/430/1280px.
