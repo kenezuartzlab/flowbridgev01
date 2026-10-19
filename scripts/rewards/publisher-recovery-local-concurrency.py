@@ -1,3 +1,4 @@
+"""Disposable /tmp/publisher-db only: load exact migrations and synthetic fixture first. Never managed PG variables."""
 import subprocess,concurrent.futures
 cmd=['psql','-X','-h','/tmp/publisher-db','-p','55433','-U','nobody','-d','postgres','-v','ON_ERROR_STOP=1','-Atq']
 def q(sql,fail=False):
@@ -15,6 +16,8 @@ op=next(x for x in ops if x); attempt=q('SELECT id FROM reward_publish_attempts'
 def transition(phase,hash='NULL',safe=False,operation=op):return q(f"SELECT transition_reward_publication('{attempt}','{operation}','{a}','{phase}',{hash},{str(safe).lower()})")
 assert transition('CANCELLED',safe=True)=='t'
 assert transition('CANCELLED',safe=True)=='f'
+q(f"SELECT acquire_reward_publication('{b}','{a}','sender',43,'0x1234',100)",True)
+q(f"SELECT acquire_reward_publication('{b}','{a}','sender',42,'0x5678',100)",True)
 with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:ops=list(pool.map(acquire,range(8)))
 assert len([x for x in ops if x])==1,ops
 newop=next(x for x in ops if x)
