@@ -20,7 +20,10 @@ export async function verifyPublicationOnChain(batch:StoredBatch,hash:Hex,operat
  ]);
  if(block.hash!==receipt.blockHash || head<receipt.blockNumber+1n) return {phase:'BROADCAST_PENDING' as const,checks:[{id:'CANONICAL_CONFIRMATIONS',pass:false}]};
  const identity=verifyPublicationIdentity({chainId,operatorWallet,publisherRole:role,tx:{...tx,chainId:tx.chainId ?? 0},receipt,canonicalBlockHash:block.hash,head,distributor:DISTRIBUTOR,batch});
- if(receipt.status==='reverted') return {phase:'REVERTED' as const,checks:identity.checks};
+ if(receipt.status==='reverted') {
+  const exactRevert=identity.checks.filter(c=>!['RECEIPT_SUCCESS','EXACT_EPOCH_PUBLISHED_EVENT'].includes(c.id)).every(c=>c.pass);
+  return {phase:exactRevert?'REVERTED' as const:'CONFIRMED_MISMATCH' as const,checks:identity.checks};
+ }
  if(!identity.complete) return {phase:'CONFIRMED_MISMATCH' as const,checks:identity.checks};
  const [live,epoch]=await Promise.all([readChainState(),readEpoch(batch.epochId)]);
  if(!live || !epoch) throw new Error('CHAIN_STATE_UNAVAILABLE');
