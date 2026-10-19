@@ -28,7 +28,7 @@ const STATUS_TONE: Record<string, string> = {
   REJECTED: "border-danger/40 bg-danger/10 text-danger",
 };
 
-async function api(wallet: string, action?: string, body: Record<string, unknown> = {}) {
+async function api(wallet: string, action: string, body: Record<string, unknown> = {}): Promise<any> {
   const token = await getIdToken();
   const h: Record<string, string> = { "x-wallet-address": wallet };
   if (token) h.authorization = `Bearer ${token}`;
@@ -46,6 +46,10 @@ async function api(wallet: string, action?: string, body: Record<string, unknown
   return j as State;
 }
 
+async function fetchState(wallet: string): Promise<State> {
+  return api(wallet, "");
+}
+
 function CheckList({ checks }: { checks: Check[] }) {
   return (
     <ul className="space-y-1">
@@ -59,7 +63,7 @@ function CheckList({ checks }: { checks: Check[] }) {
   );
 }
 
-export function BudgetControlsTab({ wallet }: { wallet: string }) {
+export function BudgetControlsTab({ wallet }: { wallet: string | undefined }) {
   const qc = useQueryClient();
   const publicClient = usePublicClient({ chainId: 677 });
   const { sendTransactionAsync } = useSendTransaction();
