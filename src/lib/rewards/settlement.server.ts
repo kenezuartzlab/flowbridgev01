@@ -98,6 +98,14 @@ export async function discoverPublishedBatches(admin: Admin, liveEpochCount: num
   const seen = new Set<number>();
   for (const row of (data ?? []) as unknown as (BatchRow & { source: RoundSource })[]) {
     if (seen.has(row.epoch_id)) continue;
+    if (row.source !== HISTORICAL_SOURCE && row.epoch_id > 2) {
+      const { data: attempt, error } = await admin.from("reward_publish_attempts").select("tx_hash,phase").eq("chain_id",MAINNET_CHAIN_ID).eq("distributor",DISTRIBUTOR.toLowerCase()).eq("epoch_id",row.epoch_id).eq("root",row.root).maybeSingle();
+      if (error || !attempt?.tx_hash || attempt.phase !== "CONFIRMED_VERIFIED") continue;
+      const { verifyPublicationOnChain } = await import("./publicationRecovery.server");
+      const receipt = await verifyPublicationOnChain(toBatch(row),attempt.tx_hash as Hex,SETTLEMENT_SIGNER.address).catch(()=>null);
+      if (receipt?.phase !== "CONFIRMED_VERIFIED") continue;
+    }
+
     const ep = await readEpoch(row.epoch_id);
     if (!ep || ep.root.toLowerCase() !== row.root.toLowerCase()) continue; // rebuilt candidates that were never signed
     const batch = toBatch(row);
@@ -106,7 +114,7 @@ export async function discoverPublishedBatches(admin: Admin, liveEpochCount: num
       batch, receiptStatus: "success", liveEpochCount, epoch: ep, paused: chain?.paused ?? true,
       balanceWei: chain?.balanceWei ?? 0n, totalReservedWei: chain?.totalReservedWei ?? 1n, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR,
     });
-    if (verification.complete && !row.publication_verified_at) {
+    if (verification.complete && !row.publication_verified_at && row.epoch_id <= 2) {
       await admin.from("reward_settlement_batches").update({ publication_verified_at: new Date().toISOString() })
         .eq("epoch_id", row.epoch_id).eq("root", row.root);
     }

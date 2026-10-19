@@ -1,3 +1,10 @@
+# V36.7.1 Publisher confirmation hotfix
+- [x] Bound-wallet header, exact receipt/call/event checks, canonical confirmations, durable epoch attempt lock, atomic confirmation/audit, refresh recovery; no signing or chain writes.
+- [x] Targeted receipt/recovery/auth tests; full regression; fresh available scan; isolated exact-schema atomic + 8-client concurrency tests; fork eth_call (no transactions); signed-in simulated-wallet Ops at 320/390/430/1280px.
+- [x] Published and independently verified flowbridge.space: authenticated simulated-wallet history 200; Review & Publish disabled; zero eligible wallets; claimed rounds 1/2 preserved; served ops-1XH0UuF7.js SHA256 93720d9fe9637602e606cbf7d6237b604ae5896950747ea11e34d5c32af3f3da.
+- [ ] Physical TokenPocket / real-wallet signed publisher acceptance unavailable; no signatures authorized.
+- [x] Pending/dropped/rejected attempts fail closed and require investigation; no automatic unlock/rebroadcast.
+
 # MultiSend BOT Testnet Release
 
 # V36.7 Easy authentication & permanent referrals
