@@ -55,4 +55,4 @@ async function handle(request:Request) {
   return jsonResponse({error:'Verification unavailable. Keep the original transaction; re-check only.'},503);
  }
 }
-export const Route=createFileRoute('/api/admin/rewards-publish-verify')({server:{handlers:{GET:({request})=>handle(request),PUT:({request})=>handle(request),POST:({request})=>handle(request)}});
+export const Route=createFileRoute('/api/admin/rewards-publish-verify')({server:{handlers:{GET:({request})=>handle(request),PUT:({request})=>handle(request),POST:({request})=>handle(request)}}});
