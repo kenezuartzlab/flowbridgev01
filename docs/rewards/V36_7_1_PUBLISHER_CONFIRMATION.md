@@ -24,5 +24,5 @@ PublishBatchPanel used a separate fetch helper that omitted x-wallet-address on 
 
 ## Limits / release evidence
 Physical TokenPocket and real signed publisher acceptance are not performed; this task authorizes neither signatures nor real rounds. The successful on-chain-publication lifecycle is covered by mocks, isolated SQL concurrency and read-only fork simulation, not a new payout transaction.
-Publishing requested; independently served production verification must be recorded after deployment completes.
+Published and independently verified https://flowbridge.space: bound-wallet history 200; missing wallet 403; signed-out 401; empty Review & Publish disabled; zero eligible funded wallets; automatic signing OFF. Verified on phone and desktop sizes with simulated non-signing wallet transport. Initial served Ops hotfix bundle: ops-CTmDgnwk.js, SHA256 bc39af11b7121c2e6f6963dd3e38dc40f03ae5328cf14cfb3f1525fc526f6f75. Confirmed attempts clear the local pending lock; the durable server epoch lock and original hash remain in history.
 No contracts, treasury, roles, economics, program funding or payout rounds changed.

@@ -49,6 +49,9 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
       if (a) {
         remember({attemptId:a.id,epochId:a.epoch_id,root:a.root,fingerprint:a.fingerprint,txHash:a.tx_hash});
         setPhase(a.tx_hash ? "BROADCAST_PENDING" : "AWAITING_SIGNATURE");
+      } else if (j?.attempts) {
+        setPending(null);
+        try { localStorage.removeItem(storageKey); } catch { /* Server is authoritative. */ }
       }
     }
   }
@@ -67,7 +70,11 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
       return "BROADCAST_PENDING";
     }
     setPhase(j.phase);
-    if (j.phase === "CONFIRMED_VERIFIED") { void rebuild(); void loadHistory(); }
+    if (j.phase === "CONFIRMED_VERIFIED") {
+      setPending(null);
+      try { localStorage.removeItem(storageKey); } catch { /* Server confirmation persists. */ }
+      void rebuild(); void loadHistory();
+    }
     return j.phase as PublishPhase;
   }
   async function recheck() {
