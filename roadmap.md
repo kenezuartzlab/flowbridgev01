@@ -1,3 +1,8 @@
+# V36.10.1 Publisher lock recovery
+- [ ] Add fenced operation ownership, conclusive cancellation/revert recovery and retry controls without chain writes.
+- [ ] Test rejection, ambiguity, refresh, eventual confirmation, concurrent retries and immutable rounds; run regression and fresh security checks.
+- [ ] Verify mobile/desktop Ops and publish only after mandatory gates pass; independently verify served release and Round #3 readiness.
+
 # V36.9A Core Swap funding preparation — read-only
 - [x] Reconcile Mainnet/Testnet and omitted labels: 1,823 Mainnet pending; 1,047 clean funding proposal, 776 reviewed-account gated. All 26 positive Mainnet receipts and funded reservations verified; historical claims preserved.
 - [x] Verify executed 1M ceiling and backing at block 27,210,984; no repeat transaction. Conditional Round #3: one wallet / 1,122 FLOW; unsigned eth_call passes, nothing saved or sent.
