@@ -141,6 +141,13 @@
       "when": 1792386365481,
       "tag": "0019_reward_budget_adjustments",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792415011225,
+      "tag": "0020_rewards_control_center",
+      "breakpoints": true
     }
   ]
 }
