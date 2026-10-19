@@ -11,7 +11,7 @@ function evidence():PublicationEvidence {
  return {chainId:677,operatorWallet:SETTLEMENT_SIGNER.address,publisherRole:true,distributor,
  batch:{epochId:3,root,totalWei:args[1].toString(),claimStart:10000,claimEnd:2602000,leaves:[]},
  tx:{hash,from:SETTLEMENT_SIGNER.address,to:distributor,input:encodeFunctionData({abi:PUBLISH_EPOCH_ABI,functionName:'publishEpoch',args}),value:0n,chainId:677,blockHash:block},
- receipt:{transactionHash:hash,from:SETTLEMENT_SIGNER.address,to:distributor,status:'success',blockHash:block,blockNumber:100n,logs:[{address:distributor,topics:encodeEventTopics({abi:PUBLICATION_EVENT_ABI,eventName:'EpochPublished',args:{epochId:3n}}),data:encodeAbiParameters([{type:'bytes32'},{type:'uint256'},{type:'uint64'},{type:'uint64'}],args)}]},canonicalBlockHash:block,head:101n};
+ receipt:{transactionHash:hash,from:SETTLEMENT_SIGNER.address,to:distributor,status:'success',blockHash:block,blockNumber:100n,logs:[{address:distributor,topics:encodeEventTopics({abi:PUBLICATION_EVENT_ABI,eventName:'EpochPublished',args:{epochId:3n}}) as Hex[],data:encodeAbiParameters([{type:'bytes32'},{type:'uint256'},{type:'uint64'},{type:'uint64'}],args)}]},canonicalBlockHash:block,head:101n};
 }
 describe('publisher confirmation identity',()=>{
  it('requires the exact authorized publish transaction and emitted epoch',()=>expect(verifyPublicationIdentity(evidence()).complete).toBe(true));

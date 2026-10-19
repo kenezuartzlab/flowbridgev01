@@ -19,7 +19,7 @@ export async function verifyPublicationOnChain(batch:StoredBatch,hash:Hex,operat
   c.readContract({address:DISTRIBUTOR,abi:parseAbi(['function hasRole(bytes32,address) view returns(bool)']),functionName:'hasRole',args:[DISTRIBUTOR_ROLES.PUBLISHER_ROLE,tx.from],blockNumber:receipt.blockNumber}),
  ]);
  if(block.hash!==receipt.blockHash || head<receipt.blockNumber+1n) return {phase:'BROADCAST_PENDING' as const,checks:[{id:'CANONICAL_CONFIRMATIONS',pass:false}]};
- const identity=verifyPublicationIdentity({chainId,operatorWallet,publisherRole:role,tx,receipt,canonicalBlockHash:block.hash,head,distributor:DISTRIBUTOR,batch});
+ const identity=verifyPublicationIdentity({chainId,operatorWallet,publisherRole:role,tx:{...tx,chainId:tx.chainId ?? 0},receipt,canonicalBlockHash:block.hash,head,distributor:DISTRIBUTOR,batch});
  if(receipt.status==='reverted') return {phase:'REVERTED' as const,checks:identity.checks};
  if(!identity.complete) return {phase:'CONFIRMED_MISMATCH' as const,checks:identity.checks};
  const [live,epoch]=await Promise.all([readChainState(),readEpoch(batch.epochId)]);
