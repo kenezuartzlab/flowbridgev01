@@ -1,7 +1,11 @@
-import subprocess,concurrent.futures
+import subprocess,concurrent.futures,uuid
+# Isolated local test database only; never reads managed PG environment.
+epoch=str(100000+uuid.uuid4().int%1000000)
+batch_id=str(uuid.uuid4())
+hash_id=str(uuid.uuid4())
 cmd=['psql','-X','-h','/tmp/publisher-local-pg','-p','55432','-U','supabase-postgres','-d','postgres','-v','ON_ERROR_STOP=1','-Atq']
 def query(sql):
- r=subprocess.run(cmd+['-c',sql],capture_output=True,text=True)
+ r=subprocess.run(cmd+['-c',sql.replace('99997',epoch).replace('00000000-0000-0000-0000-000000000004',batch_id).replace('hash-local-99997',hash_id)],capture_output=True,text=True)
  if r.returncode:raise RuntimeError(r.stderr)
  return r.stdout.strip()
 query("INSERT INTO reward_settlement_batches(id,chain_id,distributor,epoch_id,root,total_wei,claim_start,claim_end,fingerprint,leaves) VALUES('00000000-0000-0000-0000-000000000004',677,'local-concurrency',99997,'root',1,1,2,'fingerprint','[]');")

@@ -129,7 +129,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
         <Row k="Daily limit (24h)" v={`${fmt((s.flowPublishedLast24h ?? 0) + s.totalFlow)}/${fmt(s.publisherConfig?.maxFlowPerDay)} FLOW`} />
         <Row k="Pending / review-held / rejected" v={`${count("PENDING_BELOW_MINIMUM") + count("PENDING_NO_WALLET") + count("PENDING_LIMITS")} / ${count("REVIEW_HELD")} / ${count("REJECTED_HISTORICAL")}`} />
         <Row k="Merkle root" v={s.root ?? "—"} />
-        <Row k="Merkle proofs" v={s.checks.find((c) => c.id === "PROOFS_VERIFIED")?.pass ? "every proof re-verified against the root" : "none — no batch built"} />
+        <Row k="Merkle proofs" v={s.root && s.leaves > 0 && s.checks.find((c) => c.id === "PROOFS_VERIFIED")?.pass ? "every proof re-verified against the root" : "none — no batch built"} />
         <Row k="Claim opens / closes" v={s.root && s.claimStartIso ? `${s.claimStartIso.slice(0, 16)} → ${s.claimEndIso?.slice(0, 16)} UTC` : "—"} />
         <Row k="Simulation" v={s.simulation?.ran ? (s.simulation.ok ? "PASS" : "FAIL") : "not run (no publishable batch)"} />
         <Row k="Emergency pause" v={live ? (live.paused ? "PAUSED — publishing blocked" : "not paused") : "UNKNOWN"} />
