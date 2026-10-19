@@ -54,7 +54,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
     const j = r?.ok ? await r.json().catch(() => null) : null;
     if (j?.history) setHistory(j.history);
     if (restore) {
-      const a = j?.attempts?.find((a: { phase: string }) => !["CONFIRMED_VERIFIED", "CANCELLED"].includes(a.phase) && !a.retry_safe);
+      const a = j?.attempts?.find((a: { phase: string; retry_safe: boolean; epoch_id: number }) => a.epoch_id === s.epochId && a.phase !== "CONFIRMED_VERIFIED" && !a.retry_safe);
       if (a) {
         remember({attemptId:a.id,operationId:a.operation_id,epochId:a.epoch_id,root:a.root,fingerprint:a.fingerprint,txHash:a.tx_hash});
         setPhase(a.tx_hash ? "BROADCAST_PENDING" : "RECOVERY_REQUIRED");
