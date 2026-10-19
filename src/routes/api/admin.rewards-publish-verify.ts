@@ -40,7 +40,7 @@ async function handle(request:Request) {
   if(typeof body.attemptId!=='string') return jsonResponse({error:'Original attempt required'},400);
   const {data:attempt,error:attemptError}=await admin.from('reward_publish_attempts').select('*').eq('id',body.attemptId).eq('batch_id',batch.id).eq('operator_id',gate.admin.userId).maybeSingle();
   if(attemptError) throw attemptError;
-  if(!attempt || (body.operationId && attempt.operation_id!==body.operationId)) return jsonResponse({error:'Original operation mismatch'},409);
+  if(!attempt || attempt.operation_id!==body.operationId) return jsonResponse({error:'Original operation mismatch; reload recovery'},409);
   if(attempt.phase==='CONFIRMED_VERIFIED') return jsonResponse({phase:'CONFIRMED_VERIFIED',retrySafe:false});
   const transition=async(phase:string,hash:string|null,safe=false)=> {
    const {error}=await admin.rpc('transition_reward_publication',{p_attempt:attempt.id,p_operation:attempt.operation_id,p_actor:gate.admin.userId,p_phase:phase,p_hash:hash ?? undefined,p_retry_safe:safe});
@@ -51,11 +51,12 @@ async function handle(request:Request) {
    if(body.operationId!==attempt.operation_id) return jsonResponse({error:'Operation ownership required'},409);
    const live=await publicationPreflight(batch.epoch_id);
    const {isPublisherCancellation}=await import('@/lib/rewards/publisherRecovery');
-   const cancelled=body.action==='cancel' && isPublisherCancellation(body.cancellation) && !attempt.tx_hash && live.epochAvailable && live.latest===attempt.sender_nonce && live.pending===attempt.sender_nonce;
+   const cancelled=body.action==='cancel' && attempt.phase==='AWAITING_WALLET' && isPublisherCancellation(body.cancellation) && !attempt.tx_hash && live.epochAvailable && live.latest===attempt.sender_nonce && live.pending===attempt.sender_nonce;
    if(cancelled) {await transition('CANCELLED',null,true);return jsonResponse({phase:'CANCELLED',retrySafe:true});}
    if(!attempt.tx_hash && !body.txHash) body.txHash=await recoverPublisherHash(attempt,live.head);
    if(!attempt.tx_hash && !body.txHash) {await transition('RECOVERY_REQUIRED',null);return jsonResponse({phase:'RECOVERY_REQUIRED',retrySafe:false});}
   }
+  if(attempt.tx_hash && body.txHash && attempt.tx_hash!==String(body.txHash).toLowerCase()) return jsonResponse({error:'Original hash mismatch'},409);
   body.txHash=attempt.tx_hash ?? body.txHash;
   if(!/^0x[0-9a-f]{64}$/i.test(body.txHash ?? '')) return jsonResponse({error:'Original transaction hash required; use Recover Stuck Batch'},400);
   body.txHash=body.txHash.toLowerCase();
