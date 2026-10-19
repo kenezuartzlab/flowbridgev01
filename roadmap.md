@@ -1,3 +1,8 @@
+# V36.7.1 Publisher confirmation hotfix
+- [x] Bound-wallet header, exact receipt/call/event checks, canonical confirmations, durable epoch attempt lock, atomic confirmation/audit, refresh recovery; no signing or chain writes.
+- [ ] Targeted/full tests, security scan, database concurrency tests, fork simulation, authenticated Ops responsive checks, release and production verification.
+- [ ] Pending/dropped/rejected attempts fail closed and require investigation; no automatic unlock/rebroadcast.
+
 # MultiSend BOT Testnet Release
 
 # V36.7 Easy authentication & permanent referrals

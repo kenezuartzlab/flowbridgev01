@@ -34,3 +34,5 @@
 - Launch preparation is served through the existing admin gate; source evidence and screenshots use the private application-materials bucket, and launchTracker schema rejects window activation. Why: preparation must not publish drafts or manufacture qualification.
 - Shared BOT network badges and the root public footer own ecosystem branding; the badge follows the selected product network. Why: avoid duplicate branding and false Mainnet labels on Testnet.
 - Which functions exist on Mainnet vs Testnet is decided only in src/lib/network/environmentCapabilities.ts; UI hides, transaction senders and API routes enforce. Why: separation must hold beyond the UI.
+
+- Publisher receipt identity is validated in publicationVerification.ts and publicationRecovery.server.ts; server-only epoch attempts lock before wallet submission and confirm_reward_publication atomically persists confirmation/audit. Why: missing wallet context and transient RPC/UI failures must never cause a second publication.
