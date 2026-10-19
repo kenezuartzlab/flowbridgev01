@@ -1,7 +1,8 @@
 # V36.10.1 Publisher lock recovery
-- [ ] Add fenced operation ownership, conclusive cancellation/revert recovery and retry controls without chain writes.
-- [ ] Test rejection, ambiguity, refresh, eventual confirmation, concurrent retries and immutable rounds; run regression and fresh security checks.
-- [ ] Verify mobile/desktop Ops and publish only after mandatory gates pass; independently verify served release and Round #3 readiness.
+- [x] Add fenced operation ownership, nonce/payload-preserving cancelled retries, exact revert reconciliation and read-only recovery controls without chain writes.
+- [x] 1,826 tests pass; automatic build/type validation OK; fresh available security scan; exact-schema isolated eight-client concurrency, stale generation and immutable batch checks pass.
+- [x] Signed-in simulated-bound-wallet Control Center and real publisher panel at 320/390/430/1280px; Round #3 1,122 FLOW / one wallet, proof checks and live simulation PASS, unsigned.
+- [ ] Release held: mocked wallet-prompt end-to-end cancellation/recovery and current local-fork acceptance still required; production publish/independent verification must wait. Physical TokenPocket acceptance requires owner's device, with no real signing authorized.
 
 # V36.9A Core Swap funding preparation — read-only
 - [x] Reconcile Mainnet/Testnet and omitted labels: 1,823 Mainnet pending; 1,047 clean funding proposal, 776 reviewed-account gated. All 26 positive Mainnet receipts and funded reservations verified; historical claims preserved.
