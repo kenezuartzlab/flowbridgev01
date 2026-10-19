@@ -6,9 +6,18 @@ import { getActiveProvider } from "@/lib/wallet/activeProvider";
 import { publisherWalletGate, WALLET_GATE_COPY, AUTONOMOUS_ACTIVATION_REQUIREMENTS, type PublishPhase } from "@/lib/rewards/publishGate";
 import type { RewardSolvencyReport } from "@/lib/rewards/rewardSolvency.server";
 
+import { isPublisherCancellation } from "@/lib/rewards/publisherRecovery";
+
 type S = RewardSolvencyReport["settlement"];
 const fmt = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
 const PHASE_COPY: Record<PublishPhase, string> = {
+  READY: "Ready for publisher review.",
+  VALIDATING: "Validating live batch…",
+  AWAITING_WALLET: "Waiting for publisher wallet…",
+  CANCELLED: "Wallet request cancelled. Safe to retry after reconciliation.",
+  CONFIRMING: "Verifying transaction confirmation…",
+  CONFIRMED: "Publication confirmed.",
+  RECOVERY_REQUIRED: "Broadcast status uncertain. Recover before retrying.",
   IDLE: "Not started.",
   REVALIDATING: "Revalidating against live ledger and contract state…",
   AWAITING_SIGNATURE: "Waiting for the publisher to approve in the wallet…",
@@ -45,10 +54,10 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
     const j = r?.ok ? await r.json().catch(() => null) : null;
     if (j?.history) setHistory(j.history);
     if (restore) {
-      const a = j?.attempts?.find((a: { phase: string }) => a.phase !== "CONFIRMED_VERIFIED");
+      const a = j?.attempts?.find((a: { phase: string; retry_safe: boolean; epoch_id: number }) => a.epoch_id === s.epochId && a.phase !== "CONFIRMED_VERIFIED" && !a.retry_safe);
       if (a) {
-        remember({attemptId:a.id,epochId:a.epoch_id,root:a.root,fingerprint:a.fingerprint,txHash:a.tx_hash});
-        setPhase(a.tx_hash ? "BROADCAST_PENDING" : "AWAITING_SIGNATURE");
+        remember({attemptId:a.id,operationId:a.operation_id,epochId:a.epoch_id,root:a.root,fingerprint:a.fingerprint,txHash:a.tx_hash});
+        setPhase(a.tx_hash ? "BROADCAST_PENDING" : "RECOVERY_REQUIRED");
       } else if (j?.attempts) {
         setPending(null);
         try { localStorage.removeItem(storageKey); } catch { /* Server is authoritative. */ }
@@ -70,6 +79,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
       return "BROADCAST_PENDING";
     }
     setPhase(j.phase);
+    if (j.retrySafe) { setPending(null); try { localStorage.removeItem(storageKey); } catch {} }
     if (j.phase === "CONFIRMED_VERIFIED") {
       setPending(null);
       try { localStorage.removeItem(storageKey); } catch { /* Server confirmation persists. */ }
@@ -85,6 +95,15 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
     try { const p={...pending,txHash}; remember(p); await verify(p); void loadHistory(); }
     finally { busy.current=false; }
   }
+  async function recover(action = "recover", cancellation?: unknown) {
+    if (!pending) return;
+    const r=await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PATCH",body:JSON.stringify({...pending,txHash:hash ?? (recoveryHash.trim() || null),action,cancellation})}).catch(()=>null);
+    const j=r ? await r.json().catch(()=>null) : null;
+    if(!r?.ok) {setPhase("RECOVERY_REQUIRED");setMsg(j?.error ?? "Recovery unavailable; do not resend.");return;}
+    setPhase(j.phase);setMsg(null);
+    if(j.retrySafe) {setPending(null);setHash(null);try {localStorage.removeItem(storageKey);} catch {} await rebuild();}
+    void loadHistory();
+  }
   const ready = s.status === "READY_FOR_PUBLISHER_REVIEW" && !!s.tx;
   const states = s.walletStates ?? [];
   const count = (k: string) => states.filter((w) => w.state === k).length;
@@ -93,7 +112,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
 
   async function publish() {
     if (busy.current || pending) return;
-    busy.current = true; setMsg(null); setPhase("REVALIDATING");
+    busy.current = true; setMsg(null); setPhase("VALIDATING");
     try {
       const fresh = (await rebuild()).data?.settlement;
       if (!fresh || fresh.fingerprint !== s.fingerprint || fresh.root !== s.root || !fresh.tx || !fresh.root || !fresh.epochId || !fresh.fingerprint) {
@@ -108,11 +127,18 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
       const locked = await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PUT",body:JSON.stringify({epochId:fresh.epochId,root:fresh.root,fingerprint:fresh.fingerprint})});
       const lock = await locked.json();
       if (!locked.ok || !lock.attemptId) { setPhase("IDLE"); setMsg(lock.error ?? "Publication blocked."); void loadHistory(true); return; }
-      const p: PendingPublication = {attemptId:lock.attemptId,epochId:fresh.epochId,root:fresh.root,fingerprint:fresh.fingerprint,txHash:null};
-      remember(p); setPhase("AWAITING_SIGNATURE");
+      const p: PendingPublication = {attemptId:lock.attemptId,operationId:lock.operationId,epochId:fresh.epochId,root:fresh.root,fingerprint:fresh.fingerprint,txHash:null};
+      remember(p); setPhase("AWAITING_WALLET");
       let txHash: string;
-      try { txHash=String(await eth.request({method:"eth_sendTransaction",params:[{from:accounts[0],to:fresh.tx.to,data:fresh.tx.data,value:"0x0"}]})); }
-      catch (e) { setPhase((e as {code?:number}).code===4001 ? "REJECTED" : "ERROR"); setMsg("Attempt locked. Recover the original transaction if one was sent; no automatic resend."); return; }
+      try { txHash=String(await eth.request({method:"eth_sendTransaction",params:[{from:accounts[0],to:fresh.tx.to,data:fresh.tx.data,value:"0x0",nonce:`0x${Number(lock.nonce).toString(16)}`}]})); }
+      catch (e) {
+        const cancellation=isPublisherCancellation(e);
+        const r=await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PATCH",body:JSON.stringify({...p,action:cancellation?"cancel":"recover",cancellation:cancellation?{code:4001}:undefined})}).catch(()=>null);
+        const j=r ? await r.json().catch(()=>null) : null;
+        if(r?.ok && j?.retrySafe) {setPending(null);setHash(null);setPhase("CANCELLED");try {localStorage.removeItem(storageKey);} catch {} setMsg(null);}
+        else {setPhase("RECOVERY_REQUIRED");setMsg("Broadcast status uncertain. Recover this operation before retrying.");}
+        return;
+      }
       if (!/^0x[0-9a-f]{64}$/i.test(txHash)) { setPhase("ERROR"); setMsg("Wallet returned an invalid hash. Attempt remains locked for investigation."); return; }
       const sent={...p,txHash}; remember(sent); setPhase("BROADCAST_PENDING");
       for (let i=0;i<60;i++) {
@@ -166,7 +192,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
           <p className="font-bold">You are about to publish round #{s.epochId} on BOT Mainnet (677).</p>
           <p className="text-muted">{fmt(s.leaves)} wallets will be able to claim {fmt(s.totalFlow)} FLOW from {s.claimStartIso?.slice(0, 16)} to {s.claimEndIso?.slice(0, 16)} UTC. Your wallet will show one publishEpoch call to the payout contract; it moves no tokens and costs only gas. Signer must be {s.signer.address.slice(0, 6)}…{s.signer.address.slice(-4)}.</p>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" disabled={!!pending || phase !== "IDLE"} onClick={() => void publish()} className="rounded-lg bg-primary px-3 py-2 font-bold text-primary-foreground disabled:opacity-40">Revalidate &amp; open wallet</Button>
+            <Button type="button" disabled={!!pending || !["IDLE","READY","CANCELLED","REVERTED"].includes(phase)} onClick={() => void publish()} className="rounded-lg bg-primary px-3 py-2 font-bold text-primary-foreground disabled:opacity-40">{phase === "CANCELLED" || phase === "REVERTED" ? "Retry Publication" : "Revalidate & open wallet"}</Button>
             <Button type="button" onClick={() => { setReview(false); }} className="rounded-lg border border-border px-3 py-2">Cancel</Button>
           </div>
         </div>
@@ -176,7 +202,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
       {phase !== "IDLE" && <p className="mt-2 text-[12px] font-bold">{PHASE_COPY[phase]}</p>}
       {pending && phase !== "CONFIRMED_VERIFIED" && <div className="mt-2 space-y-2">
         {!hash && <label className="block text-[12px]">Original transaction hash<input aria-label="Original transaction hash" value={recoveryHash} onChange={e=>setRecoveryHash(e.target.value)} className="mt-1 block w-full min-w-0 rounded border border-border bg-background p-2 font-mono" /></label>}
-        <Button type="button" variant="outline" onClick={() => void recheck()}>Re-check transaction</Button>
+        <div className="flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={() => void recheck()}>Re-check Transaction</Button><Button type="button" variant="outline" onClick={() => void recover()}>Recover Stuck Batch</Button></div>
         <p className="text-[12px] text-muted">This attempt is locked. Re-checking never opens the wallet or sends another transaction.</p>
       </div>}
       {hash && <a className="mt-1 block break-all font-mono text-[11px] text-primary underline" href={`https://scan.botchain.ai/tx/${hash}`} target="_blank" rel="noreferrer">{hash}</a>}

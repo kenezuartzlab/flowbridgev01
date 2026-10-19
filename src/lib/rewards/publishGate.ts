@@ -41,7 +41,7 @@ export const WALLET_GATE_COPY: Record<WalletGate, string> = {
 };
 
 /** Publication is only ever "successful" after a confirmed receipt and full on-chain verification. */
-export type PublishPhase = "IDLE" | "REVALIDATING" | "AWAITING_SIGNATURE" | "BROADCAST_PENDING" | "CONFIRMED_VERIFIED" | "CONFIRMED_MISMATCH" | "REVERTED" | "REJECTED" | "ERROR";
+export type PublishPhase = "IDLE" | "REVALIDATING" | "AWAITING_SIGNATURE" | "BROADCAST_PENDING" | "CONFIRMED_VERIFIED" | "CONFIRMED_MISMATCH" | "REVERTED" | "REJECTED" | "ERROR" | "READY" | "VALIDATING" | "AWAITING_WALLET" | "CANCELLED" | "CONFIRMING" | "CONFIRMED" | "RECOVERY_REQUIRED";
 export function phaseFromVerification(receipt: "success" | "reverted" | null, complete: boolean): PublishPhase {
   if (receipt === null) return "BROADCAST_PENDING";
   if (receipt === "reverted") return "REVERTED";
@@ -50,8 +50,8 @@ export function phaseFromVerification(receipt: "success" | "reverted" | null, co
 
 /** Phases the operator may retry from. A pending broadcast is re-checked, never re-sent. */
 export function retryAction(phase: PublishPhase): "RESTART" | "RECHECK" | null {
-  if (phase === "REJECTED" || phase === "ERROR" || phase === "REVERTED") return "RESTART";
-  if (phase === "BROADCAST_PENDING" || phase === "CONFIRMED_MISMATCH") return "RECHECK";
+  if (phase === "REJECTED" || phase === "CANCELLED") return "RESTART";
+  if (phase === "BROADCAST_PENDING" || phase === "CONFIRMED_MISMATCH" || phase === "ERROR" || phase === "REVERTED" || phase === "RECOVERY_REQUIRED" || phase === "CONFIRMING") return "RECHECK";
   return null;
 }
 

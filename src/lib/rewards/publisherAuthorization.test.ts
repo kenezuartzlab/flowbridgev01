@@ -12,4 +12,15 @@ describe('publisher server authorization',()=>{
  it('rejects absent/wrong bound-wallet context before storage access',async()=>{mocks.gate.mockResolvedValue({ok:false,response:new Response('Forbidden',{status:403})});expect((await post(new Request('http://localhost/api',{method:'POST',headers:{'x-wallet-address':SETTLEMENT_SIGNER.address}}))).status).toBe(403);expect(mocks.from).not.toHaveBeenCalled();});
  it('an approved operator cannot impersonate publisher with request body',async()=>{mocks.gate.mockResolvedValue({ok:true,admin:{wallet:'0x'+'2'.repeat(40)}});expect((await post(new Request('http://localhost/api',{method:'POST',body:JSON.stringify({publisher:SETTLEMENT_SIGNER.address})}))).status).toBe(403);expect(mocks.from).not.toHaveBeenCalled();});
  it('rejects edits or verification writes against historical epochs 1 and 2',async()=>{mocks.gate.mockResolvedValue({ok:true,admin:{wallet:SETTLEMENT_SIGNER.address}});for(const epochId of [1,2])expect((await post(new Request('http://localhost/api',{method:'POST',body:JSON.stringify({epochId,root:'0x'+'a'.repeat(64),fingerprint:'f'})}))).status).toBe(400);expect(mocks.from).not.toHaveBeenCalled();});
+ it('rejects missing or stale operation ownership before transaction attachment',async()=>{
+  mocks.gate.mockResolvedValue({ok:true,admin:{wallet:SETTLEMENT_SIGNER.address,userId:'actor'}});
+  const batch={id:'batch',leaves:[{}]},attempt={id:'attempt',operation_id:'current'};
+  let calls=0;
+  mocks.from.mockImplementation(()=>{const chain={select:()=>chain,eq:()=>chain,maybeSingle:async()=>({data:calls++===0?batch:attempt})};return chain;});
+  for(const operationId of [undefined,'stale']) {
+   calls=0;
+   const response=await post(new Request('http://localhost/api',{method:'POST',body:JSON.stringify({epochId:3,root:'0x'+'a'.repeat(64),fingerprint:'f',attemptId:'attempt',operationId,txHash:'0x'+'b'.repeat(64)})}));
+   expect(response.status).toBe(409);
+  }
+ });
 });
