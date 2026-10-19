@@ -148,6 +148,13 @@
       "when": 1792415011225,
       "tag": "0020_rewards_control_center",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792425636331,
+      "tag": "0021_publisher_fenced_retry_recovery",
+      "breakpoints": true
     }
   ]
 }

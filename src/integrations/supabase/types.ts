@@ -1537,11 +1537,18 @@ export type Database = {
           created_at: string
           distributor: string
           epoch_id: number
+          expected_calldata: string | null
           fingerprint: string
           id: string
+          operation_id: string
           operator_id: string
           phase: string
+          retry_history: Json
+          retry_safe: boolean
           root: string
+          sender: string | null
+          sender_nonce: number | null
+          start_block: number | null
           tx_hash: string | null
           updated_at: string
         }
@@ -1553,11 +1560,18 @@ export type Database = {
           created_at?: string
           distributor: string
           epoch_id: number
+          expected_calldata?: string | null
           fingerprint: string
           id?: string
+          operation_id?: string
           operator_id: string
           phase?: string
+          retry_history?: Json
+          retry_safe?: boolean
           root: string
+          sender?: string | null
+          sender_nonce?: number | null
+          start_block?: number | null
           tx_hash?: string | null
           updated_at?: string
         }
@@ -1569,11 +1583,18 @@ export type Database = {
           created_at?: string
           distributor?: string
           epoch_id?: number
+          expected_calldata?: string | null
           fingerprint?: string
           id?: string
+          operation_id?: string
           operator_id?: string
           phase?: string
+          retry_history?: Json
+          retry_safe?: boolean
           root?: string
+          sender?: string | null
+          sender_nonce?: number | null
+          start_block?: number | null
           tx_hash?: string | null
           updated_at?: string
         }
@@ -2005,6 +2026,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acquire_reward_publication: {
+        Args: {
+          p_actor: string
+          p_batch: string
+          p_calldata: string
+          p_nonce: number
+          p_sender: string
+          p_start: number
+        }
+        Returns: string
+      }
       admin_bind_core_swap_evidence: {
         Args: {
           p_activity_id: string
@@ -2217,6 +2249,17 @@ export type Database = {
         Returns: Json
       }
       reward_funding_hash: { Args: { p_ids: string[] }; Returns: string }
+      transition_reward_publication: {
+        Args: {
+          p_actor: string
+          p_attempt: string
+          p_hash?: string
+          p_operation: string
+          p_phase: string
+          p_retry_safe?: boolean
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       campaign_review_state:
