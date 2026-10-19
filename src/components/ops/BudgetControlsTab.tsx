@@ -75,7 +75,8 @@ export function BudgetControlsTab({ wallet }: { wallet: string | undefined }) {
 
   const q = useQuery({
     queryKey: ["budget-controls", wallet],
-    queryFn: () => api(wallet),
+    queryFn: () => fetchState(wallet!),
+    enabled: !!wallet,
     refetchInterval: 30_000,
   });
   const s = q.data;
@@ -121,6 +122,7 @@ export function BudgetControlsTab({ wallet }: { wallet: string | undefined }) {
     }
   };
 
+  if (!wallet) return <p className="text-sm text-muted">Connect the wallet bound to your admin account to manage budgets.</p>;
   if (q.isLoading) return <p className="text-sm text-muted">Loading budget state…</p>;
   if (q.isError || !s) return <p className="text-sm text-danger">{(q.error as Error)?.message ?? "Unavailable"}</p>;
 
