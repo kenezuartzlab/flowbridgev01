@@ -62,33 +62,33 @@ describe("owner reconciliation decisions", () => {
 });
 
 describe("budgets and funding", () => {
-  it("separate 1M / 3k / 2k buckets totalling 1,005,000", () => {
-    expect(APPROVED_INITIAL_BUDGETS).toEqual({ SIGNUP_BONUS: 1_000_000, CORE_SWAP: 3_000, REFERRAL_MILESTONE: 2_000 });
-    expect(TOTAL_REQUIRED_BACKING).toBe(1_005_000);
+  it("separate 1M / 1M / 2k buckets totalling 2,002,000 (V36.9 owner decision)", () => {
+    expect(APPROVED_INITIAL_BUDGETS).toEqual({ SIGNUP_BONUS: 1_000_000, CORE_SWAP: 1_000_000, REFERRAL_MILESTONE: 2_000 });
+    expect(TOTAL_REQUIRED_BACKING).toBe(2_002_000);
   });
   it("no cross-budget spending", () => {
     const rows = [
       programSolvency({ programId: "SIGNUP_BONUS", authorizedBudget: 1_000_000, backingVerified: true, reserved: 0, earned: 0, claimed: 0, unfunded: 0 }),
-      programSolvency({ programId: "CORE_SWAP", authorizedBudget: 3_000, backingVerified: true, reserved: 2_995, earned: 0, claimed: 0, unfunded: 0 }),
+      programSolvency({ programId: "CORE_SWAP", authorizedBudget: 1_000_000, backingVerified: true, reserved: 999_995, earned: 0, claimed: 0, unfunded: 0 }),
     ];
     expect(canReserve(rows, "CORE_SWAP", 10)).toBe(false);
     expect(canReserve(rows, "REFERRAL_MILESTONE", 15)).toBe(false);
   });
-  it("shortfall: 999,999 free → 5,001; live 2,499,999 → 0", () => {
-    expect(fundingShortfallWei(999_999n * 10n ** 18n)).toBe(5_001n * 10n ** 18n);
+  it("shortfall: 999,999 free → 1,002,001; live ~2,499,989 → 0", () => {
+    expect(fundingShortfallWei(999_999n * 10n ** 18n)).toBe(1_002_001n * 10n ** 18n);
     expect(fundingShortfallWei(BigInt(FUNDING_PREPARATION.liveFreeBalanceWei))).toBe(0n);
   });
   it("the same FLOW never backs two buckets", () => {
-    const b = allocateBacking(1_002_000n * 10n ** 18n);
+    const b = allocateBacking(1_501_000n * 10n ** 18n);
     expect(b.buckets.SIGNUP_BONUS!.fullyBacked).toBe(true);
-    expect(b.buckets.CORE_SWAP!.backedFlow + b.buckets.REFERRAL_MILESTONE!.backedFlow).toBe(2_000);
+    expect(b.buckets.CORE_SWAP!.backedFlow + b.buckets.REFERRAL_MILESTONE!.backedFlow).toBe(501_000);
     expect(b.buckets.REFERRAL_MILESTONE!.fullyBacked).toBe(false);
   });
   it("prepared budget tx is unsigned and unbroadcast", () => {
     expect(FUNDING_PREPARATION.signed).toBe(false);
     expect(FUNDING_PREPARATION.broadcast).toBe(false);
     expect(FUNDING_PREPARATION.budgetTx.calldata.startsWith("0x7bc0db46")).toBe(true);
-    expect(BigInt(FUNDING_PREPARATION.budgetTx.newBudgetWei)).toBe(1_005_001n * 10n ** 18n);
+    expect(BigInt(FUNDING_PREPARATION.budgetTx.newBudgetWei)).toBe(2_002_011n * 10n ** 18n);
   });
   it("claims remain locked before funding", () => {
     expect(MAINNET_CLAIM_GATE_FACTS.distributorDeployed).toBe(false);
