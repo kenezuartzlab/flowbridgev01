@@ -1282,6 +1282,65 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_publish_attempts: {
+        Row: {
+          batch_id: string
+          block_hash: string | null
+          block_number: number | null
+          chain_id: number
+          created_at: string
+          distributor: string
+          epoch_id: number
+          fingerprint: string
+          id: string
+          operator_id: string
+          phase: string
+          root: string
+          tx_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          batch_id: string
+          block_hash?: string | null
+          block_number?: number | null
+          chain_id?: number
+          created_at?: string
+          distributor: string
+          epoch_id: number
+          fingerprint: string
+          id?: string
+          operator_id: string
+          phase?: string
+          root: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string
+          block_hash?: string | null
+          block_number?: number | null
+          chain_id?: number
+          created_at?: string
+          distributor?: string
+          epoch_id?: number
+          fingerprint?: string
+          id?: string
+          operator_id?: string
+          phase?: string
+          root?: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_publish_attempts_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "reward_settlement_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reward_reservations: {
         Row: {
           created_at: string
@@ -1819,6 +1878,18 @@ export type Database = {
       bind_referral_v367: {
         Args: { p_code: string; p_user: string }
         Returns: Json
+      }
+      confirm_reward_publication: {
+        Args: {
+          p_actor: string
+          p_attempt: string
+          p_block: number
+          p_block_hash: string
+          p_email: string
+          p_hash: string
+          p_role: string
+        }
+        Returns: boolean
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
