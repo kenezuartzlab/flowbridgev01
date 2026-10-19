@@ -16,6 +16,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as BotChainRouteImport } from './routes/bot-chain'
+import { Route as BudgetPreviewRouteImport } from './routes/budget-preview'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as EarnRouteImport } from './routes/earn'
@@ -153,6 +154,11 @@ const AssistantRoute = AssistantRouteImport.update({
 const BotChainRoute = BotChainRouteImport.update({
   id: '/bot-chain',
   path: '/bot-chain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetPreviewRoute = BudgetPreviewRouteImport.update({
+  id: '/budget-preview',
+  path: '/budget-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiscoverRoute = DiscoverRouteImport.update({
@@ -697,6 +703,7 @@ export interface FileRoutesByFullPath {
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/bot-chain': typeof BotChainRoute
+  '/budget-preview': typeof BudgetPreviewRoute
   '/discover': typeof DiscoverRoute
   '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
@@ -809,6 +816,7 @@ export interface FileRoutesByTo {
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/bot-chain': typeof BotChainRoute
+  '/budget-preview': typeof BudgetPreviewRoute
   '/discover': typeof DiscoverRoute
   '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
@@ -922,6 +930,7 @@ export interface FileRoutesById {
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/bot-chain': typeof BotChainRoute
+  '/budget-preview': typeof BudgetPreviewRoute
   '/discover': typeof DiscoverRoute
   '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
@@ -1036,6 +1045,7 @@ export interface FileRouteTypes {
     | '/arcadeflix'
     | '/assistant'
     | '/bot-chain'
+    | '/budget-preview'
     | '/discover'
     | '/docs'
     | '/earn'
@@ -1148,6 +1158,7 @@ export interface FileRouteTypes {
     | '/arcadeflix'
     | '/assistant'
     | '/bot-chain'
+    | '/budget-preview'
     | '/discover'
     | '/docs'
     | '/earn'
@@ -1260,6 +1271,7 @@ export interface FileRouteTypes {
     | '/arcadeflix'
     | '/assistant'
     | '/bot-chain'
+    | '/budget-preview'
     | '/discover'
     | '/docs'
     | '/earn'
@@ -1373,6 +1385,7 @@ export interface RootRouteChildren {
   ArcadeflixRoute: typeof ArcadeflixRoute
   AssistantRoute: typeof AssistantRoute
   BotChainRoute: typeof BotChainRoute
+  BudgetPreviewRoute: typeof BudgetPreviewRoute
   DiscoverRoute: typeof DiscoverRoute
   DocsRoute: typeof DocsRoute
   EarnRoute: typeof EarnRoute
@@ -1516,6 +1529,13 @@ declare module '@tanstack/react-router' {
       path: '/bot-chain'
       fullPath: '/bot-chain'
       preLoaderRoute: typeof BotChainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budget-preview': {
+      id: '/budget-preview'
+      path: '/budget-preview'
+      fullPath: '/budget-preview'
+      preLoaderRoute: typeof BudgetPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discover': {
@@ -2329,6 +2349,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArcadeflixRoute: ArcadeflixRoute,
   AssistantRoute: AssistantRoute,
   BotChainRoute: BotChainRoute,
+  BudgetPreviewRoute: BudgetPreviewRoute,
   DiscoverRoute: DiscoverRoute,
   DocsRoute: DocsRoute,
   EarnRoute: EarnRoute,
