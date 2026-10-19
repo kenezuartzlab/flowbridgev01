@@ -25,7 +25,7 @@
 
 - Reward progression toward the claim minimum is computed only in src/lib/rewards/rewardProgression.ts (pure) and resolved caller-scoped server-side in rewardProgression.server.ts via /api/rewards/progression; the next-best-action is decided only in src/lib/growth/nextBestAction.ts from those server facts. Why: client-side progress or recommendations must never be fabricated.
 
-- Reward/claim/settlement rules live in src/lib/rewards/AGENTS.md. Why: keep root notes small.
+- Read src/lib/rewards/AGENTS.md before changing reward/claim/settlement code. Why: scoped rules keep root notes small.
 - Incentive entry points reuse RewardsExperience/ReferralRewards and canonical policy/summary; referral explanations use recorded evidence without awarding or inferring claims. Why: legacy portal rules drifted from live truth.
 - Wallet connection choices, WalletConnect kill switch (VITE_WALLETCONNECT_ENABLED, fails closed), error normalization and the WALLET_BINDING message live only in src/lib/wallet/; binding is a separate explicit signature validated server-side for domain/origin/account/nonce. Why: connecting must never sign, and WalletConnect must never break boot.
 - Sign-in setup and Profile reuse BindWalletCard for explicit ownership binding and canonical state refresh. Why: separate legacy linking paths cannot bypass or drift from verified binding.
@@ -34,5 +34,3 @@
 - Launch preparation is served through the existing admin gate; source evidence and screenshots use the private application-materials bucket, and launchTracker schema rejects window activation. Why: preparation must not publish drafts or manufacture qualification.
 - Shared BOT network badges and the root public footer own ecosystem branding; the badge follows the selected product network. Why: avoid duplicate branding and false Mainnet labels on Testnet.
 - Which functions exist on Mainnet vs Testnet is decided only in src/lib/network/environmentCapabilities.ts; UI hides, transaction senders and API routes enforce. Why: separation must hold beyond the UI.
-
-- Publisher receipt identity is validated in publicationVerification.ts and publicationRecovery.server.ts; server-only epoch attempts lock before wallet submission and confirm_reward_publication atomically persists confirmation/audit. Why: missing wallet context and transient RPC/UI failures must never cause a second publication.
