@@ -1,7 +1,8 @@
 # V36.9A Core Swap funding preparation — read-only
-- [ ] Reconcile Mainnet vs Testnet, missing program labels, canonical receipts, wallet/policy/exclusion/reservation evidence and historical allocations.
-- [ ] Verify the executed 1M ceiling and unencumbered backing without repeating any transaction; calculate exact funding proposal and post-funding Round #3 eligibility.
-- [ ] Verify shared balance presentation and batching/publisher safeguards; return privacy-safe account-category reconciliation and outstanding approvals. No funding writes, batch persistence, signatures or publication authorized.
+- [x] Reconcile Mainnet/Testnet and omitted labels: 1,823 Mainnet pending; 1,047 clean funding proposal, 776 reviewed-account gated. All 26 positive Mainnet receipts and funded reservations verified; historical claims preserved.
+- [x] Verify executed 1M ceiling and backing at block 27,210,984; no repeat transaction. Conditional Round #3: one wallet / 1,122 FLOW; unsigned eth_call passes, nothing saved or sent.
+- [x] Audit presentation and safeguards; 206 targeted tests pass. Privacy-safe report in docs/rewards/V36_9A_FUNDING_PREPARATION.md. Display parity is not PASS (Budgets omits null-program rows); global legacy 50-point mismatch retained/excluded. No application or financial changes authorized.
+- [ ] Funding activation waits for explicit approval of exact 1,047 FLOW clean subset; 776 reviewed-account Points require separate decision. Physical wallet signature acceptance unavailable and unauthorized in this task.
 
 # V36.7.1 Publisher confirmation hotfix
 - [x] Bound-wallet header, exact receipt/call/event checks, canonical confirmations, durable epoch attempt lock, atomic confirmation/audit, refresh recovery; no signing or chain writes.
