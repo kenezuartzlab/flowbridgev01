@@ -43,7 +43,7 @@ async function handle(request:Request) {
   if(!attempt || (body.operationId && attempt.operation_id!==body.operationId)) return jsonResponse({error:'Original operation mismatch'},409);
   if(attempt.phase==='CONFIRMED_VERIFIED') return jsonResponse({phase:'CONFIRMED_VERIFIED',retrySafe:false});
   const transition=async(phase:string,hash:string|null,safe=false)=> {
-   const {error}=await admin.rpc('transition_reward_publication',{p_attempt:attempt.id,p_operation:attempt.operation_id,p_actor:gate.admin.userId,p_phase:phase,p_hash:hash,p_retry_safe:safe});
+   const {error}=await admin.rpc('transition_reward_publication',{p_attempt:attempt.id,p_operation:attempt.operation_id,p_actor:gate.admin.userId,p_phase:phase,p_hash:hash ?? undefined,p_retry_safe:safe});
    if(error) throw error;
   };
   const {publicationPreflight,recoverPublisherHash,publicationNonceMatches}=await import('@/lib/rewards/publisherReconciliation.server');
