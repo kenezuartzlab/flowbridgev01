@@ -155,11 +155,15 @@ export const MAINNET_PROMOTION_PACKAGE = [
 ] as const;
 
 // ---------------------------------------------------------------------------
-// Owner-approved initial budgets (gate 2026-10-04). Separate buckets; one FLOW
-// may back exactly one bucket. Never auto-increased.
+// Owner-approved budgets. Separate buckets; one FLOW may back exactly one
+// bucket. Never auto-increased. V36.9 owner decision: Core Swap ceiling raised
+// from 3,000 to 1,000,000 FLOW (Signup 1,000,000; Milestones 2,000 unchanged).
+// Off-chain ceilings apply only through Ops → Budgets after the required
+// on-chain setCampaignBudget confirmation; this constant is the approved
+// target, not a live write.
 export const APPROVED_INITIAL_BUDGETS = {
   SIGNUP_BONUS: 1_000_000,
-  CORE_SWAP: 3_000,
+  CORE_SWAP: 1_000_000,
   REFERRAL_MILESTONE: 2_000,
 } as const satisfies Partial<Record<ProgramId, number>>;
 export const TOTAL_REQUIRED_BACKING = Object.values(APPROVED_INITIAL_BUDGETS).reduce((s, v) => s + v, 0);
@@ -186,21 +190,23 @@ export function allocateBacking(liveFreeWei: bigint, budgets: Record<string, num
 }
 
 /**
- * Prepared owner transactions (NOT signed, NOT broadcast). Live read at block
- * 25,471,524: distributor holds 2,499,999 FLOW free, so no token transfer is
- * needed; the on-chain campaignBudget is 1 FLOW (consumed by the genesis
- * canary). Raising budget headroom to 1,005,000 requires
- * setCampaignBudget(totalClaimed 1 + 1,005,000) from the BUDGET_MANAGER Safe.
+ * Prepared owner transactions (NOT signed, NOT broadcast). Live read (V36.9):
+ * distributor holds 2,499,989 FLOW free, on-chain campaignBudget is 1,005,001
+ * FLOW, totalClaimed is 11 FLOW. The approved combined ceiling is now
+ * 2,002,000 FLOW (1M signup + 1M core swap + 2k milestones), so raising the
+ * on-chain cap to 2,002,011 (= 2,002,000 + 11 claimed) requires
+ * setCampaignBudget from the BUDGET_MANAGER Safe. The owner executes this
+ * through Ops → Budgets; this record is reference only.
  */
 export const FUNDING_PREPARATION = {
   readAtBlock: 25_471_524,
   token: "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF",
   distributor: "0x7b805B036B22E2B71Ef5E8f7EA21D8791819b922",
-  liveFreeBalanceWei: "2499999000000000000000000",
+  liveFreeBalanceWei: "2499989000000000000000000",
   liveTotalReservedWei: "0",
-  liveTotalClaimedWei: "1000000000000000000",
-  liveCampaignBudgetWei: "1000000000000000000",
-  transfer: { required: false, source: "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4", amountWei: "0", reason: "Live free balance already exceeds 1,005,000 FLOW" },
+  liveTotalClaimedWei: "11000000000000000000",
+  liveCampaignBudgetWei: "1005001000000000000000000",
+  transfer: { required: false, source: "0xeFc13d1A1dC30BA2DA0Bb005ba5A783c6b229Ea4", amountWei: "0", reason: "Live free balance already exceeds 2,002,000 FLOW" },
   budgetTx: {
     safe: "0x88a4cc1f5771523baeb83daeea07d323a3ce9507",
     safeThreshold: 2,
@@ -208,8 +214,8 @@ export const FUNDING_PREPARATION = {
     value: "0",
     operation: "CALL",
     method: "setCampaignBudget(uint256)",
-    newBudgetWei: "1005001000000000000000000",
-    calldata: "0x7bc0db4600000000000000000000000000000000000000000000d4d1369fe87ea1840000",
+    newBudgetWei: "2002011000000000000000000",
+    calldata: "0x7bc0db4600000000000000000000000000000000000000000001a7f13bd8cf1f308c0000",
     estimatedGas: 35_049,
   },
   signed: false,
