@@ -134,6 +134,13 @@
       "when": 1792372506762,
       "tag": "0018_publisher_attempt_access_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792386365481,
+      "tag": "0019_reward_budget_adjustments",
+      "breakpoints": true
     }
   ]
 }

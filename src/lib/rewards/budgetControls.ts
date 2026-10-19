@@ -8,8 +8,6 @@
 import { encodeFunctionData, parseAbi, type Hex } from "viem";
 
 export const SET_CAMPAIGN_BUDGET_ABI = parseAbi(["function setCampaignBudget(uint256 newBudget)"]);
-export const CAMPAIGN_BUDGET_UPDATED_TOPIC =
-  "0x" + "" /* computed below via keccak — kept explicit for tests */;
 
 const WEI = 10n ** 18n;
 

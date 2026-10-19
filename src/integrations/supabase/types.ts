@@ -1190,6 +1190,71 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_budget_adjustments: {
+        Row: {
+          approved_by: string | null
+          approved_by_email: string | null
+          block_number: number | null
+          committed_points: number
+          created_at: string
+          id: string
+          new_budget: number
+          note: string | null
+          onchain_budget_required: number
+          previous_budget: number
+          program_id: string
+          proposed_by: string
+          proposed_by_email: string
+          status: string
+          tx_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          approved_by_email?: string | null
+          block_number?: number | null
+          committed_points: number
+          created_at?: string
+          id?: string
+          new_budget: number
+          note?: string | null
+          onchain_budget_required: number
+          previous_budget: number
+          program_id: string
+          proposed_by: string
+          proposed_by_email: string
+          status?: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          approved_by_email?: string | null
+          block_number?: number | null
+          committed_points?: number
+          created_at?: string
+          id?: string
+          new_budget?: number
+          note?: string | null
+          onchain_budget_required?: number
+          previous_budget?: number
+          program_id?: string
+          proposed_by?: string
+          proposed_by_email?: string
+          status?: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_budget_adjustments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "reward_budgets"
+            referencedColumns: ["program_id"]
+          },
+        ]
+      }
       reward_budget_events: {
         Row: {
           actor_email: string
