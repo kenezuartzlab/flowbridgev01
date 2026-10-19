@@ -71,6 +71,7 @@ import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/a
 import { Route as ApiAdminOpsRouteImport } from './routes/api/admin.ops'
 import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
 import { Route as ApiAdminRewardsBudgetRouteImport } from './routes/api/admin.rewards-budget'
+import { Route as ApiAdminRewardsControlRouteImport } from './routes/api/admin.rewards-control'
 import { Route as ApiAdminRewardsPublishVerifyRouteImport } from './routes/api/admin.rewards-publish-verify'
 import { Route as ApiAdminRewardsSolvencyRouteImport } from './routes/api/admin.rewards-solvency'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
@@ -111,6 +112,7 @@ import { Route as ApiCampaignsAdminIdRouteImport } from './routes/api/campaigns.
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public/activity.verify'
 import { Route as ApiPublicActivityVerifySwapRouteImport } from './routes/api/public/activity.verify-swap'
+import { Route as ApiPublicHooksRewardsSweepRouteImport } from './routes/api/public/hooks/rewards-sweep'
 import { Route as ApiPublicReferralValidateRouteImport } from './routes/api/public/referral.validate'
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
 import { Route as ApiPublicSiweVerifyRouteImport } from './routes/api/public/siwe.verify'
@@ -442,6 +444,11 @@ const ApiAdminRewardsBudgetRoute = ApiAdminRewardsBudgetRouteImport.update({
   path: '/api/admin/rewards-budget',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminRewardsControlRoute = ApiAdminRewardsControlRouteImport.update({
+  id: '/api/admin/rewards-control',
+  path: '/api/admin/rewards-control',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminRewardsPublishVerifyRoute =
   ApiAdminRewardsPublishVerifyRouteImport.update({
     id: '/api/admin/rewards-publish-verify',
@@ -645,6 +652,12 @@ const ApiPublicActivityVerifySwapRoute =
     path: '/api/public/activity/verify-swap',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRewardsSweepRoute =
+  ApiPublicHooksRewardsSweepRouteImport.update({
+    id: '/api/public/hooks/rewards-sweep',
+    path: '/api/public/hooks/rewards-sweep',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicReferralValidateRoute =
   ApiPublicReferralValidateRouteImport.update({
     id: '/api/public/referral/validate',
@@ -752,6 +765,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/rewards-budget': typeof ApiAdminRewardsBudgetRoute
+  '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
@@ -792,6 +806,7 @@ export interface FileRoutesByFullPath {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/hooks/rewards-sweep': typeof ApiPublicHooksRewardsSweepRoute
   '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
@@ -864,6 +879,7 @@ export interface FileRoutesByTo {
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/rewards-budget': typeof ApiAdminRewardsBudgetRoute
+  '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
@@ -904,6 +920,7 @@ export interface FileRoutesByTo {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/hooks/rewards-sweep': typeof ApiPublicHooksRewardsSweepRoute
   '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
@@ -977,6 +994,7 @@ export interface FileRoutesById {
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/rewards-budget': typeof ApiAdminRewardsBudgetRoute
+  '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
@@ -1017,6 +1035,7 @@ export interface FileRoutesById {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/hooks/rewards-sweep': typeof ApiPublicHooksRewardsSweepRoute
   '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
   '/api/public/siwe/verify': typeof ApiPublicSiweVerifyRoute
@@ -1091,6 +1110,7 @@ export interface FileRouteTypes {
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/rewards-budget'
+    | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
@@ -1131,6 +1151,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/hooks/rewards-sweep'
     | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
@@ -1203,6 +1224,7 @@ export interface FileRouteTypes {
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/rewards-budget'
+    | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
@@ -1243,6 +1265,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/hooks/rewards-sweep'
     | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
@@ -1315,6 +1338,7 @@ export interface FileRouteTypes {
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/rewards-budget'
+    | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
     | '/api/admin/settings'
@@ -1355,6 +1379,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/hooks/rewards-sweep'
     | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
     | '/api/public/siwe/verify'
@@ -1428,6 +1453,7 @@ export interface RootRouteChildren {
   ApiAdminOpsRoute: typeof ApiAdminOpsRoute
   ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
   ApiAdminRewardsBudgetRoute: typeof ApiAdminRewardsBudgetRoute
+  ApiAdminRewardsControlRoute: typeof ApiAdminRewardsControlRoute
   ApiAdminRewardsPublishVerifyRoute: typeof ApiAdminRewardsPublishVerifyRoute
   ApiAdminRewardsSolvencyRoute: typeof ApiAdminRewardsSolvencyRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
@@ -1459,6 +1485,7 @@ export interface RootRouteChildren {
   CampaignsAnalyticsIdRoute: typeof CampaignsAnalyticsIdRoute
   ApiPublicActivityVerifyRoute: typeof ApiPublicActivityVerifyRoute
   ApiPublicActivityVerifySwapRoute: typeof ApiPublicActivityVerifySwapRoute
+  ApiPublicHooksRewardsSweepRoute: typeof ApiPublicHooksRewardsSweepRoute
   ApiPublicReferralValidateRoute: typeof ApiPublicReferralValidateRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
   ApiPublicSiweVerifyRoute: typeof ApiPublicSiweVerifyRoute
@@ -1903,6 +1930,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminRewardsBudgetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/rewards-control': {
+      id: '/api/admin/rewards-control'
+      path: '/api/admin/rewards-control'
+      fullPath: '/api/admin/rewards-control'
+      preLoaderRoute: typeof ApiAdminRewardsControlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/rewards-publish-verify': {
       id: '/api/admin/rewards-publish-verify'
       path: '/api/admin/rewards-publish-verify'
@@ -2183,6 +2217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicActivityVerifySwapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/rewards-sweep': {
+      id: '/api/public/hooks/rewards-sweep'
+      path: '/api/public/hooks/rewards-sweep'
+      fullPath: '/api/public/hooks/rewards-sweep'
+      preLoaderRoute: typeof ApiPublicHooksRewardsSweepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/referral/validate': {
       id: '/api/public/referral/validate'
       path: '/api/public/referral/validate'
@@ -2386,6 +2427,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminOpsRoute: ApiAdminOpsRoute,
   ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
   ApiAdminRewardsBudgetRoute: ApiAdminRewardsBudgetRoute,
+  ApiAdminRewardsControlRoute: ApiAdminRewardsControlRoute,
   ApiAdminRewardsPublishVerifyRoute: ApiAdminRewardsPublishVerifyRoute,
   ApiAdminRewardsSolvencyRoute: ApiAdminRewardsSolvencyRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
@@ -2417,6 +2459,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsAnalyticsIdRoute: CampaignsAnalyticsIdRoute,
   ApiPublicActivityVerifyRoute: ApiPublicActivityVerifyRoute,
   ApiPublicActivityVerifySwapRoute: ApiPublicActivityVerifySwapRoute,
+  ApiPublicHooksRewardsSweepRoute: ApiPublicHooksRewardsSweepRoute,
   ApiPublicReferralValidateRoute: ApiPublicReferralValidateRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,
   ApiPublicSiweVerifyRoute: ApiPublicSiweVerifyRoute,
