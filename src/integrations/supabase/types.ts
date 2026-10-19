@@ -1190,6 +1190,44 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_automation_policy: {
+        Row: {
+          auto_funding_enabled: boolean
+          daily_cap: number
+          per_run_cap: number
+          program_id: string
+          suspended: boolean
+          updated_at: string
+          updated_by_email: string | null
+        }
+        Insert: {
+          auto_funding_enabled?: boolean
+          daily_cap?: number
+          per_run_cap?: number
+          program_id: string
+          suspended?: boolean
+          updated_at?: string
+          updated_by_email?: string | null
+        }
+        Update: {
+          auto_funding_enabled?: boolean
+          daily_cap?: number
+          per_run_cap?: number
+          program_id?: string
+          suspended?: boolean
+          updated_at?: string
+          updated_by_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_automation_policy_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: true
+            referencedRelation: "reward_budgets"
+            referencedColumns: ["program_id"]
+          },
+        ]
+      }
       reward_budget_adjustments: {
         Row: {
           approved_by: string | null
@@ -1314,6 +1352,149 @@ export type Database = {
           status?: string
           total_points?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      reward_funding_snapshots: {
+        Row: {
+          account_count: number
+          approved_at: string | null
+          approved_by: string | null
+          approved_by_email: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          confirmed_by_email: string | null
+          created_at: string
+          evidence: Json
+          id: string
+          ledger_ids: string[]
+          note: string | null
+          program_id: string
+          proposed_by: string | null
+          proposed_by_email: string
+          result: Json | null
+          row_count: number
+          snapshot_hash: string
+          status: string
+          total_points: number
+          updated_at: string
+        }
+        Insert: {
+          account_count: number
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_email?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_by_email?: string | null
+          created_at?: string
+          evidence?: Json
+          id?: string
+          ledger_ids: string[]
+          note?: string | null
+          program_id: string
+          proposed_by?: string | null
+          proposed_by_email: string
+          result?: Json | null
+          row_count: number
+          snapshot_hash: string
+          status?: string
+          total_points: number
+          updated_at?: string
+        }
+        Update: {
+          account_count?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_email?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_by_email?: string | null
+          created_at?: string
+          evidence?: Json
+          id?: string
+          ledger_ids?: string[]
+          note?: string | null
+          program_id?: string
+          proposed_by?: string | null
+          proposed_by_email?: string
+          result?: Json | null
+          row_count?: number
+          snapshot_hash?: string
+          status?: string
+          total_points?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_funding_snapshots_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "reward_budgets"
+            referencedColumns: ["program_id"]
+          },
+        ]
+      }
+      reward_ops_exceptions: {
+        Row: {
+          corrective_action: string | null
+          created_at: string
+          dedupe_key: string
+          detail: string
+          id: string
+          kind: string
+          resolved_at: string | null
+          resolved_by_email: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          corrective_action?: string | null
+          created_at?: string
+          dedupe_key: string
+          detail: string
+          id?: string
+          kind: string
+          resolved_at?: string | null
+          resolved_by_email?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          corrective_action?: string | null
+          created_at?: string
+          dedupe_key?: string
+          detail?: string
+          id?: string
+          kind?: string
+          resolved_at?: string | null
+          resolved_by_email?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reward_ops_runs: {
+        Row: {
+          id: string
+          ran_at: string
+          source: string
+          summary: Json
+        }
+        Insert: {
+          id?: string
+          ran_at?: string
+          source: string
+          summary: Json
+        }
+        Update: {
+          id?: string
+          ran_at?: string
+          source?: string
+          summary?: Json
         }
         Relationships: []
       }
@@ -1944,6 +2125,16 @@ export type Database = {
         Args: { p_code: string; p_user: string }
         Returns: Json
       }
+      confirm_reward_funding_snapshot: {
+        Args: {
+          p_actor: string
+          p_email: string
+          p_expected_hash: string
+          p_role: string
+          p_snapshot: string
+        }
+        Returns: Json
+      }
       confirm_reward_publication: {
         Args: {
           p_actor: string
@@ -1955,6 +2146,17 @@ export type Database = {
           p_role: string
         }
         Returns: boolean
+      }
+      create_reward_funding_snapshot: {
+        Args: {
+          p_actor: string
+          p_email: string
+          p_evidence: Json
+          p_ids: string[]
+          p_note: string
+          p_program: string
+        }
+        Returns: string
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -2014,6 +2216,7 @@ export type Database = {
         }
         Returns: Json
       }
+      reward_funding_hash: { Args: { p_ids: string[] }; Returns: string }
     }
     Enums: {
       campaign_review_state:
