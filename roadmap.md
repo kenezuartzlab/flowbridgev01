@@ -1,8 +1,12 @@
 # V36.10.1 Security hotfix and final release
+- [x] Final release gate rerun (2026-10-20): 1,839 tests / 171 files; final Bun lock unchanged; full audit 0 critical/0 high, production audit 0 critical/0 high; authorized Ops/read-error retry/signed-out 401; simulated publisher recovery and 320/390/430/1280 checks PASS.
+- [x] Fresh exact final migrations on disposable PostgreSQL 17.9: eight-way initial/cancelled/reverted acquisition single winner, stale operation/nonce/payload/hash fences, uncertain locks retained, eight confirmations yield one audit. No managed database or chain writes.
+- [ ] Fresh production-build/typecheck evidence unavailable from the automatic harness in this run; manual app build/typecheck prohibited by environment instructions.
+- [ ] Mandatory scan coverage remains blocked: Wiz unconfigured, no approved equivalent connection; deep application and deep MCP scans dated 2026-10-13 remain stale. No waiver or suppression requested.
 - [x] Bun full/production dependency scans: zero critical/high after targeted lock-preserving patches; complete advisory/path report in docs/security/V36_10_1_DEPENDENCY_AUDIT.md; remaining esbuild moderate/low unsuppressed.
 - [x] Authorized Ops loads with real caller session/read-only acceptance wallet; signed-out API 401; bounded failed reads; 320/390/430/1280 layouts PASS.
 - [x] 1,839 regressions / 171 files, automatic build OK, simulated publisher recovery and private-fork delay/success/revert checks PASS; Round #3 one wallet/1,122 FLOW unsigned, attempts zero.
-- [ ] Release validation blocked: standalone typecheck evidence unavailable; fresh exact-schema PostgreSQL eight-way test blocked by missing local extension and absent migration/fixture definitions; external scanner unconfigured and persisted deep scans stale, no formal waiver.
+- [ ] Release validation blocked by fresh build/typecheck evidence and mandatory external/deep scan coverage; fresh database concurrency blocker is resolved.
 - [ ] Publication/independent new bundle verification waits on those mandatory gates; no publish requested; automatic signing OFF.
 
 # V36.10.1 Publisher lock recovery
