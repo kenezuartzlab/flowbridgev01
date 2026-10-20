@@ -1,12 +1,13 @@
 # V36.10.1 Security hotfix and final release
-- [ ] Audit actual Bun dependency paths and exposure; apply compatible patches; rerun full/production audits without suppression.
-- [ ] Diagnose authorized Ops loading; bound failed reads; verify signed-in/out and 320/390/430/1280 layouts.
-- [ ] Preserve publisher safeguards; full regression, automatic build/type validation, fresh security and private-fork checks.
-- [ ] Publish only after all mandatory gates pass; independently verify bundle/recovery; Round #3 stays unsigned/unpublished and automatic signing OFF.
+- [x] Bun full/production dependency scans: zero critical/high after targeted lock-preserving patches; complete advisory/path report in docs/security/V36_10_1_DEPENDENCY_AUDIT.md; remaining esbuild moderate/low unsuppressed.
+- [x] Authorized Ops loads with real caller session/read-only acceptance wallet; signed-out API 401; bounded failed reads; 320/390/430/1280 layouts PASS.
+- [x] 1,839 regressions / 171 files, automatic build OK, simulated publisher recovery and private-fork delay/success/revert checks PASS; Round #3 one wallet/1,122 FLOW unsigned, attempts zero.
+- [ ] Release validation blocked: standalone typecheck evidence unavailable; fresh exact-schema PostgreSQL eight-way test blocked by missing local extension and absent migration/fixture definitions; external scanner unconfigured and persisted deep scans stale, no formal waiver.
+- [ ] Publication/independent new bundle verification waits on those mandatory gates; no publish requested; automatic signing OFF.
 
 # V36.10.1 Publisher lock recovery
 - [x] Final recovery acceptance: simulated wallet rejection/timeout/disconnect/remount/retry; private BOT fork success/revert/delay; exact-schema eight-way retries/confirmation; 1,834 regressions and automatic build/type validation PASS; fresh Round #3 remains one wallet/1,122 FLOW, unsigned.
-- [ ] Final release blocked: dependency scan critical/high advisories need security assessment/remediation; full signed-in Ops layout remained loading. Do not publish until both pass; then independently verify the new served bundle. Current production ops-C30r3sDO.js identified, not a new hotfix deployment.
+- [ ] Final release: dependency critical/high and signed-in Ops blockers resolved; remaining mandatory gates are listed above. No new deployment reference; historical ops-C30r3sDO.js is not proof of this release.
 - [x] Add fenced operation ownership, nonce/payload-preserving cancelled retries, exact revert reconciliation and read-only recovery controls without chain writes.
 - [x] 1,826 tests pass; automatic build/type validation OK; fresh available security scan; exact-schema isolated eight-client concurrency, stale generation and immutable batch checks pass.
 - [x] Signed-in simulated-bound-wallet Control Center and real publisher panel at 320/390/430/1280px; Round #3 1,122 FLOW / one wallet, proof checks and live simulation PASS, unsigned.
