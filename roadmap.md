@@ -1,4 +1,5 @@
 # V36.10.1 Publisher lock recovery
+- [ ] Complete final acceptance: wallet-prompt UI scenarios, private BOT fork success/revert/delay, exact-schema concurrent retry/confirmation, fresh records/security/regression/layout, then publish and independently identify served bundle. No production signing or payouts authorized.
 - [x] Add fenced operation ownership, nonce/payload-preserving cancelled retries, exact revert reconciliation and read-only recovery controls without chain writes.
 - [x] 1,826 tests pass; automatic build/type validation OK; fresh available security scan; exact-schema isolated eight-client concurrency, stale generation and immutable batch checks pass.
 - [x] Signed-in simulated-bound-wallet Control Center and real publisher panel at 320/390/430/1280px; Round #3 1,122 FLOW / one wallet, proof checks and live simulation PASS, unsigned.

@@ -62,6 +62,7 @@ async function handle(request:Request) {
   body.txHash=body.txHash.toLowerCase();
   if(attempt.tx_hash && attempt.tx_hash!==body.txHash) return jsonResponse({error:'Original hash mismatch'},409);
   if(attempt.retry_safe) return jsonResponse({phase:attempt.phase,retrySafe:true});
+  if(!await publicationNonceMatches(body.txHash,attempt.sender_nonce)) return jsonResponse({error:'Original publisher nonce mismatch; keep the batch locked'},409);
   await transition('CONFIRMING',body.txHash);
   const {verifyPublicationOnChain}=await import('@/lib/rewards/publicationRecovery.server');
   const result=await verifyPublicationOnChain({epochId:batch.epoch_id,root:batch.root as `0x${string}`,totalWei:BigInt(String(batch.total_wei).split('.')[0]).toString(),claimStart:Number(batch.claim_start),claimEnd:Number(batch.claim_end),leaves:batch.leaves as never},body.txHash,gate.admin.wallet);
