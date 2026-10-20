@@ -92,11 +92,13 @@ function chainFromText(q: string, fallback: number): number {
 }
 
 /** Reads an exact amount only when it is attached to a token or stands alone. */
+const reEscape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export function extractExactAmount(text: string, tokenSymbol: string | null): string | null {
   const q = text.toLowerCase();
   const symbols = tokenSymbol ? [tokenSymbol.toLowerCase()] : Object.keys(SYMBOLS).map((s) => s.toLowerCase());
   for (const sym of symbols) {
-    const m = q.match(new RegExp(`(\\d+(?:\\.\\d{1,18})?)\\s*${sym}\\b`));
+    const m = q.match(new RegExp(`(\\d+(?:\\.\\d{1,18})?)\\s*${reEscape(sym)}\\b`));
     if (m) return m[1];
   }
   // Bare numeric reply ("10", "10.5") — a direct answer to the clarification.
@@ -273,7 +275,7 @@ export function resolvePending(input: {
     const offTopic = !new RegExp(
       `(${[pending.tokenInSymbol, pending.tokenOutSymbol, pending.type.split("_")[0]]
         .filter(Boolean)
-        .map((s) => String(s).toLowerCase())
+        .map((s) => reEscape(String(s).toLowerCase()))
         .join("|")}|amount|yes|ok)`,
     ).test(input.question.toLowerCase());
     if (offTopic) return { kind: "CONTEXT_CHANGED" };
