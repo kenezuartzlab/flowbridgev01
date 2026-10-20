@@ -140,7 +140,7 @@ export async function buildOpsReport(periodKey: PeriodKey) {
 
   const drift = computeDrift({
     router: ROUTER_V4_MAINNET_EXPECTED.router, owner: ROUTER_V4_MAINNET_EXPECTED.owner, treasury: ROUTER_V4_MAINNET_EXPECTED.treasury,
-    globalFeeBps: 0, bdexV3FeeBps: 1, bdexV3Router: ROUTER_V4_MAINNET_EXPECTED.bdexV3Router, wrappedNative: ROUTER_V4_MAINNET_EXPECTED.wrappedNative,
+    globalFeeBps: Number(ROUTER_V4_MAINNET_EXPECTED.globalFeeBps), bdexV3FeeBps: 1, bdexV3Router: ROUTER_V4_MAINNET_EXPECTED.bdexV3Router, wrappedNative: ROUTER_V4_MAINNET_EXPECTED.wrappedNative,
   }, v4Actual);
 
   const recentFailures = (dex: (d: string) => boolean) => trades.filter((r) => dex(r.dex.toLowerCase()) && (r.event_name === "tx_reverted" || r.event_name === "simulation_failure" || r.event_name === "rpc_failure") && Date.parse(r.occurred_at) > now.getTime() - 86_400_000).length;
