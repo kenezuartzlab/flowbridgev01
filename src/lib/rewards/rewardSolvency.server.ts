@@ -7,7 +7,7 @@ import { reconcileAll, mainnetSwapEvidence, OWNER_REVIEW_DECISIONS, MAINNET_CHAI
 import {
   APPROVED_INITIAL_BUDGETS, FUNDING_PREPARATION, TOTAL_REQUIRED_BACKING, allocateBacking, buildDraftAllocation, fundingShortfallWei,
   MAINNET_PAYOUT_AUDIT, MAINNET_PROMOTION_PACKAGE, milestoneFundingOptions, payoutContractSufficient, programSolvency,
-  swapFundingOptions, type ProgramId,
+  summarizeFundedDraft, swapFundingOptions, type ProgramId,
 } from "./rewardFundingPlan";
 import { MAINNET_EPOCH_DRAFTS, draftFlowLabel } from "./mainnetEpochDraft";
 import { MAINNET_EPOCH_MANIFESTS } from "./mainnetEpochManifest";
@@ -94,6 +94,15 @@ export async function buildRewardSolvencyReport() {
     programSolvency({ programId: "OTHER", authorizedBudget: 0, backingVerified: false, reserved: 0, earned: 0, claimed: 0, unfunded: 0 }),
   ];
 
+  const settlement = await buildSettlement({
+    admin: supabaseAdmin,
+    recon: recon.results,
+    ledger: (ledger.data ?? []) as never,
+    wallets: new Map((profiles.data ?? []).map((p) => [p.id, p.wallet_address])),
+    budgets: (budgets.data ?? []) as never,
+    profiles: new Map((profiles.data ?? []).map((p) => [p.id, { createdAt: p.created_at ? new Date(p.created_at).toISOString() : null, wallet: p.wallet_address }])),
+  });
+
   return {
     generatedAt: new Date().toISOString(),
     claims: PUBLIC_MAINNET_FLOW_CLAIMS
@@ -156,9 +165,10 @@ export async function buildRewardSolvencyReport() {
     })(),
     draftAllocation: (() => {
       const wallet = new Map((profiles.data ?? []).map((p) => [p.id, p.wallet_address]));
-      const d = buildDraftAllocation(recon.results.map((r) => ({ userId: r.userId, wallet: wallet.get(r.userId) ?? null, classification: r.classification, authoritative: r.authoritative, pendingReview: r.pendingReview })), { epochId: 2 });
-      // Admin view: counts only, no wallet addresses.
-      return { status: d.status, leaves: d.leaves.length, totalPoints: d.totalPoints };
+      const reconDraft = buildDraftAllocation(recon.results.map((r) => ({ userId: r.userId, wallet: wallet.get(r.userId) ?? null, classification: r.classification, authoritative: r.authoritative, pendingReview: r.pendingReview })), { epochId: 2 });
+      // Funded-only: the preview mirrors the publishable settlement path; earned-but-unfunded
+      // points are reported as excluded, never added to a batch. Admin view: counts only.
+      return summarizeFundedDraft({ reconTotalPoints: reconDraft.totalPoints, fundedWallets: settlement.readiness?.nextBatchWallets ?? 0, fundedTotalPoints: settlement.readiness?.nextBatchFlow ?? 0 });
     })(),
     // Prepared allocation rounds: root + schedule only, never signed or broadcast here.
     publication: MAINNET_EPOCH_DRAFTS.map((d) => ({
@@ -174,14 +184,7 @@ export async function buildRewardSolvencyReport() {
       signed: false,
       broadcast: false,
     })),
-    settlement: await buildSettlement({
-      admin: supabaseAdmin,
-      recon: recon.results,
-      ledger: (ledger.data ?? []) as never,
-      wallets: new Map((profiles.data ?? []).map((p) => [p.id, p.wallet_address])),
-      budgets: (budgets.data ?? []) as never,
-      profiles: new Map((profiles.data ?? []).map((p) => [p.id, { createdAt: p.created_at ? new Date(p.created_at).toISOString() : null, wallet: p.wallet_address }])),
-    }),
+    settlement,
     canary: await readCanaryStatus(),
     payout: { sufficient: payoutContractSufficient(), capabilities: MAINNET_PAYOUT_AUDIT.capabilities, promotionPackage: MAINNET_PROMOTION_PACKAGE },
   };
