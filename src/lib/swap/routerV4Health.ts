@@ -8,11 +8,12 @@ export const ROUTER_V4_MAINNET_EXPECTED = {
   router: NATIVE_V3_MULTI_CANDIDATE[677].router as Address,
   lens: NATIVE_V3_MULTI_CANDIDATE[677].lens as Address,
   owner: "0x524Db06954de917025180057BCBeB36eC96A98c5" as Address,
-  treasury: "0xefc13d1a1dc30ba2da0bb005ba5a783c6b229ea4" as Address,
+  // Owner-approved 2026-10-20 (on-chain change 2026-10-19, feeConfigNonce 3).
+  treasury: "0xabe9ac1bc4b9e99b89c27f97c580b5a0b8fa75e1" as Address,
   bdexV3Router: MAINNET_CONTRACTS.bdexV3Router as Address,
   wrappedNative: MAINNET_CONTRACTS.wbot as Address,
   routerId: 0n,
-  globalFeeBps: 0n,
+  globalFeeBps: 10n,
   effectiveFeeBps: 1n,
 } as const;
 
