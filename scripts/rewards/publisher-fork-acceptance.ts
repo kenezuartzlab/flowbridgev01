@@ -1,0 +1,36 @@
+/** Isolated loopback fork only. Never signs or sends to a production transport. */
+import {createPublicClient,http,parseAbi,encodeFunctionData,decodeFunctionData,type Hex} from 'viem';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {verifyPublicationIdentity} from '../../src/lib/rewards/publicationVerification';
+import {verifyPublishedRound,PUBLISH_EPOCH_ABI,SETTLEMENT_SIGNER,type StoredBatch} from '../../src/lib/rewards/settlementPlanner';
+const url='http://127.0.0.1:8547';
+const c=createPublicClient({transport:http(url)});
+const rpc=async(method:string,params:unknown[]=[])=>{const j=await (await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})})).json();if(j.error)throw Error(j.error.message);return j.result;};
+const live=JSON.parse(readFileSync('/tmp/publisher-acceptance/live.json','utf8')).report.settlement;
+const to=live.tx.to as Hex;const data=live.tx.data as Hex;const sender=SETTLEMENT_SIGNER.address;
+const decoded=decodeFunctionData({abi:PUBLISH_EPOCH_ABI,data});const [root,total,start,end]=decoded.args;
+const batch:StoredBatch={epochId:3,root,totalWei:total.toString(),claimStart:Number(start),claimEnd:Number(end),leaves:[]};
+const abi=parseAbi(['function epochCount() view returns(uint256)','function getEpoch(uint256) view returns ((bytes32 root,uint256 allocation,uint256 claimed,uint64 claimStart,uint64 claimEnd,bool cancelled,bool released))','function hasRole(bytes32,address) view returns(bool)','function totalReserved() view returns(uint256)','function isClaimed(uint256,uint256) view returns(bool)']);
+if(await c.getChainId()!==677)throw Error('Wrong fork');
+if(await c.readContract({address:to,abi,functionName:'epochCount'})!==2n)throw Error('Unexpected rounds');
+await rpc('anvil_impersonateAccount',[sender]);await rpc('anvil_setBalance',[sender,'0x56BC75E2D63100000']);
+const base=await rpc('evm_snapshot');
+const send=async(input:Hex)=>await rpc('eth_sendTransaction',[{from:sender,to,data:input,value:'0x0',gas:'0x989680',nonce:'0x'+(await c.getTransactionCount({address:sender,blockTag:'pending'})).toString(16)}]) as Hex;
+const evidence=async(hash:Hex,b:StoredBatch)=>{const tx=await c.getTransaction({hash});const receipt=await c.getTransactionReceipt({hash});const block=await c.getBlock({blockNumber:receipt.blockNumber});return verifyPublicationIdentity({chainId:677,operatorWallet:sender,publisherRole:true,tx:{...tx,chainId:tx.chainId??0},receipt,canonicalBlockHash:block.hash,head:await c.getBlockNumber({cacheTime:0}),distributor:to,batch:b});};
+const results:string[]=[];
+await rpc('evm_setAutomine',[false]);const nonce=await c.getTransactionCount({address:sender});const h=await send(data);
+let pending=false;try{await c.getTransactionReceipt({hash:h});}catch{pending=true;}if(!pending)throw Error('Delay missing');
+if(await c.getTransactionCount({address:sender,blockTag:'pending'})!==nonce+1)throw Error('Pending nonce mismatch');results.push('delayed receipt absent; pending nonce advanced; round still 2');
+await rpc('evm_mine');await rpc('evm_mine');await rpc('evm_setAutomine',[true]);
+const identity=await evidence(h,batch);if(!identity.complete)throw Error(JSON.stringify(identity));
+const ep=await c.readContract({address:to,abi,functionName:'getEpoch',args:[3n]});if(ep.root!==root||ep.allocation!==1122n*10n**18n)throw Error('Round mismatch');
+const verified=verifyPublishedRound({batch,receiptStatus:'success',liveEpochCount:3,epoch:ep,paused:false,balanceWei:BigInt(Math.floor(live.liveState.balanceFlow))*10n**18n,totalReservedWei:await c.readContract({address:to,abi,functionName:'totalReserved'}),chainId:677,distributor:to});if(!verified.complete)throw Error('Round state verification');
+if((await c.getTransaction({hash:h})).nonce!==nonce)throw Error('Sender nonce drift');results.push('success: canonical receipt, sender nonce, exact calldata, Merkle root, allocation and window match');
+// The fork publishes the real reviewed root but does not hold private recipient records.
+await rpc('evm_revert',[base]);const snap=await rpc('evm_snapshot');
+const badData=encodeFunctionData({abi:PUBLISH_EPOCH_ABI,functionName:'publishEpoch',args:[root,total,1n,2n]});const badBatch={...batch,claimStart:1,claimEnd:2};const reverted=await send(badData);await rpc('evm_mine');
+const receipt=await c.getTransactionReceipt({hash:reverted});if(receipt.status!=='reverted')throw Error('Expected revert');const checks=await evidence(reverted,badBatch);if(!checks.checks.filter(x=>!['RECEIPT_SUCCESS','EXACT_EPOCH_PUBLISHED_EVENT'].includes(x.id)).every(x=>x.pass))throw Error('Exact revert identity');
+if(await c.readContract({address:to,abi,functionName:'epochCount'})!==2n)throw Error('Revert published');if(await c.getTransactionCount({address:sender,blockTag:'latest'})!==await c.getTransactionCount({address:sender,blockTag:'pending'}))throw Error('Revert nonce unresolved');results.push('exact reverted receipt: nonce consumed, no epoch publication, retry reconciliation valid');
+await rpc('evm_revert',[snap]);
+if(!await c.readContract({address:to,abi,functionName:'isClaimed',args:[1n,0n]})||!await c.readContract({address:to,abi,functionName:'isClaimed',args:[2n,0n]}))throw Error('History changed');results.push('fork restored: rounds 1/2 claimed, round 3 unpublished');
+writeFileSync('/tmp/publisher-acceptance/fork-results.json',JSON.stringify({results,identity:identity.checks}));console.log(results.map(x=>'PASS '+x).join('\n'));

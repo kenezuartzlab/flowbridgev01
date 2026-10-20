@@ -59,7 +59,8 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
         remember({attemptId:a.id,operationId:a.operation_id,epochId:a.epoch_id,root:a.root,fingerprint:a.fingerprint,txHash:a.tx_hash});
         setPhase(a.tx_hash ? "BROADCAST_PENDING" : "RECOVERY_REQUIRED");
       } else if (j?.attempts) {
-        setPending(null);
+        const safe = j.attempts.find((a: { phase: string; retry_safe: boolean; epoch_id: number }) => a.epoch_id === s.epochId && a.retry_safe && ["CANCELLED", "REVERTED"].includes(a.phase));
+        setPending(null); setHash(null); setPhase(safe?.phase ?? "IDLE");
         try { localStorage.removeItem(storageKey); } catch { /* Server is authoritative. */ }
       }
     }
@@ -70,7 +71,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
     setPending(local); setHash(local?.txHash ?? null);
     setPhase(local ? "BROADCAST_PENDING" : "IDLE");
     void loadHistory(true);
-  }, [wallet]);
+  }, [wallet, s.epochId]);
   async function verify(p: PendingPublication) {
     const res = await authed(wallet, "/api/admin/rewards-publish-verify", {method:"POST",body:JSON.stringify(p)}).catch(() => null);
     const j = res ? await res.json().catch(() => null) : null;
