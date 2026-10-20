@@ -1549,7 +1549,7 @@ export function UniversalSwapCard({
       {txError && (
         <WarningPanel
           type="error"
-          title={txBlockedPreSubmit || !lastTx ? PRE_SUBMIT_BLOCK_TITLE.replace(" route configuration check failed.", " see details below.") : "Swap Failed"}
+          title={txBlockedPreSubmit ? PRE_SUBMIT_BLOCK_TITLE : lastTx ? "Swap Failed" : "Swap not submitted"}
           message={txError}
           txHash={lastTx ?? undefined}
           txUrlPrefix={txUrlPrefix}
