@@ -1,9 +1,10 @@
 # V36.10.1 Publisher lock recovery
-- [ ] Complete final acceptance: wallet-prompt UI scenarios, private BOT fork success/revert/delay, exact-schema concurrent retry/confirmation, fresh records/security/regression/layout, then publish and independently identify served bundle. No production signing or payouts authorized.
+- [x] Final recovery acceptance: simulated wallet rejection/timeout/disconnect/remount/retry; private BOT fork success/revert/delay; exact-schema eight-way retries/confirmation; 1,834 regressions and automatic build/type validation PASS; fresh Round #3 remains one wallet/1,122 FLOW, unsigned.
+- [ ] Final release blocked: dependency scan critical/high advisories need security assessment/remediation; full signed-in Ops layout remained loading. Do not publish until both pass; then independently verify the new served bundle. Current production ops-C30r3sDO.js identified, not a new hotfix deployment.
 - [x] Add fenced operation ownership, nonce/payload-preserving cancelled retries, exact revert reconciliation and read-only recovery controls without chain writes.
 - [x] 1,826 tests pass; automatic build/type validation OK; fresh available security scan; exact-schema isolated eight-client concurrency, stale generation and immutable batch checks pass.
 - [x] Signed-in simulated-bound-wallet Control Center and real publisher panel at 320/390/430/1280px; Round #3 1,122 FLOW / one wallet, proof checks and live simulation PASS, unsigned.
-- [ ] Release held: mocked wallet-prompt end-to-end cancellation/recovery and current local-fork acceptance still required; production publish/independent verification must wait. Physical TokenPocket acceptance requires owner's device, with no real signing authorized.
+- [ ] Physical TokenPocket acceptance requires owner's device; no real signing authorized. Production publish/independent hotfix verification waits on the final release blockers above.
 
 # V36.9A Core Swap funding preparation — read-only
 - [x] Reconcile Mainnet/Testnet and omitted labels: 1,823 Mainnet pending; 1,047 clean funding proposal, 776 reviewed-account gated. All 26 positive Mainnet receipts and funded reservations verified; historical claims preserved.
