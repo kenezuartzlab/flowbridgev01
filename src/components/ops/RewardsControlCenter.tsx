@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getIdToken } from "@/lib/auth";
 import { toast } from "sonner";
+import { readOpsJson } from "@/lib/admin/opsRead";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 type Snapshot = { id: string; program_id: string; total_points: number; row_count: number; account_count: number; snapshot_hash: string; status: string; proposed_by_email: string; approved_by_email: string | null; confirmed_by_email: string | null; confirmed_at: string | null; created_at: string };
 type State = {
@@ -28,6 +31,7 @@ const TONE: Record<string, string> = {
 const Chip = ({ s }: { s: string }) => <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-black ${TONE[s] ?? "border-hairline text-muted"}`}>{s}</span>;
 
 async function call(wallet: string, body?: Record<string, unknown>) {
+  if (!body) return readOpsJson<State>("/api/admin/rewards-control", wallet);
   const token = await getIdToken();
   const h: Record<string, string> = { "x-wallet-address": wallet, ...(token ? { authorization: `Bearer ${token}` } : {}) };
   const res = await fetch("/api/admin/rewards-control", body ? { method: "POST", headers: { ...h, "content-type": "application/json" }, body: JSON.stringify(body) } : { headers: h });
@@ -45,7 +49,10 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
   const qc = useQueryClient();
   const [section, setSection] = useState<Section>("Overview");
   const [busy, setBusy] = useState<string | null>(null);
-  const q = useQuery({ queryKey: ["rewards-control", wallet], queryFn: () => call(wallet!) as Promise<State>, enabled: !!wallet, refetchInterval: 30_000 });
+  const q = useQuery({ queryKey: ["rewards-control", wallet], queryFn: () => {
+    if (!wallet) throw new Error("Connect the wallet bound to your admin account.");
+    return call(wallet) as Promise<State>;
+  }, enabled: !!wallet, refetchInterval: 30_000, retry: false });
   const act = async (key: string, body: Record<string, unknown>, ok: string) => {
     if (!wallet || busy) return;
     setBusy(key);
@@ -56,7 +63,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
 
   if (!wallet) return <p className="rounded-xl border border-hairline bg-card p-3 text-[12px] text-muted">Connect the wallet bound to your admin account.</p>;
   if (q.isLoading) return <p className="text-[12px] text-muted">Loading control center…</p>;
-  if (q.error || !q.data) return <p className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-[12px] text-danger">{(q.error as Error)?.message ?? "Unavailable"}</p>;
+  if (q.error || !q.data) return <div role="alert" className="space-y-2 rounded-lg border border-danger/40 bg-danger/10 p-3 text-[12px] text-danger"><p>{q.error?.message ?? "Control center unavailable."}</p><Button variant="outline" size="sm" disabled={q.isFetching} onClick={() => q.refetch()}><RefreshCw />Retry Control Center</Button></div>;
   const s = q.data;
   const isSuper = s.viewer.role === "super_admin";
   const open = s.snapshots.filter((x) => x.status === "PROPOSED" || x.status === "APPROVED");

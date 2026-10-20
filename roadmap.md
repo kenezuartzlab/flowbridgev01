@@ -1,3 +1,9 @@
+# V36.10.1 Security hotfix and final release
+- [ ] Audit actual Bun dependency paths and exposure; apply compatible patches; rerun full/production audits without suppression.
+- [ ] Diagnose authorized Ops loading; bound failed reads; verify signed-in/out and 320/390/430/1280 layouts.
+- [ ] Preserve publisher safeguards; full regression, automatic build/type validation, fresh security and private-fork checks.
+- [ ] Publish only after all mandatory gates pass; independently verify bundle/recovery; Round #3 stays unsigned/unpublished and automatic signing OFF.
+
 # V36.10.1 Publisher lock recovery
 - [x] Final recovery acceptance: simulated wallet rejection/timeout/disconnect/remount/retry; private BOT fork success/revert/delay; exact-schema eight-way retries/confirmation; 1,834 regressions and automatic build/type validation PASS; fresh Round #3 remains one wallet/1,122 FLOW, unsigned.
 - [ ] Final release blocked: dependency scan critical/high advisories need security assessment/remediation; full signed-in Ops layout remained loading. Do not publish until both pass; then independently verify the new served bundle. Current production ops-C30r3sDO.js identified, not a new hotfix deployment.

@@ -4,7 +4,8 @@ import { useState, type ReactNode } from "react";
 import { RefreshCw, ShieldAlert } from "lucide-react";
 import { useAccount, WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
-import { getIdToken } from "@/lib/auth";
+import { readOpsJson } from "@/lib/admin/opsRead";
+import { Button } from "@/components/ui/button";
 import type { OpsReport } from "@/lib/ops/opsReport.server";
 import { RewardsSolvencyTab } from "@/components/ops/RewardsSolvencyTab";
 import { BudgetControlsTab } from "@/components/ops/BudgetControlsTab";
@@ -30,16 +31,8 @@ const TABS = ["Overview", "Router V4", "Trade", "Liquidity Gaps", "Token Demand"
 type Tab = (typeof TABS)[number];
 
 async function fetchReport(period: PeriodKey, wallet: string | undefined): Promise<{ status: number; report: OpsReport | null; reason?: string }> {
-  const token = await getIdToken();
-  const h: Record<string, string> = {};
-  if (token) h.authorization = `Bearer ${token}`;
-  if (wallet) h["x-wallet-address"] = wallet;
-  const res = await fetch(`/api/admin/ops?period=${period}`, { headers: h });
-  if (!res.ok) {
-    const j = (await res.json().catch(() => ({}))) as { error?: string };
-    return { status: res.status, report: null, reason: j.error };
-  }
-  return { status: 200, report: (await res.json()) as OpsReport };
+  const report = await readOpsJson<OpsReport>(`/api/admin/ops?period=${period}`, wallet);
+  return { status: 200, report };
 }
 
 function tone(v: string | null | undefined) {
@@ -136,7 +129,7 @@ function OpsPage() {
   const [period, setPeriod] = useState<PeriodKey>("7d");
   const [tab, setTab] = useState<Tab>("Overview");
   const { address } = useAccount();
-  const q = useQuery({ queryKey: ["ops-report", period, address], queryFn: () => fetchReport(period, address), refetchInterval: 60_000, retry: 1 });
+  const q = useQuery({ queryKey: ["ops-report", period, address], queryFn: () => fetchReport(period, address), refetchInterval: 60_000, retry: false });
 
   if (q.data && q.data.status !== 200) {
     return (
@@ -181,7 +174,7 @@ function OpsPage() {
       </nav>
 
       {q.isLoading && <p className="text-[13px] text-muted">Running live read-only checks…</p>}
-      {q.isError && <p className="text-[13px] text-danger">Operations report is temporarily unavailable. Status is UNKNOWN until it loads.</p>}
+      {q.isError && <div role="alert" className="space-y-2 text-[13px] text-danger"><p>{q.error.message} Status is UNKNOWN until the check succeeds.</p><Button variant="outline" size="sm" onClick={() => q.refetch()} disabled={q.isFetching}><RefreshCw />Retry operator check</Button><Link to="/account" className="ml-3 text-primary underline">Go to account</Link></div>}
       {tab === "Control Center" ? <RewardsControlCenter wallet={address} onOpen={(t) => setTab(t)} /> : tab === "Rewards" ? <RewardsSolvencyTab wallet={address} /> : tab === "Budgets" ? <BudgetControlsTab wallet={address} /> : r && <TabBody tab={tab} r={r} />}
     </main>
   );

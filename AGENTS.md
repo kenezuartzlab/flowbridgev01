@@ -33,4 +33,5 @@
 - Public documentation inventory lives in src/lib/contracts/productionRegistry.json with chain-scoped deployment/config parity tests; private application answers and evidence are served only after the admin gate, never embedded in public client bundles. Why: keep contract facts current without exposing application strategy or owner inputs.
 - Launch preparation is served through the existing admin gate; source evidence and screenshots use the private application-materials bucket, and launchTracker schema rejects window activation. Why: preparation must not publish drafts or manufacture qualification.
 - Shared BOT network badges and the root public footer own ecosystem branding; the badge follows the selected product network. Why: avoid duplicate branding and false Mainnet labels on Testnet.
-- Which functions exist on Mainnet vs Testnet is decided only in src/lib/network/environmentCapabilities.ts; UI hides, transaction senders and API routes enforce. Why: separation must hold beyond the UI.
+- Mainnet/Testnet availability is owned by environmentCapabilities.ts and enforced by UI, senders and APIs. Why: separation must hold beyond UI.
+- Ops reads use opsRead.ts to bound session/request waits; writes never use its retry path. Why: stalled reads must recover without implying a write was cancelled.
