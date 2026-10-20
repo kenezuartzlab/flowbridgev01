@@ -1,3 +1,12 @@
+# V36.10.2 Approved Ops correction
+- [x] Owner authorized production deployment 2026-10-20 17:57 UTC; financial actions remain prohibited.
+- [x] Fresh full regression: 1,844 tests / 173 files PASS; wallet cancellation/uncertain-lock/recheck/single-audit and 320/390/430/1280 publisher checks PASS.
+- [x] Fresh records: immutable Round #3 one wallet / 1,122 FLOW; 74 CORE_SWAP Points UNFUNDED with no reservation; zero attempts; auto-funding/signing OFF; two live rounds; historical exclusions PASS.
+- [x] Final automatic build/type validation OK at 18:03:26 UTC; authenticated stored-round and eligible draft both one wallet / 1,122 FLOW. Separate production-mode evidence not supplied by harness.
+- [x] Release security exposure review: 0 critical/high; moderate Hono serveStatic advisory has no matching application/MCP adapter use; existing esbuild moderate/low retained. Evidence in docs/security/V36_10_2_RELEASE_GATE.md.
+- [ ] Security-owner release-specific approval: V36.10.1 managed-provider cloud/IAM acceptance explicitly expires with that release; V36.10.2 acceptance requested, never auto-transferred.
+- [ ] Publish approved correction and independently verify production Ops, bundle hash and unchanged financial records.
+
 # V36.10.1 Security hotfix and final release
 - [x] Final release gate rerun (2026-10-20): 1,839 tests / 171 files; final Bun lock unchanged; full audit 0 critical/0 high, production audit 0 critical/0 high; authorized Ops/read-error retry/signed-out 401; simulated publisher recovery and 320/390/430/1280 checks PASS.
 - [x] Fresh exact final migrations on disposable PostgreSQL 17.9: eight-way initial/cancelled/reverted acquisition single winner, stale operation/nonce/payload/hash fences, uncertain locks retained, eight confirmations yield one audit. No managed database or chain writes.
