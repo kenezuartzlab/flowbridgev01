@@ -11,11 +11,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { PartnerVisual } from "./PartnerVisual";
 import { PartnerProfileModal } from "./PartnerProfileModal";
-import {
-  availabilityLabel,
-  partnerAvailability,
-  partnerCategories,
-} from "./partnerPresentation";
+import { availabilityLabel, partnerAvailability, partnerCategories } from "./partnerPresentation";
 import { getPartners, useAppConfig, type PartnerCard } from "@/lib/config/appConfig";
 
 export function PartnersDirectory() {
@@ -26,9 +22,7 @@ export function PartnersDirectory() {
   const partners = useMemo(() => getPartners(config), [config]);
   const categories = useMemo(() => partnerCategories(partners), [partners]);
 
-  const visible = partners.filter(
-    (p) => category === "all" || (p.category ?? "").trim() === category,
-  );
+  const visible = partners.filter((p) => category === "all" || (p.category ?? "").trim() === category);
   const featured = visible.filter((p) => p.featured);
   const rest = visible.filter((p) => !p.featured);
 
@@ -36,7 +30,7 @@ export function PartnersDirectory() {
     <div className="space-y-5">
       <section className="relative overflow-hidden rounded-[var(--fb-radius-lg,20px)] px-1 py-2">
         <h2 className="text-[19px] font-black leading-tight tracking-[-0.02em] sm:text-[23px]">
-          Mini-apps and partners building on FlowBridge
+          Mini-apps and partners building with FlowBridge on BOT Chain
         </h2>
         <p className="mt-1.5 max-w-xl text-[12.5px] leading-relaxed text-muted">
           Partner experiences across BOT Chain. Campaign quests and Campaign PTS live in{" "}
@@ -93,9 +87,7 @@ export function PartnersDirectory() {
         </section>
       )}
 
-      {visible.length === 0 && (
-        <p className="px-1 text-[12.5px] text-muted">No partners in this category yet.</p>
-      )}
+      {visible.length === 0 && <p className="px-1 text-[12.5px] text-muted">No partners in this category yet.</p>}
 
       {active && <PartnerProfileModal partner={active} onClose={() => setActive(null)} />}
     </div>
@@ -119,9 +111,7 @@ function CategoryChip({
       onClick={onClick}
       aria-pressed={active}
       className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-full border px-3.5 text-[12px] font-bold transition-colors ${
-        active
-          ? "border-primary/45 bg-primary/12 text-primary"
-          : "border-hairline text-muted hover:text-foreground"
+        active ? "border-primary/45 bg-primary/12 text-primary" : "border-hairline text-muted hover:text-foreground"
       }`}
     >
       {label}
@@ -168,19 +158,13 @@ function FeaturedPartner({ partner, onOpen }: { partner: PartnerCard; onOpen: ()
           )}
           <AvailabilityBadge partner={partner} />
         </span>
-        <span className="mt-2 block truncate text-[17px] font-black leading-tight">
-          {partner.name}
-        </span>
+        <span className="mt-2 block truncate text-[17px] font-black leading-tight">{partner.name}</span>
         {partner.tagline && (
-          <span className="mt-1 block line-clamp-2 text-[12.5px] leading-relaxed text-muted">
-            {partner.tagline}
-          </span>
+          <span className="mt-1 block line-clamp-2 text-[12.5px] leading-relaxed text-muted">{partner.tagline}</span>
         )}
         <span
           className={`mt-3 inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-[12.5px] font-bold ${
-            state === "live"
-              ? "bg-primary text-primary-foreground"
-              : "border border-hairline text-muted"
+            state === "live" ? "bg-primary text-primary-foreground" : "border border-hairline text-muted"
           }`}
         >
           {state === "live" ? partner.ctaLabel || "Open" : availabilityLabel(state)}
@@ -209,9 +193,7 @@ function PartnerTile({ partner, onOpen }: { partner: PartnerCard; onOpen: () => 
           {partner.category || "Partner"}
         </span>
         {partner.tagline && (
-          <span className="line-clamp-2 text-[12px] leading-relaxed text-muted">
-            {partner.tagline}
-          </span>
+          <span className="line-clamp-2 text-[12px] leading-relaxed text-muted">{partner.tagline}</span>
         )}
         <span className="mt-auto pt-2 font-mono text-[10px] font-black uppercase tracking-[0.1em] text-primary">
           {state === "live" ? "View profile" : availabilityLabel(state)}
