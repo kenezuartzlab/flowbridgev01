@@ -51,6 +51,9 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
       <Box title="Payout rounds">
         <p className="text-[11.5px] leading-snug text-muted-soft">Prepared → Awaiting signature → Published → Claim open → Claimed / Expired. Publishing a round needs the authorized publisher's single signature; this page never signs.</p>
         <KV k="Next batch (draft)" v={`${r.draftAllocation.status} · ${fmt(r.draftAllocation.leaves)} wallets · ${fmt(r.draftAllocation.totalPoints)} FLOW`} />
+        {r.draftAllocation.excludedUnfundedPoints > 0 && (
+          <p className="text-[11.5px] leading-snug text-muted-soft">Unapproved draft only — excludes {fmt(r.draftAllocation.excludedUnfundedPoints)} earned-but-unfunded point(s) recorded in the ledger without backing; they never enter a publishable batch until funded through the authorized funding workflow.</p>
+        )}
         {(r.rounds ?? []).length === 0 && <p className="text-[12px] text-muted">No stored payout rounds.</p>}
         {(r.rounds ?? []).map((x) => (
           <KV key={x.epochId} k={`Round #${x.epochId} · ${fmt(x.leaves)} wallets · ${fmt(x.totalFlow)} FLOW`} v={x.status.replace("_", " ")} />
@@ -89,7 +92,7 @@ export function RewardsSolvencyTab({ wallet }: { wallet?: string }) {
         <KV k="Additional FLOW required" v={r.fundingPreparation.additionalRequiredFlow == null ? "UNKNOWN" : fmt(r.fundingPreparation.additionalRequiredFlow)} />
         <KV k="On-chain budget headroom" v={r.fundingPreparation.liveCampaignBudgetFlow == null ? "UNKNOWN" : `${fmt(r.fundingPreparation.liveCampaignBudgetFlow)} FLOW`} />
         <KV k="Owner action" v={r.fundingPreparation.budgetTx.method} />
-        <KV k="Draft first allocation" v={`${r.draftAllocation.leaves} wallet(s) · ${fmt(r.draftAllocation.totalPoints)} FLOW · not published`} />
+        <KV k="Draft first allocation" v={`${r.draftAllocation.leaves} wallet(s) · ${fmt(r.draftAllocation.totalPoints)} FLOW · not published${r.draftAllocation.excludedUnfundedPoints > 0 ? ` · ${fmt(r.draftAllocation.excludedUnfundedPoints)} unfunded excluded` : ""}`} />
       </Box>
       <SettlementBox wallet={wallet} r={r} rebuild={() => q.refetch() as never} rebuilding={q.isFetching} />
       {r.publication.map((p) => (

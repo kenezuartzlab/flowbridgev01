@@ -250,3 +250,19 @@ export function buildDraftAllocation(rows: DraftAllocationInput[], opts: { epoch
   const totalPoints = leaves.reduce((s, l) => s + l.points, 0);
   return { status: "DRAFT_NOT_PUBLISHED" as const, leaves, totalPoints, totalWei: (BigInt(totalPoints) * WEI).toString() };
 }
+
+/**
+ * Ops draft preview is funded-only: unfunded ledger points never enter a
+ * publishable allocation. `reconTotalPoints` is the historical-reconciliation
+ * figure (which can include unfunded rows); the difference is reported as
+ * excluded, never paid.
+ */
+export function summarizeFundedDraft(args: { reconTotalPoints: number; fundedWallets: number; fundedTotalPoints: number }) {
+  const totalPoints = Math.max(0, Math.floor(args.fundedTotalPoints));
+  return {
+    status: "DRAFT_NOT_PUBLISHED" as const,
+    leaves: Math.max(0, Math.floor(args.fundedWallets)),
+    totalPoints,
+    excludedUnfundedPoints: Math.max(0, Math.floor(args.reconTotalPoints) - totalPoints),
+  };
+}
