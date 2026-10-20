@@ -125,7 +125,8 @@ export async function buildRewardSolvencyReport() {
         rows.forEach((b, i) => {
           const leaves = Array.isArray(b.leaves) ? b.leaves.length : 0;
           const claimedLeaves = counts[i];
-          out.push({ epochId: b.epoch_id, leaves, claimedWallets: claimedLeaves, totalFlow: Number(BigInt(String(b.total_wei).split(".")[0]) / 10n ** 18n), source: b.source,
+          // Display only: JSON numeric values may use exponent notation; never truncate at the decimal point.
+          out.push({ epochId: b.epoch_id, leaves, claimedWallets: claimedLeaves, totalFlow: Number(b.total_wei) / 1e18, source: b.source,
             claimStartIso: b.claim_start ? new Date(Number(b.claim_start) * 1000).toISOString() : null, claimEndIso: b.claim_end ? new Date(Number(b.claim_end) * 1000).toISOString() : null,
             status: payoutRoundStatus({ epochId: b.epoch_id, publishedOnChain: !!b.publication_verified_at, claimStart: Number(b.claim_start), claimEnd: Number(b.claim_end), leaves, claimedLeaves, nowSec }) });
         });
