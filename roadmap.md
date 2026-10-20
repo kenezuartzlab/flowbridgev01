@@ -2,8 +2,9 @@
 - [x] Owner authorized production deployment 2026-10-20 17:57 UTC; financial actions remain prohibited.
 - [x] Fresh full regression: 1,844 tests / 173 files PASS; wallet cancellation/uncertain-lock/recheck/single-audit and 320/390/430/1280 publisher checks PASS.
 - [x] Fresh records: immutable Round #3 one wallet / 1,122 FLOW; 74 CORE_SWAP Points UNFUNDED with no reservation; zero attempts; auto-funding/signing OFF; two live rounds; historical exclusions PASS.
-- [ ] Verify final hosted build and authenticated stored-round display after correcting numeric display truncation only.
-- [ ] Complete release security exposure review: 0 critical/high; new moderate Hono advisory plus existing esbuild moderate/low. Managed provider-IAM gap remains documented; no automatic acceptance.
+- [x] Final automatic build/type validation OK at 18:03:26 UTC; authenticated stored-round and eligible draft both one wallet / 1,122 FLOW. Separate production-mode evidence not supplied by harness.
+- [x] Release security exposure review: 0 critical/high; moderate Hono serveStatic advisory has no matching application/MCP adapter use; existing esbuild moderate/low retained. Evidence in docs/security/V36_10_2_RELEASE_GATE.md.
+- [ ] Security-owner release-specific approval: V36.10.1 managed-provider cloud/IAM acceptance explicitly expires with that release; V36.10.2 acceptance requested, never auto-transferred.
 - [ ] Publish approved correction and independently verify production Ops, bundle hash and unchanged financial records.
 
 # V36.10.1 Security hotfix and final release
