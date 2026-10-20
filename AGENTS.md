@@ -35,3 +35,4 @@
 - Shared BOT network badges and the root public footer own ecosystem branding; the badge follows the selected product network. Why: avoid duplicate branding and false Mainnet labels on Testnet.
 - Mainnet/Testnet availability is owned by environmentCapabilities.ts and enforced by UI, senders and APIs. Why: separation must hold beyond UI.
 - Ops reads use opsRead.ts to bound session/request waits; writes never use its retry path. Why: stalled reads must recover without implying a write was cancelled.
+- HTML security headers (report-only CSP, production-host-only clickjacking protection) are set only in withSecurityHeaders in src/server.ts. Why: preview must stay embeddable while CSP is validated before enforcement.
