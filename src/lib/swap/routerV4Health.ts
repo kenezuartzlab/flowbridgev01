@@ -21,6 +21,10 @@ export interface RouterHealthCheck { key: RouterHealthKey; ok: boolean; detail: 
 export interface RouterV4Health { ok: boolean; checkedAt: number; checks: RouterHealthCheck[] }
 
 const eq = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+const short = (a: string) => (/^0x[0-9a-fA-F]{40}$/.test(a) ? `${a.slice(0, 6)}…${a.slice(-4)}`.toLowerCase() : String(a));
+
+/** Shown whenever a swap is stopped before anything reaches the wallet. */
+export const PRE_SUBMIT_BLOCK_TITLE = "Swap not submitted — route configuration check failed.";
 
 export async function readRouterV4Health(client: PublicClient): Promise<RouterV4Health> {
   const e = ROUTER_V4_MAINNET_EXPECTED;
@@ -44,8 +48,8 @@ export async function readRouterV4Health(client: PublicClient): Promise<RouterV4
     { key: "bdex_v3_registered", ok: eq(config[0], e.bdexV3Router) && Number(config[1]) === 1, detail: "BDEX V3 registration" },
     { key: "bdex_v3_active", ok: config[3] === true, detail: "BDEX V3 active" },
     { key: "effective_fee", ok: BigInt(routerFee as bigint) === e.effectiveFeeBps, detail: "BDEX V3 fee 1 bp" },
-    { key: "global_fee", ok: fees[0] === e.globalFeeBps, detail: "Global fee 0 bp" },
-    { key: "treasury", ok: eq(fees[2], e.treasury), detail: "Treasury" },
+    { key: "global_fee", ok: fees[0] === e.globalFeeBps, detail: `Global fee (verified ${e.globalFeeBps} bp, on-chain ${fees[0]} bp)` },
+    { key: "treasury", ok: eq(fees[2], e.treasury), detail: `Fee treasury (verified ${short(e.treasury)}, on-chain ${short(fees[2])})` },
     { key: "not_paused", ok: paused === false, detail: "Router not paused" },
     { key: "wrapped_native", ok: eq(config[2], e.wrappedNative), detail: "WBOT configuration" },
   ];
@@ -53,7 +57,7 @@ export async function readRouterV4Health(client: PublicClient): Promise<RouterV4
 }
 
 export function routerHealthWarning(health: RouterV4Health | null, error: boolean): string | null {
-  if (error) return "Router V4 health check is temporarily unavailable. Atomic V4 routes are paused until it recovers.";
+  if (error) return "Router V4 configuration could not be read (RPC unavailable). Atomic V4 routes are paused until it recovers. Nothing was submitted.";
   if (!health || health.ok) return null;
-  return `Router V4 configuration warning: ${health.checks.filter((c) => !c.ok).map((c) => c.detail).join(", ")}. Atomic V4 routes are paused; no contract change was attempted.`;
+  return `Failing field(s): ${health.checks.filter((c) => !c.ok).map((c) => c.detail).join("; ")}. The live router no longer matches the verified production configuration, so atomic V4 routes are paused. Nothing was submitted and no contract change was attempted.`;
 }
