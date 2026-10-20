@@ -13,8 +13,6 @@
 
 - Router V4 changes ship as new frozen candidate directories under contracts/production/ (never edit a deployed candidate); app ABIs are generated from the compiled artifact into routerV4Abi.generated.ts and guarded by a parity test. Why: hand-written ABIs drifted from deployed bytecode.
 - Route execution class (atomic V4 vs staged) is decided only in src/lib/swap/executionCapability.ts behind per-chain flags. Why: one place controls promotion.
-- Liquidity venues live in src/lib/liquidity/ as independent adapters (BDEX V2, BDEX V3, CaSwap); V2-style factories and wrapped-native are always read from the venue's router at runtime. Why: CaSwap Mainnet router's factory differs from the recorded address.
-- Per-chain liquidity write availability is decided only by LIQUIDITY_WRITES_ENABLED in src/lib/liquidity/liquidityTokens.ts. Why: Mainnet liquidity opens only after separately approved canaries.
 - Privacy-safe trade telemetry contains route quality and lifecycle fields only, never wallet addresses, hashes, signatures, amounts, or token metadata. Why: operational monitoring must not become user tracking.
 - Production ops/growth analytics are aggregated only in src/lib/ops/ (pure, tested) and served admin-only via /api/admin/ops to the /ops page; events are category-level with random browser session ids, never wallet addresses, emails, amounts or AI text. Why: operational insight must not become user tracking.
 
@@ -25,7 +23,7 @@
 
 - Reward progression toward the claim minimum is computed only in src/lib/rewards/rewardProgression.ts (pure) and resolved caller-scoped server-side in rewardProgression.server.ts via /api/rewards/progression; the next-best-action is decided only in src/lib/growth/nextBestAction.ts from those server facts. Why: client-side progress or recommendations must never be fabricated.
 
-- Read src/lib/rewards/AGENTS.md before changing reward/claim/settlement code. Why: scoped rules keep root notes small.
+- Subdirectories (src/lib/rewards, src/lib/liquidity) have their own AGENTS.md; read before changing files there. Why: scoped rules keep root notes small.
 - Incentive entry points reuse RewardsExperience/ReferralRewards and canonical policy/summary; referral explanations use recorded evidence without awarding or inferring claims. Why: legacy portal rules drifted from live truth.
 - Wallet connection choices, WalletConnect kill switch (VITE_WALLETCONNECT_ENABLED, fails closed), error normalization and the WALLET_BINDING message live only in src/lib/wallet/; binding is a separate explicit signature validated server-side for domain/origin/account/nonce. Why: connecting must never sign, and WalletConnect must never break boot.
 - Sign-in setup and Profile reuse BindWalletCard for explicit ownership binding and canonical state refresh. Why: separate legacy linking paths cannot bypass or drift from verified binding.
@@ -35,3 +33,4 @@
 - Shared BOT network badges and the root public footer own ecosystem branding; the badge follows the selected product network. Why: avoid duplicate branding and false Mainnet labels on Testnet.
 - Mainnet/Testnet availability is owned by environmentCapabilities.ts and enforced by UI, senders and APIs. Why: separation must hold beyond UI.
 - Ops reads use opsRead.ts to bound session/request waits; writes never use its retry path. Why: stalled reads must recover without implying a write was cancelled.
+- HTML security headers (report-only CSP, production-host-only clickjacking protection) are set only in withSecurityHeaders in src/server.ts. Why: preview must stay embeddable while CSP is validated before enforcement.
