@@ -65,7 +65,7 @@ import { LowGasSettingsModal } from "@/modals/LowGasSettingsModal";
 import { atomicV4Target, encodeV3Path } from "@/lib/swap/atomicV4";
 import { planExecution } from "@/lib/swap/executionCapability";
 import { createSwapReviewSnapshot, reviewChanged, type SwapReviewSnapshot } from "@/lib/swap/reviewSnapshot";
-import { readRouterV4Health, routerHealthWarning, type RouterV4Health } from "@/lib/swap/routerV4Health";
+import { PRE_SUBMIT_BLOCK_TITLE, readRouterV4Health, routerHealthWarning, type RouterV4Health } from "@/lib/swap/routerV4Health";
 import { atomicFailureMessage, createRoutedSwapActivity, recordRoutedSwapTx } from "@/lib/swap/swapLifecycle";
 import { sanitizeFailureReason, trackTradeOperationalEvent, trackLiquidityGap, type TradeOperationalEvent, type TradeOperationalEventName } from "@/lib/swap/operationalTelemetry";
 import { trackProductEvent } from "@/lib/ops/productEvents";
@@ -215,6 +215,7 @@ export function UniversalSwapCard({
   const [busy, setBusy] = useState(false);
   const [busyMsg, setBusyMsg] = useState("");
   const [txError, setTxError] = useState<string | null>(null);
+  const [txBlockedPreSubmit, setTxBlockedPreSubmit] = useState(false);
   const [lastTx, setLastTx] = useState<`0x${string}` | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [reviewSnapshot, setReviewSnapshot] = useState<SwapReviewSnapshot | null>(null);
@@ -1272,7 +1273,8 @@ export function UniversalSwapCard({
     if (guardBlocked) return;
     if (!publicClient || !address) return;
     const plan = planExecution(quote.steps, balanceChainId);
-    if (plan.execution === "ATOMIC_V4" && healthWarning) { setTxError(healthWarning); return; }
+    if (plan.execution === "ATOMIC_V4" && healthWarning) { setTxBlockedPreSubmit(true); setTxError(healthWarning); return; }
+    setTxBlockedPreSubmit(false);
     try {
       setReviewSnapshot(await buildReviewSnapshot(quote, parsedAmount));
       setConfirmOpen(true);
@@ -1523,7 +1525,7 @@ export function UniversalSwapCard({
       <LowGasSettingsModal isOpen={gasSettingsOpen} onClose={() => setGasSettingsOpen(false)} />
 
       {healthWarning && quote && planExecution(quote.steps, balanceChainId).execution === "ATOMIC_V4" && (
-        <WarningPanel type="warning" title="Atomic route unavailable" message={healthWarning} />
+        <WarningPanel type="warning" title={PRE_SUBMIT_BLOCK_TITLE} message={`${healthWarning} Retry the quote later or choose a different token pair.`} />
       )}
 
       {quoteError && amountIn && parseFloat(amountIn) > 0 && !quoting && (
@@ -1547,7 +1549,7 @@ export function UniversalSwapCard({
       {txError && (
         <WarningPanel
           type="error"
-          title="Swap Failed"
+          title={txBlockedPreSubmit || !lastTx ? PRE_SUBMIT_BLOCK_TITLE.replace(" route configuration check failed.", " see details below.") : "Swap Failed"}
           message={txError}
           txHash={lastTx ?? undefined}
           txUrlPrefix={txUrlPrefix}
