@@ -34,6 +34,11 @@ The epoch lock was inserted before the wallet request, but rejection was only di
 - Fresh signed-in ledger read: **Round #3 / one eligible wallet / proposed 1,122 FLOW**; simulation PASS, all root proof checks PASS; on-chain epochCount **2**, no publication attempt, autonomous signing **false**. Any later signature requires another fresh revalidation.
 - Current production (not this new hotfix): `/assets/ops-C30r3sDO.js`, SHA-256 `e3c37e03b9b68a543441a2ab427652695d27ab458d5bc47890e2de3653387808`. Downloaded independently from flowbridge.space; this proves the currently served bundle only, not a new deployment.
 
-Final result: recovery mechanics PASS in the bounded simulated/local checks; **release FAIL / HELD** pending security and full-page acceptance. Publisher candidate ready for review only; no production signature authorized.
+Historical result above: recovery mechanics PASS in the bounded simulated/local checks; release was HELD pending security and full-page acceptance.
+
+## Security hotfix follow-up — 2026-10-20 01:56 UTC
+Critical/high dependency findings corrected with preserved Bun lockfile; full/production scans have zero critical/high. Signed-in Control Center now loads using the real authorized caller and a non-signing acceptance wallet provider; signed-out API returns 401; all four layouts PASS. Full regression: 1,839 tests / 171 files; automatic build OK at 01:56:22 UTC. Private fork and simulated publisher UI recovery rerun PASS. Round #3 remains one eligible wallet / 1,122 FLOW, rounds published 2, attempts zero, automatic signing OFF.
+
+Release remains HELD: independent typecheck evidence unavailable; fresh exact-schema eight-way PostgreSQL rerun blocked by unavailable local extension and missing migration/fixture definitions in this checkout; external scan unavailable and deep persisted scans stale, without formal residual-risk acceptance. No publish request or new production reference. Detailed advisory report and six-part final status: `docs/security/V36_10_1_DEPENDENCY_AUDIT.md`.
 
 No payout was signed/published, no FLOW moved, no budget transaction repeated, no contract or historical hold changed.
