@@ -8,7 +8,10 @@
 - [x] Authorized Ops loads with real caller session/read-only acceptance wallet; signed-out API 401; bounded failed reads; 320/390/430/1280 layouts PASS.
 - [x] 1,839 regressions / 171 files, automatic build OK, simulated publisher recovery and private-fork delay/success/revert checks PASS; Round #3 one wallet/1,122 FLOW unsigned, attempts zero.
 - [ ] Release validation blocked by standalone typecheck/explicit production-mode evidence and mandatory external/deep scan coverage; fresh database concurrency blocker is resolved and automatic build is OK.
-- [ ] Publication/independent new bundle verification waits on those mandatory gates; no publish requested; automatic signing OFF.
+- [x] Security coverage matrix + reusable release checklist (docs/security/V36_10_1_SECURITY_COVERAGE.md, RELEASE_SECURITY_CHECKLIST.md): TLS/edge PASS, bundles+source secret scan CLEAN, fresh backend scan 0 new findings, Round #3 freshly revalidated (epoch 3, 1 leaf, 1,122 FLOW, 0 attempts, chain epochCount 2, auto-signing OFF).
+- [x] Owner formally accepted residual limitation A (no provider-native cloud/IAM audit on managed hosting; Wiz unconfigured) and authorized publish, recorded in the coverage matrix.
+- [x] Publish requested 2026-10-20 ~15:50 UTC; automatic signing OFF.
+- [ ] Post-publish verification pending: flowbridge.space still served the pre-hotfix bundle (index-DkcOmog5.js) ~6 minutes after the request; confirm new bundle hash, live CSP/X-Frame-Options headers, new-bundle secret scan and signed-in Ops recovery once the deploy lands.
 
 # V36.10.1 Publisher lock recovery
 - [x] Final recovery acceptance: simulated wallet rejection/timeout/disconnect/remount/retry; private BOT fork success/revert/delay; exact-schema eight-way retries/confirmation; 1,834 regressions and automatic build/type validation PASS; fresh Round #3 remains one wallet/1,122 FLOW, unsigned.

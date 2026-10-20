@@ -35,3 +35,7 @@ C. **Deployed-artifact secret scan covered the currently deployed (old) bundles.
 ## Decision required
 
 Coverage is complete except limitation A. Per the release gate, this requires the authorized security owner's explicit decision: accept the documented residual risk for limitation A and publish, or hold.
+
+## Owner decision (2026-10-20)
+
+The authorized security owner reviewed this matrix and formally ACCEPTED the residual risk described in limitation A (provider-native cloud/IAM audit unavailable on managed hosting; compensating controls documented above) and authorized publication of V36.10.1. Scope of acceptance: this release only; the acceptance does not waive future releases from this checklist.
