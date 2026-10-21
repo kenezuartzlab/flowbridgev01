@@ -113,8 +113,9 @@ export async function buildRewardSolvencyReport() {
       const out: { epochId: number; status: PayoutRoundStatus; leaves: number; claimedWallets: number | null; totalFlow: number; claimStartIso: string | null; claimEndIso: string | null; source: string }[] = [];
       try {
         const { countRoundClaims } = await import("./settlement.server");
-        const { data } = await supabaseAdmin.from("reward_settlement_batches").select("epoch_id,total_wei,claim_start,claim_end,leaves,publication_verified_at,source").eq("chain_id", MAINNET_CHAIN_ID).order("epoch_id");
-        const rows = data ?? [];
+        const { data } = await supabaseAdmin.from("reward_settlement_batches").select("id,fingerprint,epoch_id,total_wei,claim_start,claim_end,leaves,publication_verified_at,source").eq("chain_id", MAINNET_CHAIN_ID).order("epoch_id");
+        const { resolveBatchSchedule } = await import('./scheduleRenewal.server');
+        const rows = await Promise.all((data ?? []).map(b => resolveBatchSchedule(supabaseAdmin,b)));
         // V36.1: verified on-chain isClaimed per leaf; null when any read fails (never guessed).
         const counts = await Promise.all(rows.map(async (b) => {
           const ls = Array.isArray(b.leaves) ? (b.leaves as any[]) : [];

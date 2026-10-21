@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { readOpsJson } from "@/lib/admin/opsRead";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { PayoutOperations } from './PayoutOperations';
 
 type Snapshot = { id: string; program_id: string; total_points: number; row_count: number; account_count: number; snapshot_hash: string; status: string; proposed_by_email: string; approved_by_email: string | null; confirmed_by_email: string | null; confirmed_at: string | null; created_at: string };
 type State = {
@@ -19,7 +20,7 @@ type State = {
   automation: { policies: { program_id: string; auto_funding_enabled: boolean; suspended: boolean; per_run_cap: number; daily_cap: number }[]; autonomousFundingAuthorized: boolean; autonomousSigning: boolean; lastRuns: { ran_at: string; source: string }[] };
 };
 
-const SECTIONS = ["Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation", "Audit History"] as const;
+const SECTIONS = ["Payout Operations", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation", "Audit History"] as const;
 type Section = (typeof SECTIONS)[number];
 const fmt = (n: number | null | undefined) => (n == null ? "—" : Math.floor(n).toLocaleString());
 const TONE: Record<string, string> = {
@@ -47,7 +48,7 @@ function download(name: string, data: unknown) {
 
 export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | undefined; onOpen: (tab: "Rewards" | "Budgets") => void }) {
   const qc = useQueryClient();
-  const [section, setSection] = useState<Section>("Overview");
+  const [section, setSection] = useState<Section>("Payout Operations");
   const [busy, setBusy] = useState<string | null>(null);
   const q = useQuery({ queryKey: ["rewards-control", wallet], queryFn: () => {
     if (!wallet) throw new Error("Connect the wallet bound to your admin account.");
@@ -81,11 +82,11 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
 
   return (
     <section className="space-y-3">
-      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
+      {section !== 'Payout Operations' && <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
         <div className="flex items-start justify-between gap-2"><p className="min-w-0 text-[12.5px] font-bold">{next.text}</p><Chip s={next.state} /></div>
         {next.run && <button type="button" onClick={next.run} className="mt-2 w-full rounded-xl bg-primary px-3 py-2 text-[12.5px] font-black text-primary-foreground sm:w-auto">{next.label}</button>}
         {openExc.length > 0 && <p className="mt-2 text-[11px] font-bold text-warning">{openExc.length} open exception(s) need attention.</p>}
-      </div>
+      </div>}
 
       <div className="flex gap-1.5 overflow-x-auto pb-1">
         {SECTIONS.map((t) => <button key={t} type="button" onClick={() => setSection(t)} className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold ${section === t ? "border-primary/50 bg-primary/12 text-primary" : "border-hairline bg-card text-muted"}`}>{t}</button>)}
@@ -93,6 +94,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
         <button type="button" onClick={() => onOpen("Budgets")} className="shrink-0 rounded-full border border-hairline bg-card px-3 py-1 text-[11px] font-bold text-muted">Budgets ↗</button>
       </div>
 
+      {section === 'Payout Operations' && <PayoutOperations wallet={wallet}/>}
       {section === "Overview" && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[

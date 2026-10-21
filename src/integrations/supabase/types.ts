@@ -1653,6 +1653,62 @@ export type Database = {
           },
         ]
       }
+      reward_schedule_renewals: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          batch_id: string
+          claim_end: number
+          claim_start: number
+          created_at: string
+          evidence_hash: string
+          fingerprint: string
+          id: string
+          min_publish_delay: number
+          original_fingerprint: string
+          proposed_by: string | null
+          status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id: string
+          claim_end: number
+          claim_start: number
+          created_at?: string
+          evidence_hash: string
+          fingerprint: string
+          id?: string
+          min_publish_delay: number
+          original_fingerprint: string
+          proposed_by?: string | null
+          status?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id?: string
+          claim_end?: number
+          claim_start?: number
+          created_at?: string
+          evidence_hash?: string
+          fingerprint?: string
+          id?: string
+          min_publish_delay?: number
+          original_fingerprint?: string
+          proposed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_schedule_renewals_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "reward_settlement_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reward_settlement_batches: {
         Row: {
           chain_id: number
@@ -2132,6 +2188,18 @@ export type Database = {
           points_awarded: number
         }[]
       }
+      approve_reward_schedule: {
+        Args: {
+          p_actor: string
+          p_delay: number
+          p_email: string
+          p_evidence: string
+          p_id: string
+          p_now: number
+          p_wallet: string
+        }
+        Returns: boolean
+      }
       award_referral_milestone_v366: {
         Args: {
           p_day: string
@@ -2249,6 +2317,7 @@ export type Database = {
         Returns: Json
       }
       reward_funding_hash: { Args: { p_ids: string[] }; Returns: string }
+      reward_payout_evidence_hash: { Args: never; Returns: string }
       transition_reward_publication: {
         Args: {
           p_actor: string

@@ -21,8 +21,11 @@ async function handle(request:Request) {
  const body=await request.json().catch(()=>null);
  if(!body || !Number.isInteger(body.epochId) || body.epochId<=2 || !/^0x[0-9a-f]{64}$/i.test(body.root ?? '') || typeof body.fingerprint!=='string') return jsonResponse({error:'Invalid reviewed batch'},400);
  try {
-  const {data:batch,error}=await admin.from('reward_settlement_batches').select('*').eq('chain_id',677).eq('distributor',DISTRIBUTOR.toLowerCase()).eq('epoch_id',body.epochId).eq('root',body.root.toLowerCase()).eq('fingerprint',body.fingerprint).maybeSingle();
+  const {data:original,error}=await admin.from('reward_settlement_batches').select('*').eq('chain_id',677).eq('distributor',DISTRIBUTOR.toLowerCase()).eq('epoch_id',body.epochId).eq('root',body.root.toLowerCase()).maybeSingle();
   if(error) throw error;
+  const {resolveBatchSchedule}=await import('@/lib/rewards/scheduleRenewal.server');
+  const batch=original ? await resolveBatchSchedule(admin,original) : null;
+  if(batch && batch.fingerprint!==body.fingerprint) return jsonResponse({error:'Review expired or schedule changed. Re-check and review the current authorized batch. No wallet request submitted.'},409);
   if(!batch || !Array.isArray(batch.leaves) || !batch.leaves.length) return jsonResponse({error:'The reviewed snapshot does not match the stored batch. Refresh and review the existing batch again; no wallet request was submitted.'},409);
   if(request.method==='PUT') {
    const {buildRewardSolvencyReport}=await import('@/lib/rewards/rewardSolvency.server');
