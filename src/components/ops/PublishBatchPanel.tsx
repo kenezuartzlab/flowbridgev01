@@ -54,7 +54,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
     const j = r?.ok ? await r.json().catch(() => null) : null;
     if (j?.history) setHistory(j.history);
     if (restore) {
-      const a = j?.attempts?.find((a: { phase: string; retry_safe: boolean; epoch_id: number }) => a.epoch_id === s.epochId && a.phase !== "CONFIRMED_VERIFIED" && !a.retry_safe);
+      const a = selectRestorableAttempt(j?.attempts as PublisherAttempt[] | undefined);
       if (a) {
         remember({attemptId:a.id,operationId:a.operation_id,epochId:a.epoch_id,root:a.root,fingerprint:a.fingerprint,txHash:a.tx_hash});
         setPhase(a.tx_hash ? "BROADCAST_PENDING" : "RECOVERY_REQUIRED");
@@ -98,7 +98,8 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
   }
   async function recover(action = "recover", cancellation?: unknown) {
     if (!pending) return;
-    const r=await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PATCH",body:JSON.stringify({...pending,txHash:hash ?? (recoveryHash.trim() || null),action,cancellation})}).catch(()=>null);
+    const evidence = cancellation ?? pending.cancellation;
+    const r=await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PATCH",body:JSON.stringify({...pending,txHash:hash ?? (recoveryHash.trim() || null),action:evidence && action === "recover" ? "cancel" : action,cancellation:evidence})}).catch(()=>null);
     const j=r ? await r.json().catch(()=>null) : null;
     if(!r?.ok) {setPhase("RECOVERY_REQUIRED");setMsg(j?.error ?? "Recovery unavailable; do not resend.");return;}
     setPhase(j.phase);setMsg(null);
@@ -134,6 +135,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
       try { txHash=String(await eth.request({method:"eth_sendTransaction",params:[{from:accounts[0],to:fresh.tx.to,data:fresh.tx.data,value:"0x0",nonce:`0x${Number(lock.nonce).toString(16)}`}]})); }
       catch (e) {
         const cancellation=isPublisherCancellation(e);
+        if (cancellation) remember({...p,cancellation:{code:4001}});
         const r=await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PATCH",body:JSON.stringify({...p,action:cancellation?"cancel":"recover",cancellation:cancellation?{code:4001}:undefined})}).catch(()=>null);
         const j=r ? await r.json().catch(()=>null) : null;
         if(r?.ok && j?.retrySafe) {setPending(null);setHash(null);setPhase("CANCELLED");try {localStorage.removeItem(storageKey);} catch {} setMsg(null);}
