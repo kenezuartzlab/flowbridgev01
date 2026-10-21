@@ -1,3 +1,11 @@
+# Round #3 reviewed-batch restoration
+- [x] Select and revalidate the existing immutable batch; never replace its schedule or allocation.
+- [x] Cover hourly lookup drift, missing/expired review, stale allocation, reconnect/refresh, payload mismatch and existing recovery regressions. Eight deterministic revalidation callers tested; fresh database concurrency not run.
+- [x] Run regression and automatic compilation gates; authenticated real Ops read shows 1,122 FLOW / one wallet, 74 excluded, zero attempts, two rounds. Actual panel renders blocked at 390/1280px.
+- [x] Report stored-window blocker without opening the wallet: stored start 2026-10-20 16:00 UTC cannot satisfy live 86,400-second publication delay on 2026-10-21.
+- [ ] Production release blocked by mandatory dependency security audit (2 high full / 1 high production dependency graph); no publish performed. Fresh database concurrency and full wallet-connected production acceptance remain unverified.
+- [ ] Publisher readiness blocked by immutable expired schedule; cannot restore signing without separately authorized schedule/batch replacement, prohibited by this request.
+
 # V36.10.2 Approved Ops correction
 - [x] Owner authorized production deployment 2026-10-20 17:57 UTC; financial actions remain prohibited.
 - [x] Fresh full regression: 1,844 tests / 173 files PASS; wallet cancellation/uncertain-lock/recheck/single-audit and 320/390/430/1280 publisher checks PASS.

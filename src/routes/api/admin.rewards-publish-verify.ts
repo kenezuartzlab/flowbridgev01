@@ -23,15 +23,20 @@ async function handle(request:Request) {
  try {
   const {data:batch,error}=await admin.from('reward_settlement_batches').select('*').eq('chain_id',677).eq('distributor',DISTRIBUTOR.toLowerCase()).eq('epoch_id',body.epochId).eq('root',body.root.toLowerCase()).eq('fingerprint',body.fingerprint).maybeSingle();
   if(error) throw error;
-  if(!batch || !Array.isArray(batch.leaves) || !batch.leaves.length) return jsonResponse({error:'Reviewed batch not found'},404);
+  if(!batch || !Array.isArray(batch.leaves) || !batch.leaves.length) return jsonResponse({error:'The reviewed snapshot does not match the stored batch. Refresh and review the existing batch again; no wallet request was submitted.'},409);
   if(request.method==='PUT') {
    const {buildRewardSolvencyReport}=await import('@/lib/rewards/rewardSolvency.server');
    const fresh=(await buildRewardSolvencyReport()).settlement;
-   if(fresh.status!=='READY_FOR_PUBLISHER_REVIEW' || fresh.fingerprint!==batch.fingerprint || fresh.root!==batch.root || !fresh.tx || !fresh.simulation?.ok) return jsonResponse({error:'Batch is stale or blocked; rebuild before review'},409);
+   if(fresh.status!=='READY_FOR_PUBLISHER_REVIEW' || fresh.fingerprint!==batch.fingerprint || fresh.root!==batch.root || !fresh.tx || !fresh.simulation?.ok) return jsonResponse({error:`Stored batch validation failed (${fresh.reason ?? 'snapshot mismatch'}). No wallet request submitted. Refresh and review again; an expired stored claim window requires separately authorized replacement.`},409);
+   const {integerWei,immutableBatchCalldata}=await import('@/lib/rewards/immutableBatch');
+   const expected=immutableBatchCalldata({epochId:batch.epoch_id,root:batch.root as `0x${string}`,totalWei:integerWei(batch.total_wei),claimStart:Number(batch.claim_start),claimEnd:Number(batch.claim_end),leaves:batch.leaves as never});
+   if(fresh.epochId!==batch.epoch_id || fresh.tx.to.toLowerCase()!==DISTRIBUTOR.toLowerCase() || fresh.tx.chainId!==677 || fresh.tx.value!=='0' || fresh.tx.data.toLowerCase()!==expected.toLowerCase()) return jsonResponse({error:'Stored batch payload mismatch. Refresh and review again; no wallet request submitted.'},409);
    const {publicationPreflight}=await import('@/lib/rewards/publisherReconciliation.server');
    const live=await publicationPreflight(batch.epoch_id);
    if(!live.epochAvailable || live.latest!==live.pending) return jsonResponse({error:'Published epoch or unresolved publisher nonce; reconcile first'},409);
    if(!fresh.tx.data) return jsonResponse({error:'Missing exact transaction'},409);
+   const {publicationClient}=await import('@/lib/rewards/publisherReconciliation.server');
+   await publicationClient().call({account:SETTLEMENT_SIGNER.address,to:DISTRIBUTOR,data:expected});
    const {data:operation,error:lockError}=await admin.rpc('acquire_reward_publication',{p_batch:batch.id,p_actor:gate.admin.userId,p_sender:gate.admin.wallet,p_nonce:live.pending,p_calldata:fresh.tx.data,p_start:Number(live.head)});
    if(lockError || !operation) return jsonResponse({error:'Epoch locked; recover the original operation before retrying'},409);
    const {data:a}=await admin.from('reward_publish_attempts').select('id').eq('operation_id',operation).single();
@@ -65,7 +70,8 @@ async function handle(request:Request) {
   if(!await publicationNonceMatches(body.txHash,attempt.sender_nonce)) return jsonResponse({error:'Original publisher nonce mismatch; keep the batch locked'},409);
   await transition('CONFIRMING',body.txHash);
   const {verifyPublicationOnChain}=await import('@/lib/rewards/publicationRecovery.server');
-  const result=await verifyPublicationOnChain({epochId:batch.epoch_id,root:batch.root as `0x${string}`,totalWei:BigInt(String(batch.total_wei).split('.')[0]).toString(),claimStart:Number(batch.claim_start),claimEnd:Number(batch.claim_end),leaves:batch.leaves as never},body.txHash,gate.admin.wallet);
+  const {integerWei}=await import('@/lib/rewards/immutableBatch');
+  const result=await verifyPublicationOnChain({epochId:batch.epoch_id,root:batch.root as `0x${string}`,totalWei:integerWei(batch.total_wei),claimStart:Number(batch.claim_start),claimEnd:Number(batch.claim_end),leaves:batch.leaves as never},body.txHash,gate.admin.wallet);
   if(result.phase==='CONFIRMED_VERIFIED' && result.blockHash && result.blockNumber) {
    const {error:saveError}=await admin.rpc('confirm_reward_publication',{p_attempt:attempt.id,p_hash:body.txHash,p_block_hash:result.blockHash,p_block: Number(result.blockNumber),p_actor:gate.admin.userId,p_email:gate.admin.email,p_role:gate.admin.role});
    if(saveError) throw saveError;
