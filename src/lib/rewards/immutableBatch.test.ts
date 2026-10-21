@@ -43,5 +43,6 @@ describe('immutable reviewed batch', () => {
     expect(integerWei(1.122e21)).toBe('1122000000000000000000');
     expect(integerWei('1122000000000000000000')).toBe('1122000000000000000000');
     expect(()=>integerWei('1.5')).toThrow();
+    expect(()=>integerWei('1e99999999')).toThrow();
   });
 });

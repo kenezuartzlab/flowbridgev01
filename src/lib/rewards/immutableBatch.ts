@@ -17,17 +17,23 @@ export function revalidateImmutableBatch(candidate: Candidate, stored: Immutable
   return { ...candidate, status: ready ? 'READY_FOR_PUBLISHER_REVIEW' : 'BLOCKED',
     reason: ready ? null : checks.filter(c => !c.pass).map(c => c.id).join(', '),
     batch: candidate.batch ? { ...candidate.batch, root: stored.root, totalWei: stored.totalWei } : null, fingerprint: stored.fingerprint as Hex, claimStart: stored.claimStart, claimEnd: stored.claimEnd, checks,
-    tx: ready && candidate.tx ? { ...candidate.tx, data: encodeFunctionData({ abi: PUBLISH_EPOCH_ABI, functionName: 'publishEpoch', args: [stored.root,BigInt(stored.totalWei),BigInt(stored.claimStart),BigInt(stored.claimEnd)] }) } : null,
+    tx: ready && candidate.tx ? { ...candidate.tx, data: immutableBatchCalldata(stored) } : null,
   };
+}
+
+export function immutableBatchCalldata(stored: StoredBatch): Hex {
+  return encodeFunctionData({ abi: PUBLISH_EPOCH_ABI, functionName: 'publishEpoch', args: [stored.root,BigInt(stored.totalWei),BigInt(stored.claimStart),BigInt(stored.claimEnd)] });
 }
 
 /** Expand JSON exponent notation without truncating at a decimal point. */
 export function integerWei(value: string | number): string {
   const text = String(value);
+  if (text.length > 100) throw new Error('Invalid stored allocation');
   const match = /^(\d+)(?:\.(\d+))?(?:e\+?(\d+))?$/i.exec(text);
   if (!match) throw new Error('Invalid stored allocation');
   const fraction = match[2] ?? '';
   const shift = Number(match[3] ?? 0) - fraction.length;
+  if (Number(match[3] ?? 0) > 77 || match[1].length + fraction.length + Math.max(shift,0) > 78) throw new Error('Invalid stored allocation');
   if (shift < 0 && !('' + fraction).endsWith('0'.repeat(-shift))) throw new Error('Non-integer allocation');
   const digits = match[1] + fraction;
   return BigInt(shift >= 0 ? digits + '0'.repeat(shift) : digits.slice(0,shift)).toString();
