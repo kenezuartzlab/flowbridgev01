@@ -1,3 +1,9 @@
+# Round #3 reviewed-batch restoration
+- [ ] Select and revalidate the existing immutable batch; never replace its schedule or allocation.
+- [ ] Cover lookup drift, missing/expired review, reconnect/refresh and recovery/concurrency regressions.
+- [ ] Run security and automatic build gates; verify authenticated UI and production if gates permit deployment.
+- [ ] Report any stored-window blocker without opening the wallet.
+
 # V36.10.2 Approved Ops correction
 - [x] Owner authorized production deployment 2026-10-20 17:57 UTC; financial actions remain prohibited.
 - [x] Fresh full regression: 1,844 tests / 173 files PASS; wallet cancellation/uncertain-lock/recheck/single-audit and 320/390/430/1280 publisher checks PASS.

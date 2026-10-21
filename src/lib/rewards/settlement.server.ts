@@ -5,6 +5,7 @@
  * publisher signs. No private key exists here; nothing is signed or broadcast.
  */
 import { CLAIM_WINDOW_POLICY, PUBLIC_MAINNET_FLOW_CLAIMS, settlementEligibility } from "./publicClaimPolicy";
+import { integerWei, revalidateImmutableBatch } from './immutableBatch';
 import { createPublicClient, http, parseAbi, type Address, type Hex } from "viem";
 import { MAINNET_PAYOUT_AUDIT, type ProgramId } from "./rewardFundingPlan";
 import { MAINNET_EPOCH_MANIFESTS } from "./mainnetEpochManifest";
@@ -60,7 +61,7 @@ export async function readEpoch(epochId: number) {
 
 type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 type BatchRow = { epoch_id: number; root: string; total_wei: string | number; claim_start: number; claim_end: number; leaves: StoredBatch["leaves"]; publication_verified_at: string | null };
-const toBatch = (r: BatchRow): StoredBatch => ({ epochId: r.epoch_id, root: r.root as Hex, totalWei: BigInt(String(r.total_wei).split(".")[0]).toString(), claimStart: Number(r.claim_start), claimEnd: Number(r.claim_end), leaves: r.leaves });
+const toBatch = (r: BatchRow): StoredBatch => ({ epochId: r.epoch_id, root: r.root as Hex, totalWei: integerWei(r.total_wei), claimStart: Number(r.claim_start), claimEnd: Number(r.claim_end), leaves: r.leaves });
 
 /**
  * Read-only historical indexing: every on-chain round missing a local record is
@@ -229,14 +230,20 @@ export async function buildSettlement(args: {
   const programs: ProgramFunding[] = [...PROGRAMS, "OTHER" as ProgramId].map((p) => ({ programId: p, includedPoints: inc.get(p) ?? 0, availablePoints: Math.max(0, budgetOf(p) - (usedBefore.get(p) ?? 0)) }));
   const fundedAvail = programs.reduce((t, p) => t + p.availablePoints, 0);
 
-  const p = prepareSettlementBatch({ rows, fundedPointsAvailable: fundedAvail, programs, publisherRoles: roles, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
+  let p = prepareSettlementBatch({ rows, fundedPointsAvailable: fundedAvail, programs, publisherRoles: roles, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
+  const { data: existing, error: existingError } = await args.admin.from('reward_settlement_batches').select('*')
+    .eq('chain_id', MAINNET_CHAIN_ID).eq('distributor', DISTRIBUTOR.toLowerCase()).eq('epoch_id', p.epochId);
+  if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
+  if ((existing ?? []).length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
+  const stored = existing?.[0];
+  if (stored) p = revalidateImmutableBatch(p, { ...toBatch(stored as unknown as BatchRow), id: stored.id, fingerprint: stored.fingerprint, published: !!stored.publication_verified_at }, live.nowSec, live.minPublishDelay);
 
   // V36.3A — batch/day limits + exact eth_call simulation from the publisher.
   const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
   const { data: recent, error: recentError } = await args.admin.from("reward_settlement_batches").select("total_wei,publication_verified_at")
     .eq("chain_id", MAINNET_CHAIN_ID).gte("publication_verified_at", dayAgo);
   if (recentError) throw new Error('PUBLICATION_LIMIT_STATE_UNAVAILABLE');
-  const flowPublishedLast24h = ((recent ?? []) as { total_wei: string | number }[]).reduce((t, r) => t + Number(BigInt(String(r.total_wei).split(".")[0]) / WEI), 0);
+  const flowPublishedLast24h = ((recent ?? []) as { total_wei: string | number }[]).reduce((t, r) => t + Number(BigInt(integerWei(r.total_wei)) / WEI), 0);
   const batchFlow = p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0;
   const limits = publisherLimitChecks({ wallets: p.batch?.leaves.length ?? 0, totalFlow: batchFlow, flowPublishedLast24h });
   let simulation: { ran: boolean; ok: boolean; detail: string } = { ran: false, ok: false, detail: "no publishable transaction" };
@@ -262,7 +269,7 @@ export async function buildSettlement(args: {
     return { account: opaque(r.userId), state, fundedPoints: Math.floor(r.authoritative), alreadySettled: Math.floor(r.alreadyAllocatedPoints), delta };
   });
 
-  if (publishable && p.batch?.root) {
+  if (publishable && p.batch?.root && !stored) {
     const { error: saveError } = await args.admin.from("reward_settlement_batches").upsert({
       chain_id: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR.toLowerCase(), epoch_id: p.epochId, root: p.batch.root,
       total_wei: p.batch.totalWei as never, claim_start: p.claimStart, claim_end: p.claimEnd, fingerprint: p.fingerprint,
@@ -278,6 +285,7 @@ export async function buildSettlement(args: {
     simulation, limits, flowPublishedLast24h, walletStates, signupReconciliation: signup.report,
     publisherConfig: { mode: PUBLISHER_CONFIG.mode, autonomousSigning: PUBLISHER_CONFIG.autonomousSigning, maxWalletsPerEpoch: PUBLISHER_CONFIG.maxWalletsPerEpoch, maxFlowPerEpoch: PUBLISHER_CONFIG.maxFlowPerEpoch, maxFlowPerDay: PUBLISHER_CONFIG.maxFlowPerDay },
     signer: SETTLEMENT_SIGNER, publisher,
+    batchId: stored?.id ?? null,
     epochId: p.epochId, leaves: p.batch?.leaves.length ?? 0,
     totalFlow: p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0, root: p.batch?.root ?? null,
     checks, tx: publishable ? p.tx : null, fingerprint: p.fingerprint, programs: programs.filter((x) => x.includedPoints > 0 || x.availablePoints > 0),

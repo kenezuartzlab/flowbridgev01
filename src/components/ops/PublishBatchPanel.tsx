@@ -107,6 +107,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
     void loadHistory();
   }
   const ready = s.status === "READY_FOR_PUBLISHER_REVIEW" && !!s.tx;
+  useEffect(() => { setReview(false); }, [wallet, s.fingerprint, s.root, ready, stale]);
   const states = s.walletStates ?? [];
   const count = (k: string) => states.filter((w) => w.state === k).length;
   const live = s.liveState;
@@ -117,8 +118,8 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
     busy.current = true; setMsg(null); setPhase("VALIDATING");
     try {
       const fresh = (await rebuild()).data?.settlement;
-      if (!fresh || fresh.fingerprint !== s.fingerprint || fresh.root !== s.root || !fresh.tx || !fresh.root || !fresh.epochId || !fresh.fingerprint) {
-        setPhase("IDLE"); setMsg("Settlement changed during revalidation — review the rebuilt batch."); return;
+      if (!fresh || fresh.status !== 'READY_FOR_PUBLISHER_REVIEW' || fresh.fingerprint !== s.fingerprint || fresh.root !== s.root || !fresh.tx || !fresh.root || !fresh.epochId || !fresh.fingerprint) {
+        setReview(false); setPhase("IDLE"); setMsg("Stored batch validation failed — refresh and review the existing batch again. No wallet request was submitted."); return;
       }
       const eth = await getActiveProvider();
       if (!eth) { setPhase("IDLE"); setMsg(WALLET_GATE_COPY.NOT_CONNECTED); return; }
@@ -128,7 +129,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
       if (gate !== "OK" || accounts[0]?.toLowerCase() !== wallet?.toLowerCase()) { setPhase("IDLE"); setMsg(WALLET_GATE_COPY[gate] === WALLET_GATE_COPY.OK ? "Reconnect your bound operator wallet." : WALLET_GATE_COPY[gate]); return; }
       const locked = await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PUT",body:JSON.stringify({epochId:fresh.epochId,root:fresh.root,fingerprint:fresh.fingerprint})});
       const lock = await locked.json();
-      if (!locked.ok || !lock.attemptId) { setPhase("IDLE"); setMsg(lock.error ?? "Publication blocked."); void loadHistory(true); return; }
+      if (!locked.ok || !lock.attemptId) { setReview(false); setPhase("IDLE"); setMsg(lock.error ?? "Publication blocked."); void loadHistory(true); return; }
       const p: PendingPublication = {attemptId:lock.attemptId,operationId:lock.operationId,epochId:fresh.epochId,root:fresh.root,fingerprint:fresh.fingerprint,txHash:null};
       remember(p); setPhase("AWAITING_WALLET");
       let txHash: string;
@@ -190,16 +191,17 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
       )}
       {!review ? (
         <Button type="button" disabled={!ready || stale || !!pending} onClick={() => setReview(true)} className="mt-3 rounded-lg bg-primary px-3 py-2 text-[12.5px] font-bold text-primary-foreground disabled:opacity-40">Review &amp; Publish</Button>
-      ) : (
+      ) : ready && !stale ? (
         <div className="mt-3 space-y-2 rounded-xl border border-border p-3 text-[12.5px]">
           <p className="font-bold">You are about to publish round #{s.epochId} on BOT Mainnet (677).</p>
           <p className="text-muted">{fmt(s.leaves)} wallets will be able to claim {fmt(s.totalFlow)} FLOW from {s.claimStartIso?.slice(0, 16)} to {s.claimEndIso?.slice(0, 16)} UTC. Your wallet will show one publishEpoch call to the payout contract; it moves no tokens and costs only gas. Signer must be {s.signer.address.slice(0, 6)}…{s.signer.address.slice(-4)}.</p>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" disabled={!!pending || !["IDLE","READY","CANCELLED","REVERTED"].includes(phase)} onClick={() => void publish()} className="rounded-lg bg-primary px-3 py-2 font-bold text-primary-foreground disabled:opacity-40">{phase === "CANCELLED" || phase === "REVERTED" ? "Retry Publication" : "Revalidate & open wallet"}</Button>
+            <Button type="button" disabled={!ready || stale || !!pending || !["IDLE","READY","CANCELLED","REVERTED"].includes(phase)} onClick={() => void publish()} className="rounded-lg bg-primary px-3 py-2 font-bold text-primary-foreground disabled:opacity-40">{phase === "CANCELLED" || phase === "REVERTED" ? "Retry Publication" : "Revalidate & open wallet"}</Button>
             <Button type="button" onClick={() => { setReview(false); }} className="rounded-lg border border-border px-3 py-2">Cancel</Button>
           </div>
         </div>
-      )}
+      ) : null}
+      {s.checks.some(c => c.id === 'STORED_CLAIM_WINDOW' && !c.pass) && <p className="mt-2 text-[12px] font-bold text-danger">Stored claim window no longer meets the contract’s minimum publication delay. Nothing submitted. Re-review cannot change the immutable schedule; separately authorized batch replacement is required.</p>}
       {!ready && <p className="mt-2 text-[12px] text-muted">{s.reason ? `Not publishable: ${s.reason.replaceAll("_", " ")}` : "Not publishable."}</p>}
       {msg && <p className="mt-2 text-[12px] font-bold text-danger">{msg}</p>}
       {phase !== "IDLE" && <p className="mt-2 text-[12px] font-bold">{PHASE_COPY[phase]}</p>}

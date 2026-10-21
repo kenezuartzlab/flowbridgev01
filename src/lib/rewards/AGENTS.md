@@ -1,4 +1,5 @@
 # Rewards rules
+- Existing unsigned batches are selected and revalidated through immutableBatch.ts against fresh funded eligibility and live contract timing; reads never overwrite their fingerprint, window or allocation. Why: hourly preview fingerprints previously diverged from stored immutable records and hid expired windows.
 - Existing approved policy versions are validated by approvedRewardPolicy.ts; policy drift fails closed, and reviewed historical milestones are excluded by row/date in historicalReconciliation.ts. Why: later activity must never silently restore a historical hold or change economics under the same version.
 - Reward insert guards serialize wallet/day and referrer/month caps in PostgreSQL; historical rows are not rewritten. Why: separate concurrent events can bypass a read-then-insert cap.
 
