@@ -140,7 +140,7 @@
     "source-map-js": "1.2.2",
     "tmp": "0.2.7",
     "@hono/node-server": "1.19.15",
-    "hono": "4.13.7",
+    "hono": "4.13.11",
     "qs": "6.16.0"
   },
   "resolutions": {
