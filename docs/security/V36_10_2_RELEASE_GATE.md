@@ -13,8 +13,8 @@ Status: HOLD pending release-specific residual-risk approval. Production has not
 - Fresh backend scan 17:58:19 UTC: no new active findings. Wiz skipped because connector not configured. Deep code/MCP scans remain dated October 13; changed reporting/display paths reviewed directly, not claimed freshly deep-scanned.
 - Live existing release security headers checked: HSTS, report-only CSP, enforced frame-ancestors self, X-Frame-Options SAMEORIGIN and Permissions-Policy present.
 
-## Mandatory approval boundary
-The V36.10.1 matrix explicitly restricts its managed-provider cloud/IAM residual-risk acceptance to that release only. It cannot automatically authorize V36.10.2. Current authorization permits deployment of the Ops correction but does not explicitly renew acceptance of the unavailable cloud/IAM assurance. Request explicit security-owner acceptance of the same narrowly scoped managed-provider limitation for V36.10.2, with no extension to later releases. No claim of provider-native equivalence is made.
+## Owner approval (2026-10-21T00:00:00Z)
+The authorized security owner explicitly APPROVED renewal of the existing managed-hosting cloud/IAM residual-risk exception for V36.10.2. Scope: the existing Wiz/cloud-IAM coverage gap only, recorded in V36_10_1_SECURITY_COVERAGE.md limitation A; compensating controls unchanged. Duration: 30 days, expiring 2026-11-20T00:00:00Z; the missing provider-native cloud-security assessment must be scheduled before expiry. The exception does not extend to new vulnerabilities or payout publishing defects and does not authorize any later release. No claim of provider-native equivalence is made.
 
 ## Deployment verification pending
 Last verified production Ops asset: /assets/ops-BY_X2BlX.js, SHA-256 b1a7179f93d6a798042a94c03286be83ee9e707887d32cf637780bbfd61da4bd. New release fingerprint and authenticated production acceptance remain pending; no production success claimed.
