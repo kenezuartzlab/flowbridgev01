@@ -188,7 +188,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
           {s.signupReconciliation.states.map((x) => <Row key={x.state} k={x.state.replaceAll("_", " ")} v={`${x.rows} rows · ${fmt(x.points)} pts`} />)}
         </details>
       )}
-      {!pending && !review ? (
+      {!pending && !review && ready ? (
         <Button type="button" disabled={!ready || stale || !!pending} onClick={() => setReview(true)} className="mt-3 rounded-lg bg-primary px-3 py-2 text-[12.5px] font-bold text-primary-foreground disabled:opacity-40">Review &amp; Publish</Button>
       ) : !pending && ready && !stale ? (
         <div className="mt-3 space-y-2 rounded-xl border border-border p-3 text-[12.5px]">
@@ -200,7 +200,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
           </div>
         </div>
       ) : null}
-      {s.checks.some(c => c.id === 'STORED_CLAIM_WINDOW' && !c.pass) && <p className="mt-2 text-[12px] font-bold text-danger">Stored claim window no longer meets the contract’s minimum publication delay. Nothing submitted. Re-review cannot change the immutable schedule; separately authorized batch replacement is required.</p>}
+      {s.checks.some(c => c.id === 'STORED_CLAIM_WINDOW' && !c.pass) && <p className="mt-2 text-[12px] font-bold text-warning">Schedule needs renewal. Open Payout Operations to review a valid schedule; the original allocation and history stay preserved. Nothing submitted.</p>}
       {!ready && <p className="mt-2 text-[12px] text-muted">{s.reason ? `Not publishable: ${s.reason.replaceAll("_", " ")}` : "Not publishable."}</p>}
       {msg && <p className="mt-2 text-[12px] font-bold text-danger">{msg}</p>}
       {phase !== "IDLE" && <p className="mt-2 text-[12px] font-bold">{PHASE_COPY[phase]}</p>}
