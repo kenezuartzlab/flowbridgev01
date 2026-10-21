@@ -16,7 +16,7 @@ export function revalidateImmutableBatch(candidate: Candidate, stored: Immutable
   const ready = candidate.status === 'READY_FOR_PUBLISHER_REVIEW' && checks.every(c => c.pass);
   return { ...candidate, status: ready ? 'READY_FOR_PUBLISHER_REVIEW' : 'BLOCKED',
     reason: ready ? null : checks.filter(c => !c.pass).map(c => c.id).join(', '),
-    batch: stored, fingerprint: stored.fingerprint as Hex, claimStart: stored.claimStart, claimEnd: stored.claimEnd, checks,
+    batch: candidate.batch ? { ...candidate.batch, root: stored.root, totalWei: stored.totalWei } : null, fingerprint: stored.fingerprint as Hex, claimStart: stored.claimStart, claimEnd: stored.claimEnd, checks,
     tx: ready && candidate.tx ? { ...candidate.tx, data: encodeFunctionData({ abi: PUBLISH_EPOCH_ABI, functionName: 'publishEpoch', args: [stored.root,BigInt(stored.totalWei),BigInt(stored.claimStart),BigInt(stored.claimEnd)] }) } : null,
   };
 }
