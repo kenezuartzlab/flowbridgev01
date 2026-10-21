@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { prepareSettlementBatch } from './settlementPlanner';
+import type { Hex } from 'viem';
 import { MAINNET_PAYOUT_AUDIT } from './rewardFundingPlan';
 import { integerWei, revalidateImmutableBatch, type ImmutableBatch } from './immutableBatch';
 const now = 1792549800;
 const run = (points = 1122, time = now) => prepareSettlementBatch({
   rows: [{ userId: 'test', wallet: '0xce42b27d5e5b8c2545ddabea204d776e658d9dd5', classification: 'MATCH', authoritative: points, pendingReview: 0, alreadyAllocatedPoints: 0 }],
-  fundedPointsAvailable: 2000, chainId: 677, distributor: MAINNET_PAYOUT_AUDIT.address,
+  fundedPointsAvailable: 2000, chainId: 677, distributor: MAINNET_PAYOUT_AUDIT.address as Hex,
   chain: { epochCount: 2, campaignBudgetWei: 1000000n * 10n ** 18n, totalClaimedWei: 0n, totalReservedWei: 0n, balanceWei: 1000000n * 10n ** 18n, minPublishDelay: 86400, paused: false, nowSec: time },
 });
 function stored(): ImmutableBatch {
