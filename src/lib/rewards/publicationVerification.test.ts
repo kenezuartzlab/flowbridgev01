@@ -37,4 +37,9 @@ describe('publisher confirmation identity',()=>{
  it('timeout then recovery never proves success until full evidence returns',()=>{const p=evidence();p.tx=null;expect(verifyPublicationIdentity(p).complete).toBe(false);expect(verifyPublicationIdentity(evidence()).complete).toBe(true);});
  it('repeated checks produce identical verified result',()=>{expect(verifyPublicationIdentity(evidence())).toEqual(verifyPublicationIdentity(evidence()));});
  it('persists original hash and attempt across restart without trusting it as confirmation',()=>{const p={attemptId:'id',epochId:3,root,fingerprint:hash,txHash:hash};expect(parsePendingPublication(JSON.stringify(p))).toEqual(p);expect(parsePendingPublication('{invalid')).toBeNull();expect(parsePendingPublication(JSON.stringify({...p,epochId:2}))).toBeNull();});
+ it('persists wallet cancellation evidence across reload and strips invalid evidence',()=>{
+  const p={attemptId:'id',epochId:3,root,fingerprint:hash,txHash:null,cancellation:{code:4001}};
+  expect(parsePendingPublication(JSON.stringify(p))).toEqual(p);
+  expect(parsePendingPublication(JSON.stringify({...p,cancellation:{code:'4001'}}))).toEqual({attemptId:'id',epochId:3,root,fingerprint:hash,txHash:null});
+ });
 });

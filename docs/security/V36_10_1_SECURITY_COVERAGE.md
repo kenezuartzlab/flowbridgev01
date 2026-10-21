@@ -39,3 +39,7 @@ Coverage is complete except limitation A. Per the release gate, this requires th
 ## Owner decision (2026-10-20)
 
 The authorized security owner reviewed this matrix and formally ACCEPTED the residual risk described in limitation A (provider-native cloud/IAM audit unavailable on managed hosting; compensating controls documented above) and authorized publication of V36.10.1. Scope of acceptance: this release only; the acceptance does not waive future releases from this checklist.
+
+## Owner renewal for V36.10.2 (2026-10-21T00:00:00Z)
+
+The authorized security owner explicitly renewed acceptance of limitation A for V36.10.2 only. Scope: the existing Wiz/cloud-IAM coverage gap, unchanged compensating controls. Duration: 30 days from the approval timestamp, expiring 2026-11-20T00:00:00Z; the provider-native cloud-security assessment must be scheduled before expiry. The renewal does not cover new vulnerabilities or payout publishing defects and does not extend to any later release.
