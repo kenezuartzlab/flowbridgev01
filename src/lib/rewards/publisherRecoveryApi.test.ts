@@ -29,6 +29,10 @@ describe('durable publisher recovery API',()=>{
   m.fresh.mockResolvedValue({settlement:{status:'BLOCKED',reason:'STORED_CLAIM_WINDOW',fingerprint:'f',root,tx:null}});
   expect((await call('PUT')).status).toBe(409);expect(m.rpc).not.toHaveBeenCalled();
  });
+ it('apparently ready but altered calldata cannot acquire the immutable batch lock',async()=>{
+  m.fresh.mockResolvedValue({settlement:{status:'READY_FOR_PUBLISHER_REVIEW',fingerprint:'f',root,epochId:3,simulation:{ok:true},tx:{to:'0x'+'1'.repeat(40),chainId:677,value:'0',data:'0x1234'}}});
+  const response=await call('PUT');expect(response.status).toBe(409);expect((await response.json()).error).toContain('payload mismatch');expect(m.rpc).not.toHaveBeenCalled();
+ });
  it('4001 with unchanged nonce releases only the pre-broadcast operation',async()=>{
   const r=await call('PATCH',{action:'cancel',cancellation:{code:4001}});expect(await r.json()).toEqual({phase:'CANCELLED',retrySafe:true});expect(m.rpc).toHaveBeenCalledWith('transition_reward_publication',expect.objectContaining({p_operation:'op',p_phase:'CANCELLED',p_retry_safe:true}));
  });
