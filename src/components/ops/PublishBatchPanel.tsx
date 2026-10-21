@@ -40,7 +40,6 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
   const [review, setReview] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
-  const [recoveryHash, setRecoveryHash] = useState("");
   const [history, setHistory] = useState<{ object_id: string; action: string; new_value: { txHash?: string } | null; created_at: string }[]>([]);
   const [pending, setPending] = useState<PendingPublication | null>(null);
   const busy = useRef(false);
@@ -90,8 +89,8 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
   }
   async function recheck() {
     if (!pending || busy.current) return;
-    const txHash = hash ?? recoveryHash.trim();
-    if (!/^0x[0-9a-f]{64}$/i.test(txHash)) { setMsg("Enter the original transaction hash from your wallet."); return; }
+    const txHash = hash;
+    if (!txHash) { await recover(); return; }
     busy.current = true; setMsg(null);
     try { const p={...pending,txHash}; remember(p); await verify(p); void loadHistory(); }
     finally { busy.current=false; }
@@ -99,7 +98,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
   async function recover(action = "recover", cancellation?: unknown) {
     if (!pending) return;
     const evidence = cancellation ?? pending.cancellation;
-    const r=await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PATCH",body:JSON.stringify({...pending,txHash:hash ?? (recoveryHash.trim() || null),action:evidence && action === "recover" ? "cancel" : action,cancellation:evidence})}).catch(()=>null);
+    const r=await authed(wallet,"/api/admin/rewards-publish-verify",{method:"PATCH",body:JSON.stringify({...pending,txHash:hash,action:evidence && action === "recover" ? "cancel" : action,cancellation:evidence})}).catch(()=>null);
     const j=r ? await r.json().catch(()=>null) : null;
     if(!r?.ok) {setPhase("RECOVERY_REQUIRED");setMsg(j?.error ?? "Recovery unavailable; do not resend.");return;}
     setPhase(j.phase);setMsg(null);
@@ -156,7 +155,7 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
   }
 
   return (
-    <section className="min-w-0 rounded-2xl border border-hairline bg-card p-3.5 sm:p-4 md:col-span-2">
+    <section className="min-w-0 border-t border-hairline py-4 md:col-span-2">
       <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.14em] text-muted">Review &amp; publish batch</h2>
       <div className="mt-3 grid min-w-0 gap-x-6 gap-y-1 text-[12.5px] sm:grid-cols-2">
         <Row k="Eligible wallets in batch" v={fmt(s.leaves)} />
@@ -189,9 +188,9 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
           {s.signupReconciliation.states.map((x) => <Row key={x.state} k={x.state.replaceAll("_", " ")} v={`${x.rows} rows · ${fmt(x.points)} pts`} />)}
         </details>
       )}
-      {!review ? (
+      {!pending && !review && ready ? (
         <Button type="button" disabled={!ready || stale || !!pending} onClick={() => setReview(true)} className="mt-3 rounded-lg bg-primary px-3 py-2 text-[12.5px] font-bold text-primary-foreground disabled:opacity-40">Review &amp; Publish</Button>
-      ) : ready && !stale ? (
+      ) : !pending && ready && !stale ? (
         <div className="mt-3 space-y-2 rounded-xl border border-border p-3 text-[12.5px]">
           <p className="font-bold">You are about to publish round #{s.epochId} on BOT Mainnet (677).</p>
           <p className="text-muted">{fmt(s.leaves)} wallets will be able to claim {fmt(s.totalFlow)} FLOW from {s.claimStartIso?.slice(0, 16)} to {s.claimEndIso?.slice(0, 16)} UTC. Your wallet will show one publishEpoch call to the payout contract; it moves no tokens and costs only gas. Signer must be {s.signer.address.slice(0, 6)}…{s.signer.address.slice(-4)}.</p>
@@ -201,13 +200,12 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
           </div>
         </div>
       ) : null}
-      {s.checks.some(c => c.id === 'STORED_CLAIM_WINDOW' && !c.pass) && <p className="mt-2 text-[12px] font-bold text-danger">Stored claim window no longer meets the contract’s minimum publication delay. Nothing submitted. Re-review cannot change the immutable schedule; separately authorized batch replacement is required.</p>}
+      {s.checks.some(c => c.id === 'STORED_CLAIM_WINDOW' && !c.pass) && <p className="mt-2 text-[12px] font-bold text-warning">Schedule needs renewal. Open Payout Operations to review a valid schedule; the original allocation and history stay preserved. Nothing submitted.</p>}
       {!ready && <p className="mt-2 text-[12px] text-muted">{s.reason ? `Not publishable: ${s.reason.replaceAll("_", " ")}` : "Not publishable."}</p>}
       {msg && <p className="mt-2 text-[12px] font-bold text-danger">{msg}</p>}
       {phase !== "IDLE" && <p className="mt-2 text-[12px] font-bold">{PHASE_COPY[phase]}</p>}
       {pending && phase !== "CONFIRMED_VERIFIED" && <div className="mt-2 space-y-2">
-        {!hash && <label className="block text-[12px]">Original transaction hash<input aria-label="Original transaction hash" value={recoveryHash} onChange={e=>setRecoveryHash(e.target.value)} className="mt-1 block w-full min-w-0 rounded border border-border bg-background p-2 font-mono" /></label>}
-        <div className="flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={() => void recheck()}>Re-check Transaction</Button><Button type="button" variant="outline" onClick={() => void recover()}>Recover Stuck Batch</Button></div>
+        <Button type="button" variant="outline" onClick={() => void recheck()}>{hash?'Re-check Transaction':'Recover Stuck Batch'}</Button>
         <p className="text-[12px] text-muted">This attempt is locked. Re-checking never opens the wallet or sends another transaction.</p>
       </div>}
       {hash && <a className="mt-1 block break-all font-mono text-[11px] text-primary underline" href={`https://scan.botchain.ai/tx/${hash}`} target="_blank" rel="noreferrer">{hash}</a>}

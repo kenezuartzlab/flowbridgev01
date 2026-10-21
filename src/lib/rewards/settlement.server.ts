@@ -6,6 +6,8 @@
  */
 import { CLAIM_WINDOW_POLICY, PUBLIC_MAINNET_FLOW_CLAIMS, settlementEligibility } from "./publicClaimPolicy";
 import { integerWei, revalidateImmutableBatch } from './immutableBatch';
+import { proposeScheduleRenewal, type RenewalProposal } from './scheduleRenewal';
+import { resolveBatchSchedule } from './scheduleRenewal.server';
 import { createPublicClient, http, parseAbi, type Address, type Hex } from "viem";
 import { MAINNET_PAYOUT_AUDIT, type ProgramId } from "./rewardFundingPlan";
 import { MAINNET_EPOCH_MANIFESTS } from "./mainnetEpochManifest";
@@ -72,7 +74,7 @@ const toBatch = (r: BatchRow): StoredBatch => ({ epochId: r.epoch_id, root: r.ro
 export async function indexHistoricalRounds(admin: Admin, liveEpochCount: number) {
   const { data } = await admin.from("reward_settlement_batches").select("epoch_id,root,total_wei,claim_start,claim_end,leaves,publication_verified_at")
     .eq("chain_id", MAINNET_CHAIN_ID).eq("distributor", DISTRIBUTOR.toLowerCase());
-  const local = ((data ?? []) as unknown as BatchRow[]).map(toBatch);
+  const local = ((data ?? []) as unknown as BatchRow[]).filter(b => b.epoch_id <= liveEpochCount).map(toBatch);
   const chainEpochs = new Map<number, OnchainEpoch | null>();
   for (let id = 1; id <= liveEpochCount; id++) chainEpochs.set(id, (await readEpoch(id)) as OnchainEpoch | null);
   const proofSources: ProofSource[] = MAINNET_EPOCH_MANIFESTS.map((m) => ({ epochId: m.epochId, root: m.root, leaves: m.entitlements.map((e) => ({ index: e.index, account: e.account, amount: e.amount, proof: e.proof })) }));
@@ -92,12 +94,13 @@ export async function indexHistoricalRounds(admin: Admin, liveEpochCount: number
 /** Indexed records (builder + historical) whose root is LIVE on chain and drift-free. */
 export async function discoverPublishedBatches(admin: Admin, liveEpochCount: number) {
   const indexing = await indexHistoricalRounds(admin, liveEpochCount).catch(() => []);
-  const { data } = await admin.from("reward_settlement_batches").select("epoch_id,root,total_wei,claim_start,claim_end,leaves,publication_verified_at,source")
+  const { data } = await admin.from("reward_settlement_batches").select("id,fingerprint,epoch_id,root,total_wei,claim_start,claim_end,leaves,publication_verified_at,source")
     .eq("chain_id", MAINNET_CHAIN_ID).eq("distributor", DISTRIBUTOR.toLowerCase()).lte("epoch_id", liveEpochCount).order("epoch_id", { ascending: true });
   const out: { batch: StoredBatch; source: RoundSource; verification: ReturnType<typeof verifyPublishedRound> }[] = [];
   const chain = await readChainState();
   const seen = new Set<number>();
-  for (const row of (data ?? []) as unknown as (BatchRow & { source: RoundSource })[]) {
+  for (const original of (data ?? []) as unknown as (BatchRow & { id: string; fingerprint: string; source: RoundSource })[]) {
+    const row = await resolveBatchSchedule(admin, original);
     if (seen.has(row.epoch_id)) continue;
     if (row.source !== HISTORICAL_SOURCE && row.epoch_id > 2) {
       const { data: attempt, error } = await admin.from("reward_publish_attempts").select("tx_hash,phase").eq("chain_id",MAINNET_CHAIN_ID).eq("distributor",DISTRIBUTOR.toLowerCase()).eq("epoch_id",row.epoch_id).eq("root",row.root).maybeSingle();
@@ -169,7 +172,7 @@ export async function buildSettlement(args: {
   const [live, roles] = await Promise.all([readChainState(), readPublisherRoles()]);
   const publisher = { address: SETTLEMENT_SIGNER.address, ...auditPublisherRoles(roles) };
   const generatedAt = new Date().toISOString();
-  if (!live) return { status: "BLOCKED" as const, reason: "LIVE_CONTRACT_STATE_UNAVAILABLE", signer: SETTLEMENT_SIGNER, publisher, epochId: null, leaves: 0, totalFlow: 0, root: null, checks: [], tx: null, fingerprint: null, programs: [], claimStartIso: null, claimEndIso: null, published: [], liveState: null, generatedAt };
+  if (!live) return { status: "BLOCKED" as const, reason: "LIVE_CONTRACT_STATE_UNAVAILABLE", signer: SETTLEMENT_SIGNER, publisher, epochId: null, leaves: 0, totalFlow: 0, root: null, checks: [], tx: null, fingerprint: null, programs: [], claimStartIso: null, claimEndIso: null, published: [], liveState: null, renewal: null as RenewalProposal | null, generatedAt };
 
   const discovered = await discoverPublishedBatches(args.admin, live.epochCount);
 
@@ -235,8 +238,14 @@ export async function buildSettlement(args: {
     .eq('chain_id', MAINNET_CHAIN_ID).eq('distributor', DISTRIBUTOR.toLowerCase()).eq('epoch_id', p.epochId);
   if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
   if ((existing ?? []).length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
-  const stored = existing?.[0];
-  if (stored) p = revalidateImmutableBatch(p, { ...toBatch(stored as unknown as BatchRow), id: stored.id, fingerprint: stored.fingerprint, published: !!stored.publication_verified_at }, live.nowSec, live.minPublishDelay);
+  const original = existing?.[0];
+  const stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
+  let renewal: RenewalProposal | null = null;
+  if (stored) {
+    const immutable = { ...toBatch(stored as unknown as BatchRow), id: stored.id, fingerprint: stored.fingerprint, published: !!stored.publication_verified_at };
+    renewal = proposeScheduleRenewal(p, immutable, live.nowSec, live.minPublishDelay);
+    p = revalidateImmutableBatch(p, immutable, live.nowSec, live.minPublishDelay);
+  }
 
   // V36.3A — batch/day limits + exact eth_call simulation from the publisher.
   const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
@@ -282,7 +291,7 @@ export async function buildSettlement(args: {
   return {
     status: publishable ? p.status : "BLOCKED" as const,
     reason: publishable ? null : p.reason ?? checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
-    simulation, limits, flowPublishedLast24h, walletStates, signupReconciliation: signup.report,
+    simulation, limits, renewal, flowPublishedLast24h, walletStates, signupReconciliation: signup.report,
     publisherConfig: { mode: PUBLISHER_CONFIG.mode, autonomousSigning: PUBLISHER_CONFIG.autonomousSigning, maxWalletsPerEpoch: PUBLISHER_CONFIG.maxWalletsPerEpoch, maxFlowPerEpoch: PUBLISHER_CONFIG.maxFlowPerEpoch, maxFlowPerDay: PUBLISHER_CONFIG.maxFlowPerDay },
     signer: SETTLEMENT_SIGNER, publisher,
     batchId: stored?.id ?? null,

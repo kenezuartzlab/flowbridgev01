@@ -169,6 +169,13 @@
       "when": 1792426137438,
       "tag": "0023_publisher_cancelled_nonce_fence",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792559614392,
+      "tag": "0024_payout_schedule_renewal",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,7 @@ vi.mock('@/lib/rewards/settlement.server',()=>({DISTRIBUTOR:'0x'+'1'.repeat(40)}
 vi.mock('@/lib/rewards/publisherReconciliation.server',()=>({publicationPreflight:m.preflight,recoverPublisherHash:m.recover,publicationNonceMatches:m.nonce}));
 vi.mock('@/lib/rewards/publicationRecovery.server',()=>({verifyPublicationOnChain:m.verify}));
 vi.mock('@/lib/rewards/rewardSolvency.server',()=>({buildRewardSolvencyReport:m.fresh}));
+vi.mock('@/lib/rewards/scheduleRenewal.server',()=>({resolveBatchSchedule:async(_admin:unknown,batch:unknown)=>batch}));
 import {Route} from '@/routes/api/admin.rewards-publish-verify';
 const hash='0x'+'a'.repeat(64),root='0x'+'b'.repeat(64);
 let attempt:Record<string,unknown>;

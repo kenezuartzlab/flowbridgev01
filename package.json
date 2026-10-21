@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "rewards:release-check": "bun scripts/rewards/release-check.ts",
     "multisend:compile": "bun contracts/scripts/compile.multisend.ts",
     "multisend:preflight": "bun contracts/scripts/preflight.multisend.bot-testnet.ts",
     "multisend:deploy:testnet": "bun contracts/scripts/deploy.multisend.bot-testnet.ts",
@@ -73,6 +74,7 @@
     "entities": "4.5.0",
     "events": "3.3.0",
     "input-otp": "^1.4.2",
+    "launch-editor": "^2.14.2",
     "lucide-react": "^1.21.0",
     "motion": "^12.40.0",
     "qrcode": "^1.5.4",
@@ -119,7 +121,7 @@
     "solc-0.8.20": "npm:solc@0.8.20",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^8.0.16",
+    "vite": "^8.3.4",
     "vitest": "4.1.11"
   },
   "overrides": {
@@ -141,7 +143,9 @@
     "tmp": "0.2.7",
     "@hono/node-server": "1.19.15",
     "hono": "4.13.11",
-    "qs": "6.16.0"
+    "qs": "6.16.0",
+    "launch-editor": "2.14.2",
+    "vite": "8.3.4"
   },
   "resolutions": {
     "ws": "^8.21.0"

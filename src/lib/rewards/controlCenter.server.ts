@@ -130,8 +130,8 @@ export async function setAutomationPolicy(a: AdminContext, p: { programId: strin
   const admin = await db();
   const patch: Record<string, unknown> = { updated_by_email: a.email, updated_at: new Date().toISOString(), auto_funding_enabled: false };
   if (typeof p.suspended === "boolean") patch.suspended = p.suspended;
-  if (Number.isInteger(p.perRunCap) && p.perRunCap! >= 0) patch.per_run_cap = p.perRunCap;
-  if (Number.isInteger(p.dailyCap) && p.dailyCap! >= 0) patch.daily_cap = p.dailyCap;
+  if (typeof p.perRunCap === 'number' && Number.isInteger(p.perRunCap) && p.perRunCap >= 0) patch.per_run_cap = p.perRunCap;
+  if (typeof p.dailyCap === 'number' && Number.isInteger(p.dailyCap) && p.dailyCap >= 0) patch.daily_cap = p.dailyCap;
   await admin.from("reward_automation_policy").update(patch as never).eq("program_id", p.programId);
   await admin.from("admin_audit_events").insert({ actor_user_id: a.userId, actor_email: a.email, actor_role: a.role, object_type: "reward_automation", object_id: p.programId, action: "POLICY_UPDATED", new_value: patch as never });
   return { ok: true as const };
@@ -147,6 +147,14 @@ export async function runOpsSweep(source: string) {
   const mismatch = queue.excluded.filter((e) => e.reason === "WALLET_MISMATCH");
   if (mismatch.length) exceptions.push({ kind: "WALLET_MISMATCH", key: `wallet-mismatch:${mismatch.length}`, detail: `${mismatch.length} reward records were earned by a wallet that is not the account's bound wallet.`, action: "Leave excluded; the account owner must re-earn with the bound wallet.", severity: "WARN" });
   if (!report) exceptions.push({ kind: "SOLVENCY_UNAVAILABLE", key: `solvency:${new Date().toISOString().slice(0, 13)}`, detail: "Solvency report could not be built.", action: "Re-run later; check the BOT RPC.", severity: "BLOCK" });
+  if (report) {
+    if (report.settlement.renewal?.needed) exceptions.push({kind:'SCHEDULE_NEEDS_RENEWAL',key:`schedule:${report.settlement.batchId}`,detail:`Round #${report.settlement.epochId} needs an authorized schedule renewal. Original allocation is preserved.`,action:'Open Payout Operations and review the renewal proposal.',severity:'WARN'});
+    for (const check of report.settlement.checks.filter((c: {pass:boolean;id:string})=>!c.pass && c.id!=='STORED_CLAIM_WINDOW')) exceptions.push({kind:'PAYOUT_BLOCKED',key:`payout:${check.id}`,detail:`Payout check failed: ${check.id.replaceAll('_',' ')}.`,action:'Re-check Payout Operations. Signing remains disabled until validation succeeds.',severity:'BLOCK'});
+    for (const round of report.rounds.filter((r:{status:string})=>r.status.includes('EXPIRED'))) exceptions.push({kind:'CLAIM_WINDOW_EXPIRED',key:`claim-expired:${round.epochId}`,detail:`Round #${round.epochId} claim window is closed.`,action:'Review the confirmed round history. Do not announce claimability.',severity:'WARN'});
+    const { reconcileDurablePublications } = await import('./payoutRecovery.server');
+    const recovery = await reconcileDurablePublications(admin);
+    if(recovery.unresolved) exceptions.push({kind:'PUBLICATION_RECOVERY',key:'publication-recovery',detail:`${recovery.unresolved} publication operation(s) need reconciliation.`,action:'Open Payout Operations and Re-check or Recover. Never send another transaction.',severity:'BLOCK'});
+  }
   for (const e of exceptions) await admin.from("reward_ops_exceptions").upsert({ kind: e.kind, dedupe_key: e.key, detail: e.detail, corrective_action: e.action, severity: e.severity }, { onConflict: "dedupe_key", ignoreDuplicates: true });
   const summary = {
     fundablePoints: Object.fromEntries(Object.entries(queue.eligible).map(([k, v]) => [k, v.reduce((s, i) => s + i.points, 0)])),
