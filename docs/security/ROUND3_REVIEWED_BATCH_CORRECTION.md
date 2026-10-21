@@ -19,7 +19,7 @@ A second, independent blocker exists: the stored window is **2026-10-20 16:00 UT
 ## Verified evidence
 - Authorized account with its actual bound wallet read Ops successfully (HTTP 200); no write endpoint used. Settlement **1 wallet / 1,122 FLOW**, status BLOCKED solely by STORED_CLAIM_WINDOW. Stored root/amount/window unchanged; separate **74 unfunded Points excluded**; attempts **0**, live rounds **2**, automatic signing OFF.
 - Actual publisher panel rendered from that authenticated report at 390px and 1280px; no overflow, Review & Publish disabled, wallet submission controls absent. This was panel rendering, not a complete wallet-connected production UI flow.
-- 1,857 tests / 175 files passed before the additional exact-payload mismatch test. Automatic compilation: build OK 2026-10-21T02:34:32Z. Final rerun is recorded in command output.
+- Final regression: **1,858 tests / 175 files PASS**, including exact-payload mismatch rejection. Automatic compilation/type validation: **build OK 2026-10-21T02:35:42Z**. Separate manual production build/typecheck was not run because the environment prohibits those commands.
 - Available backend security scan: no new active findings. Existing owner exception remains scoped to missing Wiz/cloud-IAM coverage only.
 - Dependency audit FAIL: full graph 2 high / 5 moderate / 1 low; production graph 1 high / 3 moderate / 1 low. New dependency advisories are not covered by the owner's cloud assessment exception. No security pass claimed.
 - Fresh eight-client database concurrency and physical TokenPocket acceptance were not run in this correction; existing recovery regressions passed, but do not replace those gates.
