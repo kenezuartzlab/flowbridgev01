@@ -36,5 +36,5 @@ export function verifyPublicationIdentity(p: PublicationEvidence) {
 export type PendingPublication = { attemptId: string; operationId?: string; epochId: number; root: string; fingerprint: string; txHash: string | null; cancellation?: { code: number } };
 export const PENDING_PUBLICATION_KEY='flowbridge.publisher.pending.v1';
 export function parsePendingPublication(raw: string | null): PendingPublication | null {
- try { const p=JSON.parse(raw ?? 'null'); return p && typeof p.attemptId==='string' && Number.isInteger(p.epochId) && p.epochId>2 && /^0x[0-9a-f]{64}$/i.test(p.root) && typeof p.fingerprint==='string' && (p.txHash===null || /^0x[0-9a-f]{64}$/i.test(p.txHash)) ? p : null; } catch {return null;}
+ try { const p=JSON.parse(raw ?? 'null'); if(!(p && typeof p.attemptId==='string' && Number.isInteger(p.epochId) && p.epochId>2 && /^0x[0-9a-f]{64}$/i.test(p.root) && typeof p.fingerprint==='string' && (p.txHash===null || /^0x[0-9a-f]{64}$/i.test(p.txHash)))) return null; if(typeof p.cancellation?.code!=='number') delete p.cancellation; return p; } catch {return null;}
 }

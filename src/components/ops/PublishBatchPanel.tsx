@@ -6,7 +6,7 @@ import { getActiveProvider } from "@/lib/wallet/activeProvider";
 import { publisherWalletGate, WALLET_GATE_COPY, AUTONOMOUS_ACTIVATION_REQUIREMENTS, type PublishPhase } from "@/lib/rewards/publishGate";
 import type { RewardSolvencyReport } from "@/lib/rewards/rewardSolvency.server";
 
-import { isPublisherCancellation } from "@/lib/rewards/publisherRecovery";
+import { isPublisherCancellation, selectRestorableAttempt, type PublisherAttempt } from "@/lib/rewards/publisherRecovery";
 
 type S = RewardSolvencyReport["settlement"];
 const fmt = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
