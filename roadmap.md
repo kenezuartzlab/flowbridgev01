@@ -1,3 +1,10 @@
+# V36.11 Payout Operations
+- [ ] Build one Payout Operations screen with canonical funded totals, schedule renewal proposal and guarded review/sign/recovery actions.
+- [ ] Add durable, audited, authorized schedule renewal preserving original batches and blocking pending publications; do not commit Round #3 renewal.
+- [ ] Extend scheduled reconciliation and operator alerts without funding or signing.
+- [ ] Add financial, renewal, concurrency and recovery tests plus repeatable release evidence and risk-expiry checks.
+- [ ] Verify real Round #3 records/chain, authenticated desktop/phone Ops, regression and security; release only when every mandatory gate passes.
+
 # Round #3 reviewed-batch restoration
 - [x] Select and revalidate the existing immutable batch; never replace its schedule or allocation.
 - [x] Cover hourly lookup drift, missing/expired review, stale allocation, reconnect/refresh, payload mismatch and existing recovery regressions. Eight deterministic revalidation callers tested; fresh database concurrency not run.
