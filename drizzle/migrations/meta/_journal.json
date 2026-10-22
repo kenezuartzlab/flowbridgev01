@@ -176,6 +176,13 @@
       "when": 1792559614392,
       "tag": "0024_payout_schedule_renewal",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792653478365,
+      "tag": "0025_payout_renewal_identity_fences",
+      "breakpoints": true
     }
   ]
 }

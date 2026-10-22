@@ -21,11 +21,9 @@ export async function reconcileDurablePublications(admin:Admin){
    if(!hash || !await publicationNonceMatches(hash,a.sender_nonce)){unresolved++;continue;}
    const result=await verifyPublicationOnChain({epochId:b.epoch_id,root:b.root as Hex,totalWei:integerWei(b.total_wei),claimStart:Number(b.claim_start),claimEnd:Number(b.claim_end),leaves:b.leaves as never},hash,SETTLEMENT_SIGNER.address);
    if(result.phase!=='CONFIRMED_VERIFIED' || !result.blockHash || !result.blockNumber){unresolved++;continue;}
-   const transition=await admin.rpc('transition_reward_publication',{p_attempt:a.id,p_operation:a.operation_id,p_actor:a.operator_id,p_phase:'CONFIRMING',p_hash:hash,p_retry_safe:false});
-   if(transition.error)throw transition.error;
-   const saved=await admin.rpc('confirm_reward_publication',{p_attempt:a.id,p_hash:hash,p_block_hash:result.blockHash,p_block:Number(result.blockNumber),p_actor:a.operator_id,p_email:'',p_role:'internal_operator'});
+   const saved=await admin.rpc('reconcile_reward_publication',{p_attempt:a.id,p_operation:a.operation_id,p_hash:hash,p_block_hash:result.blockHash,p_block:Number(result.blockNumber)});
    if(saved.error)throw saved.error;
-   confirmed++;
+   if(saved.data)confirmed++;
   }catch{unresolved++;}
  }
  return {confirmed,unresolved};

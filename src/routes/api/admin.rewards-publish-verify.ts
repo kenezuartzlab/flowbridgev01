@@ -40,7 +40,7 @@ async function handle(request:Request) {
    if(!fresh.tx.data) return jsonResponse({error:'Missing exact transaction'},409);
    const {publicationClient}=await import('@/lib/rewards/publisherReconciliation.server');
    await publicationClient().call({account:SETTLEMENT_SIGNER.address,to:DISTRIBUTOR,data:expected});
-   const {data:operation,error:lockError}=await admin.rpc('acquire_reward_publication',{p_batch:batch.id,p_actor:gate.admin.userId,p_sender:gate.admin.wallet,p_nonce:live.pending,p_calldata:fresh.tx.data,p_start:Number(live.head)});
+   const {data:operation,error:lockError}=await admin.rpc('acquire_reviewed_reward_publication',{p_batch:batch.id,p_actor:gate.admin.userId,p_sender:gate.admin.wallet,p_nonce:live.pending,p_calldata:fresh.tx.data,p_start:Number(live.head),p_fingerprint:batch.fingerprint});
    if(lockError || !operation) return jsonResponse({error:'Epoch locked; recover the original operation before retrying'},409);
    const {data:a}=await admin.from('reward_publish_attempts').select('id').eq('operation_id',operation).single();
    return jsonResponse({attemptId:a?.id,operationId:operation,nonce:live.pending});

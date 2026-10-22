@@ -141,6 +141,8 @@ export async function setAutomationPolicy(a: AdminContext, p: { programId: strin
 export async function runOpsSweep(source: string) {
   const admin = await db();
   const queue = await loadQueue();
+  const { reconcileDurablePublications } = await import('./payoutRecovery.server');
+  const recovery = await reconcileDurablePublications(admin);
   const { buildRewardSolvencyReport } = await import("./rewardSolvency.server");
   const report: any = await buildRewardSolvencyReport().catch(() => null);
   const exceptions: { kind: string; key: string; detail: string; action: string; severity: string }[] = [];
@@ -151,10 +153,8 @@ export async function runOpsSweep(source: string) {
     if (report.settlement.renewal?.needed) exceptions.push({kind:'SCHEDULE_NEEDS_RENEWAL',key:`schedule:${report.settlement.batchId}`,detail:`Round #${report.settlement.epochId} needs an authorized schedule renewal. Original allocation is preserved.`,action:'Open Payout Operations and review the renewal proposal.',severity:'WARN'});
     for (const check of report.settlement.checks.filter((c: {pass:boolean;id:string})=>!c.pass && c.id!=='STORED_CLAIM_WINDOW')) exceptions.push({kind:'PAYOUT_BLOCKED',key:`payout:${check.id}`,detail:`Payout check failed: ${check.id.replaceAll('_',' ')}.`,action:'Re-check Payout Operations. Signing remains disabled until validation succeeds.',severity:'BLOCK'});
     for (const round of report.rounds.filter((r:{status:string})=>r.status.includes('EXPIRED'))) exceptions.push({kind:'CLAIM_WINDOW_EXPIRED',key:`claim-expired:${round.epochId}`,detail:`Round #${round.epochId} claim window is closed.`,action:'Review the confirmed round history. Do not announce claimability.',severity:'WARN'});
-    const { reconcileDurablePublications } = await import('./payoutRecovery.server');
-    const recovery = await reconcileDurablePublications(admin);
-    if(recovery.unresolved) exceptions.push({kind:'PUBLICATION_RECOVERY',key:'publication-recovery',detail:`${recovery.unresolved} publication operation(s) need reconciliation.`,action:'Open Payout Operations and Re-check or Recover. Never send another transaction.',severity:'BLOCK'});
   }
+  if(recovery.unresolved) exceptions.push({kind:'PUBLICATION_RECOVERY',key:'publication-recovery',detail:`${recovery.unresolved} publication operation(s) need reconciliation.`,action:'Open Payout Operations and Re-check or Recover. Never send another transaction.',severity:'BLOCK'});
   for (const e of exceptions) await admin.from("reward_ops_exceptions").upsert({ kind: e.kind, dedupe_key: e.key, detail: e.detail, corrective_action: e.action, severity: e.severity }, { onConflict: "dedupe_key", ignoreDuplicates: true });
   const summary = {
     fundablePoints: Object.fromEntries(Object.entries(queue.eligible).map(([k, v]) => [k, v.reduce((s, i) => s + i.points, 0)])),

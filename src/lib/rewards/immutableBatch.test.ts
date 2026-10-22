@@ -30,6 +30,7 @@ describe('immutable reviewed batch', () => {
   it('stale allocation, including the 74 unfunded points, cannot enter the stored 1122 batch', () => {
     const p = revalidateImmutableBatch(run(1196),stored(),now,86400);
     expect(p.status).toBe('BLOCKED');expect(p.tx).toBeNull();expect(p.reason).toContain('IMMUTABLE_ALLOCATION');
+    expect(p.batch?.leaves).toEqual([]);
   });
   it('successful re-review of unchanged valid eligibility is deterministic across simultaneous callers', () => {
     const s=stored();const results=Array.from({length:8},()=>revalidateImmutableBatch(run(),s,now,86400));

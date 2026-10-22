@@ -38,6 +38,7 @@ export function PayoutOperations({wallet}:{wallet?:string}){
    <p><ShieldCheck className="mr-2 inline h-4 w-4 text-primary"/>Selected round #{s.epochId??'—'} · {s.leaves} wallet(s) · {s.totalFlow.toLocaleString()} FLOW</p>
    <p className="text-muted">{s.claimStartIso?`${s.claimStartIso.slice(0,16)} → ${s.claimEndIso?.slice(0,16)} UTC`:'Claim schedule unavailable'}</p>
    <p className="text-warning">{r.draftAllocation.excludedUnfundedPoints.toLocaleString()} earned-but-unfunded Points excluded · {r.reconciliation.nonclaimableHistoricalTotal.toLocaleString()} historical restricted Points excluded</p>
+   <details><summary className="cursor-pointer text-muted">Excluded Core Swap awards</summary>{r.unfundedSwapAwards.map(group => <p key={group.points} className="text-warning">{group.points.toLocaleString()} Core Swap Points per award · {group.awards} award(s) · UNFUNDED — excluded</p>)}</details>
    <p className="text-xs text-muted">Last checked {r.generatedAt.replace('T',' ').slice(0,19)} UTC</p>
   </div>
   {expired&&p&&<div className="space-y-3">

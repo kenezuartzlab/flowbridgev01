@@ -9,7 +9,7 @@ export function validClaimSchedule(nowSec: number, minPublishDelay: number) {
 }
 
 /** Schedule-only proposal. Changed economics never inherit the old approval. */
-export function proposeScheduleRenewal(candidate: ReturnType<typeof prepareSettlementBatch>, stored: ImmutableBatch, nowSec: number, delay: number) {
+export function proposeScheduleRenewal(candidate: ReturnType<typeof prepareSettlementBatch>, stored: ImmutableBatch, nowSec: number, delay: number, originalFingerprint = stored.fingerprint) {
   const schedule = validClaimSchedule(nowSec, delay);
   const fingerprint = keccak256(toHex(JSON.stringify([stored.id, stored.fingerprint, stored.epochId, stored.root, stored.totalWei, schedule.claimStart, schedule.claimEnd])));
   const replacement = { ...stored, ...schedule, fingerprint };
@@ -17,7 +17,7 @@ export function proposeScheduleRenewal(candidate: ReturnType<typeof prepareSettl
   const needed = stored.claimStart < nowSec + delay || stored.claimEnd <= nowSec;
   return {
     needed, ready: needed && checked.status === 'READY_FOR_PUBLISHER_REVIEW' && !stored.published,
-    originalBatchId: stored.id, originalFingerprint: stored.fingerprint,
+    originalBatchId: stored.id, originalFingerprint, previousFingerprint: stored.fingerprint,
     epochId: stored.epochId, root: stored.root, totalWei: stored.totalWei, wallets: stored.leaves.length,
     oldClaimStart: stored.claimStart, oldClaimEnd: stored.claimEnd,
     ...schedule, fingerprint, calldata: immutableBatchCalldata(replacement),

@@ -172,6 +172,7 @@ export async function buildRewardSolvencyReport() {
       // points are reported as excluded, never added to a batch. Admin view: counts only.
       return summarizeFundedDraft({ reconTotalPoints: reconDraft.totalPoints, fundedWallets: settlement.readiness?.nextBatchWallets ?? 0, fundedTotalPoints: settlement.readiness?.nextBatchFlow ?? 0 });
     })(),
+    unfundedSwapAwards: [...mainnetSwaps.filter(r => r.fundingState !== 'FUNDED').reduce((groups, r) => groups.set(r.points, (groups.get(r.points) ?? 0) + 1), new Map<number, number>())].map(([points, awards]) => ({ points, awards })),
     // Prepared allocation rounds: root + schedule only, never signed or broadcast here.
     publication: MAINNET_EPOCH_DRAFTS.map((d) => ({
       epochId: d.epochId,
