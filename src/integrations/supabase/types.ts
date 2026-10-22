@@ -1666,6 +1666,7 @@ export type Database = {
           id: string
           min_publish_delay: number
           original_fingerprint: string
+          previous_fingerprint: string | null
           proposed_by: string | null
           status: string
         }
@@ -1681,6 +1682,7 @@ export type Database = {
           id?: string
           min_publish_delay: number
           original_fingerprint: string
+          previous_fingerprint?: string | null
           proposed_by?: string | null
           status?: string
         }
@@ -1696,6 +1698,7 @@ export type Database = {
           id?: string
           min_publish_delay?: number
           original_fingerprint?: string
+          previous_fingerprint?: string | null
           proposed_by?: string | null
           status?: string
         }
@@ -2082,6 +2085,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acquire_reviewed_reward_publication: {
+        Args: {
+          p_actor: string
+          p_batch: string
+          p_calldata: string
+          p_fingerprint: string
+          p_nonce: number
+          p_sender: string
+          p_start: number
+        }
+        Returns: string
+      }
       acquire_reward_publication: {
         Args: {
           p_actor: string
@@ -2307,6 +2322,16 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reconcile_reward_publication: {
+        Args: {
+          p_attempt: string
+          p_block: number
+          p_block_hash: string
+          p_hash: string
+          p_operation: string
+        }
+        Returns: boolean
+      }
       reserve_reward_budget: {
         Args: {
           p_actor_email: string
@@ -2318,6 +2343,7 @@ export type Database = {
       }
       reward_funding_hash: { Args: { p_ids: string[] }; Returns: string }
       reward_payout_evidence_hash: { Args: never; Returns: string }
+      reward_uint256_hex: { Args: { n: number }; Returns: string }
       transition_reward_publication: {
         Args: {
           p_actor: string

@@ -14,7 +14,7 @@ export async function recordRenewalProposal(admin: Admin, proposal: RenewalPropo
   if (!proposal.ready) throw new Error('Renewal blocked by fresh eligibility');
   const {data:evidence,error:evidenceError}=await admin.rpc('reward_payout_evidence_hash');
   if(evidenceError || !evidence) throw new Error('Funding evidence unavailable');
-  const {error}=await admin.from('reward_schedule_renewals').upsert({batch_id:proposal.originalBatchId,original_fingerprint:proposal.originalFingerprint,fingerprint:proposal.fingerprint,claim_start:proposal.claimStart,claim_end:proposal.claimEnd,min_publish_delay:proposal.claimStart-proposal.signBefore,evidence_hash:evidence,proposed_by:actor.userId},{onConflict:'fingerprint',ignoreDuplicates:true});
+  const {error}=await admin.from('reward_schedule_renewals').upsert({batch_id:proposal.originalBatchId,original_fingerprint:proposal.originalFingerprint,previous_fingerprint:proposal.previousFingerprint,fingerprint:proposal.fingerprint,claim_start:proposal.claimStart,claim_end:proposal.claimEnd,min_publish_delay:proposal.claimStart-proposal.signBefore,evidence_hash:evidence,proposed_by:actor.userId},{onConflict:'fingerprint',ignoreDuplicates:true});
   if(error) throw new Error('Renewal proposal unavailable');
   const {data:stored,error:readError}=await admin.from('reward_schedule_renewals').select('id,fingerprint,status').eq('fingerprint',proposal.fingerprint).single();
   if(readError || !stored) throw new Error('Renewal proposal not recorded');

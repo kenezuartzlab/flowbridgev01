@@ -243,7 +243,7 @@ export async function buildSettlement(args: {
   let renewal: RenewalProposal | null = null;
   if (stored) {
     const immutable = { ...toBatch(stored as unknown as BatchRow), id: stored.id, fingerprint: stored.fingerprint, published: !!stored.publication_verified_at };
-    renewal = proposeScheduleRenewal(p, immutable, live.nowSec, live.minPublishDelay);
+    renewal = proposeScheduleRenewal(p, immutable, live.nowSec, live.minPublishDelay, original?.fingerprint);
     p = revalidateImmutableBatch(p, immutable, live.nowSec, live.minPublishDelay);
   }
 

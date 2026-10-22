@@ -55,7 +55,9 @@ export function PublishBatchPanel({ s, rebuild, stale, wallet }: { s: S; rebuild
     if (restore) {
       const a = selectRestorableAttempt(j?.attempts as PublisherAttempt[] | undefined);
       if (a) {
-        remember({attemptId:a.id,operationId:a.operation_id,epochId:a.epoch_id,root:a.root,fingerprint:a.fingerprint,txHash:a.tx_hash});
+        let saved: PendingPublication | null = null;
+        try { saved = parsePendingPublication(localStorage.getItem(storageKey)); } catch { /* Optional local cancellation evidence. */ }
+        remember({attemptId:a.id,operationId:a.operation_id,epochId:a.epoch_id,root:a.root,fingerprint:a.fingerprint,txHash:a.tx_hash,...(saved?.operationId===a.operation_id && saved.attemptId===a.id && saved.cancellation ? {cancellation:saved.cancellation}: {})});
         setPhase(a.tx_hash ? "BROADCAST_PENDING" : "RECOVERY_REQUIRED");
       } else if (j?.attempts) {
         const safe = j.attempts.find((a: { phase: string; retry_safe: boolean; epoch_id: number }) => a.epoch_id === s.epochId && a.retry_safe && ["CANCELLED", "REVERTED"].includes(a.phase));
