@@ -1,3 +1,4 @@
+import { proposalSchema, PROPOSAL_LIMITS } from '@/lib/proposalPolicy';
 import React, { useState, useEffect } from 'react';
 import { 
   X, Copy, Check, QrCode, Heart, Sparkles, MessageSquare, Plus, Minus, Send, 
@@ -418,7 +419,8 @@ export function DonateModal({
   // Submit Feedback Suggestion - Launches the validation and verification step first
   const handleLaunchVerification = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!suggestionText.trim()) return;
+    const checked = proposalSchema.safeParse({ category: suggestionCategory, text: suggestionText });
+    if (!checked.success) { setSignError("Proposal content exceeds its allowed limits."); return; }
 
     setPendingSuggestion({
       text: suggestionText,
@@ -433,47 +435,21 @@ export function DonateModal({
   const commitPendingSuggestion = async () => {
     if (!pendingSuggestion) return;
 
-    const author = connectedAddress ? `${connectedAddress.slice(0, 5)}...${connectedAddress.slice(-4)}` : 'Anonymous Supporter';
-
     try {
+      const token = await getEffectiveIdToken();
+      if (!token) { setSignError('Sign in to submit a proposal.'); return; }
+      const input = proposalSchema.parse(pendingSuggestion);
       const res = await fetch('/api/proposals', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          category: pendingSuggestion.category,
-          text: pendingSuggestion.text,
-          author
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(input),
       });
       const data = await res.json();
-      if (data.success && data.proposal) {
-        setSuggestions(prev => [data.proposal, ...prev]);
-      } else {
-        const newSugg: Suggestion = {
-          id: Math.random().toString(),
-          category: pendingSuggestion.category,
-          text: pendingSuggestion.text,
-          votes: 1,
-          author,
-          timestamp: Date.now()
-        };
-        setSuggestions(prev => [newSugg, ...prev]);
-      }
-    } catch (err) {
-      console.error("Failed to save proposal to DB:", err);
-      const newSugg: Suggestion = {
-        id: Math.random().toString(),
-        category: pendingSuggestion.category,
-        text: pendingSuggestion.text,
-        votes: 1,
-        author,
-        timestamp: Date.now()
-      };
-      setSuggestions(prev => [newSugg, ...prev]);
+      if (!res.ok || !data.success || !data.proposal) throw new Error('Proposal was not saved. Retry after signing in.');
+      setSuggestions(prev => [data.proposal, ...prev]);
+    } catch {
+      setSignError('Proposal was not saved. Check your sign-in and retry.');
+      return;
     }
-    
+
     // Clear back to writing screen
     setSuggestionText('');
     setPendingSuggestion(null);
@@ -483,50 +459,19 @@ export function DonateModal({
 
   // Upvote suggestion with off-chain cryptographic signature gate
   const handleVote = async (id: string) => {
-    if (!isConnected) {
-      try {
-        connect({ connector: injected() });
-      } catch (err) {
-        setVoteError("Please connect your wallet first.");
-      }
-      return;
-    }
-
-    if (!connectedAddress) return;
-
-    const addrLower = connectedAddress.toLowerCase();
-    const alreadyVoted = votedIds.includes(id);
-
-    if (alreadyVoted) {
-      setVoteError("Your connected wallet address has already authenticated a vote for this proposal!");
-      setTimeout(() => setVoteError(null), 3000);
-      return;
-    }
+    const token = await getEffectiveIdToken();
+    if (!token) { setVoteError('Sign in to vote.'); return; }
+    const addrLower = connectedAddress?.toLowerCase() ?? 'account';
 
     setIsVotingId(id);
     setVoteError(null);
 
     try {
-      const voteMessage = `I cryptographically sign to authorize casting 1 community voice vote for Proposal #${id} on FlowBridge. We verify wallet owners off-chain to avoid unlimited spam.`;
-      await signPromptWithTimeout(voteMessage);
-
-      // Save the vote to the database via Express API
-      const res = await fetch(`/api/proposals/${id}/vote`, {
-        method: 'POST'
-      });
+      const res = await fetch(`/api/proposals/${id}/vote`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-
-      if (data.success && data.proposal) {
-        setSuggestions(prev => prev.map(s => s.id === id ? data.proposal : s));
-      } else {
-        const updated = suggestions.map(s => {
-          if (s.id === id) {
-            return { ...s, votes: s.votes + 1 };
-          }
-          return s;
-        });
-        setSuggestions(updated);
-      }
+      if (!res.ok || !data.success || !data.proposal) throw new Error('Unable to vote. Sign in and retry.');
+      setSuggestions(prev => prev.map(s => s.id === id ? data.proposal : s));
+      if (data.alreadyVoted) setVoteError('This account has already voted.');
 
       // Mark as voted in state & localStorage to prevent double clicking in the same browser session
       const nextVoted = [...votedIds, id];
@@ -904,12 +849,12 @@ export function DonateModal({
                       value={suggestionText}
                       onChange={(e) => setSuggestionText(e.target.value)}
                       placeholder="E.g., An arbitrage dashboard showing the price differences of key ecosystem pairs..."
-                      maxLength={300}
+                      maxLength={PROPOSAL_LIMITS.body}
                       className="bg-background-elev border border-foreground/10 rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-foreground/20 focus:border-primary/50 focus:outline-none w-full h-[70px] resize-none"
                       required
                     />
                     <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-mono text-foreground/30">{300 - suggestionText.length} characters left</span>
+                      <span className="text-[11px] font-mono text-foreground/30">{PROPOSAL_LIMITS.body - suggestionText.length} characters left</span>
                       <button
                         type="submit"
                         className="px-4 py-2 bg-primary hover:bg-primary-strong text-primary-foreground rounded-xl text-[12px] uppercase font-black tracking-widest font-mono duration-150 cursor-pointer active:scale-95 shadow-md shadow-primary/10"

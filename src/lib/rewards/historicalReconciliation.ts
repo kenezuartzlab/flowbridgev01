@@ -215,7 +215,7 @@ export function reconcileAccount(
     explained.push(`OWNER_REVIEW:${review.decidedAt}`);
   }
 
-  return { userId: acct.userId, stored: acct.storedFlowPoints, authoritative, breakdown: b, pendingReview, excluded, explained, flags, difference, classification, nonclaimableHistorical };
+  return { userId: acct.userId, stored: acct.storedFlowPoints, authoritative, breakdown: b, pendingReview, excluded, explained, flags, difference, classification, nonclaimableHistorical, eligibleRowIds };
 }
 
 export interface ReconSummary {

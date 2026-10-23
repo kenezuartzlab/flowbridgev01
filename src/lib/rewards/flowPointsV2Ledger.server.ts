@@ -69,7 +69,7 @@ export interface CoreSwapAccrual {
   recorded: boolean;
   policy: FlowPointsV2Policy;
   /** V15.3M — set when settlement was refused for missing canonical identity. */
-  failClosedReason?: 'MISSING_VERIFIED_ACTIVITY_ID' | 'MISSING_SOURCE_LOG_INDEX';
+  failClosedReason?: 'MISSING_VERIFIED_ACTIVITY_ID' | 'MISSING_SOURCE_LOG_INDEX' | 'UNVERIFIED_MAINNET_EVIDENCE';
 }
 
 /**
@@ -127,16 +127,29 @@ export async function accrueCoreSwapPoints(input: {
     };
   }
 
+  const refuse = (): CoreSwapAccrual => ({ award: 0, base: 0, reason: 'CORE_SWAP_V2', recorded: false, policy, failClosedReason: 'UNVERIFIED_MAINNET_EVIDENCE' });
+  if (input.chainId !== 677) return refuse();
+  const { data: profile, error: profileError } = await supabaseAdmin.from('profiles').select('wallet_address').eq('id', input.userId).maybeSingle();
+  if (profileError || profile?.wallet_address?.toLowerCase() !== wallet) return refuse();
+  // This writer is itself a trust boundary: caller numbers and activity IDs are hints.
+  const { ingestMainnetRouterV4Swap } = await import('@/lib/activity/mainnetRouterV4Ingest.server');
+  const { ingestMainnetRouterV3Swap } = await import('@/lib/activity/mainnetRouterV3Ingest.server');
+  let verified = await ingestMainnetRouterV4Swap(input.txHash, wallet);
+  if (verified.status === 'REJECTED') verified = await ingestMainnetRouterV3Swap(input.txHash, wallet);
+  if (verified.status !== 'VERIFIED' || verified.activity.activityId.toLowerCase() !== activityId || verified.activity.logIndex !== logIndex || verified.verifiedUsd == null || !Number.isFinite(verified.verifiedUsd)) return refuse();
+  input = { ...input, verifiedUsd: verified.verifiedUsd, tokenIn: verified.activity.tokenIn, tokenOut: verified.activity.tokenOut, at: new Date(verified.activity.occurredAt * 1000) };
+  if (!isFlowPointsV2Active(input.at, policy)) return refuse();
+  const eventDay = utcDayKey(input.at);
   const activityKey = `${input.chainId}:${input.txHash.toLowerCase()}:${logIndex}`;
 
-  const alreadyToday = await awardedCoreSwapPointsToday(wallet, dayKey);
+  const alreadyToday = await awardedCoreSwapPointsToday(wallet, eventDay);
   const computed: { award: number; base: number; reason: LedgerReason } = {
     ...coreSwapAward(input.verifiedUsd, alreadyToday, policy),
   };
 
   // Anti-wash: rapid reverse-pair round trip → REVIEW (0 until resolved).
   if (input.tokenIn && input.tokenOut && computed.award > 0) {
-    const since = new Date(at.getTime() - 10 * 60 * 1000).toISOString();
+    const since = new Date(input.at.getTime() - 10 * 60 * 1000).toISOString();
     const { data: recent } = await supabaseAdmin
       .from("flow_points_ledger")
       .select("metadata, created_at")
@@ -150,7 +163,7 @@ export async function accrueCoreSwapPoints(input: {
       }))
       .filter((p) => p.tokenIn && p.tokenOut);
     if (
-      isRapidReverseRoundTrip(prior, { tokenIn: input.tokenIn, tokenOut: input.tokenOut, at: at.getTime() })
+      isRapidReverseRoundTrip(prior, { tokenIn: input.tokenIn, tokenOut: input.tokenOut, at: input.at.getTime() })
     ) {
       computed.award = 0;
       computed.reason = "ANTI_ABUSE_REVIEW";
@@ -172,9 +185,13 @@ export async function accrueCoreSwapPoints(input: {
     wallet_address: wallet,
     program_id: 'CORE_SWAP',
     funding_state: computed.reason === 'ANTI_ABUSE_REVIEW' ? 'REVIEW' : 'UNFUNDED',
-    day_key: dayKey,
+    day_key: eventDay,
+    provenance_state: 'VERIFIED',
     metadata: {
       policyVersion: policy.version,
+      valuationSource: 'SERVER_BOT_DEX_PRICE_POLICY',
+      valuationObservedAt: new Date().toISOString(),
+      evidenceSource: verified.activity.evidenceSource,
       dailyCoreSwapCap: policy.dailyCoreSwapCap,
       alreadyAwardedToday: alreadyToday,
       tokenIn: input.tokenIn?.toLowerCase() ?? null,
@@ -216,7 +233,7 @@ export async function refereeQualifiedState(userId: string) {
     .select("points, verified_usd, day_key")
     .eq("user_id", userId)
     .eq("chain_id", 677)
-    .in("reason", [...CORE_SWAP_LEDGER_REASONS]);
+    .in("reason", [...CORE_SWAP_LEDGER_REASONS]).eq("provenance_state", "VERIFIED");
   const rows = (data ?? []).filter((r: any) => Number(r.points ?? 0) > 0);
   const days = new Set(rows.map((r: any) => String(r.day_key ?? "")));
   return {
