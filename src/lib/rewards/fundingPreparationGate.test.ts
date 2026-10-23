@@ -8,7 +8,7 @@ import { MAINNET_CLAIM_GATE_FACTS, oneToOneClaimGate } from "./signupBonusPolicy
 
 const OWNER = "532956a9-657d-489e-aa6a-5385423e9a7c", ANA = "9af56470-d5bd-4e17-8e0e-fc651478878b", REF = "afb08df9";
 let n = 0;
-const row = (p: Partial<ReconLedgerRow>): ReconLedgerRow => ({ id: `r${++n}`, reason: "CORE_SWAP", points: 0, chainId: null, createdAt: "2026-08-20T00:00:00Z", evidenceKey: `k${n}`, verifiedUsd: null, dayKey: null, refereeId: null, reservationId: null, fundingState: "UNFUNDED", ...p });
+const row = (p: Partial<ReconLedgerRow>): ReconLedgerRow => ({ id: `r${++n}`, reason: "CORE_SWAP", points: 0, chainId: null, createdAt: "2026-08-20T00:00:00Z", evidenceKey: `k${n}`, verifiedUsd: null, provenanceState: 'VERIFIED', dayKey: null, refereeId: null, reservationId: null, fundingState: "UNFUNDED", ...p });
 const snap = (): ReconAccountInput[] => [
   { userId: OWNER, createdAt: "2026-06-24T00:00:00Z", storedFlowPoints: 175, storedPointsSelf: 75, storedReferralSignup: 0, ledger: [
     row({ points: 925, chainId: 968 }), row({ points: 75, chainId: 968 }),

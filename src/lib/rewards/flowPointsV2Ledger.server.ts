@@ -52,12 +52,13 @@ export async function resolveFlowPointsV2Policy(): Promise<FlowPointsV2Policy> {
 
 /** Sum of core-swap points already granted to a bound wallet for a UTC day. */
 export async function awardedCoreSwapPointsToday(walletAddress: string, dayKey: string) {
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("flow_points_ledger")
     .select("points")
     .eq("wallet_address", walletAddress)
     .in("reason", [...CORE_SWAP_LEDGER_REASONS])
-    .eq("day_key", dayKey);
+    .eq("day_key", dayKey).eq('provenance_state', 'VERIFIED');
+  if (error) throw new Error('Reward daily usage unavailable');
   return (data ?? []).reduce((sum: number, r: any) => sum + Number(r.points ?? 0), 0);
 }
 
@@ -155,14 +156,14 @@ export async function accrueCoreSwapPoints(input: {
       .from("flow_points_ledger")
       .select("metadata, created_at")
       .eq("wallet_address", wallet)
-      .gte("created_at", since);
+      .eq('provenance_state', 'VERIFIED').limit(5000);
     const prior = (recent ?? [])
       .map((r: any) => ({
         tokenIn: String(r.metadata?.tokenIn ?? ""),
         tokenOut: String(r.metadata?.tokenOut ?? ""),
-        at: new Date(r.created_at).getTime(),
+        at: new Date(r.metadata?.occurredAt ?? r.created_at).getTime(),
       }))
-      .filter((p) => p.tokenIn && p.tokenOut);
+      .filter((p) => p.tokenIn && p.tokenOut && p.at >= new Date(since).getTime() && p.at <= eventAt.getTime());
     if (
       isRapidReverseRoundTrip(prior, { tokenIn: input.tokenIn, tokenOut: input.tokenOut, at: eventAt.getTime() })
     ) {
@@ -192,6 +193,7 @@ export async function accrueCoreSwapPoints(input: {
       policyVersion: policy.version,
       valuationSource: 'SERVER_BOT_DEX_PRICE_POLICY',
       valuationObservedAt: new Date().toISOString(),
+      occurredAt: eventAt.toISOString(),
       evidenceSource: verified.activity.evidenceSource,
       dailyCoreSwapCap: policy.dailyCoreSwapCap,
       alreadyAwardedToday: alreadyToday,
