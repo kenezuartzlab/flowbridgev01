@@ -6,7 +6,7 @@ import { fetchApplicationMaterials, fetchApplicationReadiness, downloadApplicati
 import { APPLICATION_FILES, EDITABLE_COPY_LABEL } from "@/lib/application/applicationFiles";
 import { LaunchPreparation } from "./LaunchPreparation";
 
-type Material = { id: string; title: string; url: string | null };
+type Material = { id: string; title: string };
 function download(name: string, body: string, type = "application/json") {
   const url = URL.createObjectURL(new Blob([body], { type }));
   const anchor = document.createElement("a");
@@ -72,14 +72,17 @@ export function ApplicationWorkspace({ wallet }: { wallet: string }) {
         {[...new Set(APPLICATION_FILES.map((f) => f.group))].map((group) => <div key={group} className="space-y-1">
           <p className="text-xs font-bold">{group}</p>
           <div className="flex flex-wrap gap-2">{APPLICATION_FILES.filter((f) => f.group === group).map((f) => <Button key={f.id} variant={f.id === "package-zip" ? "default" : "outline"} size="sm" disabled={busy === f.id}
-            onClick={() => { setBusy(f.id); setDlError(null); downloadApplicationFile(wallet, f.id, f.path.split("/").pop()!).catch((e) => setDlError(e?.message ?? "Download failed")).finally(() => setBusy(null)); }}><Download />{f.label}</Button>)}</div>
+            onClick={() => { setBusy(f.id); setDlError(null); downloadApplicationFile(wallet, f.id, f.path.split("/").pop() ?? "application-file").catch((e) => setDlError(e?.message ?? "Download failed")).finally(() => setBusy(null)); }}><Download />{f.label}</Button>)}</div>
         </div>)}
         {dlError && <p className="text-xs text-destructive">{dlError}</p>}
       </section>
       <section className="space-y-3 py-4">
         <h2 className="text-base font-bold">Private reviewer materials</h2>
-        <div className="flex flex-wrap gap-2">{files.map((file) => <Button key={file.id} variant="outline" size="sm" disabled={!file.url} onClick={() => { if (file.url) window.open(file.url, "_blank", "noopener,noreferrer"); }}><Download />{file.title}</Button>)}</div>
-        <div className="flex flex-wrap gap-2">{files.filter((file) => file.url).map((file) => <Button key={file.id} variant="link" size="sm" onClick={() => { if (file.url) navigator.clipboard?.writeText(file.url); }}><Copy />Copy {file.id} link · 7 days</Button>)}</div>
+        <div className="flex flex-wrap gap-2">{files.map((file) => <Button key={file.id} variant="outline" size="sm" disabled={busy === file.id} onClick={() => {
+          const record = APPLICATION_FILES.find(f => f.id === file.id); if (!record) return;
+          setBusy(file.id); setDlError(null);
+          downloadApplicationFile(wallet, file.id, record.path.split('/').pop() ?? 'application.pdf').catch(e => setDlError(e?.message ?? 'Download failed')).finally(() => setBusy(null));
+        }}><Download />{file.title}</Button>)}</div>
         <Button variant="outline" size="sm" disabled={!ready} onClick={() => download(`flowbridge-evidence-${stamp}.json`, JSON.stringify(ready, null, 2))}><Download />Evidence JSON</Button>
         <p className="text-xs text-muted">Owner information complete. Compliance confirmation remains an owner action. No application has been submitted.</p>
       </section>

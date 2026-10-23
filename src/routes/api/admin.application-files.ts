@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/admin/application-files")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin.storage.from("application-materials").download(file.path);
         if (error || !data) return jsonResponse({ error: "File unavailable" }, 404);
-        const name = file.path.split("/").pop()!;
+        const name = file.path.split("/").pop() ?? "application-file";
         return new Response(data, {
           headers: {
             "content-type": data.type || "application/octet-stream",
