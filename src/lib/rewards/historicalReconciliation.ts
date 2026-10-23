@@ -169,11 +169,11 @@ export function reconcileAccount(
       milestoneSeen.add(dedup);
       if (r.points !== MILESTONE_POINTS[kind]) { pendingReview += r.points; flags.push(`MILESTONE_AMOUNT_MISMATCH:${r.id}`); continue; }
       const ev = r.refereeId ? (evidenceByUser.get(r.refereeId) ?? []) : [];
-      if (r.refereeId && milestoneSupported(kind, ev, r.createdAt)) b.referralMilestone += r.points;
+      if (r.refereeId && milestoneSupported(kind, mainnetSwapEvidence(ev), r.createdAt)) { b.referralMilestone += r.points; eligibleRowIds.push(r.id); }
       else { pendingReview += r.points; flags.push(`MILESTONE_WITHOUT_MAINNET_EVIDENCE:${kind}`); }
       continue;
     }
-    if (r.reason === "ADMIN_ADJUSTMENT" && r.evidenceKey) { b.ledgerBackedAdjustments += r.points; continue; }
+    if (r.reason === "ADMIN_ADJUSTMENT" && r.evidenceKey) { b.ledgerBackedAdjustments += r.points; eligibleRowIds.push(r.id); continue; }
     excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: "UNRECOGNISED_REASON" });
   }
 
