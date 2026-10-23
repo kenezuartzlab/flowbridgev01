@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { readProposalInput } from '@/lib/proposalPolicy';
 
 export const Route = createFileRoute("/api/proposals")({
   server: {
@@ -19,30 +20,11 @@ export const Route = createFileRoute("/api/proposals")({
         const user = await getAuthUser(request);
         if (!user) return unauthorized();
         try {
-          const { category, text, author } = (await request.json()) as {
-            category?: string;
-            text?: string;
-            author?: string;
-          };
-          if (!category || !text) {
-            return jsonResponse({ error: "Missing required fields (category or text)" }, 400);
-          }
-          if (typeof text !== "string" || typeof category !== "string") {
-            return jsonResponse({ error: "Invalid field types" }, 400);
-          }
-          if (text.length > 1000) {
-            return jsonResponse({ error: "Text too long (max 1000 chars)" }, 400);
-          }
-          if (category.length > 100) {
-            return jsonResponse({ error: "Category too long (max 100 chars)" }, 400);
-          }
-          if (author && (typeof author !== "string" || author.length > 60)) {
-            return jsonResponse({ error: "Author too long (max 60 chars)" }, 400);
-          }
-          const proposal = await createProposal(category, text, author || "Anonymous Supporter");
+          const { category, text } = await readProposalInput(request).catch(() => { throw new Error('INVALID_PROPOSAL'); });
+          const proposal = await createProposal(category, text, "Anonymous Supporter");
           return jsonResponse({ success: true, proposal }, 201);
         } catch (e: any) {
-          return jsonResponse({ error: e.message ?? "Failed to save proposal" }, 500);
+          return jsonResponse({ error: e.message === 'INVALID_PROPOSAL' ? 'Proposal exceeds limits or has invalid content.' : 'Unable to save proposal.' }, e.message === 'INVALID_PROPOSAL' ? 400 : 503);
         }
       },
     },

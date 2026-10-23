@@ -45,6 +45,7 @@ export interface ReconLedgerRow {
   refereeId: string | null;
   reservationId: string | null;
   fundingState: string | null;
+  provenanceState?: string | null;
 }
 
 export interface ReconAccountInput {
@@ -79,6 +80,7 @@ export interface ReconAccountResult {
   classification: ReconClass;
   /** Unsupported points kept as audit history; never claimable. */
   nonclaimableHistorical: number;
+  eligibleRowIds: string[];
 }
 
 const CORE_SWAP = new Set(["CORE_SWAP", "CORE_SWAP_V2"]);
@@ -98,7 +100,8 @@ export function mainnetSwapEvidence(rows: ReconLedgerRow[]): ReconLedgerRow[] {
   const seen = new Set<string>();
   return rows.filter((r) => {
     if (!CORE_SWAP.has(r.reason) || r.chainId !== MAINNET_CHAIN_ID || r.points <= 0) return false;
-    const key = r.evidenceKey ?? r.id;
+    if (r.provenanceState !== "VERIFIED" || !r.evidenceKey || !Number.isFinite(r.verifiedUsd) || Number(r.verifiedUsd) < 5 || r.points > Math.floor(Number(r.verifiedUsd))) return false;
+    const key = r.evidenceKey;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -130,6 +133,7 @@ export function reconcileAccount(
   let pendingReview = 0;
   const own = mainnetSwapEvidence(acct.ledger);
   const ownIds = new Set(own.map((r) => r.id));
+  const eligibleRowIds: string[] = [];
   const signupSeen = new Set<string>();
   const milestoneSeen = new Set<string>();
 
@@ -141,8 +145,8 @@ export function reconcileAccount(
       continue;
     }
     if (CORE_SWAP.has(r.reason)) {
-      if (ownIds.has(r.id)) b.coreSwap += r.points;
-      else excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: r.chainId === MAINNET_CHAIN_ID ? "DUPLICATE_EVIDENCE" : `NON_MAINNET_CHAIN_${r.chainId ?? "NULL"}` });
+      if (ownIds.has(r.id)) { b.coreSwap += r.points; eligibleRowIds.push(r.id); }
+      else excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: r.chainId === MAINNET_CHAIN_ID ? (r.provenanceState !== "VERIFIED" ? "PROVENANCE_REVIEW_REQUIRED" : "DUPLICATE_EVIDENCE") : `NON_MAINNET_CHAIN_${r.chainId ?? "NULL"}` });
       continue;
     }
     if (SIGNUP.has(r.reason)) {
@@ -151,6 +155,7 @@ export function reconcileAccount(
       if (okAmount && okTime && r.reservationId && !signupSeen.has(r.reason + (r.refereeId ?? ""))) {
         signupSeen.add(r.reason + (r.refereeId ?? ""));
         b.referralSignup += r.points;
+        eligibleRowIds.push(r.id);
       } else {
         pendingReview += r.points;
         flags.push(`SIGNUP_AWARD_INVALID:${r.id}`);
@@ -164,11 +169,11 @@ export function reconcileAccount(
       milestoneSeen.add(dedup);
       if (r.points !== MILESTONE_POINTS[kind]) { pendingReview += r.points; flags.push(`MILESTONE_AMOUNT_MISMATCH:${r.id}`); continue; }
       const ev = r.refereeId ? (evidenceByUser.get(r.refereeId) ?? []) : [];
-      if (r.refereeId && milestoneSupported(kind, ev, r.createdAt)) b.referralMilestone += r.points;
+      if (r.refereeId && milestoneSupported(kind, mainnetSwapEvidence(ev), r.createdAt)) { b.referralMilestone += r.points; eligibleRowIds.push(r.id); }
       else { pendingReview += r.points; flags.push(`MILESTONE_WITHOUT_MAINNET_EVIDENCE:${kind}`); }
       continue;
     }
-    if (r.reason === "ADMIN_ADJUSTMENT" && r.evidenceKey) { b.ledgerBackedAdjustments += r.points; continue; }
+    if (r.reason === "ADMIN_ADJUSTMENT" && r.evidenceKey) { b.ledgerBackedAdjustments += r.points; eligibleRowIds.push(r.id); continue; }
     excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: "UNRECOGNISED_REASON" });
   }
 
@@ -210,7 +215,7 @@ export function reconcileAccount(
     explained.push(`OWNER_REVIEW:${review.decidedAt}`);
   }
 
-  return { userId: acct.userId, stored: acct.storedFlowPoints, authoritative, breakdown: b, pendingReview, excluded, explained, flags, difference, classification, nonclaimableHistorical };
+  return { userId: acct.userId, stored: acct.storedFlowPoints, authoritative, breakdown: b, pendingReview, excluded, explained, flags, difference, classification, nonclaimableHistorical, eligibleRowIds };
 }
 
 export interface ReconSummary {

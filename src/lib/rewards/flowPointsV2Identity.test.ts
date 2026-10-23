@@ -7,6 +7,9 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 const inserted: any[] = [];
+const ingest = vi.hoisted(() => ({ call: vi.fn() }));
+vi.mock('@/lib/activity/mainnetRouterV4Ingest.server', () => ({ingestMainnetRouterV4Swap: ingest.call}));
+vi.mock('@/lib/activity/mainnetRouterV3Ingest.server', () => ({ingestMainnetRouterV3Swap: ingest.call}));
 
 vi.mock('@/integrations/supabase/client.server', () => ({
   supabaseAdmin: {
@@ -22,6 +25,8 @@ vi.mock('@/integrations/supabase/client.server', () => ({
         q.eq = () => q;
         q.in = () => q;
         q.gte = () => q;
+        q.limit = () => q;
+        q.maybeSingle = async () => ({data:{wallet_address:"0xabc"},error:null});
         return q;
       },
     }),
@@ -31,7 +36,9 @@ vi.mock('@/integrations/supabase/client.server', () => ({
 // Internal diagnostics are a separate side channel, not ledger writes.
 vi.mock('./rewardDiagnostics.server', () => ({ recordRewardDiagnostic: async () => {} }));
 
-vi.mock('./flowPointsV2Policy.server', () => ({
+vi.mock('@/lib/appConfig.server', () => ({getRewardSettings: async () => ({})}));
+vi.mock('./approvedRewardPolicy', () => ({ validateApprovedRewardPolicy: (p: unknown) => p }));
+vi.mock('./unusedPolicy', () => ({
   resolveFlowPointsV2Policy: async () => ({
     version: 'v2',
     minSwapUsd: 1,
@@ -45,6 +52,7 @@ const load = async () => await import('./flowPointsV2Ledger.server');
 describe('V15.3M CORE_SWAP canonical identity', () => {
   beforeEach(() => {
     inserted.length = 0;
+    ingest.call.mockResolvedValue({status:'VERIFIED',activity:{activityId:'0x7dd7',logIndex:8,tokenIn:'a',tokenOut:'b',occurredAt:1791504000,evidenceSource:'ROUTER_V4_SWAP_ACTIVITY'},verifiedUsd:10});
   });
 
   it('fails closed without a verified activity id', async () => {
@@ -53,7 +61,7 @@ describe('V15.3M CORE_SWAP canonical identity', () => {
       userId: 'u1',
       walletAddress: '0xAbC',
       verifiedUsd: 10,
-      chainId: 968,
+      chainId: 677,
       txHash: '0xdead',
       verifiedActivityId: '',
       sourceLogIndex: 8,
@@ -70,7 +78,7 @@ describe('V15.3M CORE_SWAP canonical identity', () => {
       userId: 'u1',
       walletAddress: '0xAbC',
       verifiedUsd: 10,
-      chainId: 968,
+      chainId: 677,
       txHash: '0xdead',
       verifiedActivityId: '0xact',
       sourceLogIndex: Number.NaN,
@@ -86,7 +94,7 @@ describe('V15.3M CORE_SWAP canonical identity', () => {
       userId: 'u1',
       walletAddress: '0xAbC',
       verifiedUsd: 10,
-      chainId: 968,
+      chainId: 677,
       txHash: '0xB89D',
       verifiedActivityId: '0x7DD7',
       sourceLogIndex: 8,
@@ -96,7 +104,23 @@ describe('V15.3M CORE_SWAP canonical identity', () => {
     expect(inserted[0].row).toMatchObject({
       verified_activity_id: '0x7dd7',
       source_log_index: 8,
-      activity_key: '968:0xb89d:8',
+      activity_key: '677:0xb89d:8',
     });
+  });
+  it.each(['REJECTED','NOT_FINAL'])('untrusted %s trades award zero even with forged USD', async (status) => {
+    ingest.call.mockResolvedValue({status,reason:'unverified'});
+    const {accrueCoreSwapPoints}=await load();
+    const result=await accrueCoreSwapPoints({userId:'u1',walletAddress:'0xabc',verifiedUsd:1000000,chainId:677,txHash:'0xb89d',verifiedActivityId:'0x7dd7',sourceLogIndex:8});
+    expect(result.award).toBe(0);expect(inserted).toHaveLength(0);
+  });
+  it('a genuine verified trade ignores forged browser USD and earns exactly 10', async () => {
+    const {accrueCoreSwapPoints}=await load();
+    const result=await accrueCoreSwapPoints({userId:'u1',walletAddress:'0xabc',verifiedUsd:1000000,chainId:677,txHash:'0xb89d',verifiedActivityId:'0x7dd7',sourceLogIndex:8});
+    expect(result.award).toBe(10);expect(inserted[0].row.verified_usd).toBe(10);
+  });
+  it('wrong-chain reports cannot earn a single point',async()=>{
+    const {accrueCoreSwapPoints}=await load();
+    const result=await accrueCoreSwapPoints({userId:'u1',walletAddress:'0xabc',verifiedUsd:1000000,chainId:968,txHash:'0xb89d',verifiedActivityId:'0x7dd7',sourceLogIndex:8});
+    expect(result.award).toBe(0);expect(inserted).toHaveLength(0);
   });
 });

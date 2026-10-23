@@ -199,6 +199,7 @@ export const Route = createFileRoute("/api/admin/settings")({
         const { jsonResponse } = await import("@/lib/api-auth.server");
         const gate = await requireAdmin(request);
         if (!gate.ok) return gate.response;
+        if (gate.admin.role !== 'super_admin') return jsonResponse({ error: 'Only a super admin may change site settings.' }, 403);
 
         const body = await request.json().catch(() => null);
         const parsed = bodySchema.safeParse(body);
@@ -210,11 +211,11 @@ export const Route = createFileRoute("/api/admin/settings")({
         try {
           for (const key of ["fees", "rewards", "flags", "social", "content", "banners", "partners", "quickActions", "pages"] as const) {
             const value = parsed.data[key];
-            if (value) await writeSetting(key, value, gate.admin.userId);
+            if (value) await writeSetting(key, value, gate.admin);
           }
           return jsonResponse({ success: true, config: await buildPublicConfig() });
         } catch (e: any) {
-          return jsonResponse({ error: e?.message ?? "Failed to save settings" }, 500);
+          return jsonResponse({ error: "Settings were not saved. Re-check their approval and retry." }, 503);
         }
       },
     },

@@ -52,12 +52,13 @@ export async function resolveFlowPointsV2Policy(): Promise<FlowPointsV2Policy> {
 
 /** Sum of core-swap points already granted to a bound wallet for a UTC day. */
 export async function awardedCoreSwapPointsToday(walletAddress: string, dayKey: string) {
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("flow_points_ledger")
     .select("points")
     .eq("wallet_address", walletAddress)
     .in("reason", [...CORE_SWAP_LEDGER_REASONS])
-    .eq("day_key", dayKey);
+    .eq("day_key", dayKey).eq('provenance_state', 'VERIFIED');
+  if (error) throw new Error('Reward daily usage unavailable');
   return (data ?? []).reduce((sum: number, r: any) => sum + Number(r.points ?? 0), 0);
 }
 
@@ -69,7 +70,7 @@ export interface CoreSwapAccrual {
   recorded: boolean;
   policy: FlowPointsV2Policy;
   /** V15.3M — set when settlement was refused for missing canonical identity. */
-  failClosedReason?: 'MISSING_VERIFIED_ACTIVITY_ID' | 'MISSING_SOURCE_LOG_INDEX';
+  failClosedReason?: 'MISSING_VERIFIED_ACTIVITY_ID' | 'MISSING_SOURCE_LOG_INDEX' | 'UNVERIFIED_MAINNET_EVIDENCE';
 }
 
 /**
@@ -127,30 +128,44 @@ export async function accrueCoreSwapPoints(input: {
     };
   }
 
+  const refuse = (): CoreSwapAccrual => ({ award: 0, base: 0, reason: 'CORE_SWAP_V2', recorded: false, policy, failClosedReason: 'UNVERIFIED_MAINNET_EVIDENCE' });
+  if (input.chainId !== 677) return refuse();
+  const { data: profile, error: profileError } = await supabaseAdmin.from('profiles').select('wallet_address').eq('id', input.userId).maybeSingle();
+  if (profileError || profile?.wallet_address?.toLowerCase() !== wallet) return refuse();
+  // This writer is itself a trust boundary: caller numbers and activity IDs are hints.
+  const { ingestMainnetRouterV4Swap } = await import('@/lib/activity/mainnetRouterV4Ingest.server');
+  const { ingestMainnetRouterV3Swap } = await import('@/lib/activity/mainnetRouterV3Ingest.server');
+  let verified: import('@/lib/activity/mainnetRouterV4Ingest.server').MainnetV4IngestResult | import('@/lib/activity/mainnetRouterV3Ingest.server').MainnetV3IngestResult = await ingestMainnetRouterV4Swap(input.txHash, wallet);
+  if (verified.status === 'REJECTED') verified = await ingestMainnetRouterV3Swap(input.txHash, wallet);
+  if (verified.status !== 'VERIFIED' || verified.activity.activityId.toLowerCase() !== activityId || verified.activity.logIndex !== logIndex || verified.verifiedUsd == null || !Number.isFinite(verified.verifiedUsd)) return refuse();
+  const eventAt = new Date(verified.activity.occurredAt * 1000);
+  input = { ...input, verifiedUsd: verified.verifiedUsd, tokenIn: verified.activity.tokenIn, tokenOut: verified.activity.tokenOut, at: new Date(verified.activity.occurredAt * 1000) };
+  if (!isFlowPointsV2Active(eventAt, policy)) return refuse();
+  const eventDay = utcDayKey(eventAt);
   const activityKey = `${input.chainId}:${input.txHash.toLowerCase()}:${logIndex}`;
 
-  const alreadyToday = await awardedCoreSwapPointsToday(wallet, dayKey);
+  const alreadyToday = await awardedCoreSwapPointsToday(wallet, eventDay);
   const computed: { award: number; base: number; reason: LedgerReason } = {
     ...coreSwapAward(input.verifiedUsd, alreadyToday, policy),
   };
 
   // Anti-wash: rapid reverse-pair round trip → REVIEW (0 until resolved).
   if (input.tokenIn && input.tokenOut && computed.award > 0) {
-    const since = new Date(at.getTime() - 10 * 60 * 1000).toISOString();
+    const since = new Date(eventAt.getTime() - 10 * 60 * 1000).toISOString();
     const { data: recent } = await supabaseAdmin
       .from("flow_points_ledger")
       .select("metadata, created_at")
       .eq("wallet_address", wallet)
-      .gte("created_at", since);
+      .eq('provenance_state', 'VERIFIED').limit(5000);
     const prior = (recent ?? [])
       .map((r: any) => ({
         tokenIn: String(r.metadata?.tokenIn ?? ""),
         tokenOut: String(r.metadata?.tokenOut ?? ""),
-        at: new Date(r.created_at).getTime(),
+        at: new Date(r.metadata?.occurredAt ?? r.created_at).getTime(),
       }))
-      .filter((p) => p.tokenIn && p.tokenOut);
+      .filter((p) => p.tokenIn && p.tokenOut && p.at >= new Date(since).getTime() && p.at <= eventAt.getTime());
     if (
-      isRapidReverseRoundTrip(prior, { tokenIn: input.tokenIn, tokenOut: input.tokenOut, at: at.getTime() })
+      isRapidReverseRoundTrip(prior, { tokenIn: input.tokenIn, tokenOut: input.tokenOut, at: eventAt.getTime() })
     ) {
       computed.award = 0;
       computed.reason = "ANTI_ABUSE_REVIEW";
@@ -172,9 +187,14 @@ export async function accrueCoreSwapPoints(input: {
     wallet_address: wallet,
     program_id: 'CORE_SWAP',
     funding_state: computed.reason === 'ANTI_ABUSE_REVIEW' ? 'REVIEW' : 'UNFUNDED',
-    day_key: dayKey,
+    day_key: eventDay,
+    provenance_state: 'VERIFIED',
     metadata: {
       policyVersion: policy.version,
+      valuationSource: 'SERVER_BOT_DEX_PRICE_POLICY',
+      valuationObservedAt: new Date().toISOString(),
+      occurredAt: eventAt.toISOString(),
+      evidenceSource: verified.activity.evidenceSource,
       dailyCoreSwapCap: policy.dailyCoreSwapCap,
       alreadyAwardedToday: alreadyToday,
       tokenIn: input.tokenIn?.toLowerCase() ?? null,
@@ -216,7 +236,7 @@ export async function refereeQualifiedState(userId: string) {
     .select("points, verified_usd, day_key")
     .eq("user_id", userId)
     .eq("chain_id", 677)
-    .in("reason", [...CORE_SWAP_LEDGER_REASONS]);
+    .in("reason", [...CORE_SWAP_LEDGER_REASONS]).eq("provenance_state", "VERIFIED");
   const rows = (data ?? []).filter((r: any) => Number(r.points ?? 0) > 0);
   const days = new Set(rows.map((r: any) => String(r.day_key ?? "")));
   return {

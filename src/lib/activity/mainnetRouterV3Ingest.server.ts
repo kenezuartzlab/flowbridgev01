@@ -18,6 +18,7 @@ async function rpc<T>(method: string, params: unknown[]): Promise<T | null> {
   try {
     const res = await fetch(RPC, {
       method: 'POST',
+      signal: AbortSignal.timeout(15000),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
     });
@@ -40,6 +41,8 @@ export async function ingestMainnetRouterV3Swap(
   txHash: string,
   wallet: string,
 ): Promise<MainnetV3IngestResult> {
+  const chain = await rpc<string>("eth_chainId", []);
+  if (chain !== "0x2a5") return { status: "NOT_FINAL", reason: "Mainnet RPC identity unavailable" };
   const [receipt, tx] = await Promise.all([
     rpc<any>('eth_getTransactionReceipt', [txHash]),
     rpc<any>('eth_getTransactionByHash', [txHash]),
@@ -53,8 +56,9 @@ export async function ingestMainnetRouterV3Swap(
     if (head && Number(BigInt(head)) - mined + 1 >= 3) break;
     await new Promise((r) => setTimeout(r, 2000));
   }
-  if (!head) return { status: 'NOT_FINAL', reason: 'head unavailable' };
+  if (!head || Number(BigInt(head)) - mined + 1 < 3) return { status: 'NOT_FINAL', reason: 'insufficient confirmations' };
   const block = await rpc<any>('eth_getBlockByNumber', [receipt.blockNumber, false]);
+  if (!block?.hash || block.hash.toLowerCase() !== String(receipt.blockHash).toLowerCase() || !block.timestamp) return { status: "NOT_FINAL", reason: "canonical block unavailable" };
   const result = verifyMainnetRouterV3CoreSwap(
     {
       chainId: BOT_MAINNET_CHAIN_ID,
@@ -77,7 +81,7 @@ export async function ingestMainnetRouterV3Swap(
   if (result.status !== 'VERIFIED') return result;
   const a = result.activity;
 
-  const occurred = a.occurredAt > 0 ? new Date(a.occurredAt * 1000) : new Date();
+  const occurred = new Date(a.occurredAt * 1000);
   const { error: vaError } = await supabaseAdmin.from('verified_activities').upsert(
     {
       activity_id: a.activityId,
@@ -114,5 +118,7 @@ export async function ingestMainnetRouterV3Swap(
   const verifiedUsd = priced
     ? (Number(a.amountRaw) / 10 ** priced.decimals) * priced.price
     : null;
+  const canonical = await rpc<any>("eth_getBlockByNumber", [receipt.blockNumber, false]);
+  if (!canonical?.hash || canonical.hash.toLowerCase() !== block.hash.toLowerCase()) return { status: "NOT_FINAL", reason: "chain reorganized" };
   return { status: 'VERIFIED', activity: a, verifiedUsd };
 }

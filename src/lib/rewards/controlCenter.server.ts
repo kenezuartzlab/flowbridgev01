@@ -13,7 +13,7 @@ async function db() { return (await import("@/integrations/supabase/client.serve
 async function loadQueue() {
   const admin = await db();
   const [ledger, profiles] = await Promise.all([
-    admin.from("flow_points_ledger").select("id,user_id,points,reason,chain_id,funding_state,reservation_id,program_id,policy_version,wallet_address,tx_hash,verified_activity_id,created_at").eq("funding_state", "UNFUNDED").gt("points", 0).limit(5000),
+    admin.from("flow_points_ledger").select("id,user_id,points,reason,chain_id,funding_state,reservation_id,program_id,policy_version,wallet_address,tx_hash,verified_activity_id,created_at,provenance_state").eq("funding_state", "UNFUNDED").gt("points", 0).limit(5000),
     admin.from("profiles").select("id,wallet_address").not("wallet_address", "is", null).limit(10000),
   ]);
   if (ledger.error || profiles.error) throw new Error("ledger unavailable");

@@ -5,7 +5,7 @@ const W = "0x" + "a".repeat(40);
 const row = (o: Partial<QueueLedgerRow>): QueueLedgerRow => ({
   id: "r1", user_id: "u1", points: 10, reason: "CORE_SWAP_V2", chain_id: 677, funding_state: "UNFUNDED",
   reservation_id: null, program_id: null, policy_version: "FLOW_POINTS_V2", wallet_address: W,
-  tx_hash: "0x1", verified_activity_id: "a1", created_at: "2026-10-10", ...o,
+  provenance_state: "VERIFIED", tx_hash: "0x1", verified_activity_id: "a1", created_at: "2026-10-10", ...o,
 });
 const wallets = new Map([["u1", W], ["u2", W]]);
 

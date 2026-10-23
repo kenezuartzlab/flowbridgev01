@@ -15,7 +15,7 @@ function toRow(l: any): ReconLedgerRow & { programId: string | null } {
     evidenceKey: l.activity_key ?? (l.tx_hash ? `${String(l.tx_hash).toLowerCase()}:${l.source_log_index ?? ""}` : null),
     verifiedUsd: l.verified_usd == null ? null : Number(l.verified_usd), dayKey: l.day_key,
     refereeId: typeof md.refereeId === "string" ? md.refereeId : null, reservationId: l.reservation_id,
-    fundingState: l.funding_state, programId: l.program_id,
+    fundingState: l.funding_state, provenanceState: l.provenance_state, programId: l.program_id,
   };
 }
 
@@ -30,7 +30,7 @@ export interface PersonalProgress {
 
 export async function resolvePersonalProgress(args: { userId: string; emailVerified: boolean }): Promise<PersonalProgress> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const cols = "id,user_id,reason,points,policy_version,wallet_address,chain_id,created_at,activity_key,tx_hash,source_log_index,verified_usd,day_key,metadata,reservation_id,funding_state,program_id";
+  const cols = "id,user_id,reason,points,policy_version,wallet_address,chain_id,created_at,activity_key,tx_hash,source_log_index,verified_usd,day_key,metadata,reservation_id,funding_state,program_id,provenance_state";
   const [{ data: profile }, { data: ledgerData }] = await Promise.all([
     supabaseAdmin.from("profiles").select("id,created_at,flow_points,points_self,points_referral_signup,wallet_address").eq("id", args.userId).maybeSingle(),
     supabaseAdmin.from("flow_points_ledger").select(cols).eq("user_id", args.userId).limit(5000),
@@ -165,7 +165,7 @@ async function attributeOwnSignupRows(admin: any, rows: any[], boundWallet: stri
       const ref = refereeOf(l); const rw = refWallet.get(ref) ?? null;
       const a = attributeSignupAward({
         points: l.points,
-        reason: l.reason, programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state, policyVersion: l.policy_version ?? null,
+        reason: l.reason, programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state,  policyVersion: l.policy_version ?? null,
         reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null, refereeCreatedAt: created.get(ref) ?? null,
         refereeEmailVerified: email.get(ref) ?? false, recipientBoundWallet: boundWallet, refereeWalletAwardCount: rw ? counts.get(rw) ?? 0 : 0,
         refereeWalletMatches: !!rw && boundByReferee.get(ref) === rw,

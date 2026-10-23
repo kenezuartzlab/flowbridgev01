@@ -25,15 +25,6 @@ function generateReferralCode() {
   return code;
 }
 
-function parsePositiveAmount(value: string) {
-  const n = Number(String(value).replace(/,/g, ""));
-  return Number.isFinite(n) && n > 0 ? n : 0;
-}
-
-function inputSymbolFromDirection(direction: string) {
-  return String(direction).split("_TO_")[0]?.trim().toUpperCase() || "";
-}
-
 async function rpc<T>(url: string, method: string, params: unknown[]): Promise<T | null> {
   try {
     const res = await fetch(url, {
@@ -98,99 +89,6 @@ async function verifySwapReceipt(
     if (statusOk && fromOk && router) return { chainId: candidate.chainId, router: router.toLowerCase() };
   }
   return null;
-}
-
-/**
- * V12.4B — canonical verified-activity evidence for a swap, when the indexer has
- * already recorded it. Token, amount and log index come from this row, never
- * from the browser payload.
- */
-async function canonicalSwapEvidence(txHash: string, walletAddress: string) {
-  // V15.3M — a single canonical SwapActivity must be resolvable. Ambiguity
-  // (more than one verified swap row for the same tx + wallet) fails closed.
-  const { data } = await supabaseAdmin
-    .from("verified_activities")
-    .select("activity_id, source_chain_id, source_log_index, amount_raw, token, kind, status")
-    .eq("source_tx_hash", txHash.toLowerCase())
-    .eq("user_wallet", walletAddress.toLowerCase())
-    .eq("kind", "SWAP_EXECUTED")
-    .order("source_log_index", { ascending: true })
-    .limit(2);
-  const rows = data ?? [];
-  if (rows.length !== 1) return null;
-  const row: any = rows[0];
-  const logIndex = Number(row.source_log_index);
-  // Never substitute a log index: unknown is not 0.
-  if (!Number.isInteger(logIndex) || logIndex < 0) return null;
-  return {
-    activityId: String(row.activity_id).toLowerCase(),
-    chainId: Number(row.source_chain_id),
-    logIndex,
-    amountRaw: String(row.amount_raw),
-    token: String(row.token).toLowerCase(),
-  };
-}
-
-/** USD value derived purely from canonical evidence (amount_raw + token). */
-async function canonicalEvidenceUsd(evidence: {
-  chainId: number;
-  amountRaw: string;
-  token: string;
-}): Promise<number> {
-  const { findVerifiedSwapPath } = await import("@/lib/swap/verifiedSwapConfig");
-  const path = findVerifiedSwapPath(evidence.chainId, evidence.token);
-  if (!path) return 0;
-  const raw = Number(evidence.amountRaw);
-  if (!Number.isFinite(raw) || raw <= 0) return 0;
-  const amount = raw / 10 ** path.tokenInDecimals;
-  const price = await fetchTokenUsdPrice(path.tokenInSymbol);
-  return amount * price;
-}
-
-
-/** Resolve the on-chain address for a swap symbol (built-ins + admin-published tokens). */
-async function resolveTokenAddress(symbol: string): Promise<string | null> {
-  const s = symbol.toUpperCase();
-  if (s === "USDT") return MAINNET_CONTRACTS.usdtBot;
-  if (s === "BOT" || s === "WBOT") return MAINNET_CONTRACTS.wbot;
-  if (s === "CA") return MAINNET_CONTRACTS.caToken;
-  const { data } = await supabaseAdmin
-    .from("swap_tokens")
-    .select("address, symbol, chain, is_active")
-    .eq("chain", "mainnet")
-    .ilike("symbol", s)
-    .maybeSingle();
-  return data?.address ?? null;
-}
-
-/**
- * USD price for a swap input symbol. Unknown / unpriceable tokens return 0 so
- * they never inflate swap volume or FLOW points.
- */
-async function fetchTokenUsdPrice(symbol: string) {
-  const s = symbol.toUpperCase();
-  if (s === "USDT") return 1;
-  const token = await resolveTokenAddress(s);
-  if (!token) return 0;
-  try {
-    const res = await fetch(`https://dex-wallet.botchain.ai/api/v1/price?token=${token.toLowerCase()}&pool_type=all`);
-    const json = await res.json().catch(() => null);
-    const price = Number(json?.data?.price);
-    if (Number.isFinite(price) && price > 0) return price;
-  } catch {
-    // fall through
-  }
-  // Conservative fallbacks exist only for the two core assets.
-  if (s === "BOT" || s === "WBOT") return 9.7482;
-  return 0;
-}
-
-async function estimateSwapUsd(direction: string, fromAmount: string) {
-  const amount = parsePositiveAmount(fromAmount);
-  if (amount <= 0) return 0;
-  const symbol = inputSymbolFromDirection(direction);
-  const price = await fetchTokenUsdPrice(symbol);
-  return amount * price;
 }
 
 export async function ensureProfile(userId: string, email: string, referredByCode?: string) {
@@ -352,6 +250,7 @@ export async function createTransactionHistory(
             verifiedActivityId: ingest.activity.activityId,
             tokenIn: ingest.activity.tokenIn,
             tokenOut: ingest.activity.tokenOut,
+            at: new Date(ingest.activity.occurredAt * 1000),
           });
           pointsToEarn = accrual.award;
           if (!accrual.recorded) verifiedSwapUsd = 0;
@@ -397,6 +296,7 @@ export async function createTransactionHistory(
             verifiedActivityId: ingest.activity.activityId,
             tokenIn: ingest.activity.tokenIn,
             tokenOut: ingest.activity.tokenOut,
+            at: new Date(ingest.activity.occurredAt * 1000),
           });
           pointsToEarn = accrual.award;
           if (!accrual.recorded) verifiedSwapUsd = 0;
@@ -414,46 +314,10 @@ export async function createTransactionHistory(
           metadata: { kind: "FINALITY_PENDING", detail: ingest.reason },
         });
       }
-    } else if (verified) {
-      // V12.4B — token/amount authority is canonical on-chain evidence when the
-      // verified-activity indexer has it.
-      const evidence = await canonicalSwapEvidence(normalizedTxHash, submittedWallet);
-      verifiedSwapUsd = evidence
-        ? await canonicalEvidenceUsd(evidence)
-        : await estimateSwapUsd(payload.direction, payload.fromAmount);
-      if (v2Live) {
-        // V2 settlement requires a single canonical verified activity; browser
-        // values never decide V2 economics.
-        if (!evidence) {
-          verifiedSwapUsd = 0;
-          pointsToEarn = 0;
-          const { recordRewardDiagnostic } = await import("@/lib/rewards/rewardDiagnostics.server");
-          await recordRewardDiagnostic({
-            stage: "core_swap_evidence", outcome: "CANONICAL_EVENT_MISSING",
-            chainId: verified.chainId, txHash: normalizedTxHash,
-          });
-        } else {
-          const accrual = await accrueCoreSwapPoints({
-            userId,
-            walletAddress: submittedWallet,
-            verifiedUsd: verifiedSwapUsd,
-            chainId: evidence.chainId,
-            txHash: normalizedTxHash,
-            sourceLogIndex: evidence.logIndex,
-            verifiedActivityId: evidence.activityId,
-          });
-          pointsToEarn = accrual.award;
-          if (!accrual.recorded) verifiedSwapUsd = 0;
-        }
-      } else {
-        const rules = await getRewardSettings();
-        const { estimateFlowPointsForUsd } = await import("@/lib/rewards");
-        pointsToEarn = estimateFlowPointsForUsd(verifiedSwapUsd, rules);
-      }
     }
   }
 
-
+  // Testnet, inactive policies and missing evidence can record hints, never rewards.
 
 
   if (existingRow && pointsToEarn === 0) return existingRow;
@@ -973,7 +837,7 @@ export async function bindUserWallet(userId: string, walletAddress: string) {
     p_user_id: userId,
     p_wallet: walletAddress,
   });
-  if (error) throw new Error(error.message || "Failed to bind wallet");
+  if (error) throw new Error("Unable to bind this wallet. Verify ownership or use secure account recovery.");
   return data;
 }
 
@@ -1073,19 +937,8 @@ export async function createProposal(category: string, text: string, author: str
   return data;
 }
 
-export async function upvoteProposal(id: string) {
-  const { data: p } = await supabaseAdmin
-    .from("proposals")
-    .select("votes")
-    .eq("id", id)
-    .maybeSingle();
-  if (!p) throw new Error(`Proposal with ID ${id} not found.`);
-  const { data, error } = await supabaseAdmin
-    .from("proposals")
-    .update({ votes: (p.votes ?? 0) + 1 })
-    .eq("id", id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+export async function upvoteProposal(id: string, userId: string) {
+  const { data, error } = await supabaseAdmin.rpc('vote_proposal_once', { p_id: id, p_user: userId });
+  if (error) throw new Error('Unable to vote');
+  return data as { proposal: unknown; alreadyVoted: boolean };
 }

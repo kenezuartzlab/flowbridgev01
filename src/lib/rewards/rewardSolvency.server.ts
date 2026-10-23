@@ -42,7 +42,7 @@ export async function buildRewardSolvencyReport() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [profiles, ledger, budgets, reservations, chain] = await Promise.all([
     supabaseAdmin.from("profiles").select("id,created_at,flow_points,points_self,points_referral_signup,claimed_tokens,wallet_address").limit(10000),
-    supabaseAdmin.from("flow_points_ledger").select("id,user_id,reason,points,chain_id,created_at,activity_key,tx_hash,source_log_index,verified_usd,day_key,metadata,reservation_id,funding_state,program_id,policy_version,wallet_address").limit(50000),
+    supabaseAdmin.from("flow_points_ledger").select("id,user_id,reason,points,chain_id,created_at,activity_key,tx_hash,source_log_index,verified_usd,day_key,metadata,reservation_id,funding_state,program_id,policy_version,wallet_address,provenance_state").limit(50000),
     supabaseAdmin.from("reward_budgets").select("program_id,total_points,reserved_points,status,funding_verified"),
     supabaseAdmin.from("reward_reservations").select("program_id,points"),
     readDistributor(),
@@ -56,7 +56,7 @@ export async function buildRewardSolvencyReport() {
       id: l.id, reason: l.reason, points: l.points, chainId: l.chain_id, createdAt: new Date(l.created_at).toISOString(),
       evidenceKey: l.activity_key ?? (l.tx_hash ? `${l.tx_hash.toLowerCase()}:${l.source_log_index ?? ""}` : null),
       verifiedUsd: l.verified_usd == null ? null : Number(l.verified_usd), dayKey: l.day_key,
-      refereeId: typeof md.refereeId === "string" ? md.refereeId : null, reservationId: l.reservation_id, fundingState: l.funding_state,
+      refereeId: typeof md.refereeId === "string" ? md.refereeId : null, reservationId: l.reservation_id, fundingState: l.funding_state, provenanceState: l.provenance_state,
     };
     byUser.set(l.user_id, [...(byUser.get(l.user_id) ?? []), r]);
   }
@@ -170,7 +170,7 @@ export async function buildRewardSolvencyReport() {
       const reconDraft = buildDraftAllocation(recon.results.map((r) => ({ userId: r.userId, wallet: wallet.get(r.userId) ?? null, classification: r.classification, authoritative: r.authoritative, pendingReview: r.pendingReview })), { epochId: 2 });
       // Funded-only: the preview mirrors the publishable settlement path; earned-but-unfunded
       // points are reported as excluded, never added to a batch. Admin view: counts only.
-      return summarizeFundedDraft({ reconTotalPoints: reconDraft.totalPoints, fundedWallets: settlement.readiness?.nextBatchWallets ?? 0, fundedTotalPoints: settlement.readiness?.nextBatchFlow ?? 0 });
+      return summarizeFundedDraft({ reconTotalPoints: reconDraft.totalPoints, fundedWallets: settlement.readiness?.wallets ?? 0, fundedTotalPoints: settlement.readiness?.totalFlow ?? 0 });
     })(),
     unfundedSwapAwards: [...mainnetSwaps.filter(r => r.fundingState !== 'FUNDED').reduce((groups, r) => groups.set(r.points, (groups.get(r.points) ?? 0) + 1), new Map<number, number>())].map(([points, awards]) => ({ points, awards })),
     // Prepared allocation rounds: root + schedule only, never signed or broadcast here.

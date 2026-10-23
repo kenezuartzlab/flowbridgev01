@@ -59,12 +59,13 @@ export async function getRewardSettings() {
   return mergeAppConfig({ rewards: settings.rewards }).rewards;
 }
 
-export async function writeSetting(key: string, value: any, updatedBy?: string) {
+export async function writeSetting(key: string, value: any, actor: import('@/lib/admin/adminGate.server').AdminContext) {
+  if (actor.role !== 'super_admin') throw new Error('Forbidden');
   const db = await admin();
-  const { error } = await db
-    .from("app_settings")
-    .upsert({ key, value, updated_by: updatedBy ?? null, updated_at: new Date().toISOString() }, { onConflict: "key" });
-  if (error) throw error;
+  const { error } = await db.rpc('write_audited_site_setting', {
+    p_key: key, p_value: value, p_actor: actor.userId, p_email: actor.email, p_wallet: actor.wallet,
+  });
+  if (error) throw new Error('Settings approval or audit failed');
 }
 
 export { DEFAULT_APP_CONFIG };

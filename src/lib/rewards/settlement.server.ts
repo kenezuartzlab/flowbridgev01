@@ -160,7 +160,7 @@ export async function countRoundClaims(epochId: number, leafIndexes: number[]) {
 }
 
 export interface LedgerRow { id?: string; user_id: string; points: number; chain_id: number | null; funding_state: string | null; program_id: string | null; reason?: string; policy_version?: string | null; reservation_id?: string | null; wallet_address?: string | null; metadata?: unknown }
-export interface ReconRow { userId: string; classification: string; authoritative: number; pendingReview: number }
+export interface ReconRow { userId: string; classification: string; authoritative: number; pendingReview: number; eligibleRowIds?: string[] }
 
 const PROGRAMS: ProgramId[] = ["CORE_SWAP", "REFERRAL_MILESTONE", "SIGNUP_BONUS"];
 
@@ -195,7 +195,9 @@ export async function buildSettlement(args: {
   const { data: reservations, error: reservationError } = await args.admin.from('reward_reservations').select('reservation_id,ledger_id,user_id,wallet_address,points,program_id');
   if (reservationError) throw new Error('REWARD_RESERVATIONS_UNAVAILABLE');
   const reservationById = new Map((reservations ?? []).map((r) => [r.reservation_id, r]));
+  const eligibleIds = new Set(args.recon.flatMap(r => r.eligibleRowIds ?? []));
   for (const [i, l] of args.ledger.entries()) {
+    if (!l.id || !eligibleIds.has(l.id)) continue;
     if (l.funding_state !== "FUNDED" || effChain(l, i) !== MAINNET_CHAIN_ID) continue;
     if ((SIGNUP_REASONS as readonly string[]).includes(l.reason ?? '') && !signup.mainnetIdx.has(i)) continue;
     const reservation = l.reservation_id ? reservationById.get(l.reservation_id) : null;
@@ -210,7 +212,7 @@ export async function buildSettlement(args: {
   const rows = args.recon.filter((x) => fundedBy.has(x.userId)).map((x) => {
     const w = args.wallets.get(x.userId) ?? null;
     const fundedTotal = [...(fundedBy.get(x.userId)?.values() ?? [])].reduce((a, b) => a + b, 0);
-    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: Math.min(fundedTotal, x.authoritative), pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0 };
+    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: fundedTotal, pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0 };
   });
 
   const first = prepareSettlementBatch({ rows, fundedPointsAvailable: Number.MAX_SAFE_INTEGER, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
@@ -239,6 +241,7 @@ export async function buildSettlement(args: {
   if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
   if ((existing ?? []).length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
   const original = existing?.[0];
+  const provenanceExcludedPoints = args.ledger.filter(l => l.points > 0 && l.chain_id === MAINNET_CHAIN_ID && (l.reason === 'CORE_SWAP' || l.reason === 'CORE_SWAP_V2') && !eligibleIds.has(l.id ?? '')).reduce((total,l)=>total+l.points,0);
   const stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
   let renewal: RenewalProposal | null = null;
   if (stored) {
@@ -264,7 +267,8 @@ export async function buildSettlement(args: {
       simulation = { ran: true, ok: false, detail: String((e as Error).message ?? e).split("\n")[0].slice(0, 200) };
     }
   }
-  const checks = [...p.checks, ...limits, ...(p.tx ? [{ id: "SIMULATION", pass: simulation.ok, detail: simulation.detail }] : [])];
+  const provenanceCheck = { id: 'REWARD_PROVENANCE', pass: !stored || p.checks.every(c => c.id !== 'IMMUTABLE_ALLOCATION' || c.pass), detail: provenanceExcludedPoints > 0 ? `${provenanceExcludedPoints} Core Swap Points excluded pending independent historical evidence review. Stored batch is unchanged.` : 'Independent earning evidence accepted.' };
+  const checks = [...p.checks, ...limits, provenanceCheck, ...(p.tx ? [{ id: "SIMULATION", pass: simulation.ok, detail: simulation.detail }] : [])];
   const publishable = p.status === "READY_FOR_PUBLISHER_REVIEW" && limits.every((c) => c.pass) && simulation.ok;
   const includedSet = new Set((p.batch?.leaves ?? []).map((l) => l.account.toLowerCase()));
   const opaque = (id: string) => `Account ${rows.findIndex((r) => r.userId === id) + 1}`;
@@ -291,10 +295,11 @@ export async function buildSettlement(args: {
   return {
     status: publishable ? p.status : "BLOCKED" as const,
     reason: publishable ? null : p.reason ?? checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
-    simulation, limits, renewal, flowPublishedLast24h, walletStates, signupReconciliation: signup.report,
+    simulation, limits, renewal, flowPublishedLast24h, walletStates, signupReconciliation: signup.report, provenanceExcludedPoints,
     publisherConfig: { mode: PUBLISHER_CONFIG.mode, autonomousSigning: PUBLISHER_CONFIG.autonomousSigning, maxWalletsPerEpoch: PUBLISHER_CONFIG.maxWalletsPerEpoch, maxFlowPerEpoch: PUBLISHER_CONFIG.maxFlowPerEpoch, maxFlowPerDay: PUBLISHER_CONFIG.maxFlowPerDay },
     signer: SETTLEMENT_SIGNER, publisher,
     batchId: stored?.id ?? null,
+    storedAllocation: stored ? { wallets: toBatch(stored as unknown as BatchRow).leaves.length, totalFlow: Number(BigInt(integerWei(stored.total_wei)) / WEI) } : null,
     epochId: p.epochId, leaves: p.batch?.leaves.length ?? 0,
     totalFlow: p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0, root: p.batch?.root ?? null,
     checks, tx: publishable ? p.tx : null, fingerprint: p.fingerprint, programs: programs.filter((x) => x.includedPoints > 0 || x.availablePoints > 0),
