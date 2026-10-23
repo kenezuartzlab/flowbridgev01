@@ -204,6 +204,13 @@
       "when": 1792773076915,
       "tag": "0028_atomic_super_admin_settings_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792773450972,
+      "tag": "0029_immutable_provenance_funding_and_publication_guards",
+      "breakpoints": true
     }
   ]
 }
