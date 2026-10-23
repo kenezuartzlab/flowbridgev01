@@ -1,4 +1,5 @@
 # V36.11 Payout Operations
+- [ ] Owner-approved six-findings remediation: independently verified rewards + historical provenance quarantine, authenticated/idempotent proposals, super-admin settings audit, private binding errors and bounded proposal input; full release remains gated.
 - [x] Code security remediation: trusted/coalesced provider messages, non-enumerable lookup, canonical single-use sign-in proof, approved atomic HMAC request limits, admin-gated downloads; 1,894 regressions PASS and real authorized download/payout reads verified.
 - [ ] Legacy file bearer-link revocation waits for a safe transition from current production paths; new gated downloads pass, old links not yet revoked.
 - [x] Build Payout Operations with funded totals, actionable renewal and guarded review/sign/recovery controls; authenticated component and real authorized reads verified at 390/1280px.
