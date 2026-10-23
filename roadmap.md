@@ -1,10 +1,11 @@
 # V36.11 Payout Operations
-- [ ] Owner-approved security remediation: validate wallet messages, revoke bearer access to private materials, remove public wallet enumeration; rerun security and regression gates.
+- [x] Code security remediation: trusted/coalesced provider messages, non-enumerable lookup, canonical single-use sign-in proof, approved atomic HMAC request limits, admin-gated downloads; 1,894 regressions PASS and real authorized download/payout reads verified.
+- [ ] Legacy file bearer-link revocation waits for a safe transition from current production paths; new gated downloads pass, old links not yet revoked.
 - [x] Build Payout Operations with funded totals, actionable renewal and guarded review/sign/recovery controls; authenticated component and real authorized reads verified at 390/1280px.
 - [x] Add audited schedule overlays, repeat renewal, batch-first identity/calldata fences and interrupted-session system confirmation; original Round #3 untouched, zero attempts/renewals.
 - [x] Financial/recovery regression: 1,873 tests / 177 files; fresh disposable PostgreSQL eight-way acquisition, renewal approval and confirmation PASS. Automatic build OK.
-- [ ] Activate and verify scheduled checks/alerts: server-only sweep credential and an authorized scheduler are not configured/verified; no automatic funding/signing.
-- [ ] Complete release security: deep scan running, full dependency audit endpoint returns 404, production scanner reports moderate esbuild advisories; V36.11 cloud/IAM coverage is not approved.
+- [ ] Update existing hourly production scheduler (confirmed present, using public key) to private V36.11 credential and verify alerts/recovery; no duplicate cron, funding or signing.
+- [ ] Complete release security: final deep scan requested, full/production dependency audit endpoint still returns 404; V36.11 cloud/IAM coverage or scoped acceptance unavailable.
 - [ ] Complete supported physical-wallet and full integrated Ops acceptance, final type-validation evidence and production bundle verification; release HOLD, not deployed.
 - [ ] Round #3 renewal approval waits for separate explicit super-admin authorization; development must not approve or sign it.
 
