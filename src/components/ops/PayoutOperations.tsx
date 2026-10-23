@@ -35,7 +35,7 @@ export function PayoutOperations({wallet}:{wallet?:string}){
    <Metric label="Publication readiness" value={expired?'Schedule needs renewal':s.status==='READY_FOR_PUBLISHER_REVIEW'?'Ready for review':'Action required'}/>
   </dl>
   <div className="space-y-2 border-y border-hairline py-4 text-sm">
-   <p><ShieldCheck className="mr-2 inline h-4 w-4 text-primary"/>Stored round #{s.epochId??'—'} · {s.leaves} wallet(s) · {s.totalFlow.toLocaleString()} FLOW · unchanged allocation, not approval</p>
+   <p><ShieldCheck className="mr-2 inline h-4 w-4 text-primary"/>Stored round #{s.epochId??'—'} · {s.storedAllocation?.wallets ?? s.leaves} wallet(s) · {(s.storedAllocation?.totalFlow ?? s.totalFlow).toLocaleString()} FLOW · unchanged allocation, not approval</p>
    <p className="text-muted">{s.claimStartIso?`${s.claimStartIso.slice(0,16)} → ${s.claimEndIso?.slice(0,16)} UTC`:'Claim schedule unavailable'}</p>
    <p className="text-warning">{r.draftAllocation.excludedUnfundedPoints.toLocaleString()} earned-but-unfunded Points excluded · {r.reconciliation.nonclaimableHistoricalTotal.toLocaleString()} historical restricted Points excluded</p>
    {!!s.provenanceExcludedPoints && <p role="alert" className="text-danger">Reward provenance review required: {s.provenanceExcludedPoints.toLocaleString()} Mainnet Core Swap Points are excluded until independent earning evidence passes. Re-check after the review; signing stays disabled.</p>}

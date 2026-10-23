@@ -267,7 +267,7 @@ export async function buildSettlement(args: {
       simulation = { ran: true, ok: false, detail: String((e as Error).message ?? e).split("\n")[0].slice(0, 200) };
     }
   }
-  const provenanceCheck = { id: 'REWARD_PROVENANCE', pass: !stored || p.checks.every(c => c.id !== 'STORED_ALLOCATION_MATCH' || c.pass), detail: provenanceExcludedPoints > 0 ? `${provenanceExcludedPoints} Core Swap Points excluded pending independent historical evidence review. Stored batch is unchanged.` : 'Independent earning evidence accepted.' };
+  const provenanceCheck = { id: 'REWARD_PROVENANCE', pass: !stored || p.checks.every(c => c.id !== 'IMMUTABLE_ALLOCATION' || c.pass), detail: provenanceExcludedPoints > 0 ? `${provenanceExcludedPoints} Core Swap Points excluded pending independent historical evidence review. Stored batch is unchanged.` : 'Independent earning evidence accepted.' };
   const checks = [...p.checks, ...limits, provenanceCheck, ...(p.tx ? [{ id: "SIMULATION", pass: simulation.ok, detail: simulation.detail }] : [])];
   const publishable = p.status === "READY_FOR_PUBLISHER_REVIEW" && limits.every((c) => c.pass) && simulation.ok;
   const includedSet = new Set((p.batch?.leaves ?? []).map((l) => l.account.toLowerCase()));
@@ -299,6 +299,7 @@ export async function buildSettlement(args: {
     publisherConfig: { mode: PUBLISHER_CONFIG.mode, autonomousSigning: PUBLISHER_CONFIG.autonomousSigning, maxWalletsPerEpoch: PUBLISHER_CONFIG.maxWalletsPerEpoch, maxFlowPerEpoch: PUBLISHER_CONFIG.maxFlowPerEpoch, maxFlowPerDay: PUBLISHER_CONFIG.maxFlowPerDay },
     signer: SETTLEMENT_SIGNER, publisher,
     batchId: stored?.id ?? null,
+    storedAllocation: stored ? { wallets: toBatch(stored as unknown as BatchRow).leaves.length, totalFlow: Number(BigInt(integerWei(stored.total_wei)) / WEI) } : null,
     epochId: p.epochId, leaves: p.batch?.leaves.length ?? 0,
     totalFlow: p.batch ? Number(BigInt(p.batch.totalWei) / WEI) : 0, root: p.batch?.root ?? null,
     checks, tx: publishable ? p.tx : null, fingerprint: p.fingerprint, programs: programs.filter((x) => x.includedPoints > 0 || x.availablePoints > 0),
