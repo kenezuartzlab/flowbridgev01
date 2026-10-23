@@ -3,6 +3,10 @@ import { mainnetSwapEvidence, reconcileAccount, type ReconLedgerRow } from './hi
 import { buildFundingQueue } from './fundingQueue';
 const row = (extra: Partial<ReconLedgerRow> = {}): ReconLedgerRow => ({ id:'row',reason:'CORE_SWAP_V2',points:1022,chainId:677,createdAt:'2026-10-20',evidenceKey:'677:tx:8',verifiedUsd:1022,dayKey:'2026-10-20',refereeId:null,reservationId:'reservation',fundingState:'FUNDED',provenanceState:'VERIFIED',...extra });
 describe('reward integrity quarantine', () => {
+  it('does not treat an adjustment evidence label as payout authorization', () => {
+    const result=reconcileAccount({userId:'account',createdAt:'2026-10-05',storedFlowPoints:1000,storedPointsSelf:1000,storedReferralSignup:0,ledger:[row({reason:'ADMIN_ADJUSTMENT',points:1000})]},new Map());
+    expect(result.authoritative).toBe(0);expect(result.eligibleRowIds).toEqual([]);
+  });
   it('blocks all 1,022 Round 3 swap points with unresolved provenance', () => {
     const result = reconcileAccount({userId:'account',createdAt:'2026-10-05',storedFlowPoints:1122,storedPointsSelf:1022,storedReferralSignup:0,ledger:[row({provenanceState:'PENDING'})]},new Map());
     expect(result.authoritative).toBe(0); expect(result.eligibleRowIds).toEqual([]); expect(result.excluded[0]?.points).toBe(1022);
