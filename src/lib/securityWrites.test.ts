@@ -21,5 +21,5 @@ describe('community write authentication',()=>{
 describe('site settings authorization',()=>{
   it('ordinary operators cannot change fees or rewards',async()=>{m.gate.mockResolvedValue({ok:true,admin:{role:'internal_operator'}});expect((await handler(settings,'PUT')({request:request({fees:{}})})).status).toBe(403);expect(m.write).not.toHaveBeenCalled();});
   it('anonymous direct requests cannot change settings',async()=>{m.gate.mockResolvedValue({ok:false,response:Response.json({error:'Unauthorized'},{status:401})});expect((await handler(settings,'PUT')({request:request({})})).status).toBe(401);expect(m.write).not.toHaveBeenCalled();});
-  it('authorized settings changes pass the authenticated actor to audited storage',async()=>{const admin={role:'super_admin',userId:'account'};m.gate.mockResolvedValue({ok:true,admin});expect((await handler(settings,'PUT')({request:request({})})).status).toBe(200);expect(m.write).not.toHaveBeenCalled();});
+  it('authorized settings changes pass the authenticated actor to audited storage',async()=>{const admin={role:'super_admin',userId:'account'};m.gate.mockResolvedValue({ok:true,admin});const flags={showBanners:true,maintenanceNotice:''};expect((await handler(settings,'PUT')({request:request({flags})})).status).toBe(200);expect(m.write).toHaveBeenCalledExactlyOnceWith('flags',flags,admin);});
 });

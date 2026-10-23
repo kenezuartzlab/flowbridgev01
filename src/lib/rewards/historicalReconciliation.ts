@@ -173,7 +173,8 @@ export function reconcileAccount(
       else { pendingReview += r.points; flags.push(`MILESTONE_WITHOUT_MAINNET_EVIDENCE:${kind}`); }
       continue;
     }
-    if (r.reason === "ADMIN_ADJUSTMENT" && r.evidenceKey) { b.ledgerBackedAdjustments += r.points; eligibleRowIds.push(r.id); continue; }
+    // An evidence label alone cannot authorize a discretionary economic adjustment.
+    if (r.reason === "ADMIN_ADJUSTMENT") { excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: "ADJUSTMENT_APPROVAL_REQUIRED" }); continue; }
     excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: "UNRECOGNISED_REASON" });
   }
 

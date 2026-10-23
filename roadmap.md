@@ -1,12 +1,13 @@
 # V36.11 Payout Operations
-- [ ] Owner-approved six-findings remediation: independently verified rewards + historical provenance quarantine, authenticated/idempotent proposals, super-admin settings audit, private binding errors and bounded proposal input; full release remains gated.
+- [x] Implement six code corrections: independently verified rewards + historical provenance quarantine, authenticated/idempotent proposals, super-admin settings audit, private binding errors and bounded proposal input; 1,918 regressions PASS. Full release remains gated.
+- [ ] Complete historical price/provenance audit: Round #3's 1,022 Core Swap Points remain PENDING; stored 1,122 immutable, eligible preview zero, signing blocked. No evidence approval fabricated.
 - [x] Code security remediation: trusted/coalesced provider messages, non-enumerable lookup, canonical single-use sign-in proof, approved atomic HMAC request limits, admin-gated downloads; 1,894 regressions PASS and real authorized download/payout reads verified.
 - [ ] Legacy file bearer-link revocation waits for a safe transition from current production paths; new gated downloads pass, old links not yet revoked.
 - [x] Build Payout Operations with funded totals, actionable renewal and guarded review/sign/recovery controls; authenticated component and real authorized reads verified at 390/1280px.
 - [x] Add audited schedule overlays, repeat renewal, batch-first identity/calldata fences and interrupted-session system confirmation; original Round #3 untouched, zero attempts/renewals.
 - [x] Financial/recovery regression: 1,873 tests / 177 files; fresh disposable PostgreSQL eight-way acquisition, renewal approval and confirmation PASS. Automatic build OK.
 - [ ] Update existing hourly production scheduler (confirmed present, using public key) to private V36.11 credential and verify alerts/recovery; no duplicate cron, funding or signing.
-- [ ] Complete release security: final deep scan requested, full/production dependency audit endpoint still returns 404; V36.11 cloud/IAM coverage or scoped acceptance unavailable.
+- [ ] Complete release security: fresh deep scan running, final saved-code coverage pending; full and production dependency audits now PASS. V36.11 cloud/IAM coverage or scoped acceptance unavailable.
 - [ ] Complete supported physical-wallet and full integrated Ops acceptance, final type-validation evidence and production bundle verification; release HOLD, not deployed.
 - [ ] Round #3 renewal approval waits for separate explicit super-admin authorization; development must not approve or sign it.
 
