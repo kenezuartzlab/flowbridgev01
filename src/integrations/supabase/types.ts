@@ -767,6 +767,7 @@ export type Database = {
           points: number
           policy_version: string
           program_id: string | null
+          provenance_state: string
           reason: string
           referrer_id: string | null
           reservation_id: string | null
@@ -789,6 +790,7 @@ export type Database = {
           points?: number
           policy_version?: string
           program_id?: string | null
+          provenance_state?: string
           reason: string
           referrer_id?: string | null
           reservation_id?: string | null
@@ -811,6 +813,7 @@ export type Database = {
           points?: number
           policy_version?: string
           program_id?: string | null
+          provenance_state?: string
           reason?: string
           referrer_id?: string | null
           reservation_id?: string | null
@@ -1072,6 +1075,39 @@ export type Database = {
           wallet_address?: string | null
         }
         Relationships: []
+      }
+      proposal_votes: {
+        Row: {
+          created_at: string
+          proposal_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          proposal_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          proposal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposals: {
         Row: {
@@ -2376,6 +2412,10 @@ export type Database = {
           p_retry_safe?: boolean
         }
         Returns: boolean
+      }
+      vote_proposal_once: {
+        Args: { p_id: string; p_user: string }
+        Returns: Json
       }
     }
     Enums: {
