@@ -2417,6 +2417,16 @@ export type Database = {
         Args: { p_id: string; p_user: string }
         Returns: Json
       }
+      write_audited_site_setting: {
+        Args: {
+          p_actor: string
+          p_email: string
+          p_key: string
+          p_value: Json
+          p_wallet: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       campaign_review_state:
