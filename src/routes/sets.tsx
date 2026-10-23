@@ -25,6 +25,7 @@ import {
   uploadBannerImage,
   fetchBannerStats,
   fetchApplicationMaterials,
+  downloadApplicationFile,
   type BannerStat,
 } from "@/lib/admin/adminApi";
 import {
@@ -57,6 +58,8 @@ import { TokenIcon } from "@/components/TokenIcon";
 import { CampaignStudioWorkspace } from "@/components/campaigns/CampaignStudioWorkspace";
 import { PartnerGovernancePanel } from "@/components/studio/PartnerGovernancePanel";
 import { ApplicationWorkspace } from "@/components/admin/ApplicationWorkspace";
+import { APPLICATION_FILES } from '@/lib/application/applicationFiles';
+import { Button } from '@/components/ui/button';
 import { AdminUsersPanel } from "@/components/admin/AdminUsersPanel";
 
 const SECTIONS = [
@@ -2756,7 +2759,8 @@ function PagesPanel({ wallet }: { wallet: string }) {
 
 /** PRIVATE: BOT Ecosystem Support application materials — never public. */
 function ApplicationMaterialsPanel({ wallet }: { wallet: string }) {
-  const [files, setFiles] = useState<{ id: string; title: string; url: string | null }[] | null>(null);
+  const [files, setFiles] = useState<{ id: string; title: string }[] | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const load = useCallback(() => {
     setErr(null);
@@ -2770,8 +2774,7 @@ function ApplicationMaterialsPanel({ wallet }: { wallet: string }) {
       <p className="fb-eyebrow">Private · unlisted</p>
       <h2 className="text-[16px] font-black">BOT Ecosystem Support application</h2>
       <p className="text-[12px] text-muted">
-        Not shown on the public site, sitemap or search. Links below are private and expire after 7 days —
-        copy one to share directly with BOT Chain reviewers.
+        Private materials. Downloads require current authorized access.
       </p>
       {err && <p className="text-[12px] text-destructive">{err}</p>}
       {!files && !err && <p className="text-[12px] text-muted">Loading…</p>}
@@ -2779,18 +2782,15 @@ function ApplicationMaterialsPanel({ wallet }: { wallet: string }) {
         {files?.map((f) => (
           <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline p-3">
             <span className="text-[12.5px] font-bold">{f.title}</span>
-            {f.url ? (
-              <span className="flex gap-2">
-                <a href={f.url} target="_blank" rel="noreferrer" className="rounded-lg border border-primary/40 px-2.5 py-1 text-[11px] font-bold text-primary">Download</a>
-                <button type="button" onClick={() => navigator.clipboard?.writeText(f.url!)} className="rounded-lg border border-hairline px-2.5 py-1 text-[11px] font-bold">Copy private link</button>
-              </span>
-            ) : (
-              <span className="text-[11px] text-muted">Unavailable</span>
-            )}
+            <Button variant="outline" size="sm" disabled={busy === f.id} onClick={() => {
+              const record = APPLICATION_FILES.find(record => record.id === f.id); if (!record) return;
+              setBusy(f.id); setErr(null);
+              downloadApplicationFile(wallet, f.id, record.path.split('/').pop() ?? 'application.pdf').catch(e => setErr(e?.message ?? 'Download failed')).finally(() => setBusy(null));
+            }}>{busy === f.id ? 'Downloading…' : 'Download'}</Button>
           </li>
         ))}
       </ul>
-      <button type="button" onClick={load} className="text-[11px] font-bold text-primary">Refresh links</button>
+      <Button variant="ghost" size="sm" onClick={load}>Refresh</Button>
     </section>
   );
 }

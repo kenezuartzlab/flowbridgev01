@@ -155,13 +155,17 @@ export async function runOpsSweep(source: string) {
     for (const round of report.rounds.filter((r:{status:string})=>r.status.includes('EXPIRED'))) exceptions.push({kind:'CLAIM_WINDOW_EXPIRED',key:`claim-expired:${round.epochId}`,detail:`Round #${round.epochId} claim window is closed.`,action:'Review the confirmed round history. Do not announce claimability.',severity:'WARN'});
   }
   if(recovery.unresolved) exceptions.push({kind:'PUBLICATION_RECOVERY',key:'publication-recovery',detail:`${recovery.unresolved} publication operation(s) need reconciliation.`,action:'Open Payout Operations and Re-check or Recover. Never send another transaction.',severity:'BLOCK'});
-  for (const e of exceptions) await admin.from("reward_ops_exceptions").upsert({ kind: e.kind, dedupe_key: e.key, detail: e.detail, corrective_action: e.action, severity: e.severity }, { onConflict: "dedupe_key", ignoreDuplicates: true });
+  for (const e of exceptions) {
+    const saved = await admin.from("reward_ops_exceptions").upsert({ kind: e.kind, dedupe_key: e.key, detail: e.detail, corrective_action: e.action, severity: e.severity }, { onConflict: "dedupe_key", ignoreDuplicates: true });
+    if (saved.error) throw new Error('Operator alert could not be recorded. Re-check required.');
+  }
   const summary = {
     fundablePoints: Object.fromEntries(Object.entries(queue.eligible).map(([k, v]) => [k, v.reduce((s, i) => s + i.points, 0)])),
     excludedRows: queue.excluded.length,
     settlementStatus: report?.settlement?.status ?? null,
     autoFunding: "OFF", autoSigning: "OFF",
   };
-  await admin.from("reward_ops_runs").insert({ source, summary });
+  const savedRun = await admin.from("reward_ops_runs").insert({ source, summary });
+  if (savedRun.error) throw new Error('Scheduled verification could not be recorded. Re-check required.');
   return summary;
 }

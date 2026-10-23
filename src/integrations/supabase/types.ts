@@ -2080,6 +2080,24 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_auth_request_windows: {
+        Row: {
+          requests: number
+          scope: string
+          window_start: string
+        }
+        Insert: {
+          requests?: number
+          scope: string
+          window_start: string
+        }
+        Update: {
+          requests?: number
+          scope?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -2260,6 +2278,10 @@ export type Database = {
           p_hash: string
           p_role: string
         }
+        Returns: boolean
+      }
+      consume_wallet_auth_request: {
+        Args: { p_wallet_digest: string }
         Returns: boolean
       }
       create_reward_funding_snapshot: {

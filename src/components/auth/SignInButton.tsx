@@ -10,9 +10,8 @@ import { detectLinkedWallet, signInWithLinkedWallet, type LinkedWallet } from "@
  * Signs in right where the user already is (returns to the current page),
  * instead of sending them off to the swap screen.
  *
- * When the connected browser wallet is already bound to a registered account,
- * the primary action becomes a gasless wallet signature (same flow as swap),
- * with Google kept as a secondary option.
+ * A connected wallet may explicitly prove ownership to sign in;
+ * passive detection never looks up account linkage.
  */
 export function SignInButton({
   label = "Sign in",
@@ -90,11 +89,6 @@ export function SignInButton({
             <Wallet className="h-4 w-4" />
             {walletLoading ? "Signing…" : "Sign in with wallet"}
           </button>
-          {linked.emailHint ? (
-            <span className="font-mono text-[9.5px] uppercase tracking-[0.08em] text-muted">
-              Linked to {linked.emailHint}
-            </span>
-          ) : null}
           <button
             type="button"
             onClick={onClick}

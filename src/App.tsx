@@ -719,10 +719,7 @@ export default function App() {
     }
   }, [address]);
 
-  // When a wallet connects, check if it's already bound to a registered
-  // account so the user can be guided back into the linked email (instead of
-  // earning points/referrals on an unlinked session). Privacy-safe: the
-  // public endpoint returns only a masked email hint.
+  // Only the signed-in account's own profile may determine wallet binding.
   useEffect(() => {
     let cancelled = false;
     if (!isConnected || !address) {
@@ -731,35 +728,16 @@ export default function App() {
     }
     (async () => {
       try {
-        const res = await fetch("/api/public/wallet-lookup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ walletAddress: address }),
-        });
-        if (!res.ok) return;
-        const data = (await res.json()) as {
-          bound?: boolean;
-          userId?: string;
-          emailHint?: string;
-        };
-        if (cancelled) return;
         const normalized = address.toLowerCase();
-        if (!data.bound) {
-          setWalletLinkNotice({ kind: "unbound", address: normalized });
+        if (!googleUser) {
+          setWalletLinkNotice({ kind: "signin-needed", emailHint: "", address: normalized });
           return;
         }
-        if (!googleUser) {
-          setWalletLinkNotice({ kind: "signin-needed", emailHint: data.emailHint ?? "", address: normalized });
-        } else if (await (async () => {
-          // Mismatch is decided from the signed-in account's own profile.
-          const { supabase } = await import("@/integrations/supabase/client");
-          const { data: me } = await supabase.from("profiles").select("wallet_address").eq("id", googleUser.uid).maybeSingle();
-          return ((me as any)?.wallet_address ?? "").toLowerCase() !== normalized;
-        })()) {
-          setWalletLinkNotice({ kind: "mismatch", emailHint: data.emailHint ?? "", address: normalized });
-        } else {
-          setWalletLinkNotice({ kind: "linked", address: normalized });
-        }
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data: me, error } = await supabase.from("profiles").select("wallet_address").eq("id", googleUser.uid).maybeSingle();
+        if (cancelled || error) return;
+        const bound = (me?.wallet_address ?? "").toLowerCase();
+        setWalletLinkNotice(!bound ? { kind: "unbound", address: normalized } : bound === normalized ? { kind: "linked", address: normalized } : { kind: "mismatch", emailHint: "", address: normalized });
       } catch {
         /* non-fatal */
       }
@@ -2946,15 +2924,11 @@ export default function App() {
               <div className="min-w-0 flex-1 text-[10.5px] leading-snug text-foreground/90">
                 {walletLinkNotice.kind === "signin-needed" ? (
                   <>
-                    Sign in to{" "}
-                    <span className="font-mono text-primary">{walletLinkNotice.emailHint}</span> to
-                    keep earning FlowPoints and referrals.
+                    Sign in with your wallet or email to keep earning FlowPoints and referrals.
                   </>
                 ) : walletLinkNotice.kind === "mismatch" ? (
                   <>
-                    Wallet bound to{" "}
-                    <span className="font-mono text-[#F6BA00]">{walletLinkNotice.emailHint}</span> —
-                    FlowPoints accrue there.
+                    This wallet does not match your signed-in account. Connect your verified wallet or use Verify &amp; Bind.
                   </>
                 ) : (
                   <>Sign once with this wallet to activate FlowPoints.</>

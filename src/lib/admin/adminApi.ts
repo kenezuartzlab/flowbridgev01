@@ -98,10 +98,10 @@ export async function fetchBannerStats(
 }
 
 
-/** PRIVATE application materials (dossier, pitch deck) — signed, expiring links. */
+/** PRIVATE application materials: downloads require current admin access. */
 export async function fetchApplicationMaterials(
   wallet: string,
-): Promise<{ files: { id: string; title: string; url: string | null }[]; expiresInSeconds: number }> {
+): Promise<{ files: { id: string; title: string }[]; expiresInSeconds: number }> {
   return parse(await fetch("/api/admin/application-materials", { headers: await headers(wallet) }));
 }
 
