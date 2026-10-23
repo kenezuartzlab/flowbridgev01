@@ -160,7 +160,7 @@ export async function countRoundClaims(epochId: number, leafIndexes: number[]) {
 }
 
 export interface LedgerRow { id?: string; user_id: string; points: number; chain_id: number | null; funding_state: string | null; program_id: string | null; reason?: string; policy_version?: string | null; reservation_id?: string | null; wallet_address?: string | null; metadata?: unknown }
-export interface ReconRow { userId: string; classification: string; authoritative: number; pendingReview: number }
+export interface ReconRow { userId: string; classification: string; authoritative: number; pendingReview: number; eligibleRowIds?: string[] }
 
 const PROGRAMS: ProgramId[] = ["CORE_SWAP", "REFERRAL_MILESTONE", "SIGNUP_BONUS"];
 
@@ -195,7 +195,9 @@ export async function buildSettlement(args: {
   const { data: reservations, error: reservationError } = await args.admin.from('reward_reservations').select('reservation_id,ledger_id,user_id,wallet_address,points,program_id');
   if (reservationError) throw new Error('REWARD_RESERVATIONS_UNAVAILABLE');
   const reservationById = new Map((reservations ?? []).map((r) => [r.reservation_id, r]));
+  const eligibleIds = new Set(args.recon.flatMap(r => r.eligibleRowIds ?? []));
   for (const [i, l] of args.ledger.entries()) {
+    if (!l.id || !eligibleIds.has(l.id)) continue;
     if (l.funding_state !== "FUNDED" || effChain(l, i) !== MAINNET_CHAIN_ID) continue;
     if ((SIGNUP_REASONS as readonly string[]).includes(l.reason ?? '') && !signup.mainnetIdx.has(i)) continue;
     const reservation = l.reservation_id ? reservationById.get(l.reservation_id) : null;
@@ -210,7 +212,7 @@ export async function buildSettlement(args: {
   const rows = args.recon.filter((x) => fundedBy.has(x.userId)).map((x) => {
     const w = args.wallets.get(x.userId) ?? null;
     const fundedTotal = [...(fundedBy.get(x.userId)?.values() ?? [])].reduce((a, b) => a + b, 0);
-    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: Math.min(fundedTotal, x.authoritative), pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0 };
+    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: fundedTotal, pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0 };
   });
 
   const first = prepareSettlementBatch({ rows, fundedPointsAvailable: Number.MAX_SAFE_INTEGER, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });

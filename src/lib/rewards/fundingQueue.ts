@@ -12,12 +12,12 @@ export interface QueueLedgerRow {
   id: string; user_id: string; points: number; reason: string; chain_id: number | null;
   funding_state: string | null; reservation_id: string | null; program_id: string | null;
   policy_version: string | null; wallet_address: string | null; tx_hash: string | null;
-  verified_activity_id: string | null; created_at: string;
+  verified_activity_id: string | null; created_at: string; provenance_state?: string | null;
 }
 
 export type ExclusionReason =
   | "REVIEWED_HISTORICAL_ACCOUNT" | "WALLET_MISMATCH" | "NO_BOUND_WALLET" | "NOT_MAINNET"
-  | "MISSING_EVIDENCE" | "POLICY_VERSION" | "DUPLICATE_EVIDENCE" | "PROGRAM_CONFLICT" | "NEEDS_MANUAL_REVIEW";
+  | "PROVENANCE_REVIEW_REQUIRED" | "MISSING_EVIDENCE" | "POLICY_VERSION" | "DUPLICATE_EVIDENCE" | "PROGRAM_CONFLICT" | "NEEDS_MANUAL_REVIEW";
 
 export interface QueueItem { id: string; userId: string; points: number; programId: string; labelFromNull: boolean; createdAt: string }
 export interface FundingQueue {
@@ -26,7 +26,7 @@ export interface FundingQueue {
 }
 
 export function programForReason(reason: string): string | null {
-  if (reason.startsWith("CORE_SWAP")) return "CORE_SWAP";
+  if ((reason === "CORE_SWAP" || reason === "CORE_SWAP_V2")) return "CORE_SWAP";
   if (reason.startsWith("REFERRAL_MILESTONE")) return "REFERRAL_MILESTONE";
   if (reason === "SIGNUP_BONUS_REFEREE" || reason === "REFERRAL_SIGNUP_BONUS") return "SIGNUP_BONUS";
   return null;
@@ -51,6 +51,7 @@ export function buildFundingQueue(
     if (program !== "CORE_SWAP") { ex("NEEDS_MANUAL_REVIEW"); continue; }
     if (reviewed.has(r.user_id)) { ex("REVIEWED_HISTORICAL_ACCOUNT"); continue; }
     if (r.chain_id !== MAINNET_CHAIN_ID) { ex("NOT_MAINNET"); continue; }
+    if (r.provenance_state !== "VERIFIED") { ex("PROVENANCE_REVIEW_REQUIRED"); continue; }
     if (!r.tx_hash || !r.verified_activity_id) { ex("MISSING_EVIDENCE"); continue; }
     if (!FUNDABLE_POLICY_VERSIONS.has(r.policy_version ?? "")) { ex("POLICY_VERSION"); continue; }
     if ((seen.get(`${r.tx_hash}|${r.reason}`) ?? 0) > 1) { ex("DUPLICATE_EVIDENCE"); continue; }
