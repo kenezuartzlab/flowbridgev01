@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { verifyMessage, verifyTypedData } from "viem";
 import { buildFlowBridgeTypedData } from "@/lib/siweProof";
 import { z } from 'zod';
+import { validateSignInMessage } from '@/lib/wallet/signInMessage';
 
 // Verifies a SIWE-style signature and, if the wallet is already linked to a
 // registered email, returns a single-use OTP token_hash the client can exchange
@@ -22,8 +23,8 @@ export const Route = createFileRoute("/api/public/siwe/verify")({
           if (!/^0x[a-f0-9]{40}$/.test(normalized)) {
             return Response.json({ error: "Invalid wallet address" }, { status: 400 });
           }
-          if (!message.includes(nonce)) {
-            return Response.json({ error: "Nonce missing from message" }, { status: 400 });
+          if (!validateSignInMessage(message, { wallet: normalized, nonce, requestOrigin: request.headers.get('origin'), nowMs: Date.now() })) {
+            return Response.json({ error: "Wallet proof does not match this site. Retry sign-in." }, { status: 400 });
           }
           const { checkWalletRequestLimit } = await import('@/lib/wallet/requestLimit.server');
           const limited = await checkWalletRequestLimit(normalized);
