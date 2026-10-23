@@ -106,4 +106,20 @@ describe('V15.3M CORE_SWAP canonical identity', () => {
       activity_key: '677:0xb89d:8',
     });
   });
+  it.each(['REJECTED','NOT_FINAL'])('untrusted %s trades award zero even with forged USD', async (status) => {
+    ingest.call.mockResolvedValue({status,reason:'unverified'});
+    const {accrueCoreSwapPoints}=await load();
+    const result=await accrueCoreSwapPoints({userId:'u1',walletAddress:'0xabc',verifiedUsd:1000000,chainId:677,txHash:'0xb89d',verifiedActivityId:'0x7dd7',sourceLogIndex:8});
+    expect(result.award).toBe(0);expect(inserted).toHaveLength(0);
+  });
+  it('a genuine verified trade ignores forged browser USD and earns exactly 10', async () => {
+    const {accrueCoreSwapPoints}=await load();
+    const result=await accrueCoreSwapPoints({userId:'u1',walletAddress:'0xabc',verifiedUsd:1000000,chainId:677,txHash:'0xb89d',verifiedActivityId:'0x7dd7',sourceLogIndex:8});
+    expect(result.award).toBe(10);expect(inserted[0].row.verified_usd).toBe(10);
+  });
+  it('wrong-chain reports cannot earn a single point',async()=>{
+    const {accrueCoreSwapPoints}=await load();
+    const result=await accrueCoreSwapPoints({userId:'u1',walletAddress:'0xabc',verifiedUsd:1000000,chainId:968,txHash:'0xb89d',verifiedActivityId:'0x7dd7',sourceLogIndex:8});
+    expect(result.award).toBe(0);expect(inserted).toHaveLength(0);
+  });
 });
