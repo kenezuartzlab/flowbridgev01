@@ -1,5 +1,39 @@
 # V36.11 release acceptance
 
+## Final remediation checkpoint — 2026-10-23 16:48:34 UTC
+
+**HOLD — not deployed. No production release fingerprint is claimed.**
+
+### Implemented corrections
+- Client transaction amounts/directions no longer supply reward valuation. The Core Swap writer independently checks bound-wallet Mainnet canonical receipts/events and server pricing; ingestion verifies chain 677, success, finality, canonical block and reorg consistency. Fake/missing evidence earns zero, with authoritative event deduplication and database-serialized verified daily caps.
+- Historical Core Swap provenance defaults to PENDING. Funding preparation, funding confirmation and publication guards exclude unresolved provenance; settlement intersects funded reservations with individually eligible ledger IDs rather than substituting aggregate balances. Discretionary adjustment evidence labels do not authorize payouts.
+- Proposal submission and votes require server-validated authentication. Atomic account/proposal voting prevents replay; public browsing remains unchanged and public authorship does not disclose account identity.
+- Site settings require the super-admin gate and audited old/new-value writes. Unknown roles fail closed. Existing sensitive fee/reward terms cannot be changed directly through the ordinary settings writer.
+- Wallet-binding errors are generic and no longer return another account's email or full profile.
+- Shared proposal limits enforce title/category 100 characters and 400 UTF-8 bytes, body 1,000 characters and 4,000 bytes, and 8 KiB request maximum before parsing/writes. Frontend uses the same policy.
+
+### Historical integrity audit (aggregate only)
+- Read-only supplied evidence sample: 45 positive awards / 5,983 Points. Canonical BOT Mainnet receipts matched 35 awards / 2,197 Points: 1,057 funded and 1,140 unfunded. The 10 non-Mainnet awards / 3,786 Points are not Mainnet proof. No false Mainnet receipts were established in this sample.
+- Historical price provenance was absent for all 45 supplied awards. Stored USD was preserved, not independently re-priced. Complete historical price verification and per-account daily-cap audit remain unresolved; receipt matching alone is not financial provenance approval.
+- Broader ledger quarantine read: 16 funded positive Core Swap rows / 1,057 Points and 52 unfunded rows / 4,926 Points remain PENDING. The supplied sample is not the complete ledger.
+- Round #3's 1,022 recorded Core Swap Points remain unapproved provenance; no VERIFIED attribution was established. Existing Round #3 batch remains 1 wallet / 1,122 FLOW, unchanged, unsigned and unpublished. Previously confirmed claims were neither reversed nor deleted. Published rounds 1 and 2 remain intact; other batch-level suspect attribution has not been established and is not represented as verified.
+
+### Fresh verification
+- Full regression: **1,918 tests / 186 files PASS** at 16:47 UTC. Includes client-value forgery, missing evidence, wrong-chain, minimum, replay, funding quarantine, authenticated/unauthenticated proposals, settings privileges, wallet privacy and existing publisher recovery tests.
+- Complete Bun dependency audit: no vulnerabilities in 872 packages; production advisory scan: no vulnerabilities in 70 dependencies.
+- Latest observed automatic build: **build OK 2026-10-23T16:46:46Z**. A separate hosted production-mode report remains unavailable; no manually run production build is claimed.
+- Authorized fresh payout API read returned 200: stored allocation 1,122 FLOW / one wallet; current eligible preview **0 FLOW / zero qualified wallets**; status BLOCKED, transaction absent, renewal not ready, live epoch count 2. Aggregate excluded Mainnet Core Swap provenance: 2,197 Points, not the Round #3 amount. Signed-in Ops opened with no page errors, but without a connected physical wallet the integrated panel acceptance remains incomplete.
+- Quick security scan completed with no new active findings; previously user-dismissed findings were not reopened. Cloud assessment skipped because the connector is unavailable. Deep scan requested and running; it scans the last saved project state, so final same-turn edits require completed coverage before release.
+
+### Outstanding mandatory gates
+1. Complete historical price/provenance review for Round #3; payout readiness remains HOLD independently of software release.
+2. Verify legacy private bearer-link revocation without disrupting the last verified release.
+3. Securely pair the existing hourly scheduler with private authentication and verify actual readiness alerts/reconciliation; public publishable credentials are not sufficient.
+4. Completed deep security coverage and V36.11-specific cloud/permissions assessment or explicitly scoped owner acceptance. No previous exception inherited.
+5. Physical TokenPocket and full wallet-connected payout/renewal acceptance; fresh isolated database concurrency against final guards, final hosted production build, deployment and authenticated production bundle/fingerprint verification.
+
+No funding, allocation/schedule replacement, signature, publication, restricted-point release, contract change or treasury movement occurred. Automatic funding/signing remain OFF. The 74 unfunded and 776 restricted Points stay excluded.
+
 Recorded 2026-10-22, after the 07:28 UTC acceptance run. Status: HOLD / production acceptance NOT PASS. No V36.11 deployment or production fingerprint exists.
 
 ## 2026-10-23 security remediation acceptance (04:13 UTC)
