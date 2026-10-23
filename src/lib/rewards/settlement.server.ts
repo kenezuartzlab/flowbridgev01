@@ -241,6 +241,7 @@ export async function buildSettlement(args: {
   if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
   if ((existing ?? []).length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
   const original = existing?.[0];
+  const provenanceExcludedPoints = args.ledger.filter(l => l.points > 0 && l.chain_id === MAINNET_CHAIN_ID && (l.reason === 'CORE_SWAP' || l.reason === 'CORE_SWAP_V2') && !eligibleIds.has(l.id ?? '')).reduce((total,l)=>total+l.points,0);
   const stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
   let renewal: RenewalProposal | null = null;
   if (stored) {
@@ -266,7 +267,8 @@ export async function buildSettlement(args: {
       simulation = { ran: true, ok: false, detail: String((e as Error).message ?? e).split("\n")[0].slice(0, 200) };
     }
   }
-  const checks = [...p.checks, ...limits, ...(p.tx ? [{ id: "SIMULATION", pass: simulation.ok, detail: simulation.detail }] : [])];
+  const provenanceCheck = { id: 'REWARD_PROVENANCE', pass: !stored || p.checks.every(c => c.id !== 'STORED_ALLOCATION_MATCH' || c.pass), detail: provenanceExcludedPoints > 0 ? `${provenanceExcludedPoints} Core Swap Points excluded pending independent historical evidence review. Stored batch is unchanged.` : 'Independent earning evidence accepted.' };
+  const checks = [...p.checks, ...limits, provenanceCheck, ...(p.tx ? [{ id: "SIMULATION", pass: simulation.ok, detail: simulation.detail }] : [])];
   const publishable = p.status === "READY_FOR_PUBLISHER_REVIEW" && limits.every((c) => c.pass) && simulation.ok;
   const includedSet = new Set((p.batch?.leaves ?? []).map((l) => l.account.toLowerCase()));
   const opaque = (id: string) => `Account ${rows.findIndex((r) => r.userId === id) + 1}`;
@@ -293,7 +295,7 @@ export async function buildSettlement(args: {
   return {
     status: publishable ? p.status : "BLOCKED" as const,
     reason: publishable ? null : p.reason ?? checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
-    simulation, limits, renewal, flowPublishedLast24h, walletStates, signupReconciliation: signup.report,
+    simulation, limits, renewal, flowPublishedLast24h, walletStates, signupReconciliation: signup.report, provenanceExcludedPoints,
     publisherConfig: { mode: PUBLISHER_CONFIG.mode, autonomousSigning: PUBLISHER_CONFIG.autonomousSigning, maxWalletsPerEpoch: PUBLISHER_CONFIG.maxWalletsPerEpoch, maxFlowPerEpoch: PUBLISHER_CONFIG.maxFlowPerEpoch, maxFlowPerDay: PUBLISHER_CONFIG.maxFlowPerDay },
     signer: SETTLEMENT_SIGNER, publisher,
     batchId: stored?.id ?? null,
