@@ -34,3 +34,6 @@
 - Mainnet/Testnet availability is owned by environmentCapabilities.ts and enforced by UI, senders and APIs. Why: separation must hold beyond UI.
 - Ops reads use opsRead.ts to bound session/request waits; writes never use its retry path. Why: stalled reads must recover without implying a write was cancelled.
 - HTML security headers (report-only CSP, production-host-only clickjacking protection) are set only in withSecurityHeaders in src/server.ts. Why: preview must stay embeddable while CSP is validated before enforcement.
+- Wallet provider hints use providerMessage.ts with same-origin/window checks and provider-state change coalescing; passive sign-in detection never reads account linkage. Why: window messages and connected addresses are not account proof.
+- Wallet sign-in request limiting uses requestLimit.server.ts and the service-only atomic consume_wallet_auth_request RPC; counters store short-lived HMAC keys only. Why: concurrent requests must share a budget without storing wallet/IP identities.
+- Private application downloads recheck the current admin gate through application-files; the materials catalogue never issues bearer storage links. Why: removing access must block future downloads instead of waiting for link expiry.

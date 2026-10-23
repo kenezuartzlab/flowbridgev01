@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from 'zod';
 
 // Issues a one-time, short-lived nonce for a wallet to sign during SIWE.
 export const Route = createFileRoute("/api/public/siwe/nonce")({
@@ -6,14 +7,14 @@ export const Route = createFileRoute("/api/public/siwe/nonce")({
     handlers: {
       POST: async ({ request }) => {
         try {
-          const { walletAddress } = (await request.json()) as { walletAddress?: string };
-          if (!walletAddress || typeof walletAddress !== "string") {
-            return Response.json({ error: "Missing walletAddress" }, { status: 400 });
-          }
-          const normalized = walletAddress.trim().toLowerCase();
-          if (!/^0x[a-f0-9]{40}$/.test(normalized)) {
+          const input = z.object({ walletAddress: z.string().trim().regex(/^0x[a-fA-F0-9]{40}$/) }).safeParse(await request.json());
+          if (!input.success) {
             return Response.json({ error: "Invalid wallet address" }, { status: 400 });
           }
+          const normalized = input.data.walletAddress.toLowerCase();
+          const { checkWalletRequestLimit } = await import('@/lib/wallet/requestLimit.server');
+          const limited = await checkWalletRequestLimit(normalized);
+          if (limited) return limited;
 
           const nonceBytes = new Uint8Array(24);
           crypto.getRandomValues(nonceBytes);
@@ -28,11 +29,11 @@ export const Route = createFileRoute("/api/public/siwe/nonce")({
             nonce,
             expires_at: expiresAt,
           });
-          if (error) return Response.json({ error: error.message }, { status: 500 });
+          if (error) return Response.json({ error: 'Wallet sign-in unavailable. Retry later.' }, { status: 503 });
 
-          return Response.json({ nonce, expiresAt });
-        } catch (e: any) {
-          return Response.json({ error: e?.message ?? "Nonce failed" }, { status: 500 });
+          return Response.json({ nonce, expiresAt }, { headers: { 'Cache-Control': 'no-store' } });
+        } catch {
+          return Response.json({ error: "Wallet sign-in unavailable. Retry later." }, { status: 503 });
         }
       },
     },
