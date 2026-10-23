@@ -1,6 +1,4 @@
-// Detects whether an already-connected browser wallet is bound to a registered
-// FlowBridge account, so pages can offer "Sign in with wallet" instead of
-// forcing a Google sign-in. Read-only: never prompts a wallet connection.
+// Detects an already-connected wallet only; never looks up account identity.
 import { signInWithEthereum } from "@/lib/siwe";
 
 type Eth = {
@@ -14,11 +12,9 @@ function getEthereum(): Eth | null {
 
 export interface LinkedWallet {
   address: string;
-  /** Masked email hint of the bound account, e.g. "k•••2@g•••.com". */
-  emailHint: string;
 }
 
-/** Returns the connected wallet + masked email when it is already bound. */
+/** Offers explicit ownership-proof sign-in without disclosing binding status. */
 export async function detectLinkedWallet(): Promise<LinkedWallet | null> {
   const eth = getEthereum();
   if (!eth) return null;
@@ -26,15 +22,7 @@ export async function detectLinkedWallet(): Promise<LinkedWallet | null> {
     const accounts: string[] = await eth.request({ method: "eth_accounts" });
     const address = accounts?.[0]?.toLowerCase();
     if (!address) return null;
-    const res = await fetch("/api/public/wallet-lookup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ walletAddress: address }),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { bound?: boolean; emailHint?: string };
-    if (!data.bound) return null;
-    return { address, emailHint: data.emailHint ?? "" };
+    return { address };
   } catch {
     return null;
   }

@@ -183,6 +183,13 @@
       "when": 1792653478365,
       "tag": "0025_payout_renewal_identity_fences",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792728126767,
+      "tag": "0026_wallet_auth_request_limits",
+      "breakpoints": true
     }
   ]
 }
