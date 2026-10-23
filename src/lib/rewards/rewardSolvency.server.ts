@@ -170,7 +170,7 @@ export async function buildRewardSolvencyReport() {
       const reconDraft = buildDraftAllocation(recon.results.map((r) => ({ userId: r.userId, wallet: wallet.get(r.userId) ?? null, classification: r.classification, authoritative: r.authoritative, pendingReview: r.pendingReview })), { epochId: 2 });
       // Funded-only: the preview mirrors the publishable settlement path; earned-but-unfunded
       // points are reported as excluded, never added to a batch. Admin view: counts only.
-      return summarizeFundedDraft({ reconTotalPoints: reconDraft.totalPoints, fundedWallets: settlement.readiness?.nextBatchWallets ?? 0, fundedTotalPoints: settlement.readiness?.nextBatchFlow ?? 0 });
+      return summarizeFundedDraft({ reconTotalPoints: reconDraft.totalPoints, fundedWallets: settlement.readiness?.wallets ?? 0, fundedTotalPoints: settlement.readiness?.totalFlow ?? 0 });
     })(),
     unfundedSwapAwards: [...mainnetSwaps.filter(r => r.fundingState !== 'FUNDED').reduce((groups, r) => groups.set(r.points, (groups.get(r.points) ?? 0) + 1), new Map<number, number>())].map(([points, awards]) => ({ points, awards })),
     // Prepared allocation rounds: root + schedule only, never signed or broadcast here.
