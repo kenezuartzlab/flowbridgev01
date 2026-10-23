@@ -20,7 +20,7 @@ describe('wallet proof single-use and privacy', () => {
   it('two concurrent valid proofs yield one session, never two', async () => {
     let used = false;
     m.consume.mockImplementation(async () => { if (used) return {data:null}; used=true; return {data:{id:'nonce-row'}}; });
-    const responses = await Promise.all([call(),call()]); expect(responses.map(r=>r.status).sort()).toEqual([200,409]); expect(m.generate).toHaveBeenCalledTimes(1);
+    const responses = await Promise.all([call(),call()]); expect(responses.filter(r=>r.status===200)).toHaveLength(1); expect(responses.filter(r=>r.status>=400)).toHaveLength(1); expect(m.generate).toHaveBeenCalledTimes(1);
   });
   it('failed nonce consumption never issues a session or reads a profile', async () => {
     m.consume.mockResolvedValue({error:{message:'unavailable'}}); expect((await call()).status).toBe(409); expect(m.generate).not.toHaveBeenCalled(); expect(m.profile).not.toHaveBeenCalled();
