@@ -10,10 +10,10 @@ export const Route = createFileRoute("/api/proposals/$id/vote")({
         if (!user) return unauthorized();
         try {
           if (!params.id) return jsonResponse({ error: "Missing proposal ID" }, 400);
-          const proposal = await upvoteProposal(params.id);
-          return jsonResponse({ success: true, proposal });
+          const result = await upvoteProposal(params.id, user.id);
+          return jsonResponse({ success: true, ...result });
         } catch (e: any) {
-          return jsonResponse({ error: e.message ?? "Failed to upvote proposal" }, 500);
+          return jsonResponse({ error: "Unable to vote. Check the proposal and retry." }, 503);
         }
       },
     },

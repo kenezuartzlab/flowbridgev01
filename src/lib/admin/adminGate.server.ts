@@ -59,8 +59,10 @@ export async function requireAdmin(request: Request): Promise<AdminGateResult> {
     };
   }
 
-  const role: InternalRole =
-    (adminRow as any)?.role === "internal_operator" ? "internal_operator" : "super_admin";
+  if (adminRow.role !== 'super_admin' && adminRow.role !== 'internal_operator') {
+    return { ok: false, response: jsonResponse({ error: 'Forbidden' }, 403) };
+  }
+  const role: InternalRole = adminRow.role;
 
   return { ok: true, admin: { userId: user.id, email, wallet: bound, role } };
 }

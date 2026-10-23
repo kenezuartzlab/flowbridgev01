@@ -61,11 +61,10 @@ export const Route = createFileRoute("/api/users/bind-wallet")({
           return jsonResponse({
             success: true,
             walletAddress: (updated as { wallet_address?: string } | null)?.wallet_address ?? null,
-            user: updated,
             referral,
           });
         } catch (e: any) {
-          return jsonResponse({ error: e.message ?? "Failed to bind wallet address" }, 400);
+          return jsonResponse({ error: "Unable to bind this wallet. Verify ownership or use secure account recovery." }, 400);
         }
       },
     },
