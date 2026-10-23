@@ -8,7 +8,7 @@ import {
 let n = 0;
 const row = (p: Partial<ReconLedgerRow>): ReconLedgerRow => ({
   id: `r${++n}`, reason: "CORE_SWAP", points: 0, chainId: null, createdAt: "2026-08-20T00:00:00Z", evidenceKey: `k${n}`,
-  verifiedUsd: null, dayKey: null, refereeId: null, reservationId: null, fundingState: "UNFUNDED", ...p,
+  verifiedUsd: p.points && p.points > 0 ? Math.max(5, p.points) : null, provenanceState: "VERIFIED", dayKey: null, refereeId: null, reservationId: null, fundingState: "UNFUNDED", ...p,
 });
 const OWNER = "owner", REF = "kentrosh", ELON = "elon", ANA = "ana";
 const legacy = (i: number): ReconAccountInput => ({ userId: `legacy${i}`, createdAt: "2026-07-01T00:00:00Z", storedFlowPoints: 50, storedPointsSelf: 50, storedReferralSignup: 0, ledger: [] });

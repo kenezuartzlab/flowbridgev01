@@ -165,7 +165,7 @@ async function attributeOwnSignupRows(admin: any, rows: any[], boundWallet: stri
       const ref = refereeOf(l); const rw = refWallet.get(ref) ?? null;
       const a = attributeSignupAward({
         points: l.points,
-        reason: l.reason, programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state, provenanceState: l.provenance_state, policyVersion: l.policy_version ?? null,
+        reason: l.reason, programId: l.program_id, chainId: l.chain_id, fundingState: l.funding_state,  policyVersion: l.policy_version ?? null,
         reservationId: l.reservation_id ?? null, ledgerWallet: l.wallet_address ?? null, refereeCreatedAt: created.get(ref) ?? null,
         refereeEmailVerified: email.get(ref) ?? false, recipientBoundWallet: boundWallet, refereeWalletAwardCount: rw ? counts.get(rw) ?? 0 : 0,
         refereeWalletMatches: !!rw && boundByReferee.get(ref) === rw,

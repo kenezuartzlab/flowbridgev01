@@ -134,12 +134,13 @@ export async function accrueCoreSwapPoints(input: {
   // This writer is itself a trust boundary: caller numbers and activity IDs are hints.
   const { ingestMainnetRouterV4Swap } = await import('@/lib/activity/mainnetRouterV4Ingest.server');
   const { ingestMainnetRouterV3Swap } = await import('@/lib/activity/mainnetRouterV3Ingest.server');
-  let verified = await ingestMainnetRouterV4Swap(input.txHash, wallet);
+  let verified: import('@/lib/activity/mainnetRouterV4Ingest.server').MainnetV4IngestResult | import('@/lib/activity/mainnetRouterV3Ingest.server').MainnetV3IngestResult = await ingestMainnetRouterV4Swap(input.txHash, wallet);
   if (verified.status === 'REJECTED') verified = await ingestMainnetRouterV3Swap(input.txHash, wallet);
   if (verified.status !== 'VERIFIED' || verified.activity.activityId.toLowerCase() !== activityId || verified.activity.logIndex !== logIndex || verified.verifiedUsd == null || !Number.isFinite(verified.verifiedUsd)) return refuse();
+  const eventAt = new Date(verified.activity.occurredAt * 1000);
   input = { ...input, verifiedUsd: verified.verifiedUsd, tokenIn: verified.activity.tokenIn, tokenOut: verified.activity.tokenOut, at: new Date(verified.activity.occurredAt * 1000) };
-  if (!isFlowPointsV2Active(input.at, policy)) return refuse();
-  const eventDay = utcDayKey(input.at);
+  if (!isFlowPointsV2Active(eventAt, policy)) return refuse();
+  const eventDay = utcDayKey(eventAt);
   const activityKey = `${input.chainId}:${input.txHash.toLowerCase()}:${logIndex}`;
 
   const alreadyToday = await awardedCoreSwapPointsToday(wallet, eventDay);
@@ -149,7 +150,7 @@ export async function accrueCoreSwapPoints(input: {
 
   // Anti-wash: rapid reverse-pair round trip → REVIEW (0 until resolved).
   if (input.tokenIn && input.tokenOut && computed.award > 0) {
-    const since = new Date(input.at.getTime() - 10 * 60 * 1000).toISOString();
+    const since = new Date(eventAt.getTime() - 10 * 60 * 1000).toISOString();
     const { data: recent } = await supabaseAdmin
       .from("flow_points_ledger")
       .select("metadata, created_at")
@@ -163,7 +164,7 @@ export async function accrueCoreSwapPoints(input: {
       }))
       .filter((p) => p.tokenIn && p.tokenOut);
     if (
-      isRapidReverseRoundTrip(prior, { tokenIn: input.tokenIn, tokenOut: input.tokenOut, at: input.at.getTime() })
+      isRapidReverseRoundTrip(prior, { tokenIn: input.tokenIn, tokenOut: input.tokenOut, at: eventAt.getTime() })
     ) {
       computed.award = 0;
       computed.reason = "ANTI_ABUSE_REVIEW";

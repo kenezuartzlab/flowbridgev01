@@ -436,7 +436,7 @@ export function DonateModal({
     if (!pendingSuggestion) return;
 
     try {
-      const token = await getEffectiveIdToken();
+      const token = await getEffectiveIdToken?.();
       if (!token) { setSignError('Sign in to submit a proposal.'); return; }
       const input = proposalSchema.parse(pendingSuggestion);
       const res = await fetch('/api/proposals', {
@@ -459,7 +459,7 @@ export function DonateModal({
 
   // Upvote suggestion with off-chain cryptographic signature gate
   const handleVote = async (id: string) => {
-    const token = await getEffectiveIdToken();
+    const token = await getEffectiveIdToken?.();
     if (!token) { setVoteError('Sign in to vote.'); return; }
     const addrLower = connectedAddress?.toLowerCase() ?? 'account';
 
