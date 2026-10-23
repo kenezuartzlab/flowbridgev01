@@ -1,4 +1,5 @@
 # V36.11 Payout Operations
+- [ ] Owner-approved security remediation: validate wallet messages, revoke bearer access to private materials, remove public wallet enumeration; rerun security and regression gates.
 - [x] Build Payout Operations with funded totals, actionable renewal and guarded review/sign/recovery controls; authenticated component and real authorized reads verified at 390/1280px.
 - [x] Add audited schedule overlays, repeat renewal, batch-first identity/calldata fences and interrupted-session system confirmation; original Round #3 untouched, zero attempts/renewals.
 - [x] Financial/recovery regression: 1,873 tests / 177 files; fresh disposable PostgreSQL eight-way acquisition, renewal approval and confirmation PASS. Automatic build OK.

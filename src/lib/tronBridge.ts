@@ -3,6 +3,7 @@
 // Docs: docs/bridge/README.md — shared USDT resource ID used across gateways.
 
 import { USDT_BRIDGE_RESOURCE_ID, getContracts } from './contracts';
+import { isTrustedTronMessage } from './wallet/providerMessage';
 
 // Standard BOT Chain BridgeGateway destination chain id assigned to BOT chain
 // (Bohr registered id). Tron itself uses `728126428` in the ChainBridge
@@ -55,16 +56,20 @@ export function waitForTronWeb(timeoutMs = 8000): Promise<boolean> {
 /** Subscribe to TronLink account/lock changes. Returns unsubscribe. */
 export function subscribeTronLink(cb: () => void): () => void {
   if (typeof window === 'undefined') return () => {};
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let previous = JSON.stringify([getTronStatus(), window.tronWeb?.defaultAddress?.base58, window.tronWeb?.fullNode?.host]);
   const handler = (e: MessageEvent) => {
-    const msg = (e && e.data && (e.data as any).message) || null;
-    if (!msg) return;
-    if (msg.action === 'setAccount' || msg.action === 'accountsChanged' ||
-        msg.action === 'setNode' || msg.action === 'connect' || msg.action === 'disconnect') {
+    if (!isTrustedTronMessage(e, window) || timer !== undefined) return;
+    timer = setTimeout(() => {
+      timer = undefined;
+      const current = JSON.stringify([getTronStatus(), window.tronWeb?.defaultAddress?.base58, window.tronWeb?.fullNode?.host]);
+      if (current === previous) return;
+      previous = current;
       cb();
-    }
+    }, 500);
   };
   window.addEventListener('message', handler);
-  return () => window.removeEventListener('message', handler);
+  return () => { window.removeEventListener('message', handler); if (timer !== undefined) clearTimeout(timer); };
 }
 
 export async function requestTronLinkAccounts(): Promise<string | null> {
