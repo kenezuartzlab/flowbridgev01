@@ -3,7 +3,7 @@ const m=vi.hoisted(()=>({auth:vi.fn(),gate:vi.fn(),create:vi.fn(),vote:vi.fn(),w
 vi.mock('@/lib/api-auth.server',()=>({getAuthUser:m.auth,unauthorized:()=>Response.json({error:'Unauthorized'},{status:401}),jsonResponse:(body:unknown,status=200)=>Response.json(body,{status})}));
 vi.mock('@/lib/admin/adminGate.server',()=>({requireAdmin:m.gate}));
 vi.mock('@/lib/flowbridge-db.server',()=>({createProposal:m.create,upvoteProposal:m.vote,getProposals:async()=>[],bindUserWallet:m.bind}));
-vi.mock('@/lib/appConfig.server',()=>({writeSetting:m.write,readAllSettings:async()=>({})}));
+vi.mock('@/lib/appConfig.server',()=>({writeSetting:m.write,readAllSettings:async()=>({}),buildPublicConfig:async()=>({})}));
 import {Route as proposals} from '@/routes/api/proposals';
 import {Route as votes} from '@/routes/api/proposals.$id.vote';
 import {Route as settings} from '@/routes/api/admin.settings';

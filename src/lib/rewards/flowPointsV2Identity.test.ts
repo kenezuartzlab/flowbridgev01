@@ -25,6 +25,7 @@ vi.mock('@/integrations/supabase/client.server', () => ({
         q.eq = () => q;
         q.in = () => q;
         q.gte = () => q;
+        q.limit = () => q;
         q.maybeSingle = async () => ({data:{wallet_address:"0xabc"},error:null});
         return q;
       },
