@@ -7,8 +7,10 @@
 
 import { isInAppBrowser, isTokenPocketBrowser } from "@/lib/in-app-browser";
 import { buildFlowBridgeTypedData } from "@/lib/siweProof";
+import { getActiveProvider } from '@/lib/wallet/activeProvider';
+import { buildOwnershipMessage, OWNERSHIP_TTL_MS } from '@/lib/wallet/ownershipMessage';
 
-const STORAGE_PREFIX = "flowbridge:wallet-verified:";
+const STORAGE_PREFIX = "flowbridge:ownership-v2:";
 const SIGNATURE_TIMEOUT_MS = 45_000;
 // TokenPocket's in-app prompt often sits behind its own "Waiting" overlay for a
 // while (network/keystore unlock). Give the user real time to tap Confirm
@@ -66,13 +68,14 @@ function dedupeSignature(
 
 
 
-function storageKey(address: string) {
-  return `${STORAGE_PREFIX}${address.toLowerCase()}`;
+function storageKey(address: string, chainId = 677) {
+  return `${STORAGE_PREFIX}${chainId}:${address.toLowerCase()}`;
 }
 
-export function isWalletVerified(address: string): boolean {
+export function isWalletVerified(address: string, chainId = 677): boolean {
   try {
-    return window.localStorage.getItem(storageKey(address)) === "1";
+    const expires = Number(window.sessionStorage.getItem(storageKey(address, chainId)));
+    return Number.isFinite(expires) && expires > Date.now();
   } catch {
     return false;
   }
@@ -81,41 +84,21 @@ export function isWalletVerified(address: string): boolean {
 export function clearWalletVerified(address: string): void {
   try {
     window.localStorage.removeItem(storageKey(address));
+    for (const key of Object.keys(window.sessionStorage)) {
+      if (key.startsWith(STORAGE_PREFIX) && key.endsWith(`:${address.toLowerCase()}`)) window.sessionStorage.removeItem(key);
+    }
   } catch {
     /* ignore */
   }
 }
 
-export function markWalletVerified(address: string): void {
+export function markWalletVerified(address: string, chainId = 677): void {
   try {
-    window.localStorage.setItem(storageKey(address), "1");
+    // UX hint only. Server writes and transactions still require their own authorization.
+    window.sessionStorage.setItem(storageKey(address, chainId), String(Date.now() + OWNERSHIP_TTL_MS));
   } catch {
     /* ignore */
   }
-}
-
-function buildMessage(opts: { address: string; nonce: string; domain: string; uri: string }) {
-  if (isTokenPocketBrowser()) {
-    return [
-      "FlowBridge wallet check",
-      `Wallet: ${opts.address}`,
-      `Nonce: ${opts.nonce}`,
-      "Free signature. No transaction.",
-    ].join("\n");
-  }
-
-  const issuedAt = new Date().toISOString();
-  return [
-    `${opts.domain} wants you to sign in with your Ethereum account:`,
-    opts.address,
-    "",
-    "Prove control of this wallet to authorize swaps and bridges on FlowBridge. This signature is free and does not send a transaction.",
-    "",
-    `URI: ${opts.uri}`,
-    `Version: 1`,
-    `Nonce: ${opts.nonce}`,
-    `Issued At: ${issuedAt}`,
-  ].join("\n");
 }
 
 export class WalletVerificationRejectedError extends Error {
@@ -167,7 +150,7 @@ function shouldFallbackFromTypedData(err: any) {
 
 async function assertActiveInjectedAccount(expectedAddress: string): Promise<void> {
   if (typeof window === "undefined") return;
-  const eth = (window as any).ethereum;
+  const eth = await getActiveProvider();
   if (!eth?.request) return;
   try {
     const accounts = (await eth.request({ method: "eth_accounts" })) as string[];
@@ -220,7 +203,7 @@ async function requestProviderSignature(args: {
   ms: number;
   preferCallback?: boolean;
 }): Promise<string> {
-  const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
+  const eth = await getActiveProvider() as { request?: (args: { method: string; params: unknown[] }) => Promise<unknown>; sendAsync?: (args: unknown, cb: (error: any, response: any) => void) => void } | null;
   if (!eth) throw new Error("provider not found");
 
   if (args.preferCallback && typeof eth.sendAsync === "function") {
@@ -272,7 +255,7 @@ function stringToHex(value: string): `0x${string}` {
 }
 
 async function signWithInjected(normalized: string, message: string, ms?: number): Promise<string> {
-  const eth = typeof window !== "undefined" ? (window as any).ethereum : null;
+  const eth = await getActiveProvider();
   if (!eth?.request) throw new Error("provider not found");
   const tokenPocket = isTokenPocketBrowser();
   // TokenPocket's mobile in-app provider is more reliable when personal_sign
@@ -355,7 +338,7 @@ async function signMessageWithActiveWalletInner(
   await assertActiveInjectedAccount(normalized);
 
 
-  const hasInjected = typeof window !== "undefined" && !!(window as any).ethereum?.request;
+  const hasInjected = !!(await getActiveProvider())?.request;
   const tokenPocket = isTokenPocketBrowser();
   if (tokenPocket && hasInjected) {
     return await signPersonalWithTokenPocket(normalized, message);
@@ -419,22 +402,32 @@ const inFlightVerifications = new Map<string, Promise<void>>();
 export async function ensureWalletVerified(
   address: string,
   signMessageAsync: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
+  expectedChainId?: number,
 ): Promise<void> {
   if (!address) throw new Error("Wallet address required for verification");
   const normalized = address.toLowerCase();
-  if (isWalletVerified(normalized)) return;
-  const running = inFlightVerifications.get(normalized);
+  const provider = await getActiveProvider();
+  if (!provider) throw new WalletVerificationRejectedError('Connect a signing wallet before verification.');
+  const chainId = Number(await provider.request({ method: 'eth_chainId' }));
+  if (!Number.isSafeInteger(chainId) || chainId <= 0 || (expectedChainId !== undefined && chainId !== expectedChainId)) {
+    throw new WalletVerificationRejectedError('Wallet network changed. Select the requested network and retry verification.');
+  }
+  await assertActiveInjectedAccount(normalized);
+  if (isWalletVerified(normalized, chainId)) return;
+  const key = `${chainId}:${normalized}`;
+  const running = inFlightVerifications.get(key);
   if (running) return running;
-  const promise = ensureWalletVerifiedInner(normalized, signMessageAsync).finally(() => {
-    if (inFlightVerifications.get(normalized) === promise) inFlightVerifications.delete(normalized);
+  const promise = ensureWalletVerifiedInner(normalized, signMessageAsync, chainId).finally(() => {
+    if (inFlightVerifications.get(key) === promise) inFlightVerifications.delete(key);
   });
-  inFlightVerifications.set(normalized, promise);
+  inFlightVerifications.set(key, promise);
   return promise;
 }
 
 async function ensureWalletVerifiedInner(
   normalized: string,
   signMessageAsync: (args: { message: string; account?: `0x${string}` }) => Promise<string>,
+  chainId: number,
 ): Promise<void> {
 
 
@@ -450,12 +443,14 @@ async function ensureWalletVerifiedInner(
   }
   const nonce: string = nonceJson.nonce;
 
-  const message = buildMessage({
+  const message = buildOwnershipMessage({
     address: normalized,
     nonce,
     domain: window.location.host,
     uri: window.location.origin,
-  });
+    chainId,
+    issuedAt: new Date().toISOString(),
+  }, isTokenPocketBrowser());
 
   // 2) Sign — this is where watch-only wallets fail out.
   // Do NOT pin `account` on the signMessage call: after switching wallets the
@@ -471,15 +466,20 @@ async function ensureWalletVerifiedInner(
   }
 
   // 3) Server-verify
-  const verifyRes = await fetch("/api/public/siwe/verify", {
+  const provider = await getActiveProvider();
+  if (!provider || Number(await provider.request({ method: 'eth_chainId' })) !== chainId) {
+    throw new WalletVerificationRejectedError('Wallet network changed during verification. Retry on the requested network.');
+  }
+  await assertActiveInjectedAccount(normalized);
+  const verifyRes = await fetch("/api/public/wallet-proof", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ walletAddress: normalized, message, signature, nonce }),
+    body: JSON.stringify({ walletAddress: normalized, message, signature, nonce, chainId }),
   });
   const verifyJson = await verifyRes.json().catch(() => ({}));
   if (!verifyRes.ok || !verifyJson?.verified) {
     throw new Error(verifyJson?.error ?? "Wallet verification failed");
   }
 
-  markWalletVerified(normalized);
+  markWalletVerified(normalized, chainId);
 }
