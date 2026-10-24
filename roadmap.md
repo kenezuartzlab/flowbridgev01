@@ -1,3 +1,8 @@
+# V36.11 independent operational tracks
+- [ ] Track A: HOLD — one remaining high dependency advisory in legacy wallet validation dependencies; known old signed URLs unavailable; private scheduler pairing unavailable; V36.11 cloud/device-gap acceptance absent. Existing hourly job paused, public key removed, hosting credential generated. Anonymous abuse rejection and authorized reads/download PASS; 1,921 tests / 187 files PASS; automatic build OK. No deployment.
+- [ ] Track B: HOLD — fresh Round #3 query confirms 9 funded Core Swap rows / 1,022 PENDING Points, zero VERIFIED; timestamp-appropriate original historical pricing evidence unavailable. Stored 1,122 immutable, eligible 0. No record or balance changes.
+- [x] Track C: independent security, evidence, batch, schedule and publication display states with tested presentation logic; authorized API verifies stored 1,122 / eligible 0, no transaction, renewal blocked. Connected-wallet UI/device acceptance remains open under Track A; no production claim.
+
 # V36.11 Payout Operations
 - [x] Implement six code corrections: independently verified rewards + historical provenance quarantine, authenticated/idempotent proposals, super-admin settings audit, private binding errors and bounded proposal input; 1,918 regressions PASS. Full release remains gated.
 - [ ] Complete historical price/provenance audit: Round #3's 1,022 Core Swap Points remain PENDING; stored 1,122 immutable, eligible preview zero, signing blocked. No evidence approval fabricated.

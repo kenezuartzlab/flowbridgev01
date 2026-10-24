@@ -94,7 +94,7 @@
     "viem": "^2.53.1",
     "vite-tsconfig-paths": "^6.0.2",
     "wagmi": "^3.6.18",
-    "zod": "^4.4.3"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
@@ -131,7 +131,8 @@
     "axios": "1.20.0",
     "browserslist": "4.28.7",
     "engine.io": "6.6.10",
-    "fast-uri": "3.1.8",
+    "fast-uri": "3.1.9",
+    "body-parser": "2.4.0",
     "ip-address": "10.7.4",
     "esbuild": "0.25.12",
     "js-yaml": "4.3.2",
