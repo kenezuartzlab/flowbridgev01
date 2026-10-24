@@ -7,6 +7,7 @@ import { readOpsJson } from '@/lib/admin/opsRead';
 import type { RewardSolvencyReport } from '@/lib/rewards/rewardSolvency.server';
 import type { RenewalProposal } from '@/lib/rewards/scheduleRenewal';
 import { PublishBatchPanel } from './PublishBatchPanel';
+import { payoutStatus } from '@/lib/ops/payoutStatus';
 
 type Data={report:RewardSolvencyReport;viewer:{role:string}};
 const date=(sec:number)=>new Date(sec*1000).toISOString().slice(0,16).replace('T',' ')+' UTC';
@@ -27,18 +28,28 @@ export function PayoutOperations({wallet}:{wallet?:string}){
  if(!q.data)return <div role={q.isError?'alert':undefined} className="space-y-3"><p className="text-muted">{q.isError?'Payout checks unavailable. Signing is disabled.':'Checking funded rewards and the payout contract…'}</p><Button variant="outline" onClick={()=>q.refetch()} disabled={q.isFetching}><RefreshCw/>Re-check</Button></div>;
  const r=q.data.report,s=r.settlement,p=s.renewal;
  const expired=!!p?.needed;
+ const evidenceBlocked=s.checks.some(c=>c.id==='REWARD_PROVENANCE'&&!c.pass);
+ // Release acceptance is not granted by payout eligibility or an older exception.
+ const states=payoutStatus({securityAccepted:false,evidenceBlocked,qualifiedFlow:r.draftAllocation.totalPoints,scheduleNeedsRenewal:expired,readyForReview:s.status==='READY_FOR_PUBLISHER_REVIEW',confirmed:false});
  return <section className="space-y-5">
   <header className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-4"><div><h2 className="text-xl font-bold">Payout Operations</h2><p className="text-sm text-muted">BOT Mainnet · Manual signing · Automatic funding OFF</p></div><Button variant="outline" size="sm" disabled={q.isFetching||busy} onClick={()=>q.refetch()}><RefreshCw/>Re-check</Button></header>
   <dl className="grid gap-4 sm:grid-cols-3">
    <Metric label="Funded eligible payout" value={`${r.draftAllocation.totalPoints.toLocaleString()} FLOW`}/>
    <Metric label="Qualified wallets" value={String(r.draftAllocation.leaves)}/>
-   <Metric label="Publication readiness" value={expired?'Schedule needs renewal':s.status==='READY_FOR_PUBLISHER_REVIEW'?'Ready for review':'Action required'}/>
+   <Metric label="Publication readiness" value={states.publication}/>
   </dl>
+  <dl className="grid gap-4 sm:grid-cols-2">
+   <Metric label="Security release — independent of rewards" value={states.security}/>
+   <Metric label="Reward evidence" value={states.evidence}/>
+   <Metric label="Batch eligibility" value={states.batch}/>
+   <Metric label="Claim schedule" value={states.schedule}/>
+  </dl>
+  <p className="text-sm text-warning">V36.11 security acceptance is pending. This does not approve or invalidate reward evidence.</p>
   <div className="space-y-2 border-y border-hairline py-4 text-sm">
    <p><ShieldCheck className="mr-2 inline h-4 w-4 text-primary"/>Stored round #{s.epochId??'—'} · {s.storedAllocation?.wallets ?? s.leaves} wallet(s) · {(s.storedAllocation?.totalFlow ?? s.totalFlow).toLocaleString()} FLOW · unchanged allocation, not approval</p>
    <p className="text-muted">{s.claimStartIso?`${s.claimStartIso.slice(0,16)} → ${s.claimEndIso?.slice(0,16)} UTC`:'Claim schedule unavailable'}</p>
    <p className="text-warning">{r.draftAllocation.excludedUnfundedPoints.toLocaleString()} earned-but-unfunded Points excluded · {r.reconciliation.nonclaimableHistoricalTotal.toLocaleString()} historical restricted Points excluded</p>
-   {!!s.provenanceExcludedPoints && <p role="alert" className="text-danger">Reward provenance review required: {s.provenanceExcludedPoints.toLocaleString()} Mainnet Core Swap Points are excluded until independent earning evidence passes. Re-check after the review; signing stays disabled.</p>}
+   {!!s.provenanceExcludedPoints && <p role="alert" className="text-danger">Evidence review: {s.provenanceExcludedPoints.toLocaleString()} Mainnet Core Swap Points across all accounts remain excluded. Verified trades alone do not prove historical USD pricing. Next authorized action: review timestamp-appropriate price evidence, then re-check. Stored allocations stay unchanged; signing stays disabled.</p>}
    <details><summary className="cursor-pointer text-muted">Excluded Core Swap awards</summary>{r.unfundedSwapAwards.map(group => <p key={group.points} className="text-warning">{group.points.toLocaleString()} Core Swap Points per award · {group.awards} award(s) · UNFUNDED — excluded</p>)}</details>
    <p className="text-xs text-muted">Last checked {r.generatedAt.replace('T',' ').slice(0,19)} UTC</p>
   </div>
