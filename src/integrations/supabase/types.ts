@@ -1391,6 +1391,71 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_evidence_reviews: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          id: string
+          ledger_id: string
+          onchain_evidence: Json
+          points: number
+          policy_id: string
+          price_evidence: Json
+          proposed_by: string
+          proposed_by_email: string
+          rationale: string
+          status: string
+          uncertainty: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decided_by_email?: string | null
+          decision_note?: string | null
+          id?: string
+          ledger_id: string
+          onchain_evidence: Json
+          points: number
+          policy_id?: string
+          price_evidence?: Json
+          proposed_by: string
+          proposed_by_email: string
+          rationale: string
+          status?: string
+          uncertainty: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decided_by_email?: string | null
+          decision_note?: string | null
+          id?: string
+          ledger_id?: string
+          onchain_evidence?: Json
+          points?: number
+          policy_id?: string
+          price_evidence?: Json
+          proposed_by?: string
+          proposed_by_email?: string
+          rationale?: string
+          status?: string
+          uncertainty?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_evidence_reviews_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "flow_points_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reward_funding_snapshots: {
         Row: {
           account_count: number
@@ -2331,6 +2396,16 @@ export type Database = {
         }
         Returns: string
       }
+      decide_reward_evidence_exception: {
+        Args: {
+          p_actor: string
+          p_decision: string
+          p_email: string
+          p_note: string
+          p_review: string
+        }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2370,6 +2445,17 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      propose_reward_evidence_exception: {
+        Args: {
+          p_actor: string
+          p_email: string
+          p_ledger: string
+          p_price_evidence: Json
+          p_rationale: string
+          p_uncertainty: string
+        }
+        Returns: string
       }
       purge_siwe_nonces: { Args: never; Returns: undefined }
       read_email_batch: {
