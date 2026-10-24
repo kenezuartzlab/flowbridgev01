@@ -154,7 +154,9 @@ async function assertActiveInjectedAccount(expectedAddress: string): Promise<voi
   if (!eth?.request) return;
   try {
     const accounts = (await eth.request({ method: "eth_accounts" })) as string[];
-    if (!Array.isArray(accounts) || accounts.length === 0) return;
+    if (!Array.isArray(accounts) || accounts.length === 0) {
+      throw new WalletVerificationRejectedError('Wallet disconnected. Reconnect a signing wallet and retry verification.');
+    }
     const expected = expectedAddress.toLowerCase();
     const active = accounts.map((a) => String(a).toLowerCase());
     if (!active.includes(expected)) {
