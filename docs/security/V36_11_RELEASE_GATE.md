@@ -1,5 +1,31 @@
 # V36.11 release acceptance
 
+## Independent track checkpoint — 2026-10-24 13:32 UTC
+
+### Security release: HOLD (independent of payout evidence)
+- No production deployment was performed and no new production fingerprint is claimed. Preserve the last verified frontend release.
+- Fresh complete dependency audits initially returned six advisories (2 high, 2 moderate, 2 low). Guarded updates to body-parser 2.4.0, fast-uri 3.1.9 and direct Zod 4.6.6 removed all but the Zod high advisory. Compatible V4 transitive instances were updated. Legacy Zod 3.22.4 / 3.25.76 remain required by wallet dependencies; a blanket cross-major override is not an accepted fix. Full and production dependency acceptance remains HOLD. No advisory was waived.
+- Full final regression: **1,921 tests / 187 files PASS**, after lockfile update. Frozen lockfile installation PASS. Latest observed automatic compilation: build OK 2026-10-24T13:30:25Z. Hosted check results contained no separate checks; explicit final production-mode/type evidence is not established by that response.
+- Quick scan at 13:28 UTC returned no new active findings. Cloud assessment was skipped because the connector is not configured. Deep scan started against the previously saved project; it does not establish coverage of this turn's new changes. Final saved-state coverage remains pending.
+- Real authorized local payout API: HTTP 200, stored 1,122 FLOW / one wallet, eligible 0 / zero wallets, transaction absent, renewal not ready, live epoch count 2. Anonymous proposal submission/voting, settings writes and both private-file interfaces returned 401. Public-key scheduler request returned 401. Authorized PDF delivery returned 200 with private/no-store caching. No payout or settings writes were used for acceptance.
+- Existing hourly job 257 was paused and its public credential removed. Its prepared command refers only to a dedicated private credential. REWARDS_SWEEP_SECRET was generated through the hosting secrets mechanism without disclosure. Database credential-presence read returned zero; secure hosting-to-scheduler pairing is unavailable through the offered tools. Job remains inactive; hourly alerts are not accepted as operational. No duplicate job was created.
+- Private bucket is confirmed nonpublic. Future admin-gated downloads work. Original signed URLs are not available in the inspected evidence, so actual anonymous old-link invalidation was NOT tested and no global revocation is claimed. Provider-backed revocation/expiry evidence remains a material gate.
+- Physical TokenPocket is unperformed. The authenticated Ops page opens but reports that its bound wallet is not connected; screenshot does not establish integrated connected-wallet acceptance. A security-only scope still needs explicit V36.11 cloud/permissions decision and any unrelated device-gap acceptance. Neither is inferred from prior release exceptions.
+
+### Rewards integrity: historical evidence HOLD, records unchanged
+- Fresh aggregate query: 16 funded Core Swap rows / **1,057 Points PENDING** and 29 unfunded rows / **4,926 Points PENDING**. These current row counts supersede earlier broader-ledger counts; balances were not edited.
+- Round #3 recipient-scoped query: **9 funded Core Swap rows / 1,022 Points; zero VERIFIED Points**. Receipt-matched trades are not pricing-verified rewards. Earlier supplied sample documented 35 canonical Mainnet trades / 2,197 recorded Points; that sample is not a fresh exhaustive audit or Round #3 subtotal.
+- Original V2 methodology: effective 2026-08-20 15:00 UTC, independently valued input USD ≥ $5, floor(verified USD), 1,000 Core Swap Points per bound-wallet UTC day. Today's DEX API quote is not historical price evidence. No historical price was substituted or fabricated.
+- Next authorized action: obtain retained timestamp-appropriate price observations or reconstruct approved pricing from independent trade-block pool/oracle history, verify decimals/amount/daily-cap calculations and preserve reproducible evidence privately. If unavailable, keep 1,022 held and submit a separate owner exception report; no exception creates provenance, funding, replacement, renewal or signature authorization.
+
+### Round #3: immutable, ineligible, schedule needs renewal
+- Stored allocation remains **1 wallet / 1,122 FLOW** (1,022 held Core Swap Points plus documented 100 funded signup Points). Current publishable allocation **0 FLOW**, below the 1,000 funded-eligible minimum after excluding unsupported Core Swap rewards.
+- Stored window remains **2026-10-20 16:00 → 2026-11-19 16:00 UTC**. The publication deadline cannot meet the live 24-hour activation delay. Schedule renewal remains unapproved and blocked by evidence mismatch; dates must be recalculated only for a separately authorized proposal.
+- Zero epoch-3 publication attempts; zero renewal records; rounds 1 and 2 remain confirmed. The separate 74-Point award remains UNFUNDED; a different funded 74-Point award was not reclassified. The 776 restricted Points remain excluded. Automatic funding/signing OFF; no financial or contract actions.
+- Payout Operations now separates software security acceptance, reward evidence, batch eligibility, schedule and publication presentation. Pure display states never authorize signing or financial changes. Preview UI changes are not a production release.
+
+Remaining gates are independent: security dependency/old-link/private-scheduler/cloud-acceptance gates prevent security release; historical pricing evidence and separately approved valid scheduling prevent payout. Neither track grants approval to the other.
+
 ## Final remediation checkpoint — 2026-10-23 16:48:34 UTC
 
 **HOLD — not deployed. No production release fingerprint is claimed.**
