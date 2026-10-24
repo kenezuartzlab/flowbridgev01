@@ -51,7 +51,7 @@ export function buildFundingQueue(
     if (program !== "CORE_SWAP") { ex("NEEDS_MANUAL_REVIEW"); continue; }
     if (reviewed.has(r.user_id)) { ex("REVIEWED_HISTORICAL_ACCOUNT"); continue; }
     if (r.chain_id !== MAINNET_CHAIN_ID) { ex("NOT_MAINNET"); continue; }
-    if (r.provenance_state !== "VERIFIED") { ex("PROVENANCE_REVIEW_REQUIRED"); continue; }
+    if (r.provenance_state !== "VERIFIED" && r.provenance_state !== "EXCEPTION_APPROVED") { ex("PROVENANCE_REVIEW_REQUIRED"); continue; }
     if (!r.tx_hash || !r.verified_activity_id) { ex("MISSING_EVIDENCE"); continue; }
     if (!FUNDABLE_POLICY_VERSIONS.has(r.policy_version ?? "")) { ex("POLICY_VERSION"); continue; }
     if ((seen.get(`${r.tx_hash}|${r.reason}`) ?? 0) > 1) { ex("DUPLICATE_EVIDENCE"); continue; }

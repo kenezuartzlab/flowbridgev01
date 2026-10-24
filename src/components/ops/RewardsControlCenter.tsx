@@ -6,6 +6,7 @@ import { readOpsJson } from "@/lib/admin/opsRead";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { PayoutOperations } from './PayoutOperations';
+import { EvidenceReview, RewardsPipeline } from './EvidenceReview';
 
 type Snapshot = { id: string; program_id: string; total_points: number; row_count: number; account_count: number; snapshot_hash: string; status: string; proposed_by_email: string; approved_by_email: string | null; confirmed_by_email: string | null; confirmed_at: string | null; created_at: string };
 type State = {
@@ -20,7 +21,7 @@ type State = {
   automation: { policies: { program_id: string; auto_funding_enabled: boolean; suspended: boolean; per_run_cap: number; daily_cap: number }[]; autonomousFundingAuthorized: boolean; autonomousSigning: boolean; lastRuns: { ran_at: string; source: string }[] };
 };
 
-const SECTIONS = ["Payout Operations", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation", "Audit History"] as const;
+const SECTIONS = ["Payout Operations", "Evidence Review", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation", "Audit History"] as const;
 type Section = (typeof SECTIONS)[number];
 const fmt = (n: number | null | undefined) => (n == null ? "—" : Math.floor(n).toLocaleString());
 const TONE: Record<string, string> = {
@@ -94,7 +95,9 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
         <button type="button" onClick={() => onOpen("Budgets")} className="shrink-0 rounded-full border border-hairline bg-card px-3 py-1 text-[11px] font-bold text-muted">Budgets ↗</button>
       </div>
 
+      <RewardsPipeline />
       {section === 'Payout Operations' && <PayoutOperations wallet={wallet}/>}
+      {section === 'Evidence Review' && <EvidenceReview wallet={wallet} role={s.viewer.role}/>}
       {section === "Overview" && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[

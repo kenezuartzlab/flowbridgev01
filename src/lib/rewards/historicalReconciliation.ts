@@ -100,7 +100,7 @@ export function mainnetSwapEvidence(rows: ReconLedgerRow[]): ReconLedgerRow[] {
   const seen = new Set<string>();
   return rows.filter((r) => {
     if (!CORE_SWAP.has(r.reason) || r.chainId !== MAINNET_CHAIN_ID || r.points <= 0) return false;
-    if (r.provenanceState !== "VERIFIED" || !r.evidenceKey || !Number.isFinite(r.verifiedUsd) || Number(r.verifiedUsd) < 5 || r.points > Math.floor(Number(r.verifiedUsd))) return false;
+    if ((r.provenanceState !== "VERIFIED" && r.provenanceState !== "EXCEPTION_APPROVED") || !r.evidenceKey || !Number.isFinite(r.verifiedUsd) || Number(r.verifiedUsd) < 5 || r.points > Math.floor(Number(r.verifiedUsd))) return false;
     const key = r.evidenceKey;
     if (seen.has(key)) return false;
     seen.add(key);

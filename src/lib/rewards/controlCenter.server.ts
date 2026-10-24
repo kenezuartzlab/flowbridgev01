@@ -169,3 +169,40 @@ export async function runOpsSweep(source: string) {
   if (savedRun.error) throw new Error('Scheduled verification could not be recorded. Re-check required.');
   return summary;
 }
+
+/** Historical evidence review queue: Core Swap rewards with verified trades awaiting pricing evidence. Anonymised. */
+export async function readEvidenceReviews() {
+  const admin = await db();
+  const [rows, reviews] = await Promise.all([
+    admin.from("flow_points_ledger").select("id,points,funding_state,policy_version,verified_usd,tx_hash,created_at").in("reason", ["CORE_SWAP", "CORE_SWAP_V2"]).eq("chain_id", 677).eq("provenance_state", "PENDING").gt("points", 0).order("created_at").limit(500),
+    admin.from("reward_evidence_reviews").select("id,ledger_id,status,points,uncertainty,rationale,price_evidence,proposed_by,proposed_by_email,decided_by_email,decision_note,created_at,decided_at").order("created_at", { ascending: false }).limit(500),
+  ]);
+  if (rows.error || reviews.error) throw new Error("evidence unavailable");
+  const open = new Map((reviews.data ?? []).filter((r: any) => r.status === "PROPOSED").map((r: any) => [r.ledger_id, r]));
+  return {
+    pending: (rows.data ?? []).map((r: any) => ({ id: r.id, points: r.points, funded: r.funding_state === "FUNDED", policyVersion: r.policy_version, recordedUsd: r.verified_usd, txHash: r.tx_hash, earnedAt: r.created_at, review: open.get(r.id) ? { ...open.get(r.id), proposed_by: undefined, proposedBy: (open.get(r.id) as any).proposed_by } : null })),
+    decided: (reviews.data ?? []).filter((r: any) => r.status !== "PROPOSED").slice(0, 50).map((r: any) => ({ ...r, proposed_by: undefined })),
+  };
+}
+
+export async function proposeEvidenceException(a: AdminContext, ledgerId: string, input: { rationale: string; uncertainty: string; priceSource?: string; priceUsd?: number | null }) {
+  const { validateExceptionProposal, EXCEPTION_POLICY_ID } = await import("./evidenceReview");
+  const v = validateExceptionProposal(input);
+  if (!v.ok) return { ok: false as const, error: v.error };
+  const admin = await db();
+  const { data, error } = await admin.rpc("propose_reward_evidence_exception" as never, { p_ledger: ledgerId, p_actor: a.userId, p_email: a.email, p_price_evidence: { policy: EXCEPTION_POLICY_ID, source: input.priceSource ?? null, priceUsd: input.priceUsd ?? null }, p_uncertainty: input.uncertainty, p_rationale: input.rationale } as never);
+  if (error) return { ok: false as const, error: /duplicate|unique/i.test(error.message) ? "This reward already has an open review." : error.message.replace(/^.*?:\s*/, "") };
+  return { ok: true as const, id: data as unknown as string };
+}
+
+export async function decideEvidenceException(a: AdminContext, reviewId: string, decision: "APPROVED" | "REJECTED", note?: string) {
+  const { canDecideException } = await import("./evidenceReview");
+  const admin = await db();
+  const { data: r } = await admin.from("reward_evidence_reviews").select("status,proposed_by").eq("id", reviewId).maybeSingle();
+  if (!r) return { ok: false as const, error: "Review not found." };
+  const d = canDecideException({ status: (r as any).status, proposedBy: (r as any).proposed_by }, a);
+  if (!d.ok) return { ok: false as const, error: d.reason };
+  const { data, error } = await admin.rpc("decide_reward_evidence_exception" as never, { p_review: reviewId, p_actor: a.userId, p_email: a.email, p_decision: decision, p_note: note ?? null } as never);
+  if (error) return { ok: false as const, error: error.message.replace(/^.*?:\s*/, "") };
+  return { ok: data !== "STALE", outcome: data as unknown as string, ...(data === "STALE" ? { error: "The reward changed after the proposal; review it again." } : {}) };
+}
