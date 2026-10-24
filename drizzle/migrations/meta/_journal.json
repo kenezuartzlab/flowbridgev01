@@ -225,6 +225,13 @@
       "when": 1792860984910,
       "tag": "0031_reward_evidence_exception_review",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792861749395,
+      "tag": "0032_evidence_exception_requires_price_evidence",
+      "breakpoints": true
     }
   ]
 }

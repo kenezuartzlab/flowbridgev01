@@ -13,6 +13,7 @@ export function validateExceptionProposal(i: ExceptionProposalInput): { ok: true
   const rationale = (i.rationale ?? '').trim(), uncertainty = (i.uncertainty ?? '').trim();
   if (rationale.length < 20 || rationale.length > 2000) return { ok: false, error: 'Explain the decision in 20–2,000 characters.' };
   if (uncertainty.length < 5 || uncertainty.length > 1000) return { ok: false, error: 'Describe what remains uncertain.' };
+  if ((i.priceSource ?? '').trim().length < 5) return { ok: false, error: 'Document the historical price evidence source. Missing evidence alone cannot be approved.' };
   if ((i.priceSource ?? '').length > 500) return { ok: false, error: 'Price source is too long.' };
   if (i.priceUsd != null && !(Number.isFinite(i.priceUsd) && i.priceUsd >= 0)) return { ok: false, error: 'Price must be a positive number.' };
   return { ok: true };
