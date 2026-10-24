@@ -74,4 +74,21 @@ describe("MultiSend import", () => {
     expect(csv.split("\n")[0]).toBe("batchId,token,source,recipient,amount,status,txHash");
     expect(csv).toContain("0xabc,BOT");
   });
+
+  it("neutralizes untrusted receipt fields and preserves decimal precision", () => {
+    const csv = receiptCsv({ clientBatchId: "=1", tokenSymbol: '+BOT;"token"', rows: [
+      { source: A, recipient: B, amount: "1122.000000000000000001", status: "@SUM(A1)", txHash: "\t=1" },
+      { source: A, recipient: B, amount: "=1+1", status: "safe", txHash: "safe,=2" },
+    ] });
+    expect(csv).toContain("'=1,\"'+BOT;\"\"token\"\"\"");
+    expect(csv).toContain("1122.000000000000000001,'@SUM(A1),\"'\t=1\"");
+    expect(csv).toContain("'=1+1,safe,\"safe,=2\"");
+  });
+
+  it("protects both raw rejected rows and reasons from formulas and separators", () => {
+    const preview = parseImport({ mode: "one-to-many", text: "=1+1,2" });
+    preview.invalid[0].reason = '@SUM(A1);"reason"';
+    expect(errorsCsv(preview)).toBe('line,reason,row\n1,"\'@SUM(A1);""reason""","\'=1+1,2"');
+    expect(preview.invalid[0].raw).toBe("=1+1,2");
+  });
 });
