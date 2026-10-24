@@ -782,7 +782,7 @@ export function UniversalSwapCard({
     // Prove wallet control before any state-changing call. Blocks watch-only
     // wallets and surfaces a clear message if the user rejects the signature.
     try {
-      await ensureWalletVerified(address, signMessageAsync as any);
+      await ensureWalletVerified(address, signMessageAsync as any, balanceChainId);
     } catch (err: any) {
       const msg = err instanceof WalletVerificationRejectedError
         ? err.message

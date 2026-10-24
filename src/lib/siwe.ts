@@ -3,7 +3,6 @@
 // is already linked to a registered email.
 import { supabase } from "@/integrations/supabase/client";
 import { isTokenPocketBrowser } from "@/lib/in-app-browser";
-import { markWalletVerified } from "@/lib/walletVerification";
 import { buildSignInMessage } from '@/lib/wallet/signInMessage';
 
 export type SiweResult =
@@ -49,8 +48,6 @@ export async function signInWithEthereum(args: {
   });
   const verifyJson = await verifyRes.json();
   if (!verifyRes.ok) throw new Error(verifyJson?.error ?? "Signature verification failed");
-
-  markWalletVerified(address);
 
   if (verifyJson.needs_binding) return { status: "needs_binding" };
 

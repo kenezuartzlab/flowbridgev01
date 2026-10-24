@@ -87,6 +87,7 @@ export async function verifyWalletChallenge(
     .update({ used_at: new Date().toISOString() })
     .eq("id", row.id)
     .is("used_at", null)
+    .gt("expires_at", new Date().toISOString())
     .select("id");
   if (consumeError) return { ok: false, status: 500, error: "Could not consume challenge" };
   if (!consumed || consumed.length === 0) {

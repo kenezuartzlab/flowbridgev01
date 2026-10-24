@@ -777,13 +777,6 @@ export default function App() {
       setErrorMessage("Connect a wallet before continuing.");
       return false;
     }
-    if (isTokenPocketBrowser()) {
-      // TokenPocket transaction signing works, but its message-sign prompt can
-      // freeze behind a native "Waiting" overlay. Do not block swaps/bridges on
-      // that extra pre-signature; the actual transaction still requires the
-      // wallet's signing confirmation and watch-only wallets cannot send it.
-      return true;
-    }
     try {
       await ensureWalletVerified(address, signMessageAsync as any);
       return true;
