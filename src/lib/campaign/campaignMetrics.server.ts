@@ -9,6 +9,8 @@
  * and never signatures, intent hashes/nonces or raw rows.
  */
 
+import { spreadsheetRow } from "@/lib/spreadsheetExport";
+
 export interface PublicTaskMetric {
   taskId: string;
   title: string;
@@ -230,27 +232,22 @@ export async function getAdminCampaignAnalytics(
 
 /** CSV of safe aggregate rows for an authorized campaign. */
 export function analyticsToCsv(a: AdminCampaignAnalytics): string {
-  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines: string[] = [];
   lines.push('section,key,label,completions,participants,points');
   lines.push(
-    ['summary', a.slug, a.name, a.completions, a.participants, a.pointsAwarded].map(esc).join(','),
+    spreadsheetRow(['summary', a.slug, a.name, a.completions, a.participants, a.pointsAwarded]),
   );
   for (const t of a.tasks) {
     lines.push(
-      ['task', t.taskId, t.title, t.completions, t.participants, t.points * t.completions]
-        .map(esc)
-        .join(','),
+      spreadsheetRow(['task', t.taskId, t.title, t.completions, t.participants, t.points * t.completions]),
     );
   }
   for (const p of a.series) {
-    lines.push(['daily', p.date, p.date, p.completions, '', p.points].map(esc).join(','));
+    lines.push(spreadsheetRow(['daily', p.date, p.date, p.completions, '', p.points]));
   }
   for (const r of a.recentCompletions) {
     lines.push(
-      ['completion', r.completedAt, `${r.wallet} · ${r.taskTitle}`, 1, '', r.points]
-        .map(esc)
-        .join(','),
+      spreadsheetRow(['completion', r.completedAt, `${r.wallet} · ${r.taskTitle}`, 1, '', r.points]),
     );
   }
   return lines.join('\n');

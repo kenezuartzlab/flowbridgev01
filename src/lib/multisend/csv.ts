@@ -11,6 +11,7 @@
  * seen the import preview.
  */
 import type { Address, MultiSendMode } from "./types";
+import { spreadsheetRow, spreadsheetCell, spreadsheetDecimal } from "../spreadsheetExport";
 
 const ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -152,7 +153,7 @@ export function parseImport(args: {
 /** CSV text of the rows a user could not import, for the "Download errors" action. */
 export function errorsCsv(p: ImportPreview): string {
   const rows = [...p.invalid, ...p.unsupportedAmount].sort((a, b) => a.line - b.line);
-  return ["line,reason,row", ...rows.map((r) => `${r.line},"${r.reason}","${r.raw.replace(/"/g, '""')}"`)].join("\n");
+  return ["line,reason,row", ...rows.map((r) => spreadsheetRow([r.line, r.reason, r.raw]))].join("\n");
 }
 
 /** CSV receipt export for a completed or partially completed session. */
@@ -164,7 +165,11 @@ export function receiptCsv(args: {
   return [
     "batchId,token,source,recipient,amount,status,txHash",
     ...args.rows.map((r) =>
-      [args.clientBatchId, args.tokenSymbol, r.source, r.recipient, r.amount, r.status, r.txHash ?? ""].join(","),
+      [
+        ...[args.clientBatchId, args.tokenSymbol, r.source, r.recipient].map(spreadsheetCell),
+        spreadsheetDecimal(r.amount),
+        spreadsheetCell(r.status), spreadsheetCell(r.txHash),
+      ].join(","),
     ),
   ].join("\n");
 }
