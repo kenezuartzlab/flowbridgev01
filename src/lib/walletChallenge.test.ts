@@ -34,11 +34,13 @@ vi.mock("@/integrations/supabase/client.server", () => ({
         return {
           eq: () => ({
             is: () => ({
+              gt: (_field: string, now: string) => ({
               select: async () => {
-                if (!row || row.used_at) return { data: [], error: null };
+                if (!row || row.used_at || row.expires_at <= now) return { data: [], error: null };
                 row.used_at = new Date().toISOString();
                 return { data: [{ id: row.id }], error: null };
               },
+              }),
             }),
           }),
         };
