@@ -33,6 +33,9 @@ export const Route = createFileRoute("/api/admin/rewards-control")({
             case "resolve-exception": r = await m.resolveException(gate.admin, id); break;
             case "automation": r = await m.setAutomationPolicy(gate.admin, { programId: String(b.programId ?? ""), suspended: b.suspended as boolean | undefined, perRunCap: b.perRunCap as number | undefined, dailyCap: b.dailyCap as number | undefined }); break;
             case "sweep": r = { ok: true, summary: await m.runOpsSweep(`manual:${gate.admin.email}`) }; break;
+            case "evidence-list": r = { ok: true, ...(await m.readEvidenceReviews()) }; break;
+            case "evidence-propose": r = await m.proposeEvidenceException(gate.admin, id, { rationale: String(b.rationale ?? ""), uncertainty: String(b.uncertainty ?? ""), priceSource: typeof b.priceSource === "string" ? b.priceSource : undefined, priceUsd: typeof b.priceUsd === "number" ? b.priceUsd : null }); break;
+            case "evidence-approve": case "evidence-reject": r = await m.decideEvidenceException(gate.admin, id, b.action === "evidence-approve" ? "APPROVED" : "REJECTED", typeof b.note === "string" ? b.note.slice(0, 1000) : undefined); break;
             default: return jsonResponse({ error: "Unknown action" }, 400);
           }
           return jsonResponse(r, r.ok ? 200 : 409);
