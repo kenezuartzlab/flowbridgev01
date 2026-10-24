@@ -206,10 +206,11 @@ async function requestProviderSignature(args: {
   const eth = await getActiveProvider() as { request?: (args: { method: string; params: unknown[] }) => Promise<unknown>; sendAsync?: (args: unknown, cb: (error: any, response: any) => void) => void } | null;
   if (!eth) throw new Error("provider not found");
 
-  if (args.preferCallback && typeof eth.sendAsync === "function") {
+  const sendAsync = eth.sendAsync?.bind(eth);
+  if (args.preferCallback && sendAsync) {
     const signature = await withTimeout(
       new Promise<string>((resolve, reject) => {
-        eth.sendAsync(
+        sendAsync(
           {
             id: Date.now(),
             jsonrpc: "2.0",
