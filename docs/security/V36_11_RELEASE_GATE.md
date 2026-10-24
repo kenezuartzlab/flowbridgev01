@@ -1,5 +1,14 @@
 # V36.11 release acceptance
 
+## Approved spreadsheet remediation — 2026-10-24 14:29 UTC
+- Shared spreadsheetExport boundary now protects campaign analytics and MultiSend error/receipt exports at generation time. Text formula prefixes, whitespace/control starts and Unicode compatibility operators are prefixed as literal text; CSV quotes, commas, semicolons and embedded newlines are escaped. Stored data is unchanged. Finite numeric columns stay numeric; trusted decimal amount columns retain their exact string precision.
+- Focused tests: 30 PASS. Complete regression: **1,943 tests / 189 files PASS**. Latest automatic compilation **build OK 2026-10-24T14:27:15Z**. No separate manually run build/typecheck or hosted production-mode evidence is claimed.
+- LibreOffice Calc 25.2 actual import/save/reopen: 17 representative malicious cases exported as CSV, imported to Calc, saved as XLSX and reopened into ODS. All rows retain exactly three cells; no formula nodes in either spreadsheet format; numeric 1,122 remains numeric. Campaign export additionally retains numeric -74 after save/reopen. Microsoft Excel and authenticated in-app export-button acceptance were not performed. Scratch evidence is under /tmp/csv-security and is not an app download.
+- Quick backend scan 2026-10-24T14:28:48Z: no new active findings; cloud assessment skipped (connector unavailable). Deep scan requested; completion and coverage of this turn's newly saved CSV correction are not established yet. Do not mark the persisted formula-injection finding resolved until a completed scan covers the corrected source.
+- Fresh full/production Bun audits and platform production dependency scan still report one high Zod advisory group, including legacy Zod 3 instances. Direct Zod 4.6.6 is patched; a blanket v3→v4 override is not a safe remedy. Advisory not suppressed or waived.
+- Security release **HOLD / NOT DEPLOYED**: dependency advisory, actual old private-link revocation, private scheduler credential pairing, V36.11 cloud/permissions decision, physical TokenPocket/integrated acceptance and final saved-state scan/deployment evidence remain open. Last verified production release preserved; no V36.11 fingerprint claimed.
+- Financial state unchanged by this correction: Round #3 stored at 1,122 FLOW, current publishable allocation 0 pending historical evidence and separately authorized renewal. No funding of 74, release of 776, signature, publication, treasury or contract action. Automatic funding/signing remain OFF.
+
 ## Independent track checkpoint — 2026-10-24 13:32 UTC
 
 ### Security release: HOLD (independent of payout evidence)
