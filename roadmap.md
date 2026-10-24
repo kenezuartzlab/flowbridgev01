@@ -1,3 +1,8 @@
+# V36.11 independent operational tracks
+- [ ] Track A: verify legacy-link revocation, private hourly scheduler authentication/replay/audit, deployed-equivalent abuse tests and current dependency/regression gates; security-only release requires its own cloud/permissions and unrelated-device-gap acceptance.
+- [ ] Track B: recover timestamp-appropriate original pricing evidence without rewriting records; report verified trades separately from eligible Points and hold the immutable Round #3.
+- [ ] Track C: show independent security, evidence, batch, schedule and publication states with one safe next action; no automatic financial approval.
+
 # V36.11 Payout Operations
 - [x] Implement six code corrections: independently verified rewards + historical provenance quarantine, authenticated/idempotent proposals, super-admin settings audit, private binding errors and bounded proposal input; 1,918 regressions PASS. Full release remains gated.
 - [ ] Complete historical price/provenance audit: Round #3's 1,022 Core Swap Points remain PENDING; stored 1,122 immutable, eligible preview zero, signing blocked. No evidence approval fabricated.
