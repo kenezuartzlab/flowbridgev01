@@ -18,24 +18,21 @@ describe('private wallet account lookup', () => {
     expect(responses).toEqual(Array(4).fill({ verificationRequired: true })); expect(mocks.from).not.toHaveBeenCalled();
   });
 });
-describe('revocable private application access', () => {
-  it('catalogue creates no signed URL and offers only gated download identifiers', async () => {
-    const r = await handler(materials, 'GET')({ request: new Request('http://localhost/api/admin/application-materials') });
-    const body = await r.json(); expect(body.expiresInSeconds).toBe(0); expect(body.files).toHaveLength(5);
-    expect(body.files.every((f: Record<string, unknown>) => !('url' in f) && !('path' in f))).toBe(true);
-    expect(mocks.signed).not.toHaveBeenCalled(); expect(r.headers.get('cache-control')).toBe('private, no-store');
-  });
-  it('rechecks authorization for each download and blocks a previously authorized operator after revocation', async () => {
-    mocks.download.mockResolvedValue({ data: new Blob(['private content'], { type: 'application/pdf' }), error: null });
-    const request = new Request('http://localhost/api/admin/application-files?id=dossier-pdf');
-    const first = await handler(files, 'GET')({ request }); expect(first.status).toBe(200); expect(await first.text()).toBe('private content');
-    mocks.gate.mockResolvedValue({ ok: false, response: new Response('Forbidden', { status: 403 }) });
-    const second = await handler(files, 'GET')({ request }); expect(second.status).toBe(403); expect(mocks.download).toHaveBeenCalledTimes(1);
-  });
-  it('unauthorized users cannot list or download private files', async () => {
-    mocks.gate.mockImplementation(async () => ({ ok: false, response: new Response('Unauthorized', { status: 401 }) }));
-    expect((await handler(materials, 'GET')({ request: new Request('http://localhost/api/admin/application-materials') })).status).toBe(401);
-    expect((await handler(files, 'GET')({ request: new Request('http://localhost/api/admin/application-files?id=dossier-pdf') })).status).toBe(401);
-    expect(mocks.download).not.toHaveBeenCalled();
+describe('permanently retired private-file sharing', () => {
+  for (const [name, route] of [['catalogue', materials], ['download', files]] as const) {
+    for (const method of ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
+      it(`${name} denies direct ${method} without storage or link generation`, async () => {
+        const response = await handler(route, method)({ request: new Request('http://localhost/api/admin/application-files?id=dossier-pdf', { method }) });
+        expect(response.status).toBe(410);
+        const body = await response.json();
+        expect(body.files).toBeUndefined(); expect(body.url).toBeUndefined();
+        expect(mocks.download).not.toHaveBeenCalled(); expect(mocks.signed).not.toHaveBeenCalled(); expect(mocks.from).not.toHaveBeenCalled();
+      });
+    }
+  }
+  it('denies a signed-out caller just as an authorized caller', async () => {
+    mocks.gate.mockResolvedValue({ ok: false, response: new Response('Unauthorized', { status: 401 }) });
+    expect((await handler(files, 'GET')({ request: new Request('http://localhost/api/admin/application-files') })).status).toBe(410);
+    expect(mocks.download).not.toHaveBeenCalled(); expect(mocks.gate).not.toHaveBeenCalled();
   });
 });

@@ -24,8 +24,6 @@ import {
   saveAdminToken,
   uploadBannerImage,
   fetchBannerStats,
-  fetchApplicationMaterials,
-  downloadApplicationFile,
   type BannerStat,
 } from "@/lib/admin/adminApi";
 import {
@@ -58,7 +56,6 @@ import { TokenIcon } from "@/components/TokenIcon";
 import { CampaignStudioWorkspace } from "@/components/campaigns/CampaignStudioWorkspace";
 import { PartnerGovernancePanel } from "@/components/studio/PartnerGovernancePanel";
 import { ApplicationWorkspace } from "@/components/admin/ApplicationWorkspace";
-import { APPLICATION_FILES } from '@/lib/application/applicationFiles';
 import { Button } from '@/components/ui/button';
 import { AdminUsersPanel } from "@/components/admin/AdminUsersPanel";
 
@@ -2757,40 +2754,3 @@ function PagesPanel({ wallet }: { wallet: string }) {
   );
 }
 
-/** PRIVATE: BOT Ecosystem Support application materials — never public. */
-function ApplicationMaterialsPanel({ wallet }: { wallet: string }) {
-  const [files, setFiles] = useState<{ id: string; title: string }[] | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-  const load = useCallback(() => {
-    setErr(null);
-    fetchApplicationMaterials(wallet)
-      .then((r) => setFiles(r.files))
-      .catch((e) => setErr(e?.message ?? "Failed to load"));
-  }, [wallet]);
-  useEffect(() => { load(); }, [load]);
-  return (
-    <section className="fb-surface space-y-3 p-4">
-      <p className="fb-eyebrow">Private · unlisted</p>
-      <h2 className="text-[16px] font-black">BOT Ecosystem Support application</h2>
-      <p className="text-[12px] text-muted">
-        Private materials. Downloads require current authorized access.
-      </p>
-      {err && <p className="text-[12px] text-destructive">{err}</p>}
-      {!files && !err && <p className="text-[12px] text-muted">Loading…</p>}
-      <ul className="space-y-2">
-        {files?.map((f) => (
-          <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline p-3">
-            <span className="text-[12.5px] font-bold">{f.title}</span>
-            <Button variant="outline" size="sm" disabled={busy === f.id} onClick={() => {
-              const record = APPLICATION_FILES.find(record => record.id === f.id); if (!record) return;
-              setBusy(f.id); setErr(null);
-              downloadApplicationFile(wallet, f.id, record.path.split('/').pop() ?? 'application.pdf').catch(e => setErr(e?.message ?? 'Download failed')).finally(() => setBusy(null));
-            }}>{busy === f.id ? 'Downloading…' : 'Download'}</Button>
-          </li>
-        ))}
-      </ul>
-      <Button variant="ghost" size="sm" onClick={load}>Refresh</Button>
-    </section>
-  );
-}
