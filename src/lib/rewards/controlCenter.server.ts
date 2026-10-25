@@ -40,7 +40,7 @@ async function capacity(programId: string, need: number) {
   });
 }
 
-export async function readControlCenter() {
+export async function readControlCenter(actor?: AdminContext) {
   const admin = await db();
   const [queue, snaps, exc, audit, policy, runs, budgets, chain, evidence] = await Promise.all([
     loadQueue(),
@@ -74,7 +74,7 @@ export async function readControlCenter() {
     budgets: budgets.data ?? [],
     fundingQueue: programs,
     exclusions,
-    snapshots: (snaps.data ?? []).map((s: any) => ({ ...s, canApprove:s.status==='PROPOSED' && !!s.proposed_by, proposed_by: undefined })),
+    snapshots: (snaps.data ?? []).map((s: any) => ({ ...s, canApprove:!!actor && approvalDecision(s,actor).ok, proposed_by: undefined })),
     exceptions: exc.data ?? [],
     audit: audit.data ?? [],
     automation: { policies: policy.data ?? [], autonomousFundingAuthorized: false, autonomousSigning: false, lastRuns: runs.data ?? [] },
@@ -187,7 +187,7 @@ export async function runOpsSweep(source: string) {
 }
 
 /** Historical evidence review queue: Core Swap rewards with verified trades awaiting pricing evidence. Anonymised. */
-export async function readEvidenceReviews() {
+export async function readEvidenceReviews(actor?: AdminContext) {
   const admin = await db();
   const [rows, reviews] = await Promise.all([
     admin.from("flow_points_ledger").select("id,points,funding_state,policy_version,verified_usd,tx_hash,created_at").in("reason", ["CORE_SWAP", "CORE_SWAP_V2"]).eq("chain_id", 677).eq("provenance_state", "PENDING").gt("points", 0).order("created_at").limit(500),
@@ -198,7 +198,7 @@ export async function readEvidenceReviews() {
   const assessed=new Map(evidence.assessed.map(x=>[x.row.id,x]));
   const open = new Map((reviews.data ?? []).filter((r: any) => r.status === "PROPOSED").map((r: any) => [r.ledger_id, r]));
   return {
-    pending: (rows.data ?? []).map((r: any) => ({ id: r.id, points: r.points, funded: r.funding_state === "FUNDED", policyVersion: r.policy_version, recordedUsd: r.verified_usd, txHash: r.tx_hash, earnedAt: r.created_at, assessment:assessed.get(r.id)?.assessment, evidence:{activity:assessed.get(r.id)?.activity,basePoints:assessed.get(r.id)?.row.base_points,originalMetadata:assessed.get(r.id)?.row.metadata,reservationPreserved:!!assessed.get(r.id)?.row.reservation_id}, review: open.get(r.id) ? { ...open.get(r.id), canDecide:false, proposed_by: undefined, proposedBy: (open.get(r.id) as any).proposed_by } : null })),
+    pending: (rows.data ?? []).map((r: any) => ({ id: r.id, points: r.points, funded: r.funding_state === "FUNDED", policyVersion: r.policy_version, recordedUsd: r.verified_usd, txHash: r.tx_hash, earnedAt: r.created_at, assessment:assessed.get(r.id)?.assessment, evidence:{activity:assessed.get(r.id)?.activity,basePoints:assessed.get(r.id)?.row.base_points,originalMetadata:assessed.get(r.id)?.row.metadata,reservationPreserved:!!assessed.get(r.id)?.row.reservation_id}, review: open.get(r.id) ? { ...open.get(r.id), canDecide:actor?.role==='super_admin' && actor.userId!==(open.get(r.id) as any).proposed_by, proposed_by: undefined, proposedBy: undefined } : null })),
     round3:evidence.round3,
     decided: (reviews.data ?? []).filter((r: any) => r.status !== "PROPOSED").slice(0, 50).map((r: any) => ({ ...r, proposed_by: undefined })),
   };
@@ -209,9 +209,30 @@ export async function proposeEvidenceException(a: AdminContext, ledgerId: string
   const v = validateExceptionProposal(input);
   if (!v.ok) return { ok: false as const, error: v.error };
   const admin = await db();
+  const assessment=await (await import('./rewardEvidenceAssessment.server')).readRewardEvidenceAssessment();
+  const candidate=assessment.assessed.find(x=>x.row.id===ledgerId);
+  if (!candidate?.assessment.exceptionAllowed) return {ok:false as const,error:'This record has a non-valuation blocker and cannot use a pricing exception.'};
   const { data, error } = await admin.rpc("propose_reward_evidence_exception" as never, { p_ledger: ledgerId, p_actor: a.userId, p_email: a.email, p_price_evidence: { policy: EXCEPTION_POLICY_ID, source: input.priceSource ?? null, priceUsd: input.priceUsd ?? null }, p_uncertainty: input.uncertainty, p_rationale: input.rationale } as never);
   if (error) return { ok: false as const, error: /duplicate|unique/i.test(error.message) ? "This reward already has an open review." : error.message.replace(/^.*?:\s*/, "") };
   return { ok: true as const, id: data as unknown as string };
+}
+
+/** Grouped operator review; every row retains its own decision and original reservation. */
+export async function batchEvidenceReview(a:AdminContext, ids:string[], action:'propose'|'APPROVED'|'REJECTED', input:{rationale:string;uncertainty:string;priceSource?:string;priceUsd?:number|null}) {
+  if (!ids.length || ids.length>50 || new Set(ids).size!==ids.length) return {ok:false,error:'Select 1–50 distinct records.'};
+  const admin=await db();
+  const assessment=await (await import('./rewardEvidenceAssessment.server')).readRewardEvidenceAssessment();
+  const selected=action==='propose' ? assessment.assessed.filter(x=>ids.includes(x.row.id)) : [];
+  if (action==='propose' && (selected.length!==ids.length || selected.some(x=>!x.assessment.exceptionAllowed) || new Set(selected.map(x=>x.assessment.condition)).size!==1)) return {ok:false,error:'Batch review requires one shared documented valuation condition.'};
+  if (action!=='propose') {
+    const {data:reviews,error}=await admin.from('reward_evidence_reviews').select('ledger_id,proposed_by,status').in('id',ids);
+    if (error || reviews?.length!==ids.length || a.role!=='super_admin' || reviews.some(r=>r.proposed_by===a.userId || r.status!=='PROPOSED')) return {ok:false,error:'A different authorized approver must decide every selected review.'};
+    const conditions=assessment.assessed.filter(x=>reviews.some(r=>r.ledger_id===x.row.id)).map(x=>x.assessment.condition);
+    if (new Set(conditions).size!==1) return {ok:false,error:'Selected reviews no longer share one evidence condition.'};
+  }
+  const results=[];
+  for (const id of ids) { const result=action==='propose' ? await proposeEvidenceException(a,id,input) : await decideEvidenceException(a,id,action,input.rationale); results.push({id,...result}); if (!result.ok) break; }
+  return {ok:results.every(r=>r.ok),results,error:results.some(r=>!r.ok)?'Batch stopped at a failed record. Earlier decisions are saved; refresh before retrying.':undefined};
 }
 
 export async function decideEvidenceException(a: AdminContext, reviewId: string, decision: "APPROVED" | "REJECTED", note?: string) {

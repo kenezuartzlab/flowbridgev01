@@ -8,9 +8,10 @@ import { RefreshCw } from "lucide-react";
 import { PayoutOperations } from './PayoutOperations';
 import { EvidenceReview, RewardsPipeline } from './EvidenceReview';
 
-type Snapshot = { id: string; program_id: string; total_points: number; row_count: number; account_count: number; snapshot_hash: string; status: string; proposed_by_email: string; approved_by_email: string | null; confirmed_by_email: string | null; confirmed_at: string | null; created_at: string };
+type Snapshot = { id: string; program_id: string; total_points: number; row_count: number; account_count: number; snapshot_hash: string; status: string; proposed_by_email: string; approved_by_email: string | null; confirmed_by_email: string | null; confirmed_at: string | null; created_at: string; canApprove:boolean };
 type State = {
   viewer: { role: string };
+  fundingOverview:{verifiedQualifyingPoints:number;walletCount:number;fundingAmount:number;availableBackingFlow:number|null;availableBudget:number;exceptionCount:number;alreadyFundedPoints:number;settledFlow:number|null};
   chain: null | { freeBalanceFlow: number; totalClaimedFlow: number; campaignBudgetFlow: number; epochCount: number; paused: boolean };
   budgets: { program_id: string; total_points: number; reserved_points: number; status: string }[];
   fundingQueue: { programId: string; rows: number; points: number; accounts: number; unlabelled: number; accountBreakdown: number[] }[];
@@ -49,7 +50,7 @@ function download(name: string, data: unknown) {
 
 export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | undefined; onOpen: (tab: "Rewards" | "Budgets") => void }) {
   const qc = useQueryClient();
-  const [section, setSection] = useState<Section>("Payout Operations");
+  const [section, setSection] = useState<Section>("Overview");
   const [busy, setBusy] = useState<string | null>(null);
   const q = useQuery({ queryKey: ["rewards-control", wallet], queryFn: () => {
     if (!wallet) throw new Error("Connect the wallet bound to your admin account.");
@@ -58,7 +59,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
   const act = async (key: string, body: Record<string, unknown>, ok: string) => {
     if (!wallet || busy) return;
     setBusy(key);
-    try { const r = await call(wallet, body); toast.success(r?.outcome === "STALE" ? "Snapshot was stale — nothing funded. Create a new one." : ok); }
+    try { const r = await call(wallet, body); if(r?.ok===false)throw new Error(r.error??'Action rejected.'); toast.success(r?.outcome === "STALE" ? "Snapshot was stale — nothing funded. Create a new one." : ok); }
     catch (e) { toast.error((e as Error).message); }
     finally { setBusy(null); qc.invalidateQueries({ queryKey: ["rewards-control"] }); }
   };
@@ -77,15 +78,15 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
   const approved = open.find((x) => x.status === "APPROVED");
   const proposed = open.find((x) => x.status === "PROPOSED");
   if (approved) next = { state: isSuper ? "READY" : "NEEDS APPROVAL", text: `Approved funding of ${fmt(approved.total_points)} Points is waiting for confirmation.`, label: "Review & Confirm Funding", run: isSuper ? () => setSection("Funding Approvals") : undefined };
-  else if (proposed) next = { state: "NEEDS APPROVAL", text: `A ${fmt(proposed.total_points)}-Point funding proposal needs super-admin approval.`, label: "Review proposal", run: () => setSection("Funding Approvals") };
-  else if (queued > 0) next = { state: "PENDING", text: `${fmt(queued)} verified Points are waiting for a funding proposal.`, label: "Open Funding Queue", run: () => setSection("Funding Queue") };
+  else if (proposed) next = { state: "NEEDS APPROVAL", text: `A ${fmt(proposed.total_points)}-Point funding proposal needs super-admin approval.`, label: "Review & Approve Funding", run: () => setSection("Funding Approvals") };
+  else if (queued > 0) next = { state: "PENDING", text: `${fmt(queued)} verified Points are waiting for a funding proposal.`, label: "Review & Approve Funding", run: () => setSection("Funding Queue") };
   else next = { state: "READY", text: "No funding work pending. Check Settlement / Review & Publish for eligible wallets.", label: "Open Review & Publish", run: () => onOpen("Rewards") };
 
   return (
     <section className="space-y-3">
       {section !== 'Payout Operations' && <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
         <div className="flex items-start justify-between gap-2"><p className="min-w-0 text-[12.5px] font-bold">{next.text}</p><Chip s={next.state} /></div>
-        {next.run && <button type="button" onClick={next.run} className="mt-2 w-full rounded-xl bg-primary px-3 py-2 text-[12.5px] font-black text-primary-foreground sm:w-auto">{next.label}</button>}
+        {next.run && <Button onClick={next.run} className="mt-2 w-full sm:w-auto">{next.label}</Button>}
         {openExc.length > 0 && <p className="mt-2 text-[11px] font-bold text-warning">{openExc.length} open exception(s) need attention.</p>}
       </div>}
 
@@ -101,9 +102,10 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
       {section === "Overview" && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[
-            ["Distributor free FLOW", fmt(s.chain?.freeBalanceFlow)], ["Claimed FLOW", fmt(s.chain?.totalClaimedFlow)],
-            ["Published rounds", fmt(s.chain?.epochCount)], ["Contract", s.chain ? (s.chain.paused ? "PAUSED" : "Active") : "Unreadable"],
-            ["Points awaiting funding", fmt(queued)], ["Open approvals", fmt(open.length)], ["Open exceptions", fmt(openExc.length)], ["Auto-signing", "OFF"],
+            ["Verified qualifying Points", fmt(s.fundingOverview.verifiedQualifyingPoints)], ["Wallet count", fmt(s.fundingOverview.walletCount)],
+            ["Funding amount · FLOW", fmt(s.fundingOverview.fundingAmount)], ["Available backing · FLOW",fmt(s.fundingOverview.availableBackingFlow)],
+            ["Available budget · Points",fmt(s.fundingOverview.availableBudget)], ["Valuation exceptions",fmt(s.fundingOverview.exceptionCount)],
+            ["Already funded · Points",fmt(s.fundingOverview.alreadyFundedPoints)], ["Settled on-chain · FLOW",fmt(s.fundingOverview.settledFlow)],
           ].map(([k, v]) => <div key={k} className="min-w-0 rounded-xl border border-hairline bg-card p-2.5"><p className="text-[10.5px] text-muted">{k}</p><p className="break-words text-[15px] font-black tabular-nums">{v}</p></div>)}
           <div className="col-span-2 rounded-xl border border-hairline bg-card p-2.5 sm:col-span-4">
             <p className="mb-1 text-[11px] font-bold">Program budgets (ceilings are not claimable FLOW)</p>
@@ -120,9 +122,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
               <div className="flex items-start justify-between gap-2"><p className="font-mono text-[12px] font-black">{p.programId}</p><Chip s="PENDING" /></div>
               <p className="mt-1 text-[12px]"><b className="tabular-nums">{fmt(p.points)}</b> Points · {p.rows} records · {p.accounts} accounts{p.unlabelled ? ` · ${p.unlabelled} unlabelled (labelled ${p.programId} on confirm)` : ""}</p>
               <p className="mt-1 break-words text-[11px] text-muted">Per account (anonymous): {p.accountBreakdown.map(fmt).join(" · ")}</p>
-              <button type="button" disabled={!!busy || open.some((x) => x.program_id === p.programId)} onClick={() => act("propose", { action: "propose", programId: p.programId }, "Funding snapshot created")} className="mt-2 w-full rounded-xl bg-primary px-3 py-2 text-[12px] font-black text-primary-foreground disabled:opacity-50 sm:w-auto">
-                {open.some((x) => x.program_id === p.programId) ? "Snapshot already open" : "Create funding snapshot"}
-              </button>
+              <Button disabled={!!busy || open.some((x) => x.program_id === p.programId)} onClick={() => act("propose", { action: "propose", programId: p.programId }, "Funding proposed; a different super admin must approve.")} className="mt-2 w-full sm:w-auto">{open.some((x) => x.program_id === p.programId) ? "Proposal already open" : "Propose funding for approval"}</Button>
             </div>
           ))}
           <div className="rounded-xl border border-hairline bg-card p-3">
@@ -143,7 +143,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
               <p className="text-[11px] text-muted">Proposed by {x.proposed_by_email}{x.approved_by_email ? ` · decided by ${x.approved_by_email}` : ""}{x.confirmed_at ? ` · confirmed ${new Date(x.confirmed_at).toLocaleString()}` : ""}</p>
               {x.status === "PROPOSED" && isSuper && (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <button type="button" disabled={!!busy} onClick={() => act("approve", { action: "approve", id: x.id }, "Approved")} className="rounded-xl bg-primary px-3 py-2 text-[12px] font-black text-primary-foreground disabled:opacity-50">Approve</button>
+                  <Button disabled={!!busy || !x.canApprove} onClick={() => act("approve", { action: "approve", id: x.id }, "Approved")}>Review & Approve Funding</Button>
                   <button type="button" disabled={!!busy} onClick={() => act("reject", { action: "reject", id: x.id }, "Rejected")} className="rounded-xl border border-danger/40 px-3 py-2 text-[12px] font-black text-danger disabled:opacity-50">Reject</button>
                 </div>
               )}
