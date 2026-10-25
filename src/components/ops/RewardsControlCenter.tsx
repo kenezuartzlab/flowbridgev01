@@ -12,6 +12,7 @@ type Snapshot = { id: string; program_id: string; total_points: number; row_coun
 type State = {
   viewer: { role: string };
   fundingOverview:{verifiedQualifyingPoints:number;walletCount:number;fundingAmount:number;availableBackingFlow:number|null;availableBudget:number;exceptionCount:number;alreadyFundedPoints:number;settledFlow:number|null};
+  round3:{heldPoints:number;storedFlow:number|null};
   chain: null | { freeBalanceFlow: number; totalClaimedFlow: number; campaignBudgetFlow: number; epochCount: number; paused: boolean };
   budgets: { program_id: string; total_points: number; reserved_points: number; status: string }[];
   fundingQueue: { programId: string; rows: number; points: number; accounts: number; unlabelled: number; accountBreakdown: number[] }[];
@@ -80,6 +81,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
   if (approved) next = { state: isSuper ? "READY" : "NEEDS APPROVAL", text: `Approved funding of ${fmt(approved.total_points)} Points is waiting for confirmation.`, label: "Review & Confirm Funding", run: isSuper ? () => setSection("Funding Approvals") : undefined };
   else if (proposed) next = { state: "NEEDS APPROVAL", text: `A ${fmt(proposed.total_points)}-Point funding proposal needs super-admin approval.`, label: "Review & Approve Funding", run: () => setSection("Funding Approvals") };
   else if (queued > 0) next = { state: "PENDING", text: `${fmt(queued)} verified Points are waiting for a funding proposal.`, label: "Review & Approve Funding", run: () => setSection("Funding Queue") };
+  else if(s.round3.heldPoints>0 || s.fundingOverview.exceptionCount>0) next={state:'BLOCKED',text:`${fmt(s.round3.heldPoints)} Round #3 Points remain held. Historical valuation exceptions require independent approval.`,label:'Review exceptions',run:()=>setSection('Evidence Review')};
   else next = { state: "READY", text: "No funding work pending. Check Settlement / Review & Publish for eligible wallets.", label: "Open Review & Publish", run: () => onOpen("Rewards") };
 
   return (

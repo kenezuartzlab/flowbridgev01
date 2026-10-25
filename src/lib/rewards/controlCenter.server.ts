@@ -25,7 +25,7 @@ async function loadQueue() {
 async function capacity(programId: string, need: number) {
   const admin = await db();
   const [{ data: budgets }, chain] = await Promise.all([
-    admin.from("reward_budgets").select("program_id,total_points,reserved_points,status"),
+    admin.from("reward_budgets").select("program_id,total_points,reserved_points,status,funding_verified"),
     readChainState(),
   ]);
   const b = (budgets ?? []).find((x: any) => x.program_id === programId);
@@ -34,7 +34,7 @@ async function capacity(programId: string, need: number) {
   const free = chain ? Number((chain.balanceWei - chain.totalReservedWei) / WEI) : null;
   return capacityCheck({
     need,
-    programRemaining: b && b.status === "ACTIVE" ? Number(b.total_points) - Number(b.reserved_points) : 0,
+    programRemaining: b && b.status === "ACTIVE" && b.funding_verified ? Number(b.total_points) - Number(b.reserved_points) : 0,
     freeBackingFlow: free,
     outstandingReservedPoints: Math.max(0, reservedAll - claimed),
   });
