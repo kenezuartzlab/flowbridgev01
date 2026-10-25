@@ -1,10 +1,21 @@
-# Complete grouped rewards review
+# Final grouped rewards release check — 2026-10-25 09:39 UTC
+- [x] Exact candidate 85194719274674e044c007a6f08bb63155d9785f: 2,020 tests / 198 files PASS; exact-SQL isolated eight-way approval/rollback/independence/reservation checks PASS; frozen install unchanged.
+- [x] Identify GHSA-mrhx-c7xc-m3w5: legacy wallet Zod 3.22.4 and 3.25.76 match the existing V36.11 conditional acceptance; patched 4.6.6 framework/MCP copies are not new vulnerable instances. No duplicate approval requested.
+- [x] Reuse owner-reported TokenPocket 05:37 and connected-screen 06:52 acceptance only for unchanged paths; prior two-person individual Evidence Review remains evidence for unchanged authorization, not the new group screen.
+- [x] Fresh authenticated evidence/control/payout reads, wrong-wallet denial, mounted group cancellation/navigation refresh PASS; actual /ops route correctly requires a connected wallet. Round #3 remains one wallet / 1,122 stored FLOW, nine held / 1,022 Points; no financial writes.
+- [x] Hosted exact-candidate preview build succeeded 09:23:22 UTC, no diagnostics/failed targets; separate production-mode/type reports unavailable (checks array empty), not invented.
+- [x] Existing production independently fingerprinted: index-CcxoQnMf.js / SHA256 87043968bd2ef92467690f7997f7485a0f2ac972d03a995db1df21cef95a86a4; production security headers present; no new deployment.
+- [ ] New grouped connected-wallet acceptance (separate authorized operators, cancellation/refresh/payout preparation) needs operator/device evidence; no provider is available in sandbox. Never submit or approve Round #3 during acceptance.
+- [ ] Fresh deep scan requested 09:37 UTC; awaiting completion notification. Quick scan has no new active findings; cloud coverage uses existing scoped acceptance.
+- [ ] Production HOLD until remaining connected-group, completed security and explicit production validation gates pass; no rewards redevelopment, duplicate risk request or storage escalation.
+
+# Complete grouped rewards review (prior checkpoint; current status above supersedes)
 - [x] Present Round #3 as one proposal with nine auditable records / 1,022 Points and existing evidence; no transaction or valuation re-entry.
 - [x] Atomic grouped proposal/independent approval, live exception criteria and original reservation preservation; automatic read-only eligibility/renewal recalculation.
 - [x] 2,020 regressions / 198 files and automatic compilation PASS; disposable exact-SQL eight-way approvals/atomic rollback/independent authorization/reservation tests PASS; actual authenticated API/UI read and cancelled form PASS.
 - [x] Verify Round #3 unchanged/unpublished, 74 unfunded, 776 restricted, 40 reservations, zero group proposals/renewals/attempts, automatic funding/signing OFF.
 - [ ] Physical connected-wallet and separate-operator acceptance requires authorized operators/devices; live proposal/approval intentionally not exercised against held records.
-- [ ] Release HOLD: existing high transitive Zod dependency advisory and release-specific security/device clearance unresolved; no publish or new production fingerprint claimed.
+- [x] Dependency hold corrected by final check: existing conditional V36.11 Zod approval located and unchanged source/lock exposure checked; no new dependency waiver. Other current gates are listed above.
 
 # Automated reward eligibility and simple Ops funding
 - [x] Canonical verified awards queue automatically; historical original pricing is not inferred from stored USD/metadata.
