@@ -34,6 +34,7 @@ export type MainnetV3IngestResult =
       status: 'VERIFIED';
       activity: RouterV3CanonicalActivity;
       verifiedUsd: number | null;
+      valuationEvidence?: { source: string; priceUsd: number; decimals: number; amountRaw: string; fetchedAt: string };
     }
   | { status: 'NOT_FINAL' | 'REJECTED'; reason: string };
 
@@ -120,5 +121,5 @@ export async function ingestMainnetRouterV3Swap(
     : null;
   const canonical = await rpc<any>("eth_getBlockByNumber", [receipt.blockNumber, false]);
   if (!canonical?.hash || canonical.hash.toLowerCase() !== block.hash.toLowerCase()) return { status: "NOT_FINAL", reason: "chain reorganized" };
-  return { status: 'VERIFIED', activity: a, verifiedUsd };
+  return { status: 'VERIFIED', activity: a, verifiedUsd, valuationEvidence: priced ? { source: 'EXISTING_SERVER_PRICE_POLICY', priceUsd: priced.price, decimals: priced.decimals, amountRaw: a.amountRaw.toString(), fetchedAt: new Date().toISOString() } : undefined };
 }

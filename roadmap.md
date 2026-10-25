@@ -1,3 +1,12 @@
+# Automated reward eligibility and simple Ops funding
+- [x] Canonical verified awards queue automatically; historical original pricing is not inferred from stored USD/metadata.
+- [x] Aggregate funding overview and separated proposer/approver workflow; confirmation retains original reservations and financial gates.
+- [x] Existing evidence displayed; grouped historical valuation exceptions use independent audited decisions, no mandatory unavailable price source and no automatic approval.
+- [x] Existing unsigned distribution preparation invoked after funding commit; manual signatures/confirmed claim availability preserved.
+- [x] Round #3 read-only assessment: nine records / 1,022 Points need valuation exceptions; stored 1,122 unpublished and all reservations/exclusions preserved.
+- [x] 2,012 tests / 196 files PASS; real authenticated APIs and directly mounted actual-data desktop/mobile controls verified; no financial writes or signing.
+- [ ] Physical connected-wallet and two-person financial approval acceptance: requires authorized operators; deliberately not exercised against held live rewards.
+
 # V36.11 independent operational tracks
 - [x] Owner retirement directive 06:27 UTC: removed unused private-file controls/helpers/reviewer panel; both retired APIs deny direct anonymous/authenticated calls, 1,993 tests and automatic build PASS. Application-required storage/launch preparation preserved; no migration or special permissions.
 - [ ] Production release HOLD: legacy issuance cannot be ruled out, expiry unknown, prior residual-risk decision remains HOLD. Fresh retirement scan coverage, connected UI and production/type/deployment acceptance incomplete. Existing live fingerprint recorded; nothing published.

@@ -13,7 +13,6 @@ export function validateExceptionProposal(i: ExceptionProposalInput): { ok: true
   const rationale = (i.rationale ?? '').trim(), uncertainty = (i.uncertainty ?? '').trim();
   if (rationale.length < 20 || rationale.length > 2000) return { ok: false, error: 'Explain the decision in 20–2,000 characters.' };
   if (uncertainty.length < 5 || uncertainty.length > 1000) return { ok: false, error: 'Describe what remains uncertain.' };
-  if ((i.priceSource ?? '').trim().length < 5) return { ok: false, error: 'Document the historical price evidence source. Missing evidence alone cannot be approved.' };
   if ((i.priceSource ?? '').length > 500) return { ok: false, error: 'Price source is too long.' };
   if (i.priceUsd != null && !(Number.isFinite(i.priceUsd) && i.priceUsd >= 0)) return { ok: false, error: 'Price must be a positive number.' };
   return { ok: true };
@@ -26,4 +25,4 @@ export function canDecideException(review: { status: string; proposedBy: string 
   return { ok: true as const };
 }
 
-export const PIPELINE = ['Earned', 'Verified', 'Approved & Funded', 'Ready for Distribution', 'Published', 'Claimable', 'Claimed'] as const;
+export const PIPELINE = ['Earn', 'System Verified', 'Ops Funding Approval', 'Distribution Ready', 'Publisher Signature', 'Wallet Claim'] as const;

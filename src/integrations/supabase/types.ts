@@ -2485,6 +2485,7 @@ export type Database = {
         }
         Returns: Json
       }
+      reward_exception_evidence: { Args: { p_ledger: string }; Returns: Json }
       reward_funding_hash: { Args: { p_ids: string[] }; Returns: string }
       reward_payout_evidence_hash: { Args: never; Returns: string }
       reward_uint256_hex: { Args: { n: number }; Returns: string }

@@ -105,6 +105,8 @@ describe('V15.3M CORE_SWAP canonical identity', () => {
       verified_activity_id: '0x7dd7',
       source_log_index: 8,
       activity_key: '677:0xb89d:8',
+      points:10,base_points:10,verified_usd:10,provenance_state:'VERIFIED',funding_state:'UNFUNDED',
+      metadata:expect.objectContaining({validationStatus:'PASS',originalEligiblePoints:10,originalBasePoints:10,originalVerifiedUsd:10,validationChecks:expect.objectContaining({canonicalReceipt:true,boundWallet:true})}),
     });
   });
   it.each(['REJECTED','NOT_FINAL'])('untrusted %s trades award zero even with forged USD', async (status) => {

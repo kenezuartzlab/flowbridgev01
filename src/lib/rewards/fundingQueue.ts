@@ -39,7 +39,7 @@ export function buildFundingQueue(
 ): FundingQueue {
   const out: FundingQueue = { eligible: {}, excluded: [] };
   const seen = new Map<string, number>();
-  for (const r of rows) if (r.tx_hash) seen.set(`${r.tx_hash}|${r.reason}`, (seen.get(`${r.tx_hash}|${r.reason}`) ?? 0) + 1);
+  for (const r of rows) if (r.tx_hash) seen.set(`${r.chain_id}|${r.tx_hash.toLowerCase()}|${programForReason(r.reason)}`, (seen.get(`${r.chain_id}|${r.tx_hash.toLowerCase()}|${programForReason(r.reason)}`) ?? 0) + 1);
   const sorted = [...rows].sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : a.id < b.id ? -1 : 1));
   for (const r of sorted) {
     if (r.funding_state !== "UNFUNDED" || r.reservation_id || !(r.points > 0)) continue;
@@ -54,7 +54,7 @@ export function buildFundingQueue(
     if (r.provenance_state !== "VERIFIED" && r.provenance_state !== "EXCEPTION_APPROVED") { ex("PROVENANCE_REVIEW_REQUIRED"); continue; }
     if (!r.tx_hash || !r.verified_activity_id) { ex("MISSING_EVIDENCE"); continue; }
     if (!FUNDABLE_POLICY_VERSIONS.has(r.policy_version ?? "")) { ex("POLICY_VERSION"); continue; }
-    if ((seen.get(`${r.tx_hash}|${r.reason}`) ?? 0) > 1) { ex("DUPLICATE_EVIDENCE"); continue; }
+    if ((seen.get(`${r.chain_id}|${r.tx_hash.toLowerCase()}|${program}`) ?? 0) > 1) { ex("DUPLICATE_EVIDENCE"); continue; }
     const bound = (boundWallets.get(r.user_id) ?? "").toLowerCase();
     if (!bound) { ex("NO_BOUND_WALLET"); continue; }
     if ((r.wallet_address ?? "").toLowerCase() !== bound) { ex("WALLET_MISMATCH"); continue; }
