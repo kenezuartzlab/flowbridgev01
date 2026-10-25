@@ -278,7 +278,7 @@ export async function buildSettlement(args: {
       : r.pendingReview > 0 ? "REVIEW_HELD"
       : r.classification !== "MATCH" && r.classification !== "EXPLAINED_DIFFERENCE" ? "REJECTED_HISTORICAL"
       : !r.wallet ? "PENDING_NO_WALLET"
-      : delta < 1000 ? "PENDING_BELOW_MINIMUM" : "PENDING_LIMITS";
+      : delta < 1 ? "PENDING_BELOW_MINIMUM" : "PENDING_LIMITS";
     return { account: opaque(r.userId), state, fundedPoints: Math.floor(r.authoritative), alreadySettled: Math.floor(r.alreadyAllocatedPoints), delta };
   });
 
