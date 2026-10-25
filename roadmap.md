@@ -1,4 +1,15 @@
-# Final grouped rewards release check — 2026-10-25 09:39 UTC
+# Rewards completion directive — 2026-10-25 09:44 UTC
+- [x] Freeze features and financial writes. Fresh full regression: 2,020 tests / 198 files PASS; exact-migration concurrency, independent approval, atomic rollback, duplicate and reservation checks PASS.
+- [x] Current candidate 31ff75df026dea3b7fe9fe574084a6ac36f44672: hosted build br_4ecada69-3ed0-4de8-93ac-d4142031fe19 succeeded 09:41:43 UTC; diagnostics/failed targets empty. Stored checks empty: explicit production-build/typecheck evidence unavailable; manual commands prohibited by environment.
+- [x] Fresh real caller-scoped evidence/control/payout reads PASS; nine held / 1,022 Points, stored one wallet / 1,122 FLOW; wrong-wallet 403; automation OFF. Mounted cancellation and navigation refresh PASS, not connected-wallet acceptance.
+- [x] Fresh served production fingerprint: /assets/index-DlD1Xc_K.js SHA256 74c5614f3ac32a801461f2fb1ce65a25110444b14b291c2416494b25dba11467; HTTP 200 and security headers present. Changed since prior observation; no deployment made by this check and source/deployment mapping not established.
+- [ ] Deep security scan already reported in progress; returned completed code scan was stale. Latest requested scan running; await notification, do not poll or claim final coverage.
+- [ ] Conditional accepted legacy Zod advisory unchanged; final server bundle absent, so browser-only artifact condition remains unverified. No duplicate approval or unsafe override.
+- [ ] New two-account connected-wallet grouped acceptance requires two authorized operators and real wallet connections; sandbox has no injected provider. No live exceptions submitted/approved.
+- [ ] Production funding-to-publication-to-wallet-claim acceptance remains untested; requires authorized operators/publisher/claimant and financial wallet approvals, not inferred from historical claims or isolated tests.
+- [ ] Production release HOLD pending final security/artifact/explicit validation and connected operator acceptance. Round #3 stays held, unsigned/unpublished; schedule replacement not proposed or approved; threshold 1,000 unchanged.
+
+# Final grouped rewards release check — 2026-10-25 09:39 UTC (historical checkpoint)
 - [x] Exact candidate 85194719274674e044c007a6f08bb63155d9785f: 2,020 tests / 198 files PASS; exact-SQL isolated eight-way approval/rollback/independence/reservation checks PASS; frozen install unchanged.
 - [x] Identify GHSA-mrhx-c7xc-m3w5: legacy wallet Zod 3.22.4 and 3.25.76 match the existing V36.11 conditional acceptance; patched 4.6.6 framework/MCP copies are not new vulnerable instances. No duplicate approval requested.
 - [x] Reuse owner-reported TokenPocket 05:37 and connected-screen 06:52 acceptance only for unchanged paths; prior two-person individual Evidence Review remains evidence for unchanged authorization, not the new group screen.
