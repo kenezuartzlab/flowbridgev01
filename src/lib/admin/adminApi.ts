@@ -98,26 +98,9 @@ export async function fetchBannerStats(
 }
 
 
-/** PRIVATE application materials: downloads require current admin access. */
-export async function fetchApplicationMaterials(
-  wallet: string,
-): Promise<{ files: { id: string; title: string }[]; expiresInSeconds: number }> {
-  return parse(await fetch("/api/admin/application-materials", { headers: await headers(wallet) }));
-}
-
 /** PRIVATE Scheme A readiness + on-chain evidence (read-only chain data). */
 export async function fetchApplicationReadiness(wallet: string): Promise<any> {
   return parse(await fetch("/api/admin/application-readiness", { headers: await headers(wallet) }));
-}
-
-/** PRIVATE: downloads a current master-refresh file through the admin gate. */
-export async function downloadApplicationFile(wallet: string, id: string, filename: string) {
-  const res = await fetch(`/api/admin/application-files?id=${encodeURIComponent(id)}`, { headers: await headers(wallet) });
-  if (!res.ok) await parse(res);
-  const url = URL.createObjectURL(await res.blob());
-  const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export async function fetchLaunchPreparation(wallet: string) {

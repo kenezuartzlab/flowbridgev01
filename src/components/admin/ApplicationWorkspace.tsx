@@ -1,32 +1,20 @@
 // Private responses are fetched only after the server's admin gate.
 import { useCallback, useEffect, useState } from "react";
-import { Download, Copy, RefreshCw } from "lucide-react";
+import { Copy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { fetchApplicationMaterials, fetchApplicationReadiness, downloadApplicationFile } from "@/lib/admin/adminApi";
-import { APPLICATION_FILES, EDITABLE_COPY_LABEL } from "@/lib/application/applicationFiles";
+import { fetchApplicationReadiness } from "@/lib/admin/adminApi";
 import { LaunchPreparation } from "./LaunchPreparation";
 
-type Material = { id: string; title: string };
-function download(name: string, body: string, type = "application/json") {
-  const url = URL.createObjectURL(new Blob([body], { type }));
-  const anchor = document.createElement("a");
-  anchor.href = url; anchor.download = name; anchor.click(); URL.revokeObjectURL(url);
-}
-
 export function ApplicationWorkspace({ wallet }: { wallet: string }) {
-  const [files, setFiles] = useState<Material[]>([]);
   const [ready, setReady] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [dlError, setDlError] = useState<string | null>(null);
   const load = useCallback(() => {
     setError(null); setReady(null);
-    Promise.all([fetchApplicationMaterials(wallet), fetchApplicationReadiness(wallet)])
-      .then(([materials, data]) => { setFiles(materials.files); setReady(data); })
+    fetchApplicationReadiness(wallet)
+      .then(setReady)
       .catch((e) => setError(e?.message ?? "Application information unavailable"));
   }, [wallet]);
   useEffect(() => { load(); }, [load]);
-  const stamp = ready?.generatedAt?.slice(0, 10) ?? "current";
   return (
     <div className="space-y-4">
       <section className="space-y-3 border-b border-hairline py-4">
@@ -65,27 +53,6 @@ export function ApplicationWorkspace({ wallet }: { wallet: string }) {
           <p className="text-xs text-muted">Block {ready.block} · {ready.generatedAt}. Historical and quarantined replacements excluded from the current registry.</p>
         </section>
       </>}
-      <section className="space-y-3 border-b border-hairline py-4">
-        <h2 className="text-base font-bold">APPLICATION FILES — LATEST MASTER REFRESH</h2>
-        <p className="text-xs text-muted">Admin-only downloads. Frozen v1.1 master refresh. PDFs are canonical; no expiring links.</p>
-        <p className="text-xs font-bold text-muted">DOCX/PPTX: {EDITABLE_COPY_LABEL}</p>
-        {[...new Set(APPLICATION_FILES.map((f) => f.group))].map((group) => <div key={group} className="space-y-1">
-          <p className="text-xs font-bold">{group}</p>
-          <div className="flex flex-wrap gap-2">{APPLICATION_FILES.filter((f) => f.group === group).map((f) => <Button key={f.id} variant={f.id === "package-zip" ? "default" : "outline"} size="sm" disabled={busy === f.id}
-            onClick={() => { setBusy(f.id); setDlError(null); downloadApplicationFile(wallet, f.id, f.path.split("/").pop() ?? "application-file").catch((e) => setDlError(e?.message ?? "Download failed")).finally(() => setBusy(null)); }}><Download />{f.label}</Button>)}</div>
-        </div>)}
-        {dlError && <p className="text-xs text-destructive">{dlError}</p>}
-      </section>
-      <section className="space-y-3 py-4">
-        <h2 className="text-base font-bold">Private reviewer materials</h2>
-        <div className="flex flex-wrap gap-2">{files.map((file) => <Button key={file.id} variant="outline" size="sm" disabled={busy === file.id} onClick={() => {
-          const record = APPLICATION_FILES.find(f => f.id === file.id); if (!record) return;
-          setBusy(file.id); setDlError(null);
-          downloadApplicationFile(wallet, file.id, record.path.split('/').pop() ?? 'application.pdf').catch(e => setDlError(e?.message ?? 'Download failed')).finally(() => setBusy(null));
-        }}><Download />{file.title}</Button>)}</div>
-        <Button variant="outline" size="sm" disabled={!ready} onClick={() => download(`flowbridge-evidence-${stamp}.json`, JSON.stringify(ready, null, 2))}><Download />Evidence JSON</Button>
-        <p className="text-xs text-muted">Owner information complete. Compliance confirmation remains an owner action. No application has been submitted.</p>
-      </section>
       <LaunchPreparation wallet={wallet} />
     </div>
   );
