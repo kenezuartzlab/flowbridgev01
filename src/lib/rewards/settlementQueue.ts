@@ -6,7 +6,7 @@
  * publisher mode is DRY_RUN or ONE_CLICK; AUTONOMOUS is not selectable until
  * a separately approved signer exists. Nothing here signs or broadcasts.
  */
-import { MAINNET_MIN_CLAIM_FLOW } from "./claimMinimumPolicy";
+import { MIN_OPS_CLAIM_FLOW } from "./claimMinimumPolicy";
 
 export type QueueState =
   | "ELIGIBLE" | "QUEUED" | "PREPARED" | "PUBLISHING" | "PUBLISHED" | "OPEN" | "CLAIMED" | "EXPIRED" | "FAILED" | "QUARANTINED";
@@ -60,7 +60,7 @@ export function buildSettlementQueue(
   rows: QueueCandidate[],
   opts: { minimum?: number; flowPublishedToday?: number; config?: typeof PUBLISHER_CONFIG } = {},
 ): QueueResult {
-  const min = opts.minimum ?? MAINNET_MIN_CLAIM_FLOW;
+  const min = opts.minimum ?? MIN_OPS_CLAIM_FLOW;
   const cfg = opts.config ?? PUBLISHER_CONFIG;
   const out: QueueResult = { queued: [], quarantined: [], skipped: [], circuitBreaker: null };
   const users = new Set<string>();

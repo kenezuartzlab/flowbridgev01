@@ -9,7 +9,7 @@
 import { encodeFunctionData, getAddress, keccak256, toHex, type Hex } from "viem";
 import { buildPayoutBatch, discoverRounds, type PayoutBatch } from "./payoutBatch";
 import type { DraftAllocationInput, ProgramId } from "./rewardFundingPlan";
-import { MAINNET_MIN_CLAIM_FLOW } from "./claimMinimumPolicy";
+import { claimMinimumForEpoch } from "./claimMinimumPolicy";
 import { MAINNET_CHAIN_ID } from './historicalReconciliation';
 import { MAINNET_PAYOUT_AUDIT } from './rewardFundingPlan';
 import { hashPair, merkleClaimLeafHash, verifyMerkleProof } from "./merkleClaim";
@@ -148,8 +148,9 @@ function buildOnce(i: SettlementInput) {
     }
   }
   const totalWei = BigInt(batch?.totalWei ?? "0");
-  add("NONEMPTY", !!batch?.root, batch?.root ? `has leaves ≥ ${MAINNET_MIN_CLAIM_FLOW} FLOW` : "NO_ELIGIBLE_WALLETS_ABOVE_MINIMUM");
-  add("MINIMUM_ENFORCED", !!batch && batch.leaves.every((l) => BigInt(l.amount) >= BigInt(MAINNET_MIN_CLAIM_FLOW) * WEI), "every leaf ≥ 1,000 FLOW (canary exception is round #2 only)");
+  const leafMinimum = claimMinimumForEpoch(epochId);
+  add("NONEMPTY", !!batch?.root, batch?.root ? `has leaves ≥ ${leafMinimum} FLOW` : "NO_ELIGIBLE_WALLETS_ABOVE_MINIMUM");
+  add("MINIMUM_ENFORCED", !!batch && batch.leaves.every((l) => BigInt(l.amount) >= BigInt(leafMinimum) * WEI), `every leaf ≥ ${leafMinimum} FLOW (historical rounds keep their terms; canary exception is round #2 only)`);
   add("FUNDED_BUCKET", totalWei <= BigInt(i.fundedPointsAvailable) * WEI, "within funded program reservations");
   if (i.programs) {
     const inc = i.programs.reduce((t, p) => t + p.includedPoints, 0);
