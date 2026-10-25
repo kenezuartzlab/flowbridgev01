@@ -224,3 +224,5 @@ Final status: HOLD — storage migration/revocation and exact-candidate/deep-sca
 - STATUS: PRODUCTION HOLD. Not published. Scheduler OFF. Round #3 unchanged (1,122 FLOW, unsigned, unpublished).
 - 06:47 UTC: Security owner explicitly ACCEPTED, for V36.11 only, the residual risk of unknown exposure from legacy private-file links issued before retirement (expiry unknown, not revoked). Not a blanket waiver; no revocation claimed.
 - Remaining mandatory gate: owner-run connected-wallet screen acceptance.
+- 06:52 UTC: Owner reported connected-wallet screen acceptance PASS. Fresh quick scan: no new active findings (only two owner-ignored). All mandatory gates satisfied; publish requested.
+- 06:55 UTC: PRODUCTION PASS. Live bundle /assets/index-CcxoQnMf.js, SHA256 87043968bd2ef92467690f7997f7485a0f2ac972d03a995db1df21cef95a86a4. HSTS, X-Frame-Options SAMEORIGIN, frame-ancestors, report-only CSP present. Retired file APIs 410; studio campaigns 401 unauthenticated. /, /trade, /rewards, /ops 200. Scheduler OFF; Round #3 unchanged.
