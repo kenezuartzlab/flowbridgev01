@@ -128,7 +128,7 @@ export async function confirmFunding(a: AdminContext, id: string, expectedHash: 
     try {
       const {buildRewardSolvencyReport}=await import('./rewardSolvency.server');
       const report=await buildRewardSolvencyReport();
-      distribution={status:report.settlement.status,prepared:report.settlement.status==='DRAFT_READY'};
+      distribution={status:report.settlement.status,prepared:report.settlement.status==='READY_FOR_PUBLISHER_REVIEW'};
     } catch { distribution={status:'CHECKS_UNAVAILABLE',prepared:false}; }
   }
   return { ok: true as const, ...(data as object), distribution };
