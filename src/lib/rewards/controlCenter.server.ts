@@ -191,15 +191,16 @@ export async function readEvidenceReviews(actor?: AdminContext) {
   const admin = await db();
   const [rows, reviews] = await Promise.all([
     admin.from("flow_points_ledger").select("id,points,funding_state,policy_version,verified_usd,tx_hash,created_at").in("reason", ["CORE_SWAP", "CORE_SWAP_V2"]).eq("chain_id", 677).eq("provenance_state", "PENDING").gt("points", 0).order("created_at").limit(500),
-    admin.from("reward_evidence_reviews").select("id,ledger_id,status,points,uncertainty,rationale,price_evidence,proposed_by,proposed_by_email,decided_by_email,decision_note,created_at,decided_at").order("created_at", { ascending: false }).limit(500),
+    admin.from("reward_evidence_reviews").select("id,ledger_id,group_id,status,points,uncertainty,rationale,price_evidence,proposed_by,proposed_by_email,decided_by_email,decision_note,created_at,decided_at").order("created_at", { ascending: false }).limit(500),
   ]);
   if (rows.error || reviews.error) throw new Error("evidence unavailable");
   const evidence=await (await import('./rewardEvidenceAssessment.server')).readRewardEvidenceAssessment();
   const assessed=new Map(evidence.assessed.map(x=>[x.row.id,x]));
   const open = new Map((reviews.data ?? []).filter((r: any) => r.status === "PROPOSED").map((r: any) => [r.ledger_id, r]));
   return {
-    pending: (rows.data ?? []).map((r: any) => ({ id: r.id, points: r.points, funded: r.funding_state === "FUNDED", policyVersion: r.policy_version, recordedUsd: r.verified_usd, txHash: r.tx_hash, earnedAt: r.created_at, assessment:assessed.get(r.id)?.assessment, evidence:{activity:assessed.get(r.id)?.activity,basePoints:assessed.get(r.id)?.row.base_points,originalMetadata:assessed.get(r.id)?.row.metadata,reservationPreserved:!!assessed.get(r.id)?.row.reservation_id}, review: open.get(r.id) ? { ...open.get(r.id), canDecide:actor?.role==='super_admin' && actor.userId!==(open.get(r.id) as any).proposed_by, proposed_by: undefined, proposedBy: undefined } : null })),
+    pending: (rows.data ?? []).map((r: any) => { const x=assessed.get(r.id); return { id: r.id, points: r.points, funded: r.funding_state === "FUNDED", policyVersion: r.policy_version, recordedUsd: r.verified_usd, txHash: r.tx_hash, earnedAt: r.created_at, assessment:x?.assessment, evidence:{transactionStatus:x?.activity?.status,evidenceSource:x?.activity?.evidence_source,logIndex:x?.activity?.source_log_index,amountRaw:x?.activity?.amount_raw,basePoints:x?.row.base_points,boundWallet:x?.boundWallet,reservation:x?.reservation ? {id:x.reservation.reservation_id,points:x.reservation.points,program:x.reservation.program_id}:null,reservationPreserved:!!x?.row.reservation_id,missingEvidence:'Original historical price-source evidence'}, review: open.get(r.id) ? { ...open.get(r.id), canDecide:actor?.role==='super_admin' && actor.userId!==(open.get(r.id) as any).proposed_by, proposed_by: undefined, proposedBy: undefined } : null }; }),
     round3:evidence.round3,
+    round3HeldIds:evidence.round3HeldIds,
     decided: (reviews.data ?? []).filter((r: any) => r.status !== "PROPOSED").slice(0, 50).map((r: any) => ({ ...r, proposed_by: undefined })),
   };
 }
@@ -245,4 +246,29 @@ export async function decideEvidenceException(a: AdminContext, reviewId: string,
   const { data, error } = await admin.rpc("decide_reward_evidence_exception" as never, { p_review: reviewId, p_actor: a.userId, p_email: a.email, p_decision: decision, p_note: note ?? null } as never);
   if (error) return { ok: false as const, error: error.message.replace(/^.*?:\s*/, "") };
   return { ok: data !== "STALE", outcome: data as unknown as string, ...(data === "STALE" ? { error: "The reward changed after the proposal; review it again." } : {}) };
+}
+
+/** One transaction owns the complete proposal/decision; reads never authorize renewal. */
+export async function groupedEvidenceReview(a: AdminContext, input: {action:'propose'|'APPROVED'|'REJECTED';ids?:string[];groupId?:string;rationale?:string;uncertainty?:string}) {
+  const admin=await db();
+  if (input.action==='propose') {
+    const {validateExceptionProposal}=await import('./evidenceReview');
+    const validation=validateExceptionProposal({rationale:input.rationale ?? '',uncertainty:input.uncertainty ?? ''});
+    if (!validation.ok) return {ok:false,error:validation.error};
+    const ids=input.ids ?? [];
+    if (!ids.length || ids.length>50 || new Set(ids).size!==ids.length) return {ok:false,error:'Select 1–50 distinct records.'};
+    const {data,error}=await admin.rpc('propose_reward_evidence_group',{p_ids:ids,p_actor:a.userId,p_email:a.email,p_rationale:input.rationale ?? '',p_uncertainty:input.uncertainty ?? ''});
+    return error ? {ok:false,error:'Group not saved. A record is blocked, changed or already under review; refresh.'} : {ok:true,groupId:data};
+  }
+  if(a.role!=='super_admin') return {ok:false,error:'A different super admin must approve this group.'};
+  if(!input.groupId) return {ok:false,error:'Group is required.'};
+  const {data,error}=await admin.rpc('decide_reward_evidence_group',{p_group:input.groupId,p_actor:a.userId,p_email:a.email,p_decision:input.action,p_note:input.rationale ?? null});
+  if(error) return {ok:false,error:'Group not changed. Independent authorization and every original evidence record must still pass.'};
+  let recalculation: {status:string;renewal:unknown;automaticSigning:false};
+  try {
+    const {buildRewardSolvencyReport}=await import('./rewardSolvency.server');
+    const report=await buildRewardSolvencyReport();
+    recalculation={status:report.settlement.status,renewal:report.settlement.renewal,automaticSigning:false};
+  } catch {recalculation={status:'CHECKS_UNAVAILABLE',renewal:null,automaticSigning:false};}
+  return {ok:true,outcome:data,recalculation};
 }
