@@ -1,5 +1,16 @@
 # System verification and simple Ops funding
 
+## Latest completion check — 2026-10-25 09:44 UTC directive
+- No new rewards features, application/dependency changes, financial approvals or deployment in this check.
+- Fresh regression **2,020 tests / 198 files PASS**. Disposable exact-migration eight-way approval/independence/atomic rollback/duplicate/reservation checks PASS; not live financial acceptance.
+- Current candidate `31ff75df026dea3b7fe9fe574084a6ac36f44672`: hosted run `br_4ecada69-3ed0-4de8-93ac-d4142031fe19` succeeded 09:41:43 UTC, diagnostics/failed targets empty. Stored checks are empty; separate explicit production/typecheck evidence unavailable. No prohibited manual build/typecheck run.
+- Fresh authenticated caller-scoped reads show nine held records / 1,022 Points, stored one wallet / 1,122 FLOW, renewal not ready, automatic funding/signing false and wrong-wallet 403. Mounted cancellation/navigation refresh pass with zero page errors; actual Ops requires connected wallet and sandbox has no provider. Neither physical connected-wallet nor two-account new grouped frontend acceptance is proven.
+- GHSA-mrhx-c7xc-m3w5 repeats accepted legacy wallet Zod versions 3.22.4/3.25.76; active Bun framework/direct copies remain 4.6.6. Final server build artifact absent, so its browser-only condition remains unverified; no duplicate approval requested.
+- Previously running deep scan completed 09:47:30 UTC with zero application/MCP findings; reports up_to_date=false (job source 85194719, candidate 31ff75df). Latest requested scan awaits notification; no current-candidate coverage PASS. Existing scoped cloud gap acceptance is not expanded.
+- Independently fetched production now serves `/assets/index-DlD1Xc_K.js`, SHA256 `74c5614f3ac32a801461f2fb1ce65a25110444b14b291c2416494b25dba11467`, HTTP 200, HSTS/SAMEORIGIN/frame-ancestors/report-only CSP present. This differs from the preceding fingerprint; no publish performed by this check and no verified deployment-to-source mapping.
+- **Release HOLD; end-to-end production claiming NOT PASS / outstanding**, not a demonstrated claim defect. Historical claims and isolated success/recovery tests do not prove current frontend funding confirmation → payout publication → wallet claim. These require authorized operators, publisher and claimant wallet approvals; no new transaction authorized or executed here.
+- Round #3 evidence exception and subsequent schedule approval remain separate Ops decisions. No exception, funding, schedule replacement or payout committed; 1,000 funded eligible-Point threshold unchanged. Previously recorded 74 unfunded / 776 restricted exclusions and reservation totals were not changed or reclassified; no claim of a fresh exhaustive ledger audit.
+
 ## Implemented
 - Existing canonical accrual automatically writes VERIFIED awards after receipt, wallet, policy, server pricing and limit checks; diagnostic records now retain original calculated Points, base Points, USD calculation inputs and validation results. No historical metadata was backfilled.
 - Ordinary verified UNFUNDED awards enter the existing funding queue, not Evidence Review. Queue reads include funded history for duplicate detection.
