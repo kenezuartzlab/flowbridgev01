@@ -6,9 +6,9 @@ const c = (id: string, pts: number, wallet: string | null = `0x${id.padStart(40,
 
 describe("settlement queue", () => {
   it("queues wallets at any positive funded eligible amount (V37)", () => {
-    const q = buildSettlementQueue([c("a", 1000), c("b", 999)]);
-    expect(q.queued.map((x) => x.userId)).toEqual(["a"]);
-    expect(q.skipped).toContainEqual({ userId: "b", reason: "BELOW_MINIMUM" });
+    const q = buildSettlementQueue([c("a", 1000), c("b", 999), c("z", 0)]);
+    expect(q.queued.map((x) => x.userId)).toEqual(["a", "b"]);
+    expect(q.skipped).toContainEqual({ userId: "z", reason: "BELOW_MINIMUM" });
   });
   it("is idempotent and never double-queues", () => {
     const q = buildSettlementQueue([c("a", 1500, undefined, { alreadyQueuedEpoch: 3 })]);
