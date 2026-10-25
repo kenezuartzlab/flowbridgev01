@@ -146,7 +146,7 @@ export function reconcileAccount(
     }
     if (CORE_SWAP.has(r.reason)) {
       if (ownIds.has(r.id)) { b.coreSwap += r.points; eligibleRowIds.push(r.id); }
-      else excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: r.chainId === MAINNET_CHAIN_ID ? (r.provenanceState !== "VERIFIED" ? "PROVENANCE_REVIEW_REQUIRED" : "DUPLICATE_EVIDENCE") : `NON_MAINNET_CHAIN_${r.chainId ?? "NULL"}` });
+      else excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: r.chainId === MAINNET_CHAIN_ID ? (r.provenanceState !== "VERIFIED" && r.provenanceState !== "EXCEPTION_APPROVED" ? "PROVENANCE_REVIEW_REQUIRED" : "DUPLICATE_EVIDENCE") : `NON_MAINNET_CHAIN_${r.chainId ?? "NULL"}` });
       continue;
     }
     if (SIGNUP.has(r.reason)) {
@@ -194,6 +194,15 @@ export function reconcileAccount(
     explainedAmount = LEGACY_SIGNUP_DIRECT_CREDIT;
     explained.push("LEGACY_SIGNUP_DIRECT_CREDIT_50 (retired server trigger; not ledger-backed, not claimable)");
   }
+  // A recorded provenance hold explains the aggregate difference, but never
+  // enters authoritative points or eligibleRowIds. Do not let these excluded
+  // rows veto a separately accepted, funded subset on the same account.
+  const provenanceHeld = excluded.filter((e) => e.cause === 'PROVENANCE_REVIEW_REQUIRED')
+    .reduce((total, e) => total + e.points, 0);
+  if (difference > 0 && provenanceHeld > 0 && difference === explainedAmount + provenanceHeld) {
+    explainedAmount += provenanceHeld;
+    explained.push('PROVENANCE_HELD_LEDGER_ROWS_EXCLUDED');
+  }
   if (excluded.some((e) => e.cause.startsWith("NON_MAINNET"))) explained.push("BOT_TESTNET_LEDGER_ROWS_EXCLUDED");
 
   if (acct.storedFlowPoints > 0 && acct.ledger.length === 0 && !explainedAmount) flags.push("STORED_BALANCE_WITHOUT_LEDGER");
@@ -206,7 +215,8 @@ export function reconcileAccount(
   else classification = difference > 0 ? "UNEXPLAINED_POSITIVE_DIFFERENCE" : "UNEXPLAINED_NEGATIVE_DIFFERENCE";
   if (classification !== "MATCH" && classification !== "EXPLAINED_DIFFERENCE" && difference > 0) flags.push("STORED_EXCEEDS_LEDGER");
 
-  let nonclaimableHistorical = explainedAmount;
+  // Temporary provenance holds are not permanent owner-forfeited history.
+  let nonclaimableHistorical = legacySignup && acct.ledger.length === 0 ? explainedAmount : 0;
   // An owner review closes ambiguity WITHOUT creating evidence: unsupported
   // points become non-claimable history; the authoritative subset is unchanged.
   if (review && classification !== "MATCH" && classification !== "EXPLAINED_DIFFERENCE") {
