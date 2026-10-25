@@ -1,6 +1,7 @@
 # Approved grouped review → payout correction
-- [ ] Verify recorded independent approval, trace zero eligibility, correct exact mismatch and test approved subset/exclusions/schedule readiness.
-- [ ] Verify authenticated payout read and visible panel, unchanged reservations/base batch/exclusions; no financial writes or publication.
+- [x] Recorded group approval and all nine EXCEPTION_APPROVED rows / 1,022 Points confirmed. The 354 additional provenance-held/unfunded Points caused an aggregate mismatch that wrongly vetoed the accepted subset. Exact excluded-row explanation corrects classification without admitting held rows or altering balances.
+- [x] Fresh authenticated payout API and mounted real-data panel: one eligible wallet / 1,122 FLOW, immutable amount/root/proof parity PASS, renewal ready with no blockers; only STORED_CLAIM_WINDOW fails. Review renewal proposal enabled. 2,024 tests / 199 files PASS; automatic build OK; zero browser errors. This is preview verification, not physical-wallet or production acceptance.
+- [x] Reservations remain 40 / 3,457 Points; approved nine records remain 1,022; excluded 74 and restricted 776 preserved; base Round #3 one wallet / 1,122 FLOW and original dates unchanged; zero renewals/publication attempts. No financial writes or publication performed.
 
 # Rewards completion directive — 2026-10-25 09:44 UTC
 - [x] Freeze features and financial writes. Fresh full regression: 2,020 tests / 198 files PASS; exact-migration concurrency, independent approval, atomic rollback, duplicate and reservation checks PASS.
