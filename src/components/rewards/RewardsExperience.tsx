@@ -27,12 +27,12 @@ export function RewardsExperience() {
     {!authReady ? <p role="status" className="text-sm text-muted">Checking your account…</p> : !user ? <div className="space-y-3"><p className="text-sm leading-relaxed text-muted">Sign in to see recorded Points, funded rewards and verified payout eligibility. Points are not a token balance.</p><SignInButton label="Sign in" returnTo="/rewards" /></div> : <>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3" data-testid="reward-balances">
         {[
-          ['Recorded Points', summary?.totalPts, 'PTS'],
-          ['Verified and funded', personal?.progression.eligibleFundedFlow, 'PTS'],
+          ['Available Points', Math.max(0, (summary?.eligibleFundedUnallocated ?? 0) - (personal?.payoutApproval?.awaitingApproval ?? 0)), 'PTS'],
+          ['Awaiting Approval', personal?.payoutApproval?.awaitingApproval ?? 0, 'PTS'],
+          ['Approved FLOW', personal?.payoutApproval?.approvedFlow ?? 0, 'FLOW'],
+          ['Claimable FLOW', summary?.claimableNow, 'FLOW'],
           ['Awaiting funding', summary?.pendingFunding, 'PTS'],
           ['Held for review', summary?.pendingReview, 'PTS'],
-          ['Claimable now', summary?.claimableNow, 'FLOW'],
-          ['Claimed on-chain', personal?.chainReadable ? summary?.claimedLifetime : undefined, 'FLOW'],
         ].map(([label,value,unit]) => <div key={String(label)} className="min-w-0"><dt className="text-xs leading-relaxed text-muted">{label}</dt><dd className="break-words text-xl font-bold tabular-nums">{typeof value === 'number' ? value.toLocaleString('en-US') : '—'} <span className="text-xs font-semibold text-muted">{unit}</span></dd></div>)}
       </dl>
       <Button asChild className="h-auto min-h-10 w-full whitespace-normal text-center"><Link to="/earn">{(summary?.claimableNow ?? 0) > 0 ? 'View verified claim' : 'View payout status'}</Link></Button>
