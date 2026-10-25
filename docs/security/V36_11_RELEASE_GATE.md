@@ -224,3 +224,4 @@ Final status: HOLD — storage migration/revocation and exact-candidate/deep-sca
 - STATUS: PRODUCTION HOLD. Not published. Scheduler OFF. Round #3 unchanged (1,122 FLOW, unsigned, unpublished).
 - 06:47 UTC: Security owner explicitly ACCEPTED, for V36.11 only, the residual risk of unknown exposure from legacy private-file links issued before retirement (expiry unknown, not revoked). Not a blanket waiver; no revocation claimed.
 - Remaining mandatory gate: owner-run connected-wallet screen acceptance.
+- 06:52 UTC: Owner reported connected-wallet screen acceptance PASS. Fresh quick scan: no new active findings (only two owner-ignored). All mandatory gates satisfied; publish requested.
