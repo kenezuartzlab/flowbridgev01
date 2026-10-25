@@ -191,6 +191,12 @@ export async function accrueCoreSwapPoints(input: {
     provenance_state: 'VERIFIED',
     metadata: {
       policyVersion: policy.version,
+      validationStatus: computed.reason === 'ANTI_ABUSE_REVIEW' ? 'REVIEW' : 'PASS',
+      originalEligiblePoints: computed.award,
+      originalBasePoints: computed.base,
+      originalVerifiedUsd: input.verifiedUsd,
+      valuationEvidence: verified.valuationEvidence ?? null,
+      validationChecks: { canonicalReceipt: true, boundWallet: true, policy: true, duplicateGuard: 'DATABASE_UNIQUE_ACTIVITY', dailyLimitGuard: 'DATABASE_SERIALIZED_WALLET_DAY', antiWash: computed.reason !== 'ANTI_ABUSE_REVIEW' },
       valuationSource: 'SERVER_BOT_DEX_PRICE_POLICY',
       valuationObservedAt: new Date().toISOString(),
       occurredAt: eventAt.toISOString(),

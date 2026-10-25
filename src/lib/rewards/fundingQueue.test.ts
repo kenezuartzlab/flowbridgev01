@@ -10,6 +10,13 @@ const row = (o: Partial<QueueLedgerRow>): QueueLedgerRow => ({
 const wallets = new Map([["u1", W], ["u2", W]]);
 
 describe("funding queue", () => {
+  it('rejects cross-reason and case-variant duplicate transactions even when already funded', () => {
+    const q = buildFundingQueue([row({tx_hash:'0xABC'}),row({id:'funded',reason:'CORE_SWAP',tx_hash:'0xabc',funding_state:'FUNDED'})],wallets,new Map());
+    expect(q.eligible).toEqual({});expect(q.excluded[0]?.reason).toBe('DUPLICATE_EVIDENCE');
+  });
+  it('never creates another reservation for exception-approved funded rewards', () => {
+    expect(buildFundingQueue([row({funding_state:'FUNDED',reservation_id:'original',provenance_state:'EXCEPTION_APPROVED'})],wallets,new Map()).eligible).toEqual({});
+  });
   it("queues verified Mainnet swap rows and labels null programs", () => {
     const q = buildFundingQueue([row({})], wallets, new Map());
     expect(q.eligible.CORE_SWAP).toHaveLength(1);

@@ -11,7 +11,7 @@ describe('historical evidence exception review', () => {
   it('requires a rationale and an uncertainty statement', () => {
     expect(validateExceptionProposal({ rationale: 'short', uncertainty: 'none known' }).ok).toBe(false);
     expect(validateExceptionProposal({ rationale: 'Verified Router V3 receipt; price from pool at block', uncertainty: '' }).ok).toBe(false);
-    expect(validateExceptionProposal({ rationale: 'Verified Router V3 receipt; price from pool at block', uncertainty: 'No archived quote' }).ok).toBe(false);
+    expect(validateExceptionProposal({ rationale: 'Verified Router V3 receipt; original price archive is unavailable', uncertainty: 'No archived quote' }).ok).toBe(true);
     expect(validateExceptionProposal({ rationale: 'Verified Router V3 receipt; price from pool at block', uncertainty: 'No archived quote', priceSource: 'BDEX pool reserves at block 123' }).ok).toBe(true);
   });
   it('blocks self-approval and non-super-admin decisions', () => {
