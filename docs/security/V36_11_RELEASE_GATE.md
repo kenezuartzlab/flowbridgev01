@@ -222,3 +222,5 @@ Final status: HOLD — storage migration/revocation and exact-candidate/deep-sca
 - Connected-wallet screen acceptance (wallets, trading preflights, Evidence Review, funding approvals, Payout Operations) cannot be run by the agent: it needs the owner's wallet to connect and sign in the browser.
 - Legacy signed URLs: issuance cannot be ruled out, expiry UNKNOWN, not revoked. Residual risk NOT ACCEPTED (owner chose HOLD).
 - STATUS: PRODUCTION HOLD. Not published. Scheduler OFF. Round #3 unchanged (1,122 FLOW, unsigned, unpublished).
+- 06:47 UTC: Security owner explicitly ACCEPTED, for V36.11 only, the residual risk of unknown exposure from legacy private-file links issued before retirement (expiry unknown, not revoked). Not a blanket waiver; no revocation claimed.
+- Remaining mandatory gate: owner-run connected-wallet screen acceptance.
