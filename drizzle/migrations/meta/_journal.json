@@ -267,6 +267,13 @@
       "when": 1792919641439,
       "tag": "0037_atomic_grouped_reward_evidence_review",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792919797914,
+      "tag": "0038_enforce_group_only_evidence_decisions",
+      "breakpoints": true
     }
   ]
 }
