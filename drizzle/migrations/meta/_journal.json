@@ -246,6 +246,13 @@
       "when": 1792912790839,
       "tag": "0034_exception_cap_and_funding_separation",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792913072465,
+      "tag": "0035_reviewed_exception_publication_provenance",
+      "breakpoints": true
     }
   ]
 }
