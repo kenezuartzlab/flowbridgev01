@@ -253,6 +253,13 @@
       "when": 1792913072465,
       "tag": "0035_reviewed_exception_publication_provenance",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792913134955,
+      "tag": "0036_historical_unlabelled_exception_scope",
+      "breakpoints": true
     }
   ]
 }
