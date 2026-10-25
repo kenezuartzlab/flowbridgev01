@@ -146,7 +146,7 @@ export function reconcileAccount(
     }
     if (CORE_SWAP.has(r.reason)) {
       if (ownIds.has(r.id)) { b.coreSwap += r.points; eligibleRowIds.push(r.id); }
-      else excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: r.chainId === MAINNET_CHAIN_ID ? (r.provenanceState !== "VERIFIED" ? "PROVENANCE_REVIEW_REQUIRED" : "DUPLICATE_EVIDENCE") : `NON_MAINNET_CHAIN_${r.chainId ?? "NULL"}` });
+      else excluded.push({ rowId: r.id, reason: r.reason, points: r.points, cause: r.chainId === MAINNET_CHAIN_ID ? (r.provenanceState !== "VERIFIED" && r.provenanceState !== "EXCEPTION_APPROVED" ? "PROVENANCE_REVIEW_REQUIRED" : "DUPLICATE_EVIDENCE") : `NON_MAINNET_CHAIN_${r.chainId ?? "NULL"}` });
       continue;
     }
     if (SIGNUP.has(r.reason)) {
