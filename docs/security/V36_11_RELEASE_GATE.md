@@ -162,3 +162,10 @@ These approvals do not authorize: payout signatures, Round #3 publication, treas
 - Remaining external blockers, unchanged: physical TokenPocket device acceptance (owner action); private-file migration executes at deployment time per the authorization above; scheduler vault credential if hourly checks are wanted.
 
 Status: HOLD for production deployment until physical TokenPocket acceptance and the deployment-time private-file migration are complete. No deploy performed. Round #3 unchanged at 1,122 FLOW / one wallet, unsigned and unpublished; 74 unfunded and 776 restricted remain excluded; automatic funding and signing OFF.
+
+## Final production release request — 2026-10-25 05:37 UTC
+- Owner explicitly reports ALL physical TokenPocket acceptance checks PASS. Recorded as owner-reported device acceptance, not an independently observed agent device test. The previous physical-device blocker is closed on that basis.
+- Owner authorizes the existing V36.11 release conditional on final mandatory checks, approved private-file relocation/revocation, authenticated download acceptance and production verification. The three previously approved security decisions remain in force within their exact conditions; none is requested again.
+- Fresh complete regression at 05:38 UTC: **1,961 tests / 192 files PASS**. Quick backend scan at 05:38 UTC returns no new active findings; managed cloud/IAM coverage remains limited by the already accepted exception. A fresh deep scan of saved source has been requested; completion is pending, not PASS.
+- Scheduler remains optional and OFF pending secure private credential pairing. Manual checks remain available. No Round #3 approval, funding, signature, publication, schedule replacement, treasury or contract change is authorized; stored 1,122 FLOW, 74 unfunded and 776 restricted Points must remain unchanged.
+- Production status remains HOLD until storage migration, final hosted validation and actual deployment acceptance are verified. No new release fingerprint is yet claimed.
