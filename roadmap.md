@@ -1,3 +1,7 @@
+# Approved grouped review → payout correction
+- [ ] Verify recorded independent approval, trace zero eligibility, correct exact mismatch and test approved subset/exclusions/schedule readiness.
+- [ ] Verify authenticated payout read and visible panel, unchanged reservations/base batch/exclusions; no financial writes or publication.
+
 # Rewards completion directive — 2026-10-25 09:44 UTC
 - [x] Freeze features and financial writes. Fresh full regression: 2,020 tests / 198 files PASS; exact-migration concurrency, independent approval, atomic rollback, duplicate and reservation checks PASS.
 - [x] Current candidate 31ff75df026dea3b7fe9fe574084a6ac36f44672: hosted build br_4ecada69-3ed0-4de8-93ac-d4142031fe19 succeeded 09:41:43 UTC; diagnostics/failed targets empty. Stored checks empty: explicit production-build/typecheck evidence unavailable; manual commands prohibited by environment.
