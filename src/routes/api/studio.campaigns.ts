@@ -10,7 +10,7 @@ export const Route = createFileRoute("/api/studio/campaigns")({
       GET: async ({ request }) => {
         const { jsonResponse } = await import("@/lib/api-auth.server");
         const { requirePartner } = await import("@/lib/partner/partnerGate.server");
-        const gate = await requirePartner(request, { requireOperational: false });
+        const gate = await requirePartner(request);
         if (!gate.ok) return gate.response;
         const { listPartnerCampaigns } = await import("@/lib/partner/partnerStudio.server");
         try {

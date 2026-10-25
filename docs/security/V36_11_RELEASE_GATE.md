@@ -215,3 +215,10 @@ Final status: HOLD — storage migration/revocation and exact-candidate/deep-sca
 - Added 20 regression cases covering production/preview/local hosts, lookalike suffixes, adversarial hyphenated labels, oversized input and canonical binding acceptance. Full regression: **1,981 tests / 193 files PASS**; latest automatic compilation observed **build OK 2026-10-25T06:10:40Z**. No separate manual production build/typecheck claimed.
 - The finding is not suppressed or marked independently scan-verified; a completed reassessment of the saved correction is still required for release. No private-storage migration or production deployment was attempted by this correction.
 - **PRODUCTION HOLD** remains: supported private-file relocation/old-link revocation and exact-candidate security/deployment acceptance are incomplete. Round #3 and exclusions were not touched; no funding, signing, publication, scheduler activation or contract action occurred.
+
+## 2026-10-25 06:46 UTC — final deep-scan remediation
+- Deep scan finding (suspended partners could read campaigns) FIXED: /api/studio/campaigns and /api/studio/campaigns/$id now require an operational org. Test added; 1,993 suite tests + 2 new pass.
+- Release candidate changed; fresh scan of saved source needed before publish.
+- Connected-wallet screen acceptance (wallets, trading preflights, Evidence Review, funding approvals, Payout Operations) cannot be run by the agent: it needs the owner's wallet to connect and sign in the browser.
+- Legacy signed URLs: issuance cannot be ruled out, expiry UNKNOWN, not revoked. Residual risk NOT ACCEPTED (owner chose HOLD).
+- STATUS: PRODUCTION HOLD. Not published. Scheduler OFF. Round #3 unchanged (1,122 FLOW, unsigned, unpublished).
