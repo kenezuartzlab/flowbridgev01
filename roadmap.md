@@ -1,3 +1,11 @@
+# Automated reward eligibility and simple Ops funding
+- [ ] Reuse canonical verification evidence; automatically queue ordinary verified unfunded rewards and classify historical exceptions without financial changes.
+- [ ] Add aggregate funding overview and simple separated proposer/approver workflow; server confirmation rechecks all gates and preserves reservations.
+- [ ] Display existing historical evidence and grouped exception review under the existing approved policy; no automatic historical approvals.
+- [ ] Prepare eligible unsigned distribution after confirmation; keep manual signing and verified claim notifications.
+- [ ] Assess Round #3's 1,022 held Core Swap Points read-only and report aggregate reasons; preserve stored 1,122, excluded 74 and restricted 776.
+- [ ] Run financial invariant tests, authenticated real-data read/interaction acceptance and automatic compilation; no funding or signing during implementation.
+
 # V36.11 independent operational tracks
 - [x] Owner retirement directive 06:27 UTC: removed unused private-file controls/helpers/reviewer panel; both retired APIs deny direct anonymous/authenticated calls, 1,993 tests and automatic build PASS. Application-required storage/launch preparation preserved; no migration or special permissions.
 - [ ] Production release HOLD: legacy issuance cannot be ruled out, expiry unknown, prior residual-risk decision remains HOLD. Fresh retirement scan coverage, connected UI and production/type/deployment acceptance incomplete. Existing live fingerprint recorded; nothing published.
