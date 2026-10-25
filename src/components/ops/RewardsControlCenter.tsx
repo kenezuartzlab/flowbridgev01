@@ -23,7 +23,7 @@ type State = {
   automation: { policies: { program_id: string; auto_funding_enabled: boolean; suspended: boolean; per_run_cap: number; daily_cap: number }[]; autonomousFundingAuthorized: boolean; autonomousSigning: boolean; lastRuns: { ran_at: string; source: string }[] };
 };
 
-const SECTIONS = ["Payout Operations", "Evidence Review", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation", "Audit History"] as const;
+const SECTIONS = ["Payout Operations", "Approval Queue", "Evidence Review", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation", "Audit History"] as const;
 type Section = (typeof SECTIONS)[number];
 const fmt = (n: number | null | undefined) => (n == null ? "—" : Math.floor(n).toLocaleString());
 const TONE: Record<string, string> = {
@@ -100,6 +100,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
 
       <RewardsPipeline />
       {section === 'Payout Operations' && <PayoutOperations wallet={wallet}/>}
+      {section === 'Approval Queue' && <ApprovalQueue wallet={wallet} isSuper={isSuper} busy={busy} act={act} />}
       {section === 'Evidence Review' && <EvidenceReview wallet={wallet} role={s.viewer.role}/>}
       {section === "Overview" && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
