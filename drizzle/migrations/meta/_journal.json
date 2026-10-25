@@ -232,6 +232,13 @@
       "when": 1792861749395,
       "tag": "0032_evidence_exception_requires_price_evidence",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792912540507,
+      "tag": "0033_historical_valuation_review_safeguards",
+      "breakpoints": true
     }
   ]
 }
