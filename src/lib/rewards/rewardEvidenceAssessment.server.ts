@@ -1,5 +1,6 @@
 import { assessRewardEvidence, type EvidenceRow, type ActivityEvidence, type ReservationEvidence } from './rewardEvidenceAssessment';
 import { OWNER_REVIEW_DECISIONS } from './historicalReconciliation';
+import { integerWei } from './immutableBatch';
 /** Admin-only, SELECT-only. Metadata/recorded USD cannot authorize a historical transition. */
 export async function readRewardEvidenceAssessment() {
   const { supabaseAdmin: admin } = await import('@/integrations/supabase/client.server');
@@ -32,5 +33,5 @@ export async function readRewardEvidenceAssessment() {
   });
   const totals = (items:typeof assessed)=>items.reduce((o,x)=>{ const k=x.assessment.status; o[k] ??= {rows:0,points:0};o[k].rows++;o[k].points+=x.row.points;return o; },{} as Record<string,{rows:number;points:number}>);
   const roundHeld = assessed.filter(x=>x.row.funding_state==='FUNDED' && x.row.provenance_state==='PENDING' && roundWallets.has(x.row.wallet_address?.toLowerCase()));
-  return { assessed, summary:totals(assessed), round3:{storedFlow:round3 ? Number(BigInt(String(round3.total_wei))/10n**18n) : null,published:!!round3?.publication_verified_at,heldPoints:roundHeld.reduce((s,x)=>s+x.row.points,0),assessment:totals(roundHeld),readOnly:true} };
+  return { assessed, summary:totals(assessed), round3:{storedFlow:round3 ? Number(BigInt(integerWei(round3.total_wei))/10n**18n) : null,published:!!round3?.publication_verified_at,heldPoints:roundHeld.reduce((s,x)=>s+x.row.points,0),assessment:totals(roundHeld),readOnly:true} };
 }
