@@ -28,8 +28,9 @@ describe("bounded wallet-binding host validation", () => {
 
   it("rejects oversized attacker-controlled hosts before matching", () => {
     expect(isAllowedBindingHost(`${"a--".repeat(100_000)}!.lovable.app`)).toBe(false);
-    expect(isAllowedBindingHost(`${"a".repeat(MAX_BINDING_HOST_LENGTH - 11)}.lovable.app`)).toBe(true);
-    expect(isAllowedBindingHost(`${"a".repeat(MAX_BINDING_HOST_LENGTH - 10)}.lovable.app`)).toBe(false);
+    const suffix = ".lovable.app";
+    expect(isAllowedBindingHost(`${"a".repeat(MAX_BINDING_HOST_LENGTH - suffix.length)}${suffix}`)).toBe(true);
+    expect(isAllowedBindingHost(`${"a".repeat(MAX_BINDING_HOST_LENGTH - suffix.length + 1)}${suffix}`)).toBe(false);
   });
 
   it("bounds the signed message before parsing or rebuilding", () => {
