@@ -10,9 +10,11 @@ describe('system evidence assessment', () => {
   it('wrong wallet is not a valuation exception',()=>expect(assessRewardEvidence(row,{...context,boundWallet:'other'}).exceptionAllowed).toBe(false));
   it('daily cap violations cannot be waived',()=>expect(assessRewardEvidence(row,{...context,dailyPoints:1001}).exceptionAllowed).toBe(false));
   it('funded records require original matching reservations',()=>expect(assessRewardEvidence({...row,funding_state:'FUNDED',reservation_id:'old'},context).status).toBe('BLOCKED'));
-  it('recognizes replayable original server evidence without changing the row',()=>{
+  it('self-described replayable metadata cannot manufacture historical authority',()=>{
     const original = {...row,metadata:{validationStatus:'PASS',policyVersion:'FLOW_POINTS_V2',dailyCoreSwapCap:1000,alreadyAwardedToday:0,valuationEvidence:{authority:'SERVER_CANONICAL_INGEST_V1',source:'BOT_DEX_PRICE',priceUsd:1,decimals:18,amountRaw:activity.amount_raw,observedAt:'2026-10-20T00:01:00Z'}}};
-    expect(assessRewardEvidence(original,context).status).toBe('ORIGINAL_EVIDENCE_ESTABLISHED'); expect(original.provenance_state).toBe('PENDING');
+    expect(assessRewardEvidence(original,context).status).toBe('NEEDS_EXCEPTION_REVIEW'); expect(original.provenance_state).toBe('PENDING');
   });
   it('today pricing never establishes old valuation',()=>expect(assessRewardEvidence({...row,metadata:{valuationEvidence:{authority:'SERVER_CANONICAL_INGEST_V1',source:'DEX',priceUsd:1,decimals:18,amountRaw:activity.amount_raw,observedAt:'2026-10-25T00:01:00Z'}}},context).status).toBe('NEEDS_EXCEPTION_REVIEW'));
+  it('invalid cap input fails closed',()=>expect(assessRewardEvidence(row,{...context,dailyPoints:NaN}).status).toBe('BLOCKED'));
+  it('wrong activity identity cannot be waived',()=>expect(assessRewardEvidence(row,{...context,activity:{...activity,activity_id:'other'}}).exceptionAllowed).toBe(false));
 });
