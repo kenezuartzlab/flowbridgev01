@@ -132,7 +132,7 @@ export function buildRewardsSummary(i: SummaryInput): RewardsSummary {
     message = `${fmt(p.reviewHeld)} Points are under review. Settlement waits until review completes.`;
   } else if (eligible > 0) {
     blocker = "BELOW_MINIMUM"; stage = "FUNDED";
-    message = `You have ${fmt(eligible)} eligible FLOW toward the ${fmt(p.minimum)} FLOW minimum. Earn ${fmt(p.remainingToMinimum)} more to qualify for a settlement batch.`;
+    message = `You have ${fmt(eligible)} eligible FLOW ready for payout approval. An authorized operator approves the next payout batch.`;
   } else if (p.pendingUnfunded > 0) {
     blocker = "NOT_FUNDED"; stage = "EARNED";
     message = `${fmt(p.pendingUnfunded)} Points are awaiting reward funding. These do not count toward claiming yet.`;
@@ -141,7 +141,7 @@ export function buildRewardsSummary(i: SummaryInput): RewardsSummary {
     message = `Claim completed: ${fmt(a.amountFlow)} FLOW.`;
   } else {
     blocker = "BELOW_MINIMUM"; stage = p.earnedPoints > 0 ? "EARNED" : "EARNED";
-    message = `You have 0 eligible FLOW toward the ${fmt(p.minimum)} FLOW minimum. Earn ${fmt(p.remainingToMinimum)} more to qualify for a settlement batch.`;
+    message = `No eligible FLOW yet. Earn verified Points to qualify for payout approval.`;
   }
 
   return {
