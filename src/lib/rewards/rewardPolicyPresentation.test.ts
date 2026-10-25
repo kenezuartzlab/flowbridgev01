@@ -8,7 +8,7 @@ describe('unified portal policy matches the executed rules', () => {
   it('earns one point per whole verified USD', () => { expect(coreSwapAward(5.99,0,p).award).toBe(5); });
   it('shows 100 PTS for an eligible signup', () => { expect(p.signupPoints).toBe(100); });
   it('shows 100 PTS for an eligible referrer signup', () => { expect(p.referrerSignupPoints).toBe(100); });
-  it('requires 1000 funded Points for settlement', () => { expect(p.settlementMinimum).toBe(1000); });
+  it('requires any positive funded Points for settlement (V37)', () => { expect(p.settlementMinimum).toBe(1); });
   it('uses the configured cap rather than an obsolete rolling cap', () => { const custom = rewardPolicyPresentation({...DEFAULT_FLOW_POINTS_V2_POLICY,dailyCoreSwapCap:123}); expect(custom.dailyCoreSwapCap).toBe(123); expect(coreSwapAward(200,100,custom).award).toBe(23); });
   it('uses actual configured milestone amounts', () => { const custom=rewardPolicyPresentation({...DEFAULT_FLOW_POINTS_V2_POLICY,referralMilestoneFirstSwap:17,referralMonthlyCap:7}); expect(custom.referralMilestoneFirstSwap).toBe(17); expect(custom.referralMonthlyCap).toBe(7); });
 });
