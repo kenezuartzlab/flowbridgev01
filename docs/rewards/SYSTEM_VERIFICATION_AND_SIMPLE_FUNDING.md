@@ -6,7 +6,8 @@
 - Ops Control Center opens on an aggregate overview: qualifying Points, wallets, funding, unencumbered backing, verified budget, valuation exceptions, funded totals and claimed on-chain totals. Proposal and separate super-admin approval/confirmation remain distinct financial decisions.
 - Successful atomic funding confirmation invokes existing unsigned settlement preparation. Failed preparation never repeats funding or reports a payout as published.
 - Historical assessment is SELECT-only. Recorded valuation and self-described metadata cannot establish historical authority. Existing transaction, calculation, funding and reservation evidence is displayed automatically.
-- Batch exception review supports up to 50 records sharing one documented condition. Each keeps its own proposal, independent decision and audit. Partial failure stops and explicitly requires refresh; it is not presented as atomic batch success.
+- Round #3 now has one grouped proposal with nine individually auditable evidence records. Atomic group RPCs support up to 50 records, retain individual audits, reject direct child decisions and roll back all records on a failed live check. A different current super admin decides the group.
+- Authorized group decisions automatically recalculate unsigned eligibility and the existing renewal proposal. The Payout Operations read is invalidated; renewing the stored schedule, signing and publishing still require separate explicit actions.
 - Missing original price documentation is optional under HISTORICAL_PRICING_EXCEPTION_V1, not a fraud/duplicate/wallet/policy waiver. RPCs recheck receipt/log identity, bound wallet, owner exclusions, approved version/day, original recorded economics, caps and matching reservations at proposal and approval. Approval changes provenance only, never funding or amounts.
 - Insert caps count approved exceptions; publication accepts them only with a complete independent approval audit and original valid funding reservation.
 
@@ -20,7 +21,11 @@
 - Rewards scheduler `rewards-ops-sweep`: **OFF**. Other existing jobs were not changed.
 
 ## Verification and limitations
-- Full regression: **2,012 tests / 196 files PASS**; preparation tests rerun after type narrowing correction.
+- Latest grouped-review regression (09:20 UTC): **2,020 tests / 198 files PASS**; automatic build/typecheck **build OK** at 09:20:14 UTC.
+- Exact migrations 0033/0036/0037/0038 on a disposable local database: nine funded records / 1,022 Points, one atomic proposal; same proposer/non-super/direct child denial; eight approvals produce one effective decision and one group audit; stale evidence and invalid policy roll back the group; duplicates blocked; original nine reservations / 1,022 Points unchanged. This does not authorize or mutate live records.
+- Actual authenticated API returns nine held records / 1,022 Points; wrong-wallet access returns 403. Directly mounted actual-data group screen displays all nine transaction/policy/USD/wallet/reservation records; one rationale and prefilled missing-evidence statement verified, then cancelled. Not a physical connected-wallet test.
+- Fresh live invariants: zero grouped proposals/reviews, renewals and publication attempts; 40 existing reservations; 74 unfunded and 776 restricted Points; automatic funding OFF. Round #3 remains 1,122 FLOW/unpublished.
+- Basic security scan: no new actionable findings. Full and production dependency checks flag one high Zod advisory (GHSA-mrhx-c7xc-m3w5) in existing transitive dependencies. No dependency upgrade or risk waiver was performed. Release remains HOLD; physical connected-wallet acceptance and release security clearance are unverified. No production deployment or new live fingerprint is claimed.
 - Authenticated real-data control/evidence APIs return 200. Overview, evidence display, batch selection and 390px layout checked with actual caller-scoped reads; component mounted directly for visual acceptance, not a physical connected-wallet test.
 - No exception proposals/approvals, financial confirmations, publisher signatures or chain transactions were exercised against live financial records. These remain gated; unit tests cover post-confirm preparation and duplicate reservation exclusion.
 - No independent immutable historical pricing archive exists for these records. No automatic PENDING→VERIFIED promotion was introduced; pending records require the approved exception path.

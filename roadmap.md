@@ -1,3 +1,11 @@
+# Complete grouped rewards review
+- [x] Present Round #3 as one proposal with nine auditable records / 1,022 Points and existing evidence; no transaction or valuation re-entry.
+- [x] Atomic grouped proposal/independent approval, live exception criteria and original reservation preservation; automatic read-only eligibility/renewal recalculation.
+- [x] 2,020 regressions / 198 files and automatic compilation PASS; disposable exact-SQL eight-way approvals/atomic rollback/independent authorization/reservation tests PASS; actual authenticated API/UI read and cancelled form PASS.
+- [x] Verify Round #3 unchanged/unpublished, 74 unfunded, 776 restricted, 40 reservations, zero group proposals/renewals/attempts, automatic funding/signing OFF.
+- [ ] Physical connected-wallet and separate-operator acceptance requires authorized operators/devices; live proposal/approval intentionally not exercised against held records.
+- [ ] Release HOLD: existing high transitive Zod dependency advisory and release-specific security/device clearance unresolved; no publish or new production fingerprint claimed.
+
 # Automated reward eligibility and simple Ops funding
 - [x] Canonical verified awards queue automatically; historical original pricing is not inferred from stored USD/metadata.
 - [x] Aggregate funding overview and separated proposer/approver workflow; confirmation retains original reservations and financial gates.
