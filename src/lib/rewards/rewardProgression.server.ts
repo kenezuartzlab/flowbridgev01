@@ -26,6 +26,8 @@ export interface PersonalProgress {
   missionNextStep: { id: string; title: string; href: string } | null;
   chainReadable: boolean;
   observedAt: string;
+  /** V37 — the caller's own Ops payout approvals (points). */
+  payoutApproval: { awaitingApproval: number; approvedFlow: number; status: string | null };
 }
 
 export async function resolvePersonalProgress(args: { userId: string; emailVerified: boolean }): Promise<PersonalProgress> {
@@ -116,7 +118,17 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     activeMissionHref: missionNextStep?.href ?? null, confirmedMainnetTrades, eligibleRoutesAvailable: true,
     liquidityPositions: 0, activeStakes: 0, activeCampaigns,
   });
-  return { progression, nextBestAction, confirmedMainnetTrades, missionNextStep, chainReadable, observedAt: new Date().toISOString() };
+  let payoutApproval: PersonalProgress["payoutApproval"] = { awaitingApproval: 0, approvedFlow: 0, status: null };
+  try {
+    const { data: ap } = await supabaseAdmin.from("reward_payout_approvals").select("points,status").eq("user_id", args.userId).order("created_at", { ascending: false }).limit(10);
+    const rows = ap ?? [];
+    payoutApproval = {
+      awaitingApproval: rows.filter((r) => r.status === "PROPOSED" || r.status === "APPROVED").reduce((s, r) => s + Number(r.points), 0),
+      approvedFlow: rows.filter((r) => r.status === "CONFIRMED").reduce((s, r) => s + Number(r.points), 0),
+      status: rows[0]?.status ?? null,
+    };
+  } catch { /* optional; balances fall back to progression only */ }
+  return { progression, nextBestAction, confirmedMainnetTrades, missionNextStep, chainReadable, observedAt: new Date().toISOString(), payoutApproval };
 }
 
 /**
