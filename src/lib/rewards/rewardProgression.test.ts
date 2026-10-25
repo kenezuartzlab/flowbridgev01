@@ -18,14 +18,15 @@ const alloc = (o: Partial<ProgressionAllocation> = {}): ProgressionAllocation =>
 
 describe("V34 1,000 FLOW progression", () => {
   it.each([
-    [0, 1000, 0], [100, 900, 10], [999, 1, 99], [1000, 0, 100], [1500, 0, 100],
+    [0, 1, 0], [100, 0, 100], [999, 0, 100], [1000, 0, 100], [1500, 0, 100],
   ])("%i FLOW → %i remaining, %i%%", (pts, remaining, pct) => {
     const p = computeRewardProgression(base(pts));
     expect(p.remainingToMinimum).toBe(remaining);
     expect(p.percent).toBe(pct);
   });
-  it("999 is not settlement eligible; 1,000 is", () => {
-    expect(computeRewardProgression(base(999)).lifecycle).not.toBe("ELIGIBLE_FOR_SETTLEMENT");
+  it("0 is not settlement eligible; any positive amount is (V37)", () => {
+    expect(computeRewardProgression(base(0)).lifecycle).not.toBe("ELIGIBLE_FOR_SETTLEMENT");
+    expect(computeRewardProgression(base(25)).lifecycle).toBe("ELIGIBLE_FOR_SETTLEMENT");
     expect(computeRewardProgression(base(1000)).lifecycle).toBe("ELIGIBLE_FOR_SETTLEMENT");
   });
   it("eligible but not allocated has no claim button", () => {
@@ -80,7 +81,10 @@ describe("V34 next-best-action", () => {
   it("signed out explores", () => expect(resolveNextBestAction(facts({ signedIn: false })).id).toBe("EXPLORE"));
   it("unverified email first", () => expect(resolveNextBestAction(facts({ emailVerified: false })).id).toBe("VERIFY_EMAIL"));
   it("unbound wallet", () => expect(resolveNextBestAction(facts({ walletBound: false })).id).toBe("BIND_WALLET"));
-  it("low points earns toward minimum", () => expect(resolveNextBestAction(facts()).id).toBe("EARN_TOWARD_MINIMUM"));
+  it("funded points are settlement eligible; zero points earns", () => {
+    expect(resolveNextBestAction(facts()).id).toBe("SETTLEMENT_ELIGIBLE");
+    expect(resolveNextBestAction(facts({ progression: computeRewardProgression(base(0)) })).id).not.toBe("SETTLEMENT_ELIGIBLE");
+  });
   it("claimable wins", () => expect(resolveNextBestAction(facts({ progression: computeRewardProgression(base(1250, { allocations: [alloc({ claimStart: NOW - 1 })] })) })).id).toBe("CLAIM_FLOW"));
   it("never signs", () => expect(resolveNextBestAction(facts()).signsTransaction).toBe(false));
 });
@@ -125,6 +129,6 @@ describe("V34 AI personal context", () => {
     expect(a).not.toMatch(/999/);
   });
   it("answers from the caller's own progression", () => {
-    expect(answerProgressQuestion("REMAINING", { signedIn: true, progression: computeRewardProgression(base(425)), next: null })).toMatch(/575 FLOW remaining/);
+    expect(answerProgressQuestion("REMAINING", { signedIn: true, progression: computeRewardProgression(base(425)), next: null })).toMatch(/425 verified funded FLOW ready for payout approval/);
   });
 });

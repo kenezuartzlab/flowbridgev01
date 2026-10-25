@@ -1654,6 +1654,81 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_payout_approvals: {
+        Row: {
+          already_settled_points: number
+          available_points: number
+          confirmed_at: string | null
+          confirmed_by: string | null
+          confirmed_by_email: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          evidence: Json
+          evidence_hash: string
+          funded_points: number
+          id: string
+          points: number
+          proposed_by: string
+          proposed_by_email: string
+          settlement_batch_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          wallet: string
+        }
+        Insert: {
+          already_settled_points: number
+          available_points: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_by_email?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decided_by_email?: string | null
+          decision_note?: string | null
+          evidence: Json
+          evidence_hash: string
+          funded_points: number
+          id?: string
+          points: number
+          proposed_by: string
+          proposed_by_email: string
+          settlement_batch_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          wallet: string
+        }
+        Update: {
+          already_settled_points?: number
+          available_points?: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_by_email?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decided_by_email?: string | null
+          decision_note?: string | null
+          evidence?: Json
+          evidence_hash?: string
+          funded_points?: number
+          id?: string
+          points?: number
+          proposed_by?: string
+          proposed_by_email?: string
+          settlement_batch_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
       reward_processing_events: {
         Row: {
           chain_id: number | null

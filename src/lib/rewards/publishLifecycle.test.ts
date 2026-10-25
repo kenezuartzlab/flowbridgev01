@@ -12,12 +12,13 @@ describe("V36.3B publish lifecycle", () => {
     expect(PUBLISHER_CONFIG.autonomousSigning).toBe(false);
     expect(autonomousSigningAllowed({ autonomousSigning: true })).toBe(false);
   });
-  it("simulated end-to-end: 1,000 funded points → queued → published → claimable only after verified receipt", () => {
+  it("simulated end-to-end: funded points → queued → published → claimable only after verified receipt", () => {
     const q = buildSettlementQueue([
       { userId: "a", wallet: "0x" + "1".repeat(40), eligibleFundedUnallocated: 1000, underReview: false, alreadyQueuedEpoch: null },
       { userId: "b", wallet: "0x" + "2".repeat(40), eligibleFundedUnallocated: 300, underReview: false, alreadyQueuedEpoch: null },
+      { userId: "c", wallet: "0x" + "3".repeat(40), eligibleFundedUnallocated: 0, underReview: false, alreadyQueuedEpoch: null },
     ]);
-    expect(q.queued.map((x) => x.userId)).toEqual(["a"]);
+    expect(q.queued.map((x) => x.userId)).toEqual(["a", "b"]);
     expect(phaseFromVerification(null, false)).toBe("BROADCAST_PENDING");
     expect(phaseFromVerification("success", true)).toBe("CONFIRMED_VERIFIED");
     expect(canTransition("PUBLISHED", "OPEN") && canTransition("OPEN", "CLAIMED")).toBe(true);

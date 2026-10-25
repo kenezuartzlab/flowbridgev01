@@ -6,7 +6,7 @@
  * PTS never count. Nothing here changes economics or authorizes a claim: the
  * claim lifecycle is delegated verbatim to publicClaimPolicy.claimLifecycle.
  */
-import { MAINNET_MIN_CLAIM_FLOW } from "./claimMinimumPolicy";
+import { MIN_OPS_CLAIM_FLOW } from "./claimMinimumPolicy";
 import { claimLifecycle, type ClaimLifecycle } from "./publicClaimPolicy";
 import { MAINNET_CHAIN_ID } from "./historicalReconciliation";
 
@@ -109,24 +109,24 @@ export function computeRewardProgression(i: ProgressionInput): RewardProgression
   const settledFlow = valid.reduce((s, a) => s + floor(a.amountFlow), 0);
   const claimedFlow = valid.filter((a) => a.claimed).reduce((s, a) => s + floor(a.amountFlow), 0);
   const available = Math.max(0, eligibleFundedFlow - settledFlow);
-  const remaining = Math.max(0, MAINNET_MIN_CLAIM_FLOW - available);
-  const percent = Math.min(100, Math.floor((available / MAINNET_MIN_CLAIM_FLOW) * 100));
+  const remaining = Math.max(0, MIN_OPS_CLAIM_FLOW - available);
+  const percent = Math.min(100, Math.floor((available / MIN_OPS_CLAIM_FLOW) * 100));
   const allocation = pickAllocation(i.allocations);
   const lc = claimLifecycle({
     earnedPoints: floor(i.storedFlowPoints),
     fundedEligiblePoints: eligibleFundedFlow,
     alreadySettledPoints: settledFlow,
-    allocation: allocation && !(allocation.claimed && available >= MAINNET_MIN_CLAIM_FLOW) ? allocation : null,
+    allocation: allocation && !(allocation.claimed && available >= MIN_OPS_CLAIM_FLOW) ? allocation : null,
     nowSec: i.nowSec,
   });
   const settlementReady =
-    i.walletBound && i.reconciliationOk && floor(i.reviewHeldPoints) === 0 && available >= MAINNET_MIN_CLAIM_FLOW;
+    i.walletBound && i.reconciliationOk && floor(i.reviewHeldPoints) === 0 && available >= MIN_OPS_CLAIM_FLOW;
   // Lifecycle ELIGIBLE requires every settlement gate, not just the amount.
   const lifecycle: ClaimLifecycle = lc.state === "ELIGIBLE_FOR_SETTLEMENT" && !settlementReady ? "FUNDED" : lc.state;
   const lifecycleLabel =
     lifecycle !== lc.state ? `${available.toLocaleString("en-US")} FLOW reached — settlement needs a bound wallet and completed review` : lc.label;
   return {
-    minimum: MAINNET_MIN_CLAIM_FLOW,
+    minimum: MIN_OPS_CLAIM_FLOW,
     earnedPoints: floor(i.storedFlowPoints),
     eligibleFundedFlow,
     settledFlow,

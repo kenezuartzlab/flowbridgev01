@@ -52,7 +52,7 @@ export const TIMELINE: { stage: TimelineStage; label: string; explain: string }[
   { stage: "EARNED", label: "Earned", explain: "Points recorded from qualifying activity." },
   { stage: "VERIFIED", label: "Verified", explain: "Activity confirmed on BOT Mainnet and reconciled." },
   { stage: "FUNDED", label: "Funded", explain: "Backed 1:1 by reserved FLOW in the reward budget." },
-  { stage: "QUEUED", label: "Queued", explain: "1,000 FLOW minimum reached; included in the next settlement batch." },
+  { stage: "QUEUED", label: "Queued", explain: "Verified funded Points are eligible; included in the next Ops-approved payout batch." },
   { stage: "PUBLISHED", label: "Published", explain: "Your allocation is published on-chain in a payout round." },
   { stage: "CLAIM_OPEN", label: "Claim open", explain: "The round's claim window is open — claim in your wallet." },
   { stage: "CLAIMED", label: "Claimed", explain: "FLOW has been sent to your wallet." },
@@ -63,7 +63,7 @@ export const BLOCKER_LABEL: Record<RewardBlocker, string> = {
   STATE_UNAVAILABLE: "Status could not be verified",
   NO_WALLET: "No verified wallet bound",
   NOT_FUNDED: "Points awaiting reward funding",
-  BELOW_MINIMUM: "Below the 1,000 FLOW minimum",
+  BELOW_MINIMUM: "Awaiting payout approval",
   UNDER_REVIEW: "Points under review",
   AWAITING_PUBLICATION: "Waiting for settlement publication",
   AWAITING_OPEN: "Waiting for claim window to open",
@@ -132,7 +132,7 @@ export function buildRewardsSummary(i: SummaryInput): RewardsSummary {
     message = `${fmt(p.reviewHeld)} Points are under review. Settlement waits until review completes.`;
   } else if (eligible > 0) {
     blocker = "BELOW_MINIMUM"; stage = "FUNDED";
-    message = `You have ${fmt(eligible)} eligible FLOW toward the ${fmt(p.minimum)} FLOW minimum. Earn ${fmt(p.remainingToMinimum)} more to qualify for a settlement batch.`;
+    message = `You have ${fmt(eligible)} eligible FLOW ready for payout approval. An authorized operator approves the next payout batch.`;
   } else if (p.pendingUnfunded > 0) {
     blocker = "NOT_FUNDED"; stage = "EARNED";
     message = `${fmt(p.pendingUnfunded)} Points are awaiting reward funding. These do not count toward claiming yet.`;
@@ -141,7 +141,7 @@ export function buildRewardsSummary(i: SummaryInput): RewardsSummary {
     message = `Claim completed: ${fmt(a.amountFlow)} FLOW.`;
   } else {
     blocker = "BELOW_MINIMUM"; stage = p.earnedPoints > 0 ? "EARNED" : "EARNED";
-    message = `You have 0 eligible FLOW toward the ${fmt(p.minimum)} FLOW minimum. Earn ${fmt(p.remainingToMinimum)} more to qualify for a settlement batch.`;
+    message = `No eligible FLOW yet. Earn verified Points to qualify for payout approval.`;
   }
 
   return {

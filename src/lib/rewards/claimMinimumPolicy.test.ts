@@ -11,9 +11,9 @@ describe("Mainnet claim minimum", () => {
     expect(CONTRACT_ENFORCES_MIN_CLAIM).toBe(false);
   });
   it("progress label", () => {
-    expect(claimMinimumProgress(350).label).toBe("350 / 1,000 FLOW toward minimum claim");
-    expect(claimMinimumProgress(1000).meetsMinimum).toBe(true);
-    expect(claimMinimumProgress(999).meetsMinimum).toBe(false);
+    expect(claimMinimumProgress(350).label).toBe("350 verified FLOW ready for payout approval");
+    expect(claimMinimumProgress(1).meetsMinimum).toBe(true);
+    expect(claimMinimumProgress(0).meetsMinimum).toBe(false);
   });
   it("canary exception only for kentrosh2002, round 2, exactly 10", () => {
     expect(leafMeetsClaimMinimum(2, CANARY, 10)).toBe(true);

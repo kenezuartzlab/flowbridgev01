@@ -63,7 +63,6 @@ export function resolveNextBestAction(f: NextBestActionFacts): NextBestAction {
   if (f.activeCampaigns > 0)
     return act("CONTINUE_CAMPAIGN", "Continue campaign", "A campaign you can join is active.", "/campaigns", ["active_campaign"]);
   if (p && p.claimedFlow > 0 && p.availableTowardMinimum === 0)
-    return act("CONTINUE_EARNING", "Continue earning", `You claimed ${fmt(p.claimedFlow)} FLOW. New eligible activity counts toward your next 1,000 FLOW.`, "/earn", ["claimed"]);
-  const remaining = p?.remainingToMinimum ?? 1000;
-  return act("EARN_TOWARD_MINIMUM", "Earn toward 1,000 FLOW", `${fmt(remaining)} FLOW remaining to the claim minimum. Eligible swaps and funded referral milestones count.`, "/earn", ["below_minimum"]);
+    return act("CONTINUE_EARNING", "Continue earning", `You claimed ${fmt(p.claimedFlow)} FLOW. New eligible activity counts toward your next payout.`, "/earn", ["claimed"]);
+  return act("EARN_TOWARD_MINIMUM", "Earn verified FLOW", `Earn verified Points to qualify for payout approval. Eligible swaps and funded referral milestones count.`, "/earn", ["below_minimum"]);
 }

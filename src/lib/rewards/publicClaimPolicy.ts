@@ -8,7 +8,7 @@
  * - Settlement eligibility = eligibleBackedPoints - alreadySettledPoints >= 1,000,
  *   from funded, reconciled Mainnet ledger rows only.
  */
-import { MAINNET_CLAIM_CANARY_EXCEPTION, MAINNET_MIN_CLAIM_FLOW } from './claimMinimumPolicy';
+import { MAINNET_CLAIM_CANARY_EXCEPTION, MIN_OPS_CLAIM_FLOW } from './claimMinimumPolicy';
 
 export const PUBLIC_MAINNET_FLOW_CLAIMS = true as boolean;
 
@@ -58,9 +58,9 @@ export function claimLifecycle(i: LifecycleInput): { state: ClaimLifecycle; labe
     };
   }
   const available = Math.max(0, Math.floor(i.fundedEligiblePoints) - Math.floor(i.alreadySettledPoints));
-  if (available >= MAINNET_MIN_CLAIM_FLOW) return { state: 'ELIGIBLE_FOR_SETTLEMENT', label: 'Eligible for next settlement batch', claimButton: false };
-  if (i.fundedEligiblePoints > 0) return { state: 'FUNDED', label: `${fmt(available)} / ${fmt(MAINNET_MIN_CLAIM_FLOW)} FLOW toward minimum claim`, claimButton: false };
-  return { state: 'EARNED', label: `${fmt(available)} / ${fmt(MAINNET_MIN_CLAIM_FLOW)} FLOW toward minimum claim`, claimButton: false };
+  if (available >= MIN_OPS_CLAIM_FLOW) return { state: 'ELIGIBLE_FOR_SETTLEMENT', label: 'Eligible for payout approval', claimButton: false };
+  if (i.fundedEligiblePoints > 0) return { state: 'FUNDED', label: `${fmt(available)} FLOW funded — awaiting eligibility`, claimButton: false };
+  return { state: 'EARNED', label: 'Earn verified Points to become eligible for payout approval', claimButton: false };
 }
 
 export interface EligibilityRow {
@@ -83,7 +83,7 @@ export function settlementEligibility(rows: EligibilityRow[]) {
   for (const r of rows) {
     const backed = Math.min(Math.floor(r.fundedPoints), Math.floor(r.authoritative));
     const available = Math.max(0, backed - Math.floor(r.alreadySettledPoints));
-    const ok = !!r.wallet && OK_CLASS.has(r.classification) && r.pendingReview <= 0 && available >= MAINNET_MIN_CLAIM_FLOW;
+    const ok = !!r.wallet && OK_CLASS.has(r.classification) && r.pendingReview <= 0 && available >= MIN_OPS_CLAIM_FLOW;
     if (ok) eligible.push({ wallet: r.wallet!.toLowerCase(), flow: available });
     else excludedFlow += available;
   }

@@ -44,7 +44,7 @@ export function answerProgressQuestion(kind: ProgressQuestion, ctx: { signedIn: 
   const p = ctx.progression;
   switch (kind) {
     case "ELIGIBLE": return `You have ${f(p.eligibleFundedFlow)} eligible, funded Mainnet FLOW Points (${f(p.availableTowardMinimum)} not yet settled).`;
-    case "REMAINING": return p.remainingToMinimum === 0 ? "You have reached the 1,000 FLOW claim minimum." : `${f(p.availableTowardMinimum)} / 1,000 FLOW — ${f(p.remainingToMinimum)} FLOW remaining to the claim minimum.`;
+    case "REMAINING": return p.remainingToMinimum === 0 ? `You have ${f(p.availableTowardMinimum)} verified funded FLOW ready for payout approval — there is no minimum.` : "Earn verified Points to qualify for payout approval.";
     case "NOT_CLAIMABLE": {
       const parts = [
         p.pendingUnfunded ? `${f(p.pendingUnfunded)} not yet funded` : "",
@@ -52,10 +52,10 @@ export function answerProgressQuestion(kind: ProgressQuestion, ctx: { signedIn: 
         p.testnetExcluded ? `${f(p.testnetExcluded)} from Testnet` : "",
         p.historicalNonclaimable ? `${f(p.historicalNonclaimable)} unsupported historical` : "",
       ].filter(Boolean);
-      return `Only funded, reconciled Mainnet points count, and claims need at least 1,000 FLOW in a published payout round. ${parts.length ? `Not counted: ${parts.join(", ")}.` : "None of your points are excluded."} Campaign PTS are separate and never convert.`;
+      return `Only funded, reconciled Mainnet points count, and a claim needs a published payout round for your wallet. ${parts.length ? `Not counted: ${parts.join(", ")}.` : "None of your points are excluded."} Campaign PTS are separate and never convert.`;
     }
     case "ROUND": return p.allocation && !p.allocation.claimed ? `Yes — ${f(p.allocation.amountFlow)} FLOW in round #${p.allocation.epochId}.` : p.settlementReady ? "Not yet. You are eligible for the next settlement batch, which a reviewer publishes." : "No current unclaimed payout round includes your wallet.";
-    case "WHEN": return p.allocation && !p.allocation.claimed ? `Round #${p.allocation.epochId} claim window: ${d(p.allocation.claimStart)} to ${d(p.allocation.claimEnd)} (30 days).` : "There is no open allocation for you yet. After you reach 1,000 FLOW and a round is published, the claim window lasts 30 days.";
+    case "WHEN": return p.allocation && !p.allocation.claimed ? `Round #${p.allocation.epochId} claim window: ${d(p.allocation.claimStart)} to ${d(p.allocation.claimEnd)} (30 days).` : "There is no open allocation for you yet. Once an operator approves your verified Points and a round is published, the claim window lasts 30 days.";
     case "NEXT": return ctx.next ? `${ctx.next.label}: ${ctx.next.reason}` : "Open Home to see your next step.";
     case "ROUTE": return "Open Trade and pick two tokens — Auto shows whether a supported route exists right now, before anything is signed. You can watch an unavailable route to be notified.";
   }

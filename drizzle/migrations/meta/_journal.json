@@ -274,6 +274,13 @@
       "when": 1792919797914,
       "tag": "0038_enforce_group_only_evidence_decisions",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1792927110490,
+      "tag": "0039_create_reward_payout_approvals",
+      "breakpoints": true
     }
   ]
 }

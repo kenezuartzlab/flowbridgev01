@@ -21,7 +21,8 @@ describe("V36 rewards summary", () => {
   it("625 pending funding is never claimable or eligible", () => {
     const s = buildRewardsSummary({ progression: prog({ funded: 200, unfunded: 625, stored: 825 }), nowSec: now });
     expect(s.pendingFunding).toBe(625); expect(s.eligibleFundedUnallocated).toBe(200); expect(s.claimableNow).toBe(0);
-    expect(s.blocker).toBe("BELOW_MINIMUM"); expect(s.remainingToMinimum).toBe(800);
+    // V37: 200 verified funded Points exceed the new 1-FLOW Ops threshold, so the account is settlement-ready.
+    expect(s.blocker).toBe("AWAITING_PUBLICATION"); expect(s.remainingToMinimum).toBe(0);
   });
   it("800 stored points never become a ready banner", () => {
     const s = buildRewardsSummary({ progression: prog({ stored: 800 }), nowSec: now });

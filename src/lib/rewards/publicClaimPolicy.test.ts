@@ -10,23 +10,24 @@ const alloc = (o: Record<string, unknown> = {}) => ({ epochId: 3, amountFlow: 15
 const base = { earnedPoints: 1500, fundedEligiblePoints: 1500, alreadySettledPoints: 0, nowSec: now };
 
 describe('V33 settlement eligibility', () => {
-  it('999 FLOW not eligible', () => expect(settlementEligibility([funded(999)]).wallets).toBe(0));
+  it('999 FLOW eligible under V37 (any positive amount)', () => expect(settlementEligibility([funded(999)]).wallets).toBe(1));
+  it('zero FLOW not eligible', () => expect(settlementEligibility([funded(0)]).wallets).toBe(0));
   it('1,000 FLOW eligible', () => expect(settlementEligibility([funded(1000)])).toMatchObject({ wallets: 1, totalFlow: 1000 }));
   it('1,500 FLOW eligible', () => expect(settlementEligibility([funded(1500)]).totalFlow).toBe(1500));
   it('Testnet-only 2,000 points not eligible (no funded Mainnet rows)', () => expect(settlementEligibility([row({ fundedPoints: 0, authoritative: 2000 })]).wallets).toBe(0));
   it('historical unsupported 2,000 not eligible', () => expect(settlementEligibility([row({ fundedPoints: 2000, authoritative: 2000, classification: 'REVIEWED_NONCLAIMABLE_HISTORICAL' })]).wallets).toBe(0));
   it('unfunded 2,000 not eligible', () => expect(settlementEligibility([row({ fundedPoints: 0, authoritative: 2000 })]).wallets).toBe(0));
   it('review-held not eligible', () => expect(settlementEligibility([row({ fundedPoints: 2000, authoritative: 2000, pendingReview: 5 })]).wallets).toBe(0));
-  it('already-settled points do not count twice', () => expect(settlementEligibility([row({ fundedPoints: 1500, authoritative: 1500, alreadySettledPoints: 1000 })]).wallets).toBe(0));
+  it('already-settled points do not count twice', () => expect(settlementEligibility([row({ fundedPoints: 1500, authoritative: 1500, alreadySettledPoints: 1000 })])).toMatchObject({ wallets: 1, totalFlow: 500 }));
   it('zero eligible reports no batch required', () => expect(settlementEligibility([]).status).toBe('NO_PUBLIC_BATCH_REQUIRED_YET'));
 });
 
 describe('V33 claim lifecycle', () => {
   it('public flag is ON (V33.2)', () => expect(PUBLIC_MAINNET_FLOW_CLAIMS).toBe(true));
   it('eligible but not allocated: no claim button', () => {
-    expect(claimLifecycle({ ...base, allocation: null })).toMatchObject({ state: 'ELIGIBLE_FOR_SETTLEMENT', claimButton: false, label: 'Eligible for next settlement batch' });
+    expect(claimLifecycle({ ...base, allocation: null })).toMatchObject({ state: 'ELIGIBLE_FOR_SETTLEMENT', claimButton: false, label: 'Eligible for payout approval' });
   });
-  it('below minimum shows progress', () => expect(claimLifecycle({ ...base, fundedEligiblePoints: 350, allocation: null }).label).toBe('350 / 1,000 FLOW toward minimum claim'));
+  it('funded below any allocation shows funded status', () => expect(claimLifecycle({ ...base, fundedEligiblePoints: 0, allocation: null }).label).toBe('Earn verified Points to become eligible for payout approval'));
   it('allocated but window not open: disabled', () => {
     expect(claimLifecycle({ ...base, publicFlag: true, allocation: alloc({ claimStart: now + 100 }) })).toMatchObject({ state: 'ALLOCATED_ON_CHAIN', claimButton: false });
   });
@@ -40,7 +41,9 @@ describe('V33 claim lifecycle', () => {
     const e = MAINNET_CLAIM_CANARY_EXCEPTION;
     expect(leafMeetsClaimMinimum(e.epochId, e.wallet, e.points)).toBe(true);
     expect(leafMeetsClaimMinimum(3, e.wallet, e.points)).toBe(false);
-    expect(leafMeetsClaimMinimum(4, e.wallet, 999)).toBe(false);
+    // V37: epoch 4+ accepts any positive amount; zero is never eligible.
+    expect(leafMeetsClaimMinimum(4, e.wallet, 999)).toBe(true);
+    expect(leafMeetsClaimMinimum(4, e.wallet, 0)).toBe(false);
   });
   it('claim window policy is owner-approved at 30 days', () => {
     expect(CLAIM_WINDOW_POLICY.ownerApproved).toBe(true);
@@ -50,7 +53,7 @@ describe('V33 claim lifecycle', () => {
 });
 
 describe('V33.2 public activation keeps safety', () => {
-  it('flag ON never makes sub-1,000 claimable without allocation', () => {
+  it('flag ON never makes any amount claimable without allocation', () => {
     expect(claimLifecycle({ ...base, fundedEligiblePoints: 999, allocation: null })).toMatchObject({ claimButton: false });
   });
   it('flag ON: eligible but unallocated has no claim button', () => {
