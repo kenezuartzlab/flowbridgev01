@@ -296,6 +296,9 @@ export async function buildSettlement(args: {
     status: publishable ? p.status : "BLOCKED" as const,
     reason: publishable ? null : p.reason ?? checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
     simulation, limits, renewal, flowPublishedLast24h, walletStates, signupReconciliation: signup.report, provenanceExcludedPoints,
+    // Server-only per-account settlement facts (userId + wallet). Never serialized
+    // to anonymized report consumers; the V37 approval queue reads these.
+    accountRows: rows,
     publisherConfig: { mode: PUBLISHER_CONFIG.mode, autonomousSigning: PUBLISHER_CONFIG.autonomousSigning, maxWalletsPerEpoch: PUBLISHER_CONFIG.maxWalletsPerEpoch, maxFlowPerEpoch: PUBLISHER_CONFIG.maxFlowPerEpoch, maxFlowPerDay: PUBLISHER_CONFIG.maxFlowPerDay },
     signer: SETTLEMENT_SIGNER, publisher,
     batchId: stored?.id ?? null,
