@@ -262,7 +262,7 @@ export async function groupedEvidenceReview(a: AdminContext, input: {action:'pro
   }
   if(a.role!=='super_admin') return {ok:false,error:'A different super admin must approve this group.'};
   if(!input.groupId) return {ok:false,error:'Group is required.'};
-  const {data,error}=await admin.rpc('decide_reward_evidence_group',{p_group:input.groupId,p_actor:a.userId,p_email:a.email,p_decision:input.action,p_note:input.rationale ?? null});
+  const {data,error}=await admin.rpc('decide_reward_evidence_group',{p_group:input.groupId,p_actor:a.userId,p_email:a.email,p_decision:input.action,p_note:input.rationale ?? ''});
   if(error) return {ok:false,error:'Group not changed. Independent authorization and every original evidence record must still pass.'};
   let recalculation: {status:string;renewal:unknown;automaticSigning:false};
   try {
