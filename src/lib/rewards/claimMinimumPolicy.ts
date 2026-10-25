@@ -38,7 +38,9 @@ export function isCanaryException(epochId: number | null | undefined, wallet: st
 
 /** Minimum that applies to a round: historical rounds keep 1,000; new Ops-approved rounds use the V37 minimum. */
 export function claimMinimumForEpoch(epochId: number | null | undefined): number {
-  return epochId != null && epochId <= LAST_PRESERVED_EPOCH ? MAINNET_MIN_CLAIM_FLOW : MIN_OPS_CLAIM_FLOW;
+  // Unknown epoch (legacy/draft callers) fails closed under the historical minimum;
+  // new Ops-approved rounds always carry an explicit epoch > LAST_PRESERVED_EPOCH.
+  return epochId == null || epochId <= LAST_PRESERVED_EPOCH ? MAINNET_MIN_CLAIM_FLOW : MIN_OPS_CLAIM_FLOW;
 }
 
 /** True when this allocation leaf may be included in a settlement round. */
