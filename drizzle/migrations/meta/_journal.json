@@ -239,6 +239,13 @@
       "when": 1792912540507,
       "tag": "0033_historical_valuation_review_safeguards",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792912790839,
+      "tag": "0034_exception_cap_and_funding_separation",
+      "breakpoints": true
     }
   ]
 }
