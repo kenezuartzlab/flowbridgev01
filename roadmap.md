@@ -1,3 +1,9 @@
+# Complete grouped rewards review
+- [ ] Present Round #3 as one proposal with nine auditable records / 1,022 Points and existing evidence; no transaction or valuation re-entry.
+- [ ] Atomic grouped proposal/independent approval, live exception criteria and original reservation preservation; automatic read-only eligibility/renewal recalculation.
+- [ ] Run authorization/concurrency/regression/release checks and real authenticated read-only Ops acceptance; physical wallets/two-person live financial actions remain unperformed without authorized operators.
+- [ ] Verify Round #3 unchanged/unpublished, 74 unfunded, 776 restricted and automation OFF; report actual remaining release gates.
+
 # Automated reward eligibility and simple Ops funding
 - [x] Canonical verified awards queue automatically; historical original pricing is not inferred from stored USD/metadata.
 - [x] Aggregate funding overview and separated proposer/approver workflow; confirmation retains original reservations and financial gates.
