@@ -25,7 +25,7 @@ export function RewardPolicyDetails() {
       </details>
       <details className="text-sm"><summary className="cursor-pointer font-semibold">When can I claim?</summary><ol className="mt-3 list-decimal space-y-2 pl-5 leading-relaxed text-muted">
         <li>Earn verified, eligible and funded rewards.</li>
-        <li>Reach {f(p.settlementMinimum)} funded Points not already allocated.</li>
+        <li>Have at least {f(p.settlementMinimum)} funded Point not already allocated — any positive verified amount can be approved.</li>
         <li>Wait for your funded allocation to be published in an on-chain payout round.</li>
         <li>Wait until the verified claim window opens.</li>
         <li>Claim with the allocated, authorized wallet on BOT Mainnet (677).</li>
