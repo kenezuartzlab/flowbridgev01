@@ -1391,6 +1391,51 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_evidence_groups: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          ledger_ids: string[]
+          points: number
+          policy_id: string
+          proposed_by: string
+          proposed_by_email: string
+          rationale: string
+          status: string
+          uncertainty: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          ledger_ids: string[]
+          points: number
+          policy_id?: string
+          proposed_by: string
+          proposed_by_email: string
+          rationale: string
+          status?: string
+          uncertainty: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          ledger_ids?: string[]
+          points?: number
+          policy_id?: string
+          proposed_by?: string
+          proposed_by_email?: string
+          rationale?: string
+          status?: string
+          uncertainty?: string
+        }
+        Relationships: []
+      }
       reward_evidence_reviews: {
         Row: {
           created_at: string
@@ -1398,6 +1443,7 @@ export type Database = {
           decided_by: string | null
           decided_by_email: string | null
           decision_note: string | null
+          group_id: string | null
           id: string
           ledger_id: string
           onchain_evidence: Json
@@ -1416,6 +1462,7 @@ export type Database = {
           decided_by?: string | null
           decided_by_email?: string | null
           decision_note?: string | null
+          group_id?: string | null
           id?: string
           ledger_id: string
           onchain_evidence: Json
@@ -1434,6 +1481,7 @@ export type Database = {
           decided_by?: string | null
           decided_by_email?: string | null
           decision_note?: string | null
+          group_id?: string | null
           id?: string
           ledger_id?: string
           onchain_evidence?: Json
@@ -1447,6 +1495,13 @@ export type Database = {
           uncertainty?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reward_evidence_reviews_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "reward_evidence_groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reward_evidence_reviews_ledger_id_fkey"
             columns: ["ledger_id"]
@@ -2406,6 +2461,16 @@ export type Database = {
         }
         Returns: string
       }
+      decide_reward_evidence_group: {
+        Args: {
+          p_actor: string
+          p_decision: string
+          p_email: string
+          p_group: string
+          p_note: string
+        }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2452,6 +2517,16 @@ export type Database = {
           p_email: string
           p_ledger: string
           p_price_evidence: Json
+          p_rationale: string
+          p_uncertainty: string
+        }
+        Returns: string
+      }
+      propose_reward_evidence_group: {
+        Args: {
+          p_actor: string
+          p_email: string
+          p_ids: string[]
           p_rationale: string
           p_uncertainty: string
         }
