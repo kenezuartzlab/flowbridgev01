@@ -4,6 +4,8 @@
  */
 export const BINDING_PURPOSE = "WALLET_BINDING";
 export const BINDING_TTL_MS = 5 * 60 * 1000;
+export const MAX_BINDING_HOST_LENGTH = 253;
+export const MAX_BINDING_MESSAGE_LENGTH = 4096;
 
 export const ALLOWED_BINDING_HOSTS = [
   "flowbridge.space",
@@ -13,9 +15,13 @@ export const ALLOWED_BINDING_HOSTS = [
 ];
 
 export function isAllowedBindingHost(host: string): boolean {
+  if (typeof host !== "string" || host.length === 0 || host.length > MAX_BINDING_HOST_LENGTH) return false;
   const h = host.toLowerCase();
   if (ALLOWED_BINDING_HOSTS.includes(h)) return true;
-  if (/^[a-z0-9-]+(--[a-z0-9-]+)*\.lovable\.app$/.test(h)) return true;
+  // The old nested repetition matched the same label language but could
+  // backtrack exponentially. Check suffix and label independently instead.
+  const previewSuffix = ".lovable.app";
+  if (h.endsWith(previewSuffix)) return /^[a-z0-9-]+$/.test(h.slice(0, -previewSuffix.length));
   if (/^localhost(:\d+)?$/.test(h) || /^127\.0\.0\.1(:\d+)?$/.test(h)) return true;
   return false;
 }
@@ -49,6 +55,7 @@ export function buildBindingMessage(f: Omit<BindingFields, "purpose">): string {
 }
 
 export function parseBindingMessage(message: string): BindingFields | null {
+  if (typeof message !== "string" || message.length > MAX_BINDING_MESSAGE_LENGTH) return null;
   const get = (k: string) => {
     const m = message.match(new RegExp(`^${k}: (.+)$`, "m"));
     return m ? m[1].trim() : null;
@@ -74,6 +81,8 @@ export function validateBindingMessage(
   message: string,
   expect: { userId: string; wallet: string; nonce: string; requestOrigin: string | null; nowMs: number },
 ): BindingCheck {
+  if (typeof message !== "string" || message.length > MAX_BINDING_MESSAGE_LENGTH)
+    return { ok: false, error: "Binding message is invalid or too long." };
   const f = parseBindingMessage(message);
   if (!f) return { ok: false, error: "Binding message is incomplete." };
   // Exact canonical text: any modification of the human-readable part is rejected.
