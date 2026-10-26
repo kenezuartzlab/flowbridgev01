@@ -10,7 +10,7 @@ export interface PersonalProgressClient {
   missionNextStep: { id: string; title: string; href: string } | null;
   chainReadable: boolean;
   observedAt: string;
-  payoutApproval?: { awaitingApproval: number; approvedFlow: number; status: string | null };
+  payoutApproval?: { awaitingApproval: number; approvedFlow: number; status: string | null; awaitingPublicationFlow?: number; publishedWaitingFlow?: number; claimOpensAt?: string | null };
 }
 
 let cache: { at: number; token: string; data: PersonalProgressClient | null } | null = null;

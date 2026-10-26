@@ -33,7 +33,7 @@ export function RewardsExperience() {
           ['Approved · awaiting publisher signature', personal?.payoutApproval?.awaitingPublicationFlow ?? 0, 'FLOW'],
           ['Published · claim opens soon', personal?.payoutApproval?.publishedWaitingFlow ?? 0, 'FLOW'],
           ['Claimable FLOW', summary?.claimableNow, 'FLOW'],
-          ['Claimed FLOW', summary?.claimed, 'FLOW'],
+          ['Claimed FLOW', summary?.claimedLifetime, 'FLOW'],
           ['Held for review', summary?.pendingReview, 'PTS'],
         ].map(([label,value,unit]) => <div key={String(label)} className="min-w-0"><dt className="text-xs leading-relaxed text-muted">{label}</dt><dd className="break-words text-xl font-bold tabular-nums">{typeof value === 'number' ? value.toLocaleString('en-US') : '—'} <span className="text-xs font-semibold text-muted">{unit}</span></dd></div>)}
       </dl>
