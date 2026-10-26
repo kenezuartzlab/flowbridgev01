@@ -86,7 +86,9 @@ export function planAutoApprovals(candidates: ApprovalCandidate[], cfg: AutoAppr
     const programs = allocateByProgram(c.availableByProgram, total, enabled);
     const pts = Object.values(programs).reduce((s, v) => s + v, 0);
     const rest = total - pts;
-    if (rest > 0) held.push({ userId: c.userId, reason: (c.availableByProgram.OTHER ?? 0) > 0 && pts + (c.availableByProgram.OTHER ?? 0) >= total && enabled.length === BUDGET_PROGRAMS.length ? "PROGRAM_ATTRIBUTION_UNKNOWN" : "PROGRAM_NOT_ENABLED", points: rest });
+    const ambiguous = Math.min(rest, Math.floor(c.availableByProgram.OTHER ?? 0));
+    if (ambiguous > 0) held.push({ userId: c.userId, reason: "PROGRAM_ATTRIBUTION_UNKNOWN", points: ambiguous });
+    if (rest - ambiguous > 0) held.push({ userId: c.userId, reason: "PROGRAM_NOT_ENABLED", points: rest - ambiguous });
     if (pts <= 0) continue;
     const hold = (reason: AutoHoldReason) => held.push({ userId: c.userId, reason, points: pts });
     if (publishers.has(c.wallet.toLowerCase())) { hold("PUBLISHER_RECIPIENT_REVIEW"); continue; }
