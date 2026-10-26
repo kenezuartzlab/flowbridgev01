@@ -26,5 +26,6 @@ export async function reconcileDurablePublications(admin:Admin){
    if(saved.data)confirmed++;
   }catch{unresolved++;}
  }
+ try{const {linkPublishedApprovals}=await import('./approvalLinkage.server');await linkPublishedApprovals(admin);}catch{/* retried next cycle; approvals keep their commitment */}
  return {confirmed,unresolved};
 }
