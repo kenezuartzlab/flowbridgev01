@@ -125,8 +125,8 @@ export function answerWalletQuestion(kind: WalletQuestion, ctx: WalletAnswerCont
       }
       if (a) return `Round #${a.epochId} has ${Math.floor(a.amountFlow)} FLOW for you, but the claim window is not open (${new Date(a.claimStart * 1000).toUTCString()} to ${new Date(a.claimEnd * 1000).toUTCString()}).`;
       const avail = Math.floor(p.availableTowardMinimum);
-      if (avail < 1000) return `Not yet — ${avail.toLocaleString("en-US")} / 1,000 eligible funded FLOW. Claims need at least 1,000 and a published payout round.`;
-      return "You have reached 1,000 eligible FLOW but are not in a published payout round yet. A reviewer publishes rounds; then you get a 30-day claim window.";
+      if (avail < 1) return "Not yet — you have no verified, funded FLOW waiting for payout. New verified Points can enter Ops approval in any positive amount.";
+      return `You have ${avail.toLocaleString("en-US")} verified FLOW awaiting Ops payout approval. After approval it must be published in a round; claims open at least 24 hours after publication.`;
     }
   }
 }

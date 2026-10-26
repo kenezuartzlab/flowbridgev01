@@ -52,11 +52,11 @@ export function deriveRetentionNotifications(i: RetentionInput): RetentionNotifi
     if (p.settlementReady)
       out.push(n(`SETTLEMENT_ELIGIBLE:${p.availableTowardMinimum}`, "SETTLEMENT_ELIGIBLE", "Eligible for the next settlement batch", "A reviewer includes you in the next payout round. You will be notified when it is published.", "/earn", "Open Earn"));
     else if (p.availableTowardMinimum >= p.minimum)
-      out.push(n("MINIMUM_REACHED", "MINIMUM_REACHED", "You reached 1,000 FLOW", "Your funded FLOW reached the claim minimum.", "/earn", "Open Earn"));
+      out.push(n("MINIMUM_REACHED", "MINIMUM_REACHED", "Ready for payout approval", "Your verified, funded FLOW can be reviewed by Ops for the next payout round.", "/earn", "Open Earn"));
     else if (p.percent >= 75)
-      out.push(n("APPROACHING_MINIMUM:75", "APPROACHING_MINIMUM", "Getting close to 1,000 FLOW", `${fmt(p.remainingToMinimum)} FLOW remaining to the claim minimum.`, "/earn", "See progress"));
+      out.push(n("APPROACHING_MINIMUM:75", "APPROACHING_MINIMUM", "Verified FLOW growing", `${fmt(p.availableTowardMinimum)} verified FLOW awaiting payout approval.`, "/earn", "See progress"));
     else if (p.percent >= 25)
-      out.push(n(`REWARD_PROGRESS:${p.thresholdsReached[p.thresholdsReached.length - 1]}`, "REWARD_PROGRESS", "Reward progress updated", `${fmt(p.availableTowardMinimum)} / 1,000 FLOW toward the claim minimum.`, "/earn", "See progress"));
+      out.push(n(`REWARD_PROGRESS:${p.thresholdsReached[p.thresholdsReached.length - 1]}`, "REWARD_PROGRESS", "Reward progress updated", `${fmt(p.availableTowardMinimum)} verified FLOW awaiting payout approval.`, "/earn", "See progress"));
   }
   for (const r of i.routesNowAvailable ?? [])
     out.push(n(`ROUTE_AVAILABLE:${r.from}>${r.to}`, "ROUTE_AVAILABLE", `${r.from} → ${r.to} route available`, "A supported route you watched is available again. Review it before your wallet signs anything.", "/trade", "Open Trade"));
