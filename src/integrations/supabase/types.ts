@@ -1710,9 +1710,13 @@ export type Database = {
           evidence_hash: string
           funded_points: number
           id: string
+          linked_at: string | null
+          linked_epoch_id: number | null
           points: number
+          program_breakdown: Json
           proposed_by: string
           proposed_by_email: string
+          publication_tx_hash: string | null
           settlement_batch_id: string | null
           status: string
           updated_at: string
@@ -1735,9 +1739,13 @@ export type Database = {
           evidence_hash: string
           funded_points: number
           id?: string
+          linked_at?: string | null
+          linked_epoch_id?: number | null
           points: number
+          program_breakdown?: Json
           proposed_by: string
           proposed_by_email: string
+          publication_tx_hash?: string | null
           settlement_batch_id?: string | null
           status?: string
           updated_at?: string
@@ -1760,9 +1768,13 @@ export type Database = {
           evidence_hash?: string
           funded_points?: number
           id?: string
+          linked_at?: string | null
+          linked_epoch_id?: number | null
           points?: number
+          program_breakdown?: Json
           proposed_by?: string
           proposed_by_email?: string
+          publication_tx_hash?: string | null
           settlement_batch_id?: string | null
           status?: string
           updated_at?: string
@@ -2519,6 +2531,20 @@ export type Database = {
         }
         Returns: Json
       }
+      auto_approve_payout_v2: {
+        Args: {
+          p_available: number
+          p_evidence: Json
+          p_funded: number
+          p_hash: string
+          p_points: number
+          p_programs: Json
+          p_settled: number
+          p_user: string
+          p_wallet: string
+        }
+        Returns: Json
+      }
       award_referral_milestone_v366: {
         Args: {
           p_day: string
@@ -2631,6 +2657,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      link_payout_approval: {
+        Args: { p_approval: string; p_batch: string; p_tx: string }
+        Returns: Json
       }
       move_to_dlq: {
         Args: {

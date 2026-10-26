@@ -9,7 +9,7 @@
  * settlement builder and reports the resulting status and claim window.
  */
 import type { AdminContext } from "@/lib/admin/adminGate.server";
-import { approvalEvidence, buildApprovalQueue, payoutApprovalDecision, proposedAmountValid, type ApprovalAccountRow } from "./approvalQueue";
+import { allocateByProgram, approvalEvidence, buildApprovalQueue, payoutApprovalDecision, proposedAmountValid, type ApprovalAccountRow } from "./approvalQueue";
 
 async function db() { return (await import("@/integrations/supabase/client.server")).supabaseAdmin; }
 async function sha256(text: string): Promise<string> {
@@ -17,7 +17,7 @@ async function sha256(text: string): Promise<string> {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-interface SettlementAccountRow { userId: string; wallet: string | null; classification: string; authoritative: number; pendingReview: number; alreadyAllocatedPoints: number }
+interface SettlementAccountRow { userId: string; wallet: string | null; classification: string; authoritative: number; pendingReview: number; alreadyAllocatedPoints: number; fundedByProgram?: Record<string, number> }
 
 export async function loadQueueState() {
   const { buildRewardSolvencyReport } = await import("./rewardSolvency.server");
@@ -27,10 +27,19 @@ export async function loadQueueState() {
   const { data: open, error } = await admin.from("reward_payout_approvals").select("user_id").or("status.in.(PROPOSED,APPROVED),and(status.eq.CONFIRMED,settlement_batch_id.is.null)");
   if (error) throw new Error("approval queue unavailable");
   const openUsers = new Set((open ?? []).map((r: { user_id: string }) => r.user_id));
+  const { data: linked, error: linkedError } = await admin.from("reward_payout_approvals").select("user_id,program_breakdown").eq("status", "CONFIRMED").not("settlement_batch_id", "is", null);
+  if (linkedError) throw new Error("approval history unavailable");
+  const settledBy = new Map<string, Record<string, number>>();
+  for (const l of linked ?? []) {
+    const m = settledBy.get(l.user_id) ?? {};
+    for (const [k, v] of Object.entries((l.program_breakdown ?? {}) as Record<string, number>)) m[k] = (m[k] ?? 0) + Number(v);
+    settledBy.set(l.user_id, m);
+  }
   const inputs: ApprovalAccountRow[] = rows.map((r) => ({
     userId: r.userId, wallet: r.wallet, fundedPoints: r.authoritative, authoritative: r.authoritative,
     alreadySettledPoints: r.alreadyAllocatedPoints, pendingReview: r.pendingReview,
     classification: r.classification, openProposal: openUsers.has(r.userId),
+    fundedByProgram: r.fundedByProgram, settledByProgram: settledBy.get(r.userId),
   }));
   return { report, queue: buildApprovalQueue(inputs) };
 }
@@ -39,7 +48,7 @@ export async function readApprovalQueue(actor?: AdminContext) {
   const admin = await db();
   const [{ queue, report }, { data: approvals, error }] = await Promise.all([
     loadQueueState(),
-    admin.from("reward_payout_approvals").select("id,user_id,wallet,points,available_points,funded_points,already_settled_points,evidence_hash,status,proposed_by_email,decided_by_email,decided_at,confirmed_by_email,confirmed_at,decision_note,created_at").order("created_at", { ascending: false }).limit(100),
+    admin.from("reward_payout_approvals").select("id,user_id,wallet,points,auto_approved,program_breakdown,linked_epoch_id,publication_tx_hash,linked_at,available_points,funded_points,already_settled_points,evidence_hash,status,proposed_by_email,decided_by_email,decided_at,confirmed_by_email,confirmed_at,decision_note,created_at").order("created_at", { ascending: false }).limit(100),
   ]);
   if (error) throw new Error("approval records unavailable");
   const chain = report.distributor.live;
@@ -80,6 +89,7 @@ export async function proposePayout(a: AdminContext, userId: string, points: num
     available_points: c.availablePoints, funded_points: c.fundedPoints, already_settled_points: c.alreadySettledPoints,
     evidence: { ...evidence, note: note ?? null, backingFreeFlow: Math.floor(chain.freeFlow), proposedAt: new Date().toISOString() } as never,
     evidence_hash: evidenceHash, proposed_by: a.userId, proposed_by_email: a.email,
+    program_breakdown: c.availableByProgram ? allocateByProgram(c.availableByProgram, points) : {},
   } as never).select("id");
   if (error) return { ok: false as const, error: /duplicate|unique/i.test(error.message) ? "An open payout approval already exists for this account." : "Proposal could not be recorded." };
   await admin.from("admin_audit_events").insert({ actor_user_id: a.userId, actor_email: a.email, actor_role: a.role, object_type: "reward_payout_approval", object_id: (data as { id: string }[])[0]?.id ?? userId, action: "PROPOSED", new_value: { points, wallet: c.wallet } as never });

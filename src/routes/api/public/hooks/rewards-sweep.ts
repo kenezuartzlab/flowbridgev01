@@ -16,6 +16,8 @@ export const Route = createFileRoute("/api/public/hooks/rewards-sweep")({
           const { runOpsSweep } = await import("@/lib/rewards/controlCenter.server");
           await runOpsSweep("cron");
           // Inert unless a super admin enabled it with a budget and confirmed acceptance.
+          const { linkPublishedApprovals } = await import("@/lib/rewards/approvalLinkage.server");
+          await linkPublishedApprovals((await import("@/integrations/supabase/client.server")).supabaseAdmin).catch(() => null);
           const { runAutoApproval } = await import("@/lib/rewards/autoApproval.server");
           await runAutoApproval("cron").catch(() => null);
           return Response.json({ ok: true });

@@ -77,7 +77,9 @@ async function handle(request:Request) {
   const result=await verifyPublicationOnChain({epochId:batch.epoch_id,root:batch.root as `0x${string}`,totalWei:integerWei(batch.total_wei),claimStart:Number(batch.claim_start),claimEnd:Number(batch.claim_end),leaves:batch.leaves as never},body.txHash,gate.admin.wallet);
   if(result.phase==='CONFIRMED_VERIFIED' && result.blockHash && result.blockNumber) {
    const {error:saveError}=await admin.rpc('confirm_reward_publication',{p_attempt:attempt.id,p_hash:body.txHash,p_block_hash:result.blockHash,p_block: Number(result.blockNumber),p_actor:gate.admin.userId,p_email:gate.admin.email,p_role:gate.admin.role});
-   if(saveError) throw saveError;
+    if(saveError) throw saveError;
+    const {linkPublishedApprovals}=await import('@/lib/rewards/approvalLinkage.server');
+    await linkPublishedApprovals(admin).catch(()=>null); // retried by the sweep/recovery if this fails
   } else {
    let retrySafe=false;
    if(result.phase==='REVERTED') {

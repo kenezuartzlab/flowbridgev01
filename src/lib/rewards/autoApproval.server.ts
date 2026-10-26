@@ -76,7 +76,7 @@ export async function readAutomation() {
     config: cfg, blocker: automationBlocker(cfg),
     budget: { dailyBudgetFlow: cfg.dailyBudgetFlow, committedTodayFlow: usage.used, remainingFlow: Math.max(0, cfg.dailyBudgetFlow - usage.used), freeBackingFlow: live ? Math.floor(live.freeFlow) : null, awaitingPublicationFlow: usage.pendingFlow },
     pendingBatch: { wallets: usage.pending.length, flow: usage.pendingFlow, autoApproved: usage.pending.filter((p) => p.auto_approved).length },
-    wouldApprove: plan.approve.map((x) => ({ wallet: x.wallet, points: x.points })),
+    wouldApprove: plan.approve.map((x) => ({ wallet: x.wallet, points: x.points, programs: x.programs })),
     held: plan.held.map((h) => ({ reason: h.reason, points: h.points })),
     excluded: queue.excluded.map((e) => ({ reason: e.reason, points: e.points })),
     autonomousSigning: false as const,
@@ -91,11 +91,11 @@ export async function runAutoApproval(source: string) {
   const admin = await db();
   let approved = 0; const rejected: Record<string, number> = {};
   for (const x of state._plan.approve) {
-    const evidence = { ...approvalEvidence(x.candidate, x.points), source, automatic: true, at: new Date().toISOString() };
-    const hash = await sha256(JSON.stringify(approvalEvidence(x.candidate, x.points)));
-    const { data, error } = await admin.rpc("auto_approve_payout" as never, {
+    const evidence = { ...approvalEvidence(x.candidate, x.points), programs: x.programs, source, automatic: true, at: new Date().toISOString() };
+    const hash = await sha256(JSON.stringify({ ...approvalEvidence(x.candidate, x.points), programs: x.programs }));
+    const { data, error } = await admin.rpc("auto_approve_payout_v2" as never, {
       p_user: x.userId, p_wallet: x.wallet, p_points: x.points, p_available: x.candidate.availablePoints,
-      p_funded: x.candidate.fundedPoints, p_settled: x.candidate.alreadySettledPoints, p_evidence: evidence, p_hash: hash,
+      p_funded: x.candidate.fundedPoints, p_settled: x.candidate.alreadySettledPoints, p_programs: x.programs, p_evidence: { ...evidence, programs: x.programs }, p_hash: hash,
     } as never);
     const res = (data ?? {}) as { ok?: boolean; reason?: string };
     if (error || !res.ok) { const k = error ? "RPC_ERROR" : res.reason ?? "UNKNOWN"; rejected[k] = (rejected[k] ?? 0) + 1; if (res.reason === "AUTOMATION_OFF" || res.reason === "DAILY_BUDGET_EXHAUSTED") break; continue; }
