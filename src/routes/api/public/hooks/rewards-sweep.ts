@@ -15,6 +15,9 @@ export const Route = createFileRoute("/api/public/hooks/rewards-sweep")({
         try {
           const { runOpsSweep } = await import("@/lib/rewards/controlCenter.server");
           await runOpsSweep("cron");
+          // Inert unless a super admin enabled it with a budget and confirmed acceptance.
+          const { runAutoApproval } = await import("@/lib/rewards/autoApproval.server");
+          await runAutoApproval("cron").catch(() => null);
           return Response.json({ ok: true });
         } catch {
           return Response.json({ ok: false }, { status: 503 });
