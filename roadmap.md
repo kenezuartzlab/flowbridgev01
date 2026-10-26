@@ -5,6 +5,6 @@
 - [x] 3. Payout preparation on confirmation (no new reservation, prepare-only unsigned batch, claim window returned)
 - [x] 4. User Rewards page: four balances + claim link gate
 - [x] 5. Tests: small amounts, cycles, partial, multi-user, duplicate prevention + DB-level concurrency/guard checks
-- [ ] 6. Full regression + build verification
+- [x] 6. Full regression + build verification (2,036 tests green; build OK; signed-in Rewards page and admin queue API verified live)
 
 Preserved: Round #3 (1,122 FLOW, unsigned, unpublished), 74 unfunded / 776 restricted Points, auto funding/signing OFF, scheduler OFF, no contracts, no real payouts.
