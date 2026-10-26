@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_AUTO_APPROVAL_CONFIG, planAutoApprovals, validateAutoConfig, type AutoApprovalConfig, type AutoPlanContext } from "./autoApproval";
 
 const cand = (id: string, pts: number, wallet = `0x${id.padStart(40, "0")}`) =>
-  ({ userId: id, wallet, availablePoints: pts, fundedPoints: pts, alreadySettledPoints: 0 });
+  ({ userId: id, wallet, availablePoints: pts, fundedPoints: pts, alreadySettledPoints: 0, availableByProgram: { SIGNUP_BONUS: pts } as Record<string, number> });
 const ON: AutoApprovalConfig = { enabled: true, suspended: false, acceptanceConfirmed: true, dailyBudgetFlow: 1000, perWalletDailyCap: 0, enabledPrograms: ["SIGNUP_BONUS", "CORE_SWAP", "REFERRAL_MILESTONE"], configuredBy: "u" };
 const CTX: AutoPlanContext = { usedTodayFlow: 0, walletUsedToday: {}, freeBackingFlow: 100_000, paused: false, publisherWallets: [], pendingBatchWallets: 0, pendingBatchFlow: 0 };
 
@@ -32,7 +32,7 @@ describe("automatic approval plan", () => {
   });
   it("enforces the per-wallet daily cap and program gating", () => {
     expect(planAutoApprovals([cand("a", 50)], { ...ON, perWalletDailyCap: 40 }, CTX).held[0].reason).toBe("WALLET_DAILY_CAP");
-    expect(planAutoApprovals([cand("a", 50)], { ...ON, enabledPrograms: ["CORE_SWAP"] }, CTX).held[0].reason).toBe("PROGRAM_NOT_ENABLED");
+    expect(planAutoApprovals([cand("a", 50)], { ...ON, enabledPrograms: ["CORE_SWAP"] }, CTX).held[0]?.reason).toBe("PROGRAM_NOT_ENABLED");
   });
   it("respects the 200-wallet / 250,000-FLOW batch limits", () => {
     expect(planAutoApprovals([cand("a", 5)], ON, { ...CTX, pendingBatchWallets: 200 }).held[0].reason).toBe("BATCH_CAP");
