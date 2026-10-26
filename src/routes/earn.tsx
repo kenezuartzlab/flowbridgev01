@@ -173,8 +173,9 @@ function EarnPage() {
             </div>
             <p className="text-[12.5px] leading-relaxed text-muted">
               FLOW Points (PTS) are off-chain loyalty points earned from qualified swaps,
-              funded signup and referral rewards. Campaign PTS are separate. Reaching 1,000 eligible
-              PTS qualifies for a payout round, not an immediate withdrawal.
+              funded signup and referral rewards. Campaign PTS are separate. Any positive verified eligible
+              amount can enter Ops payout approval; funding, an authorized published round and the
+              contract's claim window are still required before you can claim.
             </p>
             <SignInButton label="Sign in" returnTo="/earn" />
           </Surface>
@@ -242,7 +243,7 @@ function EarnPage() {
 
             <Surface id="claim">
               <SectionHeader title="When can I claim?" hint={display.readiness} />
-              <p className="border-t border-hairline p-4 text-[12px] leading-relaxed text-muted">A total of 1,000 PTS does not automatically mean 1,000 FLOW is available. First reach 1,000 verified, funded Mainnet PTS not already allocated; then wait for your payout round to be published. The claim above becomes available only during its open window, for the allocated wallet. Community follows are optional, not a claim requirement.</p>
+              <p className="border-t border-hairline p-4 text-[12px] leading-relaxed text-muted">Points are not automatically FLOW. Any positive amount of verified, funded Mainnet PTS not already allocated can be approved by Ops; then it must be published in a payout round. Historical rounds 1–3 used a 1,000-Point minimum; it no longer applies to new payouts. The claim above becomes available only during its open window, for the allocated wallet. Community follows are optional, not a claim requirement.</p>
             </Surface>
 
             {/* V13.2 — testnet vault live and funded; read-only surface, never a quoted rate. */}

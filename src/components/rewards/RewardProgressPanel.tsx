@@ -1,5 +1,5 @@
 /**
- * V34 — verified progress toward the 1,000 FLOW claim minimum. Render-only:
+ * V37 — verified FLOW awaiting payout approval (no minimum for new rounds). Render-only:
  * every number comes from the server progression; nothing is signed here.
  */
 import { useEffect } from "react";
@@ -38,14 +38,14 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
       </div>
       <p id={`rp-${area}`} className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">Eligible toward next FLOW batch</p>
       <div>
-        <p className="text-[18px] font-bold tabular-nums">{f(p.availableTowardMinimum)} / {f(p.minimum)} FLOW</p>
-        <p className="text-[12px] text-muted">1 eligible funded PTS = 1 FLOW. {p.remainingToMinimum > 0 ? `${f(p.remainingToMinimum)} more eligible PTS needed.` : "Minimum reached; a published payout round is still required."}</p>
+        <p className="text-[18px] font-bold tabular-nums">{f(p.availableTowardMinimum)} FLOW</p>
+        <p className="text-[12px] text-muted">1 eligible funded PTS = 1 FLOW. Any positive verified amount can enter Ops approval; funding, a published round and the claim window are still required.</p>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-muted/20" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={p.percent} aria-label="Progress toward 1,000 FLOW">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted/20" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={p.percent} aria-label="Verified FLOW progress">
         <div className="h-full rounded-full bg-primary motion-safe:transition-[width]" style={{ width: `${p.percent}%` }} />
       </div>
       <p className="text-[12px] font-semibold">{p.lifecycleLabel}</p>
-      <p className="text-[12px] leading-relaxed text-muted">Your total FLOW Points are not your withdrawable balance. Only verified, funded BOT Mainnet points count toward the 1,000 FLOW minimum.</p>
+      <p className="text-[12px] leading-relaxed text-muted">Your total FLOW Points are not your withdrawable balance. Only verified, funded BOT Mainnet points count toward a payout. The 1,000-Point minimum applied only to historical rounds 1–3.</p>
       {a && !a.claimed && <p className="text-[11.5px] text-muted">Round #{a.epochId}: {f(a.amountFlow)} FLOW · window {d(a.claimStart)} – {d(a.claimEnd)}</p>}
 
       <details><summary className="cursor-pointer text-sm font-semibold">Approved earning policy</summary><RewardPolicyDetails /></details>

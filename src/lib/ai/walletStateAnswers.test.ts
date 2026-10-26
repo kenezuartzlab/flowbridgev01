@@ -51,8 +51,9 @@ describe("V34.2A Flow AI wallet answers", () => {
     expect(answerWalletQuestion("NETWORK", { ...base, chainId: 1 })).toMatch(/never switch/);
   });
   it("claim answers use claim state, not aggregate points", () => {
-    expect(answerWalletQuestion("CAN_CLAIM", { ...base, progression: prog({ availableTowardMinimum: 999 }) })).toMatch(/Not yet — 999/);
-    expect(answerWalletQuestion("CAN_CLAIM", { ...base, progression: prog({ availableTowardMinimum: 1500 }) })).toMatch(/not in a published payout round/);
+    expect(answerWalletQuestion("CAN_CLAIM", { ...base, progression: prog({ availableTowardMinimum: 0 }) })).toMatch(/Not yet/);
+    expect(answerWalletQuestion("CAN_CLAIM", { ...base, progression: prog({ availableTowardMinimum: 129 }) })).toMatch(/129 verified FLOW awaiting Ops payout approval/);
+    expect(answerWalletQuestion("CAN_CLAIM", { ...base, progression: prog({ availableTowardMinimum: 1500 }) })).toMatch(/must be published in a round/);
     const alloc = { epochId: 3, amountFlow: 1200, claimed: false, claimStart: 0, claimEnd: 1 };
     expect(answerWalletQuestion("CAN_CLAIM", { ...base, progression: prog({ allocation: alloc, claimButton: true }) })).toMatch(/^Yes/);
     expect(answerWalletQuestion("CAN_CLAIM", { ...base, connectedWallet: B, progression: prog({ allocation: alloc, claimButton: true }) })).toMatch(/connect that wallet/);
