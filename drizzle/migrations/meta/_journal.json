@@ -288,6 +288,13 @@
       "when": 1793026634476,
       "tag": "0040_v37_1_auto_approval_budget",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793034188759,
+      "tag": "0041_v37_1_payout_round_linkage_programs",
+      "breakpoints": true
     }
   ]
 }
