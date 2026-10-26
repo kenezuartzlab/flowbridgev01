@@ -8,3 +8,6 @@
 - [x] 6. Full regression + build verification (2,036 tests green; build OK; signed-in Rewards page and admin queue API verified live)
 
 Preserved: Round #3 (1,122 FLOW, unsigned, unpublished), 74 unfunded / 776 restricted Points, auto funding/signing OFF, scheduler OFF, no contracts, no real payouts.
+
+- [x] V37.1 automatic approval within Ops daily budget (default OFF)
+- [ ] V37.1 link confirmed approvals to the prepared batch (settlement_batch_id) on publication
