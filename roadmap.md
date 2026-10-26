@@ -1,10 +1,10 @@
 # V37 — Continuous Points, Operator-Approved Claiming
 
-- [ ] 1. Claim-minimum policy change (pure + tests)
-- [ ] 2. Rewards Approval Queue (pure module, migration, server, API, Ops UI)
-- [ ] 3. Payout preparation on confirmation (reserve once, unsigned batch, activation time)
-- [ ] 4. User Rewards page: four balances + CLAIM gate
-- [ ] 5. Tests: small amounts, cycles, partial, concurrency, multi-user, duplicate prevention
-- [ ] 6. Regression + build verification
+- [x] 1. Claim-minimum policy change (pure + tests)
+- [x] 2. Rewards Approval Queue (pure module, migration, server, API, Ops UI)
+- [x] 3. Payout preparation on confirmation (no new reservation, prepare-only unsigned batch, claim window returned)
+- [x] 4. User Rewards page: four balances + claim link gate
+- [x] 5. Tests: small amounts, cycles, partial, multi-user, duplicate prevention + DB-level concurrency/guard checks
+- [x] 6. Full regression + build verification (2,036 tests green; build OK; signed-in Rewards page and admin queue API verified live)
 
 Preserved: Round #3 (1,122 FLOW, unsigned, unpublished), 74 unfunded / 776 restricted Points, auto funding/signing OFF, scheduler OFF, no contracts, no real payouts.
