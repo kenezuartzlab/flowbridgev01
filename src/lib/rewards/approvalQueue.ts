@@ -27,6 +27,10 @@ export interface ApprovalAccountRow {
   classification: string;
   /** An open proposal already exists for this account. */
   openProposal: boolean;
+  /** Funded points per reward program (OTHER = ambiguous attribution). */
+  fundedByProgram?: Record<string, number>;
+  /** Points per program already linked to published rounds via approvals. */
+  settledByProgram?: Record<string, number>;
 }
 
 export type ApprovalExclusion =
@@ -39,6 +43,42 @@ export interface ApprovalCandidate {
   availablePoints: number;
   fundedPoints: number;
   alreadySettledPoints: number;
+  /** Unallocated points per program; absent = attribution unknown. */
+  availableByProgram?: Record<string, number>;
+}
+
+/** Fixed attribution order, shared with the settlement builder. */
+export const PROGRAM_ORDER = ["CORE_SWAP", "REFERRAL_MILESTONE", "SIGNUP_BONUS", "OTHER"] as const;
+
+/**
+ * Per-program unallocated points. Settled points recorded per program on linked
+ * approvals are removed from their own program first; any remaining historical
+ * settlement (rounds 1-3, pre-V37) consumes programs in PROGRAM_ORDER.
+ */
+export function programAvailability(funded: Record<string, number>, settledTotal: number, settledByProgram: Record<string, number> = {}): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const p of PROGRAM_ORDER) out[p] = floor(funded[p] ?? 0);
+  for (const k of Object.keys(funded)) if (!(k in out)) out.OTHER += floor(funded[k]);
+  let remaining = floor(settledTotal);
+  for (const [p, v] of Object.entries(settledByProgram)) {
+    const key = p in out ? p : "OTHER"; const take = Math.min(out[key], floor(v), remaining);
+    out[key] -= take; remaining -= take;
+  }
+  for (const p of PROGRAM_ORDER) { const take = Math.min(out[p], remaining); out[p] -= take; remaining -= take; }
+  for (const p of Object.keys(out)) if (out[p] <= 0) delete out[p];
+  return out;
+}
+
+/** Splits an approved amount across programs in PROGRAM_ORDER, limited to `allowed`. */
+export function allocateByProgram(available: Record<string, number>, points: number, allowed?: readonly string[]): Record<string, number> {
+  const out: Record<string, number> = {}; let left = floor(points);
+  for (const p of PROGRAM_ORDER) {
+    if (left <= 0) break;
+    if (allowed && !allowed.includes(p)) continue;
+    const take = Math.min(floor(available[p] ?? 0), left);
+    if (take > 0) { out[p] = take; left -= take; }
+  }
+  return out;
 }
 
 const OK_CLASS = new Set(["MATCH", "EXPLAINED_DIFFERENCE"]);
@@ -67,6 +107,7 @@ export function buildApprovalQueue(rows: ApprovalAccountRow[]): {
     candidates.push({
       userId: r.userId, wallet: r.wallet.toLowerCase(), availablePoints: available,
       fundedPoints: backed, alreadySettledPoints: floor(r.alreadySettledPoints),
+      ...(r.fundedByProgram ? { availableByProgram: programAvailability(r.fundedByProgram, r.alreadySettledPoints, r.settledByProgram) } : {}),
     });
   }
   return { candidates, excluded };

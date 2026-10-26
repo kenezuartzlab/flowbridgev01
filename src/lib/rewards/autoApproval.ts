@@ -6,7 +6,7 @@
  * hold their reservations; the atomic DB function re-checks budget and
  * duplicates under a lock. Default config is OFF with a zero budget.
  */
-import type { ApprovalCandidate } from "./approvalQueue";
+import { allocateByProgram, type ApprovalCandidate } from "./approvalQueue";
 import { BUDGET_PROGRAMS } from "./budgetControls";
 import { PUBLISHER_CONFIG } from "./settlementQueue";
 
@@ -26,7 +26,7 @@ export const DEFAULT_AUTO_APPROVAL_CONFIG: AutoApprovalConfig = Object.freeze({
 }) as AutoApprovalConfig;
 
 export type AutoHoldReason =
-  | "AUTOMATION_OFF" | "PROGRAM_NOT_ENABLED" | "PUBLISHER_RECIPIENT_REVIEW" | "BACKING_UNAVAILABLE"
+  | "AUTOMATION_OFF" | "PROGRAM_NOT_ENABLED" | "PROGRAM_ATTRIBUTION_UNKNOWN" | "PUBLISHER_RECIPIENT_REVIEW" | "BACKING_UNAVAILABLE"
   | "DISTRIBUTOR_PAUSED" | "INSUFFICIENT_BACKING" | "DAILY_BUDGET_EXHAUSTED" | "WALLET_DAILY_CAP" | "BATCH_CAP";
 
 export interface AutoPlanContext {
@@ -62,14 +62,15 @@ export function validateAutoConfig(c: AutoApprovalConfig): string | null {
 }
 
 /**
- * Deterministic plan. Account balances combine programs, so every program
- * must be enabled for an account to be auto-approved (conservative).
+ * Deterministic plan. Programs are evaluated independently: only the account's
+ * unallocated points in enabled programs are approved; ambiguous (OTHER) or
+ * unattributed points are never auto-approved.
  */
 export function planAutoApprovals(candidates: ApprovalCandidate[], cfg: AutoApprovalConfig, ctx: AutoPlanContext) {
-  const approve: { userId: string; wallet: string; points: number; candidate: ApprovalCandidate }[] = [];
+  const approve: { userId: string; wallet: string; points: number; programs: Record<string, number>; candidate: ApprovalCandidate }[] = [];
   const held: { userId: string; reason: AutoHoldReason; points: number }[] = [];
   const blocker = automationBlocker(cfg);
-  const allPrograms = BUDGET_PROGRAMS.every((p) => cfg.enabledPrograms.includes(p));
+  const enabled = cfg.enabledPrograms.filter((p) => (BUDGET_PROGRAMS as readonly string[]).includes(p));
   const publishers = new Set(ctx.publisherWallets.map((w) => w.toLowerCase()));
   let used = Math.max(0, ctx.usedTodayFlow);
   let backing = ctx.freeBackingFlow;
@@ -78,11 +79,16 @@ export function planAutoApprovals(candidates: ApprovalCandidate[], cfg: AutoAppr
   const walletUsed = new Map(Object.entries(ctx.walletUsedToday).map(([k, v]) => [k.toLowerCase(), v]));
   const sorted = [...candidates].sort((a, b) => (a.userId < b.userId ? -1 : a.userId > b.userId ? 1 : 0));
   for (const c of sorted) {
-    const pts = Math.floor(c.availablePoints);
-    const hold = (reason: AutoHoldReason) => held.push({ userId: c.userId, reason, points: pts });
+    const total = Math.floor(c.availablePoints);
+    if (total <= 0) continue;
+    if (blocker) { held.push({ userId: c.userId, reason: "AUTOMATION_OFF", points: total }); continue; }
+    if (!c.availableByProgram) { held.push({ userId: c.userId, reason: "PROGRAM_ATTRIBUTION_UNKNOWN", points: total }); continue; }
+    const programs = allocateByProgram(c.availableByProgram, total, enabled);
+    const pts = Object.values(programs).reduce((s, v) => s + v, 0);
+    const rest = total - pts;
+    if (rest > 0) held.push({ userId: c.userId, reason: (c.availableByProgram.OTHER ?? 0) > 0 && pts + (c.availableByProgram.OTHER ?? 0) >= total && enabled.length === BUDGET_PROGRAMS.length ? "PROGRAM_ATTRIBUTION_UNKNOWN" : "PROGRAM_NOT_ENABLED", points: rest });
     if (pts <= 0) continue;
-    if (blocker) { hold("AUTOMATION_OFF"); continue; }
-    if (!allPrograms) { hold("PROGRAM_NOT_ENABLED"); continue; }
+    const hold = (reason: AutoHoldReason) => held.push({ userId: c.userId, reason, points: pts });
     if (publishers.has(c.wallet.toLowerCase())) { hold("PUBLISHER_RECIPIENT_REVIEW"); continue; }
     if (backing === null || ctx.paused === null) { hold("BACKING_UNAVAILABLE"); continue; }
     if (ctx.paused) { hold("DISTRIBUTOR_PAUSED"); continue; }
@@ -91,7 +97,7 @@ export function planAutoApprovals(candidates: ApprovalCandidate[], cfg: AutoAppr
     const wu = walletUsed.get(c.wallet.toLowerCase()) ?? 0;
     if (cfg.perWalletDailyCap > 0 && wu + pts > cfg.perWalletDailyCap) { hold("WALLET_DAILY_CAP"); continue; }
     if (wallets + 1 > PUBLISHER_CONFIG.maxWalletsPerEpoch || batchFlow + pts > PUBLISHER_CONFIG.maxFlowPerEpoch) { hold("BATCH_CAP"); continue; }
-    approve.push({ userId: c.userId, wallet: c.wallet, points: pts, candidate: c });
+    approve.push({ userId: c.userId, wallet: c.wallet, points: pts, programs, candidate: c });
     used += pts; backing -= pts; wallets += 1; batchFlow += pts;
     walletUsed.set(c.wallet.toLowerCase(), wu + pts);
   }
