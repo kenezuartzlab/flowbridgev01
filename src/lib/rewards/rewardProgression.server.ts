@@ -27,7 +27,7 @@ export interface PersonalProgress {
   chainReadable: boolean;
   observedAt: string;
   /** V37 — the caller's own Ops payout approvals (points). */
-  payoutApproval: { awaitingApproval: number; approvedFlow: number; status: string | null };
+  payoutApproval: { awaitingApproval: number; approvedFlow: number; status: string | null; awaitingPublicationFlow: number; publishedWaitingFlow: number; claimOpensAt: string | null };
 }
 
 export async function resolvePersonalProgress(args: { userId: string; emailVerified: boolean }): Promise<PersonalProgress> {
@@ -118,13 +118,26 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     activeMissionHref: missionNextStep?.href ?? null, confirmedMainnetTrades, eligibleRoutesAvailable: true,
     liquidityPositions: 0, activeStakes: 0, activeCampaigns,
   });
-  let payoutApproval: PersonalProgress["payoutApproval"] = { awaitingApproval: 0, approvedFlow: 0, status: null };
+  let payoutApproval: PersonalProgress["payoutApproval"] = { awaitingApproval: 0, approvedFlow: 0, status: null, awaitingPublicationFlow: 0, publishedWaitingFlow: 0, claimOpensAt: null };
   try {
-    const { data: ap } = await supabaseAdmin.from("reward_payout_approvals").select("points,status").eq("user_id", args.userId).order("created_at", { ascending: false }).limit(10);
+    const { approvalStage } = await import("./approvalLinkage");
+    const { data: ap } = await supabaseAdmin.from("reward_payout_approvals").select("points,status,settlement_batch_id").eq("user_id", args.userId).order("created_at", { ascending: false }).limit(10);
     const rows = ap ?? [];
+    const ids = [...new Set(rows.map((r) => r.settlement_batch_id).filter(Boolean))] as string[];
+    const { data: bs } = ids.length ? await supabaseAdmin.from("reward_settlement_batches").select("id,claim_start,claim_end").in("id", ids) : { data: [] };
+    const win = new Map((bs ?? []).map((b) => [b.id, b]));
+    const now = Math.floor(Date.now() / 1000);
+    const staged = rows.map((r) => { const b = r.settlement_batch_id ? win.get(r.settlement_batch_id) : undefined;
+      return { r, b, stage: approvalStage({ status: r.status, linked: !!b, claimStartSec: b ? Number(b.claim_start) : null, claimEndSec: b ? Number(b.claim_end) : null }, now) }; });
+    const sum = (k: string) => staged.filter((x) => x.stage === k).reduce((s, x) => s + Number(x.r.points), 0);
+    const waiting = staged.filter((x) => x.stage === "PUBLISHED_WAITING_FOR_CLAIM_WINDOW").map((x) => Number(x.b!.claim_start)).sort((a, b) => a - b);
     payoutApproval = {
-      awaitingApproval: rows.filter((r) => r.status === "PROPOSED" || r.status === "APPROVED").reduce((s, r) => s + Number(r.points), 0),
-      approvedFlow: rows.filter((r) => r.status === "CONFIRMED").reduce((s, r) => s + Number(r.points), 0),
+      awaitingApproval: sum("AWAITING_APPROVAL"),
+      awaitingPublicationFlow: sum("AWAITING_PUBLICATION"),
+      publishedWaitingFlow: sum("PUBLISHED_WAITING_FOR_CLAIM_WINDOW"),
+      claimOpensAt: waiting.length ? new Date(waiting[0] * 1000).toISOString() : null,
+      // Claimable FLOW itself comes only from the live on-chain progression, never from approvals.
+      approvedFlow: sum("AWAITING_PUBLICATION") + sum("PUBLISHED_WAITING_FOR_CLAIM_WINDOW"),
       status: rows[0]?.status ?? null,
     };
   } catch { /* optional; balances fall back to progression only */ }

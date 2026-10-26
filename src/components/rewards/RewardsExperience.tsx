@@ -29,12 +29,15 @@ export function RewardsExperience() {
         {[
           ['Available Points', Math.max(0, (summary?.eligibleFundedUnallocated ?? 0) - (personal?.payoutApproval?.awaitingApproval ?? 0)), 'PTS'],
           ['Awaiting Approval', personal?.payoutApproval?.awaitingApproval ?? 0, 'PTS'],
-          ['Approved FLOW', personal?.payoutApproval?.approvedFlow ?? 0, 'FLOW'],
-          ['Claimable FLOW', summary?.claimableNow, 'FLOW'],
           ['Awaiting funding', summary?.pendingFunding, 'PTS'],
+          ['Approved · awaiting publisher signature', personal?.payoutApproval?.awaitingPublicationFlow ?? 0, 'FLOW'],
+          ['Published · claim opens soon', personal?.payoutApproval?.publishedWaitingFlow ?? 0, 'FLOW'],
+          ['Claimable FLOW', summary?.claimableNow, 'FLOW'],
+          ['Claimed FLOW', summary?.claimed, 'FLOW'],
           ['Held for review', summary?.pendingReview, 'PTS'],
         ].map(([label,value,unit]) => <div key={String(label)} className="min-w-0"><dt className="text-xs leading-relaxed text-muted">{label}</dt><dd className="break-words text-xl font-bold tabular-nums">{typeof value === 'number' ? value.toLocaleString('en-US') : '—'} <span className="text-xs font-semibold text-muted">{unit}</span></dd></div>)}
       </dl>
+      {personal?.payoutApproval?.claimOpensAt && <p role="status" className="text-sm text-muted">Your published FLOW can be claimed from {new Date(personal.payoutApproval.claimOpensAt).toLocaleString()}.</p>}
       <Button asChild className="h-auto min-h-10 w-full whitespace-normal text-center"><Link to="/earn">{(summary?.claimableNow ?? 0) > 0 ? 'View verified claim' : 'View payout status'}</Link></Button>
       <nav aria-label="Rewards views" className="flex flex-wrap gap-1 border-b border-hairline pb-2">{[['rewards','Points & eligibility'],['referrals','Referrals'],['policy','How you earn']].map(([key,label]) => <Button key={key} variant={tab === key ? 'secondary' : 'ghost'} size="sm" onClick={() => setTab(key)} aria-pressed={tab === key}>{label}</Button>)}</nav>
       {tab === 'rewards' && <>
