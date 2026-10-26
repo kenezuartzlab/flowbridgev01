@@ -1226,6 +1226,45 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_auto_approval_config: {
+        Row: {
+          acceptance_confirmed: boolean
+          daily_budget_flow: number
+          enabled: boolean
+          enabled_programs: string[]
+          id: number
+          per_wallet_daily_cap: number
+          suspended: boolean
+          updated_at: string
+          updated_by: string | null
+          updated_by_email: string | null
+        }
+        Insert: {
+          acceptance_confirmed?: boolean
+          daily_budget_flow?: number
+          enabled?: boolean
+          enabled_programs?: string[]
+          id?: number
+          per_wallet_daily_cap?: number
+          suspended?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Update: {
+          acceptance_confirmed?: boolean
+          daily_budget_flow?: number
+          enabled?: boolean
+          enabled_programs?: string[]
+          id?: number
+          per_wallet_daily_cap?: number
+          suspended?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Relationships: []
+      }
       reward_automation_policy: {
         Row: {
           auto_funding_enabled: boolean
@@ -1657,6 +1696,7 @@ export type Database = {
       reward_payout_approvals: {
         Row: {
           already_settled_points: number
+          auto_approved: boolean
           available_points: number
           confirmed_at: string | null
           confirmed_by: string | null
@@ -1681,6 +1721,7 @@ export type Database = {
         }
         Insert: {
           already_settled_points: number
+          auto_approved?: boolean
           available_points: number
           confirmed_at?: string | null
           confirmed_by?: string | null
@@ -1705,6 +1746,7 @@ export type Database = {
         }
         Update: {
           already_settled_points?: number
+          auto_approved?: boolean
           available_points?: number
           confirmed_at?: string | null
           confirmed_by?: string | null
@@ -2463,6 +2505,19 @@ export type Database = {
           p_wallet: string
         }
         Returns: boolean
+      }
+      auto_approve_payout: {
+        Args: {
+          p_available: number
+          p_evidence: Json
+          p_funded: number
+          p_hash: string
+          p_points: number
+          p_settled: number
+          p_user: string
+          p_wallet: string
+        }
+        Returns: Json
       }
       award_referral_milestone_v366: {
         Args: {

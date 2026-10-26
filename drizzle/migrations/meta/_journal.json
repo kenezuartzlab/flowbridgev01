@@ -281,6 +281,13 @@
       "when": 1792927110490,
       "tag": "0039_create_reward_payout_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1793026634476,
+      "tag": "0040_v37_1_auto_approval_budget",
+      "breakpoints": true
     }
   ]
 }

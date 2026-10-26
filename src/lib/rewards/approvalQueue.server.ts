@@ -19,12 +19,12 @@ async function sha256(text: string): Promise<string> {
 
 interface SettlementAccountRow { userId: string; wallet: string | null; classification: string; authoritative: number; pendingReview: number; alreadyAllocatedPoints: number }
 
-async function loadQueueState() {
+export async function loadQueueState() {
   const { buildRewardSolvencyReport } = await import("./rewardSolvency.server");
   const report = await buildRewardSolvencyReport();
   const rows = ((report.settlement as { accountRows?: SettlementAccountRow[] }).accountRows ?? []) as SettlementAccountRow[];
   const admin = await db();
-  const { data: open, error } = await admin.from("reward_payout_approvals").select("user_id").in("status", ["PROPOSED", "APPROVED"]);
+  const { data: open, error } = await admin.from("reward_payout_approvals").select("user_id").or("status.in.(PROPOSED,APPROVED),and(status.eq.CONFIRMED,settlement_batch_id.is.null)");
   if (error) throw new Error("approval queue unavailable");
   const openUsers = new Set((open ?? []).map((r: { user_id: string }) => r.user_id));
   const inputs: ApprovalAccountRow[] = rows.map((r) => ({

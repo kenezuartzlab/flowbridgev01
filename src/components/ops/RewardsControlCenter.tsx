@@ -23,7 +23,7 @@ type State = {
   automation: { policies: { program_id: string; auto_funding_enabled: boolean; suspended: boolean; per_run_cap: number; daily_cap: number }[]; autonomousFundingAuthorized: boolean; autonomousSigning: boolean; lastRuns: { ran_at: string; source: string }[] };
 };
 
-const SECTIONS = ["Payout Operations", "Approval Queue", "Evidence Review", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation", "Audit History"] as const;
+const SECTIONS = ["Payout Operations", "Approval Queue", "Evidence Review", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation & Budgets", "Audit History"] as const;
 type Section = (typeof SECTIONS)[number];
 const fmt = (n: number | null | undefined) => (n == null ? "—" : Math.floor(n).toLocaleString());
 const TONE: Record<string, string> = {
@@ -59,6 +59,57 @@ type ApprovalQueueState = {
 };
 
 /** V37 — user-based Rewards Approval Queue. Propose → different super admin approves → confirm. No signing here. */
+const HOLD_TEXT: Record<string, string> = { AUTOMATION_OFF: "Automation off", PROGRAM_NOT_ENABLED: "Program not enabled", PUBLISHER_RECIPIENT_REVIEW: "Publisher wallet — independent review", BACKING_UNAVAILABLE: "Backing unreadable", DISTRIBUTOR_PAUSED: "Distributor paused", INSUFFICIENT_BACKING: "Insufficient backing", DAILY_BUDGET_EXHAUSTED: "Daily budget used", WALLET_DAILY_CAP: "Wallet daily cap", BATCH_CAP: "Batch limit" };
+function AutoBudget({ wallet, isSuper, busy, act }: { wallet: string; isSuper: boolean; busy: string | null; act: (key: string, body: Record<string, unknown>, ok: string) => Promise<void> }) {
+  const qc = useQueryClient();
+  const [form, setForm] = useState<{ budget: string; cap: string } | null>(null);
+  const q = useQuery({
+    queryKey: ["auto-approval", wallet],
+    queryFn: async () => {
+      const token = await getIdToken();
+      const res = await fetch("/api/admin/rewards-control", { method: "POST", headers: { "x-wallet-address": wallet, ...(token ? { authorization: `Bearer ${token}` } : {}), "content-type": "application/json" }, body: JSON.stringify({ action: "auto-state" }) });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((j as any)?.error ?? `Request failed (${res.status})`);
+      return j as any;
+    },
+    refetchInterval: 30_000, retry: false,
+  });
+  if (q.isLoading) return <p className="text-[12px] text-muted">Loading automatic approval…</p>;
+  if (q.error || !q.data) return <p role="alert" className="text-[12px] text-danger">{q.error?.message ?? "Unavailable."}</p>;
+  const d = q.data; const c = d.config;
+  const run = async (key: string, body: Record<string, unknown>, ok: string) => { await act(key, { action: "auto-config", ...body }, ok); qc.invalidateQueries({ queryKey: ["auto-approval"] }); };
+  const held: Record<string, number> = {}; for (const h of d.held) held[h.reason] = (held[h.reason] ?? 0) + 1;
+  const progs = ["SIGNUP_BONUS", "CORE_SWAP", "REFERRAL_MILESTONE"];
+  return (
+    <div className="space-y-2 rounded-xl border border-hairline bg-card p-3 text-[12px]">
+      <p className="font-black">Automatic approval & daily budget</p>
+      <p className={d.blocker ? "text-muted" : "font-bold text-success"}>{d.blocker ? `OFF — ${d.blocker}` : "ON — eligible funded rewards are approved within the budget. Publishing still needs the publisher's signature."}</p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {[["Daily budget", d.budget.dailyBudgetFlow], ["Committed today", d.budget.committedTodayFlow], ["Remaining today", d.budget.remainingFlow], ["Distributor free", d.budget.freeBackingFlow ?? "unreadable"]].map(([k, v]) => <div key={k as string} className="rounded-lg border border-hairline p-2"><p className="text-muted">{k}</p><p className="font-black">{typeof v === "number" ? `${fmt(v)} FLOW` : v}</p></div>)}
+      </div>
+      <p>Awaiting publisher signature: <b>{d.pendingBatch.wallets} wallet(s), {fmt(d.pendingBatch.flow)} FLOW</b> ({d.pendingBatch.autoApproved} automatic). Next cycle would approve {d.wouldApprove.length} wallet(s).</p>
+      {Object.keys(held).length > 0 && <p className="text-muted">Held: {Object.entries(held).map(([k, n]) => `${HOLD_TEXT[k] ?? k} (${n})`).join(" · ")}</p>}
+      {isSuper && (
+        <div className="space-y-2 border-t border-hairline pt-2">
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="flex flex-col">Daily budget (FLOW)<input inputMode="numeric" value={form?.budget ?? String(c.dailyBudgetFlow)} onChange={(e) => setForm({ budget: e.target.value, cap: form?.cap ?? String(c.perWalletDailyCap) })} className="w-32 rounded-lg border border-hairline bg-background px-2 py-1" /></label>
+            <label className="flex flex-col">Per wallet / day (0 = none)<input inputMode="numeric" value={form?.cap ?? String(c.perWalletDailyCap)} onChange={(e) => setForm({ cap: e.target.value, budget: form?.budget ?? String(c.dailyBudgetFlow) })} className="w-32 rounded-lg border border-hairline bg-background px-2 py-1" /></label>
+            <button type="button" disabled={!!busy || !form} onClick={() => { run("ab", { dailyBudgetFlow: Number(form!.budget), perWalletDailyCap: Number(form!.cap) }, "Budget saved"); setForm(null); }} className="rounded-xl border border-hairline px-3 py-1.5 font-bold">Save budget</button>
+          </div>
+          <div className="flex flex-wrap gap-2">{progs.map((p) => { const on = c.enabledPrograms.includes(p); return <button key={p} type="button" disabled={!!busy} onClick={() => run("ap", { enabledPrograms: on ? c.enabledPrograms.filter((x: string) => x !== p) : [...c.enabledPrograms, p] }, "Programs updated")} className={`rounded-xl border px-2.5 py-1 font-mono ${on ? "border-primary text-primary" : "border-hairline text-muted"}`}>{p} {on ? "ON" : "OFF"}</button>; })}</div>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" disabled={!!busy} onClick={() => { if (c.acceptanceConfirmed || confirm("Confirm that automatic approval acceptance has passed?")) run("aa", { acceptanceConfirmed: !c.acceptanceConfirmed, ...(c.acceptanceConfirmed ? { enabled: false } : {}) }, "Acceptance updated"); }} className="rounded-xl border border-hairline px-3 py-1.5 font-bold">{c.acceptanceConfirmed ? "Acceptance confirmed — withdraw" : "Confirm acceptance"}</button>
+            <button type="button" disabled={!!busy} onClick={() => { if (c.enabled || confirm(`Turn on automatic approval up to ${fmt(c.dailyBudgetFlow)} FLOW per day?`)) run("ae", { enabled: !c.enabled }, c.enabled ? "Automatic approval off" : "Automatic approval on"); }} className="rounded-xl bg-primary px-3 py-1.5 font-black text-primary-foreground">{c.enabled ? "Turn off" : "Turn on automatic approval"}</button>
+            <button type="button" disabled={!!busy} onClick={() => run("as", { suspended: !c.suspended }, "Updated")} className={`rounded-xl border px-3 py-1.5 font-bold ${c.suspended ? "border-danger/40 text-danger" : "border-hairline"}`}>{c.suspended ? "Suspended — resume" : "Emergency suspend"}</button>
+            <button type="button" disabled={!!busy || !!d.blocker} onClick={async () => { await act("ar", { action: "auto-run" }, "Approval cycle complete"); qc.invalidateQueries({ queryKey: ["auto-approval"] }); }} className="rounded-xl border border-hairline px-3 py-1.5 font-bold disabled:opacity-50">Run approval cycle now</button>
+          </div>
+          {c.updatedByEmail && <p className="text-muted">Last changed by {c.updatedByEmail}{c.updatedAt ? ` · ${new Date(c.updatedAt).toLocaleString()}` : ""}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ApprovalQueue({ wallet, isSuper, busy, act }: { wallet: string; isSuper: boolean; busy: string | null; act: (key: string, body: Record<string, unknown>, ok: string) => Promise<void> }) {
   const qc = useQueryClient();
   const [amounts, setAmounts] = useState<Record<string, string>>({});
@@ -246,9 +297,10 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
         </div>
       )}
 
-      {section === "Automation" && (
+      {section === "Automation & Budgets" && (
         <div className="space-y-2">
           <p className="rounded-xl border border-hairline bg-card p-3 text-[12px]">Scheduled sweep verifies events, eligibility, solvency and duplicates and records exceptions. <b>Autonomous funding: OFF (not authorized). On-chain signing: OFF.</b> Last run: {s.automation.lastRuns[0] ? `${new Date(s.automation.lastRuns[0].ran_at).toLocaleString()} (${s.automation.lastRuns[0].source})` : "never"}</p>
+          <AutoBudget wallet={wallet} isSuper={isSuper} busy={busy} act={act} />
           <button type="button" disabled={!!busy} onClick={() => act("sweep", { action: "sweep" }, "Sweep complete")} className="rounded-xl border border-hairline px-3 py-2 text-[12px] font-bold">Run checks now</button>
           {s.automation.policies.map((p) => (
             <div key={p.program_id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline bg-card p-3 text-[12px]">
