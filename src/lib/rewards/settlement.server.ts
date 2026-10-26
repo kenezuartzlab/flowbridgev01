@@ -212,15 +212,25 @@ export async function buildSettlement(args: {
   const rows = args.recon.filter((x) => fundedBy.has(x.userId)).map((x) => {
     const w = args.wallets.get(x.userId) ?? null;
     const fundedTotal = [...(fundedBy.get(x.userId)?.values() ?? [])].reduce((a, b) => a + b, 0);
-    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: fundedTotal, pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0 };
+    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: fundedTotal, pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0, fundedByProgram: Object.fromEntries(fundedBy.get(x.userId) ?? []) as Record<string, number> };
+  });
+  // V37.1 — new rounds contain ONLY confirmed, not-yet-published approvals, each capped
+  // at its approved amount. Unapproved balances never enter a prepared batch.
+  const { data: confirmedOpen, error: approvalsError } = await args.admin.from('reward_payout_approvals').select('user_id,wallet,points').eq('status', 'CONFIRMED').is('settlement_batch_id', null);
+  if (approvalsError) throw new Error('PAYOUT_APPROVALS_UNAVAILABLE');
+  const approvedBy = new Map((confirmedOpen ?? []).map((a) => [a.user_id, a]));
+  const batchRows = rows.flatMap((r) => {
+    const a = approvedBy.get(r.userId);
+    if (!a || !r.wallet || a.wallet.toLowerCase() !== r.wallet.toLowerCase()) return [];
+    return [{ ...r, authoritative: Math.min(r.authoritative, Math.floor(r.alreadyAllocatedPoints) + Number(a.points)) }];
   });
 
-  const first = prepareSettlementBatch({ rows, fundedPointsAvailable: Number.MAX_SAFE_INTEGER, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
+  const first = prepareSettlementBatch({ rows: batchRows, fundedPointsAvailable: Number.MAX_SAFE_INTEGER, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
   // Attribute each included wallet's delta to programs in fixed order (prior allocations consume first).
   const included = new Set((first.batch?.leaves ?? []).map((l) => l.account.toLowerCase()));
   const inc = new Map<ProgramId, number>();
   const usedBefore = new Map<ProgramId, number>();
-  for (const r of rows) {
+  for (const r of batchRows) {
     let prior = Math.floor(r.alreadyAllocatedPoints);
     let delta = Math.max(0, Math.floor(r.authoritative) - prior);
     const by = fundedBy.get(r.userId);
@@ -235,7 +245,7 @@ export async function buildSettlement(args: {
   const programs: ProgramFunding[] = [...PROGRAMS, "OTHER" as ProgramId].map((p) => ({ programId: p, includedPoints: inc.get(p) ?? 0, availablePoints: Math.max(0, budgetOf(p) - (usedBefore.get(p) ?? 0)) }));
   const fundedAvail = programs.reduce((t, p) => t + p.availablePoints, 0);
 
-  let p = prepareSettlementBatch({ rows, fundedPointsAvailable: fundedAvail, programs, publisherRoles: roles, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
+  let p = prepareSettlementBatch({ rows: batchRows, fundedPointsAvailable: fundedAvail, programs, publisherRoles: roles, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
   const { data: existing, error: existingError } = await args.admin.from('reward_settlement_batches').select('*')
     .eq('chain_id', MAINNET_CHAIN_ID).eq('distributor', DISTRIBUTOR.toLowerCase()).eq('epoch_id', p.epochId);
   if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
