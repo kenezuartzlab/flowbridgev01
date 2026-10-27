@@ -191,6 +191,7 @@ export async function buildSettlement(args: {
 
   // Only FUNDED Mainnet ledger points; per-program attribution (no cross-bucket cover).
   const fundedBy = new Map<string, Map<ProgramId, number>>();
+  const routineBy = new Map<string, Map<ProgramId, number>>();
   const { validRewardReservation } = await import('./approvedRewardPolicy');
   const { data: reservations, error: reservationError } = await args.admin.from('reward_reservations').select('reservation_id,ledger_id,user_id,wallet_address,points,program_id');
   if (reservationError) throw new Error('REWARD_RESERVATIONS_UNAVAILABLE');
@@ -208,11 +209,16 @@ export async function buildSettlement(args: {
     const m = fundedBy.get(l.user_id) ?? new Map<ProgramId, number>();
     m.set(prog, (m.get(prog) ?? 0) + l.points);
     fundedBy.set(l.user_id, m);
+    if ((l.metadata as Record<string, unknown> | null)?.provenanceExceptionApproved !== true && (l as LedgerRow & { provenance_state?: string }).provenance_state !== 'EXCEPTION_APPROVED') {
+      const routine = routineBy.get(l.user_id) ?? new Map<ProgramId, number>();
+      routine.set(prog, (routine.get(prog) ?? 0) + l.points);
+      routineBy.set(l.user_id, routine);
+    }
   }
   const rows = args.recon.filter((x) => fundedBy.has(x.userId)).map((x) => {
     const w = args.wallets.get(x.userId) ?? null;
     const fundedTotal = [...(fundedBy.get(x.userId)?.values() ?? [])].reduce((a, b) => a + b, 0);
-    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: fundedTotal, pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0, fundedByProgram: Object.fromEntries(fundedBy.get(x.userId) ?? []) as Record<string, number> };
+    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: fundedTotal, pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0, fundedByProgram: Object.fromEntries(fundedBy.get(x.userId) ?? []) as Record<string, number>, routineFundedByProgram: Object.fromEntries(routineBy.get(x.userId) ?? []) as Record<string, number> };
   });
   // V37.1 — new rounds contain ONLY confirmed, not-yet-published approvals, each capped
   // at its approved amount. Unapproved balances never enter a prepared batch.

@@ -17,7 +17,7 @@ async function sha256(text: string): Promise<string> {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-interface SettlementAccountRow { userId: string; wallet: string | null; classification: string; authoritative: number; pendingReview: number; alreadyAllocatedPoints: number; fundedByProgram?: Record<string, number> }
+interface SettlementAccountRow { userId: string; wallet: string | null; classification: string; authoritative: number; pendingReview: number; alreadyAllocatedPoints: number; fundedByProgram?: Record<string, number>; routineFundedByProgram?: Record<string, number> }
 
 export async function loadQueueState() {
   const { buildRewardSolvencyReport } = await import("./rewardSolvency.server");
@@ -41,7 +41,12 @@ export async function loadQueueState() {
     classification: r.classification, openProposal: openUsers.has(r.userId),
     fundedByProgram: r.fundedByProgram, settledByProgram: settledBy.get(r.userId),
   }));
-  return { report, queue: buildApprovalQueue(inputs) };
+  const routineInputs = inputs.map(r => {
+    const by = rows.find(x => x.userId === r.userId)?.routineFundedByProgram ?? {};
+    const total = Object.values(by).reduce((s, n) => s + n, 0);
+    return { ...r, fundedPoints: total, authoritative: total, fundedByProgram: by };
+  });
+  return { report, queue: buildApprovalQueue(inputs), routineQueue: buildApprovalQueue(routineInputs) };
 }
 
 export async function readApprovalQueue(actor?: AdminContext) {

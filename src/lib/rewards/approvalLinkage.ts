@@ -23,7 +23,7 @@ export function planApprovalLinks(approvals: LinkApproval[], batches: LinkBatch[
       && x.leaves.some((l) => l.account.toLowerCase() === w && /^\d+$/.test(l.amount) && BigInt(l.amount) >= BigInt(Math.floor(a.points)) * WEI));
     if (!b) continue;
     used.add(`${b.id}|${w}`);
-    links.push({ approvalId: a.id, batchId: b.id, epochId: b.epochId, txHash: b.txHash! });
+    if (b.txHash) links.push({ approvalId: a.id, batchId: b.id, epochId: b.epochId, txHash: b.txHash });
   }
   return links;
 }

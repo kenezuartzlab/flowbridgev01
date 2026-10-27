@@ -58,7 +58,7 @@ async function todayUsage() {
 export async function readAutomation() {
   const cfg = await readAutoConfig();
   const { loadQueueState } = await import("./approvalQueue.server");
-  const [{ queue, report }, usage] = await Promise.all([loadQueueState(), todayUsage()]);
+  const [{ routineQueue: queue, report }, usage] = await Promise.all([loadQueueState(), todayUsage()]);
   const live = report.distributor.live;
   const plan = planAutoApprovals(queue.candidates, cfg, {
     usedTodayFlow: usage.used, walletUsedToday: usage.walletUsedToday,
@@ -92,7 +92,7 @@ export async function runAutoApproval(source: string) {
     const before = await admin.rpc("reward_payout_evidence_hash");
     const { loadQueueState } = await import("./approvalQueue.server");
     const fresh = await loadQueueState();
-    const eligible = fresh.queue.candidates.find(c => c.userId === x.userId && c.wallet === x.wallet);
+    const eligible = fresh.routineQueue.candidates.find(c => c.userId === x.userId && c.wallet === x.wallet);
     const after = await admin.rpc("reward_payout_evidence_hash");
     const { readChainState } = await import("./settlement.server");
     const chain = await readChainState();
