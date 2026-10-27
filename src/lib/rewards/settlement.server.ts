@@ -320,7 +320,7 @@ export async function buildSettlement(args: {
 
   if (publishable && p.batch?.root && !stored) {
     const { error: saveError } = await args.admin.rpc('persist_funded_reward_batch', {
-      p_epoch: p.epochId, p_root: p.batch.root, p_total: Number(p.batch.totalWei), p_start: p.claimStart, p_end: p.claimEnd, p_fingerprint: p.fingerprint,
+      p_epoch: p.epochId, p_root: p.batch.root, p_total: p.batch.totalWei as never, p_start: p.claimStart, p_end: p.claimEnd, p_fingerprint: p.fingerprint,
       p_leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
       p_programs: programs as never, p_evidence: evidenceFence.data,
     });
