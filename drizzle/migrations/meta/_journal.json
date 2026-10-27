@@ -295,6 +295,13 @@
       "when": 1793034188759,
       "tag": "0041_v37_1_payout_round_linkage_programs",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1793073654983,
+      "tag": "0042_simplified_funded_reward_automation",
+      "breakpoints": true
     }
   ]
 }

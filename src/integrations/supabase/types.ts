@@ -1234,6 +1234,7 @@ export type Database = {
           enabled_programs: string[]
           id: number
           per_wallet_daily_cap: number
+          policy_revision: number
           suspended: boolean
           updated_at: string
           updated_by: string | null
@@ -1246,6 +1247,7 @@ export type Database = {
           enabled_programs?: string[]
           id?: number
           per_wallet_daily_cap?: number
+          policy_revision?: number
           suspended?: boolean
           updated_at?: string
           updated_by?: string | null
@@ -1258,6 +1260,7 @@ export type Database = {
           enabled_programs?: string[]
           id?: number
           per_wallet_daily_cap?: number
+          policy_revision?: number
           suspended?: boolean
           updated_at?: string
           updated_by?: string | null
@@ -1938,6 +1941,35 @@ export type Database = {
           },
         ]
       }
+      reward_retired_drafts: {
+        Row: {
+          batch_id: string
+          evidence_hash: string
+          reason: string
+          retired_at: string
+        }
+        Insert: {
+          batch_id: string
+          evidence_hash: string
+          reason: string
+          retired_at?: string
+        }
+        Update: {
+          batch_id?: string
+          evidence_hash?: string
+          reason?: string
+          retired_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_retired_drafts_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: true
+            referencedRelation: "reward_settlement_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reward_schedule_renewals: {
         Row: {
           approved_at: string | null
@@ -2518,6 +2550,23 @@ export type Database = {
         }
         Returns: boolean
       }
+      auto_approve_funded_payout: {
+        Args: {
+          p_available: number
+          p_backing: number
+          p_evidence: Json
+          p_funded: number
+          p_hash: string
+          p_observed: string
+          p_points: number
+          p_programs: Json
+          p_settled: number
+          p_state_hash: string
+          p_user: string
+          p_wallet: string
+        }
+        Returns: Json
+      }
       auto_approve_payout: {
         Args: {
           p_available: number
@@ -2720,10 +2769,28 @@ export type Database = {
         }
         Returns: Json
       }
+      retire_unapproved_reward_draft: {
+        Args: {
+          p_batch: string
+          p_delay: number
+          p_epoch: number
+          p_now: number
+        }
+        Returns: boolean
+      }
       reward_exception_evidence: { Args: { p_ledger: string }; Returns: Json }
       reward_funding_hash: { Args: { p_ids: string[] }; Returns: string }
       reward_payout_evidence_hash: { Args: never; Returns: string }
       reward_uint256_hex: { Args: { n: number }; Returns: string }
+      set_funded_reward_automation: {
+        Args: {
+          p_actor: string
+          p_enabled: boolean
+          p_suspended: boolean
+          p_wallet: string
+        }
+        Returns: boolean
+      }
       transition_reward_publication: {
         Args: {
           p_actor: string
