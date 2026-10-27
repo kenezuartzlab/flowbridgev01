@@ -90,8 +90,12 @@ export async function runAutoApproval(source: string) {
   let confirmed = 0; const confirmFailures: Record<string, number> = {};
   if (cfgRow?.updated_by) {
     const { confirmApproved } = await import("./approvalQueue.server");
+    // One fresh state for the whole set, so a batch is prepared once from all
+    // confirmations rather than mid-loop from a partial set.
+    const { loadQueueState } = await import("./approvalQueue.server");
+    const pre = (approvedRows ?? []).length ? await loadQueueState(new Set((approvedRows ?? []).map((r) => r.id))) : undefined;
     for (const r of approvedRows ?? []) {
-      const res = await confirmApproved({ userId: cfgRow.updated_by, email: "funded-policy", role: "automation" }, r.id, r.evidence_hash);
+      const res = await confirmApproved({ userId: cfgRow.updated_by, email: "funded-policy", role: "automation" }, r.id, r.evidence_hash, pre);
       if (res.ok) confirmed++; else confirmFailures[res.error] = (confirmFailures[res.error] ?? 0) + 1;
     }
     if (confirmed) state = await readAutomation();
