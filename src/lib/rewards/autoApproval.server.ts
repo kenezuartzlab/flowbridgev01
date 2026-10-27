@@ -1,7 +1,7 @@
 /**
- * V37.1 — automatic approval within a super-admin daily budget (server).
- * Approvals are written only through the locked auto_approve_payout RPC, which
- * re-checks config, daily budget, per-wallet cap and duplicates atomically.
+ * Automatic approval against existing verified funding and campaign limits.
+ * The service-only RPC serializes commitments and checks evidence freshness,
+ * available backing, bound wallets, existing caps and duplicates atomically.
  * Never reserves new funding, signs, broadcasts or publishes.
  */
 import type { AdminContext } from "@/lib/admin/adminGate.server";
@@ -96,7 +96,9 @@ export async function runAutoApproval(source: string) {
     const after = await admin.rpc("reward_payout_evidence_hash");
     const { readChainState } = await import("./settlement.server");
     const chain = await readChainState();
-    if (before.error || after.error || !before.data || before.data !== after.data || !eligible || x.points > eligible.availablePoints || !chain || chain.paused) {
+    const { publicationPreflight } = await import("./publisherReconciliation.server");
+    const publisher = chain ? await publicationPreflight(chain.epochCount + 1).catch(() => null) : null;
+    if (before.error || after.error || !before.data || before.data !== after.data || !eligible || x.points > eligible.availablePoints || !chain || chain.paused || !publisher?.epochAvailable || publisher.latest !== publisher.pending) {
       rejected.CHECKS_CHANGED = (rejected.CHECKS_CHANGED ?? 0) + 1; continue;
     }
     const backing = (chain.balanceWei - chain.totalReservedWei < chain.campaignBudgetWei - chain.totalClaimedWei - chain.totalReservedWei
