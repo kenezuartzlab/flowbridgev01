@@ -23,7 +23,7 @@ async function loadQueue() {
 }
 
 function capacityError(programId: string, checks: unknown): string {
-  const failed = Array.isArray(checks) ? (checks as { id?: string; label?: string; pass?: boolean; ok?: boolean }[]).filter((c) => c.pass === false || c.ok === false).map((c) => (c.label ?? c.id ?? "check").toString()) : [];
+  const failed = Array.isArray(checks) ? (checks as { id?: string; detail?: string; pass?: boolean }[]).filter((c) => c.pass === false).map((c) => `${(c.id ?? "check").replaceAll("_", " ").toLowerCase()}: ${c.detail ?? "failed"}`) : [];
   return `${programId} cannot be funded: ${failed.length ? failed.join("; ") : "program budget is not active and funding-verified"}. Points stay in the Funding Queue.`;
 }
 
