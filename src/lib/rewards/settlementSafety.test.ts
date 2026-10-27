@@ -28,7 +28,7 @@ describe("settlement safety gate", () => {
   it("no eligible wallets ⇒ NOT READY with explicit reason, no tx", () => {
     const s = run([r(1, 999)]);
     expect(s.status).toBe("BLOCKED");
-    expect(s.reason).toBe("NO_ELIGIBLE_WALLETS_ABOVE_MINIMUM");
+    expect(s.reason).toBe("NO_CONFIRMED_ALLOCATIONS");
     expect(s.tx).toBeNull();
   });
   it("deterministic: same state ⇒ identical round/root/total/window/calldata/fingerprint", () => {

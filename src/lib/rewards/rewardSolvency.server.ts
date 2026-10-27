@@ -38,7 +38,7 @@ async function readDistributor() {
   }
 }
 
-export async function buildRewardSolvencyReport() {
+export async function buildRewardSolvencyReport(opts: { persistBatch?: boolean } = {}) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [profiles, ledger, budgets, reservations, chain] = await Promise.all([
     supabaseAdmin.from("profiles").select("id,created_at,flow_points,points_self,points_referral_signup,claimed_tokens,wallet_address").limit(10000),
@@ -94,7 +94,7 @@ export async function buildRewardSolvencyReport() {
     programSolvency({ programId: "OTHER", authorizedBudget: 0, backingVerified: false, reserved: 0, earned: 0, claimed: 0, unfunded: 0 }),
   ];
 
-  const settlement = await buildSettlement({
+  const settlement = await buildSettlement({ persistBatch: opts.persistBatch !== false,
     admin: supabaseAdmin,
     recon: recon.results,
     ledger: (ledger.data ?? []) as never,

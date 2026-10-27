@@ -20,14 +20,14 @@ async function sha256(text: string): Promise<string> {
 
 interface SettlementAccountRow { userId: string; wallet: string | null; classification: string; authoritative: number; pendingReview: number; alreadyAllocatedPoints: number; fundedByProgram?: Record<string, number>; routineFundedByProgram?: Record<string, number> }
 
-export async function loadQueueState(ignoreApprovalId?: string) {
+export async function loadQueueState(ignoreApprovalId?: string | Set<string>, opts: { persistBatch?: boolean } = {}) {
   const { buildRewardSolvencyReport } = await import("./rewardSolvency.server");
-  const report = await buildRewardSolvencyReport();
+  const report = await buildRewardSolvencyReport(opts);
   const rows = ((report.settlement as { accountRows?: SettlementAccountRow[] }).accountRows ?? []) as SettlementAccountRow[];
   const admin = await db();
   const { data: open, error } = await admin.from("reward_payout_approvals").select("id,user_id").or("status.in.(PROPOSED,APPROVED),and(status.eq.CONFIRMED,settlement_batch_id.is.null)");
   if (error) throw new Error("approval queue unavailable");
-  const openUsers = new Set((open ?? []).filter((r: { id: string }) => r.id !== ignoreApprovalId).map((r: { user_id: string }) => r.user_id));
+  const openUsers = new Set((open ?? []).filter((r: { id: string }) => typeof ignoreApprovalId === "string" ? r.id !== ignoreApprovalId : !ignoreApprovalId?.has(r.id)).map((r: { user_id: string }) => r.user_id));
   const { data: linked, error: linkedError } = await admin.from("reward_payout_approvals").select("user_id,program_breakdown").eq("status", "CONFIRMED").not("settlement_batch_id", "is", null);
   if (linkedError) throw new Error("approval history unavailable");
   const settledBy = new Map<string, Record<string, number>>();
@@ -134,13 +134,26 @@ export async function confirmPayout(a: AdminContext, id: string, expectedHash: s
   const admin = await db();
   const { data: s } = await admin.from("reward_payout_approvals").select("*").eq("id", id).maybeSingle();
   if (!s) return { ok: false as const, error: "Approval not found." };
-  const rec = s as unknown as { status: string; evidence_hash: string; points: number; proposed_by: string | null; user_id: string; wallet: string };
-  const d = payoutApprovalDecision(rec as never, { userId: a.userId, role: a.role }, "confirm");
+  const d = payoutApprovalDecision(s as never, { userId: a.userId, role: a.role }, "confirm");
   if (!d.ok) return { ok: false as const, error: d.reason };
+  return confirmApproved({ userId: a.userId, email: a.email, role: a.role }, id, expectedHash);
+}
+
+/**
+ * Shared APPROVED → CONFIRMED transition with fresh eligibility/backing checks.
+ * Also used by the enabled funded-policy automation for records that already
+ * passed two-person approval (no new approval is created).
+ */
+export async function confirmApproved(a: { userId: string; email: string; role: string }, id: string, expectedHash: string, pre?: Awaited<ReturnType<typeof loadQueueState>>) {
+  const admin = await db();
+  const { data: s } = await admin.from("reward_payout_approvals").select("*").eq("id", id).maybeSingle();
+  if (!s) return { ok: false as const, error: "Approval not found." };
+  const rec = s as unknown as { status: string; evidence_hash: string; points: number; proposed_by: string | null; user_id: string; wallet: string };
+  if (rec.status !== "APPROVED") return { ok: false as const, error: `Approval is ${rec.status}.` };
   if (rec.evidence_hash !== expectedHash) return { ok: false as const, error: "Evidence hash mismatch; reload and re-review." };
   if (isPublisherRecipient(rec.wallet)) return { ok: false as const, error: "Publisher wallet recipient is held for independent review and cannot be confirmed here." };
   // Re-verify the account is still eligible and backed before confirming. This approval's own open record is ignored.
-  const { queue, report } = await loadQueueState(id).catch(() => ({ queue: null, report: null }));
+  const { queue, report } = pre ?? await loadQueueState(id).catch(() => ({ queue: null, report: null }));
   if (!queue || !report) return { ok: false as const, error: "Eligibility checks are temporarily unavailable; nothing changed. Retry shortly." };
   const chain = report.distributor.live ?? null;
   if (!chain) return { ok: false as const, error: "Distributor state unreadable; nothing changed. Retry shortly." };

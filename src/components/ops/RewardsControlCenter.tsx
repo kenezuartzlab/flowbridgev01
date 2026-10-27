@@ -103,6 +103,32 @@ function AutoBudget({ wallet, isSuper, busy, act }: { wallet: string; isSuper: b
   );
 }
 
+function NextBatchCard({ wallet, onOpen }: { wallet: string; onOpen: () => void }) {
+  const q = useQuery({
+    queryKey: ["payout-approvals", wallet],
+    queryFn: async () => {
+      const token = await getIdToken();
+      const res = await fetch("/api/admin/rewards-control", { method: "POST", headers: { "x-wallet-address": wallet, ...(token ? { authorization: `Bearer ${token}` } : {}), "content-type": "application/json" }, body: JSON.stringify({ action: "payout-queue" }) });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((j as any)?.error ?? `Request failed (${res.status})`);
+      return j as ApprovalQueueState;
+    },
+    refetchInterval: 30_000, retry: false,
+  });
+  const b = q.data?.backing;
+  const ready = b?.settlementStatus === "READY_FOR_PUBLISHER_REVIEW";
+  return (
+    <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-[12px]">
+      <p className="font-black">Next valid payout batch</p>
+      <p className="text-muted">The publisher reviews the prepared batch and signs once. The claim window opens after the contract's 24-hour delay.</p>
+      <p className={ready ? "mt-1 font-bold text-success" : "mt-1 font-bold text-warning"}>
+        {q.isLoading ? "Checking batch…" : q.error ? "Batch state unavailable — retry shortly." : ready ? `Ready for publisher review${b?.claimStartIso ? ` · claim opens ${new Date(b.claimStartIso).toUTCString()}` : ""}` : `Not ready — ${b?.settlementBlockReason ?? b?.settlementStatus ?? "unknown"}`}
+      </p>
+      <Button disabled={!ready} onClick={onOpen} className="mt-2 w-full sm:w-auto">Review & Publish Batch</Button>
+    </div>
+  );
+}
+
 function ApprovalQueue({ wallet, isSuper, busy, act }: { wallet: string; isSuper: boolean; busy: string | null; act: (key: string, body: Record<string, unknown>, ok: string) => Promise<void> }) {
   const qc = useQueryClient();
   const [amounts, setAmounts] = useState<Record<string, string>>({});
@@ -227,11 +253,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
             {openExc.length > 3 && <button type="button" onClick={() => setSection("Exceptions")} className="mt-1 text-[11.5px] font-bold text-primary">View all {openExc.length} exceptions</button>}
           </div>
           <AutoBudget wallet={wallet} isSuper={isSuper} busy={busy} act={act} />
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-[12px]">
-            <p className="font-black">Next valid payout batch</p>
-            <p className="text-muted">The publisher reviews the prepared batch and signs once. The claim window opens after the contract's 24-hour delay.</p>
-            <Button onClick={() => onOpen("Rewards")} className="mt-2 w-full sm:w-auto">Review & Publish Batch</Button>
-          </div>
+          <NextBatchCard wallet={wallet} onOpen={() => onOpen("Rewards")} />
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={() => setSection("Approval Queue")} className="rounded-xl border border-hairline px-3 py-1.5 text-[11.5px] font-bold">Approval records</button>
             <button type="button" onClick={() => setSection("Audit History")} className="rounded-xl border border-hairline px-3 py-1.5 text-[11.5px] font-bold">Audit history</button>
