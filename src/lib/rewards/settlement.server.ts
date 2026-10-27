@@ -169,6 +169,8 @@ export async function buildSettlement(args: {
   budgets: { program_id: string; total_points: number; funding_verified?: boolean }[];
   profiles?: Map<string, { createdAt: string | null; wallet: string | null }>;
 }) {
+  const evidenceFence = await args.admin.rpc('reward_payout_evidence_hash');
+  if (evidenceFence.error || !evidenceFence.data) throw new Error('PAYOUT_EVIDENCE_UNAVAILABLE');
   const [live, roles] = await Promise.all([readChainState(), readPublisherRoles()]);
   const publisher = { address: SETTLEMENT_SIGNER.address, ...auditPublisherRoles(roles) };
   const generatedAt = new Date().toISOString();
@@ -191,6 +193,7 @@ export async function buildSettlement(args: {
 
   // Only FUNDED Mainnet ledger points; per-program attribution (no cross-bucket cover).
   const fundedBy = new Map<string, Map<ProgramId, number>>();
+  const routineBy = new Map<string, Map<ProgramId, number>>();
   const { validRewardReservation } = await import('./approvedRewardPolicy');
   const { data: reservations, error: reservationError } = await args.admin.from('reward_reservations').select('reservation_id,ledger_id,user_id,wallet_address,points,program_id');
   if (reservationError) throw new Error('REWARD_RESERVATIONS_UNAVAILABLE');
@@ -208,15 +211,20 @@ export async function buildSettlement(args: {
     const m = fundedBy.get(l.user_id) ?? new Map<ProgramId, number>();
     m.set(prog, (m.get(prog) ?? 0) + l.points);
     fundedBy.set(l.user_id, m);
+    if ((l.metadata as Record<string, unknown> | null)?.provenanceExceptionApproved !== true && (l as LedgerRow & { provenance_state?: string }).provenance_state !== 'EXCEPTION_APPROVED') {
+      const routine = routineBy.get(l.user_id) ?? new Map<ProgramId, number>();
+      routine.set(prog, (routine.get(prog) ?? 0) + l.points);
+      routineBy.set(l.user_id, routine);
+    }
   }
   const rows = args.recon.filter((x) => fundedBy.has(x.userId)).map((x) => {
     const w = args.wallets.get(x.userId) ?? null;
     const fundedTotal = [...(fundedBy.get(x.userId)?.values() ?? [])].reduce((a, b) => a + b, 0);
-    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: fundedTotal, pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0, fundedByProgram: Object.fromEntries(fundedBy.get(x.userId) ?? []) as Record<string, number> };
+    return { userId: x.userId, wallet: w, classification: x.classification, authoritative: fundedTotal, pendingReview: x.pendingReview, alreadyAllocatedPoints: w ? allocated.get(w.toLowerCase()) ?? 0 : 0, fundedByProgram: Object.fromEntries(fundedBy.get(x.userId) ?? []) as Record<string, number>, routineFundedByProgram: Object.fromEntries(routineBy.get(x.userId) ?? []) as Record<string, number> };
   });
   // V37.1 — new rounds contain ONLY confirmed, not-yet-published approvals, each capped
   // at its approved amount. Unapproved balances never enter a prepared batch.
-  const { data: confirmedOpen, error: approvalsError } = await args.admin.from('reward_payout_approvals').select('user_id,wallet,points').eq('status', 'CONFIRMED').is('settlement_batch_id', null);
+  const { data: confirmedOpen, error: approvalsError } = await args.admin.from('reward_payout_approvals').select('user_id,wallet,points,confirmed_at,program_breakdown').eq('status', 'CONFIRMED').is('settlement_batch_id', null);
   if (approvalsError) throw new Error('PAYOUT_APPROVALS_UNAVAILABLE');
   const approvedBy = new Map((confirmedOpen ?? []).map((a) => [a.user_id, a]));
   const batchRows = rows.flatMap((r) => {
@@ -249,14 +257,32 @@ export async function buildSettlement(args: {
   const { data: existing, error: existingError } = await args.admin.from('reward_settlement_batches').select('*')
     .eq('chain_id', MAINNET_CHAIN_ID).eq('distributor', DISTRIBUTOR.toLowerCase()).eq('epoch_id', p.epochId);
   if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
-  if ((existing ?? []).length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
-  const original = existing?.[0];
+  const { data: retired, error: retiredError } = await args.admin.from('reward_retired_drafts').select('batch_id');
+  if (retiredError) throw new Error('DRAFT_RETIREMENT_STATE_UNAVAILABLE');
+  const retiredIds = new Set((retired ?? []).map(r => r.batch_id));
+  // Only the exact owner-held draft can be retired; chain and DB uncertainty fail closed.
+  for (const draft of existing ?? []) {
+    if (retiredIds.has(draft.id) || draft.epoch_id !== 4 || draft.root !== '0xe2af18b23c702ddf6d0bd32e717ca4f8a997deb0dbf4f3df508096d8be2065a5' || live.epochCount !== 3) continue;
+    const { data: didRetire, error: retirementError } = await args.admin.rpc('retire_unapproved_reward_draft', { p_batch: draft.id, p_now: live.nowSec, p_delay: live.minPublishDelay, p_epoch: live.epochCount });
+    if (!retirementError && didRetire) retiredIds.add(draft.id);
+  }
+  const active = (existing ?? []).filter(b => !retiredIds.has(b.id));
+  if (active.length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
+  const original = active[0];
   const provenanceExcludedPoints = args.ledger.filter(l => l.points > 0 && l.chain_id === MAINNET_CHAIN_ID && (l.reason === 'CORE_SWAP' || l.reason === 'CORE_SWAP_V2') && !eligibleIds.has(l.id ?? '')).reduce((total,l)=>total+l.points,0);
-  const stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
+  let stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
   let renewal: RenewalProposal | null = null;
   if (stored) {
     const immutable = { ...toBatch(stored as unknown as BatchRow), id: stored.id, fingerprint: stored.fingerprint, published: !!stored.publication_verified_at };
     renewal = proposeScheduleRenewal(p, immutable, live.nowSec, live.minPublishDelay, original?.fingerprint);
+    if (renewal.ready && renewal.epochId >= 4) {
+      const { data: refreshed, error } = await args.admin.rpc('refresh_funded_batch_schedule', { p_batch: stored.id, p_start: renewal.claimStart, p_end: renewal.claimEnd, p_fingerprint: renewal.fingerprint, p_now: live.nowSec, p_delay: live.minPublishDelay, p_evidence: evidenceFence.data });
+      if (!error && refreshed && original) {
+        stored = await resolveBatchSchedule(args.admin, original);
+        Object.assign(immutable, toBatch(stored as unknown as BatchRow), { fingerprint: stored.fingerprint });
+        renewal = null;
+      }
+    }
     p = revalidateImmutableBatch(p, immutable, live.nowSec, live.minPublishDelay);
   }
 
@@ -293,12 +319,11 @@ export async function buildSettlement(args: {
   });
 
   if (publishable && p.batch?.root && !stored) {
-    const { error: saveError } = await args.admin.from("reward_settlement_batches").upsert({
-      chain_id: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR.toLowerCase(), epoch_id: p.epochId, root: p.batch.root,
-      total_wei: p.batch.totalWei as never, claim_start: p.claimStart, claim_end: p.claimEnd, fingerprint: p.fingerprint,
-      leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
-      program_breakdown: programs as never,
-    }, { onConflict: "chain_id,distributor,epoch_id,root", ignoreDuplicates: true });
+    const { error: saveError } = await args.admin.rpc('persist_funded_reward_batch', {
+      p_epoch: p.epochId, p_root: p.batch.root, p_total: p.batch.totalWei as never, p_start: p.claimStart, p_end: p.claimEnd, p_fingerprint: p.fingerprint,
+      p_leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
+      p_programs: programs as never, p_evidence: evidenceFence.data,
+    });
     if (saveError) throw new Error('PREPARED_BATCH_PERSISTENCE_FAILED');
   }
 
