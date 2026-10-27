@@ -7,7 +7,7 @@
 - [x] 5. Tests: small amounts, cycles, partial, multi-user, duplicate prevention + DB-level concurrency/guard checks
 - [x] 6. Full regression + build verification (2,036 tests green; build OK; signed-in Rewards page and admin queue API verified live)
 
-Preserved: Round #3 (1,122 FLOW, unsigned, unpublished), 74 unfunded / 776 restricted Points, auto funding/signing OFF, scheduler OFF, no contracts, no real payouts.
+Preserved: Round #3 published history and claimed allocation; restricted/unfunded rewards unchanged, automatic funding/signing OFF, no contract changes or real payouts during implementation.
 
 - [x] V37.1 automatic approval within Ops daily budget (default OFF)
 - [x] V37.1 link confirmed approvals to verified published rounds
