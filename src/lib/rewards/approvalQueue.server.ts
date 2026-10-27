@@ -134,9 +134,22 @@ export async function confirmPayout(a: AdminContext, id: string, expectedHash: s
   const admin = await db();
   const { data: s } = await admin.from("reward_payout_approvals").select("*").eq("id", id).maybeSingle();
   if (!s) return { ok: false as const, error: "Approval not found." };
-  const rec = s as unknown as { status: string; evidence_hash: string; points: number; proposed_by: string | null; user_id: string; wallet: string };
-  const d = payoutApprovalDecision(rec as never, { userId: a.userId, role: a.role }, "confirm");
+  const d = payoutApprovalDecision(s as never, { userId: a.userId, role: a.role }, "confirm");
   if (!d.ok) return { ok: false as const, error: d.reason };
+  return confirmApproved({ userId: a.userId, email: a.email, role: a.role }, id, expectedHash);
+}
+
+/**
+ * Shared APPROVED → CONFIRMED transition with fresh eligibility/backing checks.
+ * Also used by the enabled funded-policy automation for records that already
+ * passed two-person approval (no new approval is created).
+ */
+export async function confirmApproved(a: { userId: string; email: string; role: string }, id: string, expectedHash: string) {
+  const admin = await db();
+  const { data: s } = await admin.from("reward_payout_approvals").select("*").eq("id", id).maybeSingle();
+  if (!s) return { ok: false as const, error: "Approval not found." };
+  const rec = s as unknown as { status: string; evidence_hash: string; points: number; proposed_by: string | null; user_id: string; wallet: string };
+  if (rec.status !== "APPROVED") return { ok: false as const, error: `Approval is ${rec.status}.` };
   if (rec.evidence_hash !== expectedHash) return { ok: false as const, error: "Evidence hash mismatch; reload and re-review." };
   if (isPublisherRecipient(rec.wallet)) return { ok: false as const, error: "Publisher wallet recipient is held for independent review and cannot be confirmed here." };
   // Re-verify the account is still eligible and backed before confirming. This approval's own open record is ignored.
