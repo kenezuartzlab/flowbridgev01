@@ -149,7 +149,7 @@ function buildOnce(i: SettlementInput) {
   }
   const totalWei = BigInt(batch?.totalWei ?? "0");
   const leafMinimum = claimMinimumForEpoch(epochId);
-  add("NONEMPTY", !!batch?.root, batch?.root ? `has leaves ≥ ${leafMinimum} FLOW` : "NO_ELIGIBLE_WALLETS_ABOVE_MINIMUM");
+  add("NONEMPTY", !!batch?.root, batch?.root ? `${batch?.leaves.length ?? 0} confirmed allocations` : "NO_CONFIRMED_ALLOCATIONS");
   add("MINIMUM_ENFORCED", !!batch && batch.leaves.every((l) => BigInt(l.amount) >= BigInt(leafMinimum) * WEI), `every leaf ≥ ${leafMinimum} FLOW (historical rounds keep their terms; canary exception is round #2 only)`);
   add("FUNDED_BUCKET", totalWei <= BigInt(i.fundedPointsAvailable) * WEI, "within funded program reservations");
   if (i.programs) {
@@ -185,7 +185,7 @@ export function prepareSettlementBatch(i: SettlementInput) {
   const noEligible = !a.batch?.root;
   return {
     status: ready ? "READY_FOR_PUBLISHER_REVIEW" as const : "BLOCKED" as const,
-    reason: ready ? null : noEligible ? "NO_ELIGIBLE_WALLETS_ABOVE_MINIMUM" : checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
+    reason: ready ? null : noEligible ? "NO_CONFIRMED_ALLOCATIONS" : checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
     epochId: a.epochId, checks, batch: a.batch, claimStart: a.claimStart, claimEnd: a.claimEnd,
     tx: ready ? a.tx : null, fingerprint: settlementFingerprint(i), automation: SETTLEMENT_AUTOMATION,
   };

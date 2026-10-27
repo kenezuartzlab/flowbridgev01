@@ -80,9 +80,22 @@ export async function readAutomation() {
 
 /** One approval cycle. Idempotent: the RPC rejects any account already committed. */
 export async function runAutoApproval(source: string) {
-  const state = await readAutomation();
+  let state = await readAutomation();
   if (state.blocker) return { ok: true as const, approved: 0, skipped: state.held.length, blocker: state.blocker };
   const admin = await db();
+  // Progress records that already passed two-person approval through the same
+  // fresh-check confirmation. Never creates approvals; publisher recipients stay held.
+  const { data: cfgRow } = await admin.from("reward_auto_approval_config").select("updated_by").eq("id", 1).maybeSingle();
+  const { data: approvedRows } = await admin.from("reward_payout_approvals").select("id,evidence_hash").eq("status", "APPROVED");
+  let confirmed = 0; const confirmFailures: Record<string, number> = {};
+  if (cfgRow?.updated_by) {
+    const { confirmApproved } = await import("./approvalQueue.server");
+    for (const r of approvedRows ?? []) {
+      const res = await confirmApproved({ userId: cfgRow.updated_by, email: "funded-policy", role: "automation" }, r.id, r.evidence_hash);
+      if (res.ok) confirmed++; else confirmFailures[res.error] = (confirmFailures[res.error] ?? 0) + 1;
+    }
+    if (confirmed) state = await readAutomation();
+  }
   let approved = 0; const rejected: Record<string, number> = {};
   for (const x of state._plan.approve) {
     const evidence = { ...approvalEvidence(x.candidate, x.points), programs: x.programs, source, automatic: true, at: new Date().toISOString() };
