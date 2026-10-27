@@ -3,7 +3,7 @@ import { DEFAULT_AUTO_APPROVAL_CONFIG, planAutoApprovals, validateAutoConfig, ty
 
 const cand = (id: string, pts: number, wallet = `0x${id.padStart(40, "0")}`) =>
   ({ userId: id, wallet, availablePoints: pts, fundedPoints: pts, alreadySettledPoints: 0, availableByProgram: { SIGNUP_BONUS: pts } as Record<string, number> });
-const ON: AutoApprovalConfig = { enabled: true, suspended: false, acceptanceConfirmed: true, dailyBudgetFlow: 1000, perWalletDailyCap: 0, enabledPrograms: ["SIGNUP_BONUS", "CORE_SWAP", "REFERRAL_MILESTONE"], configuredBy: "u" };
+const ON: AutoApprovalConfig = { policyRevision: 2, enabled: true, suspended: false, acceptanceConfirmed: true, dailyBudgetFlow: 1000, perWalletDailyCap: 0, enabledPrograms: ["SIGNUP_BONUS", "CORE_SWAP", "REFERRAL_MILESTONE"], configuredBy: "u" };
 const CTX: AutoPlanContext = { usedTodayFlow: 0, walletUsedToday: {}, freeBackingFlow: 100_000, paused: false, publisherWallets: [], pendingBatchWallets: 0, pendingBatchFlow: 0 };
 
 describe("automatic approval plan", () => {
@@ -18,7 +18,7 @@ describe("automatic approval plan", () => {
     expect(planAutoApprovals([cand("a", 25)], ON, CTX).approve.map((x) => x.points)).toEqual([25]);
   });
   it("stops at daily-budget exhaustion, counting what was already used today", () => {
-    const p = planAutoApprovals([cand("a", 600), cand("b", 300), cand("c", 200)], ON, { ...CTX, usedTodayFlow: 100 });
+    const p = planAutoApprovals([cand("a", 100), cand("b", 100), cand("c", 200)], ON, { ...CTX, usedTodayFlow: 499_800 });
     expect(p.approve.map((x) => x.userId)).toEqual(["a", "b"]);
     expect(p.held).toContainEqual({ userId: "c", reason: "DAILY_BUDGET_EXHAUSTED", points: 200 });
   });
@@ -30,9 +30,9 @@ describe("automatic approval plan", () => {
   it("sends publisher-wallet recipients to independent review", () => {
     expect(planAutoApprovals([cand("a", 50, "0xABC")], ON, { ...CTX, publisherWallets: ["0xabc"] }).held[0].reason).toBe("PUBLISHER_RECIPIENT_REVIEW");
   });
-  it("enforces the per-wallet daily cap and program gating", () => {
-    expect(planAutoApprovals([cand("a", 50)], { ...ON, perWalletDailyCap: 40 }, CTX).held[0].reason).toBe("WALLET_DAILY_CAP");
-    expect(planAutoApprovals([cand("a", 50)], { ...ON, enabledPrograms: ["CORE_SWAP"] }, CTX).held[0]?.reason).toBe("PROGRAM_NOT_ENABLED");
+  it("requires explicit revised policy activation for legacy configuration", () => {
+    expect(planAutoApprovals([cand("a", 50)], { ...ON, policyRevision: 1, perWalletDailyCap: 40 }, CTX).held[0].reason).toBe("AUTOMATION_OFF");
+    expect(planAutoApprovals([cand("a", 50)], { ...ON, policyRevision: 1, enabledPrograms: ["CORE_SWAP"] }, CTX).held[0]?.reason).toBe("AUTOMATION_OFF");
   });
   it("respects the 200-wallet / 250,000-FLOW batch limits", () => {
     expect(planAutoApprovals([cand("a", 5)], ON, { ...CTX, pendingBatchWallets: 200 }).held[0].reason).toBe("BATCH_CAP");
@@ -42,7 +42,8 @@ describe("automatic approval plan", () => {
     expect(planAutoApprovals(rows, ON, CTX).approve).toEqual(planAutoApprovals([...rows].reverse(), ON, CTX).approve);
   });
   it("rejects enabling without budget or acceptance, and budgets above the daily cap", () => {
-    expect(validateAutoConfig({ ...ON, dailyBudgetFlow: 0 })).toMatch(/budget/);
+    expect(validateAutoConfig({ ...ON, dailyBudgetFlow: 0 })).toBeNull();
+    expect(planAutoApprovals([cand("a", 25)], { ...ON, dailyBudgetFlow: 0, enabledPrograms: [] }, CTX).approve[0].points).toBe(25);
     expect(validateAutoConfig({ ...ON, acceptanceConfirmed: false })).toMatch(/acceptance/);
     expect(validateAutoConfig({ ...ON, dailyBudgetFlow: 500_001 })).toMatch(/cap/);
     expect(validateAutoConfig(ON)).toBeNull();
@@ -53,9 +54,9 @@ describe("V37.1 program separation and round linkage", () => {
   const withProg = (id: string, by: Record<string, number>) => ({ ...cand(id, Object.values(by).reduce((a, b) => a + b, 0)), availableByProgram: by });
   it("approves only enabled programs without blocking others", async () => {
     const p = planAutoApprovals([withProg("a", { CORE_SWAP: 40, SIGNUP_BONUS: 100 })], { ...ON, enabledPrograms: ["SIGNUP_BONUS"] }, CTX);
-    expect(p.approve[0].points).toBe(100);
-    expect(p.approve[0].programs).toEqual({ SIGNUP_BONUS: 100 });
-    expect(p.held).toContainEqual({ userId: "a", reason: "PROGRAM_NOT_ENABLED", points: 40 });
+    expect(p.approve[0].points).toBe(140);
+    expect(p.approve[0].programs).toEqual({ CORE_SWAP: 40, SIGNUP_BONUS: 100 });
+    expect(p.held).toEqual([]);
   });
   it("holds ambiguous or unattributed points instead of guessing", () => {
     const p = planAutoApprovals([withProg("a", { OTHER: 30 })], ON, CTX);

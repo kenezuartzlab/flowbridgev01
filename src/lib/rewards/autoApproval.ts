@@ -11,6 +11,7 @@ import { BUDGET_PROGRAMS } from "./budgetControls";
 import { PUBLISHER_CONFIG } from "./settlementQueue";
 
 export interface AutoApprovalConfig {
+  policyRevision?: number;
   enabled: boolean;
   suspended: boolean;
   acceptanceConfirmed: boolean;
@@ -21,7 +22,7 @@ export interface AutoApprovalConfig {
 }
 
 export const DEFAULT_AUTO_APPROVAL_CONFIG: AutoApprovalConfig = Object.freeze({
-  enabled: false, suspended: false, acceptanceConfirmed: false,
+  policyRevision: 2, enabled: false, suspended: false, acceptanceConfirmed: false,
   dailyBudgetFlow: 0, perWalletDailyCap: 0, enabledPrograms: [], configuredBy: null,
 }) as AutoApprovalConfig;
 
@@ -45,7 +46,7 @@ export function automationBlocker(c: AutoApprovalConfig): string | null {
   if (c.suspended) return "Emergency suspension is on.";
   if (!c.enabled) return "Automatic approval is off.";
   if (!c.acceptanceConfirmed) return "Acceptance has not been confirmed by a super admin.";
-  if (!(c.dailyBudgetFlow > 0)) return "No daily budget is configured.";
+  if (c.policyRevision !== 2) return "The revised funded-limits policy has not been enabled.";
   if (!c.configuredBy) return "No authorizing super admin is recorded.";
   return null;
 }
@@ -56,7 +57,7 @@ export function validateAutoConfig(c: AutoApprovalConfig): string | null {
   if (!int(c.dailyBudgetFlow) || !int(c.perWalletDailyCap)) return "Budgets must be whole, non-negative FLOW amounts.";
   if (c.dailyBudgetFlow > PUBLISHER_CONFIG.maxFlowPerDay) return `Daily budget cannot exceed the ${PUBLISHER_CONFIG.maxFlowPerDay.toLocaleString()} FLOW daily publication cap.`;
   if (c.enabledPrograms.some((p) => !BUDGET_PROGRAMS.includes(p as never))) return "Unknown reward program.";
-  if (c.enabled && !(c.dailyBudgetFlow > 0)) return "Set a daily budget before enabling automatic approval.";
+  if (c.enabled && c.policyRevision !== 2) return "Enable the revised funded-limits policy explicitly.";
   if (c.enabled && !c.acceptanceConfirmed) return "Confirm acceptance before enabling automatic approval.";
   return null;
 }
@@ -70,7 +71,7 @@ export function planAutoApprovals(candidates: ApprovalCandidate[], cfg: AutoAppr
   const approve: { userId: string; wallet: string; points: number; programs: Record<string, number>; candidate: ApprovalCandidate }[] = [];
   const held: { userId: string; reason: AutoHoldReason; points: number }[] = [];
   const blocker = automationBlocker(cfg);
-  const enabled = cfg.enabledPrograms.filter((p) => (BUDGET_PROGRAMS as readonly string[]).includes(p));
+  const enabled = cfg.policyRevision === 2 ? [...BUDGET_PROGRAMS] : cfg.enabledPrograms.filter((p) => (BUDGET_PROGRAMS as readonly string[]).includes(p));
   const publishers = new Set(ctx.publisherWallets.map((w) => w.toLowerCase()));
   let used = Math.max(0, ctx.usedTodayFlow);
   let backing = ctx.freeBackingFlow;
@@ -95,9 +96,9 @@ export function planAutoApprovals(candidates: ApprovalCandidate[], cfg: AutoAppr
     if (backing === null || ctx.paused === null) { hold("BACKING_UNAVAILABLE"); continue; }
     if (ctx.paused) { hold("DISTRIBUTOR_PAUSED"); continue; }
     if (pts > backing) { hold("INSUFFICIENT_BACKING"); continue; }
-    if (used + pts > cfg.dailyBudgetFlow || used + pts > PUBLISHER_CONFIG.maxFlowPerDay) { hold("DAILY_BUDGET_EXHAUSTED"); continue; }
+    if (used + pts > PUBLISHER_CONFIG.maxFlowPerDay) { hold("DAILY_BUDGET_EXHAUSTED"); continue; }
     const wu = walletUsed.get(c.wallet.toLowerCase()) ?? 0;
-    if (cfg.perWalletDailyCap > 0 && wu + pts > cfg.perWalletDailyCap) { hold("WALLET_DAILY_CAP"); continue; }
+    if (cfg.policyRevision !== 2 && cfg.perWalletDailyCap > 0 && wu + pts > cfg.perWalletDailyCap) { hold("WALLET_DAILY_CAP"); continue; }
     if (wallets + 1 > PUBLISHER_CONFIG.maxWalletsPerEpoch || batchFlow + pts > PUBLISHER_CONFIG.maxFlowPerEpoch) { hold("BATCH_CAP"); continue; }
     approve.push({ userId: c.userId, wallet: c.wallet, points: pts, programs, candidate: c });
     used += pts; backing -= pts; wallets += 1; batchFlow += pts;
