@@ -216,7 +216,7 @@ export async function buildSettlement(args: {
   });
   // V37.1 — new rounds contain ONLY confirmed, not-yet-published approvals, each capped
   // at its approved amount. Unapproved balances never enter a prepared batch.
-  const { data: confirmedOpen, error: approvalsError } = await args.admin.from('reward_payout_approvals').select('user_id,wallet,points').eq('status', 'CONFIRMED').is('settlement_batch_id', null);
+  const { data: confirmedOpen, error: approvalsError } = await args.admin.from('reward_payout_approvals').select('user_id,wallet,points,confirmed_at,program_breakdown').eq('status', 'CONFIRMED').is('settlement_batch_id', null);
   if (approvalsError) throw new Error('PAYOUT_APPROVALS_UNAVAILABLE');
   const approvedBy = new Map((confirmedOpen ?? []).map((a) => [a.user_id, a]));
   const batchRows = rows.flatMap((r) => {
@@ -249,8 +249,18 @@ export async function buildSettlement(args: {
   const { data: existing, error: existingError } = await args.admin.from('reward_settlement_batches').select('*')
     .eq('chain_id', MAINNET_CHAIN_ID).eq('distributor', DISTRIBUTOR.toLowerCase()).eq('epoch_id', p.epochId);
   if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
-  if ((existing ?? []).length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
-  const original = existing?.[0];
+  const { data: retired, error: retiredError } = await args.admin.from('reward_retired_drafts').select('batch_id');
+  if (retiredError) throw new Error('DRAFT_RETIREMENT_STATE_UNAVAILABLE');
+  const retiredIds = new Set((retired ?? []).map(r => r.batch_id));
+  // Only the exact owner-held draft can be retired; chain and DB uncertainty fail closed.
+  for (const draft of existing ?? []) {
+    if (retiredIds.has(draft.id) || draft.epoch_id !== 4 || draft.root !== '0xe2af18b23c702ddf6d0bd32e717ca4f8a997deb0dbf4f3df508096d8be2065a5' || live.epochCount !== 3) continue;
+    const { data: didRetire, error: retirementError } = await args.admin.rpc('retire_unapproved_reward_draft', { p_batch: draft.id, p_now: live.nowSec, p_delay: live.minPublishDelay, p_epoch: live.epochCount });
+    if (!retirementError && didRetire) retiredIds.add(draft.id);
+  }
+  const active = (existing ?? []).filter(b => !retiredIds.has(b.id));
+  if (active.length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
+  const original = active[0];
   const provenanceExcludedPoints = args.ledger.filter(l => l.points > 0 && l.chain_id === MAINNET_CHAIN_ID && (l.reason === 'CORE_SWAP' || l.reason === 'CORE_SWAP_V2') && !eligibleIds.has(l.id ?? '')).reduce((total,l)=>total+l.points,0);
   const stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
   let renewal: RenewalProposal | null = null;
