@@ -11,6 +11,7 @@ Preserved: Round #3 (1,122 FLOW, unsigned, unpublished), 74 unfunded / 776 restr
 
 - [x] V37.1 automatic approval within Ops daily budget (default OFF)
 - [x] V37.1 link confirmed approvals to verified published rounds
-- [ ] Simplify automation to existing authorized funding and campaign limits, retaining OFF and suspension
-- [ ] Safely retire expired unapproved draft without reusing allocations
-- [ ] Verify atomic backing/duplicate/batch safety and activation readiness
+- [x] Simplify automation to existing authorized funding and campaign limits, retaining OFF and suspension
+- [x] Safely retire expired unapproved draft without reusing allocations (audited retirement confirmed)
+- [x] Verify atomic backing/duplicate/batch safety: isolated concurrent writes, caps, unpaid deltas and schedule recovery
+- [ ] Activation: deployment and connected publisher-wallet acceptance; revised policy remains OFF pending explicit super-admin enable
