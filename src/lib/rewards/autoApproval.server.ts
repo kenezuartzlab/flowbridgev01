@@ -93,7 +93,7 @@ export async function runAutoApproval(source: string) {
     // One fresh state for the whole set, so a batch is prepared once from all
     // confirmations rather than mid-loop from a partial set.
     const { loadQueueState } = await import("./approvalQueue.server");
-    const pre = (approvedRows ?? []).length ? await loadQueueState(new Set((approvedRows ?? []).map((r) => r.id))) : undefined;
+    const pre = (approvedRows ?? []).length ? await loadQueueState(new Set((approvedRows ?? []).map((r) => r.id)), { persistBatch: false }) : undefined;
     for (const r of approvedRows ?? []) {
       const res = await confirmApproved({ userId: cfgRow.updated_by, email: "funded-policy", role: "automation" }, r.id, r.evidence_hash, pre);
       if (res.ok) confirmed++; else confirmFailures[res.error] = (confirmFailures[res.error] ?? 0) + 1;
@@ -108,7 +108,8 @@ export async function runAutoApproval(source: string) {
     // immediately before the atomic commitment. Concurrent jobs share the DB lock.
     const before = await admin.rpc("reward_payout_evidence_hash");
     const { loadQueueState } = await import("./approvalQueue.server");
-    const fresh = await loadQueueState();
+    // Mid-cycle checks never prepare a batch; the final report prepares one from the full set.
+    const fresh = await loadQueueState(undefined, { persistBatch: false });
     const eligible = fresh.routineQueue.candidates.find(c => c.userId === x.userId && c.wallet === x.wallet);
     const after = await admin.rpc("reward_payout_evidence_hash");
     const { readChainState } = await import("./settlement.server");

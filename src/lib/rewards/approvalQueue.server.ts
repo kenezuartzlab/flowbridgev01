@@ -20,9 +20,9 @@ async function sha256(text: string): Promise<string> {
 
 interface SettlementAccountRow { userId: string; wallet: string | null; classification: string; authoritative: number; pendingReview: number; alreadyAllocatedPoints: number; fundedByProgram?: Record<string, number>; routineFundedByProgram?: Record<string, number> }
 
-export async function loadQueueState(ignoreApprovalId?: string | Set<string>) {
+export async function loadQueueState(ignoreApprovalId?: string | Set<string>, opts: { persistBatch?: boolean } = {}) {
   const { buildRewardSolvencyReport } = await import("./rewardSolvency.server");
-  const report = await buildRewardSolvencyReport();
+  const report = await buildRewardSolvencyReport(opts);
   const rows = ((report.settlement as { accountRows?: SettlementAccountRow[] }).accountRows ?? []) as SettlementAccountRow[];
   const admin = await db();
   const { data: open, error } = await admin.from("reward_payout_approvals").select("id,user_id").or("status.in.(PROPOSED,APPROVED),and(status.eq.CONFIRMED,settlement_batch_id.is.null)");

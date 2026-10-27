@@ -168,6 +168,7 @@ export async function buildSettlement(args: {
   admin: Admin; recon: ReconRow[]; ledger: LedgerRow[]; wallets: Map<string, string | null>;
   budgets: { program_id: string; total_points: number; funding_verified?: boolean }[];
   profiles?: Map<string, { createdAt: string | null; wallet: string | null }>;
+  persistBatch?: boolean;
 }) {
   const evidenceFence = await args.admin.rpc('reward_payout_evidence_hash');
   if (evidenceFence.error || !evidenceFence.data) throw new Error('PAYOUT_EVIDENCE_UNAVAILABLE');
@@ -318,7 +319,7 @@ export async function buildSettlement(args: {
     return { account: opaque(r.userId), state, fundedPoints: Math.floor(r.authoritative), alreadySettled: Math.floor(r.alreadyAllocatedPoints), delta };
   });
 
-  if (publishable && p.batch?.root && !stored) {
+  if (args.persistBatch !== false && publishable && p.batch?.root && !stored) {
     const { error: saveError } = await args.admin.rpc('persist_funded_reward_batch', {
       p_epoch: p.epochId, p_root: p.batch.root, p_total: p.batch.totalWei as never, p_start: p.claimStart, p_end: p.claimEnd, p_fingerprint: p.fingerprint,
       p_leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
