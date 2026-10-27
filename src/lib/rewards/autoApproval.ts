@@ -1,10 +1,10 @@
 /**
- * V37.1 — automatic payout approval within a super-admin daily budget (pure).
+ * V37.1 — automatic payout approval against existing authorized funded limits (pure).
  *
  * Plans which verified, funded, unsettled account balances may be approved
- * automatically. Never signs, publishes or reserves: funded ledger rows already
+ * automatically. Never signs, publishes or reserves new funding: ledger rows already
  * hold their reservations; the atomic DB function re-checks budget and
- * duplicates under a lock. Default config is OFF with a zero budget.
+ * duplicates under a lock. The master switch defaults OFF.
  */
 import { allocateByProgram, type ApprovalCandidate } from "./approvalQueue";
 import { BUDGET_PROGRAMS } from "./budgetControls";
@@ -51,7 +51,7 @@ export function automationBlocker(c: AutoApprovalConfig): string | null {
   return null;
 }
 
-/** Validates a config change. Enabling requires a positive budget and confirmed acceptance. */
+/** Revised policy activation is explicit; legacy budget fields confer no authority. */
 export function validateAutoConfig(c: AutoApprovalConfig): string | null {
   const int = (n: number) => Number.isInteger(n) && n >= 0;
   if (!int(c.dailyBudgetFlow) || !int(c.perWalletDailyCap)) return "Budgets must be whole, non-negative FLOW amounts.";
