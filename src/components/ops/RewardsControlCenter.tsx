@@ -14,7 +14,7 @@ type State = {
   fundingOverview:{verifiedQualifyingPoints:number;walletCount:number;fundingAmount:number;availableBackingFlow:number|null;availableBudget:number;exceptionCount:number;alreadyFundedPoints:number;settledFlow:number|null};
   round3:{heldPoints:number;storedFlow:number|null};
   chain: null | { freeBalanceFlow: number; totalClaimedFlow: number; campaignBudgetFlow: number; epochCount: number; paused: boolean };
-  budgets: { program_id: string; total_points: number; reserved_points: number; status: string }[];
+  budgets: { program_id: string; total_points: number; reserved_points: number; status: string; funding_verified?: boolean }[];
   fundingQueue: { programId: string; rows: number; points: number; accounts: number; unlabelled: number; accountBreakdown: number[] }[];
   exclusions: Record<string, { rows: number; points: number }>;
   snapshots: Snapshot[];
@@ -23,7 +23,7 @@ type State = {
   automation: { policies: { program_id: string; auto_funding_enabled: boolean; suspended: boolean; per_run_cap: number; daily_cap: number }[]; autonomousFundingAuthorized: boolean; autonomousSigning: boolean; lastRuns: { ran_at: string; source: string }[] };
 };
 
-const SECTIONS = ["Payout Operations", "Approval Queue", "Evidence Review", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation & Budgets", "Audit History"] as const;
+const SECTIONS = ["Rewards Operations", "Approval Queue", "Payout Operations", "Evidence Review", "Overview", "Funding Queue", "Funding Approvals", "Exceptions", "Automation & Budgets", "Audit History"] as const;
 type Section = (typeof SECTIONS)[number];
 const fmt = (n: number | null | undefined) => (n == null ? "—" : Math.floor(n).toLocaleString());
 const TONE: Record<string, string> = {
@@ -50,12 +50,12 @@ function download(name: string, data: unknown) {
 }
 
 type PayoutCandidate = { userId: string; wallet: string; availablePoints: number; fundedPoints: number; alreadySettledPoints: number };
-type PayoutApproval = { id: string; user_id: string; wallet: string; points: number; available_points: number; evidence_hash: string; status: string; proposed_by_email: string; decided_by_email: string | null; confirmed_by_email: string | null; created_at: string; canDecide: boolean; canConfirm: boolean };
+type PayoutApproval = { id: string; user_id: string; wallet: string; points: number; available_points: number; evidence_hash: string; status: string; proposed_by_email: string; decided_by_email: string | null; confirmed_by_email: string | null; created_at: string; canDecide: boolean; canConfirm: boolean; heldReason?: string | null };
 type ApprovalQueueState = {
   candidates: PayoutCandidate[];
   excluded: { userId: string; reason: string; points: number }[];
   approvals: PayoutApproval[];
-  backing: { freeBalanceFlow: number | null; campaignBudgetFlow: number | null; paused: boolean | null; settlementStatus: string; claimStartIso: string | null; claimEndIso: string | null };
+  backing: { freeBalanceFlow: number | null; campaignBudgetFlow: number | null; paused: boolean | null; settlementStatus: string; settlementBlockReason?: string | null; claimStartIso: string | null; claimEndIso: string | null };
 };
 
 /** V37 — user-based Rewards Approval Queue. Propose → different super admin approves → confirm. No signing here. */
@@ -125,22 +125,23 @@ function ApprovalQueue({ wallet, isSuper, busy, act }: { wallet: string; isSuper
     <div className="space-y-2">
       <div className="rounded-xl border border-hairline bg-card p-3 text-[11.5px] text-muted">
         <p>Routine verified funded rewards are approved automatically when the master switch is on. Manual requests remain available for independently reviewed exceptions. Any positive verified amount qualifies; publication and claim activation are still required.</p>
-        <p className="mt-1">Distributor backing: <b className="tabular-nums">{fmt(s.backing.freeBalanceFlow)}</b> FLOW free · budget {fmt(s.backing.campaignBudgetFlow)} FLOW{s.backing.paused ? " · PAUSED" : ""} · Settlement: {s.backing.settlementStatus}</p>
+        <p className="mt-1">Distributor backing: <b className="tabular-nums">{fmt(s.backing.freeBalanceFlow)}</b> FLOW free · budget {fmt(s.backing.campaignBudgetFlow)} FLOW{s.backing.paused ? " · PAUSED" : ""} · Next batch: {s.backing.settlementStatus === "READY_FOR_PUBLISHER_REVIEW" ? "ready for publisher review" : `not ready — ${s.backing.settlementBlockReason ?? s.backing.settlementStatus}`}</p>
       </div>
       {s.approvals.filter((a) => a.status === "PROPOSED" || a.status === "APPROVED").map((a) => (
         <div key={a.id} className="rounded-xl border border-hairline bg-card p-3">
-          <div className="flex items-start justify-between gap-2"><p className="min-w-0 text-[12.5px] font-black">{fmt(a.points)} FLOW → {a.wallet.slice(0, 6)}…{a.wallet.slice(-4)}</p><Chip s={a.status === "PROPOSED" ? "NEEDS APPROVAL" : a.status} /></div>
+          <div className="flex items-start justify-between gap-2"><p className="min-w-0 text-[12.5px] font-black">{fmt(a.points)} FLOW → {a.wallet.slice(0, 6)}…{a.wallet.slice(-4)}</p><Chip s={a.heldReason ? "BLOCKED" : a.status === "PROPOSED" ? "NEEDS APPROVAL" : a.status} /></div>
+          {a.heldReason && <p className="mt-1 text-[11.5px] font-bold text-warning">{a.heldReason}</p>}
           <p className="text-[11px] text-muted">Available {fmt(a.available_points)} · proposed by {a.proposed_by_email}{a.decided_by_email ? ` · decided by ${a.decided_by_email}` : ""}{a.confirmed_by_email ? ` · confirmed by ${a.confirmed_by_email}` : ""}</p>
           <p className="break-all font-mono text-[10.5px] text-muted">hash {a.evidence_hash.slice(0, 16)}…</p>
-          {a.status === "PROPOSED" && isSuper && (
+          {a.status === "PROPOSED" && isSuper && a.canDecide && !a.heldReason && (
             <div className="mt-2 flex flex-wrap gap-2">
               <Button disabled={!!busy || !a.canDecide} onClick={() => run(`pa-${a.id}`, { action: "payout-approve", id: a.id }, "Payout approved")}>Review & Approve Payout</Button>
               <button type="button" disabled={!!busy} onClick={() => run(`pr-${a.id}`, { action: "payout-reject", id: a.id }, "Rejected")} className="rounded-xl border border-danger/40 px-3 py-2 text-[12px] font-black text-danger disabled:opacity-50">Reject</button>
             </div>
           )}
-          {a.status === "PROPOSED" && isSuper && !a.canDecide && <p className="mt-1 text-[11px] text-warning">The proposer cannot approve their own proposal.</p>}
-          {a.status === "APPROVED" && isSuper && (
-            <button type="button" disabled={!!busy || !a.canConfirm} onClick={() => { if (confirm(`Confirm payout of ${a.points} FLOW? This records the decision and prepares the unsigned settlement batch; the publisher still signs.`)) run(`pc-${a.id}`, { action: "payout-confirm", id: a.id, hash: a.evidence_hash }, "Payout CONFIRMED — unsigned batch prepared"); }} className="mt-2 w-full rounded-xl bg-primary px-3 py-2 text-[12px] font-black text-primary-foreground disabled:opacity-50 sm:w-auto">{busy === `pc-${a.id}` ? "Confirming…" : "Confirm & Prepare Distribution"}</button>
+          {a.status === "PROPOSED" && isSuper && !a.canDecide && !a.heldReason && <p className="mt-1 text-[11px] text-warning">Waiting for a different super admin — the proposer cannot approve their own proposal.</p>}
+          {a.status === "APPROVED" && isSuper && a.canConfirm && !a.heldReason && (
+            <button type="button" disabled={!!busy} onClick={() => { if (confirm(`Confirm payout of ${a.points} FLOW? This records the decision and prepares the unsigned settlement batch; the publisher still signs.`)) run(`pc-${a.id}`, { action: "payout-confirm", id: a.id, hash: a.evidence_hash }, "Payout CONFIRMED — unsigned batch prepared"); }} className="mt-2 w-full rounded-xl bg-primary px-3 py-2 text-[12px] font-black text-primary-foreground disabled:opacity-50 sm:w-auto">{busy === `pc-${a.id}` ? "Confirming…" : "Confirm & Prepare Distribution"}</button>
           )}
           {!isSuper && (a.status === "PROPOSED" || a.status === "APPROVED") && <p className="mt-1 text-[11px] text-warning">Waiting for a super admin.</p>}
         </div>
@@ -168,7 +169,7 @@ function ApprovalQueue({ wallet, isSuper, busy, act }: { wallet: string; isSuper
 
 export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | undefined; onOpen: (tab: "Rewards" | "Budgets") => void }) {
   const qc = useQueryClient();
-  const [section, setSection] = useState<Section>("Overview");
+  const [section, setSection] = useState<Section>("Rewards Operations");
   const [busy, setBusy] = useState<string | null>(null);
   const q = useQuery({ queryKey: ["rewards-control", wallet], queryFn: () => {
     if (!wallet) throw new Error("Connect the wallet bound to your admin account.");
@@ -203,7 +204,7 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
 
   return (
     <section className="space-y-3">
-      {section !== 'Payout Operations' && <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
+      {section !== 'Payout Operations' && section !== 'Rewards Operations' && <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
         <div className="flex items-start justify-between gap-2"><p className="min-w-0 text-[12.5px] font-bold">{next.text}</p><Chip s={next.state} /></div>
         {next.run && <Button onClick={next.run} className="mt-2 w-full sm:w-auto">{next.label}</Button>}
         {openExc.length > 0 && <p className="mt-2 text-[11px] font-bold text-warning">{openExc.length} open exception(s) need attention.</p>}
@@ -216,6 +217,27 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
       </div>
 
       <RewardsPipeline />
+      {section === "Rewards Operations" && (
+        <div className="space-y-2">
+          <div className="rounded-xl border border-hairline bg-card p-3 text-[12px]">
+            <p className="font-black">Funding exceptions</p>
+            {s.fundingQueue.filter((p) => { const b = s.budgets.find((x) => x.program_id === p.programId); return !b || b.status !== "ACTIVE" || !b.funding_verified; }).map((p) => <p key={p.programId} className="text-warning">{p.programId}: {fmt(p.points)} verified Points held — program budget not funding-verified.</p>)}
+            {openExc.slice(0, 3).map((e) => <p key={e.id} className="text-muted">{e.detail}</p>)}
+            {openExc.length === 0 && s.fundingQueue.every((p) => { const b = s.budgets.find((x) => x.program_id === p.programId); return b && b.status === "ACTIVE" && b.funding_verified; }) && <p className="text-muted">No funding exceptions.</p>}
+            {openExc.length > 3 && <button type="button" onClick={() => setSection("Exceptions")} className="mt-1 text-[11.5px] font-bold text-primary">View all {openExc.length} exceptions</button>}
+          </div>
+          <AutoBudget wallet={wallet} isSuper={isSuper} busy={busy} act={act} />
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-[12px]">
+            <p className="font-black">Next valid payout batch</p>
+            <p className="text-muted">The publisher reviews the prepared batch and signs once. The claim window opens after the contract's 24-hour delay.</p>
+            <Button onClick={() => onOpen("Rewards")} className="mt-2 w-full sm:w-auto">Review & Publish Batch</Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setSection("Approval Queue")} className="rounded-xl border border-hairline px-3 py-1.5 text-[11.5px] font-bold">Approval records</button>
+            <button type="button" onClick={() => setSection("Audit History")} className="rounded-xl border border-hairline px-3 py-1.5 text-[11.5px] font-bold">Audit history</button>
+          </div>
+        </div>
+      )}
       {section === 'Payout Operations' && <PayoutOperations wallet={wallet}/>}
       {section === 'Approval Queue' && <ApprovalQueue wallet={wallet} isSuper={isSuper} busy={busy} act={act} />}
       {section === 'Evidence Review' && <EvidenceReview wallet={wallet} role={s.viewer.role}/>}
@@ -242,7 +264,8 @@ export function RewardsControlCenter({ wallet, onOpen }: { wallet: string | unde
               <div className="flex items-start justify-between gap-2"><p className="font-mono text-[12px] font-black">{p.programId}</p><Chip s="PENDING" /></div>
               <p className="mt-1 text-[12px]"><b className="tabular-nums">{fmt(p.points)}</b> Points · {p.rows} records · {p.accounts} accounts{p.unlabelled ? ` · ${p.unlabelled} unlabelled (labelled ${p.programId} on confirm)` : ""}</p>
               <p className="mt-1 break-words text-[11px] text-muted">Per account (anonymous): {p.accountBreakdown.map(fmt).join(" · ")}</p>
-              <Button disabled={!!busy || open.some((x) => x.program_id === p.programId)} onClick={() => act("propose", { action: "propose", programId: p.programId }, "Funding proposed; a different super admin must approve.")} className="mt-2 w-full sm:w-auto">{open.some((x) => x.program_id === p.programId) ? "Proposal already open" : "Propose funding for approval"}</Button>
+              {(() => { const b = s.budgets.find((x) => x.program_id === p.programId); return b && (b.status !== "ACTIVE" || !b.funding_verified) ? <p className="mt-2 text-[11.5px] font-bold text-warning">Funding exception: the {p.programId} budget is not funding-verified. These Points stay held until a super admin verifies backing for this program.</p> : null; })()}
+              <Button disabled={!!busy || open.some((x) => x.program_id === p.programId) || (() => { const b = s.budgets.find((x) => x.program_id === p.programId); return !b || b.status !== "ACTIVE" || !b.funding_verified; })()} onClick={() => act("propose", { action: "propose", programId: p.programId }, "Funding proposed; a different super admin must approve.")} className="mt-2 w-full sm:w-auto">{open.some((x) => x.program_id === p.programId) ? "Proposal already open" : "Propose funding for approval"}</Button>
             </div>
           ))}
           <div className="rounded-xl border border-hairline bg-card p-3">
