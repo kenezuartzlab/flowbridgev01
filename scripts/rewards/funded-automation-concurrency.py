@@ -51,3 +51,21 @@ try:q(f"insert into reward_publish_attempts values('{b}','AWAITING_WALLET',false
 except RuntimeError as e:assert 'retired unapproved draft' in str(e)
 else:raise AssertionError('retired draft publication was allowed')
 print('PASS audited retirement once, original allocation preserved, publication blocked')
+# Fresh authorized batches: one identity per epoch; stale roots cannot overlap.
+u,w=user(25);assert call(u,w,n=25,back=25)['ok'] is True
+root2='0x'+'a'*64;leaf=json.dumps([{'index':0,'account':w,'amount':str(25*10**18),'proof':[]}])
+def prepare(root=root2):
+ return q(f"select persist_funded_reward_batch(5,'{root}',25000000000000000000,extract(epoch from now())::bigint+90000,extract(epoch from now())::bigint+2682000,'fresh','{leaf}','[]','local-test-fence')")
+with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool: ids=list(pool.map(lambda _:prepare(),range(8)))
+assert len(set(ids))==1,ids
+try:prepare('0x'+'b'*64)
+except RuntimeError as e:assert 'active batch already exists' in str(e)
+else:raise AssertionError('overlapping batch created')
+print('PASS concurrent batch preparation produces one identity; different root cannot overlap')
+batch=ids[0]
+q(f"update reward_settlement_batches set claim_start=1,claim_end=2592001 where id='{batch}'")
+refresh=q(f"select refresh_funded_batch_schedule('{batch}',extract(epoch from now())::bigint+90000,extract(epoch from now())::bigint+2682000,'renewed',extract(epoch from now())::bigint,86400,'local-test-fence')")
+assert refresh=='t'
+assert q(f"select count(*) from reward_schedule_renewals where batch_id='{batch}' and status='APPROVED'")=='1'
+assert q(f"select root from reward_settlement_batches where id='{batch}'")==root2
+print('PASS expired approved batch renews under master policy; original root and schedule remain immutable')
