@@ -10,4 +10,7 @@
 Preserved: Round #3 (1,122 FLOW, unsigned, unpublished), 74 unfunded / 776 restricted Points, auto funding/signing OFF, scheduler OFF, no contracts, no real payouts.
 
 - [x] V37.1 automatic approval within Ops daily budget (default OFF)
-- [ ] V37.1 link confirmed approvals to the prepared batch (settlement_batch_id) on publication
+- [x] V37.1 link confirmed approvals to verified published rounds
+- [ ] Simplify automation to existing authorized funding and campaign limits, retaining OFF and suspension
+- [ ] Safely retire expired unapproved draft without reusing allocations
+- [ ] Verify atomic backing/duplicate/batch safety and activation readiness
