@@ -302,6 +302,13 @@
       "when": 1793073654983,
       "tag": "0042_simplified_funded_reward_automation",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1793074301352,
+      "tag": "0043_funded_batch_authorization_fences",
+      "breakpoints": true
     }
   ]
 }

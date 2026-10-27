@@ -2720,6 +2720,20 @@ export type Database = {
         }
         Returns: number
       }
+      persist_funded_reward_batch: {
+        Args: {
+          p_end: number
+          p_epoch: number
+          p_evidence: string
+          p_fingerprint: string
+          p_leaves: Json
+          p_programs: Json
+          p_root: string
+          p_start: number
+          p_total: number
+        }
+        Returns: string
+      }
       propose_reward_evidence_exception: {
         Args: {
           p_actor: string
@@ -2757,6 +2771,18 @@ export type Database = {
           p_block_hash: string
           p_hash: string
           p_operation: string
+        }
+        Returns: boolean
+      }
+      refresh_funded_batch_schedule: {
+        Args: {
+          p_batch: string
+          p_delay: number
+          p_end: number
+          p_evidence: string
+          p_fingerprint: string
+          p_now: number
+          p_start: number
         }
         Returns: boolean
       }
