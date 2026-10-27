@@ -169,6 +169,8 @@ export async function buildSettlement(args: {
   budgets: { program_id: string; total_points: number; funding_verified?: boolean }[];
   profiles?: Map<string, { createdAt: string | null; wallet: string | null }>;
 }) {
+  const evidenceFence = await args.admin.rpc('reward_payout_evidence_hash');
+  if (evidenceFence.error || !evidenceFence.data) throw new Error('PAYOUT_EVIDENCE_UNAVAILABLE');
   const [live, roles] = await Promise.all([readChainState(), readPublisherRoles()]);
   const publisher = { address: SETTLEMENT_SIGNER.address, ...auditPublisherRoles(roles) };
   const generatedAt = new Date().toISOString();
@@ -268,11 +270,19 @@ export async function buildSettlement(args: {
   if (active.length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
   const original = active[0];
   const provenanceExcludedPoints = args.ledger.filter(l => l.points > 0 && l.chain_id === MAINNET_CHAIN_ID && (l.reason === 'CORE_SWAP' || l.reason === 'CORE_SWAP_V2') && !eligibleIds.has(l.id ?? '')).reduce((total,l)=>total+l.points,0);
-  const stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
+  let stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
   let renewal: RenewalProposal | null = null;
   if (stored) {
     const immutable = { ...toBatch(stored as unknown as BatchRow), id: stored.id, fingerprint: stored.fingerprint, published: !!stored.publication_verified_at };
     renewal = proposeScheduleRenewal(p, immutable, live.nowSec, live.minPublishDelay, original?.fingerprint);
+    if (renewal.ready && renewal.epochId >= 4) {
+      const { data: refreshed, error } = await args.admin.rpc('refresh_funded_batch_schedule', { p_batch: stored.id, p_start: renewal.claimStart, p_end: renewal.claimEnd, p_fingerprint: renewal.fingerprint, p_now: live.nowSec, p_delay: live.minPublishDelay, p_evidence: evidenceFence.data });
+      if (!error && refreshed && original) {
+        stored = await resolveBatchSchedule(args.admin, original);
+        Object.assign(immutable, toBatch(stored as unknown as BatchRow), { fingerprint: stored.fingerprint });
+        renewal = null;
+      }
+    }
     p = revalidateImmutableBatch(p, immutable, live.nowSec, live.minPublishDelay);
   }
 
@@ -309,12 +319,11 @@ export async function buildSettlement(args: {
   });
 
   if (publishable && p.batch?.root && !stored) {
-    const { error: saveError } = await args.admin.from("reward_settlement_batches").upsert({
-      chain_id: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR.toLowerCase(), epoch_id: p.epochId, root: p.batch.root,
-      total_wei: p.batch.totalWei as never, claim_start: p.claimStart, claim_end: p.claimEnd, fingerprint: p.fingerprint,
-      leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
-      program_breakdown: programs as never,
-    }, { onConflict: "chain_id,distributor,epoch_id,root", ignoreDuplicates: true });
+    const { error: saveError } = await args.admin.rpc('persist_funded_reward_batch', {
+      p_epoch: p.epochId, p_root: p.batch.root, p_total: Number(p.batch.totalWei), p_start: p.claimStart, p_end: p.claimEnd, p_fingerprint: p.fingerprint,
+      p_leaves: p.batch.leaves.map((l) => ({ index: l.index, account: l.account, amount: l.amount, proof: l.proof })),
+      p_programs: programs as never, p_evidence: evidenceFence.data,
+    });
     if (saveError) throw new Error('PREPARED_BATCH_PERSISTENCE_FAILED');
   }
 
