@@ -45,7 +45,7 @@ describe("automatic approval plan", () => {
     expect(validateAutoConfig({ ...ON, dailyBudgetFlow: 0 })).toBeNull();
     expect(planAutoApprovals([cand("a", 25)], { ...ON, dailyBudgetFlow: 0, enabledPrograms: [] }, CTX).approve[0].points).toBe(25);
     expect(validateAutoConfig({ ...ON, acceptanceConfirmed: false })).toMatch(/acceptance/);
-    expect(validateAutoConfig({ ...ON, dailyBudgetFlow: 500_001 })).toMatch(/cap/);
+    expect(validateAutoConfig({ ...ON, dailyBudgetFlow: 500_001 })).toBeNull();
     expect(validateAutoConfig(ON)).toBeNull();
   });
 });

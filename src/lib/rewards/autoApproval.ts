@@ -53,6 +53,10 @@ export function automationBlocker(c: AutoApprovalConfig): string | null {
 
 /** Revised policy activation is explicit; legacy budget fields confer no authority. */
 export function validateAutoConfig(c: AutoApprovalConfig): string | null {
+  if (c.policyRevision === 2) {
+    if (c.enabled && !c.acceptanceConfirmed) return "Confirm acceptance before enabling automatic approval.";
+    return null;
+  }
   const int = (n: number) => Number.isInteger(n) && n >= 0;
   if (!int(c.dailyBudgetFlow) || !int(c.perWalletDailyCap)) return "Budgets must be whole, non-negative FLOW amounts.";
   if (c.dailyBudgetFlow > PUBLISHER_CONFIG.maxFlowPerDay) return `Daily budget cannot exceed the ${PUBLISHER_CONFIG.maxFlowPerDay.toLocaleString()} FLOW daily publication cap.`;

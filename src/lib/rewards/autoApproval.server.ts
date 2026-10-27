@@ -98,7 +98,8 @@ export async function runAutoApproval(source: string) {
     const chain = await readChainState();
     const { publicationPreflight } = await import("./publisherReconciliation.server");
     const publisher = chain ? await publicationPreflight(chain.epochCount + 1).catch(() => null) : null;
-    if (before.error || after.error || !before.data || before.data !== after.data || !eligible || x.points > eligible.availablePoints || !chain || chain.paused || !publisher?.epochAvailable || publisher.latest !== publisher.pending) {
+    const programsStillAvailable = !!eligible?.availableByProgram && Object.entries(x.programs).every(([program, amount]) => amount <= (eligible.availableByProgram?.[program] ?? 0));
+    if (before.error || after.error || !before.data || before.data !== after.data || !eligible || !programsStillAvailable || x.points > eligible.availablePoints || !chain || chain.paused || !publisher?.epochAvailable || publisher.latest !== publisher.pending) {
       rejected.CHECKS_CHANGED = (rejected.CHECKS_CHANGED ?? 0) + 1; continue;
     }
     const backing = (chain.balanceWei - chain.totalReservedWei < chain.campaignBudgetWei - chain.totalClaimedWei - chain.totalReservedWei
