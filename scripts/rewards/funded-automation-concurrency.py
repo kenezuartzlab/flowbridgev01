@@ -40,3 +40,14 @@ q('delete from reward_payout_approvals;')
 x=user();q(f"insert into reward_payout_approvals(user_id,wallet,points,available_points,funded_points,already_settled_points,evidence,evidence_hash,proposed_by,proposed_by_email,status,confirmed_at,settlement_batch_id) values('{uuid.uuid4()}','other',499950,499950,499950,0,'{{}}','h','{a}','local','CONFIRMED',now(),'{uuid.uuid4()}');")
 assert call(*x,back=1000)['reason']=='DAILY_BUDGET_EXHAUSTED'
 print('PASS existing 500000 FLOW rolling-day cap')
+q('delete from reward_payout_approvals;')
+b=str(uuid.uuid4());root='0xe2af18b23c702ddf6d0bd32e717ca4f8a997deb0dbf4f3df508096d8be2065a5'
+leaves=json.dumps([{'account':'local','amount':'1'}]*12)
+q(f"insert into reward_settlement_batches(id,chain_id,distributor,epoch_id,root,total_wei,claim_start,claim_end,fingerprint,leaves) values('{b}',677,'local',4,'{root}',1190000000000000000000,1,2,'old-fingerprint','{leaves}');")
+assert q(f"select retire_unapproved_reward_draft('{b}',extract(epoch from now())::bigint,86400,3)")=='t'
+assert q(f"select retire_unapproved_reward_draft('{b}',extract(epoch from now())::bigint,86400,3)")=='f'
+assert q(f"select count(*) from reward_settlement_batches where id='{b}' and root='{root}' and total_wei=1190000000000000000000")=='1'
+try:q(f"insert into reward_publish_attempts values('{b}','AWAITING_WALLET',false)")
+except RuntimeError as e:assert 'retired unapproved draft' in str(e)
+else:raise AssertionError('retired draft publication was allowed')
+print('PASS audited retirement once, original allocation preserved, publication blocked')
