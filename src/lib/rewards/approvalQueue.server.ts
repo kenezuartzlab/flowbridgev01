@@ -9,6 +9,7 @@
  * settlement builder and reports the resulting status and claim window.
  */
 import type { AdminContext } from "@/lib/admin/adminGate.server";
+import { SETTLEMENT_SIGNER } from "./settlementPlanner";
 import { allocateByProgram, approvalEvidence, buildApprovalQueue, payoutApprovalDecision, proposedAmountValid, type ApprovalAccountRow } from "./approvalQueue";
 
 async function db() { return (await import("@/integrations/supabase/client.server")).supabaseAdmin; }
@@ -19,14 +20,14 @@ async function sha256(text: string): Promise<string> {
 
 interface SettlementAccountRow { userId: string; wallet: string | null; classification: string; authoritative: number; pendingReview: number; alreadyAllocatedPoints: number; fundedByProgram?: Record<string, number>; routineFundedByProgram?: Record<string, number> }
 
-export async function loadQueueState() {
+export async function loadQueueState(ignoreApprovalId?: string) {
   const { buildRewardSolvencyReport } = await import("./rewardSolvency.server");
   const report = await buildRewardSolvencyReport();
   const rows = ((report.settlement as { accountRows?: SettlementAccountRow[] }).accountRows ?? []) as SettlementAccountRow[];
   const admin = await db();
-  const { data: open, error } = await admin.from("reward_payout_approvals").select("user_id").or("status.in.(PROPOSED,APPROVED),and(status.eq.CONFIRMED,settlement_batch_id.is.null)");
+  const { data: open, error } = await admin.from("reward_payout_approvals").select("id,user_id").or("status.in.(PROPOSED,APPROVED),and(status.eq.CONFIRMED,settlement_batch_id.is.null)");
   if (error) throw new Error("approval queue unavailable");
-  const openUsers = new Set((open ?? []).map((r: { user_id: string }) => r.user_id));
+  const openUsers = new Set((open ?? []).filter((r: { id: string }) => r.id !== ignoreApprovalId).map((r: { user_id: string }) => r.user_id));
   const { data: linked, error: linkedError } = await admin.from("reward_payout_approvals").select("user_id,program_breakdown").eq("status", "CONFIRMED").not("settlement_batch_id", "is", null);
   if (linkedError) throw new Error("approval history unavailable");
   const settledBy = new Map<string, Record<string, number>>();
@@ -49,6 +50,16 @@ export async function loadQueueState() {
   return { report, queue: buildApprovalQueue(inputs), routineQueue: buildApprovalQueue(routineInputs) };
 }
 
+/** Publisher-wallet recipients always require independent review; never confirmed through routine flow. */
+export const isPublisherRecipient = (wallet: string | null | undefined) => !!wallet && wallet.toLowerCase() === SETTLEMENT_SIGNER.address.toLowerCase();
+
+function settlementBlockReason(st: { status: string; reason?: string | null; checks?: { id: string; pass: boolean }[] }): string | null {
+  if (st.status === "READY_FOR_PUBLISHER_REVIEW") return null;
+  const failed = (st.checks ?? []).filter((c) => !c.pass).map((c) => c.id.replaceAll("_", " ").toLowerCase());
+  if (st.reason) return String(st.reason).replaceAll("_", " ").toLowerCase() + (failed.length ? ` (${failed.join(", ")})` : "");
+  return failed.length ? failed.join(", ") : "no confirmed approvals are waiting for a batch";
+}
+
 export async function readApprovalQueue(actor?: AdminContext) {
   const admin = await db();
   const [{ queue, report }, { data: approvals, error }] = await Promise.all([
@@ -63,13 +74,15 @@ export async function readApprovalQueue(actor?: AdminContext) {
     approvals: (approvals ?? []).map((a: Record<string, unknown>) => ({
       ...a,
       canDecide: !!actor && payoutApprovalDecision(a as never, { userId: actor.userId, role: actor.role }, "approve").ok,
-      canConfirm: !!actor && payoutApprovalDecision(a as never, { userId: actor.userId, role: actor.role }, "confirm").ok,
+      canConfirm: !!actor && !isPublisherRecipient(a.wallet as string) && payoutApprovalDecision(a as never, { userId: actor.userId, role: actor.role }, "confirm").ok,
+      heldReason: isPublisherRecipient(a.wallet as string) && ["PROPOSED", "APPROVED"].includes(String(a.status)) ? "Publisher wallet recipient — held for independent review. Not settled or published automatically." : null,
     })),
     backing: {
       freeBalanceFlow: chain?.freeFlow ?? null,
       campaignBudgetFlow: chain?.campaignBudgetFlow ?? null,
       paused: chain?.paused ?? null,
       settlementStatus: report.settlement.status,
+      settlementBlockReason: settlementBlockReason(report.settlement as never),
       claimStartIso: report.settlement.claimStartIso,
       claimEndIso: report.settlement.claimEndIso,
     },
@@ -125,12 +138,20 @@ export async function confirmPayout(a: AdminContext, id: string, expectedHash: s
   const d = payoutApprovalDecision(rec as never, { userId: a.userId, role: a.role }, "confirm");
   if (!d.ok) return { ok: false as const, error: d.reason };
   if (rec.evidence_hash !== expectedHash) return { ok: false as const, error: "Evidence hash mismatch; reload and re-review." };
-  // Re-verify the account is still eligible and backed before confirming.
-  const { queue, report } = await loadQueueState().catch(() => ({ queue: null, report: null }));
-  const still = queue?.candidates.find((x) => x.userId === rec.user_id);
-  const chain = report?.distributor.live ?? null;
-  if (!still || !chain || chain.paused || rec.points > chain.freeFlow || !proposedAmountValid(still.availablePoints, rec.points))
-    return { ok: false as const, error: "Eligibility or backing changed since approval; reject and re-propose." };
+  if (isPublisherRecipient(rec.wallet)) return { ok: false as const, error: "Publisher wallet recipient is held for independent review and cannot be confirmed here." };
+  // Re-verify the account is still eligible and backed before confirming. This approval's own open record is ignored.
+  const { queue, report } = await loadQueueState(id).catch(() => ({ queue: null, report: null }));
+  if (!queue || !report) return { ok: false as const, error: "Eligibility checks are temporarily unavailable; nothing changed. Retry shortly." };
+  const chain = report.distributor.live ?? null;
+  if (!chain) return { ok: false as const, error: "Distributor state unreadable; nothing changed. Retry shortly." };
+  if (chain.paused) return { ok: false as const, error: "Distributor is paused; confirmation blocked." };
+  if (rec.points > chain.freeFlow) return { ok: false as const, error: `Insufficient distributor backing: ${Math.floor(chain.freeFlow)} FLOW free, ${rec.points} required.` };
+  const still = queue.candidates.find((x) => x.userId === rec.user_id);
+  if (!still) {
+    const ex = queue.excluded.find((x) => x.userId === rec.user_id);
+    return { ok: false as const, error: `Account is no longer eligible (${ex ? ex.reason.replaceAll("_", " ").toLowerCase() : "no verified funded Points"}); reject this approval.` };
+  }
+  if (!proposedAmountValid(still.availablePoints, rec.points)) return { ok: false as const, error: `Only ${still.availablePoints} verified Points remain available; reject and re-propose.` };
   const { data: upd, error } = await admin.from("reward_payout_approvals").update({
     status: "CONFIRMED", confirmed_by: a.userId, confirmed_by_email: a.email, confirmed_at: new Date().toISOString(),
   } as never).eq("id", id).eq("status", "APPROVED").select("id");
