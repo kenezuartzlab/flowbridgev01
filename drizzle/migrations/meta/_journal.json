@@ -309,6 +309,13 @@
       "when": 1793074301352,
       "tag": "0043_funded_batch_authorization_fences",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1793074394322,
+      "tag": "0044_funded_batch_concurrent_snapshot_fence",
+      "breakpoints": true
     }
   ]
 }
