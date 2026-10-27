@@ -22,6 +22,11 @@ async function loadQueue() {
   return buildFundingQueue((ledger.data ?? []) as QueueLedgerRow[], wallets);
 }
 
+function capacityError(programId: string, checks: unknown): string {
+  const failed = Array.isArray(checks) ? (checks as { id?: string; detail?: string; pass?: boolean }[]).filter((c) => c.pass === false).map((c) => `${(c.id ?? "check").replaceAll("_", " ").toLowerCase()}: ${c.detail ?? "failed"}`) : [];
+  return `${programId} cannot be funded: ${failed.length ? failed.join("; ") : "program budget is not active and funding-verified"}. Points stay in the Funding Queue.`;
+}
+
 async function capacity(programId: string, need: number) {
   const admin = await db();
   const [{ data: budgets }, chain] = await Promise.all([
@@ -87,7 +92,7 @@ export async function proposeFunding(a: AdminContext, programId: string, note?: 
   if (!items.length) return { ok: false as const, error: "Nothing fundable in this program." };
   const need = items.reduce((s, i) => s + i.points, 0);
   const cap = await capacity(programId, need);
-  if (!cap.ok) return { ok: false as const, error: "Capacity check failed.", checks: cap.checks };
+  if (!cap.ok) return { ok: false as const, error: capacityError(programId, cap.checks), checks: cap.checks };
   const admin = await db();
   const { data, error } = await admin.rpc("create_reward_funding_snapshot" as never, {
     p_program: programId, p_ids: items.map((i) => i.id), p_actor: a.userId, p_email: a.email,
