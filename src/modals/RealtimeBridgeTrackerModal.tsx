@@ -17,7 +17,7 @@ function NetworkMark({ chain }: { chain: string }) {
   return <span className="font-bold text-primary">{chain}</span>;
 }
 export function RealtimeBridgeTrackerModal({ isOpen, onClose, fromChain, toChain, amount, symbol, recipientAddress, txHash, txUrlPrefix = '', onReset, bridgeDirection, isMainnet = true, walletState, errorMessage }: RealtimeBridgeTrackerModalProps) {
-  const state = useBridgeTracking({active:isOpen, txHash, direction:bridgeDirection, isMainnet, walletState});
+  const state = useBridgeTracking({active:isOpen, txHash, direction:bridgeDirection, isMainnet, walletState, recipient: recipientAddress, amount});
   if (!isOpen) return null;
   const labels: Record<string, string> = {
     awaiting:'Awaiting your confirmation', canceled:'Canceled — you can retry', error:'Confirmation unresolved — review and retry',
@@ -42,9 +42,11 @@ export function RealtimeBridgeTrackerModal({ isOpen, onClose, fromChain, toChain
       {milestone(`Destination transaction confirmed on ${toChain}`, state.destinationDone, state.sourceDone && !state.received)}
       {milestone(`Received ${symbol}`, state.received, false)}
     </div>
+    {state.received && state.evidence.destinationConfirmedAt != null && <p className="text-xs">Delivered: <time>{new Date(state.evidence.destinationConfirmedAt).toISOString()}</time></p>}
     {state.evidence.sourceConfirmedAt != null && <p className="text-xs">Origin block time: <time>{new Date(state.evidence.sourceConfirmedAt).toISOString()}</time></p>}
     <details className="text-xs"><summary className="cursor-pointer py-2 text-primary">Transaction details</summary>
       <p className="break-all">Recipient: {recipientAddress}</p><p className="break-all">Origin hash: {txHash || 'Not submitted'}</p>
+      {state.evidence.destinationTxHash && <p className="break-all">Destination hash: {state.evidence.destinationTxHash}</p>}
       {txHash && <a href={`${txUrlPrefix}${txHash}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 py-2 text-primary">Origin explorer <ExternalLink className="w-3 h-3" /></a>}
     </details>
     {['canceled','error','failed','received'].includes(state.phase) && <Button variant="outline" onClick={() => { onReset(); onClose(); }} className="w-full">{state.received ? 'New bridge' : 'Return to retry'}</Button>}

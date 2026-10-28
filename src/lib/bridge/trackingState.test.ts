@@ -35,3 +35,17 @@ describe('evidence-only bridge presentation', () => {
     for (const patch of [{persisted:false},{trackedHash:'b'},{hash:undefined},{status:'failed'},{status:'pending'},{status:'rejected'},{type:'swap'}]) expect(shouldDismissBridgeReceipt({...e,...patch})).toBe(false);
   });
 });
+import { matchDestinationTransfer } from './trackingState';
+describe('matchDestinationTransfer', () => {
+  const base = { recipient: '0xAbC', sentUnits: 10_000_000n, sourceConfirmedAt: 1000 };
+  it('matches a fee-reduced transfer to the recipient after the origin block', () => {
+    expect(matchDestinationTransfer([{ to: '0xabc', from: '0xbridge', value: 9_500_000n, timestampMs: 2000, txHash: '0x1' }], base)?.txHash).toBe('0x1');
+  });
+  it('ignores transfers before origin, above the bridged amount, or to others', () => {
+    expect(matchDestinationTransfer([
+      { to: '0xabc', from: '0xb', value: 9n, timestampMs: 500, txHash: '0x1' },
+      { to: '0xabc', from: '0xb', value: 20_000_000n, timestampMs: 2000, txHash: '0x2' },
+      { to: '0xdef', from: '0xb', value: 9n, timestampMs: 2000, txHash: '0x3' },
+    ], base)).toBeNull();
+  });
+});

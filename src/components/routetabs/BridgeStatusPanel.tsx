@@ -206,7 +206,8 @@ export function BridgeStatusPanel({
   if (!txHash) return null;
   return <div className="border border-hairline rounded-lg p-3 space-y-2 text-xs">
     <p className="font-semibold">{state.phase === 'failed' ? 'Origin transaction failed' : state.sourceDone ? `Confirmed on ${sourceChainName(bridgeDirection)}` : `Waiting for ${sourceChainName(bridgeDirection)} confirmation`}</p>
-    {state.sourceDone && <p>Awaiting relay acceptance and verified destination delivery on {destChainName(bridgeDirection)}. ETA unknown.</p>}
+    {state.received && <p className="text-primary font-semibold">USDT received on {destChainName(bridgeDirection)}{state.evidence.destinationTxHash && destExplorerPrefix ? <> — <a className="underline" target="_blank" rel="noopener noreferrer" href={`${destExplorerPrefix}${state.evidence.destinationTxHash}`}>view</a></> : null}</p>}
+    {state.sourceDone && !state.received && <p>Awaiting relay acceptance and verified destination delivery on {destChainName(bridgeDirection)}. ETA unknown.</p>}
     {state.readError && <p className="text-warning">Chain read unavailable — retrying without changing the last confirmed status.</p>}
     <a className="text-primary inline-flex gap-1 items-center" href={`${sourceExplorerPrefix}${txHash}`} target="_blank" rel="noopener noreferrer">Origin receipt <ExternalLink className="w-3 h-3" /></a>
     {state.sourceDone && <a className="block text-primary" href={destExplorerPrefix} target="_blank" rel="noopener noreferrer">Destination explorer</a>}
