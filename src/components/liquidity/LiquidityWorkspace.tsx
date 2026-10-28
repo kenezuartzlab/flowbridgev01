@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useAccount, useChainId, useConnect, useSwitchChain } from "wagmi";
 import { discoverPools, type DiscoveredPool } from "@/lib/swap/quoter";
 import { getCuratedTokens } from "@/lib/swap/tokenRegistry";
-import { LIQUIDITY_WRITES_ENABLED } from "@/lib/liquidity/liquidityTokens";
+import { liquidityWritesAllowed } from "@/lib/liquidity/liquidityTokens";
 import { CASWAP_CAPABILITY_MATRIX } from "@/lib/liquidity/venues";
 import { parseSlippagePercent } from "@/lib/liquidity/executionSafety";
 import { AddLiquidityPanel } from "./AddLiquidityPanel";
@@ -31,7 +31,7 @@ export function LiquidityWorkspace({ initialTab = "pools" }: { initialTab?: Liqu
   const parsedSlippage = parseSlippagePercent(slip);
   const slippageBps = parsedSlippage ?? 50;
   const explorer = chainId === 677 ? "https://scan.botchain.ai" : "https://scan.bohr.life";
-  const writable = LIQUIDITY_WRITES_ENABLED[chainId] === true && isConnected && walletChain === chainId && parsedSlippage !== null;
+  const writable = liquidityWritesAllowed(chainId, address) && isConnected && walletChain === chainId && parsedSlippage !== null;
   const contextKey = `${chainId}:${address ?? "disconnected"}:${walletChain}`;
 
   return (

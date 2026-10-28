@@ -24,4 +24,13 @@ export const isNative = (t: Pick<Token, "address">) => t.address.toLowerCase() =
  * closed until the Mainnet liquidity canaries are separately approved and pass;
  * Mainnet discovery/positions/fees are read-only.
  */
+/** Owner-authorized Mainnet canary: only these wallets may add/remove on BDEX V2/V3 while public Mainnet writes stay off. */
+export const LIQUIDITY_CANARY_WALLETS: Record<number, string[]> = { 677: ["0x971e7790fe6c8f77dc666bb05d4aeda362653f94"] };
+export const LIQUIDITY_CANARY_DEXES = ["BDEX V2", "BDEX V3"];
+export function liquidityWritesAllowed(chainId: number, wallet?: string, dex?: string): boolean {
+  if (LIQUIDITY_WRITES_ENABLED[chainId] === true) return true;
+  const list = LIQUIDITY_CANARY_WALLETS[chainId] ?? [];
+  if (!wallet || !list.includes(wallet.toLowerCase())) return false;
+  return dex === undefined || LIQUIDITY_CANARY_DEXES.includes(dex);
+}
 export const LIQUIDITY_WRITES_ENABLED: Record<number, boolean> = { 968: true, 677: false };
