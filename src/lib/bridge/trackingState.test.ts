@@ -1,7 +1,21 @@
-import { describe, expect, it } from 'vitest';
-import { trackingState, shouldDismissBridgeReceipt, isCurrentTrackingResult } from './trackingState';
+import { describe, expect, it, vi } from 'vitest';
+import { trackingState, shouldDismissBridgeReceipt, isCurrentTrackingResult, saveBridgeTracking, loadBridgeTracking } from './trackingState';
 const origin = { txHash: '0xorigin', source: 'success' as const, sourceConfirmedAt: 1000, providerRequired: true };
 describe('evidence-only bridge presentation', () => {
+  it('restores submitted identity without treating browser storage as receipt proof', () => {
+    const storage = new Map<string,string>();
+    vi.stubGlobal('window', { localStorage: {setItem:(k:string,v:string)=>storage.set(k,v), getItem:(k:string)=>storage.get(k) ?? null} });
+    try {
+      const c = {txHash:'0x'+'a'.repeat(64),direction:'BOT_TO_BNB',isMainnet:true,amount:'10.039',recipient:'0x'+'b'.repeat(40),fromChain:'BOT Chain',toChain:'BNB Chain',explorerPrefix:'https://scan.botchain.ai/tx/'};
+      expect(saveBridgeTracking(c)).toBe(true); expect(loadBridgeTracking()).toEqual(c);
+      expect(trackingState({txHash:loadBridgeTracking()?.txHash},99999999).phase).toBe('origin_pending');
+      saveBridgeTracking({...c,explorerPrefix:'javascript:alert(1)'}); expect(loadBridgeTracking()).toBeNull();
+    } finally {vi.unstubAllGlobals();}
+  });
+  it('failed persistence cannot authorize receipt dismissal', () => {
+    vi.stubGlobal('window', {localStorage:{setItem:()=>{throw new Error('storage blocked')}}});
+    try {expect(saveBridgeTracking({txHash:'a',direction:'BOT_TO_BNB',isMainnet:true,amount:'10',recipient:'b',fromChain:'BOT',toChain:'BNB',explorerPrefix:'https://scan.botchain.ai/tx/'})).toBe(false);} finally {vi.unstubAllGlobals();}
+  });
   it('has no relay timer before explicit submission', () => { const s = trackingState({}, 900000); expect(s.phase).toBe('awaiting'); expect(s.relayElapsedSeconds).toBeNull(); });
   it('rejection is canceled, never relaying', () => { const s = trackingState({ walletState: 'rejected' }, 900000); expect(s.phase).toBe('canceled'); expect(s.relayElapsedSeconds).toBeNull(); });
   it('unresolved wallet errors remain errors', () => expect(trackingState({walletState: 'error'}, 1000).phase).toBe('error'));

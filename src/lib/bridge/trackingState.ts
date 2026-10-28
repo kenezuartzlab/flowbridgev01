@@ -35,6 +35,7 @@ export interface BridgeTrackingContext {
   fromChain: string; toChain: string; explorerPrefix: string;
 }
 const STORAGE_KEY = 'flowbridge_bridge_tracking_v1';
+const EXPLORERS = new Set(['https://scan.botchain.ai/tx/', 'https://scan.bohr.life/tx/', 'https://bscscan.com/tx/', 'https://testnet.bscscan.com/tx/', 'https://etherscan.io/tx/', 'https://sepolia.etherscan.io/tx/', 'https://tronscan.org/#/transaction/']);
 export function saveBridgeTracking(context: BridgeTrackingContext): boolean {
   try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(context)); return window.localStorage.getItem(STORAGE_KEY) === JSON.stringify(context); } catch { return false; }
 }
@@ -45,7 +46,7 @@ export function loadBridgeTracking(): BridgeTrackingContext | null {
     if (!c || typeof c.txHash !== 'string' || !/^(0x)?[a-fA-F0-9]{64}$/.test(c.txHash)
       || !['BOT_TO_BNB','BNB_TO_BOT','BOT_TO_ETH','ETH_TO_BOT','BOT_TO_TRX','TRX_TO_BOT'].includes(c.direction)
       || typeof c.isMainnet !== 'boolean' || typeof c.amount !== 'string' || typeof c.recipient !== 'string'
-      || typeof c.fromChain !== 'string' || typeof c.toChain !== 'string' || typeof c.explorerPrefix !== 'string') return null;
+      || typeof c.fromChain !== 'string' || typeof c.toChain !== 'string' || !EXPLORERS.has(c.explorerPrefix)) return null;
     return c;
   } catch { return null; }
 }

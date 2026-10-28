@@ -2377,7 +2377,7 @@ export default function App() {
         : (botBalance?.value ?? 0n);
       return getFixedSwapBalanceTooLowMessage(caPaySymbol as 'CA' | 'BOT', amount, fee, held);
     } catch {
-      return `Lower the ${caPaySymbol} amount slightly to leave room for the ${platformFeeLabel} platform fee.`;
+      return `Lower the ${caPaySymbol} amount slightly to leave room for the ${platformFeeLabel} protocol fee.`;
     }
   })() : undefined;
   let caButtonLabel = "Enter amount";
