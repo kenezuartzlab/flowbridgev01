@@ -58,7 +58,7 @@ export function useLiquidityTx() {
     const patch = (i: number, s: Partial<TxStepView>) => { view[i] = { ...view[i], ...s }; setSteps([...view]); };
     const activity: LiquidityActivity = {
       id: `${op.kind}-${Date.now()}`, kind: op.kind, chainId: op.chainId, dex: op.dex, pair: op.pair,
-      amounts: op.amounts, tokenId: op.tokenId, pool: op.pool, wallet: address, createdAt: Date.now(), txs: [],
+      amounts: op.amounts, tokenId: op.tokenId, pool: op.pool, wallet: address, createdAt: Date.now(), txs: [], completed: false,
     };
     const sendOne = async (label: string, call: LiquidityCall, approval: boolean) => {
       const i = push({ label, phase: approval ? "approval-required" : "preparing" });

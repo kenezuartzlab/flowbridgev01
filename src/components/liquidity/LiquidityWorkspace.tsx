@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useAccount, useChainId, useConnect, useSwitchChain } from "wagmi";
 import { discoverPools, type DiscoveredPool } from "@/lib/swap/quoter";
@@ -39,14 +40,14 @@ export function LiquidityWorkspace({ initialTab = "pools" }: { initialTab?: Liqu
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Segmented value={String(chainId)} onChange={(v) => setChainId(Number(v))} options={[{ id: "677", label: "BOT Mainnet" }, { id: "968", label: "BOT Testnet" }]} />
           {!isConnected ? (
-            <button type="button" disabled={isPending || !preferredConnector} onClick={() => preferredConnector && connect({ connector: preferredConnector })}
-              className="h-10 shrink-0 rounded-xl bg-primary px-4 text-[13px] font-black text-primary-foreground">Connect wallet</button>
+            <Button variant="ghost" type="button" disabled={isPending || !preferredConnector} onClick={() => preferredConnector && connect({ connector: preferredConnector })}
+              className="h-10 shrink-0 rounded-lg bg-primary px-4 text-[13px] font-black text-primary-foreground">Connect wallet</Button>
           ) : (
             <span className="max-w-full truncate font-mono text-[11px] text-muted">{address?.slice(0, 6)}…{address?.slice(-4)}</span>
           )}
         </div>
         {isConnected && walletChain !== chainId && (
-          <Notice tone="warn">Your wallet is on another network. <button type="button" className="font-bold text-primary" onClick={() => switchChain({ chainId })}>Switch network</button></Notice>
+          <Notice tone="warn">Your wallet is on another network. <Button variant="ghost" type="button" className="font-bold text-primary" onClick={() => switchChain({ chainId })}>Switch network</Button></Notice>
         )}
         <label className="flex items-center justify-between gap-2 text-[12px]">
           <span className="text-muted">Slippage tolerance (%)</span>
@@ -79,7 +80,7 @@ function PoolsList({ chainId }: { chainId: number }) {
           {pools === null && <p className="text-[12px] text-muted">Reading pools…</p>}
           {pools?.length === 0 && <p className="text-[12px] text-muted">No pools could be read right now.</p>}
           {pools?.filter((p, i, all) => all.findIndex((o) => o.pool.toLowerCase() === p.pool.toLowerCase()) === i).map((p) => (
-            <a key={p.pool} href={`${explorer}/address/${p.pool}`} target="_blank" rel="noreferrer" className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline p-3">
+            <a key={p.pool} href={`${explorer}/address/${p.pool}`} target="_blank" rel="noreferrer" className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hairline p-3">
               <span className="text-[13px] font-bold">{p.pair}</span>
               <span className="font-mono text-[11px] text-muted">{p.dex}{p.feeTier != null ? ` · ${(p.feeTier / 10_000).toFixed(2)}%` : ""}</span>
             </a>

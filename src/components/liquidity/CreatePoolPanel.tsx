@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import type { Abi, Address } from "viem";
@@ -108,7 +109,7 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
         <>
           <AmountInput label={`Initial price: 1 ${tA.symbol} = ? ${tB.symbol}`} value={price} onChange={setPrice} />
           {recip && (
-            <div className="rounded-xl border border-hairline p-3 text-[12.5px] font-bold">
+            <div className="rounded-lg border border-hairline p-3 text-[12.5px] font-bold">
               <p>1 {tA.symbol} = {recip.aInB} {tB.symbol}</p>
               <p>1 {tB.symbol} = {recip.bInA.toPrecision(8)} {tA.symbol}</p>
             </div>
@@ -125,11 +126,11 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
       {prepared && "error" in prepared && existing === null && <Notice tone="error">{prepared.error}</Notice>}
       {venueClosed && <Notice tone="warn">{venue.label} only lets allowlisted wallets add liquidity or create pairs (the router rejects others with LP_NOT_ALLOWED). FlowBridge won't route this through another DEX. Existing CaSwap LP can still be removed under My Positions.</Notice>}
       {!writable && <Notice tone="warn">Pools can't be created on BOT Mainnet in this release. Create Pool is available on BOT Testnet.</Notice>}
-      <button type="button" disabled={venueClosed || !writable || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)} className="h-12 w-full rounded-2xl bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</button>
+      <Button variant="ghost" type="button" disabled={venueClosed || !writable || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)} className="h-12 w-full rounded-lg bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</Button>
       <TxProgress steps={tx.steps} leftover={tx.leftover} busy={tx.busy} explorer={explorer} onClear={(x) => void tx.clearLeftover(chainId, x)} />
       {prepared && "op" in prepared && (
         <ReviewModal open={review} title="Review · Create pool" rows={prepared.rows} approvals={prepared.op.approvals} busy={tx.busy}
-          confirmLabel={`Sign ${prepared.op.approvals.length + 1} transaction${prepared.op.approvals.length ? "s" : ""}`}
+          confirmLabel="Confirm in wallet"
           onClose={() => setReview(false)} onConfirm={async () => { setReview(false); await tx.run(prepared.op); }} />
       )}
     </section>
