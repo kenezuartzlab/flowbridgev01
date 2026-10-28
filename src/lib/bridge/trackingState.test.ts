@@ -1,0 +1,23 @@
+import { describe, expect, it } from 'vitest';
+import { trackingState, shouldDismissBridgeReceipt, isCurrentTrackingResult } from './trackingState';
+const origin = { txHash: '0xorigin', source: 'success' as const, sourceConfirmedAt: 1000, providerRequired: true };
+describe('evidence-only bridge presentation', () => {
+  it('has no relay timer before explicit submission', () => { const s = trackingState({}, 900000); expect(s.phase).toBe('awaiting'); expect(s.relayElapsedSeconds).toBeNull(); });
+  it('rejection is canceled, never relaying', () => { const s = trackingState({ walletState: 'rejected' }, 900000); expect(s.phase).toBe('canceled'); expect(s.relayElapsedSeconds).toBeNull(); });
+  it('unresolved wallet errors remain errors', () => expect(trackingState({walletState: 'error'}, 1000).phase).toBe('error'));
+  it('pending origin has no relay countdown', () => { const s = trackingState({txHash:'0xorigin'}, 900000); expect(s.phase).toBe('origin_pending'); expect(s.relayElapsedSeconds).toBeNull(); });
+  it('failed origin has no timer even with stale relay data', () => { const s = trackingState({...origin, source:'failed', providerAcceptedAt:2000}, 900000); expect(s.phase).toBe('failed'); expect(s.relayElapsedSeconds).toBeNull(); });
+  it('source success waits for required provider acceptance', () => { const s = trackingState(origin, 900000); expect(s.phase).toBe('awaiting_relay'); expect(s.destinationDone).toBe(false); expect(s.relayElapsedSeconds).toBeNull(); });
+  it('accepted relay uses authoritative timestamp, not page opening', () => { const s = trackingState({...origin, providerAcceptedAt:4000}, 14000); expect(s.phase).toBe('relaying'); expect(s.relayElapsedSeconds).toBe(10); });
+  it('reload reconstructs elapsed time from the same timestamps', () => { const e = JSON.parse(JSON.stringify({...origin, providerAcceptedAt:4000})); expect(trackingState(e, 24000).relayElapsedSeconds).toBe(20); });
+  it('destination submission is not destination confirmation', () => expect(trackingState({...origin, destinationSubmitted:true}, 9999999).destinationDone).toBe(false));
+  it('receipt alone without verified token arrival is not received', () => expect(trackingState({...origin, destinationConfirmed:true}, 9999999).received).toBe(false));
+  it('verified destination receipt and arrival are received', () => expect(trackingState({...origin, destinationConfirmed:true, destinationTokenArrival:true}, 10000).phase).toBe('received'));
+  it('destination evidence cannot override failed origin', () => expect(trackingState({...origin, source:'failed', destinationConfirmed:true, destinationTokenArrival:true}, 10000).received).toBe(false));
+  it('stale or canceled reads cannot commit', () => { expect(isCurrentTrackingResult('old','new',false)).toBe(false); expect(isCurrentTrackingResult('new','new',true)).toBe(false); expect(isCurrentTrackingResult('new','new',false)).toBe(true); });
+  it('dismisses only the successful submitted receipt with durable matching tracking', () => {
+    const e = {type:'bridge',status:'success',hash:'a',trackedHash:'a',persisted:true};
+    expect(shouldDismissBridgeReceipt(e)).toBe(true);
+    for (const patch of [{persisted:false},{trackedHash:'b'},{hash:undefined},{status:'failed'},{status:'pending'},{status:'rejected'},{type:'swap'}]) expect(shouldDismissBridgeReceipt({...e,...patch})).toBe(false);
+  });
+});
