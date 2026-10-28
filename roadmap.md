@@ -24,8 +24,9 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [ ] Mainnet activation and production publication: blocked on separately authorized canaries and connected-wallet acceptance.
 
 # Targeted mobile swap and existing bridge tracking release
-- [ ] Compact confirmation/receipt layouts with visible internal footer and safe viewport handling.
-- [ ] Evidence-only bridge states, durable timestamps, stale-read guards and safe tracker handoff.
-- [ ] Official BOT branding and Protocol Fee labels; preserve all financial execution.
-- [ ] Focused regression, responsive browser checks, security and preview build acceptance.
+- [x] Compact confirmation/receipt layouts with visible internal footer and safe viewport handling.
+- [x] Evidence-only bridge states, durable context and chain timestamps, stale-read guards and safe tracker handoff.
+- [x] Official BOT branding and Protocol Fee labels; preserve all financial execution.
+- [x] Focused regression (281), full regression (2,077), responsive modal checks and security; automatic preview build OK.
+- [ ] Verified relay/destination progress: blocked by absence of an existing correlated provider/destination evidence feed; display unknown, never fake completion.
 - [ ] Publish after acceptance and verify the served production release.

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPublicClient, http, fallback } from 'viem';
 import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '@/lib/wagmi';
 import { trackingState, isCurrentTrackingResult, type TrackingEvidence } from './trackingState';
@@ -9,13 +9,15 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
   active: boolean; txHash?: string; direction?: TrackingDirection; isMainnet: boolean; walletState?: TrackingEvidence['walletState'];
 }) {
   const key = `${direction}:${isMainnet}:${txHash}`;
+  const currentKey = useRef(key);
+  currentKey.current = key;
   const [observed, setObserved] = useState<{ key: string; evidence: TrackingEvidence; error: boolean }>({ key, evidence: {}, error: false });
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (!active || !txHash || !direction) return;
     let canceled = false;
     let busy = false;
-    const commit = (evidence: TrackingEvidence) => { if (isCurrentTrackingResult(key, key, canceled)) setObserved({ key, evidence, error: false }); };
+    const commit = (evidence: TrackingEvidence) => { if (isCurrentTrackingResult(key, currentKey.current, canceled)) setObserved({ key, evidence, error: false }); };
     const poll = async () => {
       if (busy) return;
       busy = true;
@@ -37,7 +39,7 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
         const confirmed = Number(latest - receipt.blockNumber) + 1 >= (required[chain.id] ?? 1);
         commit({ source: confirmed ? 'success' : 'pending', sourceConfirmedAt: confirmed ? Number(block.timestamp) * 1000 : undefined });
       } catch {
-        if (!canceled) setObserved(prev => ({ key, evidence: prev.key === key ? prev.evidence : {}, error: true }));
+        if (isCurrentTrackingResult(key, currentKey.current, canceled)) setObserved(prev => ({ key, evidence: prev.key === key ? prev.evidence : {}, error: true }));
       } finally { busy = false; }
     };
     void poll();

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { X, ExternalLink, Sparkles, CheckCircle, XCircle } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { TransactionModalFrame } from './TransactionModalFrame';
 import { Button } from '@/components/ui/button';
 import { shouldDismissBridgeReceipt } from '@/lib/bridge/trackingState';
