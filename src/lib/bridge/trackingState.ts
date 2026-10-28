@@ -50,3 +50,15 @@ export function loadBridgeTracking(): BridgeTrackingContext | null {
     return c;
   } catch { return null; }
 }
+/** A destination-chain USDT Transfer log observed on-chain. */
+export interface DestinationTransferLog { to: string; from: string; value: bigint; timestampMs: number; txHash: string }
+/**
+ * Picks the on-chain destination USDT Transfer that proves delivery: sent to the
+ * bridge recipient, after the origin block, positive and not above the bridged
+ * amount (relay fees may reduce it). Returns the earliest match.
+ */
+export function matchDestinationTransfer(logs: DestinationTransferLog[], o: { recipient: string; sentUnits: bigint; sourceConfirmedAt: number }) {
+  const r = o.recipient.toLowerCase();
+  return logs.filter(l => l.to.toLowerCase() === r && l.from.toLowerCase() !== r && l.value > 0n && l.value <= o.sentUnits
+    && l.timestampMs >= o.sourceConfirmedAt).sort((a, b) => a.timestampMs - b.timestampMs)[0] ?? null;
+}
