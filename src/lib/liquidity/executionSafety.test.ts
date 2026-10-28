@@ -11,7 +11,7 @@ if (!v2 || v2.kind !== "v2") throw new Error("Missing Testnet venue");
 const base = { chainId: 968, walletChainId: 968, wallet, expectedWallet: wallet, dex: v2.label, kind: "add-liquidity" as const, target: v2.router };
 
 describe("Liquidity signature boundary", () => {
-  it("rejects Mainnet writes even when called outside UI", () => expect(() => assertLiquidityExecution({ ...base, chainId: 677, walletChainId: 677 })).toThrow("not enabled"));
+  it("rejects unknown networks even when called outside UI", () => expect(() => assertLiquidityExecution({ ...base, chainId: 1, walletChainId: 1 })).toThrow("not enabled"));
   it("rejects a changed account", () => expect(() => assertLiquidityExecution({ ...base, wallet: "0x2000000000000000000000000000000000000002" })).toThrow("Wallet changed"));
   it("rejects a wrong wallet chain", () => expect(() => assertLiquidityExecution({ ...base, walletChainId: 677 })).toThrow("Switch"));
   it("rejects a substituted contract", () => expect(() => assertLiquidityExecution({ ...base, target: wallet })).toThrow("does not match"));
