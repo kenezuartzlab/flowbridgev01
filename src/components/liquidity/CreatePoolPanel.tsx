@@ -97,7 +97,7 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
 
   return (
     <section className="fb-surface space-y-3 p-4">
-      <Segmented value={venueId} onChange={(v) => { setVenueId(v); setA(""); setB(""); }} options={[{ id: "bdex-v3", label: "BDEX V3" }, { id: "bdex-v2", label: "BDEX V2" }, { id: "caswap", label: "CaSwap" }]} />
+      <Segmented value={venueId} onChange={(v) => { setVenueId(v); setA(""); setB(""); }} options={[{ id: "bdex-v3", label: "BDEX V3" }, { id: "bdex-v2", label: "BDEX V2" }]} />
       <div className="flex gap-2">
         <TokenSelect label="Token A" tokens={list} value={a} onChange={setA} exclude={b} />
         <TokenSelect label="Token B" tokens={list} value={b} onChange={setB} exclude={a} />

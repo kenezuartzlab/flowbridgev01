@@ -204,21 +204,12 @@ describe("CaSwap independence", () => {
     expect(() => assertVenue("bdex-v3", "caswap")).toThrow();
     expect(() => assertVenue("caswap", "caswap")).not.toThrow();
   });
-  it("CaSwap is its own venue with its own router on both chains", () => {
+  it("CaSwap is excluded from Liquidity on both chains (no FlowBridge LP access)", () => {
     for (const id of [677, 968]) {
-      const v = getLiquidityVenues(id);
-      const ca = v.find((x) => x.id === "caswap")!, b2 = v.find((x) => x.id === "bdex-v2")!;
-      expect(ca.kind === "v2" && b2.kind === "v2" && ca.router.toLowerCase() !== b2.router.toLowerCase()).toBe(true);
-      expect(ca.kind === "v2" && ca.wrappedGetter).toBe("WBOT");
+      const ids = getLiquidityVenues(id).map((x) => x.id);
+      expect(ids).not.toContain("caswap");
+      expect(ids).toContain("bdex-v2");
     }
-  });
-  it("capability matrix records the audit", () => {
-    expect(CASWAP_CAPABILITY_MATRIX.addLiquidity).toMatch(/^NOT SUPPORTED/);
-    expect(CASWAP_CAPABILITY_MATRIX.createPair).toMatch(/^NOT SUPPORTED/);
-    expect(CASWAP_CAPABILITY_MATRIX.lpDiscovery).toBe("SUPPORTED");
-    const ca = getLiquidityVenues(677).find((x) => x.id === "caswap")!;
-    expect(ca.caps.addLiquidity || ca.caps.createPool).toBe(false);
-    expect(ca.caps.removeLiquidity && ca.caps.lpDiscovery).toBe(true);
   });
   it("unknown chain has no venues", () => expect(getLiquidityVenues(56)).toEqual([]));
 });

@@ -4,7 +4,6 @@ import { useAccount, useChainId, useConnect, useSwitchChain } from "wagmi";
 import { discoverPools, type DiscoveredPool } from "@/lib/swap/quoter";
 import { getCuratedTokens } from "@/lib/swap/tokenRegistry";
 import { liquidityWritesAllowed } from "@/lib/liquidity/liquidityTokens";
-import { CASWAP_CAPABILITY_MATRIX } from "@/lib/liquidity/venues";
 import { parseSlippagePercent } from "@/lib/liquidity/executionSafety";
 import { AddLiquidityPanel } from "./AddLiquidityPanel";
 import { CreatePoolPanel } from "./CreatePoolPanel";
@@ -86,17 +85,6 @@ function PoolsList({ chainId }: { chainId: number }) {
             </a>
           ))}
         </div>
-      </section>
-      <section className="fb-surface p-4 text-[12px]">
-        <p className="fb-eyebrow">CaSwap liquidity · verified capabilities</p>
-        <ul className="mt-1 space-y-0.5 text-muted">
-          <li>Add liquidity: {CASWAP_CAPABILITY_MATRIX.addLiquidity}</li>
-          <li>Remove liquidity: {CASWAP_CAPABILITY_MATRIX.removeLiquidity}</li>
-          <li>Create pair: {CASWAP_CAPABILITY_MATRIX.createPair}</li>
-          <li>LP discovery: {CASWAP_CAPABILITY_MATRIX.lpDiscovery}</li>
-          <li>Fees: {CASWAP_CAPABILITY_MATRIX.feeRetrieval}</li>
-        </ul>
-        <p className="mt-1 text-muted-soft">CaSwap liquidity always goes through CaSwap's own contracts, never through BDEX.</p>
       </section>
     </>
   );

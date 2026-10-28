@@ -14,7 +14,7 @@ const TEXT: Record<LiquidityTopic, [string, string]> = {
   "range-width": ["Range width", "Wider ranges stay in range longer but are less concentrated. Narrower ranges are more concentrated but go out of range more easily. FlowBridge never rebalances your position."],
   "range-status": ["In range / out of range", "In range: your position earns a share of swap fees. Out of range: it earns nothing and is entirely one token, until the price comes back or you move your liquidity."],
   "impermanent-loss": ["Impermanent loss", "When the price moves, the mix of your tokens changes. Withdrawing can then leave you with less value than simply holding the tokens. Concentrated ranges make this effect stronger."],
-  collect: ["Collecting fees", "V3 fees sit with the position until you collect them. Collecting sends the owed tokens to your wallet and doesn't change your liquidity. V2 and CaSwap fees stay inside the LP token."],
+  collect: ["Collecting fees", "V3 fees sit with the position until you collect them. Collecting sends the owed tokens to your wallet and doesn't change your liquidity. V2 fees stay inside the LP token."],
   "increase-decrease": ["Increase / decrease", "Increase adds tokens to the same position and range. Decrease withdraws part of the liquidity; the tokens are then owed to you and arrive when you collect."],
 };
 
