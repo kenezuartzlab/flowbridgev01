@@ -88,7 +88,7 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
       : { address: v.router, abi: V2_ROUTER_ABI as Abi, functionName: "addLiquidity", args: [tA.address, tB.address, x, y, x, y, address, dl] };
     return {
       op: { kind: "create-pool", account: address, chainId, dex: venue.label, pair: `${tA.symbol}/${tB.symbol}`, amounts: [`${fmt(x, tA.decimals)} ${tA.symbol}`, `${fmt(y, tB.decimals)} ${tB.symbol}`], approvals, call, label: `Create ${venue.label} pair with initial liquidity` },
-      rows: [["Venue", venue.label], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Initial price", `1 ${tA.symbol} = ${chk.priceAinB} ${tB.symbol}`], ["Reciprocal", `1 ${tB.symbol} = ${chk.priceBinA.toPrecision(8)} ${tA.symbol}`], ["Initial liquidity", `${fmt(x, tA.decimals)} ${tA.symbol} + ${fmt(y, tB.decimals)} ${tB.symbol}`]],
+      rows: [["Venue", venue.label], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Initial price", `1 ${tA.symbol} = ${price} ${tB.symbol}`], ["Reciprocal", `1 ${tB.symbol} = ${chk.priceBinA.toPrecision(8)} ${tA.symbol}`], ["Initial liquidity", `${fmt(x, tA.decimals, tA.decimals)} ${tA.symbol} + ${fmt(y, tB.decimals, tB.decimals)} ${tB.symbol}`], ["Minimum accepted", "Exact initial deposit amounts"], ["Deadline", "20 minutes"]],
     };
   }, [tA, tB, existing, venue, fee, tiers, price, ack, address, amtA, chainId, wrapped]);
 

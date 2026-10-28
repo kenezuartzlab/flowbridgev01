@@ -100,7 +100,8 @@ export function rangeStatus(currentTick: number, tickLower: number, tickUpper: n
 export function priceToSqrtPriceX96(price: string, dec0: number, dec1: number, invert = false): bigint {
   const m = /^\s*(\d+)(?:\.(\d+))?\s*$/.exec(price);
   if (!m) throw new Error("Invalid price");
-  const frac = (m[2] ?? "").slice(0, 36);
+  const frac = m[2] ?? "";
+  if (frac.length > 36) throw new Error("Price supports at most 36 decimal places");
   let num = BigInt(m[1] + frac);
   let den = 10n ** BigInt(frac.length);
   if (num === 0n) throw new Error("Price must be greater than zero");

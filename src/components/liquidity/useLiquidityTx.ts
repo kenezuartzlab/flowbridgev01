@@ -10,7 +10,7 @@ import { getAccount } from "wagmi/actions";
 import type { Abi, Address } from "viem";
 import { ERC20_LITE_ABI } from "@/lib/liquidity/abis";
 import { liqClient, readAllowance } from "@/lib/liquidity/chainReads";
-import { phaseFromReceipt, upsertLiquidityActivity, type LiquidityActivity, type LiquidityActivityKind, type TxPhase } from "@/lib/liquidity/lifecycle";
+import { phaseFromReceipt, listLiquidityActivity, upsertLiquidityActivity, type LiquidityActivity, type LiquidityActivityKind, type TxPhase } from "@/lib/liquidity/lifecycle";
 import { approvalAmounts, assertLiquidityExecution } from "@/lib/liquidity/executionSafety";
 
 export interface ApprovalNeed { token: Address; symbol: string; spender: Address; amount: bigint }
@@ -44,13 +44,18 @@ export function useLiquidityTx() {
   const run = useCallback(async (op: LiquidityOp): Promise<boolean> => {
     if (running.current) return false;
     if (!address) { setSteps([{ label: op.label, phase: "failed", error: "Connect a wallet first" }]); return false; }
+    if (listLiquidityActivity(address).some(a => a.chainId === op.chainId && a.completed === false && !a.error && a.txs.some(t => t.phase === "submitted" || t.phase === "confirming"))) {
+      setSteps([{ label: op.label, phase: "confirming", error: "An earlier transaction is still unresolved. Check its receipt before starting another liquidity action." }]);
+      return false;
+    }
+    let pub;
+    try { pub = liqClient(op.chainId); } catch (e) { setSteps([{ label: op.label, phase: "failed", error: (e as Error).message }]); return false; }
     running.current = true;
     const expectedWallet = op.account ?? address;
     const guard = () => {
       const current = getAccount(config);
       assertLiquidityExecution({ chainId: op.chainId, walletChainId: current.chainId, wallet: current.address, expectedWallet, dex: op.dex, kind: op.kind, target: op.call.address });
     };
-    const pub = liqClient(op.chainId);
     setBusy(true);
     setLeftover([]);
     const view: TxStepView[] = [];
@@ -104,13 +109,15 @@ export function useLiquidityTx() {
       upsertLiquidityActivity(activity);
       const left: ApprovalNeed[] = [];
       for (const a of op.approvals) {
-        const rest = await readAllowance(op.chainId, a.token, address, a.spender);
+        const rest = await readAllowance(op.chainId, a.token, address, a.spender).catch(() => a.amount);
         if (rest > 0n) left.push({ ...a, amount: rest });
       }
       setLeftover(left);
       return true;
     } catch (e) {
+      if (activity.completed) return true;
       if (!view.length) setSteps([{ label: op.label, phase: "failed", error: (e as Error).message }]);
+      else if (!view.some(s => s.phase === "confirming" || s.phase === "failed")) push({ label: op.label, phase: "failed", error: (e as Error).message });
       if (!activity.txs.some(t => t.phase === "submitted" || t.phase === "confirming")) {
         activity.error = (e as Error).message;
         upsertLiquidityActivity(activity);
@@ -131,9 +138,13 @@ export function useLiquidityTx() {
       const current = getAccount(config);
       if (current.address?.toLowerCase() !== address.toLowerCase() || current.chainId !== chainId) throw new Error("Wallet or network changed. Review again.");
       await pub.simulateContract({ account: address, address: a.token, abi: ERC20_LITE_ABI, functionName: "approve", args: [a.spender, 0n] });
+      const afterSimulation = getAccount(config);
+      if (afterSimulation.address?.toLowerCase() !== address.toLowerCase() || afterSimulation.chainId !== chainId) throw new Error("Wallet or network changed. Review again.");
       const hash = await writeContractAsync({ address: a.token, abi: ERC20_LITE_ABI, functionName: "approve", args: [a.spender, 0n], chainId });
       const r = await pub.waitForTransactionReceipt({ hash });
       if (r.status === "success") setLeftover((l) => l.filter((x) => x.token !== a.token || x.spender !== a.spender));
+    } catch (e) {
+      setSteps(s => [...s, { label: `Clear ${a.symbol} approval`, phase: "failed", error: (e as Error).message.slice(0, 200) }]);
     } finally {
       setBusy(false);
       running.current = false;

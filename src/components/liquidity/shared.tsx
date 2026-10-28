@@ -59,7 +59,7 @@ export function AmountInput({ label, value, onChange, balance, readOnly }: { lab
 
 export function Segmented<T extends string>({ value, options, onChange }: { value: T; options: { id: T; label: string; disabled?: boolean }[]; onChange: (v: T) => void }) {
   return (
-    <div role="tablist" className="flex gap-1 overflow-x-auto rounded-lg border border-hairline bg-card p-1">
+    <div role="tablist" className="flex flex-wrap gap-1 rounded-lg border border-hairline bg-card p-1">
       {options.map((o) => (
         <Button variant="ghost" key={o.id} type="button" role="tab" aria-selected={value === o.id} disabled={o.disabled}
           onClick={() => onChange(o.id)}
