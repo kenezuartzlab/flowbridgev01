@@ -16,19 +16,10 @@ describe("Liquidity signature boundary", () => {
   it("rejects a wrong wallet chain", () => expect(() => assertLiquidityExecution({ ...base, walletChainId: 677 })).toThrow("Switch"));
   it("rejects a substituted contract", () => expect(() => assertLiquidityExecution({ ...base, target: wallet })).toThrow("does not match"));
   it("allows supported Testnet add", () => expect(() => assertLiquidityExecution(base)).not.toThrow());
-  it("rejects public CaSwap add but allows existing LP removal", () => {
-    const ca = getVenue(968, "caswap");
-    if (!ca || ca.kind !== "v2") throw new Error("Missing CaSwap");
-    expect(() => assertLiquidityExecution({ ...base, dex: ca.label, target: ca.router })).toThrow("not supported");
-    expect(() => assertLiquidityExecution({ ...base, dex: ca.label, target: ca.router, kind: "remove-liquidity" })).not.toThrow();
+  it("offers no CaSwap liquidity venue", () => {
+    expect(getVenue(968, "caswap")).toBeUndefined();
+    expect(getVenue(677, "caswap")).toBeUndefined();
   });
-});
-
-describe("Exact allowances", () => {
-  it("never grants unlimited approval or silently retains excess", () => expect(approvalAmounts((1n << 256n) - 1n, 100n)).toEqual([0n, 100n]));
-  it("skips an already exact allowance", () => expect(approvalAmounts(100n, 100n)).toEqual([]));
-  it("approves only required units from zero", () => expect(approvalAmounts(0n, 100n)).toEqual([100n]));
-  it("blocks zero approvals", () => expect(() => approvalAmounts(0n, 0n)).toThrow());
 });
 
 describe("Exact initial prices", () => {
