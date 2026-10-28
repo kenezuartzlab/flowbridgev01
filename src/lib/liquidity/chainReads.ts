@@ -8,6 +8,7 @@ import { rangeStatus, type RangeStatus } from "./v3Math";
 const ZERO = "0x0000000000000000000000000000000000000000";
 const clients = new Map<number, PublicClient>();
 export function liqClient(chainId: number): PublicClient {
+  if (chainId !== 677 && chainId !== 968) throw new Error("Unsupported liquidity network");
   let c = clients.get(chainId);
   if (!c) {
     c = createPublicClient({ chain: chainId === 677 ? botMainnet : botTestnet, transport: http(undefined, { batch: true }) }) as PublicClient;
@@ -72,6 +73,8 @@ export interface V2Position {
   token1: TokenMeta;
   lpBalance: bigint;
   totalSupply: bigint;
+  reserve0: bigint;
+  reserve1: bigint;
   amount0: bigint;
   amount1: bigint;
   shareBps: number;
@@ -87,7 +90,7 @@ export async function discoverV2Positions(v: V2Venue, owner: Address, cap = 600)
   for (let start = 0; start < total; start += 50) {
     const idx = Array.from({ length: Math.min(50, total - start) }, (_, i) => BigInt(start + i));
     const pairs = await Promise.all(idx.map((i) => c.readContract({ address: factory, abi: V2_FACTORY_ABI, functionName: "allPairs", args: [i] })));
-    const bals = await Promise.all(pairs.map((p) => c.readContract({ address: p, abi: V2_PAIR_ABI, functionName: "balanceOf", args: [owner] }).catch(() => 0n)));
+    const bals = await Promise.all(pairs.map((p) => c.readContract({ address: p, abi: V2_PAIR_ABI, functionName: "balanceOf", args: [owner] })));
     for (let i = 0; i < pairs.length; i++) {
       if (bals[i] === 0n) continue;
       const p = pairs[i];
@@ -99,7 +102,7 @@ export async function discoverV2Positions(v: V2Venue, owner: Address, cap = 600)
       ]);
       const [m0, m1] = await Promise.all([tokenMeta(v.chainId, t0), tokenMeta(v.chainId, t1)]);
       out.push({
-        venue: v.id, chainId: v.chainId, pair: p, token0: m0, token1: m1, lpBalance: bals[i], totalSupply: ts,
+        venue: v.id, chainId: v.chainId, pair: p, token0: m0, token1: m1, lpBalance: bals[i], totalSupply: ts, reserve0: r[0], reserve1: r[1],
         amount0: ts ? (bals[i] * r[0]) / ts : 0n, amount1: ts ? (bals[i] * r[1]) / ts : 0n,
         shareBps: ts ? Number((bals[i] * 10_000n) / ts) : 0,
       });
