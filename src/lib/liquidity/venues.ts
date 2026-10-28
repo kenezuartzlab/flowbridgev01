@@ -67,7 +67,7 @@ export function getLiquidityVenues(chainId: number): LiquidityVenue[] {
   ];
   const v3 = getVerifiedV3(chainId);
   if (v3) out.push({ id: "bdex-v3", kind: "v3", label: "BDEX V3", chainId, factory: v3.factory, positionManager: v3.positionManager, wrappedNative: v3.wrappedNative, caps: V3_CAPS });
-  out.push({ id: "caswap", kind: "v2", label: "CaSwap", chainId, router: c.caSwapRouter as Address, wrappedGetter: "WBOT", caps: CASWAP_CAPS });
+  // CaSwap is intentionally excluded from Liquidity: FlowBridge has no CaSwap LP access. CaSwap remains a swap-only route.
   return out;
 }
 

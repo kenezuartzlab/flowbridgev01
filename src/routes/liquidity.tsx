@@ -13,9 +13,9 @@ export const Route = createFileRoute("/liquidity")({
   head: () => ({
     meta: [
       { title: "Liquidity — FlowBridge" },
-      { name: "description", content: "Add and remove BDEX and CaSwap liquidity, create pools and manage V3 positions on BOT Chain." },
+      { name: "description", content: "Add and remove BDEX V2 and V3 liquidity, create pools and manage V3 positions on BOT Chain." },
       { property: "og:title", content: "Liquidity — FlowBridge" },
-      { property: "og:description", content: "Add and remove BDEX and CaSwap liquidity, create pools and manage V3 positions on BOT Chain." },
+      { property: "og:description", content: "Add and remove BDEX V2 and V3 liquidity, create pools and manage V3 positions on BOT Chain." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

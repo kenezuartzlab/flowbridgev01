@@ -28,7 +28,7 @@ function Inner() {
             {withFees.map((p) => (
               <Row key={p.tokenId.toString()} k={`#${p.tokenId} ${p.token0.symbol}/${p.token1.symbol}`} v={`${fmt(p.unclaimed0, p.token0.decimals)} ${p.token0.symbol} · ${fmt(p.unclaimed1, p.token1.decimals)} ${p.token1.symbol}`} />
             ))}
-            <p className="mt-1 text-[11.5px] text-muted">{lpCount} V2/CaSwap LP position{lpCount === 1 ? "" : "s"}. Their fees build up inside the LP token and are paid out when you remove liquidity.</p>
+            <p className="mt-1 text-[11.5px] text-muted">{lpCount} V2 LP position{lpCount === 1 ? "" : "s"}. Their fees build up inside the LP token and are paid out when you remove liquidity.</p>
           </div>
         )}
         <Link to="/liquidity" search={{ tab: "positions" }} className="mt-2 inline-block text-[12px] font-bold text-primary">My Positions →</Link>
