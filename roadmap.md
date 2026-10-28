@@ -22,3 +22,10 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Run liquidity/swap safety tests, full regression and read-only desktop/mobile acceptance.
 - [ ] Connected-wallet transaction/rejection/recovery acceptance: requires authorized wallet testing.
 - [ ] Mainnet activation and production publication: blocked on separately authorized canaries and connected-wallet acceptance.
+
+# Targeted mobile swap and existing bridge tracking release
+- [ ] Compact confirmation/receipt layouts with visible internal footer and safe viewport handling.
+- [ ] Evidence-only bridge states, durable timestamps, stale-read guards and safe tracker handoff.
+- [ ] Official BOT branding and Protocol Fee labels; preserve all financial execution.
+- [ ] Focused regression, responsive browser checks, security and preview build acceptance.
+- [ ] Publish after acceptance and verify the served production release.
