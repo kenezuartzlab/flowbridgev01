@@ -9,13 +9,14 @@ interface ConfirmDestinationModalProps {
   onClose: () => void;
   onConfirm: (confirmedAddress: string) => void;
   initialAddress: string;
+  payAmount?: string; receiveAmount?: string; fromChain?: string; toChain?: string; bridgeFee?: string; confirmDisabled?: boolean;
 }
 
 export function ConfirmDestinationModal({
   isOpen,
   onClose,
   onConfirm,
-  initialAddress
+  initialAddress, payAmount, receiveAmount, fromChain, toChain, bridgeFee, confirmDisabled = false
 }: ConfirmDestinationModalProps) {
   const [address, setAddress] = useState(initialAddress);
   const [copied, setCopied] = useState(false);
@@ -66,7 +67,13 @@ export function ConfirmDestinationModal({
 
   return (
     <TransactionModalFrame id="confirm_address_modal" title="Confirm transaction" onClose={onClose}
-      footer={<Button onClick={handleValidateAndConfirm} className="w-full h-11 font-bold">Confirm</Button>}>
+      footer={<Button disabled={confirmDisabled} onClick={handleValidateAndConfirm} className="w-full h-11 font-bold">Confirm</Button>}>
+        {payAmount != null && <div className="text-xs space-y-1 font-mono">
+          <p>Pay: <strong>{payAmount} USDT</strong> · {fromChain}</p>
+          <p>Receive (estimated): <strong>{receiveAmount} USDT</strong> · {toChain}</p>
+          <p>Bridge Fee: {bridgeFee}</p>
+          <p className="text-warning">Origin approval is not destination delivery. Gas is charged separately by your wallet.</p>
+        </div>}
         {/* Warning Banner block - Matching page 4 exactly */}
         <div className="rounded-xl border border-primary/25 bg-primary/10 p-3 text-left">
           <p className="text-[13px] leading-relaxed font-semibold text-primary">
