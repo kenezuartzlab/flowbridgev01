@@ -3,7 +3,7 @@ import { useAccount } from "wagmi";
 import type { Abi, Address } from "viem";
 import { getVenue, type LiquidityVenueId, type V2Venue, type V3Venue } from "@/lib/liquidity/venues";
 import { enabledFeeTiers, readV2Pair, readV3Pool, readBalance, v2Wiring } from "@/lib/liquidity/chainReads";
-import { validateCreatePool, reciprocalPrices } from "@/lib/liquidity/createPool";
+import { validateCreatePool, reciprocalPrices, initialPairedAmount } from "@/lib/liquidity/createPool";
 import { deadlineFrom } from "@/lib/liquidity/v2Math";
 import { NPM_ABI, V2_ROUTER_ABI } from "@/lib/liquidity/abis";
 import { checkTokenForLiquidity } from "@/lib/liquidity/tokenSafety";
@@ -28,6 +28,7 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
   const [price, setPrice] = useState("");
   const [ack, setAck] = useState(false);
   const [amtA, setAmtA] = useState("");
+  const [wrapped, setWrapped] = useState<Address>();
   const [review, setReview] = useState(false);
   const tx = useLiquidityTx();
   const venueClosed = !(p_caps(venue));
@@ -37,15 +38,18 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
   useEffect(() => { setAck(false); }, [price, a, b, fee, venueId]);
   useEffect(() => {
     setExisting(undefined);
+    let cancelled = false;
     if (!tA || !tB) return;
     (async () => {
-      if (venue.kind === "v3") setExisting((await readV3Pool(venue, tA.address as Address, tB.address as Address, fee)).pool);
+      if (venue.kind === "v3") { const p = await readV3Pool(venue, tA.address as Address, tB.address as Address, fee); if (!cancelled) setExisting(p.pool); }
       else {
         const { wrapped } = await v2Wiring(venue);
+        if (!cancelled) setWrapped(wrapped);
         const p = await readV2Pair(venue, (isNative(tA) ? wrapped : tA.address) as Address, (isNative(tB) ? wrapped : tB.address) as Address);
-        setExisting(p && p.reserve0 > 0n ? p.pair : null);
+        if (!cancelled) setExisting(p && p.reserve0 > 0n ? p.pair : null);
       }
-    })().catch(() => setExisting(undefined));
+    })().catch(() => { if (!cancelled) setExisting(undefined); });
+    return () => { cancelled = true; };
   }, [tA, tB, venue, fee, tx.steps.length]);
 
   let recip: { aInB: number; bInA: number } | null = null;
@@ -54,20 +58,23 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
   const prepared = useMemo((): { op: LiquidityOp; rows: [string, string][] } | { error: string } | null => {
     if (!tA || !tB || existing === undefined) return null;
     for (const t of [tA, tB]) { const s = checkTokenForLiquidity(t, new Set()); if (!s.ok) return { error: s.reason }; }
-    const chk = validateCreatePool({ version: venue.kind, tokenA: { address: isNative(tA) ? "0x0000000000000000000000000000000000000001" : tA.address, decimals: tA.decimals, symbol: tA.symbol }, tokenB: { address: isNative(tB) ? "0x0000000000000000000000000000000000000001" : tB.address, decimals: tB.decimals, symbol: tB.symbol }, feeTier: venue.kind === "v3" ? fee : undefined, enabledFeeTiers: tiers, existingPool: existing, priceAinB: price, priceConfirmed: ack });
+    if ((isNative(tA) || isNative(tB)) && !wrapped) return null;
+    const chk = validateCreatePool({ version: venue.kind, tokenA: { address: isNative(tA) ? wrapped ?? "" : tA.address, decimals: tA.decimals, symbol: tA.symbol }, tokenB: { address: isNative(tB) ? wrapped ?? "" : tB.address, decimals: tB.decimals, symbol: tB.symbol }, feeTier: venue.kind === "v3" ? fee : undefined, enabledFeeTiers: tiers, existingPool: existing, priceAinB: price, priceConfirmed: ack });
     if (!chk.ok) return { error: chk.reason };
     if (!address) return { error: "Connect a wallet" };
     if (venue.kind === "v3") {
+      if (chk.sqrtPriceX96 === undefined) return { error: "Initial price could not be encoded safely" };
       const v = venue as V3Venue;
       return {
-        op: { kind: "create-pool", chainId, dex: "BDEX V3", pair: `${tA.symbol}/${tB.symbol}`, amounts: [`1 ${tA.symbol} = ${price} ${tB.symbol}`], approvals: [],
-          call: { address: v.positionManager, abi: NPM_ABI as Abi, functionName: "createAndInitializePoolIfNecessary", args: [chk.token0.address, chk.token1.address, fee, chk.sqrtPriceX96!] }, label: "Create and initialize BDEX V3 pool" },
+        op: { kind: "create-pool", account: address, chainId, dex: "BDEX V3", pair: `${tA.symbol}/${tB.symbol}`, amounts: [`1 ${tA.symbol} = ${price} ${tB.symbol}`], approvals: [],
+          call: { address: v.positionManager, abi: NPM_ABI as Abi, functionName: "createAndInitializePoolIfNecessary", args: [chk.token0.address, chk.token1.address, fee, chk.sqrtPriceX96] }, label: "Create and initialize BDEX V3 pool" },
         rows: [["Venue", "BDEX V3"], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Fee tier", `${(fee / 10_000).toFixed(2)}%`], ["Initial price", `1 ${tA.symbol} = ${chk.priceAinB} ${tB.symbol}`], ["Reciprocal", `1 ${tB.symbol} = ${chk.priceBinA.toPrecision(8)} ${tA.symbol}`], ["Next step", "Add initial liquidity on the Add tab"]],
       };
     }
     const x = safeParse(amtA, tA.decimals);
     if (x == null || x === 0n) return { error: "Enter the initial Token A amount" };
-    const y = safeParse(String(Number(fmt(x, tA.decimals, tA.decimals)) * chk.priceAinB), tB.decimals);
+    let y: bigint;
+    try { y = initialPairedAmount(x, price, tA.decimals, tB.decimals); } catch (e) { return { error: (e as Error).message }; }
     if (!y) return { error: "Initial Token B amount is too small" };
     const v = venue as V2Venue;
     const nat = isNative(tA) ? "a" : isNative(tB) ? "b" : null;
@@ -79,10 +86,10 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
       ? { address: v.router, abi: V2_ROUTER_ABI as Abi, functionName: "addLiquidityETH", value: nat === "a" ? x : y, args: nat === "a" ? [tB.address, y, y, x, address, dl] : [tA.address, x, x, y, address, dl] }
       : { address: v.router, abi: V2_ROUTER_ABI as Abi, functionName: "addLiquidity", args: [tA.address, tB.address, x, y, x, y, address, dl] };
     return {
-      op: { kind: "create-pool", chainId, dex: venue.label, pair: `${tA.symbol}/${tB.symbol}`, amounts: [`${fmt(x, tA.decimals)} ${tA.symbol}`, `${fmt(y, tB.decimals)} ${tB.symbol}`], approvals, call, label: `Create ${venue.label} pair with initial liquidity` },
+      op: { kind: "create-pool", account: address, chainId, dex: venue.label, pair: `${tA.symbol}/${tB.symbol}`, amounts: [`${fmt(x, tA.decimals)} ${tA.symbol}`, `${fmt(y, tB.decimals)} ${tB.symbol}`], approvals, call, label: `Create ${venue.label} pair with initial liquidity` },
       rows: [["Venue", venue.label], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Initial price", `1 ${tA.symbol} = ${chk.priceAinB} ${tB.symbol}`], ["Reciprocal", `1 ${tB.symbol} = ${chk.priceBinA.toPrecision(8)} ${tA.symbol}`], ["Initial liquidity", `${fmt(x, tA.decimals)} ${tA.symbol} + ${fmt(y, tB.decimals)} ${tB.symbol}`]],
     };
-  }, [tA, tB, existing, venue, fee, tiers, price, ack, address, amtA, chainId]);
+  }, [tA, tB, existing, venue, fee, tiers, price, ack, address, amtA, chainId, wrapped]);
 
   const [balA, setBalA] = useState<string>();
   useEffect(() => { if (address && tA) readBalance(chainId, isNative(tA) ? "native" : (tA.address as Address), address).then((v) => setBalA(fmt(v, tA.decimals, 4))).catch(() => setBalA(undefined)); }, [address, tA, chainId]);
