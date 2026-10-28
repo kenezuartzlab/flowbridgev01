@@ -33,4 +33,4 @@ export function liquidityWritesAllowed(chainId: number, wallet?: string, dex?: s
   if (!wallet || !list.includes(wallet.toLowerCase())) return false;
   return dex === undefined || LIQUIDITY_CANARY_DEXES.includes(dex);
 }
-export const LIQUIDITY_WRITES_ENABLED: Record<number, boolean> = { 968: true, 677: false };
+export const LIQUIDITY_WRITES_ENABLED: Record<number, boolean> = { 968: true, 677: true };
