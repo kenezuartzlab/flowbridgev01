@@ -1,7 +1,8 @@
-import { X, ArrowDown, RefreshCw } from 'lucide-react';
+import { ArrowDown, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TokenIcon } from '../components/TokenIcon';
-import { ModalPortal } from './ModalPortal';
+import { TransactionModalFrame } from './TransactionModalFrame';
+import { Button } from '@/components/ui/button';
 
 
 interface ConfirmSwapModalProps {
@@ -25,6 +26,7 @@ interface ConfirmSwapModalProps {
   approvalCount?: number;
   dexCount?: number;
   routeSteps?: string[];
+  confirmDisabled?: boolean;
   isBridge?: boolean;
   fromChain?: string;
   toChain?: string;
@@ -50,6 +52,7 @@ export function ConfirmSwapModal({
   approvalCount,
   dexCount,
   routeSteps = [],
+  confirmDisabled = false,
   isBridge = false,
   fromChain = "BOT Chain",
   toChain = "BNB Chain"
@@ -59,36 +62,17 @@ export function ConfirmSwapModal({
   const minRec = minimumReceived || (parseFloat(toAmount) * 0.995).toFixed(6);
 
   return (
-    <ModalPortal>
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-background/92 backdrop-blur-md animate-fade-in font-sans">
-      <div 
-        id="confirm_swap_modal"
-        className="bg-card border border-hairline text-foreground rounded-[20px] w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain max-w-[340px] p-4 shadow-2xl relative space-y-3.5 animate-scale-up border-b-[4px] border-b-primary"
-      >
-        {/* Header decoration */}
-        <div className="flex justify-between items-center font-mono">
-
-          <h3 className="text-sm font-black text-foreground uppercase tracking-wider">
-            {isBridge ? "Confirm Bridge Tx" : "Confirm swap Tx"}
-          </h3>
-          <button 
-            onClick={onClose}
-            aria-label="Close swap confirmation"
-            className="p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
+    <TransactionModalFrame id="confirm_swap_modal" title={isBridge ? "Confirm Bridge Tx" : "Confirm Swap Tx"} onClose={onClose}
+      footer={<Button disabled={confirmDisabled} onClick={onConfirm} className="w-full h-11 font-bold uppercase">{confirmDisabled ? "Review unavailable — retry" : isBridge ? "Confirm Bridge" : "Confirm Swap"}</Button>}>
         {/* Swap Visual Grid */}
         <div className="space-y-2.5">
           {/* Pay Amount Box */}
           <div className="flex justify-between items-center gap-2 border-b border-hairline pb-1.5">
-            <span className="text-xl font-black text-foreground tracking-tight truncate font-mono">
+            <span className="text-xl font-black text-foreground break-all font-mono">
               {parseFloat(fromAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-[13px] font-black text-foreground tracking-widest uppercase font-mono">{fromSymbol}</span>
+              <span className="text-[13px] font-black text-foreground uppercase font-mono">{fromSymbol}</span>
               <TokenIcon symbol={fromSymbol} size={20} />
             </div>
           </div>
@@ -102,11 +86,11 @@ export function ConfirmSwapModal({
 
           {/* Receive Amount Box */}
           <div className="flex justify-between items-center gap-2 pt-1.5">
-            <span className="text-xl font-black text-primary tracking-tight truncate font-mono">
+            <span className="text-xl font-black text-primary break-all font-mono">
               {parseFloat(toAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
             </span>
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-[13px] font-black text-foreground tracking-widest uppercase font-mono">{toSymbol}</span>
+              <span className="text-[13px] font-black text-foreground uppercase font-mono">{toSymbol}</span>
               <TokenIcon symbol={toSymbol} size={20} />
             </div>
           </div>
@@ -127,17 +111,29 @@ export function ConfirmSwapModal({
           </div>
         )}
 
+        <div className="space-y-1 text-xs font-mono">
+          {executionLabel && <p>Route: <strong>{executionLabel}</strong></p>}
+          {transactionCount != null && <p>{dexCount ?? 1} DEX stages · {transactionCount} transactions · {approvalCount ?? 0} approvals</p>}
+          {!isBridge && <p>Minimum received: <strong>{minRec} {toSymbol}</strong></p>}
+          <p>{isBridge ? "Bridge Fee" : "Trading Fee"}: {tradingFee}</p>
+          {!isBridge && <p>Protocol Fee: {feeBreakdown?.percent ?? platformFee}</p>}
+          {!isBridge && parseFloat(priceImpact) > 5 && <p className="text-warning">High price impact: {priceImpact}. Review the estimated output carefully.</p>}
+          {executionLabel?.includes("STAGED") && <p className="text-warning">Each next stage is re-quoted after confirmation. If a later stage stops, earlier assets remain in your wallet.</p>}
+        </div>
+        <p className="text-xs text-muted">{isBridge ? "Destination delivery requires relay processing and destination confirmation. Origin success does not confirm receipt." : `Output is estimated. You receive at least ${minRec} ${toSymbol} or the transaction reverts.`}</p>
+        <details className="text-xs">
+          <summary className="cursor-pointer py-2 font-semibold text-primary">Technical details</summary>
         {/* Transaction Summary Card */}
-        <div className="bg-background border border-hairline rounded-xl p-3 space-y-2 text-[12px] font-mono shadow-inner">
+        <div className="bg-background border border-hairline rounded-lg p-3 space-y-2 text-[12px] font-mono shadow-inner">
 
-          {executionLabel && <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Execution</span><span className="font-black text-foreground">{executionLabel}</span></div>}
-          {transactionCount != null && <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Transactions</span><span className="font-black text-foreground">{transactionCount}</span></div>}
+          {executionLabel && <div className="flex justify-between items-start gap-3 text-muted"><span className="uppercase tracking-wider">Execution</span><span className="font-black text-foreground">{executionLabel}</span></div>}
+          {transactionCount != null && <div className="flex justify-between items-start gap-3 text-muted"><span className="uppercase tracking-wider">Transactions</span><span className="font-black text-foreground">{transactionCount}</span></div>}
           {transactionCount != null && dexCount != null && <p className="rounded-lg bg-card px-2 py-1.5 text-[10.5px] text-foreground border border-hairline">This route uses {dexCount} DEX{dexCount === 1 ? "" : "s"} and requires {transactionCount} transaction{transactionCount === 1 ? "" : "s"}.</p>}
-          {approvalCount != null && <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Approvals required</span><span className="font-black text-foreground">{approvalCount}</span></div>}
+          {approvalCount != null && <div className="flex justify-between items-start gap-3 text-muted"><span className="uppercase tracking-wider">Approvals required</span><span className="font-black text-foreground">{approvalCount}</span></div>}
           {routeSteps.map((step) => <p key={step} className="text-[10.5px] text-muted">{step}</p>)}
-          {executionLabel?.includes("STAGED") && <p className="text-[10.5px] text-amber-200">Each next stage is re-quoted after confirmation. If a later stage stops, earlier assets remain in your wallet.</p>}
+          
 
-          <div className="flex justify-between items-center text-muted">
+          <div className="flex justify-between items-start gap-3 text-muted">
             <span className="uppercase tracking-wider">Price Rate</span>
             <div className="flex items-center gap-1.5 font-bold text-foreground">
               <span>{priceRate}</span>
@@ -145,17 +141,17 @@ export function ConfirmSwapModal({
             </div>
           </div>
 
-          <div className="flex justify-between items-center text-muted">
+          <div className="flex justify-between items-start gap-3 text-muted">
             <span className="uppercase tracking-wider">Price impact</span>
             <span className={cn(
               "font-bold", 
-              parseFloat(priceImpact) > 5 ? "text-amber-400" : "text-primary"
+              parseFloat(priceImpact) > 5 ? "text-warning" : "text-primary"
             )}>
               {priceImpact}
             </span>
           </div>
 
-          <div className="flex justify-between items-center text-muted">
+          <div className="flex justify-between items-start gap-3 text-muted">
             <span className="uppercase tracking-wider">Slippage</span>
             <span className="px-1.5 py-0.5 bg-primary/10 border border-primary/25 rounded text-[12px] font-black text-primary">
               {slippageTolerance}
@@ -164,47 +160,33 @@ export function ConfirmSwapModal({
 
           <div className="border-t border-hairline my-2" />
 
-          <div className="flex justify-between items-center text-muted">
+          <div className="flex justify-between items-start gap-3 text-muted">
             <span className="uppercase tracking-wider">Min. Received</span>
             <span className="font-black text-foreground">{minRec} {toSymbol}</span>
           </div>
 
-          <div className="flex justify-between items-center text-muted">
+          <div className="flex justify-between items-start gap-3 text-muted">
             <span className="uppercase tracking-wider">Trading Fee</span>
             <span className="font-bold text-primary">{tradingFee}</span>
           </div>
 
           {!isBridge && (
-            <div className="flex justify-between items-center text-muted">
+            <div className="flex justify-between items-start gap-3 text-muted">
               <span className="uppercase tracking-wider">Protocol fee</span>
               <span className="font-bold text-primary">{feeBreakdown?.percent ?? platformFee}</span>
             </div>
           )}
           {!isBridge && feeBreakdown && (
             <>
-              <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Swap amount</span><span className="font-bold text-foreground break-all text-right">{feeBreakdown.swapAmount}</span></div>
-              <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Fee amount</span><span className="font-bold text-foreground break-all text-right">{feeBreakdown.fee}</span></div>
-              <div className="flex justify-between items-center text-muted"><span className="uppercase tracking-wider">Total</span><span className="font-black text-foreground break-all text-right">{feeBreakdown.total}</span></div>
+              <div className="flex justify-between items-start gap-3 text-muted"><span className="uppercase tracking-wider">Swap amount</span><span className="font-bold text-foreground break-all text-right">{feeBreakdown.swapAmount}</span></div>
+              <div className="flex justify-between items-start gap-3 text-muted"><span className="uppercase tracking-wider">Fee amount</span><span className="font-bold text-foreground break-all text-right">{feeBreakdown.fee}</span></div>
+              <div className="flex justify-between items-start gap-3 text-muted"><span className="uppercase tracking-wider">Total</span><span className="font-black text-foreground break-all text-right">{feeBreakdown.total}</span></div>
             </>
           )}
 
         </div>
 
-        {/* Footnote disclaimer */}
-        <p className="text-[11px] text-muted text-center leading-snug px-1">
-          Output is estimated. {!isBridge && `Protocol fee: ${feeBreakdown?.percent ?? platformFee}, read from the selected router. `}You will receive at least <strong className="text-foreground font-mono">{minRec} {toSymbol}</strong> or the transaction will revert.
-        </p>
-
-        {/* Submit Button */}
-        <button
-          onClick={onConfirm}
-          className="w-full py-3 rounded-xl bg-primary hover:bg-primary-strong text-primary-foreground font-mono tracking-widest font-black text-[13px] uppercase transition-all duration-200 active:scale-[0.98] shadow-md fb-glow cursor-pointer"
-        >
-          {isBridge ? "Confirm Bridge" : "Confirm swap"}
-        </button>
-      </div>
-    </div>
-    </ModalPortal>
+        </details>
+    </TransactionModalFrame>
   );
 }
-

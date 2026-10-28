@@ -1,6 +1,12 @@
 @import "tailwindcss" source(none);
 @source "../src";
 
+.transaction-modal-layer { position: fixed; z-index: 200; inset-inline: 0; top: var(--transaction-viewport-top, 0px); height: var(--transaction-viewport-height, 100dvh); display: flex; align-items: center; justify-content: center; padding: 8px; }
+.transaction-modal-frame { display: flex; flex-direction: column; width: 100%; max-width: 400px; max-height: 100%; min-height: 0; border-radius: 8px; overflow: hidden; }
+.transaction-modal-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; overflow-wrap: anywhere; }
+.transaction-modal-body > * { min-width: 0; }
+.transaction-modal-footer { flex-shrink: 0; position: sticky; bottom: 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+
 /* ============================================================
    P0 — SEMANTIC DESIGN TOKENS (single source of truth)
    Dark is the default theme; `html.light` swaps the same tokens.

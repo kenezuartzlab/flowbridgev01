@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { X, Copy, Check, Clipboard } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Copy, Check, Clipboard } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { ModalPortal } from './ModalPortal';
+import { TransactionModalFrame } from './TransactionModalFrame';
+import { Button } from '@/components/ui/button';
 
 interface ConfirmDestinationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (confirmedAddress: string) => void;
   initialAddress: string;
+  payAmount?: string; receiveAmount?: string; fromChain?: string; toChain?: string; bridgeFee?: string; confirmDisabled?: boolean;
 }
 
 export function ConfirmDestinationModal({
   isOpen,
   onClose,
   onConfirm,
-  initialAddress
+  initialAddress, payAmount, receiveAmount, fromChain, toChain, bridgeFee, confirmDisabled = false
 }: ConfirmDestinationModalProps) {
   const [address, setAddress] = useState(initialAddress);
   const [copied, setCopied] = useState(false);
@@ -64,26 +66,14 @@ export function ConfirmDestinationModal({
   };
 
   return (
-    <ModalPortal>
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/92 p-3 backdrop-blur-md animate-fade-in font-sans sm:p-4">
-      <div 
-        id="confirm_address_modal"
-        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[360px] flex-col space-y-4 overflow-y-auto overscroll-contain rounded-[20px] border border-hairline bg-card p-4 text-foreground shadow-2xl animate-scale-up sm:rounded-3xl sm:p-5"
-      >
-        {/* Header containing Close Button */}
-        <div className="flex justify-between items-center">
-          <h3 className="text-sm font-bold text-foreground font-mono uppercase tracking-wide">
-            Confirm transaction
-          </h3>
-          <button 
-            onClick={onClose}
-            aria-label="Close transaction confirmation"
-            className="p-1.5 hover:bg-foreground/5 rounded-xl text-muted hover:text-foreground transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
+    <TransactionModalFrame id="confirm_address_modal" title="Confirm transaction" onClose={onClose}
+      footer={<Button disabled={confirmDisabled} onClick={handleValidateAndConfirm} className="w-full h-11 font-bold">Confirm</Button>}>
+        {payAmount != null && <div className="text-xs space-y-1 font-mono">
+          <p>Pay: <strong>{payAmount} USDT</strong> · {fromChain}</p>
+          <p>Receive (estimated): <strong>{receiveAmount} USDT</strong> · {toChain}</p>
+          <p>Bridge Fee: {bridgeFee}</p>
+          <p className="text-warning">Origin approval is not destination delivery. Gas is charged separately by your wallet.</p>
+        </div>}
         {/* Warning Banner block - Matching page 4 exactly */}
         <div className="rounded-xl border border-primary/25 bg-primary/10 p-3 text-left">
           <p className="text-[13px] leading-relaxed font-semibold text-primary">
@@ -110,18 +100,19 @@ export function ConfirmDestinationModal({
             
             {/* Action buttons inside input box */}
             <div className="flex items-center gap-1.5 pr-2">
-              <button 
+              <Button 
                 type="button"
                 onClick={handlePaste}
                 title="Paste from clipboard"
-                className="p-1.5 bg-card text-muted hover:text-primary rounded-lg border border-hairline hover:border-primary/20 transition-all cursor-pointer active:scale-90"
+                variant="ghost" size="icon" aria-label="Paste destination address"
               >
                 <Clipboard className="w-3.5 h-3.5" />
-              </button>
-              <button 
+              </Button>
+              <Button 
                 type="button"
                 onClick={copyToClipboard}
                 title="Copy destination"
+                variant="ghost" size="icon" aria-label="Copy destination address"
                 className={cn(
                   "p-1.5 rounded-lg border transition-all cursor-pointer active:scale-90",
                   copied 
@@ -130,7 +121,7 @@ export function ConfirmDestinationModal({
                 )}
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
+              </Button>
             </div>
           </div>
           {addressError && (
@@ -140,15 +131,6 @@ export function ConfirmDestinationModal({
           )}
         </div>
 
-        {/* Actions - Confirm Button */}
-        <button
-          onClick={handleValidateAndConfirm}
-          className="w-full py-3 rounded-2xl bg-primary hover:bg-primary-strong text-primary-foreground font-black text-sm uppercase tracking-widest transition-all duration-150 active:scale-[0.98] shadow-md cursor-pointer"
-        >
-          Confirm
-        </button>
-      </div>
-    </div>
-    </ModalPortal>
+    </TransactionModalFrame>
   );
 }

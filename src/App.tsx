@@ -99,6 +99,8 @@ import { ConnectGuideModal } from './modals/ConnectGuideModal';
 import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
+import { loadBridgeTracking, saveBridgeTracking, type BridgeTrackingContext } from './lib/bridge/trackingState';
+import { Button } from './components/ui/button';
 import { formatUsd, formatBalance4 } from './lib/format';
 import { toFriendlyError } from './lib/friendlyError';
 import { SiteLoader } from './components/SiteLoader';
@@ -711,6 +713,27 @@ export default function App() {
   // Snapshot of the bridged amount taken when the tracker opens, so clearing the
   // input after submission never changes what the tracker displays/polls for.
   const [trackerAmount, setTrackerAmount] = useState<string>('');
+  const [bridgeTracking, setBridgeTracking] = useState<BridgeTrackingContext | null>(null);
+  const [trackingPersisted, setTrackingPersisted] = useState(false);
+  const pendingTrackingContext = useRef<{ amount: string; recipient: string } | null>(null);
+  useEffect(() => {
+    const saved = loadBridgeTracking();
+    if (saved) { setBridgeTracking(saved); setTrackingPersisted(true); }
+  }, []);
+  // Presentation-only handoff at broadcast, BEFORE receipt waits. No additional write.
+  const recordBridgeTracking = (hash: string, explorerPrefix: string) => {
+    const context: BridgeTrackingContext = { txHash: hash, direction: bridgeDirection, isMainnet,
+      amount: pendingTrackingContext.current?.amount ?? (trackerAmount || usdtAmount), recipient: pendingTrackingContext.current?.recipient ?? (trackerRecipientAddress || customDestinationAddress || address || ''),
+      fromChain: bridgeFromName, toChain: bridgeToName, explorerPrefix };
+    setTrackingPersisted(saveBridgeTracking(context));
+    setBridgeTracking(context);
+    setIsRealtimeTrackerOpen(true);
+  };
+  useEffect(() => {
+    // Tracker is already open: never stack a successful bridge receipt above it.
+    if (isRealtimeTrackerOpen && trackingPersisted && bridgeTracking?.txHash === receiptTxHash
+      && receiptTxType === 'bridge' && receiptStatus === 'success') setIsReceiptModalOpen(false);
+  }, [isReceiptModalOpen, isRealtimeTrackerOpen, trackingPersisted, bridgeTracking?.txHash, receiptTxHash, receiptTxType, receiptStatus]);
 
   // Populate default destination address from wallet address
   useEffect(() => {
@@ -1281,6 +1304,7 @@ export default function App() {
     chainId: number,
     txType: 'swap' | 'bridge'
   ) => {
+    if (txType === 'bridge') recordBridgeTracking(txHash, getExplorerPrefixForChain(chainId));
     setActionStep('confirming_chain');
     setReceiptTxHash(txHash);
     setReceiptUrlPrefix(getExplorerPrefixForChain(chainId));
@@ -1483,7 +1507,7 @@ export default function App() {
   const getFixedSwapBalanceTooLowMessage = (symbol: 'CA' | 'BOT', amount: bigint, fee: bigint, balance: bigint) => {
     const total = amount + fee;
     const decimals = 18;
-    return `Not enough ${symbol} for this swap plus the ${platformFeeLabel} platform fee. Your balance is ${formatUnits(balance, decimals)} ${symbol}, but this swap needs ${formatUnits(total, decimals)} ${symbol}. Tap MAX again or lower the amount slightly.`;
+    return `Not enough ${symbol} for this swap plus the ${platformFeeLabel} protocol fee. Your balance is ${formatUnits(balance, decimals)} ${symbol}, but this swap needs ${formatUnits(total, decimals)} ${symbol}. Tap MAX again or lower the amount slightly.`;
   };
 
   // Live and simulated swap step logic
@@ -2297,6 +2321,7 @@ export default function App() {
             isMainnet,
           });
 
+          recordBridgeTracking(txid, TRON_EXPLORER_TX_PREFIX);
           // Tron txids are 64 hex chars WITHOUT 0x. Store as-is.
           await updateSession({
             step3: { ...session.step3, status: 'submitted', tx_hash: txid, timestamp: Date.now() }
@@ -2352,7 +2377,7 @@ export default function App() {
         : (botBalance?.value ?? 0n);
       return getFixedSwapBalanceTooLowMessage(caPaySymbol as 'CA' | 'BOT', amount, fee, held);
     } catch {
-      return `Lower the ${caPaySymbol} amount slightly to leave room for the ${platformFeeLabel} platform fee.`;
+      return `Lower the ${caPaySymbol} amount slightly to leave room for the ${platformFeeLabel} protocol fee.`;
     }
   })() : undefined;
   let caButtonLabel = "Enter amount";
@@ -3195,6 +3220,8 @@ export default function App() {
           )}
 
 
+          {activeTab === 'BRIDGE' && bridgeTracking && <Button variant="outline" className="w-full mt-3" onClick={() => setIsRealtimeTrackerOpen(true)}>Track submitted bridge</Button>}
+
           {/* V6: non-authoritative campaign route hint (presentation only). */}
           {activeTab === 'BRIDGE' && !campaignActionCtx && (
             <BridgeCampaignHint direction={bridgeDirection} isMainnet={isMainnet} />
@@ -3217,10 +3244,10 @@ export default function App() {
           {activeTab === 'BRIDGE' && !session.pendingAdapterBridge && session.step3.status === 'submitted' && session.step3.tx_hash && (
             <div className="mt-4">
               <BridgeStatusPanel
-                txHash={session.step3.tx_hash}
-                bridgeDirection={bridgeDirection}
-                isMainnet={isMainnet}
-                sourceExplorerPrefix={bridgeSrcExplorerPrefix}
+                txHash={bridgeTracking?.txHash ?? session.step3.tx_hash}
+                bridgeDirection={(bridgeTracking?.direction as import('./lib/bridge/useBridgeTracking').TrackingDirection | undefined) ?? bridgeDirection}
+                isMainnet={bridgeTracking?.isMainnet ?? isMainnet}
+                sourceExplorerPrefix={bridgeTracking?.explorerPrefix ?? bridgeSrcExplorerPrefix}
                 destExplorerPrefix={bridgeDestExplorerBase}
               />
             </div>
@@ -3350,6 +3377,7 @@ export default function App() {
       {/* Premium Confirm Modal Overlay */}
       {activeConfirmModal && (
         <ConfirmSwapModal
+          confirmDisabled={isActionLoading || !isConnected || !isNetworkCorrect}
           isOpen={activeConfirmModal !== null}
           onClose={() => setActiveConfirmModal(null)}
           onConfirm={async () => {
@@ -3448,6 +3476,8 @@ export default function App() {
           txUrlPrefix={receiptUrlPrefix}
           txType={receiptTxType}
           status={receiptStatus}
+          trackedHash={bridgeTracking?.txHash}
+          trackingPersisted={trackingPersisted}
         />
       )}
 
@@ -3468,11 +3498,21 @@ export default function App() {
           isOpen={isConfirmDestinationOpen}
           onClose={() => setIsConfirmDestinationOpen(false)}
           initialAddress={customDestinationAddress || address || ''}
+          payAmount={usdtAmount}
+          receiveAmount={adapterPreview?.refundableFormatted ?? calculateBridgeReceive(usdtAmount)}
+          fromChain={bridgeFromName}
+          toChain={bridgeToName}
+          bridgeFee={adapterPreview?.officialFeeFormatted ? `${adapterPreview.officialFeeFormatted} USDT` : bridgeDirection === 'BOT_TO_BNB' ? '1 USDT' : '0 USDT'}
+          confirmDisabled={bridgeButtonDisabled || isActionLoading}
           onConfirm={async (confirmedAddress) => {
+            pendingTrackingContext.current = { amount: usdtAmount, recipient: confirmedAddress };
             setCustomDestinationAddress(confirmedAddress);
             setTrackerRecipientAddress(confirmedAddress);
             setIsConfirmDestinationOpen(false);
             setTrackerAmount(usdtAmount);
+            setBridgeTracking(null);
+            setTrackingPersisted(false);
+            setErrorMessage(null);
             setIsRealtimeTrackerOpen(true);
             await completeStep3(confirmedAddress);
           }}
@@ -3491,17 +3531,17 @@ export default function App() {
         <RealtimeBridgeTrackerModal
           isOpen={isRealtimeTrackerOpen}
           onClose={() => setIsRealtimeTrackerOpen(false)}
-          fromChain={bridgeFromName}
-          toChain={bridgeToName}
-          amount={trackerAmount || usdtAmount}
+          fromChain={bridgeTracking?.fromChain ?? bridgeFromName}
+          toChain={bridgeTracking?.toChain ?? bridgeToName}
+          amount={bridgeTracking?.amount ?? (trackerAmount || usdtAmount)}
           symbol="USDT"
-          recipientAddress={trackerRecipientAddress || customDestinationAddress || address || ''}
-          txHash={receiptTxHash || undefined}
-          txUrlPrefix={bridgeDirection === 'BOT_TO_BNB' 
-            ? (isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/')
-            : (isMainnet ? 'https://bscscan.com/tx/' : 'https://testnet.bscscan.com/tx/')}
-          bridgeDirection={bridgeDirection}
-          isMainnet={isMainnet}
+          recipientAddress={bridgeTracking?.recipient ?? (trackerRecipientAddress || customDestinationAddress || address || '')}
+          txHash={bridgeTracking?.txHash}
+          walletState={!isActionLoading && errorMessage ? /reject|denied|cancel/i.test(errorMessage) ? 'rejected' : 'error' : 'awaiting'}
+          errorMessage={errorMessage}
+          txUrlPrefix={bridgeTracking?.explorerPrefix ?? bridgeSrcExplorerPrefix}
+          bridgeDirection={(bridgeTracking?.direction as import('./lib/bridge/useBridgeTracking').TrackingDirection | undefined) ?? bridgeDirection}
+          isMainnet={bridgeTracking?.isMainnet ?? isMainnet}
           onReset={() => {
             resetStep3();
             setIsRealtimeTrackerOpen(false);

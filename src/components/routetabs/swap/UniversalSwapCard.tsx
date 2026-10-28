@@ -145,8 +145,8 @@ export function UniversalSwapCard({
   // Router used for the token-in ERC20 allowance check (the first step's router).
   // Recomputed after a quote arrives.
 
-  const appConfig = useAppConfig(); // admin-published tokens, slippage + platform fee
-  // Admin-published platform fee (bps) — mirrors FlowBridgeRouter's globalFeeBps and
+  const appConfig = useAppConfig(); // admin-published tokens, slippage + protocol fee
+  // Admin-published protocol fee (bps) — mirrors FlowBridgeRouter's globalFeeBps and
   // drives the disclosed fee plus MAX/percentage head-room. Execution still reads the
   // exact fee from the contract before each swap.
   const platformFeeBps = appConfig.fees.platformFeeBps;
@@ -566,7 +566,7 @@ export function UniversalSwapCard({
       if (held < totalIn) {
         const feeDisp = formatUnits(fee, step.inIsNative ? 18 : tokenIn.decimals);
         throw new Error(
-          `Not enough ${step.symbolPath[0]} to cover this swap plus the ${platformFeeLabel} platform fee (${feeDisp} ${step.symbolPath[0]}). Tap MAX again or lower the amount slightly, then retry.`,
+          `Not enough ${step.symbolPath[0]} to cover this swap plus the ${platformFeeLabel} protocol fee (${feeDisp} ${step.symbolPath[0]}). Tap MAX again or lower the amount slightly, then retry.`,
         );
       }
     } catch (err) {
@@ -1184,7 +1184,7 @@ export function UniversalSwapCard({
 
   // Free typing: any amount is allowed so users can quote/simulate. The swap
   // button is what blocks submission when the amount exceeds the spendable max
-  // (balance − platform fee − gas reserve).
+  // (balance − protocol fee − gas reserve).
   const onAmountInChange = (v: string) => {
     setClamped(false);
     setAmountIn(v);
@@ -1338,7 +1338,7 @@ export function UniversalSwapCard({
           usdValue={usdValueFor(tokenIn, amountIn)}
           maxHint={
             maxSpendableRaw > 0n
-              ? `Max swappable ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} — the ${feeBpsLabel(disclosedFeeBps)} platform fee${tokenIn.isNative ? " and gas reserve are" : " is"} taken on top of your amount.`
+              ? `Max swappable ${formatBalance4(maxSpendableDisplay)} ${tokenIn.symbol} — the ${feeBpsLabel(disclosedFeeBps)} protocol fee${tokenIn.isNative ? " and gas reserve are" : " is"} taken on top of your amount.`
               : undefined
           }
           clampedNotice={
@@ -1476,7 +1476,7 @@ export function UniversalSwapCard({
                     ) : null}
                   </>
                 ) : null}
-                <Row label="Platform fee" value={platformFeeLabel} />
+                <Row label="Protocol Fee" value={platformFeeLabel} />
                 {disclosedFeeBps === 0 ? (
                   <Row label="Fee status" value="Router fee currently 0 bps" />
                 ) : null}
@@ -1605,6 +1605,7 @@ export function UniversalSwapCard({
         title="Select a token to buy"
       />
       <ConfirmSwapModal
+        confirmDisabled={buttonDisabled || !isConnected || !isNetworkCorrect || !reviewSnapshot}
         isOpen={confirmOpen}
         onClose={() => { setConfirmOpen(false); setReviewSnapshot(null); }}
         onConfirm={() => {
