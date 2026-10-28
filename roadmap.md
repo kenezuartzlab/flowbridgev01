@@ -17,7 +17,8 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Rewards release and Round #4 publication completed; preserve existing rewards controls.
 
 # Smart Trade + Liquidity V1 completion
-- [ ] Correct execution guards, exact initial prices, approval previews and receipt recovery.
-- [ ] Verify Mainnet venue/token wiring without sending transactions; preserve swap routing.
-- [ ] Run liquidity/regression safety tests and desktop/mobile acceptance.
-- [ ] Mainnet activation and production publication: wait for authorized canaries and wallet acceptance if required.
+- [x] Correct execution guards, exact initial prices and approval previews; unknown receipts fail closed.
+- [x] Verify Mainnet venue/token wiring without sending transactions; preserve swap routing.
+- [x] Run liquidity/swap safety tests, full regression and read-only desktop/mobile acceptance.
+- [ ] Connected-wallet transaction/rejection/recovery acceptance: requires authorized wallet testing.
+- [ ] Mainnet activation and production publication: blocked on separately authorized canaries and connected-wallet acceptance.
