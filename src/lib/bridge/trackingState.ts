@@ -10,6 +10,7 @@ export interface TrackingEvidence {
   destinationConfirmed?: boolean;
   destinationTokenArrival?: boolean;
   destinationConfirmedAt?: number;
+  destinationTxHash?: string;
 }
 export function trackingState(e: TrackingEvidence, now: number) {
   const terminalWallet = !e.txHash && (e.walletState === 'rejected' || e.walletState === 'error');
