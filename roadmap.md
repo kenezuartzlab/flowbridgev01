@@ -29,4 +29,4 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Official BOT branding and Protocol Fee labels; preserve all financial execution.
 - [x] Focused regression (283), full regression (2,079), responsive modal checks, restored-tracker read-only flow and fresh security; automatic preview build OK. Separate manual typecheck not run (harness-owned).
 - [ ] Verified relay/destination progress: blocked by absence of an existing correlated provider/destination evidence feed; display unknown, never fake completion.
-- [ ] Publish after acceptance and verify the served production release.
+- [x] Published correction and verified flowbridge.space/trade HTTP 200, no runtime errors; App-DTHqg3Vy.js SHA-256 17e1105be5dc70b16f0acfe331fb0d632e7c612daed4d008279239830206434c.
