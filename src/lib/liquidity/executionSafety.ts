@@ -1,4 +1,4 @@
-import { LIQUIDITY_WRITES_ENABLED } from "./liquidityTokens";
+import { liquidityWritesAllowed } from "./liquidityTokens";
 import { getLiquidityVenues } from "./venues";
 import type { LiquidityActivityKind } from "./lifecycle";
 
@@ -6,7 +6,7 @@ export function assertLiquidityExecution(input: {
   chainId: number; walletChainId?: number; wallet?: string; expectedWallet: string;
   dex: string; kind: LiquidityActivityKind; target: string;
 }) {
-  if (LIQUIDITY_WRITES_ENABLED[input.chainId] !== true) throw new Error("Liquidity writes are not enabled on this network.");
+  if (!liquidityWritesAllowed(input.chainId, input.wallet, input.dex)) throw new Error("Liquidity writes are not enabled on this network.");
   if (!input.wallet || input.wallet.toLowerCase() !== input.expectedWallet.toLowerCase()) throw new Error("Wallet changed. Review the transaction again.");
   if (input.walletChainId !== input.chainId) throw new Error("Switch your wallet to the reviewed network.");
   const venue = getLiquidityVenues(input.chainId).find(v => v.label === input.dex);
