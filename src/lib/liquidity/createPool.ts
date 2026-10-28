@@ -42,15 +42,17 @@ export function validateCreatePool(input: {
   let sqrtPriceX96: bigint | undefined;
   if (input.version === "v3") {
     // Pool price is token1 per token0.
-    const p01 = flipped ? String(pr.bInA.toPrecision(18)).replace(/e.*$/, "") : input.priceAinB.trim();
-    try { sqrtPriceX96 = priceToSqrtPriceX96(toPlain(Number(p01)), t0.decimals, t1.decimals); } catch (e) { return { ok: false, reason: (e as Error).message }; }
+    try { sqrtPriceX96 = priceToSqrtPriceX96(input.priceAinB.trim(), t0.decimals, t1.decimals, flipped); } catch (e) { return { ok: false, reason: (e as Error).message }; }
   }
   return { ok: true, token0: t0, token1: t1, flipped, priceAinB: pr.aInB, priceBinA: pr.bInA, sqrtPriceX96 };
 }
 
-function toPlain(n: number): string {
-  if (!(n > 0) || !Number.isFinite(n)) throw new Error("Invalid price");
-  const s = n.toFixed(30).replace(/0+$/, "").replace(/\.$/, "");
-  if (/^0(\.0*)?$/.test(s)) throw new Error("Price is outside the supported range");
-  return s;
+/** Token B raw units from a human B/A price, rounded down without Number conversion. */
+export function initialPairedAmount(amountA: bigint, price: string, decA: number, decB: number): bigint {
+  const m = /^(\d+)(?:\.(\d+))?$/.exec(price.trim());
+  if (!m || amountA <= 0n) throw new Error("Invalid initial amount or price");
+  const frac = m[2] ?? "";
+  if (frac.length > 36) throw new Error("Price supports at most 36 decimal places");
+  const numerator = BigInt(m[1] + frac);
+  return amountA * numerator * 10n ** BigInt(decB) / (10n ** BigInt(frac.length + decA));
 }

@@ -80,14 +80,16 @@ export interface LiquidityActivity {
   wallet: string;
   createdAt: number;
   txs: LiquidityTx[];
+  completed?: boolean;
+  error?: string;
 }
 
-export function operationStatus(a: Pick<LiquidityActivity, "txs">): { phase: TxPhase; summary: string } {
+export function operationStatus(a: Pick<LiquidityActivity, "txs" | "completed" | "error">): { phase: TxPhase; summary: string } {
   const n = a.txs.length;
   const c = a.txs.filter((t) => t.phase === "confirmed").length;
   const f = a.txs.filter((t) => t.phase === "failed").length;
   const w = n - c - f;
-  const phase: TxPhase = f > 0 ? "failed" : n > 0 && c === n ? "confirmed" : n === 0 ? "preparing" : "confirming";
+  const phase: TxPhase = f > 0 || a.error ? "failed" : n > 0 && c === n && a.completed !== false ? "confirmed" : n === 0 ? "preparing" : "confirming";
   const parts = [`${n} transaction${n === 1 ? "" : "s"}`, `${c} confirmed`];
   if (w) parts.push(`${w} waiting`);
   if (f) parts.push(`${f} failed`);

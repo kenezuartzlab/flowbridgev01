@@ -1,9 +1,10 @@
+import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import type { Abi, Address } from "viem";
 import { getVenue, type LiquidityVenueId, type V2Venue, type V3Venue } from "@/lib/liquidity/venues";
 import { enabledFeeTiers, readV2Pair, readV3Pool, readBalance, v2Wiring } from "@/lib/liquidity/chainReads";
-import { validateCreatePool, reciprocalPrices } from "@/lib/liquidity/createPool";
+import { validateCreatePool, reciprocalPrices, initialPairedAmount } from "@/lib/liquidity/createPool";
 import { deadlineFrom } from "@/lib/liquidity/v2Math";
 import { NPM_ABI, V2_ROUTER_ABI } from "@/lib/liquidity/abis";
 import { checkTokenForLiquidity } from "@/lib/liquidity/tokenSafety";
@@ -28,6 +29,7 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
   const [price, setPrice] = useState("");
   const [ack, setAck] = useState(false);
   const [amtA, setAmtA] = useState("");
+  const [wrapped, setWrapped] = useState<Address>();
   const [review, setReview] = useState(false);
   const tx = useLiquidityTx();
   const venueClosed = !(p_caps(venue));
@@ -37,15 +39,18 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
   useEffect(() => { setAck(false); }, [price, a, b, fee, venueId]);
   useEffect(() => {
     setExisting(undefined);
+    let cancelled = false;
     if (!tA || !tB) return;
     (async () => {
-      if (venue.kind === "v3") setExisting((await readV3Pool(venue, tA.address as Address, tB.address as Address, fee)).pool);
+      if (venue.kind === "v3") { const p = await readV3Pool(venue, tA.address as Address, tB.address as Address, fee); if (!cancelled) setExisting(p.pool); }
       else {
         const { wrapped } = await v2Wiring(venue);
+        if (!cancelled) setWrapped(wrapped);
         const p = await readV2Pair(venue, (isNative(tA) ? wrapped : tA.address) as Address, (isNative(tB) ? wrapped : tB.address) as Address);
-        setExisting(p && p.reserve0 > 0n ? p.pair : null);
+        if (!cancelled) setExisting(p && p.reserve0 > 0n ? p.pair : null);
       }
-    })().catch(() => setExisting(undefined));
+    })().catch(() => { if (!cancelled) setExisting(undefined); });
+    return () => { cancelled = true; };
   }, [tA, tB, venue, fee, tx.steps.length]);
 
   let recip: { aInB: number; bInA: number } | null = null;
@@ -54,20 +59,23 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
   const prepared = useMemo((): { op: LiquidityOp; rows: [string, string][] } | { error: string } | null => {
     if (!tA || !tB || existing === undefined) return null;
     for (const t of [tA, tB]) { const s = checkTokenForLiquidity(t, new Set()); if (!s.ok) return { error: s.reason }; }
-    const chk = validateCreatePool({ version: venue.kind, tokenA: { address: isNative(tA) ? "0x0000000000000000000000000000000000000001" : tA.address, decimals: tA.decimals, symbol: tA.symbol }, tokenB: { address: isNative(tB) ? "0x0000000000000000000000000000000000000001" : tB.address, decimals: tB.decimals, symbol: tB.symbol }, feeTier: venue.kind === "v3" ? fee : undefined, enabledFeeTiers: tiers, existingPool: existing, priceAinB: price, priceConfirmed: ack });
+    if ((isNative(tA) || isNative(tB)) && !wrapped) return null;
+    const chk = validateCreatePool({ version: venue.kind, tokenA: { address: isNative(tA) ? wrapped ?? "" : tA.address, decimals: tA.decimals, symbol: tA.symbol }, tokenB: { address: isNative(tB) ? wrapped ?? "" : tB.address, decimals: tB.decimals, symbol: tB.symbol }, feeTier: venue.kind === "v3" ? fee : undefined, enabledFeeTiers: tiers, existingPool: existing, priceAinB: price, priceConfirmed: ack });
     if (!chk.ok) return { error: chk.reason };
     if (!address) return { error: "Connect a wallet" };
     if (venue.kind === "v3") {
+      if (chk.sqrtPriceX96 === undefined) return { error: "Initial price could not be encoded safely" };
       const v = venue as V3Venue;
       return {
-        op: { kind: "create-pool", chainId, dex: "BDEX V3", pair: `${tA.symbol}/${tB.symbol}`, amounts: [`1 ${tA.symbol} = ${price} ${tB.symbol}`], approvals: [],
-          call: { address: v.positionManager, abi: NPM_ABI as Abi, functionName: "createAndInitializePoolIfNecessary", args: [chk.token0.address, chk.token1.address, fee, chk.sqrtPriceX96!] }, label: "Create and initialize BDEX V3 pool" },
+        op: { kind: "create-pool", account: address, chainId, dex: "BDEX V3", pair: `${tA.symbol}/${tB.symbol}`, amounts: [`1 ${tA.symbol} = ${price} ${tB.symbol}`], approvals: [],
+          call: { address: v.positionManager, abi: NPM_ABI as Abi, functionName: "createAndInitializePoolIfNecessary", args: [chk.token0.address, chk.token1.address, fee, chk.sqrtPriceX96] }, label: "Create and initialize BDEX V3 pool" },
         rows: [["Venue", "BDEX V3"], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Fee tier", `${(fee / 10_000).toFixed(2)}%`], ["Initial price", `1 ${tA.symbol} = ${chk.priceAinB} ${tB.symbol}`], ["Reciprocal", `1 ${tB.symbol} = ${chk.priceBinA.toPrecision(8)} ${tA.symbol}`], ["Next step", "Add initial liquidity on the Add tab"]],
       };
     }
     const x = safeParse(amtA, tA.decimals);
     if (x == null || x === 0n) return { error: "Enter the initial Token A amount" };
-    const y = safeParse(String(Number(fmt(x, tA.decimals, tA.decimals)) * chk.priceAinB), tB.decimals);
+    let y: bigint;
+    try { y = initialPairedAmount(x, price, tA.decimals, tB.decimals); } catch (e) { return { error: (e as Error).message }; }
     if (!y) return { error: "Initial Token B amount is too small" };
     const v = venue as V2Venue;
     const nat = isNative(tA) ? "a" : isNative(tB) ? "b" : null;
@@ -79,10 +87,10 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
       ? { address: v.router, abi: V2_ROUTER_ABI as Abi, functionName: "addLiquidityETH", value: nat === "a" ? x : y, args: nat === "a" ? [tB.address, y, y, x, address, dl] : [tA.address, x, x, y, address, dl] }
       : { address: v.router, abi: V2_ROUTER_ABI as Abi, functionName: "addLiquidity", args: [tA.address, tB.address, x, y, x, y, address, dl] };
     return {
-      op: { kind: "create-pool", chainId, dex: venue.label, pair: `${tA.symbol}/${tB.symbol}`, amounts: [`${fmt(x, tA.decimals)} ${tA.symbol}`, `${fmt(y, tB.decimals)} ${tB.symbol}`], approvals, call, label: `Create ${venue.label} pair with initial liquidity` },
-      rows: [["Venue", venue.label], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Initial price", `1 ${tA.symbol} = ${chk.priceAinB} ${tB.symbol}`], ["Reciprocal", `1 ${tB.symbol} = ${chk.priceBinA.toPrecision(8)} ${tA.symbol}`], ["Initial liquidity", `${fmt(x, tA.decimals)} ${tA.symbol} + ${fmt(y, tB.decimals)} ${tB.symbol}`]],
+      op: { kind: "create-pool", account: address, chainId, dex: venue.label, pair: `${tA.symbol}/${tB.symbol}`, amounts: [`${fmt(x, tA.decimals)} ${tA.symbol}`, `${fmt(y, tB.decimals)} ${tB.symbol}`], approvals, call, label: `Create ${venue.label} pair with initial liquidity` },
+      rows: [["Venue", venue.label], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Initial price", `1 ${tA.symbol} = ${price} ${tB.symbol}`], ["Reciprocal", `1 ${tB.symbol} = ${chk.priceBinA.toPrecision(8)} ${tA.symbol}`], ["Initial liquidity", `${fmt(x, tA.decimals, tA.decimals)} ${tA.symbol} + ${fmt(y, tB.decimals, tB.decimals)} ${tB.symbol}`], ["Minimum accepted", "Exact initial deposit amounts"], ["Deadline", "20 minutes"]],
     };
-  }, [tA, tB, existing, venue, fee, tiers, price, ack, address, amtA, chainId]);
+  }, [tA, tB, existing, venue, fee, tiers, price, ack, address, amtA, chainId, wrapped]);
 
   const [balA, setBalA] = useState<string>();
   useEffect(() => { if (address && tA) readBalance(chainId, isNative(tA) ? "native" : (tA.address as Address), address).then((v) => setBalA(fmt(v, tA.decimals, 4))).catch(() => setBalA(undefined)); }, [address, tA, chainId]);
@@ -101,7 +109,7 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
         <>
           <AmountInput label={`Initial price: 1 ${tA.symbol} = ? ${tB.symbol}`} value={price} onChange={setPrice} />
           {recip && (
-            <div className="rounded-xl border border-hairline p-3 text-[12.5px] font-bold">
+            <div className="rounded-lg border border-hairline p-3 text-[12.5px] font-bold">
               <p>1 {tA.symbol} = {recip.aInB} {tB.symbol}</p>
               <p>1 {tB.symbol} = {recip.bInA.toPrecision(8)} {tA.symbol}</p>
             </div>
@@ -118,11 +126,11 @@ export function CreatePoolPanel({ chainId, writable, explorer }: { chainId: numb
       {prepared && "error" in prepared && existing === null && <Notice tone="error">{prepared.error}</Notice>}
       {venueClosed && <Notice tone="warn">{venue.label} only lets allowlisted wallets add liquidity or create pairs (the router rejects others with LP_NOT_ALLOWED). FlowBridge won't route this through another DEX. Existing CaSwap LP can still be removed under My Positions.</Notice>}
       {!writable && <Notice tone="warn">Pools can't be created on BOT Mainnet in this release. Create Pool is available on BOT Testnet.</Notice>}
-      <button type="button" disabled={venueClosed || !writable || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)} className="h-12 w-full rounded-2xl bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</button>
+      <Button variant="ghost" type="button" disabled={venueClosed || !writable || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)} className="h-12 w-full rounded-lg bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</Button>
       <TxProgress steps={tx.steps} leftover={tx.leftover} busy={tx.busy} explorer={explorer} onClear={(x) => void tx.clearLeftover(chainId, x)} />
       {prepared && "op" in prepared && (
         <ReviewModal open={review} title="Review · Create pool" rows={prepared.rows} approvals={prepared.op.approvals} busy={tx.busy}
-          confirmLabel={`Sign ${prepared.op.approvals.length + 1} transaction${prepared.op.approvals.length ? "s" : ""}`}
+          confirmLabel="Confirm in wallet"
           onClose={() => setReview(false)} onConfirm={async () => { setReview(false); await tx.run(prepared.op); }} />
       )}
     </section>

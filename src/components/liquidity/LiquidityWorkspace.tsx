@@ -1,9 +1,11 @@
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useAccount, useChainId, useConnect, useSwitchChain } from "wagmi";
 import { discoverPools, type DiscoveredPool } from "@/lib/swap/quoter";
 import { getCuratedTokens } from "@/lib/swap/tokenRegistry";
 import { LIQUIDITY_WRITES_ENABLED } from "@/lib/liquidity/liquidityTokens";
 import { CASWAP_CAPABILITY_MATRIX } from "@/lib/liquidity/venues";
+import { parseSlippagePercent } from "@/lib/liquidity/executionSafety";
 import { AddLiquidityPanel } from "./AddLiquidityPanel";
 import { CreatePoolPanel } from "./CreatePoolPanel";
 import { PositionsPanel } from "./PositionsPanel";
@@ -26,9 +28,11 @@ export function LiquidityWorkspace({ initialTab = "pools" }: { initialTab?: Liqu
   const [tab, setTab] = useState<LiquidityTab>(initialTab);
   const [slip, setSlip] = useState("0.5");
   useEffect(() => { if (walletChain === 968 || walletChain === 677) setChainId(walletChain); }, [walletChain]);
-  const slippageBps = Math.max(1, Math.min(5000, Math.round((Number(slip) || 0.5) * 100)));
+  const parsedSlippage = parseSlippagePercent(slip);
+  const slippageBps = parsedSlippage ?? 50;
   const explorer = chainId === 677 ? "https://scan.botchain.ai" : "https://scan.bohr.life";
-  const writable = LIQUIDITY_WRITES_ENABLED[chainId] === true && isConnected && walletChain === chainId;
+  const writable = LIQUIDITY_WRITES_ENABLED[chainId] === true && isConnected && walletChain === chainId && parsedSlippage !== null;
+  const contextKey = `${chainId}:${address ?? "disconnected"}:${walletChain}`;
 
   return (
     <div className="space-y-3">
@@ -36,27 +40,29 @@ export function LiquidityWorkspace({ initialTab = "pools" }: { initialTab?: Liqu
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Segmented value={String(chainId)} onChange={(v) => setChainId(Number(v))} options={[{ id: "677", label: "BOT Mainnet" }, { id: "968", label: "BOT Testnet" }]} />
           {!isConnected ? (
-            <button type="button" disabled={isPending || !preferredConnector} onClick={() => preferredConnector && connect({ connector: preferredConnector })}
-              className="h-10 shrink-0 rounded-xl bg-primary px-4 text-[13px] font-black text-primary-foreground">Connect wallet</button>
+            <Button variant="ghost" type="button" disabled={isPending || !preferredConnector} onClick={() => preferredConnector && connect({ connector: preferredConnector })}
+              className="h-10 shrink-0 rounded-lg bg-primary px-4 text-[13px] font-black text-primary-foreground">Connect wallet</Button>
           ) : (
             <span className="max-w-full truncate font-mono text-[11px] text-muted">{address?.slice(0, 6)}…{address?.slice(-4)}</span>
           )}
         </div>
         {isConnected && walletChain !== chainId && (
-          <Notice tone="warn">Your wallet is on another network. <button type="button" className="font-bold text-primary" onClick={() => switchChain({ chainId })}>Switch network</button></Notice>
+          <Notice tone="warn">Your wallet is on another network. <Button variant="ghost" type="button" className="font-bold text-primary" onClick={() => switchChain({ chainId })}>Switch network</Button></Notice>
         )}
         <label className="flex items-center justify-between gap-2 text-[12px]">
           <span className="text-muted">Slippage tolerance (%)</span>
           <input inputMode="decimal" value={slip} onChange={(e) => setSlip(e.target.value.replace(",", "."))} className="h-9 w-20 rounded-lg border border-hairline bg-card px-2 text-right font-mono" aria-label="Slippage tolerance percent" />
         </label>
+        {parsedSlippage === null && <Notice tone="error">Enter slippage between 0.01% and 50%, with at most two decimal places.</Notice>}
+        {parsedSlippage !== null && parsedSlippage > 500 && <Notice tone="warn">High slippage: minimum accepted amounts can be substantially lower.</Notice>}
       </section>
 
       <Segmented value={tab} onChange={setTab} options={[{ id: "pools", label: "Pools" }, { id: "add", label: "Add" }, { id: "create", label: "Create Pool" }, { id: "positions", label: "My Positions" }]} />
 
       {tab === "pools" && <PoolsList chainId={chainId} />}
-      {tab === "add" && <AddLiquidityPanel chainId={chainId} writable={writable} explorer={explorer} slippageBps={slippageBps} onCreatePool={() => setTab("create")} />}
-      {tab === "create" && <CreatePoolPanel chainId={chainId} writable={writable} explorer={explorer} />}
-      {tab === "positions" && <PositionsPanel chainId={chainId} writable={writable} explorer={explorer} slippageBps={slippageBps} />}
+      {tab === "add" && <AddLiquidityPanel key={contextKey} chainId={chainId} writable={writable} explorer={explorer} slippageBps={slippageBps} onCreatePool={() => setTab("create")} />}
+      {tab === "create" && <CreatePoolPanel key={contextKey} chainId={chainId} writable={writable} explorer={explorer} />}
+      {tab === "positions" && <PositionsPanel key={contextKey} chainId={chainId} writable={writable} explorer={explorer} slippageBps={slippageBps} />}
     </div>
   );
 }
@@ -74,7 +80,7 @@ function PoolsList({ chainId }: { chainId: number }) {
           {pools === null && <p className="text-[12px] text-muted">Reading pools…</p>}
           {pools?.length === 0 && <p className="text-[12px] text-muted">No pools could be read right now.</p>}
           {pools?.filter((p, i, all) => all.findIndex((o) => o.pool.toLowerCase() === p.pool.toLowerCase()) === i).map((p) => (
-            <a key={p.pool} href={`${explorer}/address/${p.pool}`} target="_blank" rel="noreferrer" className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline p-3">
+            <a key={p.pool} href={`${explorer}/address/${p.pool}`} target="_blank" rel="noreferrer" className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hairline p-3">
               <span className="text-[13px] font-bold">{p.pair}</span>
               <span className="font-mono text-[11px] text-muted">{p.dex}{p.feeTier != null ? ` · ${(p.feeTier / 10_000).toFixed(2)}%` : ""}</span>
             </a>

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import type { Abi, Address } from "viem";
@@ -58,7 +59,8 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
           if (off) return;
           if (!p || p.reserve0 === 0n) return setV2State("none");
           const aIs0 = p.token0.toLowerCase() === ad.toLowerCase();
-          setV2State({ ra: aIs0 ? p.reserve0 : p.reserve1, rb: aIs0 ? p.reserve1 : p.reserve0, ts: p.totalSupply, pair: p.pair! });
+          if (!p.pair) throw new Error("Pair address unavailable");
+          setV2State({ ra: aIs0 ? p.reserve0 : p.reserve1, rb: aIs0 ? p.reserve1 : p.reserve0, ts: p.totalSupply, pair: p.pair });
         } else {
           const s = await readV3Pool(venue, tA.address as Address, tB.address as Address, fee);
           if (!off) setV3State(s);
@@ -120,7 +122,7 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
   const prepared = useMemo((): { op: LiquidityOp; rows: [string, string][]; notes: string[] } | { error: string } | null => {
     if (!tA || !tB || !address) return null;
     const x = safeParse(amtA, tA.decimals), y = safeParse(amtB, tB.decimals);
-    if (x == null || x === 0n) return null;
+    if (x == null || (x === 0n && (y == null || y === 0n))) return null;
     try {
       const deadline = deadlineFrom(Date.now() / 1000, 20);
       if (venue.kind === "v2") {
@@ -137,7 +139,7 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
               args: nat === "a" ? [tB.address, plan.amountBDesired, plan.amountBMin, plan.amountAMin, address, deadline] : [tA.address, plan.amountADesired, plan.amountAMin, plan.amountBMin, address, deadline] }
           : { address: v.router, abi: V2_ROUTER_ABI as Abi, functionName: "addLiquidity", args: [tA.address, tB.address, plan.amountADesired, plan.amountBDesired, plan.amountAMin, plan.amountBMin, address, deadline] };
         return {
-          op: { kind: "add-liquidity", chainId, dex: venue.label, pair: `${tA.symbol}/${tB.symbol}`, pool: v2State.pair, amounts: [`${fmt(plan.amountADesired, tA.decimals)} ${tA.symbol}`, `${fmt(plan.amountBDesired, tB.decimals)} ${tB.symbol}`], approvals, call, label: `Add liquidity on ${venue.label}` },
+          op: { kind: "add-liquidity", account: address, chainId, dex: venue.label, pair: `${tA.symbol}/${tB.symbol}`, pool: v2State.pair, amounts: [`${fmt(plan.amountADesired, tA.decimals)} ${tA.symbol}`, `${fmt(plan.amountBDesired, tB.decimals)} ${tB.symbol}`], approvals, call, label: `Add liquidity on ${venue.label}` },
           rows: [["Venue", venue.label], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Deposit", `${fmt(plan.amountADesired, tA.decimals)} ${tA.symbol} + ${fmt(plan.amountBDesired, tB.decimals)} ${tB.symbol}`], ["Minimum accepted", `${fmt(plan.amountAMin, tA.decimals)} ${tA.symbol} · ${fmt(plan.amountBMin, tB.decimals)} ${tB.symbol}`], ["Pool share after", `${(plan.shareBps / 100).toFixed(2)}%`], ["Slippage", `${slippageBps / 100}%`], ["Deadline", "20 minutes"], ["Pool", v2State.pair]],
           notes: ["Gas is estimated by your wallet before each signature.", "V2 fees accumulate inside the LP token. No APR is shown because none can be verified."],
         };
@@ -160,7 +162,7 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
       const pLo = tickToPrice(v3.range.tickLower, v3.t0.decimals, v3.t1.decimals), pHi = tickToPrice(v3.range.tickUpper, v3.t0.decimals, v3.t1.decimals);
       const [lo, hi] = v3.flipped ? [1 / pHi, 1 / pLo] : [pLo, pHi];
       return {
-        op: { kind: "add-liquidity", chainId, dex: "BDEX V3", pair: `${tA.symbol}/${tB.symbol}`, pool: v3State.pool, amounts: [`${fmt(x, tA.decimals)} ${tA.symbol}`, `${fmt(y, tB.decimals)} ${tB.symbol}`], approvals,
+        op: { kind: "add-liquidity", account: address, chainId, dex: "BDEX V3", pair: `${tA.symbol}/${tB.symbol}`, pool: v3State.pool, amounts: [`${fmt(x, tA.decimals)} ${tA.symbol}`, `${fmt(y, tB.decimals)} ${tB.symbol}`], approvals,
           call: { address: v.positionManager, abi: NPM_ABI as Abi, functionName: "mint", args: [{ token0: v3.t0.address, token1: v3.t1.address, fee, tickLower: v3.range.tickLower, tickUpper: v3.range.tickUpper, amount0Desired: a0, amount1Desired: a1, amount0Min: applySlippage(exp.amount0, slippageBps), amount1Min: applySlippage(exp.amount1, slippageBps), recipient: address, deadline }] },
           label: "Mint BDEX V3 position" },
         rows: [["Venue", "BDEX V3"], ["Pair", `${tA.symbol} / ${tB.symbol}`], ["Fee tier", `${(fee / 10_000).toFixed(2)}%`], ["Current price", `1 ${tA.symbol} = ${v3.curAinB.toPrecision(6)} ${tB.symbol}`], ["Range", mode === "full" ? "Full range" : `${lo.toPrecision(6)} – ${hi.toPrecision(6)} ${tB.symbol} per ${tA.symbol}`], ["Ticks", `${v3.range.tickLower} → ${v3.range.tickUpper}`], ["Deposit (max)", `${fmt(x, tA.decimals)} ${tA.symbol} + ${fmt(y, tB.decimals)} ${tB.symbol}`], ["Minimum accepted", `${fmt(applySlippage(exp.amount0, slippageBps), v3.t0.decimals)} ${v3.t0.symbol} · ${fmt(applySlippage(exp.amount1, slippageBps), v3.t1.decimals)} ${v3.t1.symbol}`], ["Slippage", `${slippageBps / 100}%`], ["Deadline", "20 minutes"]],
@@ -194,10 +196,10 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
         {blocked && <Notice tone="error">{blocked.reason}</Notice>}
         {err && <Notice tone="error">{err}</Notice>}
         {tA && tB && venue.kind === "v2" && v2State === "none" && (
-          <Notice tone="warn">No {venue.label} pair for {tA.symbol}/{tB.symbol} yet. <button type="button" className="font-bold text-primary" onClick={onCreatePool}>Create Pool →</button></Notice>
+          <Notice tone="warn">No {venue.label} pair for {tA.symbol}/{tB.symbol} yet. <Button variant="ghost" type="button" className="font-bold text-primary" onClick={onCreatePool}>Create Pool →</Button></Notice>
         )}
         {tA && tB && venue.kind === "v3" && v3State && !v3State.pool && (
-          <Notice tone="warn">No BDEX V3 {tA.symbol}/{tB.symbol} pool at {(fee / 10_000).toFixed(2)}%. <button type="button" className="font-bold text-primary" onClick={onCreatePool}>Create Pool →</button></Notice>
+          <Notice tone="warn">No BDEX V3 {tA.symbol}/{tB.symbol} pool at {(fee / 10_000).toFixed(2)}%. <Button variant="ghost" type="button" className="font-bold text-primary" onClick={onCreatePool}>Create Pool →</Button></Notice>
         )}
 
         {v3 && (
@@ -208,11 +210,12 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
               <div className="space-y-2">
                 <Segmented value={profile} onChange={setProfile} options={[{ id: "wide", label: "Wide" }, { id: "balanced", label: "Balanced" }, { id: "narrow", label: "Narrow" }]} />
                 {(() => {
-                  const s = v3.suggestions.find((x) => x.profile === profile)!;
+                  const s = v3.suggestions.find((x) => x.profile === profile);
+                  if (!s || !tB) return null;
                   const [lo, hi] = v3.flipped ? [1 / s.priceUpper, 1 / s.priceLower] : [s.priceLower, s.priceUpper];
                   return (
-                    <div className="rounded-xl border border-hairline p-3 text-[12px]">
-                      <Row k="Current price" v={`${v3.curAinB.toPrecision(6)} ${tB!.symbol}`} />
+                    <div className="rounded-lg border border-hairline p-3 text-[12px]">
+                      <Row k="Current price" v={`${v3.curAinB.toPrecision(6)} ${tB.symbol}`} />
                       <Row k="Proposed range" v={`${lo.toPrecision(6)} – ${hi.toPrecision(6)}`} />
                       <Row k="Relative concentration" v={`${s.concentration.toFixed(1)}× full range`} />
                       {s.notes.map((n) => <p key={n} className="mt-1 text-muted">{n}</p>)}
@@ -232,14 +235,14 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
         )}
 
         <AmountInput label={tA ? `Amount ${tA.symbol}` : "Amount A"} value={amtA} onChange={setAmtA} balance={bal && tA ? fmt(bal.a, tA.decimals, 4) : undefined} />
-        <AmountInput label={tB ? `Amount ${tB.symbol} (pool ratio)` : "Amount B"} value={amtB} readOnly balance={bal && tB ? fmt(bal.b, tB.decimals, 4) : undefined} />
+        <AmountInput label={tB ? `Amount ${tB.symbol} (pool ratio)` : "Amount B"} value={amtB} onChange={setAmtB} readOnly={venue.kind === "v2" || (v3State != null && v3 != null && v3.range != null && v3State.tick < v3.range.tickUpper)} balance={bal && tB ? fmt(bal.b, tB.decimals, 4) : undefined} />
 
         {prepared && "error" in prepared && <Notice tone="error">{prepared.error}</Notice>}
         {!address && <Notice>Connect a wallet to see balances and add liquidity.</Notice>}
         {venueClosed && <Notice tone="warn">{venue.label} only lets allowlisted wallets add liquidity or create pairs (the router rejects others with LP_NOT_ALLOWED). FlowBridge won't route this through another DEX. Existing CaSwap LP can still be removed under My Positions.</Notice>}
       {!writable && <Notice tone="warn">On BOT Mainnet, adding liquidity opens after the Mainnet liquidity canary is approved. Pools and positions are read-only until then.</Notice>}
-        <button type="button" disabled={venueClosed || !writable || !!blocked || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)}
-          className="h-12 w-full rounded-2xl bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</button>
+        <Button variant="ghost" type="button" disabled={venueClosed || !writable || !!blocked || !prepared || "error" in prepared || tx.busy} onClick={() => setReview(true)}
+          className="h-12 w-full rounded-lg bg-primary text-[14px] font-black text-primary-foreground disabled:opacity-40">Review</Button>
         <TxProgress steps={tx.steps} leftover={tx.leftover} busy={tx.busy} explorer={explorer} onClear={(x) => void tx.clearLeftover(chainId, x)} />
       </section>
 
@@ -247,7 +250,7 @@ export function AddLiquidityPanel({ chainId, writable, explorer, slippageBps, on
 
       {prepared && "op" in prepared && (
         <ReviewModal open={review} title="Review · Add liquidity" rows={prepared.rows} approvals={prepared.op.approvals} notes={prepared.notes}
-          busy={tx.busy} confirmLabel={`Sign ${prepared.op.approvals.length + 1} transaction${prepared.op.approvals.length ? "s" : ""}`}
+          busy={tx.busy} confirmLabel="Confirm in wallet"
           onClose={() => setReview(false)} onConfirm={async () => { setReview(false); await tx.run(prepared.op); }} />
       )}
     </div>
