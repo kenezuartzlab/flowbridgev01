@@ -1,4 +1,4 @@
-import { X, ArrowDown, RefreshCw } from 'lucide-react';
+import { ArrowDown, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TokenIcon } from '../components/TokenIcon';
 import { TransactionModalFrame } from './TransactionModalFrame';
@@ -117,6 +117,7 @@ export function ConfirmSwapModal({
           {!isBridge && <p>Minimum received: <strong>{minRec} {toSymbol}</strong></p>}
           <p>{isBridge ? "Bridge Fee" : "Trading Fee"}: {tradingFee}</p>
           {!isBridge && <p>Protocol Fee: {feeBreakdown?.percent ?? platformFee}</p>}
+          {!isBridge && parseFloat(priceImpact) > 5 && <p className="text-warning">High price impact: {priceImpact}. Review the estimated output carefully.</p>}
           {executionLabel?.includes("STAGED") && <p className="text-warning">Each next stage is re-quoted after confirmation. If a later stage stops, earlier assets remain in your wallet.</p>}
         </div>
         <p className="text-xs text-muted">{isBridge ? "Destination delivery requires relay processing and destination confirmation. Origin success does not confirm receipt." : `Output is estimated. You receive at least ${minRec} ${toSymbol} or the transaction reverts.`}</p>
@@ -144,7 +145,7 @@ export function ConfirmSwapModal({
             <span className="uppercase tracking-wider">Price impact</span>
             <span className={cn(
               "font-bold", 
-              parseFloat(priceImpact) > 5 ? "text-amber-400" : "text-primary"
+              parseFloat(priceImpact) > 5 ? "text-warning" : "text-primary"
             )}>
               {priceImpact}
             </span>

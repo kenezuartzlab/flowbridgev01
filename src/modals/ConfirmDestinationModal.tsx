@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Copy, Check, Clipboard } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Copy, Check, Clipboard } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TransactionModalFrame } from './TransactionModalFrame';
 import { Button } from '@/components/ui/button';
@@ -104,7 +104,7 @@ export function ConfirmDestinationModal({
                 type="button"
                 onClick={handlePaste}
                 title="Paste from clipboard"
-                className="p-1.5 bg-card text-muted hover:text-primary rounded-lg border border-hairline hover:border-primary/20 transition-all cursor-pointer active:scale-90"
+                variant="ghost" size="icon" aria-label="Paste destination address"
               >
                 <Clipboard className="w-3.5 h-3.5" />
               </Button>
@@ -112,6 +112,7 @@ export function ConfirmDestinationModal({
                 type="button"
                 onClick={copyToClipboard}
                 title="Copy destination"
+                variant="ghost" size="icon" aria-label="Copy destination address"
                 className={cn(
                   "p-1.5 rounded-lg border transition-all cursor-pointer active:scale-90",
                   copied 

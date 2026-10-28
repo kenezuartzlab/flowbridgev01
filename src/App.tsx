@@ -715,6 +715,7 @@ export default function App() {
   const [trackerAmount, setTrackerAmount] = useState<string>('');
   const [bridgeTracking, setBridgeTracking] = useState<BridgeTrackingContext | null>(null);
   const [trackingPersisted, setTrackingPersisted] = useState(false);
+  const pendingTrackingContext = useRef<{ amount: string; recipient: string } | null>(null);
   useEffect(() => {
     const saved = loadBridgeTracking();
     if (saved) { setBridgeTracking(saved); setTrackingPersisted(true); }
@@ -722,7 +723,7 @@ export default function App() {
   // Presentation-only handoff at broadcast, BEFORE receipt waits. No additional write.
   const recordBridgeTracking = (hash: string, explorerPrefix: string) => {
     const context: BridgeTrackingContext = { txHash: hash, direction: bridgeDirection, isMainnet,
-      amount: trackerAmount || usdtAmount, recipient: trackerRecipientAddress || customDestinationAddress || address || '',
+      amount: pendingTrackingContext.current?.amount ?? (trackerAmount || usdtAmount), recipient: pendingTrackingContext.current?.recipient ?? (trackerRecipientAddress || customDestinationAddress || address || ''),
       fromChain: bridgeFromName, toChain: bridgeToName, explorerPrefix };
     setTrackingPersisted(saveBridgeTracking(context));
     setBridgeTracking(context);
@@ -732,7 +733,7 @@ export default function App() {
     // Tracker is already open: never stack a successful bridge receipt above it.
     if (isRealtimeTrackerOpen && trackingPersisted && bridgeTracking?.txHash === receiptTxHash
       && receiptTxType === 'bridge' && receiptStatus === 'success') setIsReceiptModalOpen(false);
-  }, [isRealtimeTrackerOpen, trackingPersisted, bridgeTracking?.txHash, receiptTxHash, receiptTxType, receiptStatus]);
+  }, [isReceiptModalOpen, isRealtimeTrackerOpen, trackingPersisted, bridgeTracking?.txHash, receiptTxHash, receiptTxType, receiptStatus]);
 
   // Populate default destination address from wallet address
   useEffect(() => {
@@ -3504,6 +3505,7 @@ export default function App() {
           bridgeFee={adapterPreview?.officialFeeFormatted ? `${adapterPreview.officialFeeFormatted} USDT` : bridgeDirection === 'BOT_TO_BNB' ? '1 USDT' : '0 USDT'}
           confirmDisabled={bridgeButtonDisabled || isActionLoading}
           onConfirm={async (confirmedAddress) => {
+            pendingTrackingContext.current = { amount: usdtAmount, recipient: confirmedAddress };
             setCustomDestinationAddress(confirmedAddress);
             setTrackerRecipientAddress(confirmedAddress);
             setIsConfirmDestinationOpen(false);
