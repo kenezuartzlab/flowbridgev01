@@ -14,4 +14,10 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Simplify automation to existing authorized funding and campaign limits, retaining OFF and suspension
 - [x] Safely retire expired unapproved draft without reusing allocations (audited retirement confirmed)
 - [x] Verify atomic backing/duplicate/batch safety: isolated concurrent writes, caps, unpaid deltas and schedule recovery
-- [ ] Activation: deployment and connected publisher-wallet acceptance; revised policy remains OFF pending explicit super-admin enable
+- [x] Rewards release and Round #4 publication completed; preserve existing rewards controls.
+
+# Smart Trade + Liquidity V1 completion
+- [ ] Correct execution guards, exact initial prices, approval previews and receipt recovery.
+- [ ] Verify Mainnet venue/token wiring without sending transactions; preserve swap routing.
+- [ ] Run liquidity/regression safety tests and desktop/mobile acceptance.
+- [ ] Mainnet activation and production publication: wait for authorized canaries and wallet acceptance if required.
