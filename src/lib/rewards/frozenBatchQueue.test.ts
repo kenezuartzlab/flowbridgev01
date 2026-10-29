@@ -12,7 +12,7 @@ type Approval = { user_id: string; wallet: string; points: number; confirmed_at:
 const approval = (i: number, points: number, at: string): Approval => ({ user_id: `u${i}`, wallet: W[i], points, confirmed_at: at });
 const build = (approvals: Approval[], prior: Record<string, number> = {}) => prepareSettlementBatch({
   rows: approvals.map(a => ({ userId: a.user_id, wallet: a.wallet, classification: 'MATCH', authoritative: (prior[a.wallet] ?? 0) + a.points, pendingReview: 0, alreadyAllocatedPoints: prior[a.wallet] ?? 0 })),
-  fundedPointsAvailable: 1_000_000, chainId: 677, distributor: MAINNET_PAYOUT_AUDIT.address as Hex, chain,
+  fundedPointsAvailable: 1_000_000, chainId: 677, distributor: MAINNET_PAYOUT_AUDIT.address as Hex, chain, knownEpochIds: [1, 2, 3, 4],
 });
 const BATCH_CREATED = '2026-10-29T03:00:00.000Z';
 const firstCycle = [approval(0, 100, '2026-10-29T02:00:00Z'), approval(1, 50, '2026-10-29T02:10:00Z'), approval(2, 7, '2026-10-29T02:20:00Z')];
