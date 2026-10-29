@@ -11,11 +11,13 @@ export interface TrackingEvidence {
   destinationTokenArrival?: boolean;
   destinationConfirmedAt?: number;
   destinationTxHash?: string;
+  /** 'unsupported': this route has no linked delivery source (e.g. Tron). */
+  deliveryCheck?: 'searching' | 'unsupported' | 'unlinkable';
 }
 export function trackingState(e: TrackingEvidence, now: number) {
   const terminalWallet = !e.txHash && (e.walletState === 'rejected' || e.walletState === 'error');
   const sourceDone = !!e.txHash && e.source === 'success';
-  const received = sourceDone && e.destinationConfirmed === true && e.destinationTokenArrival === true;
+  const received = sourceDone && e.destinationConfirmed === true && e.destinationTokenArrival === true && !!e.destinationTxHash;
   const relayStart = sourceDone && e.sourceConfirmedAt != null && (!e.providerRequired || e.providerAcceptedAt != null)
     ? Math.max(e.sourceConfirmedAt, e.providerAcceptedAt ?? e.sourceConfirmedAt) : null;
   const phase = !e.txHash ? (terminalWallet ? e.walletState === 'rejected' ? 'canceled' : 'error' : 'awaiting')
@@ -34,6 +36,8 @@ export function isCurrentTrackingResult(requestKey: string, currentKey: string, 
 export interface BridgeTrackingContext {
   txHash: string; direction: string; isMainnet: boolean; amount: string; recipient: string;
   fromChain: string; toChain: string; explorerPrefix: string;
+  /** Verified linked destination release, persisted so refresh re-verifies it directly. */
+  destinationTxHash?: string;
 }
 const STORAGE_KEY = 'flowbridge_bridge_tracking_v1';
 const EXPLORERS = new Set(['https://scan.botchain.ai/tx/', 'https://scan.bohr.life/tx/', 'https://bscscan.com/tx/', 'https://testnet.bscscan.com/tx/', 'https://etherscan.io/tx/', 'https://sepolia.etherscan.io/tx/', 'https://tronscan.org/#/transaction/']);
@@ -48,6 +52,18 @@ export function loadBridgeTracking(): BridgeTrackingContext | null {
       || !['BOT_TO_BNB','BNB_TO_BOT','BOT_TO_ETH','ETH_TO_BOT','BOT_TO_TRX','TRX_TO_BOT'].includes(c.direction)
       || typeof c.isMainnet !== 'boolean' || typeof c.amount !== 'string' || typeof c.recipient !== 'string'
       || typeof c.fromChain !== 'string' || typeof c.toChain !== 'string' || !EXPLORERS.has(c.explorerPrefix)) return null;
+    if (c.destinationTxHash !== undefined && !(typeof c.destinationTxHash === 'string' && /^0x[a-fA-F0-9]{64}$/.test(c.destinationTxHash))) delete c.destinationTxHash;
     return c;
   } catch { return null; }
+}
+
+/** Records a verified destination hash on the stored context for the same source tx only. */
+export function rememberDestination(txHash: string, destinationTxHash: string): void {
+  const c = loadBridgeTracking();
+  if (!c || c.txHash.toLowerCase() !== txHash.toLowerCase() || !/^0x[a-fA-F0-9]{64}$/.test(destinationTxHash)) return;
+  saveBridgeTracking({ ...c, destinationTxHash });
+}
+export function storedDestinationFor(txHash: string): string | undefined {
+  const c = loadBridgeTracking();
+  return c && c.txHash.toLowerCase() === txHash.toLowerCase() ? c.destinationTxHash : undefined;
 }
