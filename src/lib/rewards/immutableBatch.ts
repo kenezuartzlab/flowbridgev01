@@ -38,3 +38,21 @@ export function integerWei(value: string | number): string {
   const digits = match[1] + fraction;
   return BigInt(shift >= 0 ? digits + '0'.repeat(shift) : digits.slice(0,shift)).toString();
 }
+/**
+ * While an unpublished batch is stored, only approvals confirmed at or before its
+ * creation for wallets in its leaves belong to it; every other confirmed, unlinked
+ * approval is queued for the next round (never dropped, never merged in).
+ */
+export function partitionApprovalsForStoredBatch<A extends { wallet: string; confirmed_at: string | null }>(
+  approvals: readonly A[], stored: { createdAt: string; accounts: readonly string[] } | null,
+): { frozen: A[]; queuedNext: A[] } {
+  if (!stored) return { frozen: [...approvals], queuedNext: [] };
+  const created = Date.parse(stored.createdAt);
+  const accounts = new Set(stored.accounts.map(a => a.toLowerCase()));
+  const frozen: A[] = []; const queuedNext: A[] = [];
+  for (const a of approvals) {
+    const at = a.confirmed_at ? Date.parse(a.confirmed_at) : NaN;
+    (Number.isFinite(at) && Number.isFinite(created) && at <= created && accounts.has(a.wallet.toLowerCase()) ? frozen : queuedNext).push(a);
+  }
+  return { frozen, queuedNext };
+}

@@ -5,7 +5,7 @@
  * publisher signs. No private key exists here; nothing is signed or broadcast.
  */
 import { CLAIM_WINDOW_POLICY, PUBLIC_MAINNET_FLOW_CLAIMS, settlementEligibility } from "./publicClaimPolicy";
-import { integerWei, revalidateImmutableBatch } from './immutableBatch';
+import { integerWei, revalidateImmutableBatch, partitionApprovalsForStoredBatch } from './immutableBatch';
 import { proposeScheduleRenewal, type RenewalProposal } from './scheduleRenewal';
 import { resolveBatchSchedule } from './scheduleRenewal.server';
 import { createPublicClient, http, parseAbi, type Address, type Hex } from "viem";
@@ -334,7 +334,7 @@ export async function buildSettlement(args: {
   return {
     status: publishable ? p.status : "BLOCKED" as const,
     reason: publishable ? null : p.reason ?? checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
-    simulation, limits, renewal, flowPublishedLast24h, walletStates, signupReconciliation: signup.report, provenanceExcludedPoints,
+    simulation, limits, renewal, flowPublishedLast24h, walletStates, queuedForNextBatch: queuedNext.length, signupReconciliation: signup.report, provenanceExcludedPoints,
     // Server-only per-account settlement facts (userId + wallet). Never serialized
     // to anonymized report consumers; the V37 approval queue reads these.
     accountRows: rows,
