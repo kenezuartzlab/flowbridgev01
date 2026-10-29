@@ -4,6 +4,7 @@ import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } fro
 import { fetchTronConfirmations } from '../../lib/tronBridge';
 import { CheckCircle2, Loader2, XCircle, ExternalLink, Clock, AlertTriangle } from 'lucide-react';
 import { useBridgeTracking } from '@/lib/bridge/useBridgeTracking';
+import { DEST_EXPLORER_TX } from '@/lib/bridge/bridgeDelivery';
 import type { PendingAdapterBridge } from '../../store/routeSession';
 import { useAdapterStatus } from '../../lib/bridge/useAdapterStatus';
 import { useAdapterRefundClaim } from '../../lib/bridge/useAdapterRefundClaim';
@@ -202,12 +203,14 @@ export function BridgeStatusPanel({
   adapterSession,
 }: BridgeStatusPanelProps) {
   const state = useBridgeTracking({ active: !!txHash && !adapterSession, txHash, direction: bridgeDirection, isMainnet });
+  // Same hook and evidence as the tracker modal.
   if (adapterSession) return <AdapterStatusBranch session={adapterSession} sourceExplorerPrefix={sourceExplorerPrefix} />;
   if (!txHash) return null;
   return <div className="border border-hairline rounded-lg p-3 space-y-2 text-xs">
     <p className="font-semibold">{state.phase === 'failed' ? 'Origin transaction failed' : state.sourceDone ? `Confirmed on ${sourceChainName(bridgeDirection)}` : `Waiting for ${sourceChainName(bridgeDirection)} confirmation`}</p>
-    {state.received && <p className="text-primary font-semibold">USDT received on {destChainName(bridgeDirection)}{state.evidence.destinationTxHash && destExplorerPrefix ? <> — <a className="underline" target="_blank" rel="noopener noreferrer" href={`${destExplorerPrefix}${state.evidence.destinationTxHash}`}>view</a></> : null}</p>}
-    {state.sourceDone && !state.received && <p>Awaiting relay acceptance and verified destination delivery on {destChainName(bridgeDirection)}. ETA unknown.</p>}
+    {state.received && <p className="text-primary font-semibold">USDT received on {destChainName(bridgeDirection)}{state.evidence.destinationTxHash && (state.destinationChainId ? DEST_EXPLORER_TX[state.destinationChainId] : destExplorerPrefix) ? <> — <a className="underline" target="_blank" rel="noopener noreferrer" href={`${state.destinationChainId ? DEST_EXPLORER_TX[state.destinationChainId] : destExplorerPrefix}${state.evidence.destinationTxHash}`}>view</a></> : null}</p>}
+    {state.sourceDone && !state.received && state.evidence.deliveryCheck === 'searching' && <p>{state.evidence.destinationTxHash ? 'Release found — waiting for confirmations' : 'Waiting for validator release'} on {destChainName(bridgeDirection)}. Checking for the release linked to this transfer.</p>}
+    {state.sourceDone && !state.received && (state.evidence.deliveryCheck === 'unsupported' || state.evidence.deliveryCheck === 'unlinkable') && <p className="text-warning">Automatic delivery verification isn't available for this route — check the recipient on the {destChainName(bridgeDirection)} explorer.</p>}
     {state.readError && <p className="text-warning">Chain read unavailable — retrying without changing the last confirmed status.</p>}
     <a className="text-primary inline-flex gap-1 items-center" href={`${sourceExplorerPrefix}${txHash}`} target="_blank" rel="noopener noreferrer">Origin receipt <ExternalLink className="w-3 h-3" /></a>
     {state.sourceDone && <a className="block text-primary" href={destExplorerPrefix} target="_blank" rel="noopener noreferrer">Destination explorer</a>}

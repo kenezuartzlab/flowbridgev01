@@ -26,7 +26,7 @@ describe('evidence-only bridge presentation', () => {
   it('reload reconstructs elapsed time from the same timestamps', () => { const e = JSON.parse(JSON.stringify({...origin, providerAcceptedAt:4000})); expect(trackingState(e, 24000).relayElapsedSeconds).toBe(20); });
   it('destination submission is not destination confirmation', () => expect(trackingState({...origin, destinationSubmitted:true}, 9999999).destinationDone).toBe(false));
   it('receipt alone without verified token arrival is not received', () => expect(trackingState({...origin, destinationConfirmed:true}, 9999999).received).toBe(false));
-  it('verified destination receipt and arrival are received', () => expect(trackingState({...origin, destinationConfirmed:true, destinationTokenArrival:true}, 10000).phase).toBe('received'));
+  it('verified destination receipt and arrival are received', () => expect(trackingState({...origin, destinationTxHash:'0xd', destinationConfirmed:true, destinationTokenArrival:true}, 10000).phase).toBe('received'));
   it('destination evidence cannot override failed origin', () => expect(trackingState({...origin, source:'failed', destinationConfirmed:true, destinationTokenArrival:true}, 10000).received).toBe(false));
   it('stale or canceled reads cannot commit', () => { expect(isCurrentTrackingResult('old','new',false)).toBe(false); expect(isCurrentTrackingResult('new','new',true)).toBe(false); expect(isCurrentTrackingResult('new','new',false)).toBe(true); });
   it('dismisses only the successful submitted receipt with durable matching tracking', () => {

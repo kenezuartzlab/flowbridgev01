@@ -5,7 +5,7 @@
  * publisher signs. No private key exists here; nothing is signed or broadcast.
  */
 import { CLAIM_WINDOW_POLICY, PUBLIC_MAINNET_FLOW_CLAIMS, settlementEligibility } from "./publicClaimPolicy";
-import { integerWei, revalidateImmutableBatch } from './immutableBatch';
+import { integerWei, revalidateImmutableBatch, partitionApprovalsForStoredBatch } from './immutableBatch';
 import { proposeScheduleRenewal, type RenewalProposal } from './scheduleRenewal';
 import { resolveBatchSchedule } from './scheduleRenewal.server';
 import { createPublicClient, http, parseAbi, type Address, type Hex } from "viem";
@@ -227,7 +227,25 @@ export async function buildSettlement(args: {
   // at its approved amount. Unapproved balances never enter a prepared batch.
   const { data: confirmedOpen, error: approvalsError } = await args.admin.from('reward_payout_approvals').select('user_id,wallet,points,confirmed_at,program_breakdown').eq('status', 'CONFIRMED').is('settlement_batch_id', null);
   if (approvalsError) throw new Error('PAYOUT_APPROVALS_UNAVAILABLE');
-  const approvedBy = new Map((confirmedOpen ?? []).map((a) => [a.user_id, a]));
+  const { data: existing, error: existingError } = await args.admin.from('reward_settlement_batches').select('*')
+    .eq('chain_id', MAINNET_CHAIN_ID).eq('distributor', DISTRIBUTOR.toLowerCase()).eq('epoch_id', live.epochCount + 1);
+  if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
+  const { data: retired, error: retiredError } = await args.admin.from('reward_retired_drafts').select('batch_id');
+  if (retiredError) throw new Error('DRAFT_RETIREMENT_STATE_UNAVAILABLE');
+  const retiredIds = new Set((retired ?? []).map(r => r.batch_id));
+  // Only the exact owner-held draft can be retired; chain and DB uncertainty fail closed.
+  for (const draft of existing ?? []) {
+    if (retiredIds.has(draft.id) || draft.epoch_id !== 4 || draft.root !== '0xe2af18b23c702ddf6d0bd32e717ca4f8a997deb0dbf4f3df508096d8be2065a5' || live.epochCount !== 3) continue;
+    const { data: didRetire, error: retirementError } = await args.admin.rpc('retire_unapproved_reward_draft', { p_batch: draft.id, p_now: live.nowSec, p_delay: live.minPublishDelay, p_epoch: live.epochCount });
+    if (!retirementError && didRetire) retiredIds.add(draft.id);
+  }
+  const active = (existing ?? []).filter(b => !retiredIds.has(b.id));
+  if (active.length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
+  const original = active[0];
+  // A prepared, unpublished round is frozen to the approvals it was built from. Later
+  // confirmations wait for the next round instead of invalidating the stored snapshot.
+  const { frozen: frozenApprovals, queuedNext } = partitionApprovalsForStoredBatch(confirmedOpen ?? [], original && !original.publication_verified_at ? { createdAt: original.created_at, accounts: toBatch(original as unknown as BatchRow).leaves.map(l => l.account) } : null);
+  const approvedBy = new Map(frozenApprovals.map((a) => [a.user_id, a]));
   const batchRows = rows.flatMap((r) => {
     const a = approvedBy.get(r.userId);
     if (!a || !r.wallet || a.wallet.toLowerCase() !== r.wallet.toLowerCase()) return [];
@@ -255,21 +273,6 @@ export async function buildSettlement(args: {
   const fundedAvail = programs.reduce((t, p) => t + p.availablePoints, 0);
 
   let p = prepareSettlementBatch({ rows: batchRows, fundedPointsAvailable: fundedAvail, programs, publisherRoles: roles, chain: live, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR, knownEpochIds: discovered.map((d) => d.batch.epochId) });
-  const { data: existing, error: existingError } = await args.admin.from('reward_settlement_batches').select('*')
-    .eq('chain_id', MAINNET_CHAIN_ID).eq('distributor', DISTRIBUTOR.toLowerCase()).eq('epoch_id', p.epochId);
-  if (existingError) throw new Error('STORED_BATCH_LOOKUP_UNAVAILABLE');
-  const { data: retired, error: retiredError } = await args.admin.from('reward_retired_drafts').select('batch_id');
-  if (retiredError) throw new Error('DRAFT_RETIREMENT_STATE_UNAVAILABLE');
-  const retiredIds = new Set((retired ?? []).map(r => r.batch_id));
-  // Only the exact owner-held draft can be retired; chain and DB uncertainty fail closed.
-  for (const draft of existing ?? []) {
-    if (retiredIds.has(draft.id) || draft.epoch_id !== 4 || draft.root !== '0xe2af18b23c702ddf6d0bd32e717ca4f8a997deb0dbf4f3df508096d8be2065a5' || live.epochCount !== 3) continue;
-    const { data: didRetire, error: retirementError } = await args.admin.rpc('retire_unapproved_reward_draft', { p_batch: draft.id, p_now: live.nowSec, p_delay: live.minPublishDelay, p_epoch: live.epochCount });
-    if (!retirementError && didRetire) retiredIds.add(draft.id);
-  }
-  const active = (existing ?? []).filter(b => !retiredIds.has(b.id));
-  if (active.length > 1) throw new Error('AMBIGUOUS_STORED_BATCH');
-  const original = active[0];
   const provenanceExcludedPoints = args.ledger.filter(l => l.points > 0 && l.chain_id === MAINNET_CHAIN_ID && (l.reason === 'CORE_SWAP' || l.reason === 'CORE_SWAP_V2') && !eligibleIds.has(l.id ?? '')).reduce((total,l)=>total+l.points,0);
   let stored = original ? await resolveBatchSchedule(args.admin, original) : undefined;
   let renewal: RenewalProposal | null = null;
@@ -331,7 +334,7 @@ export async function buildSettlement(args: {
   return {
     status: publishable ? p.status : "BLOCKED" as const,
     reason: publishable ? null : p.reason ?? checks.filter((c) => !c.pass).map((c) => c.id).join(", "),
-    simulation, limits, renewal, flowPublishedLast24h, walletStates, signupReconciliation: signup.report, provenanceExcludedPoints,
+    simulation, limits, renewal, flowPublishedLast24h, walletStates, queuedForNextBatch: queuedNext.length, signupReconciliation: signup.report, provenanceExcludedPoints,
     // Server-only per-account settlement facts (userId + wallet). Never serialized
     // to anonymized report consumers; the V37 approval queue reads these.
     accountRows: rows,
