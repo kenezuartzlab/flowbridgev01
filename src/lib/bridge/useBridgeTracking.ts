@@ -90,20 +90,23 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
           const back = BigInt(Math.ceil((Number(b.timestamp) - sourceConfirmedAt / 1000 + 600) / spacing));
           cursor = destLatest > back ? destLatest - back : 0n;
         }
-        for (let i = 0; i < MAX_CHUNKS_PER_POLL && cursor <= destLatest; i++) {
-          const to = cursor + CHUNK - 1n > destLatest ? destLatest : cursor + CHUNK - 1n;
-          const logs = await dest.getLogs({ address: route.destination.gateway as `0x${string}`, event: BRIDGE_EVENTS_ABI[1], args: { depositer: deposit.depositer as `0x${string}`, recipient: deposit.recipient as `0x${string}` }, fromBlock: cursor, toBlock: to });
+        let from: bigint = cursor;
+        for (let i = 0; i < MAX_CHUNKS_PER_POLL && from <= destLatest; i++) {
+          const to: bigint = from + CHUNK - 1n > destLatest ? destLatest : from + CHUNK - 1n;
+          const logs = await dest.getLogs({ address: route.destination.gateway as `0x${string}`, event: BRIDGE_EVENTS_ABI[1], args: { depositer: deposit.depositer as `0x${string}`, recipient: deposit.recipient as `0x${string}` }, fromBlock: from, toBlock: to });
           if (!isCurrentTrackingResult(key, currentKey.current, canceled)) return;
           const hit = logs.find(l => l.args.originDepositNonce === deposit!.nonce && l.args.originChainId === BigInt(route.source.chainId));
-          if (hit) {
-            const v = await verifyDestinationTx(dest, hit.transactionHash, deposit, route, recipient);
+          if (hit?.transactionHash) {
+            const destHash = hit.transactionHash;
+            const v = await verifyDestinationTx(dest, destHash, deposit, route, recipient);
             if (v) {
-              commit({ ...base, destinationSubmitted: true, destinationTxHash: hit.transactionHash, destinationConfirmed: v.confirmed, destinationTokenArrival: v.confirmed, destinationConfirmedAt: v.at, providerAcceptedAt: v.at });
-              if (v.confirmed) { rememberDestination(txHash, hit.transactionHash); done = true; }
+              commit({ ...base, destinationSubmitted: true, destinationTxHash: destHash, destinationConfirmed: v.confirmed, destinationTokenArrival: v.confirmed, destinationConfirmedAt: v.at, providerAcceptedAt: v.at });
+              if (v.confirmed) { rememberDestination(txHash, destHash); done = true; }
               return; // keep cursor so confirmations are re-read on the next poll
             }
           }
-          cursor = to + 1n;
+          from = to + 1n;
+          cursor = from;
         }
       } catch {
         if (isCurrentTrackingResult(key, currentKey.current, canceled)) setObserved(prev => ({ key, evidence: prev.key === key ? prev.evidence : {}, error: true }));
