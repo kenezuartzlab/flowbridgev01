@@ -8,12 +8,13 @@ const clientFor = (chain: Chain) => createPublicClient({ chain, transport: fallb
 /** Event-log capable endpoints (several default RPCs reject eth_getLogs). Read-only. */
 const LOG_RPCS: Record<number, string[]> = {
   677: ['https://rpc.botchain.ai'], 968: ['https://rpc.bohr.life'],
-  56: ['https://bsc-rpc.publicnode.com'], 97: ['https://bnb-testnet.api.onfinality.io/public', 'https://bsc-testnet-rpc.publicnode.com'],
+  56: ['https://bsc-rpc.publicnode.com'], // BNB Testnet publicnode silently returns empty log sets, so it must not be used here.
+  97: ['https://bnb-testnet.api.onfinality.io/public'],
   1: ['https://ethereum-rpc.publicnode.com'],
 };
 const logClient = (chainId: number) => createPublicClient({ transport: fallback(LOG_RPCS[chainId].map(u => http(u, { timeout: 15000 }))) }) as PublicClient;
-const CHUNK = 2000n;
-const MAX_CHUNKS_PER_POLL = 5;
+const CHUNK: Record<number, bigint> = { 677: 10000n, 968: 10000n, 56: 5000n, 97: 5000n, 1: 1000n };
+const MAX_CHUNKS_PER_POLL = 3;
 
 export type TrackingDirection = 'BOT_TO_BNB' | 'BNB_TO_BOT' | 'BOT_TO_ETH' | 'ETH_TO_BOT' | 'BOT_TO_TRX' | 'TRX_TO_BOT';
 const required: Record<number, number> = { 677: 3, 968: 1, 56: 15, 97: 3, 1: 12, 11155111: 3 };
@@ -92,7 +93,7 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
         }
         let from: bigint = cursor;
         for (let i = 0; i < MAX_CHUNKS_PER_POLL && from <= destLatest; i++) {
-          const to: bigint = from + CHUNK - 1n > destLatest ? destLatest : from + CHUNK - 1n;
+          const to: bigint = from + CHUNK[route.destination.chainId] - 1n > destLatest ? destLatest : from + CHUNK[route.destination.chainId] - 1n;
           const logs = await dest.getLogs({ address: route.destination.gateway as `0x${string}`, event: BRIDGE_EVENTS_ABI[1], args: { depositer: deposit.depositer as `0x${string}`, recipient: deposit.recipient as `0x${string}` }, fromBlock: from, toBlock: to });
           if (!isCurrentTrackingResult(key, currentKey.current, canceled)) return;
           const hit = logs.find(l => l.args.originDepositNonce === deposit!.nonce && l.args.originChainId === BigInt(route.source.chainId));
