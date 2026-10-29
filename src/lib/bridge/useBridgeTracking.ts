@@ -15,6 +15,7 @@ const LOG_RPCS: Record<number, string[]> = {
 const logClient = (chainId: number) => createPublicClient({ transport: fallback(LOG_RPCS[chainId].map(u => http(u, { timeout: 15000 }))) }) as PublicClient;
 const CHUNK: Record<number, bigint> = { 677: 10000n, 968: 10000n, 56: 5000n, 97: 5000n, 1: 1000n };
 const MAX_CHUNKS_PER_POLL = 3;
+const BLOCK_SECONDS: Record<number, number> = { 677: 0.7, 968: 0.7, 56: 0.4, 97: 0.4, 1: 11 };
 
 export type TrackingDirection = 'BOT_TO_BNB' | 'BNB_TO_BOT' | 'BOT_TO_ETH' | 'ETH_TO_BOT' | 'BOT_TO_TRX' | 'TRX_TO_BOT';
 const required: Record<number, number> = { 677: 3, 968: 1, 56: 15, 97: 3, 1: 12, 11155111: 3 };
@@ -84,11 +85,10 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
         commit(base);
         const destLatest = await dest.getBlockNumber();
         if (cursor == null) {
-          // Start a little before the source block time, estimated from recent block spacing.
-          const sample = destLatest > 1000n ? destLatest - 1000n : 0n;
-          const [a, b] = await Promise.all([dest.getBlock({ blockNumber: sample }), dest.getBlock({ blockNumber: destLatest })]);
-          const spacing = Math.max(0.1, Number(b.timestamp - a.timestamp) / Number(destLatest - sample || 1n));
-          const back = BigInt(Math.ceil((Number(b.timestamp) - sourceConfirmedAt / 1000 + 600) / spacing));
+          // Start before the source block time. Spacing is deliberately under-estimated
+          // (starts earlier, never later) to keep request counts low on rate-limited RPCs.
+          const head = await dest.getBlock({ blockNumber: destLatest });
+          const back = BigInt(Math.ceil((Number(head.timestamp) - sourceConfirmedAt / 1000 + 600) / BLOCK_SECONDS[route.destination.chainId]));
           cursor = destLatest > back ? destLatest - back : 0n;
         }
         let from: bigint = cursor;
