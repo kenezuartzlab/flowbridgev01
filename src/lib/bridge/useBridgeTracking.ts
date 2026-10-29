@@ -77,7 +77,7 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
         if (stored) {
           const v = await verifyDestinationTx(dest, stored as `0x${string}`, deposit, route, recipient);
           if (v) {
-            commit({ ...base, destinationSubmitted: true, destinationTxHash: stored, destinationConfirmed: v.confirmed, destinationTokenArrival: v.confirmed, destinationConfirmedAt: v.at, providerAcceptedAt: v.at });
+            commit({ ...base, destinationSubmitted: true, destinationTxHash: stored, destinationConfirmed: v.confirmed, destinationTokenArrival: v.confirmed, destinationConfirmedAt: v.at });
             if (v.confirmed) done = true;
             return;
           }
@@ -101,7 +101,7 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
             const destHash = hit.transactionHash;
             const v = await verifyDestinationTx(dest, destHash, deposit, route, recipient);
             if (v) {
-              commit({ ...base, destinationSubmitted: true, destinationTxHash: destHash, destinationConfirmed: v.confirmed, destinationTokenArrival: v.confirmed, destinationConfirmedAt: v.at, providerAcceptedAt: v.at });
+              commit({ ...base, destinationSubmitted: true, destinationTxHash: destHash, destinationConfirmed: v.confirmed, destinationTokenArrival: v.confirmed, destinationConfirmedAt: v.at });
               if (v.confirmed) { rememberDestination(txHash, destHash); done = true; }
               return; // keep cursor so confirmations are re-read on the next poll
             }
