@@ -37,6 +37,7 @@ describe('prepared round stays frozen while later approvals queue for the next r
     const { frozen, queuedNext } = partitionApprovalsForStoredBatch(all, storedRef(s));
     expect(queuedNext.map(a => a.wallet)).toEqual([W[3]]);
     const p = revalidateImmutableBatch(build(frozen), s, now, 86400);
+    expect(p.reason).toBeNull();
     expect(p.status).toBe('READY_FOR_PUBLISHER_REVIEW');
     expect(p.batch?.root).toBe(s.root);
   });
