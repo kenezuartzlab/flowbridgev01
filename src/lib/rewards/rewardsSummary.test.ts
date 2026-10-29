@@ -14,6 +14,14 @@ function prog(o: { funded?: number; unfunded?: number; stored?: number; allocs?:
 const alloc = (x: Partial<ProgressionAllocation>): ProgressionAllocation => ({ epochId: 3, amountFlow: 1200, walletMatches: true, proofValid: true, onChain: true, claimed: false, claimStart: now - 10, claimEnd: now + 1000, ...x });
 
 describe("V36 rewards summary", () => {
+  it("299 reserved signup FLOW with unreconciled history stays held, not claimable or payout-ready", () => {
+    const p = computeRewardProgression({ ledger: [{ points: 300, chainId: 677, fundingState: 'FUNDED', programId: 'SIGNUP_BONUS' }], reconciledPoints: 300, reviewHeldPoints: 0, historicalNonclaimable: 981, reconciliationOk: false, storedFlowPoints: 1281, walletBound: true, allocations: [alloc({ epochId: 1, amountFlow: 1, claimed: true })], nowSec: now });
+    const s = buildRewardsSummary({ progression: p, nowSec: now });
+    expect(s.eligibleFundedUnallocated).toBe(299);
+    expect(p.settlementReady).toBe(false);
+    expect(s.claimableNow).toBe(0);
+    expect(s.blocker).toBe('UNDER_REVIEW');
+  });
   it("1,000 recorded but 0 funded → 0 claimable, not funded", () => {
     const s = buildRewardsSummary({ progression: prog({ unfunded: 1000, stored: 1000 }), nowSec: now });
     expect(s.totalPts).toBe(1000); expect(s.claimableNow).toBe(0); expect(s.blocker).toBe("NOT_FUNDED");

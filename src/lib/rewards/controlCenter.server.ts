@@ -47,7 +47,7 @@ async function capacity(programId: string, need: number) {
 
 export async function readControlCenter(actor?: AdminContext) {
   const admin = await db();
-  const [queue, snaps, exc, audit, policy, runs, budgets, chain, evidence] = await Promise.all([
+  const [queue, snaps, exc, audit, policy, runs, budgets, chain, evidence, publications] = await Promise.all([
     loadQueue(),
     admin.from("reward_funding_snapshots").select("id,program_id,total_points,row_count,account_count,snapshot_hash,status,proposed_by,proposed_by_email,approved_by_email,approved_at,confirmed_by_email,confirmed_at,note,created_at,result").order("created_at", { ascending: false }).limit(30),
     admin.from("reward_ops_exceptions").select("*").order("created_at", { ascending: false }).limit(100),
@@ -57,6 +57,7 @@ export async function readControlCenter(actor?: AdminContext) {
     admin.from("reward_budgets").select("program_id,total_points,reserved_points,status,funding_verified"),
     readChainState(),
     (await import('./rewardEvidenceAssessment.server')).readRewardEvidenceAssessment(),
+    admin.from('reward_settlement_batches').select('publication_verified_at').not('publication_verified_at', 'is', null).order('publication_verified_at', { ascending: false }).limit(1),
   ]);
   const exclusions: Record<string, { rows: number; points: number }> = {};
   for (const e of queue.excluded) { const k = e.reason; exclusions[k] ??= { rows: 0, points: 0 }; exclusions[k].rows++; exclusions[k].points += e.points; }
@@ -67,6 +68,15 @@ export async function readControlCenter(actor?: AdminContext) {
     accountBreakdown: Object.values(items.reduce((m: Record<string, number>, i) => ((m[i.userId] = (m[i.userId] ?? 0) + i.points), m), {})).sort((a, b) => b - a),
   }));
   if ([snaps,exc,audit,policy,runs,budgets].some(r=>r.error)) throw new Error('Control center records unavailable');
+  const publicationAt = publications.data?.[0]?.publication_verified_at;
+  const currentExceptions = (exc.data ?? []).map(e => {
+    if (!e.dedupe_key.startsWith('payout:')) return e;
+    const id = e.dedupe_key.slice('payout:'.length);
+    // Historical incident rows remain untouched; the display follows current evidence.
+    if (publicationAt && Date.parse(e.created_at) < Date.parse(publicationAt)) return { ...e, status: 'HISTORICAL', detail: `${e.detail} Historical alert before the last verified publication; re-check current batch status below.` };
+    if (id === 'NONEMPTY') return { ...e, detail: 'No confirmed unpaid approvals are available for the next batch.', corrective_action: 'Review automatic-approval exclusions. Held funding or account evidence is not solved by another approval.' };
+    return e;
+  });
   const reserved = (budgets.data ?? []).reduce((s,b)=>s+Number(b.reserved_points),0);
   const free = chain ? Number((chain.balanceWei-chain.totalReservedWei)/WEI)-Math.max(0,reserved-Number(chain.totalClaimedWei/WEI)) : null;
   return {
@@ -80,7 +90,7 @@ export async function readControlCenter(actor?: AdminContext) {
     fundingQueue: programs,
     exclusions,
     snapshots: (snaps.data ?? []).map((s: any) => ({ ...s, canApprove:!!actor && approvalDecision(s,actor).ok, proposed_by: undefined })),
-    exceptions: exc.data ?? [],
+    exceptions: currentExceptions,
     audit: audit.data ?? [],
     automation: { policies: policy.data ?? [], autonomousFundingAuthorized: false, autonomousSigning: false, lastRuns: runs.data ?? [] },
   };

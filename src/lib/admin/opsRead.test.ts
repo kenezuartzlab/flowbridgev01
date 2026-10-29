@@ -5,6 +5,14 @@ import { readOpsJson } from "./opsRead";
 beforeEach(() => { vi.useFakeTimers(); auth.token.mockReset(); auth.token.mockResolvedValue("test-session"); });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 describe("bounded authorized Ops reads", () => {
+  it("bounds the read-only payout queue POST, including stalled session checks", async () => {
+    const fetcher = vi.fn().mockImplementation(() => new Promise(() => {})); vi.stubGlobal("fetch", fetcher);
+    const assertion = expect(readOpsJson("/api/admin/rewards-control", "bound", 20_000, "payout-queue")).rejects.toThrow("too long");
+    await vi.advanceTimersByTimeAsync(20_000); await assertion;
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(fetcher.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ action: "payout-queue" }));
+    expect(fetcher.mock.calls[0]?.[1]?.signal.aborted).toBe(true);
+  });
   it("does not send a signed-out read", async () => {
     auth.token.mockResolvedValue(null); const fetcher = vi.fn(); vi.stubGlobal("fetch", fetcher);
     await expect(readOpsJson("/api/admin/ops", "bound")).rejects.toThrow("Sign in");

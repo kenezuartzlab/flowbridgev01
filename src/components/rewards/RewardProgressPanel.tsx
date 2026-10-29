@@ -36,7 +36,7 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
         {s.claimableNow === 0 && <p className="mt-1 text-[11px] font-semibold text-muted">Blocked by: {BLOCKER_LABEL[s.blocker]}</p>}
         {s.claimableNow > 0 && <Link to="/earn" className="mt-2 inline-flex min-h-[40px] items-center rounded-full bg-primary px-4 text-[12px] font-bold text-primary-foreground">Claim in wallet</Link>}
       </div>
-      <p id={`rp-${area}`} className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">Eligible toward next FLOW batch</p>
+      <p id={`rp-${area}`} className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">{p.reconciliationBlocked ? 'Reserved funding · reconciliation held' : 'Eligible toward next FLOW batch'}</p>
       <div>
         <p className="text-[18px] font-bold tabular-nums">{f(p.availableTowardMinimum)} FLOW</p>
         <p className="text-[12px] text-muted">1 eligible funded PTS = 1 FLOW. Any positive verified amount can enter Ops approval; funding, a published round and the claim window are still required.</p>
@@ -88,8 +88,8 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
         </ol></details>
       )}
       {detailed && <details className="border-t border-hairline pt-3"><summary className="cursor-pointer text-[11.5px] font-semibold">When can I claim?</summary><ol className="mt-2 space-y-2 text-[12px] leading-relaxed">
-        <li><strong>1. Earn and qualify.</strong> Reach 1,000 eligible funded PTS, verify your email and bind your wallet. Pending funding, review-held points, Testnet, unsupported history, Campaign PTS and XP do not qualify.</li>
-        <li><strong>2. Wait for publication.</strong> A reviewer must publish your allocation in a payout round. Reaching the minimum alone does not unlock a claim; no payout date is promised.</li>
+        <li><strong>1. Earn and qualify.</strong> Any positive verified, funded amount can qualify after account checks pass. Verify your email and bind your wallet. Pending funding, review-held points, Testnet, unsupported history, Campaign PTS and XP do not qualify.</li>
+        <li><strong>2. Wait for publication.</strong> Automatic approval must pass the authorized program policy; the publisher then signs your batch once. Eligibility alone does not unlock a claim; no payout date is promised.</li>
         <li><strong>3. Claim during the window.</strong> Once your published round is open and its live checks pass, claim FLOW with your allocated wallet. New rounds have a 30-day claim window. Your wallet confirms the transaction.</li>
       </ol></details>}
     </section>

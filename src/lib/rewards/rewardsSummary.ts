@@ -121,6 +121,9 @@ export function buildRewardsSummary(i: SummaryInput): RewardsSummary {
   } else if (unclaimed && i.nowSec > unclaimed.claimEnd) {
     blocker = "ROUND_EXPIRED"; stage = "PUBLISHED";
     message = `The claim window for round #${unclaimed.epochId} closed on ${fmtDate(unclaimed.claimEnd)}.`;
+  } else if (p.reconciliationBlocked && eligible > 0) {
+    blocker = "UNDER_REVIEW"; stage = "FUNDED";
+    message = `${fmt(eligible)} FLOW has reserved funding but is held because account history does not reconcile with verified earning records. Super-admin evidence review is required; another payout approval will not resolve it.`;
   } else if (p.settlementReady) {
     blocker = "AWAITING_PUBLICATION"; stage = "QUEUED";
     message = "You qualify for the next payout batch. Automatic settlement is being prepared. No wallet action needed yet.";

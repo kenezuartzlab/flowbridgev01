@@ -66,11 +66,7 @@ function AutoBudget({ wallet, isSuper, busy, act }: { wallet: string; isSuper: b
   const q = useQuery({
     queryKey: ["auto-approval", wallet],
     queryFn: async () => {
-      const token = await getIdToken();
-      const res = await fetch("/api/admin/rewards-control", { method: "POST", headers: { "x-wallet-address": wallet, ...(token ? { authorization: `Bearer ${token}` } : {}), "content-type": "application/json" }, body: JSON.stringify({ action: "auto-state" }) });
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((j as any)?.error ?? `Request failed (${res.status})`);
-      return j as any;
+      return readOpsJson<any>("/api/admin/rewards-control", wallet, 20_000, "auto-state");
     },
     refetchInterval: 30_000, retry: false,
   });
@@ -89,6 +85,7 @@ function AutoBudget({ wallet, isSuper, busy, act }: { wallet: string; isSuper: b
       </div>
       <p>Awaiting publisher signature: <b>{d.pendingBatch.wallets} wallet(s), {fmt(d.pendingBatch.flow)} FLOW</b> ({d.pendingBatch.autoApproved} automatic). Next cycle would approve {d.wouldApprove.length} wallet(s).</p>
       {Object.keys(held).length > 0 && <p className="text-muted">Held: {Object.entries(held).map(([k, n]) => `${HOLD_TEXT[k] ?? k} (${n})`).join(" · ")}</p>}
+      {d.excluded?.filter((e: { reason: string; points: number }) => e.points > 0 && e.reason !== "ALREADY_PROPOSED").map((e: { reason: string; points: number }, i: number) => <p key={i} className="text-warning">{fmt(e.points)} funded Points held — {e.reason === "NOT_RECONCILED" ? "account history does not reconcile with verified earning records; super admin must review the discrepancy, not create another payout approval" : e.reason === "UNDER_REVIEW" ? "earning evidence remains under review" : e.reason.replaceAll("_", " ").toLowerCase()}.</p>)}
       {isSuper && (
         <div className="space-y-2 border-t border-hairline pt-2">
           <div className="flex flex-wrap gap-2">
@@ -107,11 +104,7 @@ function NextBatchCard({ wallet, onOpen }: { wallet: string; onOpen: () => void 
   const q = useQuery({
     queryKey: ["payout-approvals", wallet],
     queryFn: async () => {
-      const token = await getIdToken();
-      const res = await fetch("/api/admin/rewards-control", { method: "POST", headers: { "x-wallet-address": wallet, ...(token ? { authorization: `Bearer ${token}` } : {}), "content-type": "application/json" }, body: JSON.stringify({ action: "payout-queue" }) });
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((j as any)?.error ?? `Request failed (${res.status})`);
-      return j as ApprovalQueueState;
+      return readOpsJson<ApprovalQueueState>("/api/admin/rewards-control", wallet, 20_000, "payout-queue");
     },
     refetchInterval: 30_000, retry: false,
   });
@@ -122,9 +115,10 @@ function NextBatchCard({ wallet, onOpen }: { wallet: string; onOpen: () => void 
       <p className="font-black">Next valid payout batch</p>
       <p className="text-muted">The publisher reviews the prepared batch and signs once. The claim window opens after the contract's 24-hour delay.</p>
       <p className={ready ? "mt-1 font-bold text-success" : "mt-1 font-bold text-warning"}>
-        {q.isLoading ? "Checking batch…" : q.error ? "Batch state unavailable — retry shortly." : ready ? `Ready for publisher review${b?.claimStartIso ? ` · claim opens ${new Date(b.claimStartIso).toUTCString()}` : ""}` : `Not ready — ${b?.settlementBlockReason ?? b?.settlementStatus ?? "unknown"}`}
+        {q.isLoading ? "Checking batch…" : q.error ? q.error.message : ready ? `Ready for publisher review${b?.claimStartIso ? ` · claim opens ${new Date(b.claimStartIso).toUTCString()}` : ""}` : `Not ready — ${b?.settlementBlockReason ?? b?.settlementStatus ?? "unknown"}`}
       </p>
       <Button disabled={!ready} onClick={onOpen} className="mt-2 w-full sm:w-auto">Review & Publish Batch</Button>
+      {q.error && <Button variant="outline" disabled={q.isFetching} onClick={() => q.refetch()} className="mt-2"><RefreshCw />Retry batch check</Button>}
     </div>
   );
 }
@@ -135,11 +129,7 @@ function ApprovalQueue({ wallet, isSuper, busy, act }: { wallet: string; isSuper
   const q = useQuery({
     queryKey: ["payout-approvals", wallet],
     queryFn: async () => {
-      const token = await getIdToken();
-      const res = await fetch("/api/admin/rewards-control", { method: "POST", headers: { "x-wallet-address": wallet, ...(token ? { authorization: `Bearer ${token}` } : {}), "content-type": "application/json" }, body: JSON.stringify({ action: "payout-queue" }) });
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((j as any)?.error ?? `Request failed (${res.status})`);
-      return j as ApprovalQueueState;
+      return readOpsJson<ApprovalQueueState>("/api/admin/rewards-control", wallet, 20_000, "payout-queue");
     },
     refetchInterval: 30_000, retry: false,
   });

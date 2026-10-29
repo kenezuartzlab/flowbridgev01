@@ -27,7 +27,7 @@ export function RewardsExperience() {
     {!authReady ? <p role="status" className="text-sm text-muted">Checking your account…</p> : !user ? <div className="space-y-3"><p className="text-sm leading-relaxed text-muted">Sign in to see recorded Points, funded rewards and verified payout eligibility. Points are not a token balance.</p><SignInButton label="Sign in" returnTo="/rewards" /></div> : <>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3" data-testid="reward-balances">
         {[
-          ['Available Points', Math.max(0, (summary?.eligibleFundedUnallocated ?? 0) - (personal?.payoutApproval?.awaitingApproval ?? 0)), 'PTS'],
+          [personal?.progression.reconciliationBlocked ? 'Funded · reconciliation held' : 'Available Points', Math.max(0, (summary?.eligibleFundedUnallocated ?? 0) - (personal?.payoutApproval?.awaitingApproval ?? 0)), 'PTS'],
           ['Awaiting Approval', personal?.payoutApproval?.awaitingApproval ?? 0, 'PTS'],
           ['Awaiting funding', summary?.pendingFunding, 'PTS'],
           ['Approved · awaiting publisher signature', personal?.payoutApproval?.awaitingPublicationFlow ?? 0, 'FLOW'],
