@@ -30,3 +30,7 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Focused regression (283), full regression (2,079), responsive modal checks, restored-tracker read-only flow and fresh security; automatic preview build OK. Separate manual typecheck not run (harness-owned).
 - [ ] Verified relay/destination progress: blocked by absence of an existing correlated provider/destination evidence feed; display unknown, never fake completion.
 - [x] Published correction and verified flowbridge.space/trade HTTP 200, no runtime errors; App-DTHqg3Vy.js SHA-256 17e1105be5dc70b16f0acfe331fb0d632e7c612daed4d008279239830206434c.
+
+# Monitoring finding review
+- [x] Verify cited auto-approval mid-loop persistence: stale; current reads use persistBatch:false. Six focused files / 62 tests pass.
+- [ ] Direct bridge verified completion: confirmed missing authoritative destination correlation feed; integration plan awaiting approval and official evidence interface.
