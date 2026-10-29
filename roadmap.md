@@ -33,6 +33,7 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 
 # Monitoring finding review
 - [x] Oct 29 incident: read live funded reservations, approvals and Round #4; bound payout-state reads and distinguish reconciliation-held funding from ready allocations.
-- [ ] Publish incident correction and verify live assets after regression/security acceptance.
+- [x] Published incident correction; live Ops asset ops-DYmLlvbm.js fingerprint c2c8c6a082813566, signed-out Rewards/Ops HTTP 200 without runtime errors; 2,101 tests passed and preview build OK.
+- [ ] Next payout readiness: blocked by authoritative account reconciliation (299 funded signup FLOW and another 500); no confirmed unpaid approvals exist. Requires super-admin evidence review, not another approval or funding reservation.
 - [x] Verify cited auto-approval mid-loop persistence: stale; current reads use persistBatch:false. Six focused files / 62 tests pass.
 - [ ] Direct bridge verified completion: confirmed missing authoritative destination correlation feed; integration plan awaiting approval and official evidence interface.
