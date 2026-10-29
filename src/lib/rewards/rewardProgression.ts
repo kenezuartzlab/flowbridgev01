@@ -52,6 +52,8 @@ export interface ProgressionInput {
 }
 
 export interface RewardProgression {
+  /** Account reconciliation blocks payout, even when individual rows are reserved. */
+  reconciliationBlocked?: boolean;
   /** Recorded display composition, not entitlement; categories here are disjoint. */
   recordedComposition?: { storedHistory: number; ownSignup: number; referralSignup: number };
   reconciliationEvidence?: { coreSwap: number; historicalHeld: number; unsupportedStored: number };
@@ -126,6 +128,7 @@ export function computeRewardProgression(i: ProgressionInput): RewardProgression
   const lifecycleLabel =
     lifecycle !== lc.state ? `${available.toLocaleString("en-US")} FLOW reached — settlement needs a bound wallet and completed review` : lc.label;
   return {
+    reconciliationBlocked: !i.reconciliationOk,
     minimum: MIN_OPS_CLAIM_FLOW,
     earnedPoints: floor(i.storedFlowPoints),
     eligibleFundedFlow,

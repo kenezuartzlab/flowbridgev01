@@ -32,5 +32,7 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Published correction and verified flowbridge.space/trade HTTP 200, no runtime errors; App-DTHqg3Vy.js SHA-256 17e1105be5dc70b16f0acfe331fb0d632e7c612daed4d008279239830206434c.
 
 # Monitoring finding review
+- [x] Oct 29 incident: read live funded reservations, approvals and Round #4; bound payout-state reads and distinguish reconciliation-held funding from ready allocations.
+- [ ] Publish incident correction and verify live assets after regression/security acceptance.
 - [x] Verify cited auto-approval mid-loop persistence: stale; current reads use persistBatch:false. Six focused files / 62 tests pass.
 - [ ] Direct bridge verified completion: confirmed missing authoritative destination correlation feed; integration plan awaiting approval and official evidence interface.

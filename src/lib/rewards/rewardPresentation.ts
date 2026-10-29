@@ -14,6 +14,7 @@ export function rewardPresentation(p: RewardProgression | null | undefined, nowS
       : s.blocker === 'AWAITING_PUBLICATION' ? 'Qualified · awaiting settlement publication'
       : s.blocker === 'AWAITING_OPEN' ? 'Allocation published · claim not open yet'
       : s.blocker === 'ROUND_EXPIRED' ? 'Claim window closed'
+      : s.blocker === 'UNDER_REVIEW' ? `${f(s.eligibleFundedUnallocated)} FLOW funded · held for evidence review`
       : `${f(s.eligibleFundedUnallocated)} FLOW verified · awaiting payout approval`,
   };
 }
