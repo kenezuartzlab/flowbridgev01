@@ -19,12 +19,13 @@ import { botMainnet } from '@/lib/wagmi';
 import { BOT_MAINNET_CHAIN_ID, getFlowRewardsChainConfig } from './flowRewardsRegistry';
 import {
   MERKLE_DISTRIBUTOR_CLAIM_ABI,
-  prepareMerkleClaim,
+
   type MerkleClaimPreparation,
-  type PublishedEpochState,
+
 } from './merkleClaim';
 import { MAINNET_EPOCH_MANIFESTS, type MainnetEntitlementMatch } from './mainnetEpochManifest';
 import { draftFlowLabel, findMainnetDraftEntitlement } from './mainnetEpochDraft';
+import { evaluateRound, summarizeRounds, type EpochRead, type RoundView, type RoundsSummary } from './mainnetClaimRounds';
 
 const READ_ABI = [
   ...MERKLE_DISTRIBUTOR_CLAIM_ABI,
@@ -142,172 +143,98 @@ async function allEntitlements(wallet: string | null | undefined): Promise<{ lis
 
 export interface UseMainnetFlowClaim extends MainnetClaimState {
   loading: boolean;
+  /** Every round this wallet appears in, evaluated independently. */
+  rounds: RoundsSummary;
   refresh: () => Promise<void>;
 }
 
+const EMPTY_ROUNDS: RoundsSummary = { active: [], history: [], claimable: [], totalClaimableWei: '0' };
+
 export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainnetFlowClaim {
   const [state, setState] = useState<MainnetClaimState>(IDLE);
+  const [rounds, setRounds] = useState<RoundsSummary>(EMPTY_ROUNDS);
   const [loading, setLoading] = useState(false);
 
   const read = useCallback(async () => {
-    const { list: candidates, discoveryFailed } = await allEntitlements(wallet);
-    let entitlement: MainnetEntitlementMatch | undefined = candidates[candidates.length - 1];
-    if (!entitlement && discoveryFailed && wallet) {
-      // Never fabricate a proof: unavailable claim data is shown as retryable.
-      setState({ ...IDLE, status: 'READ_FAILED', message: 'CLAIM DATA UNAVAILABLE — RETRY' });
-      return;
-    }
-    if (!entitlement) {
-      // A prepared-but-unpublished round is explained, never offered as a claim.
-      const draft = findMainnetDraftEntitlement(BOT_MAINNET_CHAIN_ID, wallet);
-      setState(
-        draft
-          ? {
-              ...IDLE,
-              status: 'NOT_PUBLISHED',
-              message: `A ${draftFlowLabel(draft.draft)} FLOW allocation is prepared for this wallet. It becomes claimable once its reward round is published on BOT Mainnet.`,
-            }
-          : IDLE,
-      );
-      return;
-    }
-    const config = getFlowRewardsChainConfig(BOT_MAINNET_CHAIN_ID);
-    const distributor = config?.distributor ?? null;
-    const token = config?.token ?? null;
-    if (!distributor || !token || distributor.toLowerCase() !== entitlement.manifest.distributor.toLowerCase()) {
-      setState({
-        ...IDLE,
-        status: 'READ_FAILED',
-        entitlement,
-        message: 'The mainnet reward distributor could not be resolved from the canonical registry.',
-      });
-      return;
-    }
-
     setLoading(true);
     try {
-      const client = createPublicClient({ chain: botMainnet, transport: http() });
-      // Offer the oldest published, unclaimed round; when every round is
-      // claimed, show the newest. A wallet in several rounds is never stuck.
-      if (candidates.length > 1) {
-        const count = (await client.readContract({ address: distributor, abi: READ_ABI, functionName: 'epochCount' })) as bigint;
-        const published = candidates.filter((c) => BigInt(c.leaf.epochId) <= count);
-        const flags = await Promise.all(
-          published.map((c) =>
-            client.readContract({ address: distributor, abi: READ_ABI, functionName: 'isClaimed', args: [BigInt(c.leaf.epochId), BigInt(c.leaf.index)] }),
-          ),
+      const { list: candidates, discoveryFailed } = await allEntitlements(wallet);
+      if (!candidates.length) {
+        setRounds(EMPTY_ROUNDS);
+        if (discoveryFailed && wallet) {
+          setState({ ...IDLE, status: 'READ_FAILED', message: 'Claim data unavailable — retry.' });
+          return;
+        }
+        const draft = findMainnetDraftEntitlement(BOT_MAINNET_CHAIN_ID, wallet);
+        setState(
+          draft
+            ? { ...IDLE, status: 'NOT_PUBLISHED', message: `A ${draftFlowLabel(draft.draft)} FLOW allocation is prepared for this wallet. It becomes claimable once its reward round is published on BOT Mainnet.` }
+            : IDLE,
         );
-        entitlement = published.find((_, i) => !flags[i]) ?? published[published.length - 1] ?? entitlement;
-      }
-      const { epochId, index } = entitlement.leaf;
-
-      // A manifest may never be shipped ahead of its publication: an epoch id
-      // above the live epochCount means the root is not on chain yet.
-      const liveEpochCount = (await client.readContract({
-        address: distributor,
-        abi: READ_ABI,
-        functionName: 'epochCount',
-      })) as bigint;
-      if (BigInt(epochId) > liveEpochCount) {
-        setState({
-          ...IDLE,
-          status: 'NOT_PUBLISHED',
-          entitlement,
-          distributor,
-          message: 'This reward round has not been published on BOT Mainnet yet. Claiming opens once it is.',
-        });
         return;
       }
-
-      const [paused, epochRaw, claimed, totalReserved, balance] = await Promise.all([
+      const config = getFlowRewardsChainConfig(BOT_MAINNET_CHAIN_ID);
+      const distributor = (config?.distributor ?? null) as Hex | null;
+      const token = (config?.token ?? null) as Hex | null;
+      if (!distributor || !token) {
+        setRounds(EMPTY_ROUNDS);
+        setState({ ...IDLE, status: 'READ_FAILED', message: 'The mainnet reward distributor could not be resolved.' });
+        return;
+      }
+      const client = createPublicClient({ chain: botMainnet, transport: http() });
+      const [epochCount, paused, totalReserved, balance] = (await Promise.all([
+        client.readContract({ address: distributor, abi: READ_ABI, functionName: 'epochCount' }),
         client.readContract({ address: distributor, abi: READ_ABI, functionName: 'paused' }),
-        client.readContract({
-          address: distributor,
-          abi: READ_ABI,
-          functionName: 'getEpoch',
-          args: [BigInt(epochId)],
-        }),
-        client.readContract({
-          address: distributor,
-          abi: READ_ABI,
-          functionName: 'isClaimed',
-          args: [BigInt(epochId), BigInt(index)],
-        }),
         client.readContract({ address: distributor, abi: READ_ABI, functionName: 'totalReserved' }),
-        client.readContract({
-          address: token,
-          abi: ERC20_BALANCE_ABI,
-          functionName: 'balanceOf',
-          args: [distributor],
+        client.readContract({ address: token, abi: ERC20_BALANCE_ABI, functionName: 'balanceOf', args: [distributor] }),
+      ])) as [bigint, boolean, bigint, bigint];
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const views = await Promise.all(
+        candidates.map(async (c): Promise<RoundView> => {
+          let r: EpochRead | null = null;
+          if (BigInt(c.leaf.epochId) <= epochCount) {
+            try {
+              const [e, claimed] = await Promise.all([
+                client.readContract({ address: distributor, abi: READ_ABI, functionName: 'getEpoch', args: [BigInt(c.leaf.epochId)] }),
+                client.readContract({ address: distributor, abi: READ_ABI, functionName: 'isClaimed', args: [BigInt(c.leaf.epochId), BigInt(c.leaf.index)] }),
+              ]);
+              r = { root: e.root as Hex, claimStart: Number(e.claimStart), claimEnd: Number(e.claimEnd), cancelled: e.cancelled, released: e.released, claimed: Boolean(claimed) };
+            } catch {
+              r = null;
+            }
+          }
+          return evaluateRound({
+            chainId: BOT_MAINNET_CHAIN_ID, distributor, entitlement: c, epochCount, paused, read: r,
+            distributorBalance: balance.toString(), totalReserved: totalReserved.toString(), nowSeconds,
+            publicClaimsOpen: PUBLIC_MAINNET_FLOW_CLAIMS, lastHistoricalEpoch: LAST_HISTORICAL_EPOCH,
+          });
         }),
-      ]);
-
-      const epoch: PublishedEpochState = {
-        epochId,
-        root: epochRaw.root as Hex,
-        claimStart: Number(epochRaw.claimStart),
-        claimEnd: Number(epochRaw.claimEnd),
-        cancelled: epochRaw.cancelled,
-        released: epochRaw.released,
-        distributorBalance: (balance as bigint).toString(),
-        totalReserved: (totalReserved as bigint).toString(),
-      };
-      const explorerTxUrl = entitlement.manifest.publicationTxHash
-        ? `${botMainnet.blockExplorers.default.url}/tx/${entitlement.manifest.publicationTxHash}`
-        : `${botMainnet.blockExplorers.default.url}/address/${distributor}`;
-      const base = { entitlement, epoch, alreadyClaimed: Boolean(claimed), distributor, explorerTxUrl };
-
-      if (epoch.root.toLowerCase() !== entitlement.manifest.root.toLowerCase()) {
-        setState({
-          ...base,
-          preparation: null,
-          status: 'ROOT_MISMATCH',
-          message:
-            'The published epoch root on chain does not match this release — claiming is blocked until it is reconciled.',
-        });
-        return;
-      }
-      if (paused) {
-        setState({
-          ...base,
-          preparation: null,
-          status: 'PAUSED',
-          message: 'The reward distributor is paused. No claim can be submitted right now.',
-        });
-        return;
-      }
-
-      const prep = prepareMerkleClaim({
-        chainId: BOT_MAINNET_CHAIN_ID,
-        distributor,
-        epoch,
-        leaf: entitlement.leaf,
-        proof: entitlement.proof,
-        alreadyClaimed: Boolean(claimed),
-        nowSeconds: Math.floor(Date.now() / 1000),
-      });
-
-      if (prep.claimable && epochId > LAST_HISTORICAL_EPOCH && !PUBLIC_MAINNET_FLOW_CLAIMS) {
-        // Public flag OFF: allocation is shown, but no ordinary claim can start.
-        setState({ ...base, preparation: null, status: 'BLOCKED', message: 'Allocated on BOT Mainnet. Public FLOW claims are not open yet.' });
-      } else if (prep.claimable) {
-        setState({ ...base, preparation: prep, status: 'CLAIMABLE', message: 'Your allocation is claimable now.' });
-      } else {
-        setState({
-          ...base,
-          preparation: null,
-          status: prep.reason === 'alreadyClaimed' ? 'ALREADY_CLAIMED' : 'BLOCKED',
-          message: prep.message,
-        });
-      }
-    } catch {
+      );
+      const summary = summarizeRounds(views);
+      setRounds(summary);
+      const first = summary.active[0] ?? summary.history[0];
+      const ent = candidates.find((c) => c.leaf.epochId === first?.epochId) ?? null;
+      const status: MainnetClaimStatus =
+        first?.status === 'CLAIMABLE' ? 'CLAIMABLE'
+        : first?.status === 'CLAIMED' ? 'ALREADY_CLAIMED'
+        : first?.status === 'PAUSED' ? 'PAUSED'
+        : first?.status === 'ROOT_MISMATCH' ? 'ROOT_MISMATCH'
+        : first?.status === 'READ_FAILED' ? 'READ_FAILED'
+        : first?.status === 'NOT_PUBLISHED' ? 'NOT_PUBLISHED'
+        : 'BLOCKED';
       setState({
-        ...IDLE,
-        status: 'READ_FAILED',
-        entitlement,
+        status,
+        message: first?.message ?? '',
+        preparation: summary.claimable[0] ?? null,
+        entitlement: ent,
+        epoch: null,
+        alreadyClaimed: first?.status === 'CLAIMED',
         distributor,
-        message: 'Live reward state could not be read from BOT Mainnet. Claiming stays disabled until it can.',
+        explorerTxUrl: `${botMainnet.blockExplorers.default.url}/address/${distributor}`,
       });
+    } catch {
+      setRounds(EMPTY_ROUNDS);
+      setState({ ...IDLE, status: 'READ_FAILED', message: 'Live reward state could not be read from BOT Mainnet. Claiming stays disabled until it can.' });
     } finally {
       setLoading(false);
     }
@@ -317,5 +244,5 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
     void read();
   }, [read]);
 
-  return { ...state, loading, refresh: read };
+  return { ...state, rounds, loading, refresh: read };
 }
