@@ -3,7 +3,6 @@
  * every number comes from the server progression; nothing is signed here.
  */
 import { useEffect } from "react";
-import { Link } from "@tanstack/react-router";
 import type { RewardProgression } from "@/lib/rewards/rewardProgression";
 import { trackProductEvent, type ProductArea } from "@/lib/ops/productEvents";
 import { RewardPolicyDetails } from './RewardPolicyDetails';
