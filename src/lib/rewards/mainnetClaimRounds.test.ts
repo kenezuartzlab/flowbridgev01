@@ -31,50 +31,50 @@ const ev = (e: MainnetEntitlementMatch, read: EpochRead | null, o: { paused?: bo
 
 describe('multi-round claim selection', () => {
   it('oldest expired does not hide a newer claimable round', () => {
-    const a = ent(3, 100), b = ent(4, 50);
+    const a = ent(3, 100n), b = ent(4, 50n);
     const s = summarizeRounds([ev(a, live(a, { claimStart: NOW - 9000, claimEnd: NOW - 10 })), ev(b, live(b))]);
     expect(s.claimable.map((p) => p.epochId)).toEqual([4]);
     expect(s.totalClaimableWei).toBe((50n * E18).toString());
     expect(s.history[0].status).toBe('EXPIRED');
   });
   it('oldest not yet open does not hide a newer open round', () => {
-    const a = ent(3, 100), b = ent(4, 50);
+    const a = ent(3, 100n), b = ent(4, 50n);
     const s = summarizeRounds([ev(a, live(a, { claimStart: NOW + 50 })), ev(b, live(b))]);
     expect(s.active[0].epochId).toBe(4);
     expect(s.active[1].status).toBe('OPENS_LATER');
     expect(s.totalClaimableWei).toBe((50n * E18).toString());
   });
   it('already claimed + open sums only the open round; all claimed sums zero', () => {
-    const a = ent(3, 100), b = ent(4, 50);
+    const a = ent(3, 100n), b = ent(4, 50n);
     expect(summarizeRounds([ev(a, live(a, { claimed: true })), ev(b, live(b))]).totalClaimableWei).toBe((50n * E18).toString());
     const all = summarizeRounds([ev(a, live(a, { claimed: true })), ev(b, live(b, { claimed: true }))]);
     expect(all.totalClaimableWei).toBe('0');
     expect(all.history).toHaveLength(2);
   });
   it('two open rounds sum both, soonest deadline first', () => {
-    const a = ent(3, 100), b = ent(4, 50);
+    const a = ent(3, 100n), b = ent(4, 50n);
     const s = summarizeRounds([ev(a, live(a, { claimEnd: NOW + 5000 })), ev(b, live(b, { claimEnd: NOW + 200 }))]);
     expect(s.claimable.map((p) => p.epochId)).toEqual([4, 3]);
     expect(s.totalClaimableWei).toBe((150n * E18).toString());
   });
   it('root mismatch, paused, failed read and unpublished never become claimable', () => {
-    const a = ent(4, 50);
+    const a = ent(4, 50n);
     expect(ev(a, live(a, { root: ('0x' + '9'.repeat(64)) as Hex })).status).toBe('ROOT_MISMATCH');
     expect(ev(a, live(a), { paused: true }).status).toBe('PAUSED');
     expect(ev(a, null).status).toBe('READ_FAILED');
     expect(ev(a, live(a), { epochCount: 3n }).status).toBe('NOT_PUBLISHED');
   });
   it('a proof for another wallet does not verify against this root', () => {
-    const mine = ent(4, 50);
-    const forged = ent(4, 50, { account: '0x2222222222222222222222222222222222222222' as Hex, root: mine.manifest.root });
+    const mine = ent(4, 50n);
+    const forged = ent(4, 50n, { account: '0x2222222222222222222222222222222222222222' as Hex, root: mine.manifest.root });
     expect(ev(forged, live(forged)).status).toBe('BLOCKED');
   });
   it('underfunded reservation blocks the claim', () => {
-    const a = ent(4, 50);
+    const a = ent(4, 50n);
     expect(ev(a, live(a), { reserved: 10n }).status).toBe('BLOCKED');
   });
   it('duplicate proofs for the same leaf count once', () => {
-    const a = ent(4, 50);
+    const a = ent(4, 50n);
     const r = ev(a, live(a));
     expect(summarizeRounds([r, r]).totalClaimableWei).toBe((50n * E18).toString());
   });
