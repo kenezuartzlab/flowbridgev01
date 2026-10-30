@@ -19,9 +19,8 @@ import { botMainnet } from '@/lib/wagmi';
 import { BOT_MAINNET_CHAIN_ID, getFlowRewardsChainConfig } from './flowRewardsRegistry';
 import {
   MERKLE_DISTRIBUTOR_CLAIM_ABI,
-
   type MerkleClaimPreparation,
-
+  type PublishedEpochState,
 } from './merkleClaim';
 import { MAINNET_EPOCH_MANIFESTS, type MainnetEntitlementMatch } from './mainnetEpochManifest';
 import { draftFlowLabel, findMainnetDraftEntitlement } from './mainnetEpochDraft';
