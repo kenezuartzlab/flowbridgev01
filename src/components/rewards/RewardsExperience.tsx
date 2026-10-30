@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from '@tanstack/react-router';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SignInButton } from '@/components/auth/SignInButton';
@@ -10,6 +9,7 @@ import { RewardProgressPanel } from './RewardProgressPanel';
 import { ReferralRewards } from './ReferralRewards';
 import { RewardPolicyDetails } from './RewardPolicyDetails';
 import { BindWalletCard } from './BindWalletCard';
+import { MainnetFlowClaimCard } from './MainnetFlowClaimCard';
 
 export function RewardsExperience() {
   const { user, authReady, incentives, loading, refresh } = useAccountData();
@@ -27,18 +27,19 @@ export function RewardsExperience() {
     {!authReady ? <p role="status" className="text-sm text-muted">Checking your account…</p> : !user ? <div className="space-y-3"><p className="text-sm leading-relaxed text-muted">Sign in to see recorded Points, funded rewards and verified payout eligibility. Points are not a token balance.</p><SignInButton label="Sign in" returnTo="/rewards" /></div> : <>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3" data-testid="reward-balances">
         {[
-          [personal?.progression.reconciliationBlocked ? 'Funded · reconciliation held' : 'Available Points', Math.max(0, (summary?.eligibleFundedUnallocated ?? 0) - (personal?.payoutApproval?.awaitingApproval ?? 0)), 'PTS'],
+          [personal?.progression.reconciliationBlocked ? 'Funded · reconciliation held' : 'Earned Points · funded', Math.max(0, (summary?.eligibleFundedUnallocated ?? 0) - (personal?.payoutApproval?.awaitingApproval ?? 0)), 'PTS'],
           ['Awaiting Approval', personal?.payoutApproval?.awaitingApproval ?? 0, 'PTS'],
           ['Awaiting funding', summary?.pendingFunding, 'PTS'],
           ['Approved · awaiting publisher signature', personal?.payoutApproval?.awaitingPublicationFlow ?? 0, 'FLOW'],
           ['Published · claim opens soon', personal?.payoutApproval?.publishedWaitingFlow ?? 0, 'FLOW'],
-          ['Claimable FLOW', summary?.claimableNow, 'FLOW'],
+          ['FLOW ready to claim', summary?.claimableNow, 'FLOW'],
           ['Claimed FLOW', summary?.claimedLifetime, 'FLOW'],
           ['Held for review', summary?.pendingReview, 'PTS'],
         ].map(([label,value,unit]) => <div key={String(label)} className="min-w-0"><dt className="text-xs leading-relaxed text-muted">{label}</dt><dd className="break-words text-xl font-bold tabular-nums">{typeof value === 'number' ? value.toLocaleString('en-US') : '—'} <span className="text-xs font-semibold text-muted">{unit}</span></dd></div>)}
       </dl>
       {personal?.payoutApproval?.claimOpensAt && <p role="status" className="text-sm text-muted">Your published FLOW can be claimed from {new Date(personal.payoutApproval.claimOpensAt).toLocaleString()}.</p>}
-      <Button asChild className="h-auto min-h-10 w-full whitespace-normal text-center"><Link to="/earn">{(summary?.claimableNow ?? 0) > 0 ? 'View verified claim' : 'View payout status'}</Link></Button>
+      <Button asChild className="h-auto min-h-10 w-full whitespace-normal text-center"><a href="#mainnet-flow-claim">{(summary?.claimableNow ?? 0) > 0 ? 'Go to FLOW ready to claim' : 'Check FLOW ready to claim'}</a></Button>
+      <MainnetFlowClaimCard />
       <nav aria-label="Rewards views" className="flex flex-wrap gap-1 border-b border-hairline pb-2">{[['rewards','Points & eligibility'],['referrals','Referrals'],['policy','How you earn']].map(([key,label]) => <Button key={key} variant={tab === key ? 'secondary' : 'ghost'} size="sm" onClick={() => setTab(key)} aria-pressed={tab === key}>{label}</Button>)}</nav>
       {tab === 'rewards' && <>
         {personal ? <RewardProgressPanel p={personal.progression} area="flow_points" detailed /> : <p role="status" className="text-sm text-muted">{progressLoading ? 'Checking verified reward eligibility…' : 'Reward status is unavailable. Refresh to retry; no claim amount is assumed.'}</p>}
