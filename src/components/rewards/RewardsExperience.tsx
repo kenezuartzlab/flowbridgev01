@@ -39,7 +39,7 @@ export function RewardsExperience() {
         ].map(([label,value,unit]) => <div key={String(label)} className="min-w-0"><dt className="text-xs leading-relaxed text-muted">{label}</dt><dd className="break-words text-xl font-bold tabular-nums">{typeof value === 'number' ? value.toLocaleString('en-US') : '—'} <span className="text-xs font-semibold text-muted">{unit}</span></dd></div>)}
       </dl>
       {personal?.payoutApproval?.claimOpensAt && <p role="status" className="text-sm text-muted">Your published FLOW can be claimed from {new Date(personal.payoutApproval.claimOpensAt).toLocaleString()}.</p>}
-      <Button asChild className="h-auto min-h-10 w-full whitespace-normal text-center"><a href="#mainnet-flow-claim">{(summary?.claimableNow ?? 0) > 0 ? 'Go to FLOW ready to claim' : 'Check FLOW ready to claim'}</a></Button>
+      <Button asChild className="h-auto min-h-10 w-full whitespace-normal text-center"><a href="#mainnet-flow-claim">{(summary?.claimableNow ?? 0) > 0 ? 'Claim available FLOW' : 'Check FLOW ready to claim'}</a></Button>
       <nav aria-label="Rewards views" className="flex flex-wrap gap-1 border-b border-hairline pb-2">{[['rewards','Points & eligibility'],['referrals','Referrals'],['policy','How you earn']].map(([key,label]) => <Button key={key} variant={tab === key ? 'secondary' : 'ghost'} size="sm" onClick={() => setTab(key)} aria-pressed={tab === key}>{label}</Button>)}</nav>
       {tab === 'rewards' && <>
         {personal ? <RewardProgressPanel p={personal.progression} area="flow_points" detailed /> : <p role="status" className="text-sm text-muted">{progressLoading ? 'Checking verified reward eligibility…' : 'Reward status is unavailable. Refresh to retry; no claim amount is assumed.'}</p>}
