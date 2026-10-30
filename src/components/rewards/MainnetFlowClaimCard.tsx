@@ -1,27 +1,35 @@
-import { useEffect, useState } from 'react';
-import { Coins, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
-import { encodeFunctionData } from 'viem';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, Coins, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
+import { createPublicClient, encodeFunctionData, http, type Hex } from 'viem';
 
 import { SectionHeader, StatusPill, Surface } from '@/components/ui-kit/primitives';
 import { botMainnet } from '@/lib/wagmi';
 import { BOT_MAINNET_CHAIN_ID } from '@/lib/rewards/flowRewardsRegistry';
 import { MERKLE_DISTRIBUTOR_CLAIM_ABI } from '@/lib/rewards/merkleClaim';
 import { useMainnetFlowClaim } from '@/lib/rewards/useMainnetFlowClaim';
+import {
+  runSequentialClaims,
+  type ClaimablePreparation,
+  type ClaimStepResult,
+  type RoundStatus,
+  type RoundView,
+} from '@/lib/rewards/mainnetClaimRounds';
 import { trackProductEvent } from '@/lib/ops/productEvents';
 import { getActiveProvider } from '@/lib/wallet/activeProvider';
 
 /**
- * FlowBridge V30.2B P2E — BOT Mainnet 677 FLOW claim surface.
+ * BOT Mainnet 677 FLOW claim surface (shared by /earn and /rewards).
  *
- * Presentation only, and strictly separate from the BOT Testnet 968 card: the
- * epoch, allocation and proof come from the frozen mainnet manifest, every gate
- * is re-read live from the canonical distributor, and the Merkle proof is
- * verified locally before the wallet is ever asked to sign.
+ * Shows every published round for the connected wallet. Each round is gated
+ * independently by live on-chain reads and local proof verification. Claims
+ * are sent one at a time; "Claimed" is shown only after a successful receipt
+ * and an on-chain isClaimed re-read. Users pay their own BOT gas.
  */
 
 const FLOW_DECIMALS = 18n;
+const EXPLORER = botMainnet.blockExplorers.default.url;
 
-function formatFlow(raw: string | null | undefined, maxFrac = 4): string {
+export function formatFlow(raw: string | null | undefined, maxFrac = 4): string {
   if (raw == null) return '—';
   let v: bigint;
   try {
@@ -39,17 +47,34 @@ function formatFlow(raw: string | null | undefined, maxFrac = 4): string {
 
 const short = (a?: string | null) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—');
 const asDate = (s?: number | null) =>
-  s ? new Date(s * 1000).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+  s ? new Date(s * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short', timeZoneName: 'short' }) : '—';
+
+const LABEL: Record<RoundStatus, string> = {
+  CLAIMABLE: 'Ready to claim',
+  OPENS_LATER: 'Opens soon',
+  EXPIRED: 'Expired',
+  CLAIMED: 'Claimed',
+  ROOT_MISMATCH: 'Blocked',
+  PAUSED: 'Paused',
+  NOT_PUBLISHED: 'Not published',
+  READ_FAILED: 'Retry',
+  BLOCKED: 'Blocked',
+};
+
+type Step = { epochId: number; phase: 'signing' | 'submitted' | 'done'; hash?: string };
 
 export function MainnetFlowClaimCard() {
   const [wallet, setWallet] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [txHash, setTxHash] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const [step, setStep] = useState<Step | null>(null);
+  const [results, setResults] = useState<ClaimStepResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const stopRef = useRef(false);
   const claim = useMainnetFlowClaim(wallet);
+  const { rounds } = claim;
 
-  // Read-only: reflect an already-connected wallet without prompting.
   useEffect(() => {
     void getActiveProvider()
       .then((eth: any) => (eth ? eth.request({ method: 'eth_accounts' }) : null))
@@ -74,177 +99,266 @@ export function MainnetFlowClaimCard() {
     }
   };
 
-  const submit = async () => {
-    const prep = claim.preparation;
-    if (!prep) return;
-    setSubmitting(true);
+  const claimRounds = async (preps: ClaimablePreparation[]) => {
+    if (!preps.length || running) return;
+    setRunning(true);
     setError(null);
+    setResults([]);
+    stopRef.current = false;
     trackProductEvent('claim_started', 'earn');
+    const client = createPublicClient({ chain: botMainnet, transport: http() });
+    const hexChain = `0x${BOT_MAINNET_CHAIN_ID.toString(16)}`;
     try {
       const eth = (await getActiveProvider()) as any;
       if (!eth) throw new Error('No wallet detected in this browser.');
-      const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
-      const from = (accounts?.[0] ?? '').toLowerCase();
-      if (from !== prep.account.toLowerCase()) {
-        throw new Error(`Connect ${short(prep.account)} — the wallet this allocation was published for.`);
-      }
-      const hexChain = `0x${BOT_MAINNET_CHAIN_ID.toString(16)}`;
-      if ((await eth.request({ method: 'eth_chainId' })) !== hexChain) {
-        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexChain }] });
-      }
-      const data = encodeFunctionData({
-        abi: MERKLE_DISTRIBUTOR_CLAIM_ABI,
-        functionName: 'claim',
-        args: [
-          BigInt(prep.epochId),
-          BigInt(prep.index),
-          prep.account,
-          BigInt(prep.amount),
-          prep.proof as readonly `0x${string}`[],
-        ],
+      const out = await runSequentialClaims(preps, {
+        shouldStop: () => stopRef.current,
+        readClaimed: async (p) =>
+          Boolean(
+            await client.readContract({
+              address: p.distributor,
+              abi: MERKLE_DISTRIBUTOR_CLAIM_ABI,
+              functionName: 'isClaimed',
+              args: [BigInt(p.epochId), BigInt(p.index)],
+            }),
+          ),
+        preflight: async (p) => {
+          const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
+          if ((accounts?.[0] ?? '').toLowerCase() !== p.account.toLowerCase()) {
+            throw new Error(`Connect ${short(p.account)} — the wallet this allocation was published for.`);
+          }
+          if ((await eth.request({ method: 'eth_chainId' })) !== hexChain) {
+            await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexChain }] });
+            if ((await eth.request({ method: 'eth_chainId' })) !== hexChain) throw new Error('Switch your wallet to BOT Mainnet.');
+          }
+        },
+        send: async (p) => {
+          const data = encodeFunctionData({
+            abi: MERKLE_DISTRIBUTOR_CLAIM_ABI,
+            functionName: 'claim',
+            args: [BigInt(p.epochId), BigInt(p.index), p.account, BigInt(p.amount), p.proof as readonly Hex[]],
+          });
+          return (await eth.request({
+            method: 'eth_sendTransaction',
+            params: [{ from: p.account, to: p.distributor, data, value: '0x0' }],
+          })) as string;
+        },
+        waitReceipt: async (hash) => {
+          const r = await client.waitForTransactionReceipt({ hash: hash as Hex, timeout: 180_000 });
+          return r.status === 'success' ? 'success' : 'reverted';
+        },
+        onStep: (epochId, phase, hash) => setStep({ epochId, phase, hash }),
       });
-      const hash: string = await eth.request({
-        method: 'eth_sendTransaction',
-        params: [{ from, to: prep.distributor, data, value: '0x0' }],
-      });
-      setTxHash(hash);
-      trackProductEvent('claim_confirmed', 'earn');
-      await claim.refresh();
+      setResults(out);
+      if (out.some((r) => r.outcome === 'claimed')) trackProductEvent('claim_confirmed', 'earn');
+      const bad = out.find((r) => r.outcome !== 'claimed' && r.outcome !== 'skipped');
+      if (bad) {
+        setError(
+          bad.outcome === 'rejected'
+            ? `Round #${bad.epochId}: ${bad.error}. Nothing else was sent — you can retry the remaining rounds.`
+            : bad.outcome === 'reverted'
+              ? `Round #${bad.epochId} transaction failed on chain. No FLOW moved for that round.`
+              : `Round #${bad.epochId} was submitted but is not yet confirmed as claimed. Re-check before retrying.`,
+        );
+      }
     } catch (e: any) {
-      setError(e?.shortMessage ?? e?.message ?? 'Claim transaction failed.');
+      setError(e?.shortMessage ?? e?.message ?? 'Claim could not start.');
     } finally {
-      setSubmitting(false);
+      setStep(null);
+      setRunning(false);
+      await claim.refresh();
     }
   };
 
-  const tone =
-    claim.status === 'CLAIMABLE' ? 'ok' : claim.status === 'ALREADY_CLAIMED' ? 'ok' : 'pending';
-  const badge =
-    claim.status === 'CLAIMABLE'
-      ? 'Claimable'
-      : claim.status === 'ALREADY_CLAIMED'
-        ? 'Claimed'
-        : claim.status === 'PAUSED'
-          ? 'Paused'
-          : claim.status === 'NO_ENTITLEMENT'
-            ? 'No allocation'
-            : claim.status === 'NOT_PUBLISHED'
-              ? 'Not published'
-              : 'Blocked';
-
-  const manifest = claim.entitlement?.manifest ?? null;
+  const count = rounds.claimable.length;
+  const total = formatFlow(rounds.totalClaimableWei);
+  const badge = count ? `${total} FLOW ready` : claim.status === 'READ_FAILED' ? 'Retry' : wallet ? 'Nothing to claim now' : 'Connect wallet';
 
   return (
     <Surface id="mainnet-flow-claim">
       <SectionHeader
-        title="Claim FLOW on BOT Mainnet"
-        hint="Published epoch allocation. Every gate — pause, window, root and prior claim — is read live from the distributor before the button unlocks."
-        badge={<StatusPill tone={tone as any}>{badge}</StatusPill>}
+        title="FLOW ready to claim"
+        hint="Published BOT Mainnet reward rounds for your wallet. Each round is checked live on chain before you can claim."
+        badge={<StatusPill tone={(count ? 'ok' : 'pending') as any}>{badge}</StatusPill>}
       />
 
       <div className="space-y-3 border-t border-hairline p-4">
         {!wallet ? (
           <p className="text-[12.5px] leading-relaxed text-muted">
-            Connect the wallet you swapped with to check whether it has an allocation in a published
-            BOT Mainnet reward epoch. Allocations are fixed at publication — they are never derived
-            from FLOW Points or Campaign PTS.
+            Connect the wallet you earned with to see every published FLOW allocation. Earned Points become
+            FLOW only after they are verified, funded and published in a reward round.
           </p>
         ) : (
-          <dl className="grid grid-cols-2 gap-3 text-[12px]">
-            <Row label="Network" value={`BOT Mainnet · ${BOT_MAINNET_CHAIN_ID}`} />
-            <Row label="Wallet" value={short(wallet)} />
-            <Row label="Epoch" value={manifest ? `#${manifest.epochId}` : '—'} />
-            <Row
-              label="Allocation"
-              value={claim.entitlement ? `${formatFlow(claim.entitlement.leaf.amount)} FLOW` : '—'}
-            />
-            <Row label="Claim opens" value={asDate(claim.epoch?.claimStart)} />
-            <Row label="Claim closes" value={asDate(claim.epoch?.claimEnd)} />
-            <Row label="Distributor" value={short(claim.distributor)} />
-            <Row label="On-chain status" value={claim.alreadyClaimed ? 'Claimed' : badge} />
-          </dl>
+          <>
+            <div className="rounded-2xl border border-hairline bg-card/60 p-3">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-muted-soft">Claimable now · {short(wallet)}</p>
+              <p className="mt-1 text-2xl font-black tabular-nums text-foreground">
+                {claim.loading ? '…' : total} <span className="text-sm font-bold text-muted">FLOW</span>
+              </p>
+              <p className="mt-1 text-[11.5px] text-muted">
+                {count > 1
+                  ? `${count} rounds — ${count} separate wallet confirmations and ${count} BOT network fees.`
+                  : count === 1
+                    ? '1 wallet confirmation · you pay a small BOT network fee. No FlowBridge fee.'
+                    : claim.loading
+                      ? 'Reading live reward state from BOT Mainnet…'
+                      : claim.message || 'No open round for this wallet right now.'}
+              </p>
+            </div>
+
+            {rounds.active.length ? (
+              <ul className="space-y-2" aria-label="Reward rounds">
+                {rounds.active.map((r) => (
+                  <RoundRow key={`${r.epochId}:${r.index}`} r={r} busy={running} step={step} onClaim={(p) => void claimRounds([p])} />
+                ))}
+              </ul>
+            ) : null}
+
+            {rounds.history.length ? (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowHistory((v) => !v)}
+                  className="inline-flex min-h-[40px] items-center gap-1 text-[12px] font-bold text-muted"
+                  aria-expanded={showHistory}
+                >
+                  History ({rounds.history.length}) <ChevronDown className={`h-3.5 w-3.5 ${showHistory ? 'rotate-180' : ''}`} aria-hidden />
+                </button>
+                {showHistory ? (
+                  <ul className="mt-1 space-y-2">
+                    {rounds.history.map((r) => (
+                      <RoundRow key={`${r.epochId}:${r.index}`} r={r} busy step={null} onClaim={() => undefined} />
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
+          </>
         )}
 
-        {wallet ? (
-          <p className="text-[12px] leading-relaxed text-muted">
-            {claim.loading ? 'Reading live reward state from BOT Mainnet…' : claim.message}
+        {step ? (
+          <p role="status" className="text-[12px] font-bold text-foreground">
+            Round #{step.epochId}:{' '}
+            {step.phase === 'signing' ? 'confirm in your wallet…' : step.phase === 'submitted' ? 'transaction submitted — waiting for BOT Mainnet confirmation…' : 'verifying claimed state…'}
+            {step.hash ? (
+              <a href={`${EXPLORER}/tx/${step.hash}`} target="_blank" rel="noreferrer" className="ml-1 inline-flex items-center gap-1 text-primary">
+                View <ExternalLink className="h-3 w-3" aria-hidden />
+              </a>
+            ) : null}
           </p>
         ) : null}
+
+        {results.length ? (
+          <ul className="space-y-1 text-[12px]">
+            {results.map((r) => (
+              <li key={r.epochId} className="text-muted">
+                Round #{r.epochId}:{' '}
+                <span className="font-bold text-foreground">
+                  {r.outcome === 'claimed' ? 'Claimed ✓' : r.outcome === 'skipped' ? 'Already claimed' : r.outcome === 'reverted' ? 'Failed' : r.outcome === 'unconfirmed' ? 'Submitted, not yet confirmed' : 'Not sent'}
+                </span>
+                {'hash' in r ? (
+                  <a href={`${EXPLORER}/tx/${r.hash}`} target="_blank" rel="noreferrer" className="ml-1 inline-flex items-center gap-1 text-primary">
+                    tx <ExternalLink className="h-3 w-3" aria-hidden />
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {error ? <p className="text-[12px] leading-relaxed text-destructive">{error}</p> : null}
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
             onClick={() => void (wallet ? claim.refresh() : connect())}
-            disabled={connecting || claim.loading || submitting}
+            disabled={connecting || claim.loading || running}
             className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl border border-hairline bg-card px-4 text-[13px] font-bold text-foreground transition-colors hover:border-primary/40 disabled:opacity-45"
           >
-            {connecting || claim.loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : (
-              <ShieldCheck className="h-4 w-4" aria-hidden />
-            )}
-            {wallet ? 'Re-check live state' : 'Connect wallet to check'}
+            {connecting || claim.loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ShieldCheck className="h-4 w-4" aria-hidden />}
+            {wallet ? 'Re-check live state' : 'Connect wallet'}
           </button>
-          <button
-            type="button"
-            onClick={() => void submit()}
-            disabled={!claim.preparation || submitting || claim.loading}
-            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:border disabled:border-hairline disabled:bg-card disabled:text-muted"
-          >
-            {submitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : (
-              <Coins className="h-4 w-4" aria-hidden />
-            )}
-            {submitting
-              ? 'Confirm in wallet…'
-              : claim.preparation
-                ? `Claim ${formatFlow(claim.preparation.amount)} FLOW`
-                : 'Claim FLOW'}
-          </button>
+          {running && count > 1 ? (
+            <button
+              type="button"
+              onClick={() => (stopRef.current = true)}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-2xl border border-hairline bg-card px-4 text-[13px] font-bold text-foreground"
+            >
+              Stop after this round
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void claimRounds(rounds.claimable)}
+              disabled={!count || running || claim.loading}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:border disabled:border-hairline disabled:bg-card disabled:text-muted"
+            >
+              {running ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Coins className="h-4 w-4" aria-hidden />}
+              {running ? 'Claiming…' : count > 1 ? `Claim available FLOW (${count} confirmations)` : count === 1 ? `Claim ${total} FLOW` : 'Claim FLOW'}
+            </button>
+          )}
         </div>
 
-        {txHash ? (
-          <a
-            href={`${botMainnet.blockExplorers.default.url}/tx/${txHash}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-primary"
-          >
-            View claim transaction <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-          </a>
-        ) : null}
-
-        {error ? <p className="text-[12px] leading-relaxed text-destructive">{error}</p> : null}
-
         {claim.explorerTxUrl ? (
-          <a
-            href={claim.explorerTxUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-muted"
-          >
-            View the on-chain epoch publication <ExternalLink className="h-3 w-3" aria-hidden />
+          <a href={claim.explorerTxUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-muted">
+            View the reward distributor <ExternalLink className="h-3 w-3" aria-hidden />
           </a>
         ) : null}
 
         <p className="text-[11px] leading-relaxed text-muted-soft">
-          Mainnet rewards are paid only from an epoch that was already funded and reserved on chain
-          before publication — nothing is minted, and a claim can never exceed its published leaf.
-          The proof is checked against the distributor's live root in your browser before your wallet
-          is asked to sign, and the contract checks it again. BOT Mainnet Staking V2 is public;
-          staking rewards are separate from FLOW Points. Deposits remain subject to live safety checks.
+          Only verified, funded and published allocations appear here — not every earned Point. 1 Point = 1 FLOW
+          only for allocations in a published round. Claims are sent one at a time from your own wallet; the
+          contract has no combined claim. Unclaimed FLOW expires when a round's window closes.
         </p>
       </div>
     </Surface>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function RoundRow({
+  r,
+  busy,
+  step,
+  onClaim,
+}: {
+  r: RoundView;
+  busy: boolean;
+  step: Step | null;
+  onClaim: (p: ClaimablePreparation) => void;
+}) {
+  const dateLine =
+    r.status === 'OPENS_LATER'
+      ? `Opens ${asDate(r.claimStart)}`
+      : r.status === 'CLAIMABLE'
+        ? `Claim by ${asDate(r.claimEnd)}`
+        : r.status === 'EXPIRED'
+          ? `Closed ${asDate(r.claimEnd)}`
+          : r.message;
   return (
-    <div className="rounded-xl border border-hairline bg-card/60 px-3 py-2">
-      <dt className="text-[10.5px] font-bold uppercase tracking-wide text-muted-soft">{label}</dt>
-      <dd className="mt-0.5 text-[12.5px] font-black text-foreground">{value}</dd>
-    </div>
+    <li className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline bg-card/60 px-3 py-2">
+      <div className="min-w-0">
+        <p className="text-[12.5px] font-black text-foreground">
+          Round #{r.epochId} · {formatFlow(r.amount)} FLOW
+        </p>
+        <p className="break-words text-[11px] text-muted">
+          <span className="font-bold">{LABEL[r.status]}</span> · {dateLine}
+        </p>
+        {r.publicationTxHash ? (
+          <a href={`${EXPLORER}/tx/${r.publicationTxHash}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10.5px] font-bold text-muted-soft">
+            Publication tx <ExternalLink className="h-3 w-3" aria-hidden />
+          </a>
+        ) : null}
+      </div>
+      {r.status === 'CLAIMABLE' && r.preparation ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onClaim(r.preparation!)}
+          className="inline-flex min-h-[40px] items-center rounded-full bg-primary px-3 text-[12px] font-bold text-primary-foreground disabled:opacity-45"
+        >
+          {step?.epochId === r.epochId ? 'Claiming…' : 'Claim'}
+        </button>
+      ) : null}
+    </li>
   );
 }
