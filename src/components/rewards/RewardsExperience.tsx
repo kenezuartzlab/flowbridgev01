@@ -24,6 +24,7 @@ export function RewardsExperience() {
   const retry = () => { void refresh(); window.dispatchEvent(new Event('flowbridge:wallet-bound')); };
   return <div className="min-w-0 space-y-5" data-testid="unified-rewards">
     <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase text-primary">FlowBridge</p><h1 className="text-2xl font-bold">FLOW Rewards</h1></div><Button variant="ghost" size="icon" aria-label="Refresh rewards" title="Refresh rewards" onClick={retry}><RefreshCw className={loading || progressLoading ? 'animate-spin' : ''} /></Button></div>
+    <MainnetFlowClaimCard />
     {!authReady ? <p role="status" className="text-sm text-muted">Checking your account…</p> : !user ? <div className="space-y-3"><p className="text-sm leading-relaxed text-muted">Sign in to see recorded Points, funded rewards and verified payout eligibility. Points are not a token balance.</p><SignInButton label="Sign in" returnTo="/rewards" /></div> : <>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3" data-testid="reward-balances">
         {[
@@ -39,7 +40,6 @@ export function RewardsExperience() {
       </dl>
       {personal?.payoutApproval?.claimOpensAt && <p role="status" className="text-sm text-muted">Your published FLOW can be claimed from {new Date(personal.payoutApproval.claimOpensAt).toLocaleString()}.</p>}
       <Button asChild className="h-auto min-h-10 w-full whitespace-normal text-center"><a href="#mainnet-flow-claim">{(summary?.claimableNow ?? 0) > 0 ? 'Go to FLOW ready to claim' : 'Check FLOW ready to claim'}</a></Button>
-      <MainnetFlowClaimCard />
       <nav aria-label="Rewards views" className="flex flex-wrap gap-1 border-b border-hairline pb-2">{[['rewards','Points & eligibility'],['referrals','Referrals'],['policy','How you earn']].map(([key,label]) => <Button key={key} variant={tab === key ? 'secondary' : 'ghost'} size="sm" onClick={() => setTab(key)} aria-pressed={tab === key}>{label}</Button>)}</nav>
       {tab === 'rewards' && <>
         {personal ? <RewardProgressPanel p={personal.progression} area="flow_points" detailed /> : <p role="status" className="text-sm text-muted">{progressLoading ? 'Checking verified reward eligibility…' : 'Reward status is unavailable. Refresh to retry; no claim amount is assumed.'}</p>}
