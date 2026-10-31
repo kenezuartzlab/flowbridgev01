@@ -14,6 +14,7 @@ export function PublicFooter() {
       </div>
       <nav aria-label="Ecosystem links" className="flex flex-wrap items-center gap-4">
         <Link to="/bot-chain" className="hover:text-primary">Ecosystem</Link>
+        <Link to="/ecosystem-ranking" className="hover:text-primary">Ranking</Link>
         <a href="https://botchain.ai" target="_blank" rel="noreferrer" className="hover:text-primary">BOT Chain</a>
         <a href="https://scan.botchain.ai" target="_blank" rel="noreferrer" className="hover:text-primary">Explorer</a>
       </nav>
