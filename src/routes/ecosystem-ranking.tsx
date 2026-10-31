@@ -2,6 +2,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Search, Trophy, ExternalLink } from "lucide-react";
+import { VoteFlowBridge } from "@/components/ecosystem/VoteFlowBridge";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { getEcosystemRanking, FLOWBRIDGE_PROJECT_ID } from "@/lib/ecosystem/ranking.functions";
@@ -41,7 +42,7 @@ export const Route = createFileRoute("/ecosystem-ranking")({
 const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "");
 
 function RankingPage() {
-  const data = useSuspenseQuery(rankingQuery).data;
+  const { data, refetch } = useSuspenseQuery(rankingQuery);
   const fb = data.flowbridge;
   const votes = fb?.weeklyVoteCount ?? 0;
   const rank = fb?.weeklyRankNo ?? null;
@@ -65,11 +66,7 @@ function RankingPage() {
           </div>
         </div>
 
-        <a href={OFFICIAL} target="_blank" rel="noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-4 text-base font-bold text-primary-foreground shadow-lg">
-          Vote for FlowBridge <ExternalLink className="h-4 w-4" />
-        </a>
-        <p className="-mt-2 text-center text-xs text-muted-foreground">Opens BOT Chain's official page — connect your wallet there to vote.</p>
+        <VoteFlowBridge onVoted={() => void refetch()} />
 
         <ol className="space-y-2">
           {data.list.map((e) => {
@@ -84,7 +81,7 @@ function RankingPage() {
             );
           })}
         </ol>
-        <p className="text-xs text-muted-foreground">Voting happens on the official BOT Chain page with your own wallet. Data provided by BOT Chain.</p>
+        <p className="text-xs text-muted-foreground">Votes go to BOT Chain's official ranking contract from your own wallet. Data provided by BOT Chain.</p>
       </main>
       <BottomNav />
     </div>

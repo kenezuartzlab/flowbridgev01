@@ -22,3 +22,16 @@ describe("ecosystem ranking page", () => {
     expect(ensureQueryData.mock.calls[0][0]).toMatchObject({ queryKey: ["ecosystem-ranking", "weekly"] });
   });
 });
+
+import { cooldownLeft, fmtCountdown, VOTE_CONTRACT } from "@/lib/ecosystem/vote";
+describe("in-app vote rules", () => {
+  it("uses BOT Chain's official vote contract", () => {
+    expect(VOTE_CONTRACT).toBe("0xF5b22756CbD9193CE6F349bbD1835c2e5a6Cb181");
+  });
+  it("blocks voting until the 6h cooldown passes", () => {
+    expect(cooldownLeft(false, 1000n, 400n)).toBe(600n);
+    expect(cooldownLeft(false, 1000n, 1000n)).toBe(0n);
+    expect(cooldownLeft(true, 1000n, 400n)).toBe(0n);
+    expect(fmtCountdown(6675)).toBe("01:51:15");
+  });
+});
