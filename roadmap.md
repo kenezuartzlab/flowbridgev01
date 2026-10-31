@@ -32,11 +32,11 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Published correction and verified flowbridge.space/trade HTTP 200, no runtime errors; App-DTHqg3Vy.js SHA-256 17e1105be5dc70b16f0acfe331fb0d632e7c612daed4d008279239830206434c.
 
 # Monitoring finding review
-- [ ] Oct 31 incident: verify both account ledgers, program backing authorization and all 11 live Round #4 proofs.
-- [ ] Correct proven read-cycle persistence and pending-status bugs; preserve all financial holds and published allocations.
+- [x] Oct 31 incident: both account ledgers and authorized budgets inspected; Round #4 public proofs and live evaluator pass for 11/11 unclaimed leaves at block 28,567,775.
+- [x] Correct approval-read snapshot persistence, prepare manual confirmations after commit, and exclude unsupported milestone rows from pending funding; all economic holds unchanged.
 - [ ] Run focused regressions and signed-in 390px acceptance; publish corrective code only after safety checks.
 - [x] Oct 29 incident: read live funded reservations, approvals and Round #4; bound payout-state reads and distinguish reconciliation-held funding from ready allocations.
 - [x] Published incident correction; live Ops asset ops-DYmLlvbm.js fingerprint c2c8c6a082813566, signed-out Rewards/Ops HTTP 200 without runtime errors; 2,101 tests passed and preview build OK.
-- [ ] Next payout readiness: blocked by authoritative account reconciliation (299 funded signup FLOW and another 500); no confirmed unpaid approvals exist. Requires super-admin evidence review, not another approval or funding reservation.
+- [ ] Next payout readiness: no confirmed unpaid approvals or Round #5 stored. CORE_SWAP has an authorized 1M ceiling but funding_verified=false; 415 verified Points lack reservations. The 299 signup delta remains blocked by REVIEWED_NONCLAIMABLE_HISTORICAL (981 stored-vs-accepted difference, 776 provenance-held swap Points and 30 unsupported later milestone Points). Requires explicit program backing authorization and an audited account evidence decision preserving historical exclusions; no financial action authorized here.
 - [x] Verify cited auto-approval mid-loop persistence: stale; current reads use persistBatch:false. Six focused files / 62 tests pass.
 - [ ] Direct bridge verified completion: confirmed missing authoritative destination correlation feed; integration plan awaiting approval and official evidence interface.
