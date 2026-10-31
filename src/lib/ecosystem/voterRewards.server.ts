@@ -13,8 +13,8 @@ const FLOW_TOKEN = "0xcaaB50F36252a57529AFeF651fa6B9f9281917fF" as const;
 const FLOW_USDT_POOL = "0xDaCFc2574b6110892351Bd31afb36F95E7206162" as const;
 const WBOT_USDT_POOL = "0x64f418471a1a7932a190e10da5a8551db5abec05" as const;
 const IMPL_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc" as const;
-const CHUNK = 5000n;
-const MAX_CHUNKS = 40;
+const CHUNK = 500_000n;
+const MAX_CHUNKS = 20;
 
 const ERC20 = parseAbi(["function transfer(address to, uint256 amount) returns (bool)", "function balanceOf(address) view returns (uint256)"]);
 const POOL = parseAbi(["function slot0() view returns (uint160,int24,uint16,uint16,uint16,uint8,bool)"]);
