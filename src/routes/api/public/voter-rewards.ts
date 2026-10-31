@@ -14,7 +14,7 @@ export const Route = createFileRoute("/api/public/voter-rewards")({
         const since = z.string().datetime().safeParse(u.searchParams.get("since"));
         const until = z.string().datetime().safeParse(u.searchParams.get("until"));
         const s = await import("@/lib/ecosystem/voterRewards.server");
-        const sync = await s.syncVotes().catch(() => ({ halted: false, lastBlock: 0 }));
+        const sync = await s.syncVotes().catch((e) => { console.error("vote sync failed", e?.message ?? e); return { halted: false, lastBlock: 0 }; });
         const now = new Date();
         const from = since.success ? since.data : new Date(now.getTime() - 7 * 86_400_000).toISOString();
         const to = until.success ? until.data : now.toISOString();
