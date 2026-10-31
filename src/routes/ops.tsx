@@ -176,7 +176,7 @@ function OpsPage() {
 
       {q.isLoading && <p className="text-[13px] text-muted">Running live read-only checks…</p>}
       {q.isError && <div role="alert" className="space-y-2 text-[13px] text-danger"><p>{q.error.message} Status is UNKNOWN until the check succeeds.</p><Button variant="outline" size="sm" onClick={() => q.refetch()} disabled={q.isFetching}><RefreshCw />Retry operator check</Button><Link to="/account" className="ml-3 text-primary underline">Go to account</Link></div>}
-      {tab === "Control Center" ? <RewardsControlCenter wallet={address} onOpen={(t) => setTab(t)} /> : tab === "Rewards" ? <RewardsSolvencyTab wallet={address} /> : tab === "Budgets" ? <BudgetControlsTab wallet={address} /> : tab === "Voter Rewards" ? <VoterRewardsTab wallet={address} /> : r && <TabBody tab={tab} r={r} />}
+      {tab === "Control Center" ? <RewardsControlCenter wallet={address} onOpen={(t) => setTab(t)} /> : tab === "Rewards" ? <RewardsSolvencyTab wallet={address} /> : tab === "Budgets" ? <BudgetControlsTab wallet={address} /> : tab === "Voter Rewards" ? <VoterRewardsTab wallet={address ?? ""} /> : r && <TabBody tab={tab} r={r} />}
     </main>
   );
 }
