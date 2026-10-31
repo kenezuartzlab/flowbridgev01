@@ -79,6 +79,7 @@ import { Route as ApiAdminRewardsSolvencyRouteImport } from './routes/api/admin.
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminUsersRouteImport } from './routes/api/admin.users'
+import { Route as ApiAdminVoterRewardsRouteImport } from './routes/api/admin.voter-rewards'
 import { Route as ApiAdminWhoamiRouteImport } from './routes/api/admin.whoami'
 import { Route as ApiAiDecisionRouteImport } from './routes/api/ai.decision'
 import { Route as ApiAiDeliberateRouteImport } from './routes/api/ai.deliberate'
@@ -96,6 +97,7 @@ import { Route as ApiIncentivesGlobalRouteImport } from './routes/api/incentives
 import { Route as ApiProfileParticipationRouteImport } from './routes/api/profile.participation'
 import { Route as ApiPublicRewardPolicyRouteImport } from './routes/api/public/reward-policy'
 import { Route as ApiPublicRewardRoundsRouteImport } from './routes/api/public/reward-rounds'
+import { Route as ApiPublicVoterRewardsRouteImport } from './routes/api/public/voter-rewards'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiPublicWalletProofRouteImport } from './routes/api/public/wallet-proof'
 import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
@@ -489,6 +491,11 @@ const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
   path: '/api/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminVoterRewardsRoute = ApiAdminVoterRewardsRouteImport.update({
+  id: '/api/admin/voter-rewards',
+  path: '/api/admin/voter-rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminWhoamiRoute = ApiAdminWhoamiRouteImport.update({
   id: '/api/admin/whoami',
   path: '/api/admin/whoami',
@@ -572,6 +579,11 @@ const ApiPublicRewardPolicyRoute = ApiPublicRewardPolicyRouteImport.update({
 const ApiPublicRewardRoundsRoute = ApiPublicRewardRoundsRouteImport.update({
   id: '/api/public/reward-rounds',
   path: '/api/public/reward-rounds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicVoterRewardsRoute = ApiPublicVoterRewardsRouteImport.update({
+  id: '/api/public/voter-rewards',
+  path: '/api/public/voter-rewards',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicWalletLookupRoute = ApiPublicWalletLookupRouteImport.update({
@@ -792,6 +804,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
+  '/api/admin/voter-rewards': typeof ApiAdminVoterRewardsRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/ai/decision': typeof ApiAiDecisionRoute
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
@@ -809,6 +822,7 @@ export interface FileRoutesByFullPath {
   '/api/profile/participation': typeof ApiProfileParticipationRoute
   '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
+  '/api/public/voter-rewards': typeof ApiPublicVoterRewardsRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/public/wallet-proof': typeof ApiPublicWalletProofRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -909,6 +923,7 @@ export interface FileRoutesByTo {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
+  '/api/admin/voter-rewards': typeof ApiAdminVoterRewardsRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/ai/decision': typeof ApiAiDecisionRoute
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
@@ -926,6 +941,7 @@ export interface FileRoutesByTo {
   '/api/profile/participation': typeof ApiProfileParticipationRoute
   '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
+  '/api/public/voter-rewards': typeof ApiPublicVoterRewardsRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/public/wallet-proof': typeof ApiPublicWalletProofRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -1027,6 +1043,7 @@ export interface FileRoutesById {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
+  '/api/admin/voter-rewards': typeof ApiAdminVoterRewardsRoute
   '/api/admin/whoami': typeof ApiAdminWhoamiRoute
   '/api/ai/decision': typeof ApiAiDecisionRoute
   '/api/ai/deliberate': typeof ApiAiDeliberateRoute
@@ -1044,6 +1061,7 @@ export interface FileRoutesById {
   '/api/profile/participation': typeof ApiProfileParticipationRoute
   '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
+  '/api/public/voter-rewards': typeof ApiPublicVoterRewardsRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/public/wallet-proof': typeof ApiPublicWalletProofRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -1146,6 +1164,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/users'
+    | '/api/admin/voter-rewards'
     | '/api/admin/whoami'
     | '/api/ai/decision'
     | '/api/ai/deliberate'
@@ -1163,6 +1182,7 @@ export interface FileRouteTypes {
     | '/api/profile/participation'
     | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
+    | '/api/public/voter-rewards'
     | '/api/public/wallet-lookup'
     | '/api/public/wallet-proof'
     | '/api/rewards/claim-authorization'
@@ -1263,6 +1283,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/users'
+    | '/api/admin/voter-rewards'
     | '/api/admin/whoami'
     | '/api/ai/decision'
     | '/api/ai/deliberate'
@@ -1280,6 +1301,7 @@ export interface FileRouteTypes {
     | '/api/profile/participation'
     | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
+    | '/api/public/voter-rewards'
     | '/api/public/wallet-lookup'
     | '/api/public/wallet-proof'
     | '/api/rewards/claim-authorization'
@@ -1380,6 +1402,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/users'
+    | '/api/admin/voter-rewards'
     | '/api/admin/whoami'
     | '/api/ai/decision'
     | '/api/ai/deliberate'
@@ -1397,6 +1420,7 @@ export interface FileRouteTypes {
     | '/api/profile/participation'
     | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
+    | '/api/public/voter-rewards'
     | '/api/public/wallet-lookup'
     | '/api/public/wallet-proof'
     | '/api/rewards/claim-authorization'
@@ -1498,6 +1522,7 @@ export interface RootRouteChildren {
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRoute
+  ApiAdminVoterRewardsRoute: typeof ApiAdminVoterRewardsRoute
   ApiAdminWhoamiRoute: typeof ApiAdminWhoamiRoute
   ApiAiDecisionRoute: typeof ApiAiDecisionRoute
   ApiAiDeliberateRoute: typeof ApiAiDeliberateRoute
@@ -1509,6 +1534,7 @@ export interface RootRouteChildren {
   ApiProfileParticipationRoute: typeof ApiProfileParticipationRoute
   ApiPublicRewardPolicyRoute: typeof ApiPublicRewardPolicyRoute
   ApiPublicRewardRoundsRoute: typeof ApiPublicRewardRoundsRoute
+  ApiPublicVoterRewardsRoute: typeof ApiPublicVoterRewardsRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiPublicWalletProofRoute: typeof ApiPublicWalletProofRoute
   ApiRewardsClaimAuthorizationRoute: typeof ApiRewardsClaimAuthorizationRoute
@@ -2026,6 +2052,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/voter-rewards': {
+      id: '/api/admin/voter-rewards'
+      path: '/api/admin/voter-rewards'
+      fullPath: '/api/admin/voter-rewards'
+      preLoaderRoute: typeof ApiAdminVoterRewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/whoami': {
       id: '/api/admin/whoami'
       path: '/api/admin/whoami'
@@ -2143,6 +2176,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/reward-rounds'
       fullPath: '/api/public/reward-rounds'
       preLoaderRoute: typeof ApiPublicRewardRoundsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/voter-rewards': {
+      id: '/api/public/voter-rewards'
+      path: '/api/public/voter-rewards'
+      fullPath: '/api/public/voter-rewards'
+      preLoaderRoute: typeof ApiPublicVoterRewardsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/wallet-lookup': {
@@ -2496,6 +2536,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
+  ApiAdminVoterRewardsRoute: ApiAdminVoterRewardsRoute,
   ApiAdminWhoamiRoute: ApiAdminWhoamiRoute,
   ApiAiDecisionRoute: ApiAiDecisionRoute,
   ApiAiDeliberateRoute: ApiAiDeliberateRoute,
@@ -2507,6 +2548,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProfileParticipationRoute: ApiProfileParticipationRoute,
   ApiPublicRewardPolicyRoute: ApiPublicRewardPolicyRoute,
   ApiPublicRewardRoundsRoute: ApiPublicRewardRoundsRoute,
+  ApiPublicVoterRewardsRoute: ApiPublicVoterRewardsRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiPublicWalletProofRoute: ApiPublicWalletProofRoute,
   ApiRewardsClaimAuthorizationRoute: ApiRewardsClaimAuthorizationRoute,

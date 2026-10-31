@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Search, Trophy } from "lucide-react";
 import { VoteFlowBridge } from "@/components/ecosystem/VoteFlowBridge";
+import { VoterRewards } from "@/components/ecosystem/VoterRewards";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { getEcosystemRanking, FLOWBRIDGE_PROJECT_ID } from "@/lib/ecosystem/ranking.functions";
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/ecosystem-ranking")({
 });
 
 const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "");
+const iso = (d: string | null) => { const t = d ? new Date(d).getTime() : NaN; return Number.isFinite(t) ? new Date(t).toISOString() : undefined; };
 
 function RankingPage() {
   const { data, refetch } = useSuspenseQuery(rankingQuery);
@@ -99,6 +101,8 @@ function RankingPage() {
           })}
         </ol>
         <p className="text-xs text-muted-foreground">Votes go to BOT Chain's official ranking contract from your own wallet. Data provided by BOT Chain.</p>
+
+        <VoterRewards since={iso(data.periodStart)} until={iso(data.periodEnd)} refreshKey={votes} />
       </main>
       <BottomNav />
     </div>
