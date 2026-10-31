@@ -20,6 +20,7 @@ import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as EarnRouteImport } from './routes/earn'
 import { Route as EcosurgeRouteImport } from './routes/ecosurge'
+import { Route as EcosystemRankingRouteImport } from './routes/ecosystem-ranking'
 import { Route as FortuneRouteImport } from './routes/fortune'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as HomeRouteImport } from './routes/home'
@@ -177,6 +178,11 @@ const EarnRoute = EarnRouteImport.update({
 const EcosurgeRoute = EcosurgeRouteImport.update({
   id: '/ecosurge',
   path: '/ecosurge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EcosystemRankingRoute = EcosystemRankingRouteImport.update({
+  id: '/ecosystem-ranking',
+  path: '/ecosystem-ranking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FortuneRoute = FortuneRouteImport.update({
@@ -727,6 +733,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
+  '/ecosystem-ranking': typeof EcosystemRankingRoute
   '/fortune': typeof FortuneRoute
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
@@ -843,6 +850,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
+  '/ecosystem-ranking': typeof EcosystemRankingRoute
   '/fortune': typeof FortuneRoute
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
@@ -960,6 +968,7 @@ export interface FileRoutesById {
   '/docs': typeof DocsRoute
   '/earn': typeof EarnRoute
   '/ecosurge': typeof EcosurgeRoute
+  '/ecosystem-ranking': typeof EcosystemRankingRoute
   '/fortune': typeof FortuneRoute
   '/games': typeof GamesRoute
   '/home': typeof HomeRoute
@@ -1078,6 +1087,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/earn'
     | '/ecosurge'
+    | '/ecosystem-ranking'
     | '/fortune'
     | '/games'
     | '/home'
@@ -1194,6 +1204,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/earn'
     | '/ecosurge'
+    | '/ecosystem-ranking'
     | '/fortune'
     | '/games'
     | '/home'
@@ -1310,6 +1321,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/earn'
     | '/ecosurge'
+    | '/ecosystem-ranking'
     | '/fortune'
     | '/games'
     | '/home'
@@ -1427,6 +1439,7 @@ export interface RootRouteChildren {
   DocsRoute: typeof DocsRoute
   EarnRoute: typeof EarnRoute
   EcosurgeRoute: typeof EcosurgeRoute
+  EcosystemRankingRoute: typeof EcosystemRankingRoute
   FortuneRoute: typeof FortuneRoute
   GamesRoute: typeof GamesRoute
   HomeRoute: typeof HomeRoute
@@ -1598,6 +1611,13 @@ declare module '@tanstack/react-router' {
       path: '/ecosurge'
       fullPath: '/ecosurge'
       preLoaderRoute: typeof EcosurgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ecosystem-ranking': {
+      id: '/ecosystem-ranking'
+      path: '/ecosystem-ranking'
+      fullPath: '/ecosystem-ranking'
+      preLoaderRoute: typeof EcosystemRankingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fortune': {
@@ -2415,6 +2435,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocsRoute: DocsRoute,
   EarnRoute: EarnRoute,
   EcosurgeRoute: EcosurgeRoute,
+  EcosystemRankingRoute: EcosystemRankingRoute,
   FortuneRoute: FortuneRoute,
   GamesRoute: GamesRoute,
   HomeRoute: HomeRoute,
