@@ -66,7 +66,7 @@ function RankingPage() {
         </div>
 
         <a href={OFFICIAL} target="_blank" rel="noreferrer"
-          className="fb-surface flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-4 text-base font-bold text-primary-foreground">
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-4 text-base font-bold text-primary-foreground shadow-lg">
           Vote for FlowBridge <ExternalLink className="h-4 w-4" />
         </a>
         <p className="-mt-2 text-center text-xs text-muted-foreground">Opens BOT Chain's official page — connect your wallet there to vote.</p>
