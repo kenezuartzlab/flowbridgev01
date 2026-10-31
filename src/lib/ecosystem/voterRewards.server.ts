@@ -31,8 +31,11 @@ export async function readImplementation(): Promise<string> {
 export async function syncVotes(maxAgeMs = 60_000): Promise<{ halted: boolean; lastBlock: number }> {
   const db = await admin();
   const { data: st } = await db.from("vote_indexer_state").select("*").eq("id", 1).maybeSingle();
-  if (st && (st.halted || Date.now() - new Date(st.synced_at).getTime() < maxAgeMs)) return { halted: st.halted, lastBlock: Number(st.last_block) };
+  if (st?.halted) return { halted: true, lastBlock: Number(st.last_block) };
   const c = client();
+  const head = await c.getBlockNumber();
+  const caughtUp = st && head - BigInt(st.last_block) < 2000n;
+  if (st && caughtUp && Date.now() - new Date(st.synced_at).getTime() < maxAgeMs) return { halted: false, lastBlock: Number(st.last_block) };
   const impl = await readImplementation();
   if (!st) {
     await db.from("vote_indexer_state").insert({ id: 1, contract: VOTE_CONTRACT.toLowerCase(), implementation: impl, last_block: Number(VOTE_CONTRACT_START_BLOCK) - 1 });
@@ -41,7 +44,6 @@ export async function syncVotes(maxAgeMs = 60_000): Promise<{ halted: boolean; l
     await db.from("vote_indexer_state").update({ halted: true, halt_reason: `Vote contract implementation changed to ${impl}`, synced_at: new Date().toISOString() }).eq("id", 1);
     return { halted: true, lastBlock: Number(st?.last_block ?? 0) };
   }
-  const head = await c.getBlockNumber();
   let from = BigInt(st?.last_block ?? Number(VOTE_CONTRACT_START_BLOCK) - 1) + 1n;
   const topic919 = `0x${PROJECT_ID.toString(16).padStart(64, "0")}` as Hex;
   for (let i = 0; i < MAX_CHUNKS && from <= head; i++) {
