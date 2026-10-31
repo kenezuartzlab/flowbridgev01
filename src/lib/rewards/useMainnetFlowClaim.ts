@@ -223,7 +223,9 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
         : 'BLOCKED';
       setState({
         status,
-        message: first?.message ?? '',
+        message: !summary.active.length && summary.history.some((r) => r.status === 'CLAIMED')
+          ? 'No new published allocation. Previously claimed rounds are in History; pending Points have not been paid by those claims.'
+          : first?.message ?? '',
         preparation: summary.claimable[0] ?? null,
         entitlement: ent,
         epoch: null,

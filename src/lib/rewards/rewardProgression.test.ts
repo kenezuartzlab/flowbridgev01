@@ -17,6 +17,21 @@ const alloc = (o: Partial<ProgressionAllocation> = {}): ProgressionAllocation =>
 });
 
 describe("V34 1,000 FLOW progression", () => {
+  it('366 verified unfunded swap Points remain separate from 1,122 already claimed and 354 held', () => {
+    const p = computeRewardProgression(base(1122, { ledger: [funded(1022), funded(100, 'SIGNUP_BONUS'), { points: 366, chainId: 677, fundingState: 'UNFUNDED', programId: 'CORE_SWAP' }, { points: 354, chainId: 677, fundingState: 'UNFUNDED', programId: 'CORE_SWAP', excluded: true }], reconciledPoints: 1488, allocations: [alloc({ amountFlow: 1122, claimed: true })] }));
+    expect(p.pendingFundingByProgram?.CORE_SWAP).toBe(366);
+    expect(p.pendingUnfunded).toBe(366);
+    expect(p.availableTowardMinimum).toBe(0);
+    expect(p.claimedFlow).toBe(1122);
+    expect(p.claimButton).toBe(false);
+  });
+  it('299 reserved referral signup Points stay held; unsupported milestones never join the funding queue', () => {
+    const p = computeRewardProgression(base(300, { ledger: [funded(300, 'SIGNUP_BONUS'), { points: 49, chainId: 677, fundingState: 'UNFUNDED', programId: 'CORE_SWAP' }, { points: 30, chainId: null, fundingState: 'UNFUNDED', programId: 'REFERRAL_MILESTONE', excluded: true }], reconciledPoints: 349, reconciliationOk: false, allocations: [alloc({ epochId: 1, amountFlow: 1, claimed: true })] }));
+    expect(p.availableTowardMinimum).toBe(299);
+    expect(p.pendingFundingByProgram?.CORE_SWAP).toBe(49);
+    expect(p.pendingFundingByProgram?.REFERRAL_MILESTONE).toBe(0);
+    expect(p.settlementReady).toBe(false);
+  });
   it.each([
     [0, 1, 0], [100, 0, 100], [999, 0, 100], [1000, 0, 100], [1500, 0, 100],
   ])("%i FLOW → %i remaining, %i%%", (pts, remaining, pct) => {

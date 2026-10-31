@@ -58,7 +58,7 @@ async function todayUsage() {
 export async function readAutomation() {
   const cfg = await readAutoConfig();
   const { loadQueueState } = await import("./approvalQueue.server");
-  const [{ routineQueue: queue, report }, usage] = await Promise.all([loadQueueState(), todayUsage()]);
+  const [{ routineQueue: queue, report }, usage] = await Promise.all([loadQueueState(undefined, { persistBatch: false }), todayUsage()]);
   const live = report.distributor.live;
   const plan = planAutoApprovals(queue.candidates, cfg, {
     usedTodayFlow: usage.used, walletUsedToday: usage.walletUsedToday,
