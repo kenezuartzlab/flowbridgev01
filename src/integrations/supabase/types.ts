@@ -2859,6 +2859,10 @@ export type Database = {
         }
         Returns: string
       }
+      credit_vote_period: {
+        Args: { p_credits: Json; p_period: Json }
+        Returns: string
+      }
       decide_reward_evidence_exception: {
         Args: {
           p_actor: string
