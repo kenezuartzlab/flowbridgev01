@@ -12,8 +12,8 @@ const data = {
 
 describe("ecosystem ranking page", () => {
   it("loads exactly one period view (weekly), never a monthly one", async () => {
-    const ensureQueryData = vi.fn(async (opts: { queryKey: unknown }) => {
-      if (opts.queryKey[1] !== "weekly") throw new Error(`unexpected period ${String(opts.queryKey[1])}`);
+    const ensureQueryData = vi.fn(async (opts: { queryKey: [string, string] }) => {
+      if (opts.queryKey[1] !== "weekly") throw new Error(`unexpected period ${opts.queryKey[1]}`);
       return data;
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
