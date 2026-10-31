@@ -1,7 +1,7 @@
 /** Public: live BOT Chain Ecosystem Ranking with FlowBridge pinned and one-tap voting. */
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { Search, Trophy, ExternalLink } from "lucide-react";
+import { Search, Trophy } from "lucide-react";
 import { VoteFlowBridge } from "@/components/ecosystem/VoteFlowBridge";
 import { AppTopBar } from "@/components/layout/AppTopBar";
 import { BottomNav } from "@/components/nav/BottomNav";
