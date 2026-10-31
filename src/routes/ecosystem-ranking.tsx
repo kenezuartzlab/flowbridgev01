@@ -29,7 +29,7 @@ export const Route = createFileRoute("/ecosystem-ranking")({
   loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(rankingQuery("weekly")), context.queryClient.ensureQueryData(rankingQuery("monthly"))]),
   component: RankingPage,
   errorComponent: () => (
-    <div className="min-h-screen bg-background text-foreground"><AppTopBar />
+    <div className="min-h-screen bg-background text-foreground"><AppTopBar title="Ecosystem Ranking" />
       <main className="mx-auto max-w-2xl p-6 text-center"><p className="text-muted-foreground">BOT Chain ranking is temporarily unavailable.</p>
         <a href={OFFICIAL} target="_blank" rel="noreferrer" className="mt-3 inline-block text-primary">Open official ranking</a></main></div>
   ),
@@ -48,7 +48,7 @@ function RankingPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24 text-foreground">
-      <AppTopBar />
+      <AppTopBar title="Ecosystem Ranking" />
       <main className="mx-auto max-w-2xl space-y-4 px-4 py-6">
         <header>
           <h1 className="flex items-center gap-2 text-2xl font-bold"><Trophy className="h-6 w-6 text-primary" />BOT Chain Ecosystem Ranking</h1>
