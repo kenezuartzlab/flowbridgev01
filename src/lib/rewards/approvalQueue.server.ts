@@ -63,7 +63,7 @@ function settlementBlockReason(st: { status: string; reason?: string | null; che
 export async function readApprovalQueue(actor?: AdminContext) {
   const admin = await db();
   const [{ queue, report }, { data: approvals, error }] = await Promise.all([
-    loadQueueState(),
+    loadQueueState(undefined, { persistBatch: false }),
     admin.from("reward_payout_approvals").select("id,user_id,wallet,points,auto_approved,program_breakdown,linked_epoch_id,publication_tx_hash,linked_at,available_points,funded_points,already_settled_points,evidence_hash,status,proposed_by_email,decided_by_email,decided_at,confirmed_by_email,confirmed_at,decision_note,created_at").order("created_at", { ascending: false }).limit(100),
   ]);
   if (error) throw new Error("approval records unavailable");
@@ -91,7 +91,7 @@ export async function readApprovalQueue(actor?: AdminContext) {
 
 export async function proposePayout(a: AdminContext, userId: string, points: number, note?: string) {
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false as const, error: "Account is required." };
-  const { queue, report } = await loadQueueState();
+  const { queue, report } = await loadQueueState(undefined, { persistBatch: false });
   const c = queue.candidates.find((x) => x.userId === userId);
   if (!c) return { ok: false as const, error: "This account has no verified eligible Points available for payout." };
   if (!proposedAmountValid(c.availablePoints, points)) return { ok: false as const, error: `Amount must be between 1 and ${c.availablePoints} verified Points.` };
@@ -153,7 +153,7 @@ export async function confirmApproved(a: { userId: string; email: string; role: 
   if (rec.evidence_hash !== expectedHash) return { ok: false as const, error: "Evidence hash mismatch; reload and re-review." };
   if (isPublisherRecipient(rec.wallet)) return { ok: false as const, error: "Publisher wallet recipient is held for independent review and cannot be confirmed here." };
   // Re-verify the account is still eligible and backed before confirming. This approval's own open record is ignored.
-  const { queue, report } = pre ?? await loadQueueState(id).catch(() => ({ queue: null, report: null }));
+  const { queue, report } = pre ?? await loadQueueState(id, { persistBatch: false }).catch(() => ({ queue: null, report: null }));
   if (!queue || !report) return { ok: false as const, error: "Eligibility checks are temporarily unavailable; nothing changed. Retry shortly." };
   const chain = report.distributor.live ?? null;
   if (!chain) return { ok: false as const, error: "Distributor state unreadable; nothing changed. Retry shortly." };
@@ -173,7 +173,9 @@ export async function confirmApproved(a: { userId: string; email: string; role: 
   // Prepare-only: unsigned settlement candidate via the existing builder. No signing, no broadcast.
   let distribution: { status: string; prepared: boolean; claimStartIso: string | null; claimEndIso: string | null; automaticSigning: false };
   try {
-    const st = report!.settlement;
+    // Manual confirmation prepares from the committed row, not the pre-write
+    // snapshot. Automation supplies `pre` and prepares once after its full cycle.
+    const st = pre ? report.settlement : (await (await import('./rewardSolvency.server')).buildRewardSolvencyReport()).settlement;
     distribution = { status: st.status, prepared: st.status === "READY_FOR_PUBLISHER_REVIEW", claimStartIso: st.claimStartIso, claimEndIso: st.claimEndIso, automaticSigning: false };
   } catch { distribution = { status: "CHECKS_UNAVAILABLE", prepared: false, claimStartIso: null, claimEndIso: null, automaticSigning: false }; }
   return { ok: true as const, status: "CONFIRMED", distribution };

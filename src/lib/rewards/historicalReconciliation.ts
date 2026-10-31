@@ -73,6 +73,8 @@ export interface ReconAccountResult {
   authoritative: number;
   breakdown: ReconBreakdown;
   pendingReview: number;
+  /** Evidence still missing before a historical display-only review classification. */
+  unresolvedReviewPoints: number;
   excluded: ReconExclusion[];
   explained: string[];
   flags: string[];
@@ -219,6 +221,7 @@ export function reconcileAccount(
   let nonclaimableHistorical = legacySignup && acct.ledger.length === 0 ? explainedAmount : 0;
   // An owner review closes ambiguity WITHOUT creating evidence: unsupported
   // points become non-claimable history; the authoritative subset is unchanged.
+  const unresolvedReviewPoints = pendingReview;
   if (review && classification !== "MATCH" && classification !== "EXPLAINED_DIFFERENCE") {
     classification = "REVIEWED_NONCLAIMABLE_HISTORICAL";
     nonclaimableHistorical = Math.max(0, acct.storedFlowPoints - authoritative);
@@ -226,7 +229,7 @@ export function reconcileAccount(
     explained.push(`OWNER_REVIEW:${review.decidedAt}`);
   }
 
-  return { userId: acct.userId, stored: acct.storedFlowPoints, authoritative, breakdown: b, pendingReview, excluded, explained, flags, difference, classification, nonclaimableHistorical, eligibleRowIds };
+  return { userId: acct.userId, stored: acct.storedFlowPoints, authoritative, breakdown: b, pendingReview, unresolvedReviewPoints, excluded, explained, flags, difference, classification, nonclaimableHistorical, eligibleRowIds };
 }
 
 export interface ReconSummary {

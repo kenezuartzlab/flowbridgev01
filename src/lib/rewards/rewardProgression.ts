@@ -52,11 +52,13 @@ export interface ProgressionInput {
 }
 
 export interface RewardProgression {
+  /** Accepted but unreserved rows, grouped without cross-program funding. */
+  pendingFundingByProgram?: Record<EarningSource, number>;
   /** Account reconciliation blocks payout, even when individual rows are reserved. */
   reconciliationBlocked?: boolean;
   /** Recorded display composition, not entitlement; categories here are disjoint. */
   recordedComposition?: { storedHistory: number; ownSignup: number; referralSignup: number };
-  reconciliationEvidence?: { coreSwap: number; historicalHeld: number; unsupportedStored: number };
+  reconciliationEvidence?: { coreSwap: number; historicalHeld: number; unsupportedStored: number; provenanceHeld?: number; unresolvedReview?: number; classification?: string; difference?: number };
   minimum: number;
   earnedPoints: number;
   eligibleFundedFlow: number;
@@ -91,18 +93,19 @@ export function computeRewardProgression(i: ProgressionInput): RewardProgression
   const sources: Record<EarningSource, number> = { CORE_SWAP: 0, SIGNUP_BONUS: 0, REFERRAL_MILESTONE: 0, OTHER: 0 };
   let funded = 0;
   let pendingUnfunded = 0;
+  const pendingFundingByProgram: Record<EarningSource, number> = { CORE_SWAP: 0, SIGNUP_BONUS: 0, REFERRAL_MILESTONE: 0, OTHER: 0 };
   let testnet = 0;
   for (const r of i.ledger) {
     const p = Math.floor(Number(r.points) || 0);
     if (p <= 0) continue;
     if (r.excluded) continue;
+    const src = (KNOWN.includes(r.programId as EarningSource) ? r.programId : "OTHER") as EarningSource;
     // V36.5: chain-less unfunded program rows (e.g. referral milestones) await
     // funding; they are not Testnet. They still never count toward the minimum.
-    if (r.chainId == null && r.fundingState !== "FUNDED") { pendingUnfunded += p; continue; }
+    if (r.chainId == null && r.fundingState !== "FUNDED") { pendingUnfunded += p; pendingFundingByProgram[src] += p; continue; }
     if (r.chainId !== MAINNET_CHAIN_ID) { testnet += p; continue; }
-    if (r.fundingState !== "FUNDED") { pendingUnfunded += p; continue; }
+    if (r.fundingState !== "FUNDED") { pendingUnfunded += p; pendingFundingByProgram[src] += p; continue; }
     funded += p;
-    const src = (KNOWN.includes(r.programId as EarningSource) ? r.programId : "OTHER") as EarningSource;
     sources[src] += p;
   }
   // Funded AND reconciled: the smaller of the two, never the stored aggregate.
@@ -128,6 +131,7 @@ export function computeRewardProgression(i: ProgressionInput): RewardProgression
   const lifecycleLabel =
     lifecycle !== lc.state ? `${available.toLocaleString("en-US")} FLOW reached — settlement needs a bound wallet and completed review` : lc.label;
   return {
+    pendingFundingByProgram,
     reconciliationBlocked: !i.reconciliationOk,
     minimum: MIN_OPS_CLAIM_FLOW,
     earnedPoints: floor(i.storedFlowPoints),

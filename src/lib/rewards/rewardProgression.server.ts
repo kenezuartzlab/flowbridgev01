@@ -79,7 +79,7 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
   const signupMainnet = await attributeOwnSignupRows(supabaseAdmin, ledgerData ?? [], wallet);
   const excludedIds = new Set(recon.excluded.map((r) => r.rowId));
   const progression = computeRewardProgression({
-    ledger: ledger.map((r) => ({ points: r.points, excluded: (r.chainId === MAINNET_CHAIN_ID || r.chainId == null) && (excludedIds.has(r.id) || ((r.reason === 'SIGNUP_BONUS_REFEREE' || r.reason === 'REFERRAL_SIGNUP_BONUS') && !signupMainnet.has(r.id))), chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
+    ledger: ledger.map((r) => ({ points: r.points, excluded: (r.chainId === MAINNET_CHAIN_ID || r.chainId == null) && (!recon.eligibleRowIds.includes(r.id) || excludedIds.has(r.id) || ((r.reason === 'SIGNUP_BONUS_REFEREE' || r.reason === 'REFERRAL_SIGNUP_BONUS') && !signupMainnet.has(r.id))), chainId: signupMainnet.has(r.id) ? MAINNET_CHAIN_ID : r.chainId, fundingState: r.fundingState, programId: r.programId })),
     reconciledPoints: recon.authoritative,
     reviewHeldPoints: recon.pendingReview,
     historicalNonclaimable: recon.nonclaimableHistorical,
@@ -96,7 +96,7 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     referralSignup: ledger.filter((r) => r.reason === 'REFERRAL_SIGNUP_BONUS').reduce((s, r) => s + r.points, 0),
   };
   const historicalHeld = recon.excluded.filter((r) => r.cause === 'OWNER_REVIEWED_HISTORICAL_HOLD').reduce((s, r) => s + r.points, 0);
-  progression.reconciliationEvidence = { coreSwap: recon.breakdown.coreSwap, historicalHeld, unsupportedStored: Math.max(0, recon.nonclaimableHistorical - historicalHeld) };
+  progression.reconciliationEvidence = { coreSwap: recon.breakdown.coreSwap, historicalHeld, unsupportedStored: Math.max(0, recon.nonclaimableHistorical - historicalHeld), provenanceHeld: recon.excluded.filter((r) => r.cause === 'PROVENANCE_REVIEW_REQUIRED').reduce((s, r) => s + r.points, 0), unresolvedReview: recon.unresolvedReviewPoints, classification: recon.classification, difference: recon.difference };
 
   let missionNextStep: PersonalProgress["missionNextStep"] = null;
   try {

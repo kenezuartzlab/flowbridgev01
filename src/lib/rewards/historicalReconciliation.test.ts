@@ -41,6 +41,17 @@ function snapshot(): ReconAccountInput[] {
 }
 
 describe("historical reconciliation", () => {
+  it('the 1,330 display with 300 funded signup, 49 verified swaps and 30 unsupported milestones stays held without inventing 981 entitlement', () => {
+    const signup = ['ref1', 'ref2', 'ref3'].map(refereeId => row({ reason: 'REFERRAL_SIGNUP_BONUS', points: 100, refereeId, reservationId: refereeId, fundingState: 'FUNDED', createdAt: '2026-10-14T00:00:00Z' }));
+    const badMilestones = ['ref1', 'ref2'].map(refereeId => row({ reason: 'REFERRAL_FIRST_QUALIFYING_SWAP', points: 15, refereeId, createdAt: '2026-10-18T00:00:00Z' }));
+    const r = reconcileAccount({ userId: 'reviewed', createdAt: '2026-06-24T00:00:00Z', storedFlowPoints: 1330, storedPointsSelf: 900, storedReferralSignup: 0, ledger: [...signup, ...badMilestones, row({ points: 49, chainId: 677, createdAt: '2026-10-30T00:00:00Z' }), row({ points: 776, chainId: 677, provenanceState: 'PENDING' })] }, new Map(), { decision: 'REVIEWED_NONCLAIMABLE_HISTORICAL', decidedAt: '2026-10-04T04:26:00Z', note: 'historical hold' });
+    expect(r.authoritative).toBe(349);
+    expect(r.difference).toBe(981);
+    expect(r.classification).toBe('REVIEWED_NONCLAIMABLE_HISTORICAL');
+    expect(r.unresolvedReviewPoints).toBe(30);
+    expect(r.eligibleRowIds).toHaveLength(4);
+    expect(badMilestones.every(x => !r.eligibleRowIds.includes(x.id))).toBe(true);
+  });
   it('preserves the reviewed 150 milestone hold even when later Mainnet evidence exists', () => {
     const account = snapshot()[0];
     if (!account) throw new Error('missing snapshot');
