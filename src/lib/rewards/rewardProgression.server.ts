@@ -96,7 +96,7 @@ export async function resolvePersonalProgress(args: { userId: string; emailVerif
     referralSignup: ledger.filter((r) => r.reason === 'REFERRAL_SIGNUP_BONUS').reduce((s, r) => s + r.points, 0),
   };
   const historicalHeld = recon.excluded.filter((r) => r.cause === 'OWNER_REVIEWED_HISTORICAL_HOLD').reduce((s, r) => s + r.points, 0);
-  progression.reconciliationEvidence = { coreSwap: recon.breakdown.coreSwap, historicalHeld, unsupportedStored: Math.max(0, recon.nonclaimableHistorical - historicalHeld) };
+  progression.reconciliationEvidence = { coreSwap: recon.breakdown.coreSwap, historicalHeld, unsupportedStored: Math.max(0, recon.nonclaimableHistorical - historicalHeld), provenanceHeld: recon.excluded.filter((r) => r.cause === 'PROVENANCE_REVIEW_REQUIRED').reduce((s, r) => s + r.points, 0), unresolvedReview: recon.unresolvedReviewPoints, classification: recon.classification, difference: recon.difference };
 
   let missionNextStep: PersonalProgress["missionNextStep"] = null;
   try {

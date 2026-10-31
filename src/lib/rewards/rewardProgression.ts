@@ -58,7 +58,7 @@ export interface RewardProgression {
   reconciliationBlocked?: boolean;
   /** Recorded display composition, not entitlement; categories here are disjoint. */
   recordedComposition?: { storedHistory: number; ownSignup: number; referralSignup: number };
-  reconciliationEvidence?: { coreSwap: number; historicalHeld: number; unsupportedStored: number };
+  reconciliationEvidence?: { coreSwap: number; historicalHeld: number; unsupportedStored: number; provenanceHeld?: number; unresolvedReview?: number; classification?: string; difference?: number };
   minimum: number;
   earnedPoints: number;
   eligibleFundedFlow: number;
