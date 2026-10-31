@@ -26,7 +26,7 @@ export const Route = createFileRoute("/ecosystem-ranking")({
     ],
     links: [{ rel: "canonical", href: "https://flowbridge.space/ecosystem-ranking" }],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(rankingQuery("weekly")),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(rankingQuery("weekly")), context.queryClient.ensureQueryData(rankingQuery("monthly"))]),
   component: RankingPage,
   errorComponent: () => (
     <div className="min-h-screen bg-background text-foreground"><AppTopBar />
@@ -39,7 +39,9 @@ const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString(undefined,
 
 function RankingPage() {
   const [rankType, setRankType] = useState<RankType>("weekly");
-  const { data } = useSuspenseQuery(rankingQuery(rankType));
+  const weekly = useSuspenseQuery(rankingQuery("weekly")).data;
+  const monthly = useSuspenseQuery(rankingQuery("monthly")).data;
+  const data = rankType === "weekly" ? weekly : monthly;
   const fb = data.flowbridge;
   const fbRank = rankType === "weekly" ? fb?.weeklyRankNo : fb?.monthlyRankNo;
   const fbVotes = rankType === "weekly" ? fb?.weeklyVoteCount : fb?.monthlyVoteCount;
