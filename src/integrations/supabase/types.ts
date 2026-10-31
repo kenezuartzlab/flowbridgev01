@@ -2397,6 +2397,209 @@ export type Database = {
         }
         Relationships: []
       }
+      vote_events: {
+        Row: {
+          block_number: number
+          block_ts: string
+          contract: string
+          created_at: string
+          log_index: number
+          project_id: number
+          tx_hash: string
+          voter: string
+        }
+        Insert: {
+          block_number: number
+          block_ts: string
+          contract: string
+          created_at?: string
+          log_index: number
+          project_id: number
+          tx_hash: string
+          voter: string
+        }
+        Update: {
+          block_number?: number
+          block_ts?: string
+          contract?: string
+          created_at?: string
+          log_index?: number
+          project_id?: number
+          tx_hash?: string
+          voter?: string
+        }
+        Relationships: []
+      }
+      vote_indexer_state: {
+        Row: {
+          contract: string
+          halt_reason: string | null
+          halted: boolean
+          id: number
+          implementation: string
+          last_block: number
+          synced_at: string
+        }
+        Insert: {
+          contract: string
+          halt_reason?: string | null
+          halted?: boolean
+          id?: number
+          implementation: string
+          last_block: number
+          synced_at?: string
+        }
+        Update: {
+          contract?: string
+          halt_reason?: string | null
+          halted?: boolean
+          id?: number
+          implementation?: string
+          last_block?: number
+          synced_at?: string
+        }
+        Relationships: []
+      }
+      vote_payout_config: {
+        Row: {
+          daily_cap_flow: number
+          enabled: boolean
+          id: number
+          min_claim_flow: number
+          per_claim_cap_flow: number
+          updated_at: string
+          updated_by_email: string | null
+        }
+        Insert: {
+          daily_cap_flow?: number
+          enabled?: boolean
+          id?: number
+          min_claim_flow?: number
+          per_claim_cap_flow?: number
+          updated_at?: string
+          updated_by_email?: string | null
+        }
+        Update: {
+          daily_cap_flow?: number
+          enabled?: boolean
+          id?: number
+          min_claim_flow?: number
+          per_claim_cap_flow?: number
+          updated_at?: string
+          updated_by_email?: string | null
+        }
+        Relationships: []
+      }
+      vote_reward_periods: {
+        Row: {
+          bot_received: number
+          created_at: string
+          created_by_email: string
+          ends_at: string
+          flow_per_bot: number
+          id: string
+          implementation: string
+          label: string
+          price_evidence: Json
+          starts_at: string
+          total_flow: number
+          voter_count: number
+        }
+        Insert: {
+          bot_received: number
+          created_at?: string
+          created_by_email: string
+          ends_at: string
+          flow_per_bot: number
+          id?: string
+          implementation: string
+          label: string
+          price_evidence: Json
+          starts_at: string
+          total_flow: number
+          voter_count: number
+        }
+        Update: {
+          bot_received?: number
+          created_at?: string
+          created_by_email?: string
+          ends_at?: string
+          flow_per_bot?: number
+          id?: string
+          implementation?: string
+          label?: string
+          price_evidence?: Json
+          starts_at?: string
+          total_flow?: number
+          voter_count?: number
+        }
+        Relationships: []
+      }
+      voter_claims: {
+        Row: {
+          created_at: string
+          detail: string | null
+          flow: number
+          id: string
+          status: string
+          tx_hash: string | null
+          updated_at: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          flow: number
+          id?: string
+          status?: string
+          tx_hash?: string | null
+          updated_at?: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          flow?: number
+          id?: string
+          status?: string
+          tx_hash?: string | null
+          updated_at?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
+      voter_credits: {
+        Row: {
+          flow: number
+          period_id: string
+          tier: string
+          votes: number
+          wallet: string
+        }
+        Insert: {
+          flow: number
+          period_id: string
+          tier: string
+          votes: number
+          wallet: string
+        }
+        Update: {
+          flow?: number
+          period_id?: string
+          tier?: string
+          votes?: number
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voter_credits_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "vote_reward_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_auth_request_windows: {
         Row: {
           requests: number
@@ -2795,6 +2998,7 @@ export type Database = {
         }
         Returns: Json
       }
+      reserve_voter_claim: { Args: { p_wallet: string }; Returns: Json }
       retire_unapproved_reward_draft: {
         Args: {
           p_batch: string
@@ -2817,6 +3021,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      top_flowbridge_voters: {
+        Args: { p_limit: number; p_since: string; p_until: string }
+        Returns: {
+          voter: string
+          votes: number
+        }[]
+      }
       transition_reward_publication: {
         Args: {
           p_actor: string
@@ -2832,6 +3043,7 @@ export type Database = {
         Args: { p_id: string; p_user: string }
         Returns: Json
       }
+      voter_available_flow: { Args: { p_wallet: string }; Returns: number }
       write_audited_site_setting: {
         Args: {
           p_actor: string
