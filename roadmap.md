@@ -1,6 +1,6 @@
 # V37 — Continuous Points, Operator-Approved Claiming
 
-- [ ] Visitor voting announcement: artwork, direct in-app CTA, editable Control Panel controls, and mobile acceptance.
+- [x] Visitor voting announcement: owner artwork, direct in-app CTA, Control Panel editing/removal controls; 17 focused tests, automatic build OK, 390px arrival/dismissal/vote-link and desktop Earn checks pass. Existing super-admin save restriction preserved; no settings write or publication performed.
 
 - [x] 1. Claim-minimum policy change (pure + tests)
 - [x] 2. Rewards Approval Queue (pure module, migration, server, API, Ops UI)
