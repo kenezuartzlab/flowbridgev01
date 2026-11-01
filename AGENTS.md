@@ -9,6 +9,8 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
+- Public visitor announcements reuse content settings and render once in VisitorAnnouncement at the root; the existing audited super-admin writer owns updates. Why: one editable message and session-scoped dismissal avoid conflicting promos and permission drift.
+
 - CA/BOT and Any pair use UniversalSwapCard for live quoting, review and execution; fixed-pair mode does not overwrite the Any pair draft. Why: separate display quotes drifted from executable routes.
 - Transaction confirmations use TransactionModalFrame; bridge display milestones use trackingState with authoritative receipt evidence, never elapsed-time or balance-delta settlement. Why: visible actions and truthful tracking must not alter execution.
 

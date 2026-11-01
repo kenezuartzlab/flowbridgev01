@@ -131,7 +131,7 @@ const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
     items: [
       ["banners", "Banners"],
       ["partners", "Partners"],
-      ["content", "Brand & Copy"],
+      ["content", "Announcements & Copy"],
       ["social", "Links & Social"],
     ],
   },
@@ -799,12 +799,34 @@ function SettingsPanel({ wallet, tab }: { wallet: string; tab: Exclude<Tab, "tok
           {textField("Brand name", cfg.content.brandName, set("brandName"))}
           {textField("Tagline", cfg.content.tagline, set("tagline"))}
           {textField(
-            "Announcement text (empty = hidden)",
+            "Announcement title",
             cfg.content.announcement,
             set("announcement"),
-            "Shown as a slim strip above the app content.",
+            "Shown above public pages and in the visitor announcement.",
           )}
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input type="checkbox" checked={cfg.content.announcementEnabled} onChange={e => setCfg({ ...cfg, content: { ...cfg.content, announcementEnabled: e.target.checked } })} />
+            Show announcement
+          </label>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input type="checkbox" checked={cfg.content.announcementPopup} onChange={e => setCfg({ ...cfg, content: { ...cfg.content, announcementPopup: e.target.checked } })} />
+            Show on arrival (once per browser tab)
+          </label>
           {textField("Announcement link", cfg.content.announcementHref, set("announcementHref"))}
+          {textField("Button label", cfg.content.announcementCtaLabel, set("announcementCtaLabel"))}
+          {textField("Announcement image URL (empty = no image)", cfg.content.announcementImageUrl, set("announcementImageUrl"))}
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-primary">
+            <Upload className="size-4" /> Replace announcement image
+            <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={async e => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              try {
+                const { url } = await uploadBannerImage(wallet, file);
+                setCfg(current => ({ ...current, content: { ...current.content, announcementImageUrl: url } }));
+              } catch { setError('Image upload failed. Please try again.'); }
+            }} />
+          </label>
+          <Button variant="outline" asChild><Link to="/">Preview announcement</Link></Button>
           {textField("Footer note", cfg.content.footerNote, set("footerNote"))}
         </>
       );

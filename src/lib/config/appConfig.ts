@@ -4,6 +4,7 @@
 // when the backend is unreachable.
 import { useEffect, useState, type CSSProperties } from "react";
 import { setLogoOverrides } from "@/lib/tokenLogos";
+import { DEFAULT_ANNOUNCEMENT } from './announcement';
 
 export interface FeeSettings {
   defaultSlippagePct: number;
@@ -82,6 +83,10 @@ export interface ContentSettings {
   tagline: string;
   announcement: string;
   announcementHref: string;
+  announcementEnabled: boolean;
+  announcementPopup: boolean;
+  announcementImageUrl: string;
+  announcementCtaLabel: string;
   footerNote: string;
 }
 
@@ -544,8 +549,12 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   content: {
     brandName: "FlowBridge",
     tagline: "Swap on BOT Chain, bridge USDT across chains, earn FLOW.",
-    announcement: "",
-    announcementHref: "",
+    announcement: DEFAULT_ANNOUNCEMENT.title,
+    announcementHref: DEFAULT_ANNOUNCEMENT.href,
+    announcementEnabled: true,
+    announcementPopup: true,
+    announcementImageUrl: DEFAULT_ANNOUNCEMENT.imageUrl,
+    announcementCtaLabel: DEFAULT_ANNOUNCEMENT.ctaLabel,
     footerNote: "ⓒ 2026 FlowBridge. Built by Kenezu",
   },
   banners: DEFAULT_BANNERS,
@@ -903,8 +912,12 @@ export function mergeAppConfig(partial: any): AppConfig {
     content: {
       brandName: str(p.content?.brandName, d.content.brandName) || d.content.brandName,
       tagline: str(p.content?.tagline, d.content.tagline),
-      announcement: str(p.content?.announcement),
-      announcementHref: str(p.content?.announcementHref),
+      announcement: str(p.content?.announcement).trim() || d.content.announcement,
+      announcementHref: str(p.content?.announcementHref).trim() || d.content.announcementHref,
+      announcementEnabled: p.content?.announcementEnabled !== false,
+      announcementPopup: p.content?.announcementPopup !== false,
+      announcementImageUrl: str(p.content?.announcementImageUrl, d.content.announcementImageUrl),
+      announcementCtaLabel: str(p.content?.announcementCtaLabel).trim() || d.content.announcementCtaLabel,
       footerNote: str(p.content?.footerNote, d.content.footerNote),
     },
 

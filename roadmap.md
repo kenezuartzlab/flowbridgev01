@@ -1,5 +1,7 @@
 # V37 — Continuous Points, Operator-Approved Claiming
 
+- [ ] Visitor voting announcement: artwork, direct in-app CTA, editable Control Panel controls, and mobile acceptance.
+
 - [x] 1. Claim-minimum policy change (pure + tests)
 - [x] 2. Rewards Approval Queue (pure module, migration, server, API, Ops UI)
 - [x] 3. Payout preparation on confirmation (no new reservation, prepare-only unsigned batch, claim window returned)
