@@ -56,6 +56,10 @@ const contentSchema = z.object({
   tagline: z.string().trim().max(200),
   announcement: z.string().trim().max(300),
   announcementHref: z.string().trim().max(300),
+  announcementEnabled: z.boolean().optional(),
+  announcementPopup: z.boolean().optional(),
+  announcementImageUrl: z.string().trim().max(500).optional(),
+  announcementCtaLabel: z.string().trim().max(40).optional(),
   footerNote: z.string().trim().max(160),
 });
 

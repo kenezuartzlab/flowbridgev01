@@ -21,6 +21,7 @@ import { FlowAiLauncher } from "../components/assistant/FlowAiLauncher";
 import { readPrefs, unlockPrefsFormatting } from "../lib/prefs";
 import { areaForPath, trackProductEvent } from "../lib/ops/productEvents";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { VisitorAnnouncement } from '@/components/banners/VisitorAnnouncement';
 
 function NotFoundComponent() {
   return (
@@ -188,6 +189,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ReturnToRedirect />
       <AuthDialog />
+      <VisitorAnnouncement />
       <Outlet />
       <PublicFooter />
       <FlowAiLauncher />
