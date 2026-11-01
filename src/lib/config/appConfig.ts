@@ -912,8 +912,8 @@ export function mergeAppConfig(partial: any): AppConfig {
     content: {
       brandName: str(p.content?.brandName, d.content.brandName) || d.content.brandName,
       tagline: str(p.content?.tagline, d.content.tagline),
-      announcement: str(p.content?.announcement).trim() || d.content.announcement,
-      announcementHref: str(p.content?.announcementHref).trim() || d.content.announcementHref,
+      announcement: p.content?.announcementEnabled === undefined ? d.content.announcement : str(p.content?.announcement).trim() || d.content.announcement,
+      announcementHref: p.content?.announcementEnabled === undefined ? d.content.announcementHref : str(p.content?.announcementHref).trim() || d.content.announcementHref,
       announcementEnabled: p.content?.announcementEnabled !== false,
       announcementPopup: p.content?.announcementPopup !== false,
       announcementImageUrl: str(p.content?.announcementImageUrl, d.content.announcementImageUrl),

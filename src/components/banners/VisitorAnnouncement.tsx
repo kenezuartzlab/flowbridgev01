@@ -7,6 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export function VisitorAnnouncement() {
+  const [ready, setReady] = useState(false);
+  // Let the existing page's lazy hydration finish before subscribing to its config.
+  useEffect(() => {
+    const timer = window.setTimeout(() => setReady(true), 1500);
+    return () => window.clearTimeout(timer);
+  }, []);
+  return ready ? <AnnouncementContent /> : null;
+}
+
+function AnnouncementContent() {
   const { content } = useAppConfig();
   const pathname = useRouterState({ select: s => s.location.pathname });
   const [open, setOpen] = useState(false);

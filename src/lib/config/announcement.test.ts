@@ -1,7 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { announcementLink, announcementSessionKey, DEFAULT_ANNOUNCEMENT } from './announcement';
+import { mergeAppConfig } from './appConfig';
 
 describe('visitor announcement', () => {
+  it('activates the voting campaign instead of reusing old login copy', () => {
+    expect(mergeAppConfig({ content: { announcement: 'Old signup notice' } }).content.announcement).toBe(DEFAULT_ANNOUNCEMENT.title);
+  });
+  it('preserves explicit operator removal and replacement', () => {
+    const content = mergeAppConfig({ content: { announcementEnabled: false, announcement: 'Updated campaign', announcementHref: '/rewards' } }).content;
+    expect(content.announcementEnabled).toBe(false);
+    expect(content.announcement).toBe('Updated campaign');
+    expect(content.announcementHref).toBe('/rewards');
+  });
   it('links voting directly to the in-app voting page', () => {
     expect(DEFAULT_ANNOUNCEMENT.href).toBe('/ecosystem-ranking');
   });
