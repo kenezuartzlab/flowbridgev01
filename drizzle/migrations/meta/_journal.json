@@ -330,6 +330,13 @@
       "when": 1793488306153,
       "tag": "0046_voter_rewards_serialize",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1793522463955,
+      "tag": "0047_restrict_vote_events_reads",
+      "breakpoints": true
     }
   ]
 }
