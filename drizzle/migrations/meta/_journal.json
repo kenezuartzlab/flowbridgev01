@@ -358,6 +358,13 @@
       "when": 1793589860155,
       "tag": "0050_vault_v2_future_award_destination_fences",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1793589917789,
+      "tag": "0051_vault_v2_atomic_reserve_and_credit",
+      "breakpoints": true
     }
   ]
 }
