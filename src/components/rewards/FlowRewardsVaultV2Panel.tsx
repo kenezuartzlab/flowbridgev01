@@ -81,10 +81,9 @@ export function FlowRewardsVaultV2Panel() {
           if(mode==='stake'&&!quote)throw new Error('Review a valid live stake quote first.');
           op={version:1,wallet:bound,rewardVault,token:tokenAddress,stakingVault:quote?.stakingVault??rewardVault,mode,claimAmount:snapshot.claimable.toString(),principal:principal.toString(),terms:quote?quoteFingerprint(quote):'',transactions:{},complete:false};
         }
-        if(resume&&op.mode==='stake'&&!op.transactions.stake){
-          if(!quote)throw new Error('Review the current Flexible quote before resuming.');
+        if(op.mode!==mode)throw new Error('Saved flow choice cannot change. Reconcile it before starting a different choice.');
+        if(resume&&op.mode==='stake'&&!op.transactions.stake&&quote){
           op.terms=quoteFingerprint(quote); // explicit Resume tap accepts the displayed fresh terms, never repeats claim
-          op.principal=quote.principal.toString();
         }
         const port=createClaimStakePort(config,bound,binding,save,setPhase);
         save(op);
@@ -103,7 +102,8 @@ export function FlowRewardsVaultV2Panel() {
       <div><p className="text-xs text-muted">FLOW available to claim</p><p className="break-words text-3xl font-bold tabular-nums">{fmt(snapshot.claimable)} <span className="text-sm text-muted">FLOW</span></p></div>
       {!saved?<><label className="block space-y-1 text-xs text-muted">Flexible stake amount (FLOW)<Input aria-label="Flexible stake amount" inputMode="decimal" value={amount} disabled={busy} onChange={e=>setAmount(e.target.value)} /></label>
       <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2"><Button variant="outline" className="h-auto min-h-11 whitespace-normal" disabled={busy||snapshot.paused||snapshot.claimable===0n} onClick={()=>void start('claim')}><Wallet/>Claim FLOW</Button><Button className="h-auto min-h-11 whitespace-normal" disabled={busy||snapshot.paused||snapshot.claimable===0n||!quote} onClick={()=>void start('stake')}><Sprout/>Claim &amp; Stake Flexible</Button></div></>:<>
-        <p className="text-sm text-muted">{operation?.complete?'Saved receipts will be verified again; no successful transaction is repeated.':'If the claim succeeded, FLOW is in your wallet; staking is not completed until its receipt and position are verified.'}</p>
+        <p className="text-sm text-muted">{operation?.complete?'Saved receipts will be verified again; no successful transaction is repeated.':operation?.mode==='claim'?'Check your claim receipt. This choice never stakes FLOW.':'If the claim succeeded, FLOW is in your wallet; staking is not completed until its receipt and position are verified.'}</p>
+        {operation?.mode==='stake'&&<p className="text-xs text-muted">Planned stake: {fmt(BigInt(operation.principal))} FLOW. Resume accepts the current displayed terms; each remaining wallet confirmation is explicit.</p>}
         <Button variant="outline" className="min-h-11 w-full whitespace-normal" disabled={busy} onClick={()=>void start(operation?.mode??'claim',true)}>{busy?<Loader2 className="animate-spin"/>:<Wallet/>}{operation?.transactions.claim&&operation.mode==='stake'?'Resume staking':'Check saved transaction status'}</Button>
         {verifiedComplete&&<Button variant="ghost" disabled={busy} onClick={()=>{localStorage.removeItem(key);setOperation(null);setVerifiedComplete(false);setPhase('');}}>Close verified flow</Button>}
       </>}
