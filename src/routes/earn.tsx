@@ -46,6 +46,7 @@ import { DEFAULT_FLOW_POINTS_V2_POLICY } from "@/lib/rewards/flowPointsV2";
 const FLOW_POINTS_V2_DAILY_CAP = DEFAULT_FLOW_POINTS_V2_POLICY.dailyCoreSwapCap;
 
 import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
+import { FlowRewardsVaultV2Panel } from "@/components/rewards/FlowRewardsVaultV2Panel";
 import { RewardProgressPanel } from "@/components/rewards/RewardProgressPanel";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
 import { RewardPolicyDetails } from '@/components/rewards/RewardPolicyDetails';
@@ -185,6 +186,7 @@ function EarnPage() {
             entirely separate from the testnet authorization flow, so it does not
             depend on being signed in. */}
         {personal ? <RewardProgressPanel p={personal.progression} area="earn" detailed /> : user && <p className="p-4 text-sm text-muted" role="status">{progressLoading ? "Checking your eligible points and payout rounds…" : "Reward eligibility is temporarily unavailable. Refresh to retry; your stored points are not a claimable balance."}</p>}
+        <FlowRewardsVaultV2Panel />
         <MainnetFlowClaimCard />
 
         {user && (

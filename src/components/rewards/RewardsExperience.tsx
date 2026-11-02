@@ -10,6 +10,7 @@ import { ReferralRewards } from './ReferralRewards';
 import { RewardPolicyDetails } from './RewardPolicyDetails';
 import { BindWalletCard } from './BindWalletCard';
 import { MainnetFlowClaimCard } from './MainnetFlowClaimCard';
+import { FlowRewardsVaultV2Panel } from './FlowRewardsVaultV2Panel';
 
 export function RewardsExperience() {
   const { user, authReady, incentives, loading, refresh } = useAccountData();
@@ -24,6 +25,7 @@ export function RewardsExperience() {
   const retry = () => { void refresh(); window.dispatchEvent(new Event('flowbridge:wallet-bound')); };
   return <div className="min-w-0 space-y-5" data-testid="unified-rewards">
     <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase text-primary">FlowBridge</p><h1 className="text-2xl font-bold">FLOW Rewards</h1></div><Button variant="ghost" size="icon" aria-label="Refresh rewards" title="Refresh rewards" onClick={retry}><RefreshCw className={loading || progressLoading ? 'animate-spin' : ''} /></Button></div>
+    <FlowRewardsVaultV2Panel />
     <MainnetFlowClaimCard />
     {!authReady ? <p role="status" className="text-sm text-muted">Checking your account…</p> : !user ? <div className="space-y-3"><p className="text-sm leading-relaxed text-muted">Sign in to see recorded Points, funded rewards and verified payout eligibility. Points are not a token balance.</p><SignInButton label="Sign in" returnTo="/rewards" /></div> : <>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3" data-testid="reward-balances">
