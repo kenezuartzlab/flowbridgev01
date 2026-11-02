@@ -1,0 +1,14 @@
+import { expect,it } from 'vitest';
+import { encodeEventTopics,encodeAbiParameters,encodeFunctionData,type Address,type Hex } from 'viem';
+import { VAULT_V2_ABI } from './vaultV2Abi.generated';
+import { verifyVaultCredit } from './vaultV2CreditVerification';
+const contract='0x0000000000000000000000000000000000000001' as Address,publisher='0x0000000000000000000000000000000000000002' as Address,wallet='0x0000000000000000000000000000000000000003' as Address,batchId=`0x${'a'.repeat(64)}` as Hex,blockHash=`0x${'b'.repeat(64)}` as Hex;
+const logs=[{address:contract,topics:encodeEventTopics({abi:VAULT_V2_ABI,eventName:'WalletCredited',args:{batchId,wallet}}),data:encodeAbiParameters([{type:'uint256'}],[100n])},{address:contract,topics:encodeEventTopics({abi:VAULT_V2_ABI,eventName:'BatchCredited',args:{batchId}}),data:encodeAbiParameters([{type:'uint256'},{type:'uint256'}],[100n,1n])}];
+const sample=()=>({chainId:677,contract,publisher,batchId,wallets:[wallet],amounts:[100n],tx:{from:publisher,to:contract,input:encodeFunctionData({abi:VAULT_V2_ABI,functionName:'creditBatch',args:[batchId,[wallet],[100n]]})},receipt:{status:'success' as const,to:contract,blockHash,blockNumber:10n,logs},canonicalBlockHash:blockHash,head:12n,processed:true});
+it('matches exact publisher calldata, wallet events and confirmed canonical receipt',()=>expect(verifyVaultCredit(sample())).toBe(true));
+it('rejects unconfirmed credit',()=>expect(verifyVaultCredit({...sample(),head:10n})).toBe(false));
+it('rejects reorg',()=>expect(verifyVaultCredit({...sample(),canonicalBlockHash:batchId})).toBe(false));
+it('rejects revert',()=>{const s=sample();expect(verifyVaultCredit({...s,receipt:{...s.receipt,status:'reverted'}})).toBe(false);});
+it('rejects another signer',()=>{const s=sample();expect(verifyVaultCredit({...s,tx:{...s.tx,from:wallet}})).toBe(false);});
+it('rejects different amounts or missing wallet events',()=>{expect(verifyVaultCredit({...sample(),amounts:[101n]})).toBe(false);const s=sample();expect(verifyVaultCredit({...s,receipt:{...s.receipt,logs:s.receipt.logs.slice(1)}})).toBe(false);});
+it('requires processedBatch onchain',()=>expect(verifyVaultCredit({...sample(),processed:false})).toBe(false));
