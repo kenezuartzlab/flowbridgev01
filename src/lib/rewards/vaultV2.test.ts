@@ -1,0 +1,29 @@
+import { describe, expect, it } from 'vitest';
+import { VAULT_V2_CONFIG, eligibleVaultAward, prepareVaultBatch, vaultClaimGate, confirmedVaultClaim, type VaultAward } from './vaultV2';
+const wallet = '0x0000000000000000000000000000000000000001';
+const award = (patch: Partial<VaultAward> = {}):VaultAward => ({id:'a',economicId:'economic:a',wallet,points:100n,program:'SIGNUP_BONUS',verified:true,reconciled:true,funded:true,authorized:true,bindingMatches:true,mainnet:true,newAfterCutover:true,allocated:false,...patch});
+describe('V2 award isolation',()=>{
+  it('stays disabled without an invented address',()=>{expect(VAULT_V2_CONFIG.enabled).toBe(false);expect(VAULT_V2_CONFIG.address).toBeNull();});
+  for (const key of ['verified','reconciled','funded','authorized','bindingMatches','mainnet','newAfterCutover'] as const) it(`holds awards lacking ${key}`,()=>expect(eligibleVaultAward(award({[key]:false}))).toBe(false));
+  it('excludes a legacy allocated award',()=>expect(eligibleVaultAward(award({allocated:true}))).toBe(false));
+  it('excludes XP and campaign points',()=>{expect(eligibleVaultAward(award({program:'XP'}))).toBe(false);expect(eligibleVaultAward(award({program:'CAMPAIGN_PTS'}))).toBe(false);});
+  it('combines multiple programs into one wallet credit',()=>{const b=prepareVaultBatch([award(),award({id:'b',economicId:'b',program:'CORE_SWAP',points:5n})],1000n*10n**18n,1000n*10n**18n,2000n*10n**18n);expect(b.amounts).toEqual([105n*10n**18n]);});
+  it('rejects duplicate economic awards across batches',()=>expect(()=>prepareVaultBatch([award(),award({id:'b'})],10n**24n,10n**24n,10n**24n)).toThrow('DUPLICATE_AWARD'));
+  it('snapshot is immutable and deterministic',()=>{const a=award(),b=award({id:'b',economicId:'b'});const run=(rows:VaultAward[])=>prepareVaultBatch(rows,10n**24n,10n**24n,10n**24n);expect(run([a,b]).batchId).toBe(run([b,a]).batchId);expect(run([a]).batchId).not.toBe(run([award({points:101n})]).batchId);});
+  it('caps 100 recipients',()=>expect(()=>prepareVaultBatch(Array.from({length:101},(_,i)=>award({id:`${i}`,economicId:`${i}`,wallet:`0x${(i+1).toString(16).padStart(40,'0')}`})),10n**30n,10n**30n,10n**30n)).toThrow('RECIPIENT_CAP'));
+  it('cannot credit beyond real backing',()=>expect(()=>prepareVaultBatch([award()],0n,10n**24n,10n**24n)).toThrow('BACKING_OR_LIMIT'));
+});
+const gate={enabled:true,verified:true,chainId:677,walletMatches:true,paused:false,balance:100n,liabilities:50n,claimable:50n};
+describe('V2 claims',()=>{
+  it('requires BOT chain 677',()=>expect(vaultClaimGate({...gate,chainId:968})).toBe('WRONG_NETWORK'));
+  it('requires wallet match',()=>expect(vaultClaimGate({...gate,walletMatches:false})).toBe('WALLET_MISMATCH'));
+  it('blocks paused claims',()=>expect(vaultClaimGate({...gate,paused:true})).toBe('PAUSED'));
+  it('fails closed on insolvency',()=>expect(vaultClaimGate({...gate,balance:1n})).toBe('INSOLVENT'));
+  it('requires a positive onchain balance',()=>expect(vaultClaimGate({...gate,claimable:0n})).toBe('EMPTY'));
+  const confirmed={receipt:'success' as const,eventWallet:wallet,wallet,eventAmount:50n,expectedAmount:50n,canonicalBlock:true,rereadClaimable:0n};
+  it('hash submission is not confirmation',()=>expect(confirmedVaultClaim({...confirmed,receipt:'pending'})).toBe(false));
+  it('revert does not claim',()=>expect(confirmedVaultClaim({...confirmed,receipt:'reverted'})).toBe(false));
+  it('reorg does not confirm',()=>expect(confirmedVaultClaim({...confirmed,canonicalBlock:false})).toBe(false));
+  it('requires a live read after receipt',()=>expect(confirmedVaultClaim({...confirmed,rereadClaimable:null})).toBe(false));
+  it('confirms exact own-wallet event with canonical receipt',()=>expect(confirmedVaultClaim(confirmed)).toBe(true));
+});
