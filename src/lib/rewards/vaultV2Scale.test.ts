@@ -120,3 +120,10 @@ it('missing reconciliation for a scanned candidate fails closed', async () => {
   const { db } = fakeDb({}, { sources: [source(1)] });
   await expect(scanEligibleVaultSources(db, MAX, null, vi.fn(async () => []) as never)).rejects.toThrow('COMPLETE_RECONCILIATION_REQUIRED');
 });
+it('a partial selection at the scan bound still reports where unscanned awards resume', async () => {
+  const total = VAULT_SOURCE_SCAN.pageSize * VAULT_SOURCE_SCAN.maxPages + 5;
+  const { db } = fakeDb({}, { sources: Array.from({ length: total }, (_, i) => source(i)) });
+  const r = await scanEligibleVaultSources(db, MAX, null, recon(u => u === uid(3)) as never);
+  expect(r.eligible.map(x => x.id)).toEqual([uid(3)]);
+  expect(r.continuation).not.toBeNull();
+});
