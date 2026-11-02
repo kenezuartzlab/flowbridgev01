@@ -25,7 +25,7 @@ export async function scanEligibleVaultSources(db: Admin, maxWei: bigint, after:
   const recon = new Map<string, VaultAccountReconciliation>();
   const eligible: VaultSourceRow[] = [];
   let cursor = after, scanned = 0;
-  for (let page = 0; page < VAULT_SOURCE_SCAN.pageSize && page < VAULT_SOURCE_SCAN.maxPages; page++) {
+  for (let page = 0; page < VAULT_SOURCE_SCAN.maxPages; page++) {
     const r = await db.rpc('vault_v2_source_rows_scan', { p_after: cursor as never, p_ids: null as never, p_limit: VAULT_SOURCE_SCAN.pageSize });
     if (r.error || !Array.isArray(r.data)) throw new Error('CANONICAL_SOURCES_UNAVAILABLE');
     const rows = r.data as VaultSourceRow[];
@@ -56,10 +56,14 @@ export async function reserveVaultV2Awards(db: Admin, after?: string) {
   if(previous.data) return previous.data;
   const fence=await db.rpc('reward_payout_evidence_hash');
   if(fence.error||!fence.data) throw new Error('CANONICAL_SOURCES_UNAVAILABLE');
-  const live=await readVaultV2(undefined,{enabled:true,chainId:677,address:cfg.contract_address as Address,codeHash:cfg.code_hash as Hex,publisher:cfg.publisher as Address,cutoverVerified:true});
-  if(!live||live.paused||live.batchCap!==BigInt(cfg.batch_cap_wei)||live.dailyCap!==BigInt(cfg.daily_cap_wei)) throw new Error('LIVE_DEPLOYMENT_OR_CAP_MISMATCH');
-  const max=[live.free,live.batchCap,live.dailyRemaining].reduce((a,b)=>a<b?a:b);
-  const scan=await scanEligibleVaultSources(db,max,after??null);
+  const readLive=async()=>{
+    const live=await readVaultV2(undefined,{enabled:true,chainId:677,address:cfg.contract_address as Address,codeHash:cfg.code_hash as Hex,publisher:cfg.publisher as Address,cutoverVerified:true});
+    if(!live||live.paused||live.batchCap!==BigInt(cfg.batch_cap_wei)||live.dailyCap!==BigInt(cfg.daily_cap_wei)) throw new Error('LIVE_DEPLOYMENT_OR_CAP_MISMATCH');
+    return {live,max:[live.free,live.batchCap,live.dailyRemaining].reduce((a,b)=>a<b?a:b)};
+  };
+  const scan=await scanEligibleVaultSources(db,(await readLive()).max,after??null);
+  // Fresh canonical backing immediately before the atomic reservation (scan may take several pages).
+  const {live,max}=await readLive();
   const selected=selectBoundedVaultSources(scan.eligible,max) as VaultSourceRow[];
   if(!selected.length) return scan.continuation?({continuation:{after:scan.continuation,scannedRows:scan.scanned}} satisfies VaultContinuation):null;
   const snapshot=canonicalVaultSnapshot(selected,cfg.cutover_at,live.free,live.batchCap,live.dailyRemaining);
