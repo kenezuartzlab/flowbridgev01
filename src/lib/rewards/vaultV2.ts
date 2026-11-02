@@ -41,5 +41,5 @@ export function vaultClaimGate(s: { enabled: boolean; verified: boolean; chainId
   return s.claimable > 0n ? 'READY' : 'EMPTY';
 }
 export function confirmedVaultClaim(s: { receipt: 'success'|'reverted'|'pending'; eventWallet: string|null; wallet: string; eventAmount: bigint; expectedAmount: bigint; canonicalBlock: boolean; rereadClaimable: bigint|null }) {
-  return s.receipt === 'success' && s.canonicalBlock && s.eventWallet?.toLowerCase() === s.wallet.toLowerCase() && s.eventAmount === s.expectedAmount && s.rereadClaimable !== null;
+  return s.receipt === 'success' && s.canonicalBlock && s.expectedAmount > 0n && s.eventWallet?.toLowerCase() === s.wallet.toLowerCase() && s.eventAmount === s.expectedAmount && s.rereadClaimable === 0n;
 }
