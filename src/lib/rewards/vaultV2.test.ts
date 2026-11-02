@@ -25,5 +25,6 @@ describe('V2 claims',()=>{
   it('revert does not claim',()=>expect(confirmedVaultClaim({...confirmed,receipt:'reverted'})).toBe(false));
   it('reorg does not confirm',()=>expect(confirmedVaultClaim({...confirmed,canonicalBlock:false})).toBe(false));
   it('requires a live read after receipt',()=>expect(confirmedVaultClaim({...confirmed,rereadClaimable:null})).toBe(false));
+  it('does not claim success while the old balance remains',()=>expect(confirmedVaultClaim({...confirmed,rereadClaimable:50n})).toBe(false));
   it('confirms exact own-wallet event with canonical receipt',()=>expect(confirmedVaultClaim(confirmed)).toBe(true));
 });
