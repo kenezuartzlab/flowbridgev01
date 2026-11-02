@@ -66,3 +66,9 @@ Temporary owner `0x8512…f3dD` (deployer/owner), publisher `0x971E…3f94`, FLO
 - creditBatch 5 FLOW `0x7d1c2b92…dc9a`; replay and non-publisher credit reverted
 - claim `0x483f5b64…eb`: received exactly 5 FLOW; liabilities 0, free 5 FLOW remains in vault
 Mainnet unchanged: still requires the approved Safe owner and separate authorization.
+
+## Mainnet deployment (BOT Mainnet 677) — 2026-11-02, owner-directed temporary owner
+Owner chose temporary owner wallet `0x8512…f3dD` instead of the 2-of-3 Safe (deliberate exception). Publisher `0x971E…3f94`.
+- Vault `0x91f70c91b4273d0129abc3f14373fbb10ca59006` deployed paused `0xc126769fdbe9688ba96c30a54a45d022a1f73ab6539cb80149260636cb1d0252`; runtime exactly matches frozen build, code hash `0xdc9d2b31…75b1`
+- Prefund 10,000 FLOW `0xc5eb4e01079558cb38d71f2ebd11ddff1916403829498718000edab49c22c847`
+- Pending: setLimits (per-batch 10,000; daily limit undecided), unpause, app owner-identity exception, cutover.
