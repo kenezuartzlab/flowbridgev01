@@ -1,4 +1,4 @@
-import {beforeEach,expect,it,vi} from 'vitest';
+import {beforeEach,expect,it,vi,type Mock} from 'vitest';
 import {publisherCalldata} from './vaultV2Publisher';
 const m=vi.hoisted(()=>({client:vi.fn(),observe:vi.fn(),ingest:vi.fn()}));
 vi.mock('./vaultV2Read',()=>({vaultClient:m.client,readVaultV2:vi.fn()}));
@@ -7,7 +7,7 @@ import {resumeVaultPublisher,cancelVaultPublisher} from './vaultV2Publisher.serv
 const wallet='0x'+'1'.repeat(40),address='0x'+'2'.repeat(40),hash=`0x${'b'.repeat(64)}` as const,blockHash='0x'+'c'.repeat(64);
 const b={batch_id:'0x'+'a'.repeat(64),snapshot_hash:'source',contract_address:address,publisher:wallet,source_ids:['award'],wallets:[wallet],amounts_wei:['100'],total_wei:'100',state:'RESERVED',tx_hash:null};
 const actor={userId:'actor',wallet,role:'internal_operator',email:'private'} as const;
-let a:Record<string,unknown>;let rpc:Record<string,ReturnType<typeof vi.fn>>;let transition:ReturnType<typeof vi.fn>;
+let a:Record<string,unknown>;let rpc:Record<string,Mock<(...args:unknown[])=>Promise<any>>>;let transition:Mock<(...args:unknown[])=>Promise<any>>;
 const db={from:(name:string)=>{const chain:{select:()=>unknown;eq:()=>unknown;single:()=>Promise<unknown>;maybeSingle:()=>Promise<unknown>}={select:()=>chain,eq:()=>chain,single:async()=>({data:name.includes('attempts')?a:b,error:null}),maybeSingle:async()=>({data:{deployment_verified:true,code_hash:hash,contract_address:address},error:null})};return chain;},rpc:(...args:unknown[])=>transition(...args)};
 const resume=()=>resumeVaultPublisher(db as never,actor,'op');
 beforeEach(()=>{vi.resetAllMocks();a={operation_id:'op',batch_id:b.batch_id,actor_user_id:'actor',publisher:wallet,nonce:7,start_block:10,calldata:publisherCalldata(b),phase:'SIGNATURE',tx_hash:null};transition=vi.fn().mockResolvedValue({error:null});rpc={getChainId:vi.fn().mockResolvedValue(677),getBlockNumber:vi.fn().mockResolvedValue(10n),getBlock:vi.fn().mockResolvedValue({hash:blockHash,transactions:[]}),getTransaction:vi.fn().mockResolvedValue({hash,from:wallet,to:address,input:publisherCalldata(b),value:0n,nonce:7}),getTransactionReceipt:vi.fn().mockResolvedValue({blockNumber:10n,blockHash}),readContract:vi.fn().mockResolvedValue(false),getTransactionCount:vi.fn().mockResolvedValue(7)};m.client.mockReturnValue(rpc);m.observe.mockResolvedValue({state:'PENDING'});m.ingest.mockResolvedValue({state:'CONFIRMED'});});
