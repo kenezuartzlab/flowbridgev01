@@ -68,6 +68,20 @@ try:
  sql(f"INSERT INTO flow_points_ledger(id,user_id,points,created_at,program_id,policy_version,reason,activity_key) VALUES('{old}','{u}',100,now()-interval '1 year','SIGNUP_BONUS','FUNDED_SIGNUP_BONUS_V1','SIGNUP_BONUS_REFEREE','old');")
  assert sql(f"SELECT count(*) FROM reward_award_destinations WHERE ledger_id='{old}';").stdout.strip()=='0'
  print('Pre-cutover historical awards remain V1 PASS')
+ # Same economic ID cannot be inserted into another V2 earning row.
+ duplicate='00000000-0000-0000-0000-000000000005'
+ assert sql(f"INSERT INTO flow_points_ledger(id,user_id,policy_version,reason,points,wallet_address,activity_key,program_id,funding_state) VALUES('{duplicate}','{u}','FUNDED_SIGNUP_BONUS_V1','SIGNUP_BONUS_REFEREE',100,'{w}','signup:{u}','SIGNUP_BONUS','FUNDED');",False).returncode
+ # Legacy rows lack a V2 destination but their obligations are protected globally.
+ sql(f"UPDATE flow_points_ledger SET wallet_address='{w}',funding_state='FUNDED',reservation_id='00000000-0000-0000-0000-000000000006' WHERE id='{old}';INSERT INTO reward_reservations VALUES('00000000-0000-0000-0000-000000000006','{old}','{u}','{w}',100,'SIGNUP_BONUS');")
+ def approve(_):return sql(f"INSERT INTO reward_payout_approvals VALUES(gen_random_uuid(),'{u}','{w}',100,'CONFIRMED',NULL,now());",False).returncode
+ with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex: wins=list(ex.map(approve,range(8)))
+ assert wins.count(0)==1,wins
+ print('Concurrent V1 approvals cannot consume the same legacy balance PASS')
+ # Pre-cutover unpublished obligations can still be tracked after cutover.
+ historic='00000000-0000-0000-0000-000000000007'
+ sql(f"INSERT INTO reward_settlement_batches(id,chain_id,leaves,publication_verified_at,created_at) VALUES('{historic}',677,'[{{\"account\":\"{w}\",\"amount\":\"100000000000000000000\"}}]',NULL,now()-interval '1 year');INSERT INTO reward_publish_attempts VALUES('{historic}','BROADCAST_PENDING',false);")
+ print('Pre-cutover unpublished V1 obligation preserved PASS')
+
 finally:
  local('pg_ctl','-D',data,'-m','immediate','stop',stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
  shutil.rmtree(base,ignore_errors=True)
