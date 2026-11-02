@@ -3,8 +3,9 @@ import { z } from 'zod';
 const address=z.string().regex(/^0x[0-9a-fA-F]{40}$/).transform(v=>v.toLowerCase() as `0x${string}`);
 const hash=z.string().regex(/^0x[0-9a-f]{64}$/).transform(v=>v as `0x${string}`);
 const command=z.discriminatedUnion('action',[
-  z.object({action:z.literal('authorize_future_cutover'),address,codeHash:hash,publisher:address,cutoverAt:z.iso.datetime()}),
-  z.object({action:z.literal('prepare')}),
+  // Code hash and publisher are derived server-side from the frozen artifact; client values are stripped.
+  z.object({action:z.literal('authorize_future_cutover'),address,cutoverAt:z.iso.datetime()}),
+  z.object({action:z.literal('prepare'),after:z.uuid().optional()}),
   z.object({action:z.literal('verify_credit'),batchId:hash,txHash:hash}),
   z.object({action:z.literal('review_batch'),batchId:hash}),
   z.object({action:z.literal('acquire_signing'),batchId:hash}),
@@ -43,7 +44,8 @@ export const Route = createFileRoute('/api/admin/rewards-vault-v2')({server:{han
       }
       if(input.action==='prepare'){
         const {reserveVaultV2Awards}=await import('@/lib/rewards/vaultV2Allocator.server');
-        return jsonResponse({batch:await reserveVaultV2Awards(db)});
+        const result=input.after?await reserveVaultV2Awards(db,input.after):await reserveVaultV2Awards(db);
+        return jsonResponse(result&&'continuation' in result?{batch:null,continuation:result.continuation}:{batch:result});
       }
       const {ingestVaultV2Credit}=await import('@/lib/rewards/vaultV2Ingestion.server');
       return jsonResponse(await ingestVaultV2Credit(db,input.batchId,input.txHash));
