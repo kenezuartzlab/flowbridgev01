@@ -40,6 +40,13 @@ export async function ingestVaultV2Credit(db: Admin, batchId: Hex, hash: Hex) {
   if(config.error||result.error||!config.data?.deployment_verified||!config.data.code_hash||!result.data) throw new Error('VERIFIED_STORED_BATCH_REQUIRED');
   const b=result.data;
   if(b.contract_address!==config.data.contract_address) throw new Error('DEPLOYMENT_CHANGED');
+  const intent=await db.from('reward_vault_v2_signing_attempts').select('nonce,publisher,calldata,tx_hash').eq('batch_id',batchId).not('phase','in','(CANCELLED,REVERTED)').maybeSingle();
+  if(intent.error)throw new Error('SIGNING_INTENT_UNAVAILABLE');
+  if(intent.data){
+    const tx=await vaultClient().getTransaction({hash}).catch(()=>null);
+    if(!tx)return {state:'PENDING' as const};
+    if(tx.nonce!==Number(intent.data.nonce)||tx.from.toLowerCase()!==intent.data.publisher||tx.input!==intent.data.calldata||(intent.data.tx_hash&&intent.data.tx_hash!==hash))throw new Error('SIGNING_NONCE_OR_PAYLOAD_MISMATCH');
+  }
   const allocations=await db.from('reward_economic_award_allocations').select('ledger_id,economic_award_id,wallet,points').eq('vault_batch_id',batchId);
   if(allocations.error || allocations.data?.length!==b.source_ids.length || b.source_ids.some(id=>!allocations.data?.some(a=>a.ledger_id===id))) throw new Error('SOURCE_SNAPSHOT_MISMATCH');
   const sums=new Map<string,bigint>();

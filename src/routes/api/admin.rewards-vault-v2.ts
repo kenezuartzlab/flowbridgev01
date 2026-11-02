@@ -6,33 +6,47 @@ const command=z.discriminatedUnion('action',[
   z.object({action:z.literal('authorize_future_cutover'),address,codeHash:hash,publisher:address,cutoverAt:z.iso.datetime()}),
   z.object({action:z.literal('prepare')}),
   z.object({action:z.literal('verify_credit'),batchId:hash,txHash:hash}),
+  z.object({action:z.literal('review_batch'),batchId:hash}),
+  z.object({action:z.literal('acquire_signing'),batchId:hash}),
+  z.object({action:z.literal('attach_hash'),operationId:z.uuid(),txHash:hash}),
+  z.object({action:z.literal('resume_signing'),operationId:z.uuid(),txHash:hash.optional()}),
+  z.object({action:z.literal('wallet_rejected'),operationId:z.uuid()}),
 ]);
 export const Route = createFileRoute('/api/admin/rewards-vault-v2')({server:{handlers:{
   GET:async({request})=>{
     const {requireAdmin}=await import('@/lib/admin/adminGate.server');
     const {jsonResponse}=await import('@/lib/api-auth.server');
     const gate=await requireAdmin(request);if(!gate.ok)return gate.response;
-    if(gate.admin.role!=='super_admin')return jsonResponse({error:'Super Admin only.'},403);
     try{const {vaultV2OpsStatus}=await import('@/lib/rewards/vaultV2.server');return jsonResponse(await vaultV2OpsStatus());}
     catch{return jsonResponse({error:'Vault V2 status unavailable. No financial action was performed.'},503);}
   },
   POST:async({request})=>{
     const {requireAdmin}=await import('@/lib/admin/adminGate.server');const gate=await requireAdmin(request);if(!gate.ok)return gate.response;
     const {jsonResponse}=await import('@/lib/api-auth.server');
-    if(gate.admin.role!=='super_admin')return jsonResponse({error:'Super Admin only.'},403);
     try{
       const input=command.parse(await request.json());
+      if(['authorize_future_cutover','prepare','verify_credit'].includes(input.action)&&gate.admin.role!=='super_admin')return jsonResponse({error:'Super Admin only.'},403);
       if(input.action==='authorize_future_cutover'){
         const {authorizeVaultCutover}=await import('@/lib/rewards/vaultV2Activation.server');
         return jsonResponse(await authorizeVaultCutover(gate.admin,input));
       }
       const {supabaseAdmin:db}=await import('@/integrations/supabase/client.server');
+      if(input.action==='review_batch'||input.action==='acquire_signing'){
+        const p=await import('@/lib/rewards/vaultV2Publisher.server');
+        return jsonResponse(await (input.action==='review_batch'?p.reviewVaultPublisher:p.acquireVaultPublisher)(db,gate.admin,input.batchId));
+      }
+      if(input.action==='attach_hash'||input.action==='resume_signing'||input.action==='wallet_rejected'){
+        const p=await import('@/lib/rewards/vaultV2Publisher.server');
+        if(input.action==='attach_hash')return jsonResponse(await p.attachVaultPublisherHash(db,gate.admin,input.operationId,input.txHash));
+        if(input.action==='wallet_rejected')return jsonResponse(await p.cancelVaultPublisher(db,gate.admin,input.operationId));
+        return jsonResponse(await p.resumeVaultPublisher(db,gate.admin,input.operationId,input.txHash));
+      }
       if(input.action==='prepare'){
         const {reserveVaultV2Awards}=await import('@/lib/rewards/vaultV2Allocator.server');
         return jsonResponse({batch:await reserveVaultV2Awards(db)});
       }
       const {ingestVaultV2Credit}=await import('@/lib/rewards/vaultV2Ingestion.server');
       return jsonResponse(await ingestVaultV2Credit(db,input.batchId,input.txHash));
-    }catch{return jsonResponse({error:'Vault action rejected. Deployment, funding, cutover and exact evidence gates must pass. No transaction was signed or sent.'},409);}
+    }catch{return jsonResponse({error:'Vault action could not complete. Check deployment, publisher, funding, cutover and exact evidence. Any unknown submission stays reserved; resume verification, never blindly resend.'},409);}
   },
 }}});

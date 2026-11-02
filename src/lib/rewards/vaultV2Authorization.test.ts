@@ -1,9 +1,10 @@
 import {beforeEach,expect,it,vi} from 'vitest';
-const mocks=vi.hoisted(()=>({gate:vi.fn(),authorize:vi.fn(),reserve:vi.fn(),ingest:vi.fn()}));
+const mocks=vi.hoisted(()=>({gate:vi.fn(),authorize:vi.fn(),reserve:vi.fn(),ingest:vi.fn(),acquire:vi.fn(),resume:vi.fn(),review:vi.fn(),attach:vi.fn(),cancel:vi.fn()}));
 vi.mock('@/lib/admin/adminGate.server',()=>({requireAdmin:mocks.gate}));
 vi.mock('@/lib/rewards/vaultV2Activation.server',()=>({authorizeVaultCutover:mocks.authorize}));
 vi.mock('@/lib/rewards/vaultV2Allocator.server',()=>({reserveVaultV2Awards:mocks.reserve}));
 vi.mock('@/lib/rewards/vaultV2Ingestion.server',()=>({ingestVaultV2Credit:mocks.ingest}));
+vi.mock('@/lib/rewards/vaultV2Publisher.server',()=>({reviewVaultPublisher:mocks.review,acquireVaultPublisher:mocks.acquire,resumeVaultPublisher:mocks.resume,attachVaultPublisherHash:mocks.attach,cancelVaultPublisher:mocks.cancel}));
 vi.mock('@/integrations/supabase/client.server',()=>({supabaseAdmin:{}}));
 vi.mock('@/lib/api-auth.server',()=>({jsonResponse:(d:unknown,status=200)=>Response.json(d,{status})}));
 import {Route} from '@/routes/api/admin.rewards-vault-v2';
@@ -17,3 +18,7 @@ it('client award IDs amounts and verified flags are not passed to allocator',asy
 it('disabled allocator rejects before any signature',async()=>{mocks.reserve.mockRejectedValue(new Error('DISABLED'));expect((await send({action:'prepare'})).status).toBe(409);expect(mocks.authorize).not.toHaveBeenCalled();});
 it('invalid receipt hash cannot reach ingestion',async()=>{expect((await send({action:'verify_credit',batchId:'fake',txHash:'fake'})).status).toBe(409);expect(mocks.ingest).not.toHaveBeenCalled();});
 it('receipt recheck takes only stored batch ID and hash',async()=>{const batchId=`0x${'a'.repeat(64)}`,txHash=`0x${'b'.repeat(64)}`;mocks.ingest.mockResolvedValue({state:'PENDING'});expect((await send({action:'verify_credit',batchId,txHash,wallets:['fake']})).status).toBe(200);expect(mocks.ingest).toHaveBeenCalledWith({},batchId,txHash);});
+it('signed-out publisher acquisition cannot reach the signing lock',async()=>{mocks.gate.mockResolvedValue({ok:false,response:new Response('Unauthorized',{status:401})});expect((await send({action:'acquire_signing',batchId:`0x${'a'.repeat(64)}`})).status).toBe(401);expect(mocks.acquire).not.toHaveBeenCalled();});
+it('bound operator publisher uses server identity, not injected amounts or nonce',async()=>{const admin={role:'internal_operator',userId:'actor',wallet:'wallet'};mocks.gate.mockResolvedValue({ok:true,admin});mocks.acquire.mockResolvedValue({operation_id:'op'});const batchId=`0x${'a'.repeat(64)}`;expect((await send({action:'acquire_signing',batchId,nonce:999,amounts:['999'],publisher:'attacker'})).status).toBe(200);expect(mocks.acquire).toHaveBeenCalledWith({},admin,batchId);});
+it('email admin without exact publisher binding cannot acquire',async()=>{mocks.acquire.mockRejectedValue(new Error('publisher mismatch'));expect((await send({action:'acquire_signing',batchId:`0x${'a'.repeat(64)}`})).status).toBe(409);expect(mocks.reserve).not.toHaveBeenCalled();});
+it('resume calls only verification and never batch preparation',async()=>{const operationId='00000000-0000-4000-8000-000000000001';mocks.resume.mockResolvedValue({state:'UNKNOWN'});expect((await send({action:'resume_signing',operationId})).status).toBe(200);expect(mocks.resume).toHaveBeenCalledWith({},expect.objectContaining({userId:'actor'}),operationId,undefined);expect(mocks.acquire).not.toHaveBeenCalled();expect(mocks.reserve).not.toHaveBeenCalled();});

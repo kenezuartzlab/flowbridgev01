@@ -2306,6 +2306,59 @@ export type Database = {
           },
         ]
       }
+      reward_vault_v2_signing_attempts: {
+        Row: {
+          actor_user_id: string
+          batch_id: string
+          calldata: string
+          created_at: string
+          evidence: Json | null
+          nonce: number
+          operation_id: string
+          phase: string
+          publisher: string
+          start_block: number
+          tx_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          actor_user_id: string
+          batch_id: string
+          calldata: string
+          created_at?: string
+          evidence?: Json | null
+          nonce: number
+          operation_id?: string
+          phase?: string
+          publisher: string
+          start_block: number
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actor_user_id?: string
+          batch_id?: string
+          calldata?: string
+          created_at?: string
+          evidence?: Json | null
+          nonce?: number
+          operation_id?: string
+          phase?: string
+          publisher?: string
+          start_block?: number
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_vault_v2_signing_attempts_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "reward_vault_v2_batches"
+            referencedColumns: ["batch_id"]
+          },
+        ]
+      }
       siwe_nonces: {
         Row: {
           created_at: string
@@ -2872,6 +2925,21 @@ export type Database = {
         }
         Returns: string
       }
+      acquire_vault_v2_signing: {
+        Args: {
+          p_actor: string
+          p_batch: string
+          p_calldata: string
+          p_daily: number
+          p_free: number
+          p_nonce: number
+          p_observed: string
+          p_source_hash: string
+          p_start: number
+          p_wallet: string
+        }
+        Returns: string
+      }
       admin_bind_core_swap_evidence: {
         Args: {
           p_activity_id: string
@@ -3323,6 +3391,17 @@ export type Database = {
           p_operation: string
           p_phase: string
           p_retry_safe?: boolean
+        }
+        Returns: boolean
+      }
+      transition_vault_v2_signing: {
+        Args: {
+          p_actor: string
+          p_evidence: Json
+          p_hash: string
+          p_operation: string
+          p_phase: string
+          p_wallet: string
         }
         Returns: boolean
       }
