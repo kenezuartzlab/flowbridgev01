@@ -48,9 +48,9 @@ Evidence: **2,327 tests / 225 files PASS** (identity 14, signing recovery 19, pu
 
 Fresh backend scan completed with no new actionable findings. Dependency scan still reports existing **high and moderate** transitive advisories (WalletConnect, serialization, MCP/email chains); these were neither ignored nor changed. The Wiz connector was unavailable; a fully clean comprehensive security claim is not warranted.
 
-Publication was withheld: release safeguards and dependency advisories remain. This does not disable or alter legacy Mainnet claims. Actual current served asset verification is recorded in `verification/served-production.json`; it describes the existing release, not a newly deployed one.
+Follow-through build: fresh scan has no new findings (only two previously user-ignored). Disabled-only code was published; flowbridge.space `/ops`, `/rewards`, `/earn` HTTP 200 and live `ops-DaUv3NZu.js` (SHA-256 `658b73ec…b169`) contains the unresolved-dismissal and Continue scan safeguards. Legacy Mainnet claims unchanged. Signed-in 320/390/430 Ops/Rewards/Earn: no overflow or runtime errors; the Ops V2 detail panel requires a connected bound wallet, which the headless check could not provide.
 
-## One future launch path (after software blockers are resolved)
+## One launch sequence (human-authorized)
 
 1. Owner authorizes exact verified multisig admin, distinct publisher and deployment signer; human signs Testnet acceptance first with a valid Testnet Safe, then separately authorized Mainnet deployment. Constructor remains paused/zero caps; attest exact deployed runtime/token/owner/publisher.
 2. Treasury multisig human-signs **only the owner-chosen limited initial FLOW amount**; governance human-signs bounded limits/unpause after backing verification. No illustrative test amount is an authorized budget.
