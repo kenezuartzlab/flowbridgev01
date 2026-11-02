@@ -8,7 +8,7 @@ import { vaultFlowToken } from './vaultV2';
 
 type Admin = Awaited<typeof import('@/integrations/supabase/client.server')>['supabaseAdmin'];
 export type VaultCreditBatch = { batch_id: string; snapshot_hash: string; contract_address: string; publisher: string; source_ids: string[]; wallets: string[]; amounts_wei: string[]; total_wei: string | number; tx_hash: string | null };
-export type CreditOutcome = { state: 'CONFIRMED' | 'PENDING' | 'REVERTED' | 'MISMATCH'; evidence?: Record<string, unknown> };
+export type CreditOutcome = { state: 'CONFIRMED' | 'PENDING' | 'REVERTED' | 'MISMATCH'; evidence?: Record<string, unknown>; blocker?: string };
 
 /** No signer or send method: unknown/reverted/reorg outcomes never free source reservations. */
 export async function observeVaultCredit(batch: VaultCreditBatch, hash: Hex, codeHash: Hex, c = vaultClient()): Promise<CreditOutcome> {
