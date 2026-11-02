@@ -2,10 +2,11 @@
 
 # Rewards Vault V2
 - [x] Non-upgradeable contract, exact compiled ABI, local adversarial/EVM tests and unsigned deployment instructions; 100-recipient execution 5,659,147 gas.
-- [x] Disabled immutable award/batch schema and exact receipt verifier; readback confirms zero config rows, batches and allocations, reservation RPC unconditionally rejects.
-- [ ] Live canonical award allocator/cross-legacy exclusion and credit ingestion: blocked on evidenced legacy award-ID mapping and separate cutover authorization; no safe automatic lifetime Points migration.
+- [x] Installed disabled post-cutover routing, canonical funded source RPC, bounded allocator, global V1 approval/batch/publication fences, atomic reservation and exact receipt ingestion; readback confirms zero config, destination, allocation, batch and credit rows. No historical mapping.
+- [x] Ops new-award cutover review, authenticated future cutover/prepare/credit verification commands, runtime-gated user panel and adversarial tests: 2,224 full tests, 66 focused tests, isolated 8-way reservations/6-way confirmations/V1 concurrency checks, automatic typecheck/build OK, signed-in 320/390/430/1280 Rewards/Earn and bound Super Admin review PASS.
+- [ ] Activation-ready manual publisher operation: durable pre-signature nonce/operation acquisition, transaction-hash recovery after disconnect/reload and integrated Ops signing controls are not implemented. Existing immutable batch ID prevents double credit, but this is not a complete publisher recovery workflow.
 - [x] Shared Rewards/Earn disabled panel and super-admin view-only controls; 320/390/430/1280 smoke no overflow/runtime errors, legacy claim section preserved.
-- [x] Full regression and automatic build passed; security reviewed. Production HOLD: existing dependency advisories plus incomplete live allocator acceptance; no publication.
+- [x] Full regression and automatic build passed; backend scan reports no new actionable findings. Production remains unchanged/not published; dependency scan retains existing high/moderate advisories. Live Mainnet acceptance unavailable without authorized deployment.
 - [ ] Mainnet deployment/funding/cutover: requires separate owner financial authorization; not part of this implementation.
 
 - [x] Visitor voting announcement: owner artwork, direct in-app CTA, Control Panel editing/removal controls; 17 focused tests, automatic build OK, 390px arrival/dismissal/vote-link and desktop Earn checks pass. Existing super-admin save restriction preserved; no settings write or publication performed.

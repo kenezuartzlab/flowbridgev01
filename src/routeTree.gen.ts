@@ -105,6 +105,7 @@ import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/r
 import { Route as ApiRewardsConvertRouteImport } from './routes/api/rewards.convert'
 import { Route as ApiRewardsProgressionRouteImport } from './routes/api/rewards.progression'
 import { Route as ApiRewardsStateRouteImport } from './routes/api/rewards.state'
+import { Route as ApiRewardsVaultV2RouteImport } from './routes/api/rewards.vault-v2'
 import { Route as ApiStudioCampaignsRouteImport } from './routes/api/studio.campaigns'
 import { Route as ApiStudioSessionRouteImport } from './routes/api/studio.session'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
@@ -623,6 +624,11 @@ const ApiRewardsStateRoute = ApiRewardsStateRouteImport.update({
   path: '/api/rewards/state',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRewardsVaultV2Route = ApiRewardsVaultV2RouteImport.update({
+  id: '/api/rewards/vault-v2',
+  path: '/api/rewards/vault-v2',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStudioCampaignsRoute = ApiStudioCampaignsRouteImport.update({
   id: '/api/studio/campaigns',
   path: '/api/studio/campaigns',
@@ -836,6 +842,7 @@ export interface FileRoutesByFullPath {
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
   '/api/rewards/progression': typeof ApiRewardsProgressionRoute
   '/api/rewards/state': typeof ApiRewardsStateRoute
+  '/api/rewards/vault-v2': typeof ApiRewardsVaultV2Route
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -956,6 +963,7 @@ export interface FileRoutesByTo {
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
   '/api/rewards/progression': typeof ApiRewardsProgressionRoute
   '/api/rewards/state': typeof ApiRewardsStateRoute
+  '/api/rewards/vault-v2': typeof ApiRewardsVaultV2Route
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -1077,6 +1085,7 @@ export interface FileRoutesById {
   '/api/rewards/convert': typeof ApiRewardsConvertRoute
   '/api/rewards/progression': typeof ApiRewardsProgressionRoute
   '/api/rewards/state': typeof ApiRewardsStateRoute
+  '/api/rewards/vault-v2': typeof ApiRewardsVaultV2Route
   '/api/studio/campaigns': typeof ApiStudioCampaignsRouteWithChildren
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
@@ -1199,6 +1208,7 @@ export interface FileRouteTypes {
     | '/api/rewards/convert'
     | '/api/rewards/progression'
     | '/api/rewards/state'
+    | '/api/rewards/vault-v2'
     | '/api/studio/campaigns'
     | '/api/studio/session'
     | '/api/users/bind-wallet'
@@ -1319,6 +1329,7 @@ export interface FileRouteTypes {
     | '/api/rewards/convert'
     | '/api/rewards/progression'
     | '/api/rewards/state'
+    | '/api/rewards/vault-v2'
     | '/api/studio/campaigns'
     | '/api/studio/session'
     | '/api/users/bind-wallet'
@@ -1439,6 +1450,7 @@ export interface FileRouteTypes {
     | '/api/rewards/convert'
     | '/api/rewards/progression'
     | '/api/rewards/state'
+    | '/api/rewards/vault-v2'
     | '/api/studio/campaigns'
     | '/api/studio/session'
     | '/api/users/bind-wallet'
@@ -1554,6 +1566,7 @@ export interface RootRouteChildren {
   ApiRewardsConvertRoute: typeof ApiRewardsConvertRoute
   ApiRewardsProgressionRoute: typeof ApiRewardsProgressionRoute
   ApiRewardsStateRoute: typeof ApiRewardsStateRoute
+  ApiRewardsVaultV2Route: typeof ApiRewardsVaultV2Route
   ApiStudioCampaignsRoute: typeof ApiStudioCampaignsRouteWithChildren
   ApiStudioSessionRoute: typeof ApiStudioSessionRoute
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
@@ -2247,6 +2260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRewardsStateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rewards/vault-v2': {
+      id: '/api/rewards/vault-v2'
+      path: '/api/rewards/vault-v2'
+      fullPath: '/api/rewards/vault-v2'
+      preLoaderRoute: typeof ApiRewardsVaultV2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/studio/campaigns': {
       id: '/api/studio/campaigns'
       path: '/api/studio/campaigns'
@@ -2576,6 +2596,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRewardsConvertRoute: ApiRewardsConvertRoute,
   ApiRewardsProgressionRoute: ApiRewardsProgressionRoute,
   ApiRewardsStateRoute: ApiRewardsStateRoute,
+  ApiRewardsVaultV2Route: ApiRewardsVaultV2Route,
   ApiStudioCampaignsRoute: ApiStudioCampaignsRouteWithChildren,
   ApiStudioSessionRoute: ApiStudioSessionRoute,
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,

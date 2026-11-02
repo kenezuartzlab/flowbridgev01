@@ -200,7 +200,12 @@ export async function buildSettlement(args: {
   if (reservationError) throw new Error('REWARD_RESERVATIONS_UNAVAILABLE');
   const reservationById = new Map((reservations ?? []).map((r) => [r.reservation_id, r]));
   const eligibleIds = new Set(args.recon.flatMap(r => r.eligibleRowIds ?? []));
+  // Earning-time destinations are immutable; before cutover the table is empty.
+  const destinations = await args.admin.from('reward_award_destinations').select('ledger_id').eq('destination','VAULT_V2');
+  if (destinations.error) throw new Error('REWARD_DESTINATION_UNAVAILABLE');
+  const vaultIds = new Set((destinations.data ?? []).map(r=>r.ledger_id));
   for (const [i, l] of args.ledger.entries()) {
+    if (l.id && vaultIds.has(l.id)) continue;
     if (!l.id || !eligibleIds.has(l.id)) continue;
     if (l.funding_state !== "FUNDED" || effChain(l, i) !== MAINNET_CHAIN_ID) continue;
     if ((SIGNUP_REASONS as readonly string[]).includes(l.reason ?? '') && !signup.mainnetIdx.has(i)) continue;

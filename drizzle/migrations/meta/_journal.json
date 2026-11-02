@@ -351,6 +351,27 @@
       "when": 1793589294377,
       "tag": "0049_vault_v2_fail_closed_staging_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1793589860155,
+      "tag": "0050_vault_v2_future_award_destination_fences",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1793589917789,
+      "tag": "0051_vault_v2_atomic_reserve_and_credit",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1793590081787,
+      "tag": "0052_vault_v2_liability_and_receipt_binding",
+      "breakpoints": true
     }
   ]
 }

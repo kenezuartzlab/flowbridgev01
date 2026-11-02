@@ -1306,6 +1306,38 @@ export type Database = {
           },
         ]
       }
+      reward_award_destinations: {
+        Row: {
+          created_at: string
+          cutover_at: string
+          destination: string
+          economic_award_id: string
+          ledger_id: string
+        }
+        Insert: {
+          created_at?: string
+          cutover_at: string
+          destination: string
+          economic_award_id: string
+          ledger_id: string
+        }
+        Update: {
+          created_at?: string
+          cutover_at?: string
+          destination?: string
+          economic_award_id?: string
+          ledger_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_award_destinations_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: true
+            referencedRelation: "flow_points_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reward_budget_adjustments: {
         Row: {
           approved_by: string | null
@@ -2184,36 +2216,95 @@ export type Database = {
       }
       reward_vault_v2_config: {
         Row: {
+          authorized_by: string | null
+          batch_cap_wei: number
           chain_id: number
           code_hash: string | null
           contract_address: string | null
+          cutover_accepted: boolean
           cutover_at: string | null
           cutover_evidence: Json | null
+          daily_cap_wei: number
+          deployment_verified: boolean
           enabled: boolean
+          financial_enabled: boolean
           id: boolean
+          publisher: string | null
           updated_at: string
         }
         Insert: {
+          authorized_by?: string | null
+          batch_cap_wei?: number
           chain_id?: number
           code_hash?: string | null
           contract_address?: string | null
+          cutover_accepted?: boolean
           cutover_at?: string | null
           cutover_evidence?: Json | null
+          daily_cap_wei?: number
+          deployment_verified?: boolean
           enabled?: boolean
+          financial_enabled?: boolean
           id?: boolean
+          publisher?: string | null
           updated_at?: string
         }
         Update: {
+          authorized_by?: string | null
+          batch_cap_wei?: number
           chain_id?: number
           code_hash?: string | null
           contract_address?: string | null
+          cutover_accepted?: boolean
           cutover_at?: string | null
           cutover_evidence?: Json | null
+          daily_cap_wei?: number
+          deployment_verified?: boolean
           enabled?: boolean
+          financial_enabled?: boolean
           id?: boolean
+          publisher?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      reward_vault_v2_credit_evidence: {
+        Row: {
+          batch_id: string
+          block_hash: string
+          block_number: number
+          created_at: string
+          evidence: Json
+          head_number: number
+          tx_hash: string
+        }
+        Insert: {
+          batch_id: string
+          block_hash: string
+          block_number: number
+          created_at?: string
+          evidence: Json
+          head_number: number
+          tx_hash: string
+        }
+        Update: {
+          batch_id?: string
+          block_hash?: string
+          block_number?: number
+          created_at?: string
+          evidence?: Json
+          head_number?: number
+          tx_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_vault_v2_credit_evidence_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: true
+            referencedRelation: "reward_vault_v2_batches"
+            referencedColumns: ["batch_id"]
+          },
+        ]
       }
       siwe_nonces: {
         Row: {
@@ -2888,6 +2979,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      authorize_vault_v2_cutover: {
+        Args: {
+          p_actor: string
+          p_batch_cap: number
+          p_code: string
+          p_contract: string
+          p_cutover: string
+          p_daily_cap: number
+          p_evidence: Json
+          p_publisher: string
+          p_state_hash: string
+          p_wallet: string
+        }
+        Returns: boolean
+      }
       auto_approve_funded_payout: {
         Args: {
           p_available: number
@@ -2976,6 +3082,18 @@ export type Database = {
           p_email: string
           p_hash: string
           p_role: string
+        }
+        Returns: boolean
+      }
+      confirm_vault_v2_credit: {
+        Args: {
+          p_batch: string
+          p_block: number
+          p_block_hash: string
+          p_evidence: Json
+          p_hash: string
+          p_head: number
+          p_snapshot: string
         }
         Returns: boolean
       }
@@ -3150,6 +3268,23 @@ export type Database = {
         }
         Returns: undefined
       }
+      reserve_vault_v2_new_awards: {
+        Args: {
+          p_amounts: string[]
+          p_batch: string
+          p_block: number
+          p_block_hash: string
+          p_evidence: string
+          p_free: number
+          p_hash: string
+          p_ids: string[]
+          p_observed: string
+          p_reconciliation: Json
+          p_total: number
+          p_wallets: string[]
+        }
+        Returns: string
+      }
       reserve_voter_claim: { Args: { p_wallet: string }; Returns: Json }
       retire_unapproved_reward_draft: {
         Args: {
@@ -3190,6 +3325,20 @@ export type Database = {
           p_retry_safe?: boolean
         }
         Returns: boolean
+      }
+      vault_v2_source_hash: { Args: { p_ids: string[] }; Returns: string }
+      vault_v2_source_rows: {
+        Args: never
+        Returns: {
+          created_at: string
+          destination: string
+          economic_award_id: string
+          id: string
+          points: number
+          policy_version: string
+          program_id: string
+          wallet: string
+        }[]
       }
       vote_proposal_once: {
         Args: { p_id: string; p_user: string }
