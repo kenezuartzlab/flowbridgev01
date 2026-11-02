@@ -76,6 +76,7 @@ import { Route as ApiAdminRewardsBudgetRouteImport } from './routes/api/admin.re
 import { Route as ApiAdminRewardsControlRouteImport } from './routes/api/admin.rewards-control'
 import { Route as ApiAdminRewardsPublishVerifyRouteImport } from './routes/api/admin.rewards-publish-verify'
 import { Route as ApiAdminRewardsSolvencyRouteImport } from './routes/api/admin.rewards-solvency'
+import { Route as ApiAdminRewardsVaultV2RouteImport } from './routes/api/admin.rewards-vault-v2'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminTokensRouteImport } from './routes/api/admin.tokens'
 import { Route as ApiAdminUsersRouteImport } from './routes/api/admin.users'
@@ -476,6 +477,11 @@ const ApiAdminRewardsSolvencyRoute = ApiAdminRewardsSolvencyRouteImport.update({
   path: '/api/admin/rewards-solvency',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminRewardsVaultV2Route = ApiAdminRewardsVaultV2RouteImport.update({
+  id: '/api/admin/rewards-vault-v2',
+  path: '/api/admin/rewards-vault-v2',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
   id: '/api/admin/settings',
   path: '/api/admin/settings',
@@ -801,6 +807,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
+  '/api/admin/rewards-vault-v2': typeof ApiAdminRewardsVaultV2Route
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -920,6 +927,7 @@ export interface FileRoutesByTo {
   '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
+  '/api/admin/rewards-vault-v2': typeof ApiAdminRewardsVaultV2Route
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -1040,6 +1048,7 @@ export interface FileRoutesById {
   '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
   '/api/admin/rewards-solvency': typeof ApiAdminRewardsSolvencyRoute
+  '/api/admin/rewards-vault-v2': typeof ApiAdminRewardsVaultV2Route
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/tokens': typeof ApiAdminTokensRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -1161,6 +1170,7 @@ export interface FileRouteTypes {
     | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
+    | '/api/admin/rewards-vault-v2'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/users'
@@ -1280,6 +1290,7 @@ export interface FileRouteTypes {
     | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
+    | '/api/admin/rewards-vault-v2'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/users'
@@ -1399,6 +1410,7 @@ export interface FileRouteTypes {
     | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
     | '/api/admin/rewards-solvency'
+    | '/api/admin/rewards-vault-v2'
     | '/api/admin/settings'
     | '/api/admin/tokens'
     | '/api/admin/users'
@@ -1519,6 +1531,7 @@ export interface RootRouteChildren {
   ApiAdminRewardsControlRoute: typeof ApiAdminRewardsControlRoute
   ApiAdminRewardsPublishVerifyRoute: typeof ApiAdminRewardsPublishVerifyRoute
   ApiAdminRewardsSolvencyRoute: typeof ApiAdminRewardsSolvencyRoute
+  ApiAdminRewardsVaultV2Route: typeof ApiAdminRewardsVaultV2Route
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTokensRoute: typeof ApiAdminTokensRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRoute
@@ -2031,6 +2044,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminRewardsSolvencyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/rewards-vault-v2': {
+      id: '/api/admin/rewards-vault-v2'
+      path: '/api/admin/rewards-vault-v2'
+      fullPath: '/api/admin/rewards-vault-v2'
+      preLoaderRoute: typeof ApiAdminRewardsVaultV2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/settings': {
       id: '/api/admin/settings'
       path: '/api/admin/settings'
@@ -2533,6 +2553,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminRewardsControlRoute: ApiAdminRewardsControlRoute,
   ApiAdminRewardsPublishVerifyRoute: ApiAdminRewardsPublishVerifyRoute,
   ApiAdminRewardsSolvencyRoute: ApiAdminRewardsSolvencyRoute,
+  ApiAdminRewardsVaultV2Route: ApiAdminRewardsVaultV2Route,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTokensRoute: ApiAdminTokensRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
