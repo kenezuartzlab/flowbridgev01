@@ -8,7 +8,7 @@ import { VAULT_V2_CONFIG, vaultClaimGate } from './vaultV2';
 import { readVaultV2, vaultClient } from './vaultV2Read';
 import { flexibleGate, quoteFingerprint, type ClaimStakeOperation, type ClaimStakePort, type FlexibleQuote, type Intent, type Step } from './vaultV2ClaimStake';
 
-const identityAbi = parseAbi(['function token() view returns(address)','function controller() view returns(address)','function treasury() view returns(address)','function MAX_POSITIONS_PER_WALLET() view returns(uint256)','function currentFlowPerSecond(uint256) view returns(uint256)','function currentEpochEnd() view returns(uint256)','event PositionOpened(uint256 indexed positionId,address indexed owner,uint8 productId,uint256 principal,uint16 genesisRateBps,uint16 floorRateBps,uint40 genesisEndAt,uint40 maturityAt,bool genesisApplied)']);
+const identityAbi = parseAbi(['function token() view returns(address)','function controller() view returns(address)','function treasury() view returns(address)','function MAX_POSITIONS_PER_WALLET() view returns(uint256)','function currentFlowPerSecond(uint8) view returns(uint256)','function currentEpochEnd() view returns(uint256)','event PositionOpened(uint256 indexed positionId,address indexed owner,uint8 productId,uint256 principal,uint16 genesisRateBps,uint16 floorRateBps,uint40 genesisEndAt,uint40 maturityAt,bool genesisApplied)']);
 export async function readFlexibleQuote(wallet: Address, principal: bigint): Promise<FlexibleQuote> {
   const {token,vault,treasury} = mainnetStakingAddresses();
   const controller = resolveCanonicalAddress(677,'FlowStakingController');
@@ -32,7 +32,7 @@ export async function readFlexibleQuote(wallet: Address, principal: bigint): Pro
     c.readContract({address:treasury,abi:STAKING_TREASURY_ABI,functionName:'freeBalance',...at}),
     c.readContract({address:controller,abi:STAKING_CONTROLLER_PRODUCT_ABI,functionName:'genesisYear1Used',...at}),
     c.readContract({address:controller,abi:STAKING_CONTROLLER_PRODUCT_ABI,functionName:'GENESIS_YEAR1_CAP',...at}),
-    c.readContract({address:vault,abi:identityAbi,functionName:'currentFlowPerSecond',args:[0n],...at}),
+    c.readContract({address:vault,abi:identityAbi,functionName:'currentFlowPerSecond',args:[0],...at}),
     c.readContract({address:vault,abi:identityAbi,functionName:'currentEpochEnd',...at}),
   ]);
   if (actualToken.toLowerCase()!==token.toLowerCase() || actualController.toLowerCase()!==controller.toLowerCase() || actualTreasury.toLowerCase()!==treasury.toLowerCase()) throw new Error('Staking contract identity mismatch.');
