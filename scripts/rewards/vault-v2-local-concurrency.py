@@ -14,7 +14,8 @@ CREATE TABLE flow_points_ledger(id uuid PRIMARY KEY,user_id uuid,policy_version 
 CREATE TABLE verified_activities(activity_id text,status text,source_chain_id int,source_tx_hash text,source_log_index int,user_wallet text);
 CREATE TABLE reward_reservations(reservation_id uuid,ledger_id uuid,user_id uuid,wallet_address text,points int,program_id text);
 CREATE TABLE reward_budgets(program_id text,total_points bigint,reserved_points bigint,status text,funding_verified bool);
-CREATE TABLE reward_settlement_batches(id uuid PRIMARY KEY,chain_id int,leaves jsonb,publication_verified_at timestamptz,created_at timestamptz DEFAULT now());
+CREATE TABLE reward_retired_drafts(batch_id uuid);
+CREATE TABLE reward_settlement_batches(id uuid PRIMARY KEY,chain_id int,leaves jsonb,total_wei numeric,publication_verified_at timestamptz,created_at timestamptz DEFAULT now());
 CREATE TABLE reward_payout_approvals(id uuid,user_id uuid,wallet text,points int,status text,settlement_batch_id uuid,created_at timestamptz DEFAULT now());
 CREATE TABLE reward_publish_attempts(batch_id uuid,phase text,retry_safe bool);
 CREATE TABLE admin_audit_events(actor_user_id uuid,actor_email text,actor_role text,object_type text,object_id text,action text,new_value jsonb);
@@ -26,7 +27,7 @@ try:
  local('pg_ctl','-D',data,'-o',f"-F -k {sock} -p {port} -c listen_addresses=''",'-w','start',check=True,stdout=subprocess.DEVNULL)
  sql(fixture)
  sql((P/'drizzle/migrations/0048_rewards_vault_v2_disabled_ledger.sql').read_text())
- sql(pathlib.Path(os.environ.get('VAULT_TEST_SQL','/tmp/vault-v2/safeguards.sql')).read_text())
+ for migration in ['0050_vault_v2_future_award_destination_fences.sql','0051_vault_v2_atomic_reserve_and_credit.sql','0052_vault_v2_liability_and_receipt_binding.sql']: sql((P/'drizzle/migrations'/migration).read_text())
  print('SQL install PASS')
  w='0x'+'1'*40;pub='0x'+'2'*40;contract='0x'+'3'*40;code='0x'+'4'*64;u='00000000-0000-0000-0000-000000000001';l='00000000-0000-0000-0000-000000000002';r='00000000-0000-0000-0000-000000000003';batch='0x'+'a'*64
  sql(f"INSERT INTO profiles VALUES('{u}','fixture@test','{w}','2026-11-02T00:00:00Z',100,0,0);INSERT INTO auth.users VALUES('{u}',now(),NULL);INSERT INTO app_admins VALUES('fixture@test','super_admin',false);INSERT INTO reward_budgets VALUES('SIGNUP_BONUS',1000,100,'ACTIVE',true);")
@@ -49,13 +50,15 @@ try:
  assert sql(call('0x'+'b'*64),False).returncode
  print('8 concurrent idempotent reservations, one batch/award PASS')
  v1=sql(f"INSERT INTO reward_payout_approvals VALUES(gen_random_uuid(),'{u}','{w}',100,'CONFIRMED',NULL,now());",False);assert v1.returncode
- b1=sql(f"INSERT INTO reward_settlement_batches VALUES(gen_random_uuid(),677,'[{{\"account\":\"{w}\",\"amount\":\"100000000000000000000\"}}]',NULL,now());",False);assert b1.returncode,b1.stderr
+ b1=sql(f"INSERT INTO reward_settlement_batches(id,chain_id,leaves,publication_verified_at,created_at) VALUES(gen_random_uuid(),677,'[{{\"account\":\"{w}\",\"amount\":\"100000000000000000000\"}}]',NULL,now());",False);assert b1.returncode,b1.stderr
  assert sql(f"UPDATE reward_award_destinations SET destination='LEGACY';",False).returncode
  assert sql(f"UPDATE flow_points_ledger SET points=101 WHERE id='{l}';",False).returncode
  print('V1 approval/batch fences and immutable economic sources PASS')
  tx='0x'+'c'*64
  assert sql(f"SELECT confirm_vault_v2_credit('{batch}','{tx}',vault_v2_source_hash(ARRAY['{l}'::uuid]),10,'{code}',11,'{{\"verification\":\"EXACT_CANONICAL_CREDIT\"}}');",False).returncode
- q=f"SELECT confirm_vault_v2_credit('{batch}','{tx}',vault_v2_source_hash(ARRAY['{l}'::uuid]),10,'{code}',12,'{{\"verification\":\"EXACT_CANONICAL_CREDIT\"}}');"
+ import json
+ evidence=json.dumps({'verification':'EXACT_CANONICAL_CREDIT','transactionHash':tx,'snapshotHash':sql(f"SELECT vault_v2_source_hash(ARRAY['{l}'::uuid]);").stdout.strip(),'contract':contract,'publisher':pub,'codeHash':code,'chainId':677,'blockHash':code,'blockNumber':'10','headNumber':'12','sourceIds':[l],'logs':[{},{}]})
+ q=f"SELECT confirm_vault_v2_credit('{batch}','{tx}',vault_v2_source_hash(ARRAY['{l}'::uuid]),10,'{code}',12,'{evidence}');"
  with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex: out=list(ex.map(lambda _:sql(q).stdout.strip(),range(6)))
  assert out.count('t')==1 and out.count('f')==5,out
  assert sql("SELECT count(*) FROM reward_vault_v2_credit_evidence;").stdout.strip()=='1'
