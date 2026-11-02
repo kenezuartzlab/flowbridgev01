@@ -1306,6 +1306,38 @@ export type Database = {
           },
         ]
       }
+      reward_award_destinations: {
+        Row: {
+          created_at: string
+          cutover_at: string
+          destination: string
+          economic_award_id: string
+          ledger_id: string
+        }
+        Insert: {
+          created_at?: string
+          cutover_at: string
+          destination: string
+          economic_award_id: string
+          ledger_id: string
+        }
+        Update: {
+          created_at?: string
+          cutover_at?: string
+          destination?: string
+          economic_award_id?: string
+          ledger_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_award_destinations_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: true
+            referencedRelation: "flow_points_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reward_budget_adjustments: {
         Row: {
           approved_by: string | null
@@ -2184,33 +2216,54 @@ export type Database = {
       }
       reward_vault_v2_config: {
         Row: {
+          authorized_by: string | null
+          batch_cap_wei: number
           chain_id: number
           code_hash: string | null
           contract_address: string | null
+          cutover_accepted: boolean
           cutover_at: string | null
           cutover_evidence: Json | null
+          daily_cap_wei: number
+          deployment_verified: boolean
           enabled: boolean
+          financial_enabled: boolean
           id: boolean
+          publisher: string | null
           updated_at: string
         }
         Insert: {
+          authorized_by?: string | null
+          batch_cap_wei?: number
           chain_id?: number
           code_hash?: string | null
           contract_address?: string | null
+          cutover_accepted?: boolean
           cutover_at?: string | null
           cutover_evidence?: Json | null
+          daily_cap_wei?: number
+          deployment_verified?: boolean
           enabled?: boolean
+          financial_enabled?: boolean
           id?: boolean
+          publisher?: string | null
           updated_at?: string
         }
         Update: {
+          authorized_by?: string | null
+          batch_cap_wei?: number
           chain_id?: number
           code_hash?: string | null
           contract_address?: string | null
+          cutover_accepted?: boolean
           cutover_at?: string | null
           cutover_evidence?: Json | null
+          daily_cap_wei?: number
+          deployment_verified?: boolean
           enabled?: boolean
+          financial_enabled?: boolean
           id?: boolean
+          publisher?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -3190,6 +3243,20 @@ export type Database = {
           p_retry_safe?: boolean
         }
         Returns: boolean
+      }
+      vault_v2_source_hash: { Args: { p_ids: string[] }; Returns: string }
+      vault_v2_source_rows: {
+        Args: never
+        Returns: {
+          created_at: string
+          destination: string
+          economic_award_id: string
+          id: string
+          points: number
+          policy_version: string
+          program_id: string
+          wallet: string
+        }[]
       }
       vote_proposal_once: {
         Args: { p_id: string; p_user: string }
