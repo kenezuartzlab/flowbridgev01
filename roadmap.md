@@ -1,5 +1,12 @@
 # V37 — Continuous Points, Operator-Approved Claiming
 
+# Rewards Vault V2
+- [ ] Non-upgradeable contract, exact compiled ABI, local adversarial/EVM tests and unsigned deployment instructions.
+- [ ] Disabled ledger integration with immutable award snapshots and cross-system exclusion; no financial reservations executed.
+- [ ] Shared Rewards/Earn claim panel and super-admin view-only controls; legacy flows unchanged.
+- [ ] Regression, security and responsive smoke; publish disabled code only if safe.
+- [ ] Mainnet deployment/funding/cutover: requires separate owner financial authorization; not part of this implementation.
+
 - [x] Visitor voting announcement: owner artwork, direct in-app CTA, Control Panel editing/removal controls; 17 focused tests, automatic build OK, 390px arrival/dismissal/vote-link and desktop Earn checks pass. Existing super-admin save restriction preserved; no settings write or publication performed.
 
 - [x] 1. Claim-minimum policy change (pure + tests)
