@@ -28,6 +28,9 @@ try:
  sql(fixture)
  sql((P/'drizzle/migrations/0048_rewards_vault_v2_disabled_ledger.sql').read_text())
  for migration in ['0050_vault_v2_future_award_destination_fences.sql','0051_vault_v2_atomic_reserve_and_credit.sql','0052_vault_v2_liability_and_receipt_binding.sql','0053_vault_v2_publisher_intent_fences.sql']: sql((P/'drizzle/migrations'/migration).read_text())
+ extra=[pathlib.Path(os.environ['VAULT_EXTRA_SQL'])] if os.environ.get('VAULT_EXTRA_SQL') else sorted((P/'drizzle/migrations').glob('*_vault_v2_scale_and_hash_recovery.sql'))
+ assert extra,'scale/hash recovery migration missing'
+ for f in extra: r=sql(f.read_text(),False); assert r.returncode==0,r.stderr
  print('SQL install PASS')
  w='0x'+'1'*40;pub='0x'+'2'*40;contract='0x'+'3'*40;code='0x'+'4'*64;u='00000000-0000-0000-0000-000000000001';l='00000000-0000-0000-0000-000000000002';r='00000000-0000-0000-0000-000000000003';batch='0x'+'a'*64
  sql(f"INSERT INTO profiles VALUES('{u}','fixture@test','{w}','2026-11-02T00:00:00Z',100,0,0);INSERT INTO auth.users VALUES('{u}',now(),NULL);INSERT INTO app_admins VALUES('fixture@test','super_admin',false);INSERT INTO reward_budgets VALUES('SIGNUP_BONUS',1000,100,'ACTIVE',true);")
@@ -69,7 +72,32 @@ try:
  assert sql(f"SELECT transition_vault_v2_signing('{op}','{u}','{pub}','CANCELLED',NULL,'{{}}');",False).returncode
  assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','CANCELLED',NULL,'{{}}');",False).returncode
  print('Publisher DB disabled/admin/funding/wallet gates and 8-way single signing intent PASS')
- tx='0x'+'c'*64
+ # Fix B: RPC non-visibility of a dismissed signature can never release the intent.
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','CANCELLED',NULL,'{{\"verification\":\"EXPLICIT_4001_NO_SEND\",\"nonce\":\"7\"}}');",False).returncode
+ sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','UNKNOWN',NULL,'{{\"verification\":\"WALLET_REPORTED_REJECTION_UNRESOLVED\"}}');")
+ assert sql(acquire(),False).returncode
+ print('Dismissed signature stays UNKNOWN and locked PASS')
+ # Fix C: wrong candidate is journaled, never authoritative; exact candidate locks the hash.
+ tx='0x'+'c'*64;wrong='0x'+'d'*64;exact='{\"verification\":\"EXACT_TRANSACTION_IDENTITY\",\"nonce\":\"7\"}'
+ with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex: recs=list(ex.map(lambda _:sql(f"SELECT record_vault_v2_hash_candidate('{op}','{pu}','{pub}','{wrong}','MANUAL');",False),range(8)))
+ assert all(x.returncode==0 for x in recs) and len({x.stdout.strip() for x in recs})==1
+ assert sql(f"SELECT count(*) FROM reward_vault_v2_hash_candidates WHERE operation_id='{op}';").stdout.strip()=='1'
+ assert sql(f"SELECT record_vault_v2_hash_candidate('{op}','{u}','{pub}','{tx}','MANUAL');",False).returncode
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','SUBMITTED','{tx}','{exact}');",False).returncode
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','SUBMITTED','{wrong}','{{}}');",False).returncode
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','SUBMITTED','{wrong}','{exact.replace('7','8')}');",False).returncode
+ assert sql(f"SELECT reject_vault_v2_hash_candidate('{op}','{pu}','{pub}','{wrong}','{{\"verification\":\"IDENTITY_MISMATCH\"}}');").stdout.strip()=='t'
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','SUBMITTED','{wrong}','{exact}');",False).returncode
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','CREDITED','{tx}','{{}}');",False).returncode
+ sql(f"SELECT record_vault_v2_hash_candidate('{op}','{pu}','{pub}','{tx}','MANUAL');")
+ sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','SUBMITTED','{tx}','{exact}');")
+ assert sql(f"SELECT tx_hash FROM reward_vault_v2_signing_attempts WHERE operation_id='{op}';").stdout.strip()==tx
+ assert sql(f"SELECT status FROM reward_vault_v2_hash_candidates WHERE operation_id='{op}' ORDER BY created_at;").stdout.split()==['REJECTED','VERIFIED']
+ other='0x'+'e'*64;sql(f"SELECT record_vault_v2_hash_candidate('{op}','{pu}','{pub}','{other}','MANUAL');")
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','SUBMITTED','{other}','{exact}');",False).returncode
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','UNKNOWN',NULL,'{{}}');",False).returncode
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','CANCELLED',NULL,'{{\"verification\":\"CANONICAL_NONCE_CONSUMED_UNPROCESSED\",\"nonce\":\"7\",\"confirmedNonce\":\"8\",\"processedBatch\":\"false\",\"blockHash\":\"{code}\"}}');",False).returncode
+ print('Wrong candidate then exact verified hash; authoritative hash immutable PASS')
  assert sql(f"SELECT confirm_vault_v2_credit('{batch}','{tx}',vault_v2_source_hash(ARRAY['{l}'::uuid]),10,'{code}',11,'{{\"verification\":\"EXACT_CANONICAL_CREDIT\"}}');",False).returncode
  import json
  evidence=json.dumps({'verification':'EXACT_CANONICAL_CREDIT','transactionHash':tx,'snapshotHash':sql(f"SELECT vault_v2_source_hash(ARRAY['{l}'::uuid]);").stdout.strip(),'contract':contract,'publisher':pub,'codeHash':code,'chainId':677,'blockHash':code,'blockNumber':'10','headNumber':'12','sourceIds':[l],'logs':[{},{}]})
@@ -99,6 +127,40 @@ try:
  historic='00000000-0000-0000-0000-000000000007'
  sql(f"INSERT INTO reward_settlement_batches(id,chain_id,leaves,publication_verified_at,created_at) VALUES('{historic}',677,'[{{\"account\":\"{w}\",\"amount\":\"100000000000000000000\"}}]',NULL,now()-interval '1 year');INSERT INTO reward_publish_attempts VALUES('{historic}','BROADCAST_PENDING',false);")
  print('Pre-cutover unpublished V1 obligation preserved PASS')
+ # Fix D: deterministic keyset pages; no first-1000 starvation.
+ sql("INSERT INTO reward_budgets VALUES('CORE_SWAP',100000,10000,'ACTIVE',true);")
+ sql("""WITH g AS (SELECT i,md5('u'||i)::uuid uid,md5('l'||i)::uuid lid,md5('r'||i)::uuid rid,'0x'||lpad(to_hex(4096+i),40,'0') w FROM generate_series(1,1200) i)
+ , a AS (INSERT INTO profiles SELECT uid,'u'||i||'@test',w,now(),0,0,0 FROM g RETURNING 1)
+ , b AS (INSERT INTO auth.users SELECT uid,now(),NULL FROM g RETURNING 1)
+ , c AS (INSERT INTO verified_activities SELECT 'act'||i,'CONFIRMED',677,'0x'||md5('t'||i)||md5('x'||i),0,w FROM g RETURNING 1)
+ , d AS (INSERT INTO reward_reservations SELECT rid,lid,uid,w,5,'CORE_SWAP' FROM g RETURNING 1)
+ SELECT count(*) FROM g""")
+ sql("""INSERT INTO flow_points_ledger(id,user_id,policy_version,reason,points,verified_usd,chain_id,tx_hash,source_log_index,activity_key,wallet_address,program_id,reservation_id,funding_state,provenance_state,verified_activity_id) SELECT md5('l'||i)::uuid,md5('u'||i)::uuid,'FLOW_POINTS_V2','CORE_SWAP',5,6,677,'0x'||md5('t'||i)||md5('x'||i),0,'swap:'||i,'0x'||lpad(to_hex(4096+i),40,'0'),'CORE_SWAP',md5('r'||i)::uuid,'FUNDED','VERIFIED','act'||i FROM generate_series(1,1200) i""")
+ total=int(sql('SELECT source_count FROM vault_v2_source_summary();').stdout.strip())
+ assert total==1200,total
+ assert sql('SELECT count(*) FROM vault_v2_source_rows();').stdout.strip()=='1000'
+ seen=[];after='NULL'
+ while True:
+  page=sql(f"SELECT id FROM vault_v2_source_rows_scan({after},NULL,500);").stdout.split()
+  if not page: break
+  seen+=page;after=f"'{page[-1]}'::uuid"
+ assert len(seen)==1200 and len(set(seen))==1200 and seen==sorted(seen)
+ last=seen[-1];lu,lw=sql(f"SELECT user_id,wallet_address FROM flow_points_ledger WHERE id='{last}';").stdout.strip().split('|')
+ b2='0x'+'f'*64
+ rec=json.dumps([{'userId':lu,'classification':'MATCH','wallet':lw,'eligibleRowIds':[last]}])
+ r2=sql(f"SELECT reserve_vault_v2_new_awards('{b2}',ARRAY['{last}'::uuid],vault_v2_source_hash(ARRAY['{last}'::uuid]),ARRAY['{lw}'],ARRAY['5000000000000000000'],5000000000000000000,'evidence','{rec}',1000000000000000000000,now(),11,'{code}');",False)
+ assert r2.returncode==0,r2.stderr
+ assert sql('SELECT source_count FROM vault_v2_source_summary();').stdout.strip()=='1199'
+ print('1,200 sources: keyset pages complete, row beyond first 1000 reservable PASS')
+ def acq2(n):return f"SELECT acquire_vault_v2_signing('{b2}','{pu}','{pub}',{n},11,'0x1234',vault_v2_source_hash(ARRAY['{last}'::uuid]),1000000000000000000000,2000000000000000000000,now());"
+ op2=sql(acq2(8)).stdout.strip()
+ bad='{\"verification\":\"CANONICAL_NONCE_CONSUMED_UNPROCESSED\",\"nonce\":\"8\",\"confirmedNonce\":\"8\",\"processedBatch\":\"false\",\"blockHash\":\"'+code+'\"}'
+ assert sql(f"SELECT transition_vault_v2_signing('{op2}','{pu}','{pub}','CANCELLED',NULL,'{bad}');",False).returncode
+ assert sql(f"SELECT transition_vault_v2_signing('{op2}','{pu}','{pub}','CANCELLED',NULL,'{bad.replace('false','true').replace('\"confirmedNonce\":\"8','\"confirmedNonce\":\"9')}');",False).returncode
+ assert sql(acq2(9),False).returncode
+ sql(f"SELECT transition_vault_v2_signing('{op2}','{pu}','{pub}','CANCELLED',NULL,'{bad.replace('\"confirmedNonce\":\"8','\"confirmedNonce\":\"9')}');")
+ assert sql(acq2(9),False).returncode==0
+ print('Release only on canonical consumed nonce with unprocessed batch PASS')
 
 finally:
  local('pg_ctl','-D',data,'-m','immediate','stop',stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
