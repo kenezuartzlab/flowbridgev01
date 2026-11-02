@@ -2,7 +2,7 @@
 
 ## Verdict
 
-**Local build / hostile tests PASS; financial deployment acceptance HOLD.** V2 remains disabled and undeployed on both networks. No signature, deployment, token movement, budget, role, staking or Merkle modification occurred. No production publication was requested because the clean-release condition is not met. Existing published code was inspected read-only.
+**All four software blockers corrected; non-financial gates PASS. Financial activation remains a human authorization gate.** V2 remains disabled and undeployed on both networks. No signature, deployment, token movement, budget, role, staking or Merkle modification occurred. Testnet still lacks a verified multisig and Vault-specific signer authorization.
 
 ## Reproducible evidence
 
@@ -35,22 +35,22 @@ Latest saved database decision replacements (August 27), not obsolete earlier ch
 - Publisher candidate `0x971E7790FE6C8F77dc666Bb05D4aedA362653f94`: matches saved root-publisher replacement, EOA on Mainnet and distinct from admin. This is a candidate, **not a granted V2 publisher role or proof the operator currently controls it**.
 - None of those three Safe addresses has Testnet code. No verified Testnet multisig, exact Vault-specific authorized Testnet signer, or prior bounded Vault Testnet funding authorization was established. Credential presence was not treated as permission; no private key was read.
 
-## Exact software blockers found by current-source review
+## Software blockers — all four corrected (follow-through build)
 
-1. `verifiedVaultDeployment` in `vaultV2Ingestion.server.ts` / `vaultV2Activation.server.ts` accepts administrator-supplied hash plus compatible reads. It does not bind immutable-patched frozen candidate runtime, canonical token runtime or approved multisig identity. Independent release evidence must not be confused with enforcement by the activation endpoint.
-2. `cancelVaultPublisher` accepts original-publisher `wallet_rejected` after latest/pending nonce equality, then synthesizes `EXPLICIT_4001_NO_SEND`. RPC nonvisibility cannot conclusively prove no broadcast; an unknown send could lose its active intent lock. Contract batch replay protection remains, but durable unknown-send locking is not fully enforced.
-3. `attachVaultPublisherHash` journals an unverified hash immutably. A mistaken hash poisons recovery because replacement with a transaction proven to match original nonce/calldata is rejected. Exact-credit checks prevent false success, but recovery can be stranded.
-4. `vault_v2_source_rows` returns at most the first 1,000 before server reconciliation/capacity filtering; excluded/oversized rows can starve eligible later rows. Reconciliation globally fails closed at 10,000 profiles / 50,000 ledger rows. Small-canary tests do not establish sustained-scale readiness.
+1. **A — frozen identity enforced.** `vaultV2Identity.ts` derives the expected runtime from the generated frozen-artifact module (`vaultV2Runtime.generated.ts`, byte-identical to `verification/artifact.json`) with all seven FLOW immutables at offsets `[457,2216,3215,3367,3489,3552,3704]` patched to `0xcaaB…17fF`. `verifiedVaultDeployment` requires chain 677, block-pinned reads with canonical block-hash recheck, actual `eth_getCode` exactly equal to that runtime, keccak derived from actual code, canonical FLOW runtime keccak `0x0bacd808…3f8b` / 18 decimals, owner Safe `0x88A4…9507` with exactly the 3 recorded owners and threshold 2, no pending owner, and publisher `0x971E…3f94` as a code-less EOA distinct from owner. The admin API strips any client code hash/publisher; a supplied hash that differs is rejected. No replacement-publisher path exists; any change needs a new reviewed code change.
+2. **B — no cancellation from nonce nonvisibility.** EIP-1193 4001 records `UNKNOWN` and keeps the intent and reservations locked (“Signature dismissed; confirmation unresolved — resume verification”). Release happens only when a finalized block (head − 12, hash rechecked) shows publisher nonce consumed beyond the reserved nonce **and** `processedBatch=false`. Resume never sends.
+3. **C — candidate-hash journal.** Wallet-returned/manual/nonce-scan hashes go into a service-only candidate journal (migration `0054`). A hash becomes authoritative only after on-chain match of signer, nonce, destination, exact calldata, zero value and chain 677. Mistyped or invisible hashes stay candidates; wrong payloads are rejected (same-nonce different payload = nonce conflict); a later exact hash is accepted. Unknown candidates never credit, release or prompt resend; audit rows are kept.
+4. **D — scale.** Sources are read by deterministic keyset pages (500 × max 20 per call) through `vault_v2_source_rows_scan`; only candidate users are reconciled, each with full paginated ledger history (plus referenced referees); errors or page bounds fail closed. A scan bound returns a continuation (“Continue scan”), never a false empty result.
 
-These were documented, not silently suppressed or rewritten during release preflight. Ingestion without an active intent is allowed only for an exact externally signed stored batch; source/hash/canonical receipt checks still apply. Live configuration remained empty after checks.
+Evidence: **2,327 tests / 225 files PASS** (identity 14, signing recovery 19, publisher 13, scale 12 new/updated), **25 hostile EVM tests PASS**, typecheck clean, isolated PostgreSQL race suite PASS (8-way reservation/intent, 6-way confirmation, 1,200-row paging, row beyond the first 1,000 reservable, nonce-release rules). Offline bundle regenerated byte-identical for all six frozen files. `verification/flow-mainnet-runtime.hex` is a read-only test fixture of live canonical FLOW code (SHA-256 `2f86c4bb…a5ca`).
 
 ## Security and production
 
 Fresh backend scan completed with no new actionable findings. Dependency scan still reports existing **high and moderate** transitive advisories (WalletConnect, serialization, MCP/email chains); these were neither ignored nor changed. The Wiz connector was unavailable; a fully clean comprehensive security claim is not warranted.
 
-Publication was withheld: release safeguards and dependency advisories remain. This does not disable or alter legacy Mainnet claims. Actual current served asset verification is recorded in `verification/served-production.json`; it describes the existing release, not a newly deployed one.
+Follow-through build: fresh scan has no new findings (only two previously user-ignored). Disabled-only code was published; flowbridge.space `/ops`, `/rewards`, `/earn` HTTP 200 and live `ops-DaUv3NZu.js` (SHA-256 `658b73ec…b169`) contains the unresolved-dismissal and Continue scan safeguards. Legacy Mainnet claims unchanged. Signed-in 320/390/430 Ops/Rewards/Earn: no overflow or runtime errors; the Ops V2 detail panel requires a connected bound wallet, which the headless check could not provide.
 
-## One future launch path (after software blockers are resolved)
+## One launch sequence (human-authorized)
 
 1. Owner authorizes exact verified multisig admin, distinct publisher and deployment signer; human signs Testnet acceptance first with a valid Testnet Safe, then separately authorized Mainnet deployment. Constructor remains paused/zero caps; attest exact deployed runtime/token/owner/publisher.
 2. Treasury multisig human-signs **only the owner-chosen limited initial FLOW amount**; governance human-signs bounded limits/unpause after backing verification. No illustrative test amount is an authorized budget.
