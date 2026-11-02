@@ -2306,6 +2306,50 @@ export type Database = {
           },
         ]
       }
+      reward_vault_v2_hash_candidates: {
+        Row: {
+          created_at: string
+          evidence: Json | null
+          id: string
+          operation_id: string
+          recorded_by: string
+          source: string
+          status: string
+          tx_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          evidence?: Json | null
+          id?: string
+          operation_id: string
+          recorded_by: string
+          source: string
+          status?: string
+          tx_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          evidence?: Json | null
+          id?: string
+          operation_id?: string
+          recorded_by?: string
+          source?: string
+          status?: string
+          tx_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_vault_v2_hash_candidates_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "reward_vault_v2_signing_attempts"
+            referencedColumns: ["operation_id"]
+          },
+        ]
+      }
       reward_vault_v2_signing_attempts: {
         Row: {
           actor_user_id: string
@@ -3302,6 +3346,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_vault_v2_hash_candidate: {
+        Args: {
+          p_actor: string
+          p_hash: string
+          p_operation: string
+          p_source: string
+          p_wallet: string
+        }
+        Returns: string
+      }
       refresh_funded_batch_schedule: {
         Args: {
           p_batch: string
@@ -3311,6 +3365,16 @@ export type Database = {
           p_fingerprint: string
           p_now: number
           p_start: number
+        }
+        Returns: boolean
+      }
+      reject_vault_v2_hash_candidate: {
+        Args: {
+          p_actor: string
+          p_evidence: Json
+          p_hash: string
+          p_operation: string
+          p_wallet: string
         }
         Returns: boolean
       }
@@ -3417,6 +3481,27 @@ export type Database = {
           policy_version: string
           program_id: string
           wallet: string
+        }[]
+      }
+      vault_v2_source_rows_scan: {
+        Args: { p_after: string; p_ids: string[]; p_limit: number }
+        Returns: {
+          created_at: string
+          destination: string
+          economic_award_id: string
+          id: string
+          points: number
+          policy_version: string
+          program_id: string
+          user_id: string
+          wallet: string
+        }[]
+      }
+      vault_v2_source_summary: {
+        Args: never
+        Returns: {
+          source_count: number
+          source_points: number
         }[]
       }
       vote_proposal_once: {
