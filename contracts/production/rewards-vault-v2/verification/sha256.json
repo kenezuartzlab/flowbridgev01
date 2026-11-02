@@ -3,6 +3,8 @@
   "compiler-output.json": "210ddb8169e3240fd110998d3f83cbc41034d1584107253cbbb3f76c63104b3a",
   "mainnet-unsigned-candidate.json": "cc75733a34b0de25011cc4132e359556a3d6b682807d0bbb7db63ff832620912",
   "manifest.json": "dfe0c8d56c0b54b2f2baec39e2525e400f3106435b8f6bce67e114a403fe89c2",
+  "served-production.json": "83f1ece2807a6e4a7e2ed1e9484766fc33b07559dae1b394f76522fc755d2e20",
+  "sha256.json": "99a9a8f5c74693662c6a4853e8eab41c2deb5ae53f06b2e76785757f1051a973",
   "standard-input.json": "775270bebdf0922f2843f1e97316c850211fd21d8cfe6182a2b0602779645a79",
   "testnet-unsigned-template.json": "ad6a2447903782049c8da500f2280842df45d1584c8ec3f38a07052cb0d56a99"
 }
