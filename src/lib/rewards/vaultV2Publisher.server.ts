@@ -53,6 +53,9 @@ async function transition(db:DB,actor:AdminContext,id:string,phase:string,hash:s
 export async function resumeVaultPublisher(db:DB,actor:AdminContext,id:string,manualHash?:Hex) {
   const {a,b,c}=await operation(db,actor,id);const rpc=vaultClient();
   if(await rpc.getChainId()!==677)throw new Error('Wrong RPC chain.');
+  if(a.phase==='CANCELLED')return {state:'CANCELLED'};
+  if(a.phase==='REVERTED')return {state:'REVERTED',blocker:'Confirmed revert. Reservation retained; review before another deliberate signature.'};
+  if(a.phase==='CREDITED'&&a.tx_hash)return ingestVaultV2Credit(db,b.batch_id as Hex,a.tx_hash as Hex);
   let hash=(a.tx_hash??manualHash) as Hex|undefined;
   if(a.tx_hash&&manualHash&&a.tx_hash!==manualHash)throw new Error('Original transaction hash is immutable.');
   if(!hash) {
