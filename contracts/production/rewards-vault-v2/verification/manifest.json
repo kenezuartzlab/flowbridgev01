@@ -1,0 +1,49 @@
+{
+  "compiler": "0.8.20+commit.a1b79de6.Emscripten.clang",
+  "openzeppelin": "5.0.2",
+  "optimizerRuns": 200,
+  "evmVersion": "paris",
+  "sourceCount": 11,
+  "creationBytes": 6485,
+  "runtimeBytes": 5615,
+  "eip170Limit": 24576,
+  "creationKeccak": "0xdb87535d2f69ff20aaa8be0bc8b1dd845de7e8539c48e3c9dd1051f77331f19c",
+  "unpatchedRuntimeKeccak": "0x2ac623cad190384bd056a6b89ea84d1285a915755fb2fadcca4065383ba3216a",
+  "immutableReferences": {
+    "1162": [
+      {
+        "length": 32,
+        "start": 457
+      },
+      {
+        "length": 32,
+        "start": 2216
+      },
+      {
+        "length": 32,
+        "start": 3215
+      },
+      {
+        "length": 32,
+        "start": 3367
+      },
+      {
+        "length": 32,
+        "start": 3489
+      },
+      {
+        "length": 32,
+        "start": 3552
+      },
+      {
+        "length": 32,
+        "start": 3704
+      }
+    ]
+  },
+  "repeatBuildAndFrozenParity": "PASS",
+  "initiallyPaused": true,
+  "initialBatchCap": "0",
+  "initialDailyCap": "0",
+  "financialAuthorization": false
+}
