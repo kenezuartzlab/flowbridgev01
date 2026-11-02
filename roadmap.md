@@ -1,6 +1,7 @@
 # V37 — Continuous Points, Operator-Approved Claiming
 
 # Rewards Vault V2
+- [ ] Deployment acceptance: deterministic isolated bundle, hostile EVM/gas tests, read-only network/token/governance checks, current safeguard audit and mobile acceptance; no financial writes.
 - [x] Optional Claim FLOW / Claim & Stake Flexible: canonical live checks, sequential receipt verification, nonce-backed durable recovery, mocked adversarial tests and signed-in disabled 320/390/430/1280 preview; no financial activation or publication. Unknown broadcasts remain blocked pending exact receipt reconciliation; live financial acceptance requires authorized deployment.
 - [x] Non-upgradeable contract, exact compiled ABI, local adversarial/EVM tests and unsigned deployment instructions; 100-recipient execution 5,659,147 gas.
 - [x] Installed disabled post-cutover routing, canonical funded source RPC, bounded allocator, global V1 approval/batch/publication fences, atomic reservation and exact receipt ingestion; readback confirms zero config, destination, allocation, batch and credit rows. No historical mapping.
