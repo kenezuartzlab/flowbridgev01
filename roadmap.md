@@ -1,7 +1,8 @@
 # V37 — Continuous Points, Operator-Approved Claiming
 
 # Rewards Vault V2
-- [ ] Deployment acceptance: deterministic isolated bundle, hostile EVM/gas tests, read-only network/token/governance checks, current safeguard audit and mobile acceptance; no financial writes.
+- [x] Deployment acceptance: frozen 11-source deterministic bundle, 25 hostile EVM tests, 2,293 full tests, isolated DB races, both RPC/token reads, live Mainnet 2-of-3 governance and authenticated 320/390/430/1280 disabled Ops PASS; no financial writes. Current-source assurance gaps and Testnet missing admin/signer authorization recorded in RELEASE_ACCEPTANCE.md; publication withheld because clean-release condition is unmet.
+- [ ] Financial acceptance blocked: patched candidate/governance enforcement, conclusive unknown-send locking, proven wrong-hash recovery and bounded-read scale assurance need correction before activation; Testnet also requires verified multisig and Vault-specific signer authorization. No activation authorized by this preflight.
 - [x] Optional Claim FLOW / Claim & Stake Flexible: canonical live checks, sequential receipt verification, nonce-backed durable recovery, mocked adversarial tests and signed-in disabled 320/390/430/1280 preview; no financial activation or publication. Unknown broadcasts remain blocked pending exact receipt reconciliation; live financial acceptance requires authorized deployment.
 - [x] Non-upgradeable contract, exact compiled ABI, local adversarial/EVM tests and unsigned deployment instructions; 100-recipient execution 5,659,147 gas.
 - [x] Installed disabled post-cutover routing, canonical funded source RPC, bounded allocator, global V1 approval/batch/publication fences, atomic reservation and exact receipt ingestion; readback confirms zero config, destination, allocation, batch and credit rows. No historical mapping.
