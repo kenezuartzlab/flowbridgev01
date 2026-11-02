@@ -48,6 +48,7 @@ export function createClaimStakePort(config: typeof VAULT_V2_CONFIG, wallet: Add
   const c = vaultClient();
   const identity = async () => {
     if (!config.enabled || !config.cutoverVerified || !config.address) throw new Error('V2 is not activated.');
+    if (await c.getChainId()!==677) throw new Error('Wrong BOT Mainnet RPC chain.');
     if ((await binding())?.toLowerCase()!==wallet.toLowerCase()) throw new Error('Verified account wallet changed. Flow halted.');
     const p = await getActiveProvider();
     if (!p) throw new Error('Reconnect your verified wallet.');
@@ -93,6 +94,7 @@ export function createClaimStakePort(config: typeof VAULT_V2_CONFIG, wallet: Add
       return await p.request({method:'eth_sendTransaction',params:[{from:wallet,...tx,value:'0x0',nonce:`0x${intent.nonce.toString(16)}`}]}) as Hex;
     },
     verify:async(intent,op)=>{
+      if (await c.getChainId()!==677) throw new Error('Wrong receipt RPC chain. Do not repeat transaction.');
       let hash = intent.hash;
       if (!hash) {
         const head = await c.getBlockNumber();

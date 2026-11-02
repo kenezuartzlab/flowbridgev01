@@ -16,6 +16,7 @@ const intent:Intent={step:'claim',nonce:7,startBlock:'9',hash};
 function port(){return createClaimStakePort({enabled:true,chainId:677,address:vault,codeHash:blockHash,publisher:token,cutoverVerified:true},wallet,async()=>wallet,()=>{},()=>{});}
 beforeEach(()=>{
  vi.resetAllMocks();
+ mocks.client.getChainId.mockResolvedValue(677);
  mocks.provider.request.mockImplementation(async({method})=>method==='eth_accounts'?[wallet]:'0x2a5');
  mocks.client.getBlockNumber.mockResolvedValue(12n);
  mocks.client.getBlock.mockResolvedValue({hash:blockHash});

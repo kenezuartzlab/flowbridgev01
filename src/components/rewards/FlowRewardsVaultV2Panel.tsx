@@ -92,7 +92,8 @@ export function FlowRewardsVaultV2Panel() {
         const live=await readVaultV2(bound,config);if(owner.current===bound)setSnapshot(live);
       });
     } catch(e) {
-      setPhase(e instanceof Error?e.message:'Flow interrupted. Check transaction receipts before retrying.');
+      const message=e instanceof Error?e.message:'Flow interrupted. Check transaction receipts before retrying.';
+      setPhase(`Flow paused. ${message} If claim is confirmed, FLOW remains in your wallet; staking is not completed until verified.`);
     } finally {running.current=false;setBusy(false);}
   };
   const saved=Boolean(operation);
