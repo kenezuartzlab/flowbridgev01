@@ -1433,6 +1433,60 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_economic_award_allocations: {
+        Row: {
+          created_at: string
+          destination: string
+          economic_award_id: string
+          ledger_id: string
+          legacy_evidence: Json | null
+          points: number
+          program_id: string
+          user_id: string
+          vault_batch_id: string | null
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          destination: string
+          economic_award_id: string
+          ledger_id: string
+          legacy_evidence?: Json | null
+          points: number
+          program_id: string
+          user_id: string
+          vault_batch_id?: string | null
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string
+          economic_award_id?: string
+          ledger_id?: string
+          legacy_evidence?: Json | null
+          points?: number
+          program_id?: string
+          user_id?: string
+          vault_batch_id?: string | null
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_economic_award_allocations_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: true
+            referencedRelation: "flow_points_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_economic_award_allocations_vault_batch_id_fkey"
+            columns: ["vault_batch_id"]
+            isOneToOne: false
+            referencedRelation: "reward_vault_v2_batches"
+            referencedColumns: ["batch_id"]
+          },
+        ]
+      }
       reward_evidence_groups: {
         Row: {
           created_at: string
@@ -2077,6 +2131,87 @@ export type Database = {
           root?: string
           source?: string
           total_wei?: number
+        }
+        Relationships: []
+      }
+      reward_vault_v2_batches: {
+        Row: {
+          amounts_wei: string[]
+          batch_id: string
+          contract_address: string
+          created_at: string
+          publisher: string
+          receipt_block: number | null
+          receipt_block_hash: string | null
+          snapshot_hash: string
+          source_ids: string[]
+          state: string
+          total_wei: number
+          tx_hash: string | null
+          wallets: string[]
+        }
+        Insert: {
+          amounts_wei: string[]
+          batch_id: string
+          contract_address: string
+          created_at?: string
+          publisher: string
+          receipt_block?: number | null
+          receipt_block_hash?: string | null
+          snapshot_hash: string
+          source_ids: string[]
+          state?: string
+          total_wei: number
+          tx_hash?: string | null
+          wallets: string[]
+        }
+        Update: {
+          amounts_wei?: string[]
+          batch_id?: string
+          contract_address?: string
+          created_at?: string
+          publisher?: string
+          receipt_block?: number | null
+          receipt_block_hash?: string | null
+          snapshot_hash?: string
+          source_ids?: string[]
+          state?: string
+          total_wei?: number
+          tx_hash?: string | null
+          wallets?: string[]
+        }
+        Relationships: []
+      }
+      reward_vault_v2_config: {
+        Row: {
+          chain_id: number
+          code_hash: string | null
+          contract_address: string | null
+          cutover_at: string | null
+          cutover_evidence: Json | null
+          enabled: boolean
+          id: boolean
+          updated_at: string
+        }
+        Insert: {
+          chain_id?: number
+          code_hash?: string | null
+          contract_address?: string | null
+          cutover_at?: string | null
+          cutover_evidence?: Json | null
+          enabled?: boolean
+          id?: boolean
+          updated_at?: string
+        }
+        Update: {
+          chain_id?: number
+          code_hash?: string | null
+          contract_address?: string | null
+          cutover_at?: string | null
+          cutover_evidence?: Json | null
+          enabled?: boolean
+          id?: boolean
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3001,6 +3136,19 @@ export type Database = {
           p_reason: string
         }
         Returns: Json
+      }
+      reserve_vault_v2_awards: {
+        Args: {
+          p_amounts: string[]
+          p_batch_id: string
+          p_contract: string
+          p_ids: string[]
+          p_publisher: string
+          p_snapshot_hash: string
+          p_total: number
+          p_wallets: string[]
+        }
+        Returns: undefined
       }
       reserve_voter_claim: { Args: { p_wallet: string }; Returns: Json }
       retire_unapproved_reward_draft: {

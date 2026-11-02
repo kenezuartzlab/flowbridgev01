@@ -337,6 +337,20 @@
       "when": 1793522463955,
       "tag": "0047_restrict_vote_events_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1793588961860,
+      "tag": "0048_rewards_vault_v2_disabled_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1793589294377,
+      "tag": "0049_vault_v2_fail_closed_staging_rpc",
+      "breakpoints": true
     }
   ]
 }
