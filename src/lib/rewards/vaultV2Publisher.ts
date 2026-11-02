@@ -12,8 +12,9 @@ export function publisherIdentity(wallet:string,accounts:string[],chain:unknown,
   if(Number(chain)!==677)throw new Error('Switch to BOT Mainnet 677.');
   if(wallet.toLowerCase()!==publisher.toLowerCase()||accounts[0]?.toLowerCase()!==wallet.toLowerCase())throw new Error('Connect the exact bound on-chain publisher wallet.');
 }
-export function matchesPublisherTransaction(tx:{from:string;to:string|null;input:string;value:bigint;nonce:number},intent:PublisherIntent,b:PublisherBatch) {
-  return tx.from.toLowerCase()===intent.publisher.toLowerCase()&&tx.to?.toLowerCase()===b.contract_address.toLowerCase()&&tx.input.toLowerCase()===publisherCalldata(b).toLowerCase()&&tx.input.toLowerCase()===intent.calldata.toLowerCase()&&tx.value===0n&&tx.nonce===Number(intent.nonce);
+/** Exact identity: bound signer, nonce, destination, immutable calldata, zero value and canonical chain 677. */
+export function matchesPublisherTransaction(tx:{from:string;to:string|null;input:string;value:bigint;nonce:number;chainId?:number},intent:PublisherIntent,b:PublisherBatch) {
+  return tx.chainId===677&&tx.from.toLowerCase()===intent.publisher.toLowerCase()&&tx.to?.toLowerCase()===b.contract_address.toLowerCase()&&tx.input.toLowerCase()===publisherCalldata(b).toLowerCase()&&tx.input.toLowerCase()===intent.calldata.toLowerCase()&&tx.value===0n&&tx.nonce===Number(intent.nonce);
 }
 export type PublisherPort = {
   identity:()=>Promise<void>; acquire:()=>Promise<PublisherIntent>; persist:(intent:PublisherIntent)=>void;
@@ -29,7 +30,8 @@ export async function signVaultBatch(b:PublisherBatch,port:PublisherPort) {
   try {await port.identity();}catch(e){throw e;} // no automatic cancellation for wallet switch
   let hash:Hex;
   try {hash=await port.send(intent);}catch(e){
-    if(typeof e==='object'&&e!==null&&'code' in e&&e.code===4001)await port.rejected(intent);
+    // A 4001 report is not proof that nothing was broadcast: the intent stays locked as UNKNOWN.
+    if(typeof e==='object'&&e!==null&&'code' in e&&e.code===4001){await port.rejected(intent);throw new Error('Signature dismissed; confirmation unresolved — resume verification.');}
     throw e;
   }
   intent.tx_hash=hash;intent.phase='SUBMITTED';port.persist(intent); // before any network wait

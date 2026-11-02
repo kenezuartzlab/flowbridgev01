@@ -379,6 +379,13 @@
       "when": 1793593422083,
       "tag": "0053_vault_v2_publisher_intent_fences",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1793603518659,
+      "tag": "0054_vault_v2_scale_and_hash_recovery",
+      "breakpoints": true
     }
   ]
 }
