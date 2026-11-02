@@ -59,3 +59,10 @@ Follow-through build: fresh scan has no new findings (only two previously user-i
 User experience: **Claim FLOW = 1 user transaction**; **Claim & Stake Flexible = 2, or 3 with exact approval**. Same EOA, user-paid BOT gas, separate transactions, verified receipt/position before success; claimed funds remain with the user if staking is interrupted.
 
 Minimal missing human input: one Vault-specific authorization naming the chain-968 admin Safe (at least 3 distinct owners / threshold at least 2), exact deploy signer and distinct publisher. Do not submit private keys. This input alone does not clear software blockers.
+## Testnet rehearsal (BOT Testnet 968) — PASS, 2026-11-02
+Temporary owner `0x8512…f3dD` (deployer/owner), publisher `0x971E…3f94`, FLOW `0xCE14…41Ac`.
+- Vault `0xb11b14a2eed65cefca729f27aafc0c03e5323680` deployed paused (`0x6fff27b0…ec57`)
+- Prefund 10 FLOW `0x967154a2…30f8`; setLimits 10/10 `0x4d18685a…aff`; unpause `0xbdc7e6be…fb`
+- creditBatch 5 FLOW `0x7d1c2b92…dc9a`; replay and non-publisher credit reverted
+- claim `0x483f5b64…eb`: received exactly 5 FLOW; liabilities 0, free 5 FLOW remains in vault
+Mainnet unchanged: still requires the approved Safe owner and separate authorization.
