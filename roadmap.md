@@ -3,7 +3,7 @@
 # Rewards Vault V2
 - [x] Non-upgradeable contract, exact compiled ABI, local adversarial/EVM tests and unsigned deployment instructions; 100-recipient execution 5,659,147 gas.
 - [x] Disabled immutable award/batch schema and exact receipt verifier; readback confirms zero config rows, batches and allocations, reservation RPC unconditionally rejects.
-- [ ] Live canonical award allocator/cross-legacy exclusion and credit ingestion: blocked on evidenced legacy award-ID mapping and separate cutover authorization; no safe automatic lifetime Points migration.
+- [ ] Finish disabled post-cutover canonical award allocator, atomic V1/V2 destination fence, exact confirmed credit ingestion, Ops cutover review and adversarial regression checks; historical rewards remain V1 without mapping.
 - [x] Shared Rewards/Earn disabled panel and super-admin view-only controls; 320/390/430/1280 smoke no overflow/runtime errors, legacy claim section preserved.
 - [x] Full regression and automatic build passed; security reviewed. Production HOLD: existing dependency advisories plus incomplete live allocator acceptance; no publication.
 - [ ] Mainnet deployment/funding/cutover: requires separate owner financial authorization; not part of this implementation.
