@@ -36,7 +36,7 @@ beforeEach(()=>{
   vi.clearAllMocks();cands=[];phases=[];txs=new Map();scan=[];nonceAt=7;processed=false;blockHashes=[];
   a={operation_id:'op',batch_id:b.batch_id,actor_user_id:'actor',publisher:wallet,nonce:7,start_block:10,calldata:publisherCalldata(b),phase:'SIGNATURE',tx_hash:null};
   rpc={getChainId:vi.fn().mockResolvedValue(677),getBlockNumber:vi.fn().mockResolvedValue(100n),
-    getBlock:vi.fn(async(q:any)=>({hash:blockHashes.shift()??blockHash,transactions:q?.includeTransactions&&q.blockNumber===10n?scan:[]})),
+    getBlock:vi.fn(async(q:any)=>q?.includeTransactions?{hash:blockHash,transactions:q.blockNumber===10n?scan:[]}:{hash:blockHashes.shift()??blockHash,transactions:[]}),
     getTransaction:vi.fn(async(q:any)=>{const t=txs.get(q.hash);if(!t)throw new Error('not found');return t;}),
     getTransactionReceipt:vi.fn().mockResolvedValue({blockNumber:10n,blockHash}),
     readContract:vi.fn(async()=>processed),getTransactionCount:vi.fn(async()=>nonceAt)};
