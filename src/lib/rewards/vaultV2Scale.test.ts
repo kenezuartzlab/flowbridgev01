@@ -53,10 +53,13 @@ it('incomplete ledger history fails closed instead of reconciling a partial acco
 });
 it('ledger page bound is enforced fail-closed', async () => {
   const user = uid(1);
-  const pages = VAULT_RECON_LIMITS.maxLedgerPagesPerChunk;
-  const { db } = fakeDb({ flow_points_ledger: Array.from({ length: pages * 1000 }, (_, i) => ledgerRow(i, user)) });
-  await expect(loadFullLedgers(db, [user])).rejects.toThrow('COMPLETE_RECONCILIATION_REQUIRED');
-}, 60_000);
+  const limits = VAULT_RECON_LIMITS as { maxLedgerPagesPerChunk: number }, saved = limits.maxLedgerPagesPerChunk;
+  limits.maxLedgerPagesPerChunk = 3;
+  try {
+    const { db } = fakeDb({ flow_points_ledger: Array.from({ length: 3_000 }, (_, i) => ledgerRow(i, user)) });
+    await expect(loadFullLedgers(db, [user])).rejects.toThrow('COMPLETE_RECONCILIATION_REQUIRED');
+  } finally { limits.maxLedgerPagesPerChunk = saved; }
+});
 it('with more than 10,000 profiles, only candidate accounts are read, in bounded chunks', async () => {
   const profiles = Array.from({ length: 10_500 }, (_, i) => ({ id: uid(i), created_at: '2026-10-05T00:00:00Z', flow_points: 0, points_self: 0, points_referral_signup: 0, wallet_address: wallet(i) }));
   const candidates = Array.from({ length: 250 }, (_, i) => uid(10_000 + i));
