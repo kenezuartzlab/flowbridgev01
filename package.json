@@ -99,6 +99,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@ethereumjs/common": "10.1.1",
+    "@ethereumjs/util": "10.1.1",
+    "@ethereumjs/vm": "10.1.1",
     "@lovable.dev/vite-tanstack-config": "2.26.5",
     "@openzeppelin/contracts": "5.0.2",
     "@types/canvas-confetti": "^1.9.0",
