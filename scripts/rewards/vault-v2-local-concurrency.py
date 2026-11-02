@@ -29,7 +29,7 @@ try:
  sql(pathlib.Path(os.environ.get('VAULT_TEST_SQL','/tmp/vault-v2/safeguards.sql')).read_text())
  print('SQL install PASS')
  w='0x'+'1'*40;pub='0x'+'2'*40;contract='0x'+'3'*40;code='0x'+'4'*64;u='00000000-0000-0000-0000-000000000001';l='00000000-0000-0000-0000-000000000002';r='00000000-0000-0000-0000-000000000003';batch='0x'+'a'*64
- sql(f"INSERT INTO profiles VALUES('{u}','fixture@test','{w}',now(),100,0,0);INSERT INTO auth.users VALUES('{u}',now(),NULL);INSERT INTO app_admins VALUES('fixture@test','super_admin',false);INSERT INTO reward_budgets VALUES('SIGNUP_BONUS',1000,100,'ACTIVE',true);")
+ sql(f"INSERT INTO profiles VALUES('{u}','fixture@test','{w}','2026-11-02T00:00:00Z',100,0,0);INSERT INTO auth.users VALUES('{u}',now(),NULL);INSERT INTO app_admins VALUES('fixture@test','super_admin',false);INSERT INTO reward_budgets VALUES('SIGNUP_BONUS',1000,100,'ACTIVE',true);")
  disabled=sql(f"SELECT reserve_vault_v2_new_awards('{batch}',ARRAY['{l}'::uuid],'hash',ARRAY['{w}'],ARRAY['100000000000000000000'],100000000000000000000,'evidence','[]',1,now(),1,'{code}');",False);assert disabled.returncode and 'DISABLED' in disabled.stderr
  print('Disabled DB gate PASS')
  sql(f"INSERT INTO reward_vault_v2_config(financial_enabled,cutover_accepted,authorized_by,publisher,batch_cap_wei,daily_cap_wei,deployment_verified,contract_address,code_hash,cutover_at) VALUES(true,true,'{u}','{pub}',1000000000000000000000,2000000000000000000000,true,'{contract}','{code}',now()-interval '1 second');")
