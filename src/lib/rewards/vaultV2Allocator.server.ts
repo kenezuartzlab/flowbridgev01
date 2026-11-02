@@ -17,14 +17,10 @@ export async function reserveVaultV2Awards(db: Admin) {
   const sources=await db.rpc('vault_v2_source_rows');
   if(fence.error||sources.error||!fence.data) throw new Error('CANONICAL_SOURCES_UNAVAILABLE');
   if(!sources.data?.length) return null;
-  const {buildRewardSolvencyReport}=await import('./rewardSolvency.server');
   // canonical reconciliation without batch writes (the report carries private server facts separately).
   const {loadVaultAccountReconciliation}=await import('./vaultV2Reconciliation.server');
   const recon=await loadVaultAccountReconciliation(db);
-  void buildRewardSolvencyReport; // never invoke settlement preparation from V2.
-  const valid=sources.data.filter(r=>recon.some(a=>a.userId===r.user_id && a.eligibleRowIds.includes(r.id)));
-  // SQL sources intentionally do not expose user IDs: reconcile by row membership.
-  const rows=(valid.length?valid:sources.data.filter(r=>recon.some(a=>a.eligibleRowIds.includes(r.id) && ['MATCH','EXPLAINED_DIFFERENCE'].includes(a.classification)))) as CanonicalVaultSource[];
+  const rows=sources.data.filter(r=>recon.some(a=>a.eligibleRowIds.includes(r.id) && ['MATCH','EXPLAINED_DIFFERENCE'].includes(a.classification))) as CanonicalVaultSource[];
   if(!rows.length) return null;
   const live=await readVaultV2(undefined,{enabled:true,chainId:677,address:cfg.contract_address as Address,codeHash:cfg.code_hash as Hex,publisher:cfg.publisher as Address,cutoverVerified:true});
   if(!live||live.paused||live.batchCap!==BigInt(cfg.batch_cap_wei)||live.dailyCap!==BigInt(cfg.daily_cap_wei)) throw new Error('LIVE_DEPLOYMENT_OR_CAP_MISMATCH');
