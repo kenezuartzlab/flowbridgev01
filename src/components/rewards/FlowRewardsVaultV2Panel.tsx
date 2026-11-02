@@ -27,12 +27,13 @@ export function FlowRewardsVaultV2Panel() {
   const [phase,setPhase] = useState('');
   const [busy,setBusy] = useState(false);
   const [operation,setOperation] = useState<ClaimStakeOperation|null>(null);
+  const [verifiedComplete,setVerifiedComplete] = useState(false);
   const running = useRef(false);
   const owner = useRef(bound); owner.current=bound;
   const key = `flowbridge:v2-claim-stake:677:${bound??''}`;
   useEffect(()=>{
     let cancelled=false;
-    setConfig(VAULT_V2_CONFIG);setSnapshot(null);setQuote(null);setOperation(null);setPhase('');
+    setConfig(VAULT_V2_CONFIG);setSnapshot(null);setQuote(null);setOperation(null);setVerifiedComplete(false);setPhase('');
     if(user&&bound) void (async()=>{
       const token=await getIdToken();if(!token)return;
       const res=await fetch('/api/rewards/vault-v2',{headers:{authorization:`Bearer ${token}`}});
@@ -41,7 +42,7 @@ export function FlowRewardsVaultV2Panel() {
       const live=await readVaultV2(bound,cfg);if(cancelled||!live)return;
       setConfig(cfg);setSnapshot(live);setAmount(fmt(live.claimable));
       const stored=localStorage.getItem(key);
-      if(stored){const parsed=operationSchema.safeParse(JSON.parse(stored));if(!parsed.success)throw new Error('Saved flow needs reconciliation. Do not repeat a transaction.');const op=parsed.data as ClaimStakeOperation;if(op.wallet.toLowerCase()!==bound||op.rewardVault.toLowerCase()!==cfg.address.toLowerCase())throw new Error('Saved wallet or deployment mismatch.');setOperation(op);setPhase('Saved flow found. Check receipts before continuing.');}
+      if(stored){const parsed=operationSchema.safeParse(JSON.parse(stored));if(!parsed.success)throw new Error('Saved flow needs reconciliation. Do not repeat a transaction.');const op=parsed.data as ClaimStakeOperation;if(op.wallet.toLowerCase()!==bound||op.rewardVault.toLowerCase()!==cfg.address.toLowerCase())throw new Error('Saved wallet or deployment mismatch.');setOperation(op);setAmount(fmt(BigInt(op.principal)));setPhase('Saved flow found. Check receipts before continuing.');}
     })().catch(e=>{if(!cancelled)setPhase(e.message);});
     return()=>{cancelled=true;};
   },[bound,user,key]);
@@ -65,6 +66,8 @@ export function FlowRewardsVaultV2Panel() {
   };
   const start = async (mode:'claim'|'stake',resume=false) => {
     if(running.current||!config.enabled||!config.address||!bound||!snapshot)return;
+    const rewardVault=config.address;
+    const tokenAddress=vaultFlowToken();if(!tokenAddress)return;
     running.current=true;setBusy(true);
     try {
       if(!navigator.locks)throw new Error('Safe transaction locking unavailable in this browser. Use a supported wallet browser.');
@@ -76,7 +79,7 @@ export function FlowRewardsVaultV2Panel() {
         else {
           const principal=mode==='stake'?parseUnits(amount,18):0n;
           if(mode==='stake'&&!quote)throw new Error('Review a valid live stake quote first.');
-          op={version:1,wallet:bound,rewardVault:config.address,token:vaultFlowToken() as Address,stakingVault:quote?.stakingVault??config.address,mode,claimAmount:snapshot.claimable.toString(),principal:principal.toString(),terms:quote?quoteFingerprint(quote):'',transactions:{},complete:false};
+          op={version:1,wallet:bound,rewardVault,token:tokenAddress,stakingVault:quote?.stakingVault??rewardVault,mode,claimAmount:snapshot.claimable.toString(),principal:principal.toString(),terms:quote?quoteFingerprint(quote):'',transactions:{},complete:false};
         }
         if(resume&&op.mode==='stake'&&!op.transactions.stake){
           if(!quote)throw new Error('Review the current Flexible quote before resuming.');
@@ -86,6 +89,7 @@ export function FlowRewardsVaultV2Panel() {
         const port=createClaimStakePort(config,bound,binding,save,setPhase);
         save(op);
         await runClaimStake(op,port);
+        if(owner.current===bound)setVerifiedComplete(true);
         const live=await readVaultV2(bound,config);if(owner.current===bound)setSnapshot(live);
       });
     } catch(e) {
@@ -101,7 +105,7 @@ export function FlowRewardsVaultV2Panel() {
       <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2"><Button variant="outline" className="h-auto min-h-11 whitespace-normal" disabled={busy||snapshot.paused||snapshot.claimable===0n} onClick={()=>void start('claim')}><Wallet/>Claim FLOW</Button><Button className="h-auto min-h-11 whitespace-normal" disabled={busy||snapshot.paused||snapshot.claimable===0n||!quote} onClick={()=>void start('stake')}><Sprout/>Claim &amp; Stake Flexible</Button></div></>:<>
         <p className="text-sm text-muted">{operation?.complete?'Saved receipts will be verified again; no successful transaction is repeated.':'If the claim succeeded, FLOW is in your wallet; staking is not completed until its receipt and position are verified.'}</p>
         <Button variant="outline" className="min-h-11 w-full whitespace-normal" disabled={busy} onClick={()=>void start(operation?.mode??'claim',true)}>{busy?<Loader2 className="animate-spin"/>:<Wallet/>}{operation?.transactions.claim&&operation.mode==='stake'?'Resume staking':'Check saved transaction status'}</Button>
-        {operation?.complete&&<Button variant="ghost" disabled={busy} onClick={()=>{localStorage.removeItem(key);setOperation(null);setPhase('');}}>Close verified flow</Button>}
+        {verifiedComplete&&<Button variant="ghost" disabled={busy} onClick={()=>{localStorage.removeItem(key);setOperation(null);setVerifiedComplete(false);setPhase('');}}>Close verified flow</Button>}
       </>}
       <p className="text-xs leading-relaxed text-muted">Claim: 1 transaction. Claim &amp; Stake: 2 wallet confirmations, or 3 if exact approval is needed. You pay BOT gas for each. These are separate transactions, not atomic.</p>
       <p className="text-xs leading-relaxed text-muted">Flexible; withdraw principal anytime; APR variable/current quote; bonus may be unavailable. No expiry for V2 credits.</p>
