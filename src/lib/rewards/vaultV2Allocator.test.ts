@@ -1,0 +1,16 @@
+import { expect, it } from 'vitest';
+import { canonicalVaultSnapshot, vaultAwardDestination, vaultPublisherIdentity } from './vaultV2Allocator';
+import { eligibleVaultAward, type VaultAward } from './vaultV2';
+const cutover='2026-12-01T00:00:00Z';
+const row={id:'a',economic_award_id:'signup:a',wallet:'0x0000000000000000000000000000000000000001',points:100,program_id:'SIGNUP_BONUS',destination:'VAULT_V2',created_at:'2026-12-01T00:00:01Z',policy_version:'FUNDED_SIGNUP_BONUS_V1'};
+it('all pre-cutover awards remain legacy',()=>expect(vaultAwardDestination('2026-11-30T23:59:59Z',cutover,true)).toBe('LEGACY'));
+it('equality at cutover is not a new award',()=>expect(vaultAwardDestination(cutover,cutover,true)).toBe('LEGACY'));
+it('only strictly later awards enter V2',()=>expect(vaultAwardDestination(row.created_at,cutover,true)).toBe('VAULT_V2'));
+it('unaccepted cutover preserves V1',()=>expect(vaultAwardDestination(row.created_at,cutover,false)).toBe('LEGACY'));
+it('V1 destination is excluded even after cutover',()=>expect(()=>canonicalVaultSnapshot([{...row,destination:'LEGACY'}],cutover,10n**24n,10n**24n,10n**24n)).toThrow('AWARD_NOT_ELIGIBLE'));
+it('later awards form another immutable batch',()=>{const run=(r:typeof row[])=>canonicalVaultSnapshot(r,cutover,10n**24n,10n**24n,10n**24n);const first=run([row]);expect(run([{...row,id:'b',economic_award_id:'signup:b'}]).batchId).not.toBe(first.batchId);expect(first.sourceIds).toEqual(['a']);});
+it('duplicate canonical economics cannot be paid twice',()=>expect(()=>canonicalVaultSnapshot([row,{...row,id:'b'}],cutover,10n**24n,10n**24n,10n**24n)).toThrow('DUPLICATE_AWARD'));
+it('unsupported referral milestones stay excluded',()=>expect(eligibleVaultAward({program:'REFERRAL_MILESTONE',points:15n,verified:true,reconciled:true,funded:true,authorized:true,bindingMatches:true,mainnet:true,newAfterCutover:true,allocated:false,wallet:row.wallet} as VaultAward)).toBe(false));
+it('disconnected publisher cannot sign',()=>expect(vaultPublisherIdentity(null,row.wallet,677)).toBe(false));
+it('changed publisher identity cannot sign',()=>expect(vaultPublisherIdentity('0x0000000000000000000000000000000000000002',row.wallet,677)).toBe(false));
+it('testnet publisher cannot sign',()=>expect(vaultPublisherIdentity(row.wallet,row.wallet,968)).toBe(false));

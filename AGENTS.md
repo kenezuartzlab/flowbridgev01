@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Public visitor announcements reuse content settings and render once in VisitorAnnouncement at the root; the existing audited super-admin writer owns updates. Why: one editable message and session-scoped dismissal avoid conflicting promos and permission drift.
-- Rewards Vault V2 uses a separate non-upgradeable candidate and artifact-generated ABI; configuration and database activation are hard-disabled until audited legacy award-ID exclusion and separately authorized deployment/cutover. Why: legacy aggregate allocations cannot safely be migrated or credited twice.
+- Rewards Vault V2 uses a separate non-upgradeable candidate and artifact-generated ABI; new earning-time immutable destinations fence post-cutover awards from every V1 writer, while all pre-cutover obligations remain legacy without mapping. Activation requires separately authorized verified deployment and cutover. Why: historical aggregates cannot safely be migrated or credited twice.
 
 - CA/BOT and Any pair use UniversalSwapCard for live quoting, review and execution; fixed-pair mode does not overwrite the Any pair draft. Why: separate display quotes drifted from executable routes.
 - Transaction confirmations use TransactionModalFrame; bridge display milestones use trackingState with authoritative receipt evidence, never elapsed-time or balance-delta settlement. Why: visible actions and truthful tracking must not alter execution.
