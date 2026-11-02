@@ -9,7 +9,7 @@ vi.mock('@/lib/api-auth.server',()=>({jsonResponse:(d:unknown,status=200)=>Respo
 import {Route} from '@/routes/api/admin.rewards-vault-v2';
 const handlers=Route.options.server?.handlers;
 const post=handlers && typeof handlers!=='function' ? handlers.POST : undefined;
-const send=(body:unknown)=>{if(typeof post!=='function')throw new Error('Missing POST');return post({request:new Request('http://localhost:8080/api/admin/rewards-vault-v2',{method:'POST',body:JSON.stringify(body)})} as never);};
+const send=async(body:unknown):Promise<Response>=>{if(typeof post!=='function')throw new Error('Missing POST');const result=await post({request:new Request('http://localhost:8080/api/admin/rewards-vault-v2',{method:'POST',body:JSON.stringify(body)})} as never);if(!(result instanceof Response))throw new Error('Expected response');return result;};
 beforeEach(()=>{vi.resetAllMocks();mocks.gate.mockResolvedValue({ok:true,admin:{role:'super_admin',userId:'actor',wallet:'wallet'}});});
 it('signed-out calls never access the allocator',async()=>{mocks.gate.mockResolvedValue({ok:false,response:new Response('Unauthorized',{status:401})});expect((await send({action:'prepare'})).status).toBe(401);expect(mocks.reserve).not.toHaveBeenCalled();});
 it('operators cannot authorize cutover or prepare',async()=>{mocks.gate.mockResolvedValue({ok:true,admin:{role:'internal_operator'}});expect((await send({action:'prepare'})).status).toBe(403);expect(mocks.reserve).not.toHaveBeenCalled();});
