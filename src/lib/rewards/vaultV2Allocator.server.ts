@@ -1,5 +1,5 @@
 import { encodeFunctionData, type Address, type Hex } from 'viem';
-import { canonicalVaultSnapshot, type CanonicalVaultSource } from './vaultV2Allocator';
+import { canonicalVaultSnapshot, selectBoundedVaultSources, type CanonicalVaultSource } from './vaultV2Allocator';
 import { readVaultV2 } from './vaultV2Read';
 import { VAULT_V2_ABI } from './vaultV2Abi.generated';
 type Admin = Awaited<typeof import('@/integrations/supabase/client.server')>['supabaseAdmin'];
@@ -24,7 +24,10 @@ export async function reserveVaultV2Awards(db: Admin) {
   if(!rows.length) return null;
   const live=await readVaultV2(undefined,{enabled:true,chainId:677,address:cfg.contract_address as Address,codeHash:cfg.code_hash as Hex,publisher:cfg.publisher as Address,cutoverVerified:true});
   if(!live||live.paused||live.batchCap!==BigInt(cfg.batch_cap_wei)||live.dailyCap!==BigInt(cfg.daily_cap_wei)) throw new Error('LIVE_DEPLOYMENT_OR_CAP_MISMATCH');
-  const snapshot=canonicalVaultSnapshot(rows,cfg.cutover_at,live.free,live.batchCap,live.dailyCap);
+  const max=[live.free,live.batchCap,live.dailyRemaining].reduce((a,b)=>a<b?a:b);
+  const selected=selectBoundedVaultSources(rows,max);
+  if(!selected.length)return null;
+  const snapshot=canonicalVaultSnapshot(selected,cfg.cutover_at,live.free,live.batchCap,live.dailyRemaining);
   const hash=await db.rpc('vault_v2_source_hash',{p_ids:snapshot.sourceIds});
   if(hash.error||!hash.data) throw new Error('SOURCE_HASH_UNAVAILABLE');
   const reserved=await db.rpc('reserve_vault_v2_new_awards',{p_batch:snapshot.batchId,p_ids:snapshot.sourceIds,p_hash:hash.data,p_wallets:snapshot.wallets,p_amounts:snapshot.amounts.map(String),p_total:snapshot.total.toString() as never,p_evidence:fence.data,p_reconciliation:recon as never,p_free:live.free.toString() as never,p_observed:new Date().toISOString(),p_block:Number(live.blockNumber),p_block_hash:live.blockHash});

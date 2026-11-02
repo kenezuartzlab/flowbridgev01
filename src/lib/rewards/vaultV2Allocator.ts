@@ -21,3 +21,14 @@ export function canonicalVaultSnapshot(rows: CanonicalVaultSource[], cutoverAt: 
 export function vaultPublisherIdentity(connected: string | null, expected: string, chainId: number) {
   return chainId === 677 && !!connected && connected.toLowerCase() === expected.toLowerCase();
 }
+/** Whole awards only; overflow remains queued, never changes an existing snapshot. */
+export function selectBoundedVaultSources(rows: CanonicalVaultSource[], maxWei: bigint) {
+  const selected:CanonicalVaultSource[]=[];const wallets=new Set<string>();let used=0n;
+  for(const r of [...rows].sort((a,b)=>a.id.localeCompare(b.id))) {
+    const amount=BigInt(r.points)*10n**18n,w=r.wallet.toLowerCase();
+    if(r.points<=0 || used+amount>maxWei || (!wallets.has(w)&&wallets.size===100)) continue;
+    selected.push(r);wallets.add(w);used+=amount;
+    if(selected.length===1000)break;
+  }
+  return selected;
+}

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { canonicalVaultSnapshot, vaultAwardDestination, vaultPublisherIdentity } from './vaultV2Allocator';
+import { canonicalVaultSnapshot, selectBoundedVaultSources, vaultAwardDestination, vaultPublisherIdentity } from './vaultV2Allocator';
 import { eligibleVaultAward, type VaultAward } from './vaultV2';
 const cutover='2026-12-01T00:00:00Z';
 const row={id:'a',economic_award_id:'signup:a',wallet:'0x0000000000000000000000000000000000000001',points:100,program_id:'SIGNUP_BONUS',destination:'VAULT_V2',created_at:'2026-12-01T00:00:01Z',policy_version:'FUNDED_SIGNUP_BONUS_V1'};
@@ -14,3 +14,5 @@ it('unsupported referral milestones stay excluded',()=>expect(eligibleVaultAward
 it('disconnected publisher cannot sign',()=>expect(vaultPublisherIdentity(null,row.wallet,677)).toBe(false));
 it('changed publisher identity cannot sign',()=>expect(vaultPublisherIdentity('0x0000000000000000000000000000000000000002',row.wallet,677)).toBe(false));
 it('testnet publisher cannot sign',()=>expect(vaultPublisherIdentity(row.wallet,row.wallet,968)).toBe(false));
+it('excess awards queue rather than freeze batch caps',()=>expect(selectBoundedVaultSources([row,{...row,id:'b',economic_award_id:'b'}],100n*10n**18n).map(r=>r.id)).toEqual(['a']));
+it('no remaining daily capacity creates no batch',()=>expect(selectBoundedVaultSources([row],0n)).toEqual([]));
