@@ -27,7 +27,7 @@ try:
  local('pg_ctl','-D',data,'-o',f"-F -k {sock} -p {port} -c listen_addresses=''",'-w','start',check=True,stdout=subprocess.DEVNULL)
  sql(fixture)
  sql((P/'drizzle/migrations/0048_rewards_vault_v2_disabled_ledger.sql').read_text())
- for migration in ['0050_vault_v2_future_award_destination_fences.sql','0051_vault_v2_atomic_reserve_and_credit.sql','0052_vault_v2_liability_and_receipt_binding.sql']: sql((P/'drizzle/migrations'/migration).read_text())
+ for migration in ['0050_vault_v2_future_award_destination_fences.sql','0051_vault_v2_atomic_reserve_and_credit.sql','0052_vault_v2_liability_and_receipt_binding.sql','0053_vault_v2_publisher_intent_fences.sql']: sql((P/'drizzle/migrations'/migration).read_text())
  print('SQL install PASS')
  w='0x'+'1'*40;pub='0x'+'2'*40;contract='0x'+'3'*40;code='0x'+'4'*64;u='00000000-0000-0000-0000-000000000001';l='00000000-0000-0000-0000-000000000002';r='00000000-0000-0000-0000-000000000003';batch='0x'+'a'*64
  sql(f"INSERT INTO profiles VALUES('{u}','fixture@test','{w}','2026-11-02T00:00:00Z',100,0,0);INSERT INTO auth.users VALUES('{u}',now(),NULL);INSERT INTO app_admins VALUES('fixture@test','super_admin',false);INSERT INTO reward_budgets VALUES('SIGNUP_BONUS',1000,100,'ACTIVE',true);")
@@ -54,6 +54,21 @@ try:
  assert sql(f"UPDATE reward_award_destinations SET destination='LEGACY';",False).returncode
  assert sql(f"UPDATE flow_points_ledger SET points=101 WHERE id='{l}';",False).returncode
  print('V1 approval/batch fences and immutable economic sources PASS')
+ # Publisher is a distinct bound Ops account, not merely the cutover administrator.
+ pu='00000000-0000-0000-0000-000000000008'
+ sql(f"INSERT INTO profiles VALUES('{pu}','publisher@test','{pub}',now(),0,0,0);INSERT INTO auth.users VALUES('{pu}',now(),NULL);INSERT INTO app_admins VALUES('publisher@test','internal_operator',false);")
+ def acquire():return f"SELECT acquire_vault_v2_signing('{batch}','{pu}','{pub}',7,10,'0x1234',vault_v2_source_hash(ARRAY['{l}'::uuid]),1000000000000000000000,2000000000000000000000,now());"
+ sql('UPDATE reward_vault_v2_config SET financial_enabled=false;');assert sql(acquire(),False).returncode;sql('UPDATE reward_vault_v2_config SET financial_enabled=true;')
+ assert sql(acquire().replace(pu,u),False).returncode
+ sql('UPDATE reward_budgets SET funding_verified=false;');assert sql(acquire(),False).returncode;sql('UPDATE reward_budgets SET funding_verified=true;')
+ sql(f"UPDATE profiles SET wallet_address='{pub}' WHERE id='{u}';");assert sql(acquire(),False).returncode;sql(f"UPDATE profiles SET wallet_address='{w}' WHERE id='{u}';")
+ with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex: attempts=list(ex.map(lambda _:sql(acquire(),False),range(8)))
+ assert sum(x.returncode==0 for x in attempts)==1,[x.stderr for x in attempts]
+ assert sql('SELECT count(*) FROM reward_vault_v2_signing_attempts;').stdout.strip()=='1'
+ op=sql('SELECT operation_id FROM reward_vault_v2_signing_attempts;').stdout.strip()
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{u}','{pub}','CANCELLED',NULL,'{{}}');",False).returncode
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','CANCELLED',NULL,'{{}}');",False).returncode
+ print('Publisher DB disabled/admin/funding/wallet gates and 8-way single signing intent PASS')
  tx='0x'+'c'*64
  assert sql(f"SELECT confirm_vault_v2_credit('{batch}','{tx}',vault_v2_source_hash(ARRAY['{l}'::uuid]),10,'{code}',11,'{{\"verification\":\"EXACT_CANONICAL_CREDIT\"}}');",False).returncode
  import json
@@ -63,6 +78,9 @@ try:
  assert out.count('t')==1 and out.count('f')==5,out
  assert sql("SELECT count(*) FROM reward_vault_v2_credit_evidence;").stdout.strip()=='1'
  print('6 concurrent exact confirmations, one credit/audit PASS')
+ sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','CREDITED','{tx}','{{}}');")
+ assert sql(f"SELECT transition_vault_v2_signing('{op}','{pu}','{pub}','SUBMITTED','{tx}','{{}}');",False).returncode
+ print('Credited signing operation cannot be reopened PASS')
  # Historical data is never routed or rewritten.
  old='00000000-0000-0000-0000-000000000004'
  sql(f"INSERT INTO flow_points_ledger(id,user_id,points,created_at,program_id,policy_version,reason,activity_key) VALUES('{old}','{u}',100,now()-interval '1 year','SIGNUP_BONUS','FUNDED_SIGNUP_BONUS_V1','SIGNUP_BONUS_REFEREE','old');")
