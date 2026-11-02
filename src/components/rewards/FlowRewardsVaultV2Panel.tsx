@@ -1,59 +1,120 @@
 import { useEffect, useRef, useState } from 'react';
-import { decodeEventLog, encodeFunctionData, formatUnits, type Address, type Hex } from 'viem';
-import { Wallet, Loader2, ExternalLink } from 'lucide-react';
+import { formatUnits, parseUnits, type Address } from 'viem';
+import { Wallet, Loader2, ExternalLink, Sprout } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getActiveProvider } from '@/lib/wallet/activeProvider';
-import { VAULT_V2_ABI } from '@/lib/rewards/vaultV2Abi.generated';
-import { VAULT_V2_CONFIG, VAULT_V2_RELEASE, confirmedVaultClaim, vaultClaimGate } from '@/lib/rewards/vaultV2';
-import { readVaultV2, vaultClient } from '@/lib/rewards/vaultV2Read';
+import { Input } from '@/components/ui/input';
+import { VAULT_V2_CONFIG, VAULT_V2_RELEASE, vaultFlowToken } from '@/lib/rewards/vaultV2';
+import { readVaultV2 } from '@/lib/rewards/vaultV2Read';
+import { createClaimStakePort, readFlexibleQuote } from '@/lib/rewards/vaultV2ClaimStakeRead';
+import { flexibleGate, quoteFingerprint, runClaimStake, type ClaimStakeOperation, type FlexibleQuote } from '@/lib/rewards/vaultV2ClaimStake';
 import { useAccountData } from '@/lib/app/useAccountData';
+import { fetchUserIncentives } from '@/lib/app/activityApi';
 import { getIdToken } from '@/lib/auth';
+import { z } from 'zod';
 
+const address = z.string().regex(/^0x[\da-fA-F]{40}$/);
+const intent = z.object({step:z.enum(['claim','approve','stake']),nonce:z.number().int().nonnegative(),startBlock:z.string().regex(/^\d+$/),hash:z.string().regex(/^0x[\da-fA-F]{64}$/).nullable()});
+const operationSchema = z.object({version:z.literal(1),wallet:address,rewardVault:address,token:address,stakingVault:address,mode:z.enum(['claim','stake']),claimAmount:z.string().regex(/^\d+$/),principal:z.string().regex(/^\d+$/),terms:z.string(),transactions:z.object({claim:intent.optional(),approve:intent.optional(),stake:intent.optional()}),complete:z.boolean()});
+const fmt = (n:bigint) => formatUnits(n,18);
 export function FlowRewardsVaultV2Panel() {
-  const { user, incentives } = useAccountData();
-  const [snapshot,setSnapshot] = useState<Awaited<ReturnType<typeof readVaultV2>>>(null);
+  const {user,incentives} = useAccountData();
+  const bound = incentives?.walletAddress?.toLowerCase() as Address | undefined;
   const [config,setConfig] = useState(VAULT_V2_CONFIG);
+  const [snapshot,setSnapshot] = useState<Awaited<ReturnType<typeof readVaultV2>>>(null);
+  const [quote,setQuote] = useState<FlexibleQuote|null>(null);
+  const [amount,setAmount] = useState('');
+  const [problem,setProblem] = useState('');
   const [phase,setPhase] = useState('');
-  const [hash,setHash] = useState<Hex|null>(null);
   const [busy,setBusy] = useState(false);
-  const pending = useRef<Hex|null>(null);
-  const bound = incentives?.walletAddress?.toLowerCase();
-  useEffect(()=>{let cancelled=false;setSnapshot(null);setConfig(VAULT_V2_CONFIG);if(user)void(async()=>{const token=await getIdToken();if(!token)return;const res=await fetch('/api/rewards/vault-v2',{headers:{authorization:`Bearer ${token}`}});if(!res.ok)return;const cfg=await res.json();if(cancelled||!cfg.enabled)return;const live=await readVaultV2(bound as Address,cfg);if(cancelled)return;setConfig(cfg);setSnapshot(live);})().catch(()=>{if(!cancelled)setPhase('Live balance unavailable. Retry before claiming.');});return()=>{cancelled=true;};},[bound,user]);
-  const claim = async () => {
-    if (busy || pending.current || !config.enabled || !bound || !user) return;
-    setBusy(true);setPhase('Checking wallet and live balance…');
-    try {
-      const provider = await getActiveProvider();
-      if (!provider) throw new Error('Connect your verified wallet.');
-      const accounts = await provider.request({method:'eth_requestAccounts'}) as string[];
-      const chain = await provider.request({method:'eth_chainId'}) as string;
-      const live = await readVaultV2(bound as Address,config);
-      if (!live) throw new Error('Vault deployment is not verified.');
-      const gate = vaultClaimGate({enabled:config.enabled,verified:config.cutoverVerified,chainId:Number.parseInt(chain,16),walletMatches:accounts[0]?.toLowerCase()===bound,paused:live.paused,balance:live.balance,liabilities:live.liabilities,claimable:live.claimable});
-      if(gate!=='READY') throw new Error(gate==='WRONG_NETWORK'?'Switch your wallet to BOT Mainnet.':gate==='WALLET_MISMATCH'?'Connect your verified reward wallet.':`Claim unavailable: ${gate}.`);
-      const client=vaultClient();
-      await client.simulateContract({address:live.address,abi:VAULT_V2_ABI,functionName:'claim',account:bound as Address});
-      // Check again immediately before the signature; do not reuse an earlier wallet/network.
-      const freshAccounts=await provider.request({method:'eth_accounts'}) as string[];
-      if(freshAccounts[0]?.toLowerCase()!==bound || Number.parseInt(await provider.request({method:'eth_chainId'}) as string,16)!==677) throw new Error('Wallet or network changed. Nothing sent.');
-      setPhase('Confirm Claim All in your wallet…');
-      const tx=await provider.request({method:'eth_sendTransaction',params:[{from:bound,to:live.address,data:encodeFunctionData({abi:VAULT_V2_ABI,functionName:'claim'}),value:'0x0'}]}) as Hex;
-      pending.current=tx;setHash(tx);setPhase('Transaction submitted — waiting for BOT Mainnet confirmation…');
-      const receipt=await client.waitForTransactionReceipt({hash:tx,confirmations:3,timeout:180_000});
-      if(receipt.status!=='success'){pending.current=null;throw new Error('Transaction reverted. Your credits remain available.');}
-      const event=receipt.logs.filter(l=>l.address.toLowerCase()===live.address.toLowerCase()).map(l=>{try{return decodeEventLog({abi:VAULT_V2_ABI,data:l.data,topics:l.topics})}catch{return null}}).find(e=>e?.eventName==='Claimed');
-      const canonical=await client.getBlock({blockNumber:receipt.blockNumber});
-      const after=await readVaultV2(bound as Address,config);
-      const args=event?.eventName==='Claimed'?event.args:null;
-      if(!confirmedVaultClaim({receipt:receipt.status,eventWallet:args?.wallet??null,wallet:bound,eventAmount:args?.amount??0n,expectedAmount:live.claimable,canonicalBlock:canonical.hash===receipt.blockHash,rereadClaimable:after?.claimable??null})) throw new Error('Submitted claim needs verification. Do not send again.');
-      pending.current=null;setSnapshot(after);setPhase(`Claimed ${formatUnits(live.claimable,18)} FLOW — confirmed on BOT Mainnet.`);
-    } catch(e) {setPhase(e instanceof Error?e.message:'Claim could not complete.');}
-    finally {setBusy(false);}
+  const [operation,setOperation] = useState<ClaimStakeOperation|null>(null);
+  const [verifiedComplete,setVerifiedComplete] = useState(false);
+  const running = useRef(false);
+  const owner = useRef(bound); owner.current=bound;
+  const key = `flowbridge:v2-claim-stake:677:${bound??''}`;
+  useEffect(()=>{
+    let cancelled=false;
+    setConfig(VAULT_V2_CONFIG);setSnapshot(null);setQuote(null);setOperation(null);setVerifiedComplete(false);setPhase('');
+    if(user&&bound) void (async()=>{
+      const token=await getIdToken();if(!token)return;
+      const res=await fetch('/api/rewards/vault-v2',{headers:{authorization:`Bearer ${token}`}});
+      if(!res.ok)throw new Error('Rewards status unavailable.');
+      const cfg=await res.json();if(cancelled||!cfg.enabled)return;
+      const live=await readVaultV2(bound,cfg);if(cancelled||!live)return;
+      setConfig(cfg);setSnapshot(live);setAmount(fmt(live.claimable));
+      const stored=localStorage.getItem(key);
+      if(stored){const parsed=operationSchema.safeParse(JSON.parse(stored));if(!parsed.success)throw new Error('Saved flow needs reconciliation. Do not repeat a transaction.');const op=parsed.data as ClaimStakeOperation;if(op.wallet.toLowerCase()!==bound||op.rewardVault.toLowerCase()!==cfg.address.toLowerCase())throw new Error('Saved wallet or deployment mismatch.');setOperation(op);setAmount(fmt(BigInt(op.principal)));setPhase('Saved flow found. Check receipts before continuing.');}
+    })().catch(e=>{if(!cancelled)setPhase(e.message);});
+    return()=>{cancelled=true;};
+  },[bound,user,key]);
+  useEffect(()=>{
+    let cancelled=false;setQuote(null);setProblem('Checking live Flexible terms…');
+    if(!config.enabled||!bound||!snapshot)return;
+    void(async()=>{
+      const principal=parseUnits(amount||'0',18);
+      const q=await readFlexibleQuote(bound,principal);
+      flexibleGate(q,vaultFlowToken()??'',operation?.transactions.claim?BigInt(operation.claimAmount):snapshot.claimable);
+      if(!cancelled){setQuote(q);setProblem('');}
+    })().catch(e=>{if(!cancelled)setProblem(e.message.startsWith('MINIMUM:')?`Minimum Flexible stake: ${fmt(BigInt(e.message.split(':')[1]))} FLOW. Claim FLOW remains available.`:e.message);});
+    return()=>{cancelled=true;};
+  },[config,bound,snapshot,amount,operation?.claimAmount,operation?.transactions.claim]);
+  const save = (op:ClaimStakeOperation) => {localStorage.setItem(key,JSON.stringify(op));if(owner.current===bound)setOperation(structuredClone(op));};
+  const binding = async () => {
+    if(owner.current!==bound)return null;
+    const token=await getIdToken();if(!token)return null;
+    const data=await fetchUserIncentives(token);
+    return data?.walletAddress??null;
   };
+  const start = async (mode:'claim'|'stake',resume=false) => {
+    if(running.current||!config.enabled||!config.address||!bound||!snapshot)return;
+    const rewardVault=config.address;
+    const tokenAddress=vaultFlowToken();if(!tokenAddress)return;
+    running.current=true;setBusy(true);
+    try {
+      if(!navigator.locks)throw new Error('Safe transaction locking unavailable in this browser. Use a supported wallet browser.');
+      await navigator.locks.request(key,{ifAvailable:true},async lock=>{
+        if(!lock)throw new Error('This rewards flow is already open in another tab.');
+        const existing=localStorage.getItem(key);
+        let op:ClaimStakeOperation;
+        if(existing){const parsed=operationSchema.parse(JSON.parse(existing));op=parsed as ClaimStakeOperation;}
+        else {
+          const principal=mode==='stake'?parseUnits(amount,18):0n;
+          if(mode==='stake'&&!quote)throw new Error('Review a valid live stake quote first.');
+          op={version:1,wallet:bound,rewardVault,token:tokenAddress,stakingVault:quote?.stakingVault??rewardVault,mode,claimAmount:snapshot.claimable.toString(),principal:principal.toString(),terms:quote?quoteFingerprint(quote):'',transactions:{},complete:false};
+        }
+        if(op.mode!==mode)throw new Error('Saved flow choice cannot change. Reconcile it before starting a different choice.');
+        if(resume&&op.mode==='stake'&&!op.transactions.stake&&quote){
+          op.terms=quoteFingerprint(quote); // explicit Resume tap accepts the displayed fresh terms, never repeats claim
+        }
+        const port=createClaimStakePort(config,bound,binding,save,setPhase);
+        save(op);
+        await runClaimStake(op,port);
+        if(owner.current===bound)setVerifiedComplete(true);
+        const live=await readVaultV2(bound,config);if(owner.current===bound)setSnapshot(live);
+      });
+    } catch(e) {
+      const message=e instanceof Error?e.message:'Flow interrupted. Check transaction receipts before retrying.';
+      setPhase(`Flow paused. ${message} If claim is confirmed, FLOW remains in your wallet; staking is not completed until verified.`);
+    } finally {running.current=false;setBusy(false);}
+  };
+  const saved=Boolean(operation);
   return <section id="flow-rewards-vault-v2" data-release={VAULT_V2_RELEASE} className="min-w-0 space-y-3 border-b border-hairline pb-4">
     <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="flex items-center gap-2 text-base font-bold"><Wallet className="h-4 w-4 text-primary"/>FLOW Rewards Wallet V2</h2><span className="shrink-0 text-xs font-semibold text-muted">{config.enabled?'BOT Mainnet':'Not activated'}</span></div>
-    {config.enabled && snapshot ? <><p className="text-xs text-muted">FLOW available to claim</p><p className="break-words text-3xl font-bold tabular-nums">{formatUnits(snapshot.claimable,18)} <span className="text-sm text-muted">FLOW</span></p><Button className="h-auto min-h-11 w-full whitespace-normal" disabled={busy||snapshot.claimable===0n||snapshot.paused||Boolean(pending.current)} onClick={()=>void claim()}>{busy?<Loader2 className="animate-spin"/>:<Wallet/>}Claim All {formatUnits(snapshot.claimable,18)} FLOW</Button><p className="text-xs text-muted">One wallet confirmation · you pay BOT network gas · no expiry.</p></>:<p className="text-sm leading-relaxed text-muted">V2 is not activated. No Points have been moved. Existing published FLOW rounds remain available below with their original claim windows.</p>}
+    {config.enabled&&snapshot?<>
+      <div><p className="text-xs text-muted">FLOW available to claim</p><p className="break-words text-3xl font-bold tabular-nums">{fmt(snapshot.claimable)} <span className="text-sm text-muted">FLOW</span></p></div>
+      {!saved?<><label className="block space-y-1 text-xs text-muted">Flexible stake amount (FLOW)<Input aria-label="Flexible stake amount" inputMode="decimal" value={amount} disabled={busy} onChange={e=>setAmount(e.target.value)} /></label>
+      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2"><Button variant="outline" className="h-auto min-h-11 whitespace-normal" disabled={busy||snapshot.paused||snapshot.claimable===0n} onClick={()=>void start('claim')}><Wallet/>Claim FLOW</Button><Button className="h-auto min-h-11 whitespace-normal" disabled={busy||snapshot.paused||snapshot.claimable===0n||!quote} onClick={()=>void start('stake')}><Sprout/>Claim &amp; Stake Flexible</Button></div></>:<>
+        <p className="text-sm text-muted">{operation?.complete?'Saved receipts will be verified again; no successful transaction is repeated.':operation?.mode==='claim'?'Check your claim receipt. This choice never stakes FLOW.':'If the claim succeeded, FLOW is in your wallet; staking is not completed until its receipt and position are verified.'}</p>
+        {operation?.mode==='stake'&&<p className="text-xs text-muted">Planned stake: {fmt(BigInt(operation.principal))} FLOW. Resume accepts the current displayed terms; each remaining wallet confirmation is explicit.</p>}
+        <Button variant="outline" className="min-h-11 w-full whitespace-normal" disabled={busy} onClick={()=>void start(operation?.mode??'claim',true)}>{busy?<Loader2 className="animate-spin"/>:<Wallet/>}{operation?.transactions.claim&&operation.mode==='stake'?'Resume staking':'Check saved transaction status'}</Button>
+        {operation&&Object.keys(operation.transactions).length===0&&<Button variant="ghost" disabled={busy} onClick={()=>{localStorage.removeItem(key);setOperation(null);setPhase('');void readVaultV2(bound,config).then(live=>{setSnapshot(live);if(live)setAmount(fmt(live.claimable));}).catch(()=>setPhase('Live balance unavailable.'));}}>Review choices again</Button>}
+        {verifiedComplete&&<Button variant="ghost" disabled={busy} onClick={()=>{localStorage.removeItem(key);setOperation(null);setVerifiedComplete(false);setPhase('');}}>Close verified flow</Button>}
+      </>}
+      <p className="text-xs leading-relaxed text-muted">Claim: 1 transaction. Claim &amp; Stake: 2 wallet confirmations, or 3 if exact approval is needed. You pay BOT gas for each. These are separate transactions, not atomic.</p>
+      <p className="text-xs leading-relaxed text-muted">Flexible; withdraw principal anytime; APR variable/current quote; bonus may be unavailable. No expiry for V2 credits.</p>
+      {quote&&<p className="text-xs text-muted">Current quoted floor APR: {quote.floorRate/100}%. {quote.genesisAvailable?`Genesis quote: ${quote.genesisRate/100}% for up to ${Math.floor(quote.genesisSeconds/86400)} days; availability rechecked before each transaction.`:'No Genesis bonus currently available; standard Flexible staking remains possible.'} Variable rewards depend on funded epochs, not a guaranteed APR.</p>}
+      {problem&&<p className="break-words text-xs text-muted">{problem}</p>}
+    </>:<p className="text-sm leading-relaxed text-muted">V2 is not activated. No Points have been moved. Existing published FLOW rounds remain available below with their original claim windows.</p>}
     {phase&&<p role="status" className="break-words text-sm text-muted">{phase}</p>}
-    {hash&&<a className="inline-flex items-center gap-1 text-sm text-primary" href={`https://scan.botchain.ai/tx/${hash}`} target="_blank" rel="noreferrer">View transaction<ExternalLink className="h-3 w-3"/></a>}
+    {Object.values(operation?.transactions??{}).map(t=>t?.hash&&<a key={t.step} className="inline-flex items-center gap-1 pr-3 text-xs text-primary" href={`https://scan.botchain.ai/tx/${t.hash}`} target="_blank" rel="noreferrer">{t.step} receipt<ExternalLink className="h-3 w-3"/></a>)}
   </section>;
 }

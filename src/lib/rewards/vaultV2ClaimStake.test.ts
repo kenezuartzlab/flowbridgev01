@@ -1,0 +1,34 @@
+import { describe, it, expect } from 'vitest';
+import { flexibleGate, quoteFingerprint, runClaimStake, type FlexibleQuote, type ClaimStakeOperation, type ClaimStakePort, type Step } from './vaultV2ClaimStake';
+const wallet='0x0000000000000000000000000000000000000001';
+const token='0x0000000000000000000000000000000000000002';
+const vault='0x0000000000000000000000000000000000000003';
+const hash=`0x${'a'.repeat(64)}` as const;
+const q0:FlexibleQuote={token,stakingVault:vault,controller:vault,treasury:vault,principal:50n,minimum:1n,active:true,paused:false,emergency:false,lockSeconds:0,positions:0n,positionLimit:32n,allowance:50n,balance:50n,genesisRate:1800,genesisSeconds:7776000,genesisObligation:2n,floorRate:0,floorObligation:0n,genesisAvailable:true,variableRate:0n};
+function harness(mode:'claim'|'stake'='stake', patch:Partial<FlexibleQuote>={}) {
+  let q={...q0,...patch};
+  const op:ClaimStakeOperation={version:1,wallet,rewardVault:vault,token,stakingVault:vault,mode,claimAmount:'50',principal:'50',terms:quoteFingerprint(q),transactions:{},complete:false};
+  const sent:Step[]=[];const checked:Step[]=[];let identity=true;let claimable=50n;let reject:Step|null=null;let revert:Step|null=null;let unknown:Step|null=null;let mutate:Step|null=null;
+  const port:ClaimStakePort={identity:async()=>{if(!identity)throw new Error('wrong wallet/chain');},claimable:async()=>claimable,quote:async()=>q,prepare:async step=>({step,nonce:sent.length,startBlock:'10',hash:null}),send:async intent=>{sent.push(intent.step);if(reject===intent.step)throw Object.assign(new Error('rejected'),{code:4001});return hash;},verify:async intent=>{checked.push(intent.step);if(unknown===intent.step)throw new Error('pending/reorg');if(revert===intent.step)return 'reverted';if(intent.step==='claim')claimable=0n;if(intent.step==='approve')q={...q,allowance:50n};if(mutate===intent.step)q={...q,genesisRate:1900};return 'success';},save:()=>{},status:()=>{}};
+  return {op,port,sent,checked,setIdentity:(v:boolean)=>identity=v,setClaimable:(v:bigint)=>claimable=v,setReject:(s:Step|null)=>reject=s,setRevert:(s:Step|null)=>revert=s,setUnknown:(s:Step|null)=>unknown=s,setMutate:(s:Step)=>mutate=s,setQuote:(v:FlexibleQuote)=>q=v};
+}
+describe('optional guided V2 claim and Flexible stake',()=>{
+  it('Claim FLOW sends one claim and never stakes',async()=>{const h=harness('claim');await runClaimStake(h.op,h.port);expect(h.sent).toEqual(['claim']);expect(h.op.complete).toBe(true);});
+  it('existing sufficient allowance uses two confirmations',async()=>{const h=harness();await runClaimStake(h.op,h.port);expect(h.sent).toEqual(['claim','stake']);});
+  it('insufficient allowance uses three confirmations with approval stage',async()=>{const h=harness('stake',{allowance:0n});await runClaimStake(h.op,h.port);expect(h.sent).toEqual(['claim','approve','stake']);});
+  it('rejected claim never stakes',async()=>{const h=harness();h.setReject('claim');await expect(runClaimStake(h.op,h.port)).rejects.toThrow('rejected');expect(h.sent).toEqual(['claim']);expect(h.op.transactions.claim).toBeUndefined();});
+  it('claim succeeds, approval rejected, reload resumes without another claim',async()=>{const h=harness('stake',{allowance:0n});h.setReject('approve');await expect(runClaimStake(h.op,h.port)).rejects.toThrow();const reloaded=JSON.parse(JSON.stringify(h.op));h.setReject(null);await runClaimStake(reloaded,h.port);expect(h.sent).toEqual(['claim','approve','approve','stake']);expect(h.checked.filter(s=>s==='claim')).toHaveLength(2);});
+  it('stake reverts after claim; retry rechecks claim and never claims twice',async()=>{const h=harness();h.setRevert('stake');await expect(runClaimStake(h.op,h.port)).rejects.toThrow('FLOW claimed');h.setRevert(null);await runClaimStake(h.op,h.port);expect(h.sent).toEqual(['claim','stake','stake']);});
+  it('unknown claim receipt or reorg never repeats the submitted claim',async()=>{const h=harness();h.setUnknown('claim');await expect(runClaimStake(h.op,h.port)).rejects.toThrow();await expect(runClaimStake(h.op,h.port)).rejects.toThrow();expect(h.sent).toEqual(['claim']);expect(h.op.complete).toBe(false);});
+  it('unknown stake receipt never sends another approval or stake',async()=>{const h=harness();h.setUnknown('stake');await expect(runClaimStake(h.op,h.port)).rejects.toThrow();await expect(runClaimStake(h.op,h.port)).rejects.toThrow();expect(h.sent).toEqual(['claim','stake']);});
+  it('local complete flag is never trusted without receipts',async()=>{const h=harness();h.op.complete=true;h.setUnknown('claim');await expect(runClaimStake(h.op,h.port)).rejects.toThrow();expect(h.sent).toEqual(['claim']);});
+  it('wrong wallet or chain halts all prompts',async()=>{const h=harness();h.setIdentity(false);await expect(runClaimStake(h.op,h.port)).rejects.toThrow();expect(h.sent).toEqual([]);});
+  it('changed claimable from accumulated batches requires review, not auto claim',async()=>{const h=harness();h.setClaimable(100n);await expect(runClaimStake(h.op,h.port)).rejects.toThrow('balance changed');expect(h.sent).toEqual([]);});
+  it('multiple batches accumulated in 50 FLOW use a single claim',async()=>{const h=harness();await runClaimStake(h.op,h.port);expect(h.sent.filter(s=>s==='claim')).toHaveLength(1);});
+  it('changed APR quote before claim fails closed',async()=>{const h=harness();h.setQuote({...q0,genesisRate:2000});await expect(runClaimStake(h.op,h.port)).rejects.toThrow('terms changed');expect(h.sent).toEqual([]);});
+  it('changed APR after successful claim halts stake',async()=>{const h=harness();h.setMutate('claim');await expect(runClaimStake(h.op,h.port)).rejects.toThrow('terms changed');expect(h.sent).toEqual(['claim']);});
+  it('spent wallet FLOW after claiming halts staking',async()=>{const h=harness('stake',{balance:0n});await expect(runClaimStake(h.op,h.port)).rejects.toThrow('insufficient wallet');expect(h.sent).toEqual(['claim']);});
+  for(const [name,patch] of [['below minimum',{minimum:51n}],['paused',{paused:true}],['position cap',{positions:32n}],['inactive',{active:false}],['wrong token',{token:wallet}],['locked product',{lockSeconds:30}],['invalid quote',{floorObligation:1n}]] as const)it(`blocks ${name} before claim`,async()=>{const h=harness('stake',patch);await expect(runClaimStake(h.op,h.port)).rejects.toThrow();expect(h.sent).toEqual([]);});
+  it('no Genesis quota and no bonus backing permit standard Flexible staking',async()=>{const h=harness('stake',{genesisSeconds:0,genesisRate:0,genesisObligation:0n,genesisAvailable:false});await runClaimStake(h.op,h.port);expect(h.sent).toEqual(['claim','stake']);});
+  it('chosen smaller eligible principal is not all wallet funds',()=>{expect(()=>flexibleGate({...q0,principal:10n,balance:1000n},token,50n)).not.toThrow();expect(()=>flexibleGate({...q0,principal:51n},token,50n)).toThrow('exceeds');});
+});

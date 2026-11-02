@@ -1,6 +1,7 @@
 # V37 — Continuous Points, Operator-Approved Claiming
 
 # Rewards Vault V2
+- [x] Optional Claim FLOW / Claim & Stake Flexible: canonical live checks, sequential receipt verification, nonce-backed durable recovery, mocked adversarial tests and signed-in disabled 320/390/430/1280 preview; no financial activation or publication. Unknown broadcasts remain blocked pending exact receipt reconciliation; live financial acceptance requires authorized deployment.
 - [x] Non-upgradeable contract, exact compiled ABI, local adversarial/EVM tests and unsigned deployment instructions; 100-recipient execution 5,659,147 gas.
 - [x] Installed disabled post-cutover routing, canonical funded source RPC, bounded allocator, global V1 approval/batch/publication fences, atomic reservation and exact receipt ingestion; readback confirms zero config, destination, allocation, batch and credit rows. No historical mapping.
 - [x] Ops new-award cutover review, authenticated future cutover/prepare/credit verification commands, runtime-gated user panel and adversarial tests: 2,224 full tests, 66 focused tests, isolated 8-way reservations/6-way confirmations/V1 concurrency checks, automatic typecheck/build OK, signed-in 320/390/430/1280 Rewards/Earn and bound Super Admin review PASS.
