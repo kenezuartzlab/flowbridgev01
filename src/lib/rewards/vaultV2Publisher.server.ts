@@ -11,10 +11,11 @@ export async function reviewVaultPublisher(db:DB,actor:AdminContext,batchId:Hex)
   if(config.error||result.error||!c?.financial_enabled||!c.deployment_verified||!c.cutover_accepted||!c.authorized_by||!c.cutover_at||Date.parse(c.cutover_at)>Date.now()||c.chain_id!==677||!c.contract_address||!c.code_hash||!c.publisher||!b||b.state==='CREDITED')throw new Error('V2 is disabled or deployment/cutover is unverified.');
   if(actor.wallet!==c.publisher||b.publisher!==c.publisher||b.contract_address!==c.contract_address)throw new Error('Only the bound on-chain publisher can sign this batch.');
   const calldata=publisherCalldata(b);
-  const [hash,alloc,recon,live]=await Promise.all([
+  const alloc=await db.from('reward_economic_award_allocations').select('ledger_id,economic_award_id,user_id,wallet,points,destination').eq('vault_batch_id',batchId);
+  if(alloc.error)throw new Error('Batch source, pause, backing or authorized cap changed.');
+  const [hash,recon,live]=await Promise.all([
     db.rpc('vault_v2_source_hash',{p_ids:b.source_ids}),
-    db.from('reward_economic_award_allocations').select('ledger_id,economic_award_id,user_id,wallet,points,destination').eq('vault_batch_id',batchId),
-    import('./vaultV2Reconciliation.server').then(m=>m.loadVaultAccountReconciliation(db)),
+    import('./vaultV2Reconciliation.server').then(m=>m.loadVaultAccountReconciliation(db,(alloc.data??[]).map(x=>x.user_id))),
     readVaultV2(undefined,{enabled:true,chainId:677,address:c.contract_address as Address,codeHash:c.code_hash as Hex,publisher:c.publisher as Address,cutoverVerified:true}),
   ]);
   if(hash.error||hash.data!==b.snapshot_hash||alloc.error||alloc.data?.length!==b.source_ids.length||!live||live.paused||live.batchCap!==BigInt(c.batch_cap_wei)||live.dailyCap!==BigInt(c.daily_cap_wei)||BigInt(b.total_wei)>live.free||BigInt(b.total_wei)>live.batchCap||BigInt(b.total_wei)>live.dailyRemaining)throw new Error('Batch source, pause, backing or authorized cap changed.');
@@ -50,31 +51,21 @@ async function operation(db:DB,actor:AdminContext,id:string) {
 async function transition(db:DB,actor:AdminContext,id:string,phase:string,hash:string|null,evidence:Record<string,unknown>={}) {
   const r=await db.rpc('transition_vault_v2_signing',{p_operation:id,p_actor:actor.userId,p_wallet:actor.wallet,p_phase:phase,p_hash:hash as never,p_evidence:evidence as never});if(r.error)throw new Error('Recovery transition rejected; reservation retained.');
 }
-export async function resumeVaultPublisher(db:DB,actor:AdminContext,id:string,manualHash?:Hex) {
-  const {a,b,c}=await operation(db,actor,id);const rpc=vaultClient();
-  if(await rpc.getChainId()!==677)throw new Error('Wrong RPC chain.');
-  if(a.phase==='CANCELLED')return {state:'CANCELLED'};
-  if(a.phase==='REVERTED')return {state:'REVERTED',blocker:'Confirmed revert. Reservation retained; review before another deliberate signature.'};
-  if(a.phase==='CREDITED'&&a.tx_hash)return ingestVaultV2Credit(db,b.batch_id as Hex,a.tx_hash as Hex);
-  let hash=(a.tx_hash??manualHash) as Hex|undefined;
-  if(a.tx_hash&&manualHash&&a.tx_hash!==manualHash)throw new Error('Original transaction hash is immutable.');
-  if(!hash) {
-    const head=await rpc.getBlockNumber();
-    // Bounded canonical scan; older gaps need explicit hash, never resend on timeout.
-    const floor=BigInt(a.start_block),end=head<floor+127n?head:floor+127n;
-    for(let n=floor;n<=end;n++) {
-      const block=await rpc.getBlock({blockNumber:n,includeTransactions:true});
-      const tx=block.transactions.find(t=>typeof t!=='string'&&t.from.toLowerCase()===a.publisher&&t.nonce===Number(a.nonce));
-      if(tx&&typeof tx!=='string') {if(!matchesPublisherTransaction(tx,a as PublisherIntent,b))throw new Error('Publisher nonce used by a different transaction; no resend.');hash=tx.hash;break;}
-    }
-  }
-  if(!hash)return {state:'UNKNOWN',blocker:'Submission unknown. Resume later or reconcile the wallet transaction hash. Never resend.'};
-  let tx;try{tx=await rpc.getTransaction({hash});}catch{return {state:'PENDING',blocker:'Transaction not yet visible. Reservation retained.'};}
-  if(!matchesPublisherTransaction(tx,a as PublisherIntent,b))throw new Error('Hash does not match the original publisher nonce and immutable batch.');
-  await transition(db,actor,id,'SUBMITTED',hash,{verification:'EXACT_TRANSACTION_IDENTITY',nonce:String(a.nonce)});
-  const observed=await observeVaultCredit({...b,tx_hash:hash},hash,c.code_hash as Hex,rpc);
+/** Blocks behind head at which a consumed publisher nonce is treated as canonically final. */
+export const VAULT_NONCE_FINALITY = 12n;
+const UNRESOLVED='Signature dismissed or submission not yet visible — confirmation unresolved. Resume verification later; never resend. The lock is released only after the original nonce is canonically consumed without crediting this batch.';
+async function recordCandidate(db:DB,actor:AdminContext,id:string,hash:Hex,source:'WALLET_RETURNED'|'MANUAL'|'NONCE_SCAN') {
+  const r=await db.rpc('record_vault_v2_hash_candidate',{p_operation:id,p_actor:actor.userId,p_wallet:actor.wallet,p_hash:hash.toLowerCase(),p_source:source});
+  if(r.error)throw new Error('Candidate hash could not be journaled; reservation retained.');
+}
+async function rejectCandidate(db:DB,actor:AdminContext,id:string,hash:string,evidence:Record<string,unknown>) {
+  const r=await db.rpc('reject_vault_v2_hash_candidate',{p_operation:id,p_actor:actor.userId,p_wallet:actor.wallet,p_hash:hash,p_evidence:evidence as never});
+  if(r.error)throw new Error('Candidate rejection could not be journaled; reservation retained.');
+}
+/** Observe an authoritative (already identity-verified) hash; never sends. */
+async function settle(db:DB,actor:AdminContext,id:string,a:PublisherIntent,b:PublisherBatch&{batch_id:string},codeHash:Hex,hash:Hex,rpc:ReturnType<typeof vaultClient>) {
+  const observed=await observeVaultCredit({...b,tx_hash:hash} as never,hash,codeHash,rpc);
   if(observed.state==='REVERTED') {
-    // observe already proved exact identity and canonical confirmed receipt.
     const receipt=await rpc.getTransactionReceipt({hash});
     if((await rpc.getBlock({blockNumber:receipt.blockNumber})).hash!==receipt.blockHash)return {state:'PENDING'};
     if(await rpc.readContract({address:b.contract_address as Address,abi:VAULT_V2_ABI,functionName:'processedBatch',args:[b.batch_id as Hex]}))return {state:'MISMATCH',blocker:'Processed batch requires reconciliation.'};
@@ -86,14 +77,68 @@ export async function resumeVaultPublisher(db:DB,actor:AdminContext,id:string,ma
   if(result.state==='CONFIRMED')await transition(db,actor,id,'CREDITED',hash,observed.evidence);
   return result;
 }
+export async function resumeVaultPublisher(db:DB,actor:AdminContext,id:string,manualHash?:Hex) {
+  const {a,b,c}=await operation(db,actor,id);const rpc=vaultClient();
+  if(await rpc.getChainId()!==677)throw new Error('Wrong RPC chain.');
+  if(a.phase==='CANCELLED')return {state:'RELEASED'};
+  if(a.phase==='REVERTED')return {state:'REVERTED',blocker:'Confirmed revert. Reservation retained; review before another deliberate signature.'};
+  if(a.phase==='CREDITED'&&a.tx_hash)return ingestVaultV2Credit(db,b.batch_id as Hex,a.tx_hash as Hex);
+  const intent=a as PublisherIntent;
+  if(a.tx_hash) {
+    if(manualHash&&manualHash.toLowerCase()!==a.tx_hash)throw new Error('Authoritative transaction hash is immutable.');
+    return settle(db,actor,id,intent,b,c.code_hash as Hex,a.tx_hash as Hex,rpc);
+  }
+  // Unverified hashes (wallet-returned or typed) are journaled candidates only.
+  if(manualHash)await recordCandidate(db,actor,id,manualHash,'MANUAL');
+  const list=await db.from('reward_vault_v2_hash_candidates').select('tx_hash,status').eq('operation_id',id).eq('status','CANDIDATE').order('created_at',{ascending:true});
+  if(list.error)throw new Error('Candidate journal unavailable; reservation retained.');
+  let verified:Hex|undefined;let conflict=false;
+  for(const cand of list.data??[]) {
+    const tx=await rpc.getTransaction({hash:cand.tx_hash as Hex}).catch(()=>null);
+    if(!tx)continue; // not visible (yet, or mistyped): stays a candidate, authorizes nothing
+    if(matchesPublisherTransaction(tx,intent,b)){verified=tx.hash;break;}
+    const sameNonce=tx.from.toLowerCase()===a.publisher&&tx.nonce===Number(a.nonce);conflict||=sameNonce;
+    await rejectCandidate(db,actor,id,cand.tx_hash,{verification:sameNonce?'NONCE_CONFLICT_DIFFERENT_PAYLOAD':'IDENTITY_MISMATCH',from:tx.from.toLowerCase(),nonce:String(tx.nonce),to:tx.to?.toLowerCase()??null,chainId:tx.chainId??null});
+  }
+  if(!verified) {
+    const head=await rpc.getBlockNumber();
+    // Bounded canonical scan; older gaps need an explicit hash, never a resend.
+    const floor=BigInt(a.start_block),end=head<floor+127n?head:floor+127n;
+    for(let n=floor;n<=end;n++) {
+      const block=await rpc.getBlock({blockNumber:n,includeTransactions:true});
+      const tx=block.transactions.find(t=>typeof t!=='string'&&t.from.toLowerCase()===a.publisher&&t.nonce===Number(a.nonce));
+      if(tx&&typeof tx!=='string'){if(matchesPublisherTransaction(tx,intent,b)){await recordCandidate(db,actor,id,tx.hash,'NONCE_SCAN');verified=tx.hash;}else conflict=true;break;}
+    }
+  }
+  if(verified) {
+    await transition(db,actor,id,'SUBMITTED',verified.toLowerCase(),{verification:'EXACT_TRANSACTION_IDENTITY',nonce:String(a.nonce),chainId:677,publisher:a.publisher,contract:b.contract_address});
+    return settle(db,actor,id,intent,b,c.code_hash as Hex,verified.toLowerCase() as Hex,rpc);
+  }
+  return resolveConsumedNonce(db,actor,id,intent,b,rpc,conflict);
+}
+/** Release only when the bound nonce is canonically consumed and the batch is unprocessed: the original can never be mined. */
+async function resolveConsumedNonce(db:DB,actor:AdminContext,id:string,a:PublisherIntent,b:PublisherBatch,rpc:ReturnType<typeof vaultClient>,conflict:boolean) {
+  const head=await rpc.getBlockNumber();
+  if(head<VAULT_NONCE_FINALITY)return {state:'UNKNOWN',blocker:UNRESOLVED};
+  const at=head-VAULT_NONCE_FINALITY;
+  const block=await rpc.getBlock({blockNumber:at});
+  const [confirmedNonce,processed]=await Promise.all([
+    rpc.getTransactionCount({address:a.publisher as Address,blockNumber:at}),
+    rpc.readContract({address:b.contract_address as Address,abi:VAULT_V2_ABI,functionName:'processedBatch',args:[b.batch_id as Hex],blockNumber:at}),
+  ]);
+  if((await rpc.getBlock({blockNumber:at})).hash!==block.hash)return {state:'PENDING',blocker:'Chain reorganized during verification. Reservation retained.'};
+  if(confirmedNonce<=Number(a.nonce))return {state:'UNKNOWN',blocker:conflict?'The publisher nonce is used by a different transaction that is not yet final. Reservation retained; never resend.':UNRESOLVED};
+  if(processed)return {state:'MISMATCH',blocker:'The batch is processed on chain. Supply the exact publisher transaction hash to reconcile; never resend.'};
+  await transition(db,actor,id,'CANCELLED',null,{verification:'CANONICAL_NONCE_CONSUMED_UNPROCESSED',nonce:String(a.nonce),confirmedNonce:String(confirmedNonce),processedBatch:'false',blockNumber:at.toString(),blockHash:block.hash});
+  return {state:'RELEASED',blocker:'The original nonce is consumed on chain without crediting this batch, so it can never be mined. Awards remain reserved; review fresh gates before any deliberate new signature.'};
+}
+/** Wallet rejection (4001) is NOT evidence of no broadcast: the intent stays locked as UNKNOWN. */
 export async function cancelVaultPublisher(db:DB,actor:AdminContext,id:string) {
   const {a}=await operation(db,actor,id);if(a.tx_hash)throw new Error('Submitted transactions cannot be cancelled here.');
-  const rpc=vaultClient();const [nonce,pending]=await Promise.all([rpc.getTransactionCount({address:a.publisher as Address,blockTag:'latest'}),rpc.getTransactionCount({address:a.publisher as Address,blockTag:'pending'})]);
-  if(nonce!==Number(a.nonce)||pending!==nonce)throw new Error('Nonce changed. Resume verification, never resend.');
-  await transition(db,actor,id,'CANCELLED',null,{verification:'EXPLICIT_4001_NO_SEND',nonce:String(nonce)});
-  return {state:'CANCELLED'};
+  if(a.phase==='SIGNATURE')await transition(db,actor,id,'UNKNOWN',null,{verification:'WALLET_REPORTED_REJECTION_UNRESOLVED',nonce:String(a.nonce)});
+  return {state:'UNKNOWN',blocker:'Signature dismissed; confirmation unresolved — resume verification.'};
 }
-/** Store the returned hash immediately; RPC visibility is NOT required for journaling. */
+/** Journal the wallet-returned hash immediately as an unverified candidate; only exact on-chain identity binds it. */
 export async function attachVaultPublisherHash(db:DB,actor:AdminContext,id:string,hash:Hex) {
-  await operation(db,actor,id);await transition(db,actor,id,'SUBMITTED',hash,{verification:'WALLET_RETURNED_HASH_UNVERIFIED'});return {state:'SUBMITTED'};
+  await operation(db,actor,id);await recordCandidate(db,actor,id,hash,'WALLET_RETURNED');return {state:'SUBMITTED_UNVERIFIED'};
 }
