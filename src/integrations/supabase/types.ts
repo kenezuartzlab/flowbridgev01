@@ -2350,6 +2350,42 @@ export type Database = {
           },
         ]
       }
+      reward_vault_v2_identity_approvals: {
+        Row: {
+          actor_user_id: string
+          batch_cap_wei: number
+          contract_address: string
+          created_at: string
+          daily_cap_wei: number
+          evidence: Json
+          id: number
+          owner: string
+          publisher: string
+        }
+        Insert: {
+          actor_user_id: string
+          batch_cap_wei: number
+          contract_address: string
+          created_at?: string
+          daily_cap_wei: number
+          evidence: Json
+          id?: number
+          owner: string
+          publisher: string
+        }
+        Update: {
+          actor_user_id?: string
+          batch_cap_wei?: number
+          contract_address?: string
+          created_at?: string
+          daily_cap_wei?: number
+          evidence?: Json
+          id?: number
+          owner?: string
+          publisher?: string
+        }
+        Relationships: []
+      }
       reward_vault_v2_signing_attempts: {
         Row: {
           actor_user_id: string
@@ -3436,6 +3472,19 @@ export type Database = {
           p_actor: string
           p_enabled: boolean
           p_suspended: boolean
+          p_wallet: string
+        }
+        Returns: boolean
+      }
+      sync_vault_v2_settings: {
+        Args: {
+          p_actor: string
+          p_batch_cap: number
+          p_contract: string
+          p_daily_cap: number
+          p_evidence: Json
+          p_owner: string
+          p_publisher: string
           p_wallet: string
         }
         Returns: boolean

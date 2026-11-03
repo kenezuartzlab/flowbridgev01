@@ -386,6 +386,13 @@
       "when": 1793603518659,
       "tag": "0054_vault_v2_scale_and_hash_recovery",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1793677376484,
+      "tag": "0055_vault_v2_settings_sync",
+      "breakpoints": true
     }
   ]
 }
