@@ -97,6 +97,7 @@ import { RouteModal } from './modals/RouteModal';
 import { LedgerHistoryModal } from './modals/LedgerHistoryModal';
 import { ConnectGuideModal } from './modals/ConnectGuideModal';
 import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
+import { resolveBridgeDestination } from './lib/bridge/destinationSafety';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
 import { loadBridgeTracking, saveBridgeTracking, type BridgeTrackingContext } from './lib/bridge/trackingState';
@@ -706,7 +707,8 @@ export default function App() {
   const [activeRouteModal, setActiveRouteModal] = useState<{ from: string; to: string } | null>(null);
 
   // Premium Destination Address & Tracker Modal States
-  const [customDestinationAddress, setCustomDestinationAddress] = useState<string>('');
+  const [destinationOverride, setDestinationOverride] = useState<{ wallet: string; value: string }>();
+  const customDestinationAddress = resolveBridgeDestination(address, destinationOverride);
   const [isConfirmDestinationOpen, setIsConfirmDestinationOpen] = useState(false);
   const [isRealtimeTrackerOpen, setIsRealtimeTrackerOpen] = useState(false);
   const [trackerRecipientAddress, setTrackerRecipientAddress] = useState<string>('');
@@ -735,11 +737,9 @@ export default function App() {
       && receiptTxType === 'bridge' && receiptStatus === 'success') setIsReceiptModalOpen(false);
   }, [isReceiptModalOpen, isRealtimeTrackerOpen, trackingPersisted, bridgeTracking?.txHash, receiptTxHash, receiptTxType, receiptStatus]);
 
-  // Populate default destination address from wallet address
+  // A wallet/account change invalidates an explicit recipient override.
   useEffect(() => {
-    if (address && !customDestinationAddress) {
-      setCustomDestinationAddress(address);
-    }
+    setDestinationOverride(undefined);
   }, [address]);
 
   // Only the signed-in account's own profile may determine wallet binding.
@@ -3498,6 +3498,7 @@ export default function App() {
           isOpen={isConfirmDestinationOpen}
           onClose={() => setIsConfirmDestinationOpen(false)}
           initialAddress={customDestinationAddress || address || ''}
+          connectedWallet={address}
           payAmount={usdtAmount}
           receiveAmount={adapterPreview?.refundableFormatted ?? calculateBridgeReceive(usdtAmount)}
           fromChain={bridgeFromName}
@@ -3506,7 +3507,7 @@ export default function App() {
           confirmDisabled={bridgeButtonDisabled || isActionLoading}
           onConfirm={async (confirmedAddress) => {
             pendingTrackingContext.current = { amount: usdtAmount, recipient: confirmedAddress };
-            setCustomDestinationAddress(confirmedAddress);
+            if (address) setDestinationOverride({ wallet: address, value: confirmedAddress });
             setTrackerRecipientAddress(confirmedAddress);
             setIsConfirmDestinationOpen(false);
             setTrackerAmount(usdtAmount);
