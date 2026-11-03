@@ -71,3 +71,17 @@ export function RewardsVaultV2Tab({wallet}:{wallet?:string}){
     </>}
   </section>;
 }
+
+const DEPLOYED_VAULT='0x91f70c91b4273d0129abc3f14373fbb10ca59006';
+function CutoverForm({busy,onSubmit}:{busy:boolean;onSubmit:(address:string,cutoverAt:string)=>void}){
+  const [address,setAddress]=useState(DEPLOYED_VAULT);
+  const [minutes,setMinutes]=useState('10');
+  const valid=/^0x[0-9a-fA-F]{40}$/.test(address)&&Number(minutes)>=2;
+  return <div className="mt-3 space-y-2 rounded-md border border-hairline p-3">
+    <p className="text-sm font-semibold">Register vault &amp; authorize cutover (Super Admin)</p>
+    <p className="text-xs text-muted">The server checks the live contract, FLOW token, owner, publisher and limits before saving. Your bound wallet must be connected.</p>
+    <Input aria-label="Vault contract address" value={address} onChange={e=>setAddress(e.target.value.trim())} disabled={busy}/>
+    <label className="flex items-center gap-2 text-xs text-muted">Start in <Input aria-label="Minutes until cutover" className="w-20" inputMode="numeric" value={minutes} onChange={e=>setMinutes(e.target.value.replace(/\D/g,''))} disabled={busy}/> minutes</label>
+    <Button disabled={busy||!valid} onClick={()=>onSubmit(address,new Date(Date.now()+Number(minutes)*60_000).toISOString())}><FileCheck/>Register &amp; authorize</Button>
+  </div>;
+}
