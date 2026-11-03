@@ -1,5 +1,8 @@
 # V37 — Continuous Points, Operator-Approved Claiming
 
+# Bridge destination safety
+- [ ] Default to the current connected wallet, make alternate destinations explicit, and require address-specific acknowledgement in the review; verify focused tests and preview without financial actions.
+
 # Rewards Vault V2
 - [x] Deployment acceptance: frozen 11-source deterministic bundle, 25 hostile EVM tests, 2,293 full tests, isolated DB races, both RPC/token reads, live Mainnet 2-of-3 governance and authenticated 320/390/430/1280 disabled Ops PASS; no financial writes. Current-source assurance gaps and Testnet missing admin/signer authorization recorded in RELEASE_ACCEPTANCE.md; publication withheld because clean-release condition is unmet.
 - [x] Four V2 software blockers fixed: enforced frozen runtime/token/Safe/publisher identity, no cancellation from nonce nonvisibility, verified candidate-hash journal, keyset-paged candidate reconciliation with continuation. 2,327 tests, 25 hostile EVM, isolated DB races, typecheck, bundle parity, signed-in 320/390/430 disabled pages PASS; no financial actions.
