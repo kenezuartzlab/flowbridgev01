@@ -21,13 +21,15 @@ export function canonicalVaultSnapshot(rows: CanonicalVaultSource[], cutoverAt: 
 export function vaultPublisherIdentity(connected: string | null, expected: string, chainId: number) {
   return chainId === 677 && !!connected && connected.toLowerCase() === expected.toLowerCase();
 }
+/** Owner-set limit: at most 100 FLOW credited to one wallet per batch; the rest stays queued. */
+export const VAULT_V2_MAX_PER_WALLET_WEI = 100n * 10n ** 18n;
 /** Whole awards only; overflow remains queued, never changes an existing snapshot. */
-export function selectBoundedVaultSources(rows: CanonicalVaultSource[], maxWei: bigint) {
-  const selected:CanonicalVaultSource[]=[];const wallets=new Set<string>();let used=0n;
+export function selectBoundedVaultSources(rows: CanonicalVaultSource[], maxWei: bigint, perWalletWei: bigint = VAULT_V2_MAX_PER_WALLET_WEI) {
+  const selected:CanonicalVaultSource[]=[];const wallets=new Map<string,bigint>();let used=0n;
   for(const r of [...rows].sort((a,b)=>a.id.localeCompare(b.id))) {
-    const amount=BigInt(r.points)*10n**18n,w=r.wallet.toLowerCase();
-    if(r.points<=0 || used+amount>maxWei || (!wallets.has(w)&&wallets.size===100)) continue;
-    selected.push(r);wallets.add(w);used+=amount;
+    const amount=BigInt(r.points)*10n**18n,w=r.wallet.toLowerCase(),prior=wallets.get(w);
+    if(r.points<=0 || used+amount>maxWei || (prior===undefined&&wallets.size===100) || (prior??0n)+amount>perWalletWei) continue;
+    selected.push(r);wallets.set(w,(prior??0n)+amount);used+=amount;
     if(selected.length===1000)break;
   }
   return selected;
