@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Copy, Check, Clipboard, Wallet, Pencil, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Copy, Check, Wallet, Pencil, AlertTriangle } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TransactionModalFrame } from './TransactionModalFrame';
 import { Button } from '@/components/ui/button';
@@ -25,11 +25,14 @@ export function ConfirmDestinationModal({
   const [addressError, setAddressError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [acknowledged, setAcknowledged] = useState('');
+  const [finalCheck, setFinalCheck] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const review = bridgeDestinationReview(address, connectedWallet, acknowledged);
 
   const updateAddress = (value: string) => {
     setAddress(value);
     setAcknowledged('');
+    setFinalCheck(false);
     setAddressError(null);
   };
 
@@ -37,6 +40,7 @@ export function ConfirmDestinationModal({
     setAddress(initialAddress);
     setEditing(false);
     setAcknowledged('');
+    setFinalCheck(false);
     setAddressError(null);
   }, [initialAddress, connectedWallet, isOpen]);
 
@@ -49,7 +53,7 @@ export function ConfirmDestinationModal({
       return;
     }
     setAddressError(null);
-    onConfirm(review.recipient);
+    setFinalCheck(true);
   };
 
   const copyToClipboard = async () => {
@@ -62,21 +66,19 @@ export function ConfirmDestinationModal({
     }
   };
 
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (text) {
-        updateAddress(text.trim());
-      }
-    } catch (err) {
-      // Browser permissions can sometimes restrict direct paste; allow editing as fallback
-      setAddressError('Clipboard unavailable. Paste or type the address into the field.');
-    }
-  };
-
   return (
     <TransactionModalFrame id="confirm_address_modal" title="Review bridge" onClose={onClose}
-      footer={<Button disabled={confirmDisabled || !review.canConfirm} onClick={handleValidateAndConfirm} className="w-full h-11 font-bold">Confirm bridge</Button>}>
+      footer={finalCheck
+        ? <div className="flex gap-2 w-full"><Button variant="outline" onClick={() => setFinalCheck(false)} className="flex-1 h-11">Go back</Button><Button disabled={confirmDisabled || !review.canConfirm} onClick={() => onConfirm(review.recipient)} className="flex-1 h-11 font-bold">Proceed</Button></div>
+        : <Button disabled={confirmDisabled || !review.canConfirm} onClick={handleValidateAndConfirm} className="w-full h-11 font-bold">Confirm bridge</Button>}>
+        {finalCheck && <div role="alertdialog" aria-label="Final destination check" className="rounded-lg border border-warning/50 bg-warning/10 p-3 space-y-2">
+          <p className="flex items-center gap-2 text-sm font-semibold text-warning"><AlertTriangle className="h-4 w-4 shrink-0" />Final check before you proceed</p>
+          <p className="text-xs text-foreground">Make sure this is the address and network you intend. Funds sent to a wrong address or network cannot be recovered.</p>
+          <p className="text-xs text-muted">Network</p>
+          <p className="text-sm font-semibold text-foreground">{toChain ?? 'Receiving network'}</p>
+          <p className="text-xs text-muted">{review.different ? 'Different destination' : 'Connected wallet'}</p>
+          <p className="text-xs font-mono break-all text-foreground">{review.recipient}</p>
+        </div>}
         {payAmount != null && <div className="text-xs space-y-1 font-mono">
           <p>Pay: <strong>{payAmount} USDT</strong> · {fromChain}</p>
           <p>Receive (estimated): <strong>{receiveAmount} USDT</strong> · {toChain}</p>
@@ -94,24 +96,17 @@ export function ConfirmDestinationModal({
               id="bridge-destination"
               type="text" 
               value={address}
+              ref={inputRef}
               readOnly={!editing}
               autoComplete="off"
               spellCheck={false}
               onChange={(e) => updateAddress(e.target.value)}
-              placeholder="0x..."
+              placeholder={editing ? "Paste or type the destination address (0x...)" : "0x..."}
               className="bg-transparent text-[13px] font-mono font-bold text-foreground w-full py-2.5 px-3 focus:outline-none placeholder:text-muted-soft overflow-x-auto"
             />
             
             {/* Action buttons inside input box */}
             <div className="flex items-center gap-1.5 pr-2">
-              {editing && <Button 
-                type="button"
-                onClick={handlePaste}
-                title="Paste from clipboard"
-                variant="ghost" size="icon" aria-label="Paste destination address"
-              >
-                <Clipboard className="w-3.5 h-3.5" />
-              </Button>}
               <Button 
                 type="button"
                 onClick={copyToClipboard}
@@ -134,7 +129,7 @@ export function ConfirmDestinationModal({
             </p>
           )}
           <div className="flex flex-wrap gap-2">
-            {!editing && <Button variant="outline" size="sm" onClick={() => setEditing(true)}><Pencil className="h-3.5 w-3.5" />Use another address</Button>}
+            {!editing && <Button variant="outline" size="sm" onClick={() => { updateAddress(''); setEditing(true); setTimeout(() => inputRef.current?.focus(), 0); }}><Pencil className="h-3.5 w-3.5" />Use another address</Button>}
             {(editing || review.different) && <Button variant="ghost" size="sm" disabled={!connectedWallet} onClick={() => { updateAddress(connectedWallet ?? ''); setEditing(false); }}><Wallet className="h-3.5 w-3.5" />Use connected wallet</Button>}
           </div>
         </div>
