@@ -1,5 +1,5 @@
 import { decodeFunctionData, encodeFunctionData, keccak256, parseAbi, type Address, type Hex } from 'viem';
-import { VAULT_V2_OWNER_EOA_EXCEPTION, VAULT_V2_APPROVED_IDENTITY, verifyVaultIdentity } from './vaultV2Identity';
+import { VAULT_V2_OWNER_EOA_EXCEPTION, VAULT_V2_APPROVED_IDENTITY, verifyVaultIdentity, type VaultApprovedRoles } from './vaultV2Identity';
 const identityAbi=parseAbi(['function decimals() view returns(uint8)','function getOwners() view returns(address[])','function getThreshold() view returns(uint256)']);
 import { VAULT_V2_ABI } from './vaultV2Abi.generated';
 import { vaultClient, readVaultV2 } from './vaultV2Read';
@@ -70,7 +70,7 @@ export async function ingestVaultV2Credit(db: Admin, batchId: Hex, hash: Hex) {
  * derived from the frozen artifact with all FLOW immutables patched; the code hash is computed from the
  * actual deployed code. Token runtime, Safe owners/threshold and publisher are all read at one canonical block.
  */
-export async function verifiedVaultDeployment(address: Address, c = vaultClient()) {
+export async function verifiedVaultDeployment(address: Address, c = vaultClient(), approved?: VaultApprovedRoles) {
   const A=VAULT_V2_APPROVED_IDENTITY;
   const chainId=await c.getChainId();
   if(chainId!==677) throw new Error('WRONG_RPC_CHAIN');
@@ -79,18 +79,21 @@ export async function verifiedVaultDeployment(address: Address, c = vaultClient(
   const v=(functionName:'flow'|'owner'|'pendingOwner'|'publisher')=>c.readContract({address,abi:VAULT_V2_ABI,functionName,...at}) as Promise<string>;
   const [vaultCode,vaultFlow,vaultOwner,vaultPendingOwner,vaultPublisher]=await Promise.all([c.getCode({address,...at}),v('flow'),v('owner'),v('pendingOwner'),v('publisher')]);
   const isException=address.toLowerCase()===VAULT_V2_OWNER_EOA_EXCEPTION.vault&&vaultOwner.toLowerCase()===VAULT_V2_OWNER_EOA_EXCEPTION.owner;
-  const [flowCode,flowDecimals,ownerCode,publisherCode,safeOwners,safeThreshold]=await Promise.all([
+  const [flowCode,flowDecimals,ownerCode,publisherCode]=await Promise.all([
     c.getCode({address:A.flow as Address,...at}),
     c.readContract({address:A.flow as Address,abi:identityAbi,functionName:'decimals',...at}),
     c.getCode({address:vaultOwner as Address,...at}),
     c.getCode({address:vaultPublisher as Address,...at}),
-    isException?Promise.resolve([] as readonly string[]):c.readContract({address:vaultOwner as Address,abi:identityAbi,functionName:'getOwners',...at}),
-    isException?Promise.resolve(0n):c.readContract({address:vaultOwner as Address,abi:identityAbi,functionName:'getThreshold',...at}),
+  ]);
+  const ownerIsContract=!!ownerCode&&ownerCode!=='0x';
+  const readSafe=!isException&&(ownerIsContract||vaultOwner.toLowerCase()===A.owner);
+  const [safeOwners,safeThreshold]=await Promise.all([
+    readSafe?c.readContract({address:vaultOwner as Address,abi:identityAbi,functionName:'getOwners',...at}):Promise.resolve([] as readonly string[]),
+    readSafe?c.readContract({address:vaultOwner as Address,abi:identityAbi,functionName:'getThreshold',...at}):Promise.resolve(0n),
   ]);
   const after=await c.getBlock({blockNumber:block.number});
-  const identity=verifyVaultIdentity({chainId,blockNumber:block.number,blockHash:block.hash as Hex,blockHashAfter:after.hash as Hex,vaultCode,flowCode,flowDecimals:Number(flowDecimals),vaultFlow,vaultOwner,vaultPendingOwner,vaultPublisher,ownerCode,publisherCode,safeOwners,safeThreshold,vaultAddress:address});
-  const live=await readVaultV2(undefined,{enabled:false,chainId:677,address,codeHash:identity.codeHash,publisher:A.publisher as Address,cutoverVerified:false});
+  const identity=verifyVaultIdentity({chainId,blockNumber:block.number,blockHash:block.hash as Hex,blockHashAfter:after.hash as Hex,vaultCode,flowCode,flowDecimals:Number(flowDecimals),vaultFlow,vaultOwner,vaultPendingOwner,vaultPublisher,ownerCode,publisherCode,safeOwners,safeThreshold,vaultAddress:address},undefined,approved);
+  const live=await readVaultV2(undefined,{enabled:false,chainId:677,address,codeHash:identity.codeHash,publisher:identity.publisher as Address,cutoverVerified:false});
   if(!live || live.free<=0n || live.batchCap<=0n || live.dailyCap<live.batchCap) throw new Error('DEPLOYMENT_PREFUNDING_OR_CAPS_MISSING');
-  if(identity.ownerException) return {verification:'FROZEN_RUNTIME_CANONICAL_TOKEN_OWNER_EOA_EXCEPTION',chainId:677,contract:address.toLowerCase(),codeHash:identity.codeHash,flow:identity.flow,owner:identity.owner,ownerSafeOwners:[] as string[],ownerSafeThreshold:'0',publisher:identity.publisher,identityBlockNumber:block.number.toString(),identityBlockHash:block.hash,freeWei:live.free.toString(),batchCapWei:live.batchCap.toString(),dailyCapWei:live.dailyCap.toString(),blockNumber:live.blockNumber.toString(),blockHash:live.blockHash};
-  return {verification:'FROZEN_RUNTIME_CANONICAL_TOKEN_APPROVED_SAFE',chainId:677,contract:address.toLowerCase(),codeHash:identity.codeHash,flow:identity.flow,owner:identity.owner,ownerSafeOwners:[...A.ownerSafeOwners],ownerSafeThreshold:A.ownerSafeThreshold.toString(),publisher:identity.publisher,identityBlockNumber:block.number.toString(),identityBlockHash:block.hash,freeWei:live.free.toString(),batchCapWei:live.batchCap.toString(),dailyCapWei:live.dailyCap.toString(),blockNumber:live.blockNumber.toString(),blockHash:live.blockHash};
+  return {verification:`FROZEN_RUNTIME_CANONICAL_TOKEN_${identity.kind}`,chainId:677,contract:address.toLowerCase(),codeHash:identity.codeHash,flow:identity.flow,owner:identity.owner,ownerSafeOwners:identity.kind==='OWNER_EOA_EXCEPTION'?[] as string[]:identity.safeOwners,ownerSafeThreshold:safeThreshold.toString(),publisher:identity.publisher,identityBlockNumber:block.number.toString(),identityBlockHash:block.hash,freeWei:live.free.toString(),batchCapWei:live.batchCap.toString(),dailyCapWei:live.dailyCap.toString(),blockNumber:live.blockNumber.toString(),blockHash:live.blockHash};
 }

@@ -52,7 +52,10 @@ export type VaultIdentityEvidence = {
 const same = (a: string | undefined, b: string) => !!a && a.toLowerCase() === b.toLowerCase();
 
 /** Pure fail-closed identity check. `suppliedCodeHash` is only ever compared, never used. */
-export function verifyVaultIdentity(e: VaultIdentityEvidence, suppliedCodeHash?: string | null) {
+/** Owner/publisher pair a Super Admin synced from live chain state (append-only audited approvals). */
+export type VaultApprovedRoles = { owner: string; publisher: string } | null | undefined;
+
+export function verifyVaultIdentity(e: VaultIdentityEvidence, suppliedCodeHash?: string | null, approved?: VaultApprovedRoles) {
   const A = VAULT_V2_APPROVED_IDENTITY;
   if (e.chainId !== A.chainId) throw new Error('WRONG_CHAIN');
   if (e.blockHash !== e.blockHashAfter || !/^0x[0-9a-f]{64}$/i.test(e.blockHash)) throw new Error('NON_CANONICAL_BLOCK_EVIDENCE');
@@ -65,7 +68,14 @@ export function verifyVaultIdentity(e: VaultIdentityEvidence, suppliedCodeHash?:
   const X = VAULT_V2_OWNER_EOA_EXCEPTION;
   const eoaException = !!e.vaultAddress && same(e.vaultAddress, X.vault) && same(e.vaultOwner, X.owner);
   let owners: string[] = [];
-  if (eoaException) {
+  const synced = !!approved && same(e.vaultOwner, approved.owner) && same(e.vaultPublisher, approved.publisher);
+  if (synced && !eoaException && !same(e.vaultOwner, A.owner)) {
+    if (e.ownerCode && e.ownerCode !== '0x') {
+      owners = [...new Set(e.safeOwners.map(o => o.toLowerCase()))];
+      if (owners.length !== e.safeOwners.length || owners.length < 2 || e.safeThreshold < 2n || e.safeThreshold > BigInt(owners.length)) throw new Error('OWNER_SAFE_OWNERS_OR_THRESHOLD_MISMATCH');
+    }
+    owners = [...owners, e.vaultOwner.toLowerCase()];
+  } else if (eoaException) {
     if (e.ownerCode && e.ownerCode !== '0x') throw new Error('EXCEPTION_OWNER_NOT_EOA');
     owners = [X.owner];
   } else {
@@ -74,7 +84,10 @@ export function verifyVaultIdentity(e: VaultIdentityEvidence, suppliedCodeHash?:
     owners = [...new Set(e.safeOwners.map(o => o.toLowerCase()))].sort();
     if (owners.length !== e.safeOwners.length || owners.join() !== [...A.ownerSafeOwners].sort().join() || e.safeThreshold !== A.ownerSafeThreshold) throw new Error('OWNER_SAFE_OWNERS_OR_THRESHOLD_MISMATCH');
   }
-  if (!same(e.vaultPublisher, A.publisher) || same(e.vaultPublisher, e.vaultOwner) || owners.includes(e.vaultPublisher.toLowerCase())) throw new Error('PUBLISHER_NOT_APPROVED');
+  const publisher = synced ? approved!.publisher.toLowerCase() : A.publisher;
+  if (!same(e.vaultPublisher, publisher) || same(e.vaultPublisher, e.vaultOwner) || owners.includes(e.vaultPublisher.toLowerCase())) throw new Error('PUBLISHER_NOT_APPROVED');
   if (e.publisherCode && e.publisherCode !== '0x') throw new Error('PUBLISHER_NOT_EOA');
-  return { codeHash, owner: eoaException ? X.owner : A.owner, publisher: A.publisher, flow: A.flow, ownerException: eoaException };
+  const owner = e.vaultOwner.toLowerCase();
+  const kind = eoaException ? 'OWNER_EOA_EXCEPTION' : same(owner, A.owner) ? 'APPROVED_SAFE' : 'APPROVED_OWNER';
+  return { codeHash, owner, publisher, flow: A.flow, ownerException: eoaException, kind: kind as 'OWNER_EOA_EXCEPTION' | 'APPROVED_SAFE' | 'APPROVED_OWNER', safeOwners: owners.filter(o => o !== owner || kind === 'APPROVED_SAFE') };
 }

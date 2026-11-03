@@ -5,6 +5,7 @@ const hash=z.string().regex(/^0x[0-9a-f]{64}$/).transform(v=>v as `0x${string}`)
 const command=z.discriminatedUnion('action',[
   // Code hash and publisher are derived server-side from the frozen artifact; client values are stripped.
   z.object({action:z.literal('authorize_future_cutover'),address,cutoverAt:z.iso.datetime()}),
+  z.object({action:z.literal('sync_settings'),address,owner:address,publisher:address,batchCapFlow:z.string().regex(/^\d{1,12}(\.\d{1,18})?$/),dailyCapFlow:z.string().regex(/^\d{1,12}(\.\d{1,18})?$/)}),
   z.object({action:z.literal('prepare'),after:z.uuid().optional()}),
   z.object({action:z.literal('verify_credit'),batchId:hash,txHash:hash}),
   z.object({action:z.literal('review_batch'),batchId:hash}),
@@ -26,10 +27,15 @@ export const Route = createFileRoute('/api/admin/rewards-vault-v2')({server:{han
     const {jsonResponse}=await import('@/lib/api-auth.server');
     try{
       const input=command.parse(await request.json());
-      if(['authorize_future_cutover','prepare','verify_credit'].includes(input.action)&&gate.admin.role!=='super_admin')return jsonResponse({error:'Super Admin only.'},403);
+      if(['authorize_future_cutover','sync_settings','prepare','verify_credit'].includes(input.action)&&gate.admin.role!=='super_admin')return jsonResponse({error:'Super Admin only.'},403);
       if(input.action==='authorize_future_cutover'){
         const {authorizeVaultCutover}=await import('@/lib/rewards/vaultV2Activation.server');
         return jsonResponse(await authorizeVaultCutover(gate.admin,input));
+      }
+      if(input.action==='sync_settings'){
+        const {syncVaultSettings}=await import('@/lib/rewards/vaultV2Activation.server');
+        try{const r=await syncVaultSettings(gate.admin,input);return jsonResponse(r,r.saved?200:409);}
+        catch(e){return jsonResponse({saved:false,error:e instanceof Error&&e.message.startsWith('Resolve')?e.message:'Live on-chain check failed: the entered owner/publisher do not match the frozen vault on BOT Mainnet, or the vault is unfunded. Nothing was saved.'},409);}
       }
       const {supabaseAdmin:db}=await import('@/integrations/supabase/client.server');
       if(input.action==='review_batch'||input.action==='acquire_signing'){

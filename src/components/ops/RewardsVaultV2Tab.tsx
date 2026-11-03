@@ -21,7 +21,7 @@ export function RewardsVaultV2Tab({wallet}:{wallet?:string}){
     if(!wallet||currentWallet.current!==wallet)throw new Error('Reconnect the original bound publisher wallet.');
     const token=await getIdToken();if(!token)throw new Error('Sign in to your approved Ops account.');
     const r=await fetch('/api/admin/rewards-vault-v2',{method:'POST',headers:{authorization:`Bearer ${token}`,'x-wallet-address':wallet,'content-type':'application/json'},body:JSON.stringify(body)});
-    const json=await r.json();if(!r.ok)throw new Error(json.error??'Action stopped. Resume verification.');return json;
+    const json=await r.json();if(!r.ok)throw new Error(json.error??(Array.isArray(json.mismatches)?`Does not match live on-chain values: ${json.mismatches.join('; ')}. Nothing was saved.`:'Action stopped. Resume verification.'));return json;
   };
   const save=(a:PublisherIntent)=>{localStorage.setItem(key,JSON.stringify(a));if(currentWallet.current===wallet)setLocal({...a});};
   const perform=async(fn:()=>Promise<void>)=>{if(running.current)return;running.current=true;setBusy(true);setMessage('');try{await fn();}catch(e){setMessage(e instanceof Error?e.message:'Interrupted. Resume verification; do not resend.');}finally{running.current=false;setBusy(false);void q.refetch();}};
@@ -67,6 +67,7 @@ export function RewardsVaultV2Tab({wallet}:{wallet?:string}){
       <div className="border-t border-hairline pt-3"><h3 className="text-sm font-bold">New-award cutover review</h3><p className="mt-2 text-sm text-muted">Cutover: {q.data.review.cutoverAt??'Not authorized'} · {q.data.review.sourceCount} canonical source awards · {q.data.review.sourcePoints} funded PTS</p><p className="mt-2 text-sm text-muted">All earlier awards, Rounds #1–4 and existing V1 obligations remain in V1.</p><ul className="mt-2 space-y-1 text-sm text-warning">{q.data.blockers.map(b=><li key={b}>{b.replaceAll('_',' ')}</li>)}</ul>
         {!q.data.review.cutoverAt&&<CutoverForm busy={busy} onSubmit={(address,cutoverAt)=>void perform(async()=>{await command({action:'authorize_future_cutover',address,cutoverAt});setMessage('Vault registered and cutover authorized. New awards after this time go to Vault V2.');})}/>}
       </div>
+      <SettingsForm busy={busy} contract={q.data.configuration.contract_address??DEPLOYED_VAULT} publisher={typeof q.data.live?.publisher==='string'?q.data.live.publisher:''} onSubmit={v=>void perform(async()=>{await command({action:'sync_settings',...v});setMessage('Settings match the live vault and were saved. The change is recorded in the audit log.');})}/>
       <div className="border-t border-hairline pt-3"><h3 className="text-sm font-bold">Existing program funding</h3>{q.data.programs.map(p=><p key={p.program_id} className="mt-2 break-words text-sm text-muted">{p.program_id}: {p.funding_verified?'Backing verified':'Backing not verified'} · {p.status} · {p.reserved_points.toLocaleString()} reserved PTS</p>)}</div>
     </>}
   </section>;
@@ -83,5 +84,18 @@ function CutoverForm({busy,onSubmit}:{busy:boolean;onSubmit:(address:string,cuto
     <Input aria-label="Vault contract address" value={address} onChange={e=>setAddress(e.target.value.trim())} disabled={busy}/>
     <label className="flex items-center gap-2 text-xs text-muted">Start in <Input aria-label="Minutes until cutover" className="w-20" inputMode="numeric" value={minutes} onChange={e=>setMinutes(e.target.value.replace(/\D/g,''))} disabled={busy}/> minutes</label>
     <Button disabled={busy||!valid} onClick={()=>onSubmit(address,new Date(Date.now()+Number(minutes)*60_000).toISOString())}><FileCheck/>Register &amp; authorize</Button>
+  </div>;
+}
+
+const ADDR=/^0x[0-9a-fA-F]{40}$/,AMT=/^\d{1,12}(\.\d{1,18})?$/;
+function SettingsForm({busy,contract,publisher,onSubmit}:{busy:boolean;contract:string;publisher:string;onSubmit:(v:{address:string;owner:string;publisher:string;batchCapFlow:string;dailyCapFlow:string})=>void}){
+  const [v,setV]=useState({address:contract,owner:'0x851275569923c62a2ef962ec35bfbb8f1bcbf3dd',publisher:publisher||'0x971e7790fe6c8f77dc666bb05d4aeda362653f94',batchCapFlow:'10000',dailyCapFlow:'10000'});
+  const set=(k:keyof typeof v)=>(e:React.ChangeEvent<HTMLInputElement>)=>setV({...v,[k]:e.target.value.trim()});
+  const valid=ADDR.test(v.address)&&ADDR.test(v.owner)&&ADDR.test(v.publisher)&&AMT.test(v.batchCapFlow)&&AMT.test(v.dailyCapFlow);
+  return <div className="space-y-2 border-t border-hairline pt-3">
+    <h3 className="text-sm font-bold">Vault settings (Super Admin)</h3>
+    <p className="text-xs text-muted">Change the owner, publisher or limits on-chain first, then enter the new values here. Saving checks the live vault: it succeeds only if every value matches exactly, otherwise nothing changes. Nothing is signed or sent.</p>
+    {([['address','Vault contract'],['owner','Owner'],['publisher','Publisher'],['batchCapFlow','Per-batch limit (FLOW)'],['dailyCapFlow','Daily limit (FLOW)']] as const).map(([k,label])=><label key={k} className="block text-xs text-muted">{label}<Input aria-label={label} className="mt-1" inputMode={k.endsWith('Flow')?'decimal':'text'} value={v[k]} onChange={set(k)} disabled={busy}/></label>)}
+    <Button variant="outline" disabled={busy||!valid} onClick={()=>onSubmit(v)}><FileCheck/>Check live vault &amp; save</Button>
   </div>;
 }
