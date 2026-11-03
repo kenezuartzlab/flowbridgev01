@@ -72,3 +72,5 @@ Owner chose temporary owner wallet `0x8512…f3dD` instead of the 2-of-3 Safe (d
 - Vault `0x91f70c91b4273d0129abc3f14373fbb10ca59006` deployed paused `0xc126769fdbe9688ba96c30a54a45d022a1f73ab6539cb80149260636cb1d0252`; runtime exactly matches frozen build, code hash `0xdc9d2b31…75b1`
 - Prefund 10,000 FLOW `0xc5eb4e01079558cb38d71f2ebd11ddff1916403829498718000edab49c22c847`
 - Pending: setLimits (per-batch 10,000; daily limit undecided), unpause, app owner-identity exception, cutover.
+- setLimits 10,000/10,000 FLOW `0x48a6f1b7f16b914ba92b264d6916a9cf06452fba6f015a12366ee56fc4111d5f`; unpause `0x3caa8effb3205e7ab636be2625766df41f480ad7e3b0bd47980c5e08a09ed663`
+- App: owner exception pinned to this vault+owner only (`VAULT_V2_OWNER_EOA_EXCEPTION`); 100 FLOW per wallet per batch enforced in allocator. Cutover pending Super Admin action in Ops.
