@@ -1,5 +1,5 @@
 import { decodeFunctionData, encodeFunctionData, keccak256, parseAbi, type Address, type Hex } from 'viem';
-import { VAULT_V2_APPROVED_IDENTITY, verifyVaultIdentity } from './vaultV2Identity';
+import { VAULT_V2_OWNER_EOA_EXCEPTION, VAULT_V2_APPROVED_IDENTITY, verifyVaultIdentity } from './vaultV2Identity';
 const identityAbi=parseAbi(['function decimals() view returns(uint8)','function getOwners() view returns(address[])','function getThreshold() view returns(uint256)']);
 import { VAULT_V2_ABI } from './vaultV2Abi.generated';
 import { vaultClient, readVaultV2 } from './vaultV2Read';
