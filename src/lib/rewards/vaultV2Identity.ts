@@ -18,6 +18,12 @@ export const VAULT_V2_APPROVED_IDENTITY = {
   publisher: '0x971e7790fe6c8f77dc666bb05d4aeda362653f94',
 } as const;
 
+/** Owner-directed exception (2026-11-02): this one deployed vault is owned by a temporary EOA instead of the Safe. Pinned to both addresses. */
+export const VAULT_V2_OWNER_EOA_EXCEPTION = {
+  vault: '0x91f70c91b4273d0129abc3f14373fbb10ca59006',
+  owner: '0x851275569923c62a2ef962ec35bfbb8f1bcbf3dd',
+} as const;
+
 const word = (address: string) => {
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) throw new Error('INVALID_TOKEN_ADDRESS');
   return address.slice(2).toLowerCase().padStart(64, '0');
@@ -39,7 +45,7 @@ export type VaultIdentityEvidence = {
   chainId: number; blockNumber: bigint; blockHash: Hex; blockHashAfter: Hex;
   vaultCode: Hex | undefined; flowCode: Hex | undefined; flowDecimals: number;
   vaultFlow: string; vaultOwner: string; vaultPendingOwner: string; vaultPublisher: string;
-  ownerCode: Hex | undefined; publisherCode: Hex | undefined;
+  ownerCode: Hex | undefined; publisherCode: Hex | undefined; vaultAddress?: string;
   safeOwners: readonly string[]; safeThreshold: bigint;
 };
 
@@ -55,11 +61,20 @@ export function verifyVaultIdentity(e: VaultIdentityEvidence, suppliedCodeHash?:
   if (suppliedCodeHash != null && suppliedCodeHash.toLowerCase() !== codeHash.toLowerCase()) throw new Error('SUPPLIED_CODE_HASH_REJECTED');
   if (!e.flowCode || keccak256(e.flowCode) !== A.flowRuntimeKeccak) throw new Error('FLOW_TOKEN_RUNTIME_NOT_CANONICAL');
   if (e.flowDecimals !== A.flowDecimals || !same(e.vaultFlow, A.flow)) throw new Error('FLOW_TOKEN_IDENTITY_MISMATCH');
-  if (!same(e.vaultOwner, A.owner) || BigInt(e.vaultPendingOwner || '0x0') !== 0n) throw new Error('VAULT_OWNER_NOT_APPROVED_SAFE');
-  if (!e.ownerCode || e.ownerCode === '0x') throw new Error('OWNER_SAFE_HAS_NO_CODE');
-  const owners = [...new Set(e.safeOwners.map(o => o.toLowerCase()))].sort();
-  if (owners.length !== e.safeOwners.length || owners.join() !== [...A.ownerSafeOwners].sort().join() || e.safeThreshold !== A.ownerSafeThreshold) throw new Error('OWNER_SAFE_OWNERS_OR_THRESHOLD_MISMATCH');
+  if (BigInt(e.vaultPendingOwner || '0x0') !== 0n) throw new Error('VAULT_OWNER_NOT_APPROVED_SAFE');
+  const X = VAULT_V2_OWNER_EOA_EXCEPTION;
+  const eoaException = !!e.vaultAddress && same(e.vaultAddress, X.vault) && same(e.vaultOwner, X.owner);
+  let owners: string[] = [];
+  if (eoaException) {
+    if (e.ownerCode && e.ownerCode !== '0x') throw new Error('EXCEPTION_OWNER_NOT_EOA');
+    owners = [X.owner];
+  } else {
+    if (!same(e.vaultOwner, A.owner)) throw new Error('VAULT_OWNER_NOT_APPROVED_SAFE');
+    if (!e.ownerCode || e.ownerCode === '0x') throw new Error('OWNER_SAFE_HAS_NO_CODE');
+    owners = [...new Set(e.safeOwners.map(o => o.toLowerCase()))].sort();
+    if (owners.length !== e.safeOwners.length || owners.join() !== [...A.ownerSafeOwners].sort().join() || e.safeThreshold !== A.ownerSafeThreshold) throw new Error('OWNER_SAFE_OWNERS_OR_THRESHOLD_MISMATCH');
+  }
   if (!same(e.vaultPublisher, A.publisher) || same(e.vaultPublisher, e.vaultOwner) || owners.includes(e.vaultPublisher.toLowerCase())) throw new Error('PUBLISHER_NOT_APPROVED');
   if (e.publisherCode && e.publisherCode !== '0x') throw new Error('PUBLISHER_NOT_EOA');
-  return { codeHash, owner: A.owner, publisher: A.publisher, flow: A.flow };
+  return { codeHash, owner: eoaException ? X.owner : A.owner, publisher: A.publisher, flow: A.flow, ownerException: eoaException };
 }
