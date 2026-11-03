@@ -1,13 +1,13 @@
-# Vault V2 release acceptance — November 2, 2026
+# Vault V2 release acceptance — November 3, 2026
 
 ## Verdict
 
-**All four software blockers corrected; non-financial gates PASS. Financial activation remains a human authorization gate.** V2 remains disabled and undeployed on both networks. No signature, deployment, token movement, budget, role, staking or Merkle modification occurred. Testnet still lacks a verified multisig and Vault-specific signer authorization.
+**All four software blockers corrected; non-financial gates PASS.** Subsequent owner-authorized Testnet rehearsal and Mainnet deployment are recorded below. Mainnet is deployed, prefunded and unpaused under the pinned temporary-owner exception; the application cutover remains pending as last recorded, not rechecked during source verification. The earlier preflight observations below are historical, not the current deployment status.
 
 ## Reproducible evidence
 
 - Frozen Solidity source unchanged. solc `0.8.20+commit.a1b79de6`, OpenZeppelin `5.0.2`, optimizer 200, Paris.
-- `scripts/acceptance-bundle.mjs` inlines all 11 source units, compiles twice with no import callback, and compares creation/runtime/ABI against the frozen artifact. `verification/` includes Standard JSON input/output, artifact, checksums, immutable slots and unsigned candidate/templates. No deploy receipt or deployed Vault address exists.
+- `scripts/acceptance-bundle.mjs` inlines all 11 source units, compiles twice with no import callback, and compares creation/runtime/ABI against the frozen artifact. `verification/` includes Standard JSON input/output, artifact, checksums, immutable slots and historical unsigned candidate/templates. Actual deployment evidence and explorer verification are recorded below.
 - Creation **6,485 bytes**, runtime **5,615 / 24,576 bytes** (18,961 bytes headroom). Immutable FLOW must be patched at all seven slots for actual runtime comparison.
 - Local deployment execution **1,217,650 gas**; intrinsic/initcode-inclusive modeled gas **1,370,886**. 100 fresh recipients: execution **5,659,147**, calldata/intrinsic-inclusive **5,714,911 gas**. These are local EVM figures, not a live transaction receipt.
 - Live Testnet constructor `eth_estimateGas`: **1,385,853** using the historical testnet deployer solely as an RPC call sender and the historical Mainnet admin candidate as a constructor value. This is a hypothetical quote: that Safe has no Testnet code, so it is **not** deployment readiness or authorization.
@@ -71,6 +71,16 @@ Mainnet unchanged: still requires the approved Safe owner and separate authoriza
 Owner chose temporary owner wallet `0x8512…f3dD` instead of the 2-of-3 Safe (deliberate exception). Publisher `0x971E…3f94`.
 - Vault `0x91f70c91b4273d0129abc3f14373fbb10ca59006` deployed paused `0xc126769fdbe9688ba96c30a54a45d022a1f73ab6539cb80149260636cb1d0252`; runtime exactly matches frozen build, code hash `0xdc9d2b31…75b1`
 - Prefund 10,000 FLOW `0xc5eb4e01079558cb38d71f2ebd11ddff1916403829498718000edab49c22c847`
-- Pending: setLimits (per-batch 10,000; daily limit undecided), unpause, app owner-identity exception, cutover.
+- Initial pending steps (subsequently completed below): setLimits, unpause and app owner-identity exception. Cutover still pending as last recorded.
 - setLimits 10,000/10,000 FLOW `0x48a6f1b7f16b914ba92b264d6916a9cf06452fba6f015a12366ee56fc4111d5f`; unpause `0x3caa8effb3205e7ab636be2625766df41f480ad7e3b0bd47980c5e08a09ed663`
 - App: owner exception pinned to this vault+owner only (`VAULT_V2_OWNER_EOA_EXCEPTION`); 100 FLOW per wallet per batch enforced in allocator. Cutover pending Super Admin action in Ops.
+
+## Mainnet explorer source verification — PASS, 2026-11-03
+
+- BOTScan: https://scan.botchain.ai/address/0x91f70c91b4273d0129abc3f14373fbb10ca59006?tab=contract
+- Submitted the frozen fully inlined Standard JSON input; BOTScan returned `Pass - Verified` and `is_verified=true`, `is_fully_verified=true`, `is_partially_verified=false` at `2026-11-03T02:57:30.909291Z`.
+- Compiler `v0.8.20+commit.a1b79de6`, optimizer enabled / 200 runs, Paris, MIT. All 11 published source units exactly match the frozen input. Independent offline compilation twice retained frozen creation/runtime/ABI parity.
+- Canonical Mainnet block `28920241`, hash `0xae1aad54151aa95c493ab07c70cf779133126048e5fe4ab7550bc9fc19d29a61`, rechecked unchanged: all seven FLOW immutable slots patched to canonical FLOW; actual 5,615-byte runtime exactly matches. Actual runtime keccak `0xdc9d2b315367b7a56fb3b9f4115ff81f8e954797caadad8d61e77399a16a75b1`.
+- Deployment transaction `0xc126769fdbe9688ba96c30a54a45d022a1f73ab6539cb80149260636cb1d0252` succeeded at block `28872174`; creation calldata exactly matches the frozen creation bytecode plus FLOW / temporary owner / publisher constructor arguments.
+- Block-pinned state: FLOW `0xcaaB50F36252a57529AFeF651fa6B9f9281917fF`; owner `0x851275569923C62a2EF962EC35bfBb8f1bCbf3dD`; publisher `0x971E7790FE6C8F77dc666Bb05D4aedA362653f94`; pending owner zero; paused false; batch/daily caps 10,000 FLOW each; balance/free balance 10,000 FLOW; liabilities zero; max recipients 100.
+- This verification submitted public Solidity sources only: no signing, key access, financial transaction, deployment, funding, role change, unpause or cutover occurred. Source verification is not a new security audit or authorization to activate rewards.
