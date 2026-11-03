@@ -64,8 +64,24 @@ export function RewardsVaultV2Tab({wallet}:{wallet?:string}){
         {hash&&<a className="mt-2 inline-flex items-center gap-1 text-sm text-primary" href={`https://explorer.botchain.ai/tx/${hash}`} target="_blank" rel="noopener noreferrer">View transaction<ExternalLink className="h-3 w-3"/></a>}
         {message&&<p role="status" className="mt-3 break-words text-sm text-warning">{message}</p>}
       </div>
-      <div className="border-t border-hairline pt-3"><h3 className="text-sm font-bold">New-award cutover review</h3><p className="mt-2 text-sm text-muted">Cutover: {q.data.review.cutoverAt??'Not authorized'} · {q.data.review.sourceCount} canonical source awards · {q.data.review.sourcePoints} funded PTS</p><p className="mt-2 text-sm text-muted">All earlier awards, Rounds #1–4 and existing V1 obligations remain in V1.</p><ul className="mt-2 space-y-1 text-sm text-warning">{q.data.blockers.map(b=><li key={b}>{b.replaceAll('_',' ')}</li>)}</ul></div>
+      <div className="border-t border-hairline pt-3"><h3 className="text-sm font-bold">New-award cutover review</h3><p className="mt-2 text-sm text-muted">Cutover: {q.data.review.cutoverAt??'Not authorized'} · {q.data.review.sourceCount} canonical source awards · {q.data.review.sourcePoints} funded PTS</p><p className="mt-2 text-sm text-muted">All earlier awards, Rounds #1–4 and existing V1 obligations remain in V1.</p><ul className="mt-2 space-y-1 text-sm text-warning">{q.data.blockers.map(b=><li key={b}>{b.replaceAll('_',' ')}</li>)}</ul>
+        {!q.data.review.cutoverAt&&<CutoverForm busy={busy} onSubmit={(address,cutoverAt)=>void perform(async()=>{await command({action:'authorize_future_cutover',address,cutoverAt});setMessage('Vault registered and cutover authorized. New awards after this time go to Vault V2.');})}/>}
+      </div>
       <div className="border-t border-hairline pt-3"><h3 className="text-sm font-bold">Existing program funding</h3>{q.data.programs.map(p=><p key={p.program_id} className="mt-2 break-words text-sm text-muted">{p.program_id}: {p.funding_verified?'Backing verified':'Backing not verified'} · {p.status} · {p.reserved_points.toLocaleString()} reserved PTS</p>)}</div>
     </>}
   </section>;
+}
+
+const DEPLOYED_VAULT='0x91f70c91b4273d0129abc3f14373fbb10ca59006';
+function CutoverForm({busy,onSubmit}:{busy:boolean;onSubmit:(address:string,cutoverAt:string)=>void}){
+  const [address,setAddress]=useState(DEPLOYED_VAULT);
+  const [minutes,setMinutes]=useState('10');
+  const valid=/^0x[0-9a-fA-F]{40}$/.test(address)&&Number(minutes)>=2;
+  return <div className="mt-3 space-y-2 rounded-md border border-hairline p-3">
+    <p className="text-sm font-semibold">Register vault &amp; authorize cutover (Super Admin)</p>
+    <p className="text-xs text-muted">The server checks the live contract, FLOW token, owner, publisher and limits before saving. Your bound wallet must be connected.</p>
+    <Input aria-label="Vault contract address" value={address} onChange={e=>setAddress(e.target.value.trim())} disabled={busy}/>
+    <label className="flex items-center gap-2 text-xs text-muted">Start in <Input aria-label="Minutes until cutover" className="w-20" inputMode="numeric" value={minutes} onChange={e=>setMinutes(e.target.value.replace(/\D/g,''))} disabled={busy}/> minutes</label>
+    <Button disabled={busy||!valid} onClick={()=>onSubmit(address,new Date(Date.now()+Number(minutes)*60_000).toISOString())}><FileCheck/>Register &amp; authorize</Button>
+  </div>;
 }
