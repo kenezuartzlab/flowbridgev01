@@ -18,6 +18,7 @@
 - CA/BOT and Any pair use UniversalSwapCard for live quoting, review and execution; fixed-pair mode does not overwrite the Any pair draft. Why: separate display quotes drifted from executable routes.
 - Transaction confirmations use TransactionModalFrame; bridge display milestones use trackingState with authoritative receipt evidence, never elapsed-time or balance-delta settlement. Why: visible actions and truthful tracking must not alter execution.
 - Bridge recipient defaults and address-specific acknowledgement use destinationSafety.ts in the existing confirmation flow; overrides are scoped to the connected wallet. Why: stale wallet destinations and edits must never bypass explicit recipient review.
+- Completed bridge dismissal clears only the matching active tracking context via clearCompletedBridgeTracking after verified delivery; pending transfers and transaction history remain untouched. Why: finished transfers must not reappear after refresh or erase newer submissions.
 
 - Router V4 changes ship as new frozen candidate directories under contracts/production/ (never edit a deployed candidate); app ABIs are generated from the compiled artifact into routerV4Abi.generated.ts and guarded by a parity test. Why: hand-written ABIs drifted from deployed bytecode.
 - Route execution class (atomic V4 vs staged) is decided only in src/lib/swap/executionCapability.ts behind per-chain flags. Why: one place controls promotion.

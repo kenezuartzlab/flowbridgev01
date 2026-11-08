@@ -100,7 +100,7 @@ import { ConfirmDestinationModal } from './modals/ConfirmDestinationModal';
 import { resolveBridgeDestination } from './lib/bridge/destinationSafety';
 import { BotGasNoticeModal } from './modals/BotGasNoticeModal';
 import { RealtimeBridgeTrackerModal } from './modals/RealtimeBridgeTrackerModal';
-import { loadBridgeTracking, saveBridgeTracking, type BridgeTrackingContext } from './lib/bridge/trackingState';
+import { loadBridgeTracking, saveBridgeTracking, clearCompletedBridgeTracking, type TrackingEvidence, type BridgeTrackingContext } from './lib/bridge/trackingState';
 import { Button } from './components/ui/button';
 import { formatUsd, formatBalance4 } from './lib/format';
 import { toFriendlyError } from './lib/friendlyError';
@@ -1221,6 +1221,23 @@ export default function App() {
     saveLocalSession(updated);
     setUsdtAmount('');
     setErrorMessage(null);
+  };
+
+  const completeBridgeTracking = (hash: string, evidence: TrackingEvidence) => {
+    if (bridgeTracking && bridgeTracking.txHash.toLowerCase() !== hash.toLowerCase()) return;
+    if (!clearCompletedBridgeTracking(hash, evidence)) return;
+    setBridgeTracking(null);
+    setTrackingPersisted(false);
+    setIsRealtimeTrackerOpen(false);
+    setTrackerAmount('');
+    setTrackerRecipientAddress('');
+    pendingTrackingContext.current = null;
+    if (receiptTxType === 'bridge' && receiptTxHash.toLowerCase() === hash.toLowerCase()) {
+      setIsReceiptModalOpen(false);
+      setReceiptTxHash('');
+    }
+    // Clear only this submitted bridge, leaving swap steps and any newer bridge untouched.
+    if (session.step3.tx_hash?.toLowerCase() === hash.toLowerCase()) resetStep3();
   };
 
   const resetAllSteps = () => {
@@ -3245,6 +3262,7 @@ export default function App() {
             <div className="mt-4">
               <BridgeStatusPanel
                 txHash={bridgeTracking?.txHash ?? session.step3.tx_hash}
+                onComplete={completeBridgeTracking}
                 bridgeDirection={(bridgeTracking?.direction as import('./lib/bridge/useBridgeTracking').TrackingDirection | undefined) ?? bridgeDirection}
                 isMainnet={bridgeTracking?.isMainnet ?? isMainnet}
                 sourceExplorerPrefix={bridgeTracking?.explorerPrefix ?? bridgeSrcExplorerPrefix}
@@ -3531,6 +3549,7 @@ export default function App() {
       {isRealtimeTrackerOpen && (
         <RealtimeBridgeTrackerModal
           isOpen={isRealtimeTrackerOpen}
+          onComplete={completeBridgeTracking}
           onClose={() => setIsRealtimeTrackerOpen(false)}
           fromChain={bridgeTracking?.fromChain ?? bridgeFromName}
           toChain={bridgeTracking?.toChain ?? bridgeToName}

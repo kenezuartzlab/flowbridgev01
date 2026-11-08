@@ -67,3 +67,14 @@ export function storedDestinationFor(txHash: string): string | undefined {
   const c = loadBridgeTracking();
   return c && c.txHash.toLowerCase() === txHash.toLowerCase() ? c.destinationTxHash : undefined;
 }
+
+/** Clear only a verified completed active receipt; never erase a newer pending bridge. */
+export function clearCompletedBridgeTracking(txHash: string, evidence: TrackingEvidence): boolean {
+  if (evidence.txHash?.toLowerCase() !== txHash.toLowerCase() || !trackingState(evidence, 0).received) return false;
+  const stored = loadBridgeTracking();
+  if (stored && stored.txHash.toLowerCase() !== txHash.toLowerCase()) return false;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+    return window.localStorage.getItem(STORAGE_KEY) === null;
+  } catch { return false; }
+}

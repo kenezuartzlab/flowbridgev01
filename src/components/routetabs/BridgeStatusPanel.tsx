@@ -8,6 +8,8 @@ import { DEST_EXPLORER_TX } from '@/lib/bridge/bridgeDelivery';
 import type { PendingAdapterBridge } from '../../store/routeSession';
 import { useAdapterStatus } from '../../lib/bridge/useAdapterStatus';
 import { useAdapterRefundClaim } from '../../lib/bridge/useAdapterRefundClaim';
+import { Button } from '@/components/ui/button';
+import type { TrackingEvidence } from '@/lib/bridge/trackingState';
 
 
 type Phase = 'pending' | 'mining' | 'confirming' | 'success' | 'failed';
@@ -25,6 +27,7 @@ interface BridgeStatusPanelProps {
   destExplorerPrefix: string;
   /** Phase 5A: when set, the Adapter status branch renders instead. */
   adapterSession?: PendingAdapterBridge | null;
+  onComplete?: (txHash: string, evidence: TrackingEvidence) => void;
 }
 
 const REQUIRED_CONFIRMATIONS: Record<number, number> = {
@@ -201,6 +204,7 @@ export function BridgeStatusPanel({
   sourceExplorerPrefix,
   destExplorerPrefix,
   adapterSession,
+  onComplete,
 }: BridgeStatusPanelProps) {
   const state = useBridgeTracking({ active: !!txHash && !adapterSession, txHash, direction: bridgeDirection, isMainnet });
   // Same hook and evidence as the tracker modal.
@@ -214,5 +218,6 @@ export function BridgeStatusPanel({
     {state.readError && <p className="text-warning">Chain read unavailable — retrying without changing the last confirmed status.</p>}
     <a className="text-primary inline-flex gap-1 items-center" href={`${sourceExplorerPrefix}${txHash}`} target="_blank" rel="noopener noreferrer">Origin receipt <ExternalLink className="w-3 h-3" /></a>
     {state.sourceDone && <a className="block text-primary" href={destExplorerPrefix} target="_blank" rel="noopener noreferrer">Destination explorer</a>}
+    {state.received && onComplete && <Button variant="outline" className="w-full" onClick={() => onComplete(txHash, state.evidence)}>Done</Button>}
   </div>;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { trackingState, shouldDismissBridgeReceipt, isCurrentTrackingResult, saveBridgeTracking, loadBridgeTracking } from './trackingState';
+import { trackingState, shouldDismissBridgeReceipt, isCurrentTrackingResult, saveBridgeTracking, loadBridgeTracking, clearCompletedBridgeTracking } from './trackingState';
 const origin = { txHash: '0xorigin', source: 'success' as const, sourceConfirmedAt: 1000, providerRequired: true };
 describe('evidence-only bridge presentation', () => {
   it('restores submitted identity without treating browser storage as receipt proof', () => {
@@ -41,5 +41,35 @@ describe('uncorrelated arrivals', () => {
     expect(state.received).toBe(false);
     expect(state.phase).toBe('awaiting_relay');
     expect(state.relayElapsedSeconds).toBeNull();
+  });
+});
+
+describe('completed active bridge cleanup', () => {
+  const context = { txHash: '0x' + 'a'.repeat(64), direction: 'BOT_TO_BNB', isMainnet: true, amount: '10', recipient: '0x' + 'b'.repeat(40), fromChain: 'BOT Chain', toChain: 'BNB Chain', explorerPrefix: 'https://scan.botchain.ai/tx/' };
+  const completed = { txHash: context.txHash, source: 'success' as const, destinationConfirmed: true, destinationTokenArrival: true, destinationTxHash: '0x' + 'c'.repeat(64) };
+  function withStorage(run: () => void) {
+    const storage = new Map<string, string>();
+    vi.stubGlobal('window', { localStorage: { setItem: (k: string, v: string) => storage.set(k, v), getItem: (k: string) => storage.get(k) ?? null, removeItem: (k: string) => storage.delete(k) } });
+    try { saveBridgeTracking(context); run(); } finally { vi.unstubAllGlobals(); }
+  }
+  it('removes a completed receipt so refresh cannot restore it', () => withStorage(() => {
+    expect(clearCompletedBridgeTracking(context.txHash, completed)).toBe(true);
+    expect(loadBridgeTracking()).toBeNull();
+  }));
+  it('keeps pending, failed, unsupported and unverified destination receipts', () => withStorage(() => {
+    for (const patch of [{ source: 'pending' as const }, { source: 'failed' as const }, { destinationConfirmed: false }, { destinationTokenArrival: false }, { destinationTxHash: undefined }, { txHash: 'other' }]) {
+      expect(clearCompletedBridgeTracking(context.txHash, { ...completed, ...patch })).toBe(false);
+      expect(loadBridgeTracking()).toEqual(context);
+    }
+  }));
+  it('cannot clear a newer pending bridge from a stale completion', () => withStorage(() => {
+    const newer = { ...context, txHash: '0x' + 'd'.repeat(64) };
+    saveBridgeTracking(newer);
+    expect(clearCompletedBridgeTracking(context.txHash, completed)).toBe(false);
+    expect(loadBridgeTracking()).toEqual(newer);
+  }));
+  it('keeps cleanup unresolved when browser storage is blocked', () => {
+    vi.stubGlobal('window', { localStorage: { getItem: () => { throw new Error('blocked'); }, removeItem: () => { throw new Error('blocked'); } } });
+    try { expect(clearCompletedBridgeTracking(context.txHash, completed)).toBe(false); } finally { vi.unstubAllGlobals(); }
   });
 });

@@ -11,14 +11,19 @@ interface RealtimeBridgeTrackerModalProps {
   amount: string; symbol: string; recipientAddress: string; txHash?: string;
   txUrlPrefix?: string; onReset: () => void; bridgeDirection?: TrackingDirection;
   isMainnet?: boolean; walletState?: TrackingEvidence['walletState']; errorMessage?: string | null;
+  onComplete: (txHash: string, evidence: TrackingEvidence) => void;
 }
 function NetworkMark({ chain }: { chain: string }) {
   if (chain.toLowerCase().includes('bot')) return <span className="block h-9 w-9 overflow-hidden shrink-0"><img src={officialBotLogo.url} alt="BOT Chain" className="h-9 w-[185px] max-w-none" /></span>;
   if (/bnb|bsc|binance/i.test(chain)) return <img src="/bnb-logo.png" alt="BNB Chain" className="h-9 w-9 rounded-full" />;
   return <span className="font-bold text-primary">{chain}</span>;
 }
-export function RealtimeBridgeTrackerModal({ isOpen, onClose, fromChain, toChain, amount, symbol, recipientAddress, txHash, txUrlPrefix = '', onReset, bridgeDirection, isMainnet = true, walletState, errorMessage }: RealtimeBridgeTrackerModalProps) {
+export function RealtimeBridgeTrackerModal({ isOpen, onClose, fromChain, toChain, amount, symbol, recipientAddress, txHash, txUrlPrefix = '', onReset, onComplete, bridgeDirection, isMainnet = true, walletState, errorMessage }: RealtimeBridgeTrackerModalProps) {
   const state = useBridgeTracking({active:isOpen, txHash, direction:bridgeDirection, isMainnet, walletState, recipient: recipientAddress, amount});
+  const close = () => {
+    if (state.received && txHash) onComplete(txHash, state.evidence);
+    onClose();
+  };
   if (!isOpen) return null;
   const labels: Record<string, string> = {
     awaiting:'Awaiting your confirmation', canceled:'Canceled — you can retry', error:'Confirmation unresolved — review and retry',
@@ -26,8 +31,8 @@ export function RealtimeBridgeTrackerModal({ isOpen, onClose, fromChain, toChain
     awaiting_relay:'Source confirmed — waiting for validator release', relaying:'Release submitted — confirming', received:`Completed — ${symbol} received`,
   };
   const milestone = (label: string, done: boolean, loading: boolean) => <div className="flex justify-between items-start gap-3 text-xs"><span>{label}</span>{done ? <Check aria-label="Confirmed" className="w-4 h-4 text-primary shrink-0" /> : loading ? <Loader2 aria-label="Pending" className="w-4 h-4 text-muted animate-spin shrink-0" /> : <span aria-label="Not confirmed" className="text-muted">—</span>}</div>;
-  return <TransactionModalFrame id="realtime_bridge_tracker" title="Track your transaction" onClose={onClose}
-    footer={<Button variant="outline" className="w-full h-11" onClick={onClose}>Keep tracking in Bridge</Button>}>
+  return <TransactionModalFrame id="realtime_bridge_tracker" title="Track your transaction" onClose={close}
+    footer={<Button variant="outline" className="w-full h-11" onClick={close}>{state.received ? 'Done' : 'Keep tracking in Bridge'}</Button>}>
     <div className="flex items-center justify-between gap-3 text-xs">
       <div className="flex items-center gap-2 min-w-0"><NetworkMark chain={fromChain} /><span>{fromChain}</span></div>
       <span>→</span><div className="flex items-center gap-2 min-w-0"><NetworkMark chain={toChain} /><span>{toChain}</span></div>
@@ -53,6 +58,6 @@ export function RealtimeBridgeTrackerModal({ isOpen, onClose, fromChain, toChain
       {state.evidence.destinationTxHash && <p className="break-all">Destination hash: {state.evidence.destinationTxHash}</p>}
       {txHash && <a href={`${txUrlPrefix}${txHash}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 py-2 text-primary">Origin explorer <ExternalLink className="w-3 h-3" /></a>}
     </details>
-    {['canceled','error','failed','received'].includes(state.phase) && <Button variant="outline" onClick={() => { onReset(); onClose(); }} className="w-full">{state.received ? 'New bridge' : 'Return to retry'}</Button>}
+    {['canceled','error','failed','received'].includes(state.phase) && <Button variant="outline" onClick={() => { if (state.received) close(); else { onReset(); onClose(); } }} className="w-full">{state.received ? 'New bridge' : 'Return to retry'}</Button>}
   </TransactionModalFrame>;
 }
