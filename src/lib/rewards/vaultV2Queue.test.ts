@@ -1,0 +1,10 @@
+import { beforeEach, it, expect, vi } from 'vitest';
+const m=vi.hoisted(()=>({reserve:vi.fn()}));
+vi.mock('./vaultV2Allocator.server',()=>({reserveVaultV2Awards:m.reserve}));
+import { queueVerifiedVaultAwards } from './vaultV2Queue.server';
+const db=(on:boolean,financial=true)=>({from:()=>({select:()=>({maybeSingle:async()=>({data:{verified_queue_enabled:on,financial_enabled:financial},error:null})})})} as never);
+beforeEach(()=>vi.resetAllMocks());
+it('default OFF never reserves or sends',async()=>{expect(await queueVerifiedVaultAwards(db(false))).toEqual({state:'OFF'});expect(m.reserve).not.toHaveBeenCalled();});
+it('financial suspension stops automatic reservation',async()=>{expect(await queueVerifiedVaultAwards(db(true,false))).toEqual({state:'OFF'});expect(m.reserve).not.toHaveBeenCalled();});
+it('approved queue prepares with no per-user approval or signing',async()=>{m.reserve.mockResolvedValue({batch_id:'batch'});const d=db(true);expect(await queueVerifiedVaultAwards(d)).toEqual({state:'AWAITING_MANUAL_PUBLISHER'});expect(m.reserve).toHaveBeenCalledWith(d);});
+it('scan continuation is not false empty',async()=>{m.reserve.mockResolvedValue({continuation:{after:'id',scannedRows:10000}});expect(await queueVerifiedVaultAwards(db(true))).toEqual({state:'CONTINUE',continuation:{after:'id',scannedRows:10000}});});

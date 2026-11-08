@@ -13,12 +13,14 @@ CREATE TABLE app_admins(email text,role text,disabled bool);
 CREATE TABLE flow_points_ledger(id uuid PRIMARY KEY,user_id uuid,policy_version text,reason text,points int,base_points int,verified_usd numeric,chain_id int,tx_hash text,source_log_index int,activity_key text,wallet_address text,day_key text,metadata jsonb,created_at timestamptz DEFAULT now(),verified_activity_id text,program_id text,reservation_id uuid,funding_state text,referrer_id uuid,provenance_state text);
 CREATE TABLE verified_activities(activity_id text,status text,source_chain_id int,source_tx_hash text,source_log_index int,user_wallet text);
 CREATE TABLE reward_reservations(reservation_id uuid,ledger_id uuid,user_id uuid,wallet_address text,points int,program_id text);
+CREATE TABLE referral_milestone_awards(referrer_id uuid,referee_id uuid,milestone text,points int);
+CREATE TABLE reward_evidence_reviews(id uuid,ledger_id uuid,points int,status text,policy_id text,decided_by uuid,proposed_by uuid,decided_by_email text,proposed_by_email text);
 CREATE TABLE reward_budgets(program_id text,total_points bigint,reserved_points bigint,status text,funding_verified bool);
 CREATE TABLE reward_retired_drafts(batch_id uuid);
-CREATE TABLE reward_settlement_batches(id uuid PRIMARY KEY,chain_id int,leaves jsonb,total_wei numeric,publication_verified_at timestamptz,created_at timestamptz DEFAULT now());
+CREATE TABLE reward_settlement_batches(id uuid PRIMARY KEY,epoch_id int,root text,chain_id int,leaves jsonb,total_wei numeric,publication_verified_at timestamptz,created_at timestamptz DEFAULT now());
 CREATE TABLE reward_payout_approvals(id uuid,user_id uuid,wallet text,points int,status text,settlement_batch_id uuid,created_at timestamptz DEFAULT now());
 CREATE TABLE reward_publish_attempts(batch_id uuid,phase text,retry_safe bool);
-CREATE TABLE admin_audit_events(actor_user_id uuid,actor_email text,actor_role text,object_type text,object_id text,action text,new_value jsonb);
+CREATE TABLE admin_audit_events(actor_user_id uuid,actor_email text,actor_role text,object_type text,object_id text,action text,new_value jsonb,reason text);
 CREATE FUNCTION reward_payout_evidence_hash() RETURNS text LANGUAGE sql AS $$SELECT 'evidence'::text$$;
 '''
 try:
@@ -31,6 +33,9 @@ try:
  extra=[pathlib.Path(os.environ['VAULT_EXTRA_SQL'])] if os.environ.get('VAULT_EXTRA_SQL') else sorted((P/'drizzle/migrations').glob('*_vault_v2_scale_and_hash_recovery.sql'))
  assert extra,'scale/hash recovery migration missing'
  for f in extra: r=sql(f.read_text(),False); assert r.returncode==0,r.stderr
+ sql((P/'drizzle/migrations/0056_legacy_carryover_v2_20261108.sql').read_text())
+ sql((P/'drizzle/migrations/0057_legacy_carryover_completion.sql').read_text())
+ sql((P/'drizzle/migrations/0058_carryover_acceptance_hardening.sql').read_text())
  print('SQL install PASS')
  w='0x'+'1'*40;pub='0x'+'2'*40;contract='0x'+'3'*40;code='0x'+'4'*64;u='00000000-0000-0000-0000-000000000001';l='00000000-0000-0000-0000-000000000002';r='00000000-0000-0000-0000-000000000003';batch='0x'+'a'*64
  sql(f"INSERT INTO profiles VALUES('{u}','fixture@test','{w}','2026-11-02T00:00:00Z',100,0,0);INSERT INTO auth.users VALUES('{u}',now(),NULL);INSERT INTO app_admins VALUES('fixture@test','super_admin',false);INSERT INTO reward_budgets VALUES('SIGNUP_BONUS',1000,100,'ACTIVE',true);")
@@ -162,6 +167,30 @@ try:
  assert sql(acq2(9),False).returncode==0
  print('Release only on canonical consumed nonce with unprocessed batch PASS')
 
+ # One-time legacy partial carryover: fixture source 1314, V1 commitment 1122.
+ cu='00000000-0000-0000-0000-000000000099';cl='00000000-0000-0000-0000-000000000098';cw='0x'+'9'*40
+ sql(f"INSERT INTO profiles VALUES('{cu}','carry@test','{cw}',now(),1314,0,0);INSERT INTO auth.users VALUES('{cu}',now(),NULL);INSERT INTO app_admins VALUES('carry@test','super_admin',false);INSERT INTO flow_points_ledger(id,user_id,policy_version,reason,points,wallet_address,activity_key,program_id,funding_state,provenance_state,created_at) VALUES('{cl}','{cu}','LEGACY','CORE_SWAP',1314,'{cw}','legacy:carry','CORE_SWAP','UNFUNDED','UNVERIFIED',now()-interval '1 year');INSERT INTO reward_settlement_batches(id,chain_id,leaves,publication_verified_at,created_at) VALUES(gen_random_uuid(),677,'[{{\"account\":\"{cw}\",\"amount\":\"1122000000000000000000\"}}]',now(),now()-interval '1 year');")
+ preview=json.loads(sql('SELECT legacy_carryover_preview();').stdout)
+ assert any(x['ledgerId']==cl and x['points']==192 and x['source']=='OWNER_GOODWILL' for x in preview['items'])
+ ph=preview['snapshotHash']
+ assert sql(f"SELECT stage_legacy_carryover('{ph}','{pu}','{pub}');",False).returncode
+ sid=sql(f"SELECT stage_legacy_carryover('{ph}','{cu}','{cw}');").stdout.strip()
+ assert sql(f"SELECT stage_legacy_carryover('{ph}','{cu}','{cw}');").stdout.strip()==sid
+ verified=preview['verifiedPoints'];goodwill=preview['goodwillPoints']
+ e=json.dumps({'verification':'FROZEN_RUNTIME_CANONICAL_TOKEN_OWNER_EOA_EXCEPTION','chainId':677,'contract':contract,'codeHash':code,'publisher':pub,'freeWei':'1000000000000000000000000','batchCapWei':'1000000000000000000000','dailyCapWei':'2000000000000000000000','blockHash':code,'v1':{'chainId':677,'blockHash':code,'epochCount':0,'epochs':[]}})
+ # unresolved existing V1 publication blocks confirmation, then resolved fixture permits exact approval.
+ q=f"SELECT confirm_legacy_carryover('{sid}','{ph}',{verified},{goodwill},'{cu}','{cw}',1000000000000000000000000,'{e}',now());"
+ assert sql(q,False).returncode
+ sql("UPDATE reward_publish_attempts SET phase='CONFIRMED_VERIFIED',retry_safe=true;")
+ assert sql(q,False).returncode # stale commitment hash
+ preview=json.loads(sql('SELECT legacy_carryover_preview();').stdout);ph=preview['snapshotHash'];sid=sql(f"SELECT stage_legacy_carryover('{ph}','{cu}','{cw}');").stdout.strip()
+ q=f"SELECT confirm_legacy_carryover('{sid}','{ph}',{preview['verifiedPoints']},{preview['goodwillPoints']},'{cu}','{cw}',1000000000000000000000000,'{e}',now());"
+ with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex: approvals=list(ex.map(lambda _:sql(q,False),range(8)))
+ assert sum(x.returncode==0 for x in approvals)==1,[x.stderr for x in approvals]
+ assert sql(f"SELECT points FROM vault_v2_canonical_sources(ARRAY['{cl}'::uuid],false);").stdout.strip()=='192'
+ assert sql(f"UPDATE flow_points_ledger SET provenance_state='VERIFIED' WHERE id='{cl}';",False).returncode
+ assert sql(f"INSERT INTO reward_payout_approvals VALUES(gen_random_uuid(),'{cu}','{cw}',1,'CONFIRMED',NULL,now()-interval '2 years');",False).returncode
+ print('Carryover exact partial 192, operator denial, staging replay, stale V1 hash, eight-way single approval, immutable provenance and V1 fence PASS')
 finally:
  local('pg_ctl','-D',data,'-m','immediate','stop',stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
  shutil.rmtree(base,ignore_errors=True)

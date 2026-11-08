@@ -13,7 +13,7 @@ export type VaultAward = {
 };
 export function eligibleVaultAward(a: VaultAward): boolean {
   return a.points > 0n && a.verified && a.reconciled && a.funded && a.authorized && a.bindingMatches && a.mainnet && a.newAfterCutover && !a.allocated
-    && ['SIGNUP_BONUS','CORE_SWAP'].includes(a.program)
+    && ['SIGNUP_BONUS','CORE_SWAP','LEGACY_VERIFIED','OWNER_GOODWILL'].includes(a.program)
     && /^0x[0-9a-fA-F]{40}$/.test(a.wallet) && BigInt(a.wallet) !== 0n;
 }
 export function prepareVaultBatch(awards: VaultAward[], freeWei: bigint, batchCap: bigint, dailyRemaining: bigint) {

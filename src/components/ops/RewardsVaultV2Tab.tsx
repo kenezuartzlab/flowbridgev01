@@ -8,7 +8,8 @@ import { publisherIdentity, signVaultBatch, type PublisherBatch, type PublisherI
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RefreshCw, ExternalLink, FileCheck, PenLine } from 'lucide-react';
-type Status={enabled:boolean;release:string;blockers:string[];review:{sourceCount:number;sourcePoints:number;cutoverAt:string|null};configuration:{contract_address:string|null;code_hash:string|null};live:Record<string,string|boolean>|null;programs:{program_id:string;funding_verified:boolean;status:string;reserved_points:number}[];batches:PublisherBatch[];attempts:PublisherIntent[];hashCandidates?:{operation_id:string;tx_hash:string;source:string;status:string}[]};
+import type { CarryoverReview } from '@/lib/rewards/legacyCarryover.server';
+type Status={carryover:CarryoverReview;enabled:boolean;release:string;blockers:string[];review:{sourceCount:number;sourcePoints:number;cutoverAt:string|null};configuration:{contract_address:string|null;code_hash:string|null};live:Record<string,string|boolean>|null;programs:{program_id:string;funding_verified:boolean;status:string;reserved_points:number}[];batches:PublisherBatch[];attempts:PublisherIntent[];hashCandidates?:{operation_id:string;tx_hash:string;source:string;status:string}[]};
 type Review={batch:PublisherBatch;gas:string;estimatedGasWei:string;liabilities:string;free:string;calldata:Hex};
 const flow=(n:string|number)=>formatUnits(BigInt(n),18);
 export function RewardsVaultV2Tab({wallet}:{wallet?:string}){
@@ -64,7 +65,8 @@ export function RewardsVaultV2Tab({wallet}:{wallet?:string}){
         {hash&&<a className="mt-2 inline-flex items-center gap-1 text-sm text-primary" href={`https://explorer.botchain.ai/tx/${hash}`} target="_blank" rel="noopener noreferrer">View transaction<ExternalLink className="h-3 w-3"/></a>}
         {message&&<p role="status" className="mt-3 break-words text-sm text-warning">{message}</p>}
       </div>
-      <div className="border-t border-hairline pt-3"><h3 className="text-sm font-bold">New-award cutover review</h3><p className="mt-2 text-sm text-muted">Cutover: {q.data.review.cutoverAt??'Not authorized'} · {q.data.review.sourceCount} canonical source awards · {q.data.review.sourcePoints} funded PTS</p><p className="mt-2 text-sm text-muted">All earlier awards, Rounds #1–4 and existing V1 obligations remain in V1.</p><ul className="mt-2 space-y-1 text-sm text-warning">{q.data.blockers.map(b=><li key={b}>{b.replaceAll('_',' ')}</li>)}</ul>
+      <CarryoverApproval review={q.data.carryover} busy={busy} onStage={()=>void perform(async()=>{await command({action:'stage_carryover',snapshotHash:q.data?.carryover.snapshotHash});setMessage('Exact carryover snapshot staged. No payout or credit was sent.');})} onApprove={(goodwillBudget)=>void perform(async()=>{const c=q.data?.carryover;if(!c?.stagedId)return;await command({action:'confirm_carryover',snapshotId:c.stagedId,snapshotHash:c.snapshotHash,verifiedPoints:c.verifiedPoints,goodwillBudget});setMessage('Carryover budgets and verified-reward queue approved. Publisher signature still required; no tokens sent.');})}/>
+      <div className="border-t border-hairline pt-3"><h3 className="text-sm font-bold">New-award cutover review</h3><p className="mt-2 text-sm text-muted">Cutover: {q.data.review.cutoverAt??'Not authorized'} · {q.data.review.sourceCount} canonical source awards · {q.data.review.sourcePoints} funded PTS</p><p className="mt-2 text-sm text-muted">Rounds #1–4 and existing V1 commitments stay unchanged. Approved unpaid carryover uses its separate recorded budget.</p><ul className="mt-2 space-y-1 text-sm text-warning">{q.data.blockers.map(b=><li key={b}>{b.replaceAll('_',' ')}</li>)}</ul>
         {!q.data.review.cutoverAt&&<CutoverForm busy={busy} onSubmit={(address,cutoverAt)=>void perform(async()=>{await command({action:'authorize_future_cutover',address,cutoverAt});setMessage('Vault registered and cutover authorized. New awards after this time go to Vault V2.');})}/>}
       </div>
       <SettingsForm busy={busy} contract={q.data.configuration.contract_address??DEPLOYED_VAULT} publisher={typeof q.data.live?.publisher==='string'?q.data.live.publisher:''} onSubmit={v=>void perform(async()=>{await command({action:'sync_settings',...v});setMessage('Settings match the live vault and were saved. The change is recorded in the audit log.');})}/>
@@ -74,6 +76,22 @@ export function RewardsVaultV2Tab({wallet}:{wallet?:string}){
 }
 
 const DEPLOYED_VAULT='0x91f70c91b4273d0129abc3f14373fbb10ca59006';
+function CarryoverApproval({review:c,busy,onStage,onApprove}:{review:CarryoverReview;busy:boolean;onStage:()=>void;onApprove:(budget:number)=>void}){
+  const [budget,setBudget]=useState(''),[ack,setAck]=useState(false);
+  useEffect(()=>{setBudget('');setAck(false);},[c.snapshotHash]);
+  return <div className="space-y-3 border-t border-hairline pt-3">
+    <h3 className="text-sm font-bold">Legacy carryover · Super Admin</h3>
+    <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">{[['Verified unpaid FLOW',c.verifiedPoints],['Separate goodwill candidates',c.goodwillPoints],['Funding required FLOW',flow(c.fundingRequiredWei)],['Wallets / source awards',`${c.wallets} / ${c.sourceCount}`],['V1 paid / committed excluded',c.bins.EXCLUDED_PAID_V1?.points??0],['Already V2 excluded',c.bins.EXCLUDED_ALREADY_V2?.points??0],['Permanently excluded / non-economic',c.bins.EXCLUDED_NON_ECONOMIC?.points??0],['Identity review held',c.bins.NEEDS_IDENTITY?.points??0]].map(([k,v])=><div key={k}><dt className="text-xs text-muted">{k}</dt><dd className="font-semibold">{v}</dd></div>)}</dl>
+    <p className="break-all text-xs text-muted">Snapshot: {c.snapshotHash}</p>
+    <p className="text-xs text-warning">{c.confirmed?'Budget approved · manual publisher signature required':c.fullyBacked?'Full vault backing verified, after pending batches':'Approval blocked · full backing or live verification unavailable'}</p>
+    <p className="text-xs text-muted">Verified future queue: {c.queueEnabled?'ON · funded canonical awards only':'OFF · awaiting explicit budget approval'}</p>
+    {!c.confirmed&&<>{!c.stagedId?<Button variant="outline" disabled={busy} onClick={onStage}><FileCheck/>Stage exact snapshot</Button>:<>
+      <label className="block text-xs text-muted">Separate goodwill budget (FLOW)<Input aria-label="Separate goodwill budget (FLOW)" inputMode="numeric" value={budget} onChange={e=>setBudget(e.target.value.replace(/\D/g,''))} disabled={busy}/></label>
+      <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={ack} onChange={e=>setAck(e.target.checked)} disabled={busy}/><span>Approve this exact unpaid snapshot, its separate goodwill budget, and automatic funded verified-award queue. Goodwill is not verified swap activity. Publisher signs manually.</span></label>
+      <Button disabled={busy||!c.fullyBacked||!ack||budget===''||Number(budget)!==c.goodwillPoints} onClick={()=>onApprove(Number(budget))}><FileCheck/>Approve budget &amp; queue</Button>
+    </>}</>}
+  </div>;
+}
 function CutoverForm({busy,onSubmit}:{busy:boolean;onSubmit:(address:string,cutoverAt:string)=>void}){
   const [address,setAddress]=useState(DEPLOYED_VAULT);
   const [minutes,setMinutes]=useState('10');

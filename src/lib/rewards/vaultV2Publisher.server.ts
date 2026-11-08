@@ -13,15 +13,17 @@ export async function reviewVaultPublisher(db:DB,actor:AdminContext,batchId:Hex)
   const calldata=publisherCalldata(b);
   const alloc=await db.from('reward_economic_award_allocations').select('ledger_id,economic_award_id,user_id,wallet,points,destination').eq('vault_batch_id',batchId);
   if(alloc.error)throw new Error('Batch source, pause, backing or authorized cap changed.');
-  const [hash,recon,live]=await Promise.all([
+  const [hash,recon,live,sources]=await Promise.all([
     db.rpc('vault_v2_source_hash',{p_ids:b.source_ids}),
     import('./vaultV2Reconciliation.server').then(m=>m.loadVaultAccountReconciliation(db,(alloc.data??[]).map(x=>x.user_id))),
     readVaultV2(undefined,{enabled:true,chainId:677,address:c.contract_address as Address,codeHash:c.code_hash as Hex,publisher:c.publisher as Address,cutoverVerified:true}),
+    db.rpc('vault_v2_canonical_sources',{p_ids:b.source_ids,p_allocated:true}),
   ]);
   if(hash.error||hash.data!==b.snapshot_hash||alloc.error||alloc.data?.length!==b.source_ids.length||!live||live.paused||live.batchCap!==BigInt(c.batch_cap_wei)||live.dailyCap!==BigInt(c.daily_cap_wei)||BigInt(b.total_wei)>live.free||BigInt(b.total_wei)>live.batchCap||BigInt(b.total_wei)>live.dailyRemaining)throw new Error('Batch source, pause, backing or authorized cap changed.');
   const sums=new Map<string,bigint>();
   for(const a of alloc.data??[]) {
-    if(a.destination!=='VAULT_V2'||!b.source_ids.includes(a.ledger_id)||!recon.some(r=>r.userId===a.user_id&&r.wallet?.toLowerCase()===a.wallet&&['MATCH','EXPLAINED_DIFFERENCE'].includes(r.classification)&&r.eligibleRowIds.includes(a.ledger_id)))throw new Error('Award identity, fence or reconciliation changed.');
+    const legacy=!sources.error&&Array.isArray(sources.data)&&sources.data.some(s=>s.id===a.ledger_id&&s.economic_award_id===a.economic_award_id&&s.points===a.points&&s.wallet===a.wallet&&s.user_id===a.user_id&&s.policy_version==='LEGACY_CARRYOVER_V2_20261108'&&['LEGACY_VERIFIED','OWNER_GOODWILL'].includes(s.program_id));
+    if(a.destination!=='VAULT_V2'||!b.source_ids.includes(a.ledger_id)||(!legacy&&!recon.some(r=>r.userId===a.user_id&&r.wallet?.toLowerCase()===a.wallet&&['MATCH','EXPLAINED_DIFFERENCE'].includes(r.classification)&&r.eligibleRowIds.includes(a.ledger_id))))throw new Error('Award identity, fence or reconciliation changed.');
     sums.set(a.wallet,(sums.get(a.wallet)??0n)+BigInt(a.points)*10n**18n);
   }
   if(sums.size!==b.wallets.length||b.wallets.some((w,i)=>sums.get(w)!==BigInt(b.amounts_wei[i])))throw new Error('Immutable allocation changed.');

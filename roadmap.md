@@ -1,8 +1,9 @@
 # Owner-approved legacy carryover completion — 2026-11-08
-- [ ] Fix authenticated canonical staging/confirmation and immutable V1/V2 payment fences.
-- [ ] Integrate approved partial legacy sources, separate goodwill budget and manual publisher lifecycle.
-- [ ] Add Super Admin snapshot approval and default-OFF automatic funded verified queue.
-- [ ] Run reward/full/isolated SQL/security/mobile acceptance; no hosted financial confirmation or signing.
+- [x] Fix authenticated canonical staging/confirmation and immutable V1/V2 payment fences.
+- [x] Integrate approved partial legacy sources, separate goodwill budget and manual publisher lifecycle.
+- [x] Add Super Admin snapshot approval and default-OFF automatic funded verified queue.
+- [x] Full suite: 2,368 tests, 25 hostile EVM tests, isolated eight-way approval race and existing V2 concurrency checks pass; automatic build/typecheck OK; backend scan has no new findings. 390px signed-in wallet-required gate has no overflow.
+- [ ] Connected bound-wallet Super Admin carryover approval-screen acceptance: wallet connection unavailable in sandbox; no financial confirmation authorized. Publication withheld.
 
 # V37 — Continuous Points, Operator-Approved Claiming
 

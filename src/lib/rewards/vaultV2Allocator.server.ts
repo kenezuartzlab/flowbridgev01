@@ -31,10 +31,13 @@ export async function scanEligibleVaultSources(db: Admin, maxWei: bigint, after:
     const rows = r.data as VaultSourceRow[];
     if (rows.some((x, i) => (i ? x.id <= rows[i - 1].id : !!cursor && x.id <= cursor))) throw new Error('NON_DETERMINISTIC_SOURCE_ORDER');
     scanned += rows.length;
-    const missing = [...new Set(rows.map(x => x.user_id))].filter(u => !recon.has(u));
+    const missing = [...new Set(rows.filter(x => !['LEGACY_VERIFIED','OWNER_GOODWILL'].includes(x.program_id)).map(x => x.user_id))].filter(u => !recon.has(u));
     if (missing.length) for (const a of await reconcile(db, missing)) recon.set(a.userId, a);
     if (missing.some(u => !recon.has(u))) throw new Error('COMPLETE_RECONCILIATION_REQUIRED');
     for (const x of rows) {
+      // SQL proves the explicit immutable legacy budget, exact partial amount and current binding.
+      // Goodwill stays a distinct source; never promote the original ledger to VERIFIED.
+      if (['LEGACY_VERIFIED','OWNER_GOODWILL'].includes(x.program_id) && x.policy_version === 'LEGACY_CARRYOVER_V2_20261108') { eligible.push(x); continue; }
       const a = recon.get(x.user_id);
       if (a && ['MATCH', 'EXPLAINED_DIFFERENCE'].includes(a.classification) && a.eligibleRowIds.includes(x.id) && a.wallet?.toLowerCase() === x.wallet.toLowerCase()) eligible.push(x);
     }

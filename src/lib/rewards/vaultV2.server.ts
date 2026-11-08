@@ -21,8 +21,9 @@ export async function vaultV2OpsStatus() {
   const summary=Array.isArray(sources.data)?sources.data[0]:sources.data;
   const blockers=[...(!live?['MAINNET_DEPLOYMENT_NOT_VERIFIED']:[]),...(!cfg?.cutover_accepted?['OWNER_FUTURE_CUTOVER_AUTHORIZATION_REQUIRED']:[]),...(!live || live.free<=0n?['VAULT_PREFUNDING_REQUIRED']:[]),...(!live || live.batchCap<=0n?['ADMIN_AUTHORIZED_LIMITS_REQUIRED']:[])];
   const enabled=Boolean(cfg?.financial_enabled&&cfg.deployment_verified&&cfg.cutover_accepted&&cfg.authorized_by&&live&&!live.paused&&live.batchCap>0n&&live.dailyCap>=live.batchCap);
+  const carryover=await (await import('./legacyCarryover.server')).reviewLegacyCarryover(db);
   return {release:VAULT_V2_RELEASE,enabled,attempts:attempts.data??[],hashCandidates:candidates.data??[],configuration:config.data??{enabled:false,chain_id:677,contract_address:null,code_hash:null,cutover_at:null},live:live?Object.fromEntries(Object.entries(live).map(([k,v])=>[k,typeof v==='bigint'?v.toString():v])):null,
-    batches:batches.data??[],programs:budgets.data??[],allocatedPoints:(allocations.data??[]).reduce((sum,r)=>sum+r.points,0),
+    carryover,batches:batches.data??[],programs:budgets.data??[],allocatedPoints:(allocations.data??[]).reduce((sum,r)=>sum+r.points,0),
     blockers,review:{scope:'NEW_POST_CUTOVER_AWARDS_ONLY',legacy:'All earlier awards and existing Merkle obligations remain V1; no historical mapping.',sourceCount:Number(summary?.source_count??0),sourcePoints:Number(summary?.source_points??0),cutoverAt:cfg?.cutover_at??null,destinationFence:'IMMUTABLE_EARNING_TIME',sourceProof:'CANONICAL_LEDGER_RESERVATION_BINDING_POLICY_AND_RECONCILIATION',activationSequence:['Owner deploys and prefunds; verifies governance and limits.','Super Admin authorizes a future new-award cutover.','Publisher signs one immutable creditBatch; credits appear after canonical receipt verification.']},
     creditAction:null,sourceConfig:VAULT_V2_CONFIG};
 }

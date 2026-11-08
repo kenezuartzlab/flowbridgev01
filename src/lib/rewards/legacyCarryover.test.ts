@@ -1,0 +1,24 @@
+import { describe, it, expect } from 'vitest';
+import { classifyLegacyCarryover, summarizeCarryover, planCarryoverBatches, carryoverSnapshotHash, carryoverConfirmationGate, type CarryoverLedgerRow } from './legacyCarryover';
+import { canonicalVaultSnapshot, selectBoundedVaultSources } from './vaultV2Allocator';
+const wallet='0x'+'1'.repeat(40);
+const row=(id:string,points:number,patch:Partial<CarryoverLedgerRow>={}):CarryoverLedgerRow=>({id,userId:'u',points,reason:'CORE_SWAP',programId:'CORE_SWAP',fundingState:'UNFUNDED',provenanceState:'VERIFIED',chainId:677,createdAt:'2026-10-01',vaultV2Destination:false,...patch});
+const classify=(rows:CarryoverLedgerRow[],flow=0)=>classifyLegacyCarryover({rows,bindings:[{userId:'u',wallet}],v1Committed:[{wallet,flow}]});
+describe('owner-approved one-time unpaid carryover',()=>{
+  it('excludes committed V1 amounts and keeps partial original award remainder',()=>{const s=summarizeCarryover(classify([row('a',1314)],1122));expect(s.bins.EXCLUDED_PAID_V1.points).toBe(1122);expect(s.bins.VERIFIED_UNPAID.points).toBe(192);});
+  it('unsupported legacy remains separately labelled goodwill',()=>{const i=classify([row('a',1175,{provenanceState:'UNVERIFIED'})]);expect(i[0].source).toBe('OWNER_GOODWILL');expect(summarizeCarryover(i).bins.VERIFIED_UNPAID.points).toBe(0);});
+  it('excludes 689 already-V2 FLOW',()=>expect(summarizeCarryover(classify([row('a',689,{vaultV2Destination:true})])).bins.EXCLUDED_ALREADY_V2.points).toBe(689));
+  it('duplicate source IDs are never counted twice',()=>expect(summarizeCarryover(classify([row('a',100),row('a',100)])).fundingRequiredFlow).toBe(100));
+  it('missing wallet cannot be paid',()=>{const i=classifyLegacyCarryover({rows:[row('a',100)],bindings:[],v1Committed:[]});expect(i[0].bin).toBe('NEEDS_IDENTITY');expect(summarizeCarryover(i).fundingRequiredFlow).toBe(0);});
+  it('shared wallets cannot be paid',()=>{const i=classifyLegacyCarryover({rows:[row('a',100)],bindings:[{userId:'u',wallet},{userId:'v',wallet}],v1Committed:[]});expect(i[0].bin).toBe('NEEDS_IDENTITY');});
+  it('Testnet excluded',()=>expect(classify([row('a',100,{chainId:968})])[0].bin).toBe('EXCLUDED_NON_ECONOMIC'));
+  it('3,198 FLOW across 14 wallets fits one 10,000 FLOW batch',()=>{const items=Array.from({length:14},(_,i)=>({...classify([row(String(i),i===0?1314:i===13?684:100)])[0],wallet:`0x${(i+1).toString(16).padStart(40,'0')}`}));const b=planCarryoverBatches(items,10000);expect(b.length).toBe(1);expect(b[0].length).toBe(14);expect(b[0].reduce((n,x)=>n+x.flow,0)).toBe(3198);});
+  it('101 recipients split despite ample backing',()=>{const items=Array.from({length:101},(_,i)=>({...classify([row(String(i),1)])[0],wallet:`0x${(i+1).toString(16).padStart(40,'0')}`}));expect(planCarryoverBatches(items,10000).map(b=>b.length)).toEqual([100,1]);});
+  it('changing unpaid amount changes snapshot',async()=>expect(await carryoverSnapshotHash(classify([row('a',101)]))).not.toBe(await carryoverSnapshotHash(classify([row('a',100)]))));
+  const gate={isSuperAdmin:true,walletBound:true,snapshotHash:'x',confirmedHash:'x',verifiedPoints:1673,confirmedVerified:1673,goodwillPoints:1525,confirmedGoodwillBudget:1525,vaultFreeFlow:3198,alreadyConfirmed:false};
+  it('exact 1673 verified + 1525 goodwill requires 3198 backing',()=>{expect(carryoverConfirmationGate(gate)).toBe('OK');expect(carryoverConfirmationGate({...gate,vaultFreeFlow:3197})).toBe('NOT_FULLY_BACKED');});
+  it('replay blocked',()=>expect(carryoverConfirmationGate({...gate,alreadyConfirmed:true})).toBe('ALREADY_CONFIRMED'));
+  it('operator rejected',()=>expect(carryoverConfirmationGate({...gate,isSuperAdmin:false})).toBe('SUPER_ADMIN_BOUND_WALLET_REQUIRED'));
+  it('wrong goodwill budget rejected',()=>expect(carryoverConfirmationGate({...gate,confirmedGoodwillBudget:0})).toBe('GOODWILL_BUDGET_MISMATCH'));
+  it('canonical legacy batch uses exact partial source amount without 100-FLOW cap',()=>{const sources=[{id:'a',economic_award_id:'legacy:a',wallet,points:1314,program_id:'OWNER_GOODWILL',destination:'VAULT_V2',created_at:'2026-10-01',policy_version:'LEGACY_CARRYOVER_V2_20261108'}];const selected=selectBoundedVaultSources(sources,10000n*10n**18n);const b=canonicalVaultSnapshot(selected,'2026-11-03',10000n*10n**18n,10000n*10n**18n,10000n*10n**18n);expect(b.total).toBe(1314n*10n**18n);expect(b.sourceIds).toEqual(['a']);});
+});

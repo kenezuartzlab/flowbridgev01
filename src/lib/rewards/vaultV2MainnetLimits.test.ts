@@ -3,9 +3,9 @@ import { selectBoundedVaultSources } from './vaultV2Allocator';
 import { VAULT_V2_OWNER_EOA_EXCEPTION } from './vaultV2Identity';
 const row=(id:string,wallet:string,points:number)=>({id,wallet,points} as never);
 describe('Mainnet V2 owner limits',()=>{
-  it('credits at most 100 FLOW per wallet per batch',()=>{
-    const s=selectBoundedVaultSources([row('a','0x1',60),row('b','0x1',60),row('c','0x2',100)],10_000n*10n**18n);
-    expect(s.map((r:any)=>r.id)).toEqual(['a','c']);
+  it('100 is a recipient count, not a per-wallet FLOW cap',()=>{
+    const s=selectBoundedVaultSources([row('a','0x1',1314),row('b','0x1',60),row('c','0x2',100)],10_000n*10n**18n);
+    expect(s.map(r=>r.id)).toEqual(['a','b','c']);
   });
   it('respects the 10,000 FLOW batch limit',()=>{
     const rows=Array.from({length:150},(_,i)=>row(String(i).padStart(3,'0'),'0x'+i,100));

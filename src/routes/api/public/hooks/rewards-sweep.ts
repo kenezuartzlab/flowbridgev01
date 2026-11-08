@@ -20,6 +20,9 @@ export const Route = createFileRoute("/api/public/hooks/rewards-sweep")({
           await linkPublishedApprovals((await import("@/integrations/supabase/client.server")).supabaseAdmin).catch(() => null);
           const { runAutoApproval } = await import("@/lib/rewards/autoApproval.server");
           await runAutoApproval("cron").catch(() => null);
+          const { queueVerifiedVaultAwards } = await import('@/lib/rewards/vaultV2Queue.server');
+          // Prepare only after explicit policy approval; never signs or broadcasts.
+          await queueVerifiedVaultAwards((await import('@/integrations/supabase/client.server')).supabaseAdmin);
           return Response.json({ ok: true });
         } catch {
           return Response.json({ ok: false }, { status: 503 });

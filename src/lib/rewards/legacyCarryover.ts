@@ -51,7 +51,7 @@ export function classifyLegacyCarryover(input: CarryoverInput): CarryoverItem[] 
   const wallets = new Map<string, string | null>();
   for (const b of input.bindings) wallets.set(b.userId, isAddr(b.wallet) ? b.wallet.toLowerCase() : null);
   const walletUsers = new Map<string, Set<string>>();
-  for (const [u, w] of wallets) if (w) { if (!walletUsers.has(w)) walletUsers.set(w, new Set()); walletUsers.get(w)!.add(u); }
+  for (const [u, w] of wallets) if (w) { const users = walletUsers.get(w) ?? new Set<string>(); users.add(u); walletUsers.set(w, users); }
   const committed = new Map<string, number>();
   for (const c of input.v1Committed) { const w = c.wallet.toLowerCase(); committed.set(w, (committed.get(w) ?? 0) + Math.max(0, c.flow)); }
 
