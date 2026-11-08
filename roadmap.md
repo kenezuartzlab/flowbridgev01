@@ -1,3 +1,9 @@
+# Owner-approved legacy carryover completion — 2026-11-08
+- [ ] Fix authenticated canonical staging/confirmation and immutable V1/V2 payment fences.
+- [ ] Integrate approved partial legacy sources, separate goodwill budget and manual publisher lifecycle.
+- [ ] Add Super Admin snapshot approval and default-OFF automatic funded verified queue.
+- [ ] Run reward/full/isolated SQL/security/mobile acceptance; no hosted financial confirmation or signing.
+
 # V37 — Continuous Points, Operator-Approved Claiming
 
 # Bridge destination safety

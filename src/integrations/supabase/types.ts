@@ -834,6 +834,41 @@ export type Database = {
           },
         ]
       }
+      legacy_carryover_budgets: {
+        Row: {
+          actor_user_id: string
+          approved_at: string
+          evidence: Json
+          goodwill_points: number
+          snapshot_id: string
+          verified_points: number
+        }
+        Insert: {
+          actor_user_id: string
+          approved_at?: string
+          evidence: Json
+          goodwill_points: number
+          snapshot_id: string
+          verified_points: number
+        }
+        Update: {
+          actor_user_id?: string
+          approved_at?: string
+          evidence?: Json
+          goodwill_points?: number
+          snapshot_id?: string
+          verified_points?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legacy_carryover_budgets_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: true
+            referencedRelation: "legacy_carryover_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legacy_carryover_items: {
         Row: {
           economic_id: string
@@ -881,6 +916,7 @@ export type Database = {
       }
       legacy_carryover_snapshots: {
         Row: {
+          backing_evidence: Json | null
           confirmed_at: string | null
           confirmed_by: string | null
           confirmed_free_wei: number | null
@@ -891,12 +927,14 @@ export type Database = {
           id: string
           policy: string
           snapshot_hash: string
+          state_hash: string | null
           status: string
           summary: Json
           verified_points: number
           wallets: number
         }
         Insert: {
+          backing_evidence?: Json | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           confirmed_free_wei?: number | null
@@ -907,12 +945,14 @@ export type Database = {
           id?: string
           policy?: string
           snapshot_hash: string
+          state_hash?: string | null
           status?: string
           summary: Json
           verified_points: number
           wallets: number
         }
         Update: {
+          backing_evidence?: Json | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           confirmed_free_wei?: number | null
@@ -923,6 +963,7 @@ export type Database = {
           id?: string
           policy?: string
           snapshot_hash?: string
+          state_hash?: string | null
           status?: string
           summary?: Json
           verified_points?: number
@@ -2327,6 +2368,7 @@ export type Database = {
           id: boolean
           publisher: string | null
           updated_at: string
+          verified_queue_enabled: boolean
         }
         Insert: {
           authorized_by?: string | null
@@ -2344,6 +2386,7 @@ export type Database = {
           id?: boolean
           publisher?: string | null
           updated_at?: string
+          verified_queue_enabled?: boolean
         }
         Update: {
           authorized_by?: string | null
@@ -2361,6 +2404,7 @@ export type Database = {
           id?: boolean
           publisher?: string | null
           updated_at?: string
+          verified_queue_enabled?: boolean
         }
         Relationships: []
       }
@@ -3307,18 +3351,37 @@ export type Database = {
         Args: { p_code: string; p_user: string }
         Returns: Json
       }
-      confirm_legacy_carryover: {
-        Args: {
-          p_actor: string
-          p_free_wei: number
-          p_goodwill_budget: number
-          p_hash: string
-          p_snapshot: string
-          p_verified: number
-          p_wallet: string
-        }
-        Returns: Json
+      carryover_admin: {
+        Args: { p_actor: string; p_wallet: string }
+        Returns: string
       }
+      confirm_legacy_carryover:
+        | {
+            Args: {
+              p_actor: string
+              p_free_wei: number
+              p_goodwill_budget: number
+              p_hash: string
+              p_snapshot: string
+              p_verified: number
+              p_wallet: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_actor: string
+              p_evidence: Json
+              p_free_wei: number
+              p_goodwill_budget: number
+              p_hash: string
+              p_observed: string
+              p_snapshot: string
+              p_verified: number
+              p_wallet: string
+            }
+            Returns: Json
+          }
       confirm_reward_funding_snapshot: {
         Args: {
           p_actor: string
@@ -3423,6 +3486,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      legacy_carryover_preview: { Args: never; Returns: Json }
+      legacy_carryover_state_hash: { Args: never; Returns: string }
       link_payout_approval: {
         Args: { p_approval: string; p_batch: string; p_tx: string }
         Returns: Json
@@ -3584,10 +3649,15 @@ export type Database = {
         }
         Returns: boolean
       }
-      stage_legacy_carryover: {
-        Args: { p_hash: string; p_items: Json; p_summary: Json }
-        Returns: string
-      }
+      stage_legacy_carryover:
+        | {
+            Args: { p_actor: string; p_hash: string; p_wallet: string }
+            Returns: string
+          }
+        | {
+            Args: { p_hash: string; p_items: Json; p_summary: Json }
+            Returns: string
+          }
       sync_vault_v2_settings: {
         Args: {
           p_actor: string
@@ -3629,6 +3699,20 @@ export type Database = {
           p_wallet: string
         }
         Returns: boolean
+      }
+      vault_v2_canonical_sources: {
+        Args: { p_allocated: boolean; p_ids: string[] }
+        Returns: {
+          created_at: string
+          destination: string
+          economic_award_id: string
+          id: string
+          points: number
+          policy_version: string
+          program_id: string
+          user_id: string
+          wallet: string
+        }[]
       }
       vault_v2_source_hash: { Args: { p_ids: string[] }; Returns: string }
       vault_v2_source_rows: {
