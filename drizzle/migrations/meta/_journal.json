@@ -393,6 +393,13 @@
       "when": 1793677376484,
       "tag": "0055_vault_v2_settings_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1794135533803,
+      "tag": "0056_legacy_carryover_v2_20261108",
+      "breakpoints": true
     }
   ]
 }

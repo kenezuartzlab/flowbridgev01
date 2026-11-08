@@ -834,6 +834,102 @@ export type Database = {
           },
         ]
       }
+      legacy_carryover_items: {
+        Row: {
+          economic_id: string
+          ledger_id: string
+          points: number
+          snapshot_id: string
+          source: string
+          user_id: string
+          wallet: string
+        }
+        Insert: {
+          economic_id: string
+          ledger_id: string
+          points: number
+          snapshot_id: string
+          source: string
+          user_id: string
+          wallet: string
+        }
+        Update: {
+          economic_id?: string
+          ledger_id?: string
+          points?: number
+          snapshot_id?: string
+          source?: string
+          user_id?: string
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legacy_carryover_items_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "flow_points_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legacy_carryover_items_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_carryover_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legacy_carryover_snapshots: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          confirmed_free_wei: number | null
+          confirmed_wallet: string | null
+          created_at: string
+          goodwill_budget_points: number | null
+          goodwill_points: number
+          id: string
+          policy: string
+          snapshot_hash: string
+          status: string
+          summary: Json
+          verified_points: number
+          wallets: number
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_free_wei?: number | null
+          confirmed_wallet?: string | null
+          created_at?: string
+          goodwill_budget_points?: number | null
+          goodwill_points: number
+          id?: string
+          policy?: string
+          snapshot_hash: string
+          status?: string
+          summary: Json
+          verified_points: number
+          wallets: number
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_free_wei?: number | null
+          confirmed_wallet?: string | null
+          created_at?: string
+          goodwill_budget_points?: number | null
+          goodwill_points?: number
+          id?: string
+          policy?: string
+          snapshot_hash?: string
+          status?: string
+          summary?: Json
+          verified_points?: number
+          wallets?: number
+        }
+        Relationships: []
+      }
       liquidity_gap_observations: {
         Row: {
           dex_preference: string
@@ -3211,6 +3307,18 @@ export type Database = {
         Args: { p_code: string; p_user: string }
         Returns: Json
       }
+      confirm_legacy_carryover: {
+        Args: {
+          p_actor: string
+          p_free_wei: number
+          p_goodwill_budget: number
+          p_hash: string
+          p_snapshot: string
+          p_verified: number
+          p_wallet: string
+        }
+        Returns: Json
+      }
       confirm_reward_funding_snapshot: {
         Args: {
           p_actor: string
@@ -3475,6 +3583,10 @@ export type Database = {
           p_wallet: string
         }
         Returns: boolean
+      }
+      stage_legacy_carryover: {
+        Args: { p_hash: string; p_items: Json; p_summary: Json }
+        Returns: string
       }
       sync_vault_v2_settings: {
         Args: {
