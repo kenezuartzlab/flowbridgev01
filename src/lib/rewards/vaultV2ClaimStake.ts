@@ -17,8 +17,34 @@ export function flexibleGate(q: FlexibleQuote, rewardToken: string, available: b
   // Flexible supports standard positions even with no Genesis quota/backing.
   if (q.floorObligation !== 0n || q.genesisSeconds < 0 || q.genesisSeconds > 7_776_000 || q.genesisRate < 0) throw new Error('Invalid live Flexible quote.');
 }
+/**
+ * Material terms only. Genesis remaining seconds, the projected Genesis obligation
+ * and the per-second variable emission tick every block, so they are excluded;
+ * contract identity, principal, minimum, lock, availability, rates and the
+ * Genesis bonus availability are kept, so any material change still requires review.
+ */
 export function quoteFingerprint(q: FlexibleQuote) {
-  return [q.token.toLowerCase(),q.stakingVault.toLowerCase(),q.controller.toLowerCase(),q.treasury.toLowerCase(),q.principal,q.minimum,q.active,q.paused,q.emergency,q.lockSeconds,q.genesisRate,q.genesisSeconds,q.genesisObligation,q.floorRate,q.floorObligation,q.genesisAvailable,q.variableRate].join(':');
+  return ['m2',q.token.toLowerCase(),q.stakingVault.toLowerCase(),q.controller.toLowerCase(),q.treasury.toLowerCase(),q.principal,q.minimum,q.active,q.paused,q.emergency,q.lockSeconds,q.genesisRate,q.floorRate,q.floorObligation,q.genesisAvailable].join(':');
+}
+/** Plain-language reason a saved review no longer matches live terms. */
+export function termsChangeReason(saved: string, q: FlexibleQuote): string {
+  const p = saved.split(':');
+  if (p[0] !== 'm2') return 'Saved review is from an older version; review current terms.';
+  if (p[14] === 'true' && !q.genesisAvailable) return 'Genesis bonus is no longer available.';
+  if (Number(p[11]) !== q.genesisRate) return `Genesis rate changed to ${q.genesisRate / 100}%.`;
+  if (Number(p[12]) !== q.floorRate) return `Floor APR changed to ${q.floorRate / 100}%.`;
+  if (p[6] !== String(q.minimum)) return 'Minimum stake changed.';
+  return 'Staking terms changed.';
+}
+
+/** What the active saved flow needs. Pure, used on load to avoid a status-only dead end. */
+export type SavedState = 'DISCARD_NO_TX' | 'ARCHIVE_VERIFIED' | 'RESUME_STAKING' | 'CHECK_PENDING';
+export function classifySaved(op: ClaimStakeOperation, verified: Partial<Record<Step, 'success'>>): SavedState {
+  const steps = (Object.keys(op.transactions) as Step[]);
+  if (steps.length === 0) return 'DISCARD_NO_TX';
+  if (steps.some((s) => verified[s] !== 'success')) return 'CHECK_PENDING';
+  if (op.mode === 'claim' || verified.stake === 'success') return 'ARCHIVE_VERIFIED';
+  return 'RESUME_STAKING';
 }
 export type Intent = { step: Step; nonce: number; startBlock: string; hash: Hex | null };
 export type ClaimStakeOperation = {
@@ -51,7 +77,8 @@ export async function runClaimStake(op: ClaimStakeOperation, port: ClaimStakePor
         intent.hash = hash;
         port.save(op);
       } catch (error) {
-        if ((error as { code?: number })?.code === 4001) {
+        // 4001 = wallet rejection; notSent = failed a pre-wallet check before eth_sendTransaction.
+        if ((error as { code?: number })?.code === 4001 || (error as { notSent?: boolean })?.notSent === true) {
           delete op.transactions[step];
           port.save(op);
         }
@@ -72,7 +99,7 @@ export async function runClaimStake(op: ClaimStakeOperation, port: ClaimStakePor
     if (op.mode === 'stake') {
       const q = await port.quote(BigInt(op.principal));
       flexibleGate(q, op.token, BigInt(op.claimAmount));
-      if (quoteFingerprint(q) !== op.terms) throw new Error('Staking terms changed. Review again before claiming.');
+      if (quoteFingerprint(q) !== op.terms) throw new Error(`${termsChangeReason(op.terms, q)} Review again before claiming.`);
     }
   }
   await execute('claim');
@@ -89,7 +116,7 @@ export async function runClaimStake(op: ClaimStakeOperation, port: ClaimStakePor
       const q = await port.quote(BigInt(op.principal));
       flexibleGate(q, op.token, BigInt(op.claimAmount));
       if (q.balance < BigInt(op.principal)) throw new Error('FLOW claimed to your wallet; insufficient wallet FLOW to resume staking.');
-      if (quoteFingerprint(q) !== op.terms) throw new Error('FLOW claimed to your wallet; staking terms changed. Review before resuming.');
+      if (quoteFingerprint(q) !== op.terms) throw new Error(`FLOW is in your wallet. ${termsChangeReason(op.terms, q)} Review and tap Resume staking.`);
       return q;
     };
     let q = await checkQuote();

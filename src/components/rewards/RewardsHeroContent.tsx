@@ -17,6 +17,7 @@ import { FLOW_TOKEN, PTS, formatPts } from "@/lib/points";
 import type { RewardProgression } from "@/lib/rewards/rewardProgression";
 import { rewardPresentation } from "@/lib/rewards/rewardPresentation";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
+import { useUnifiedRewards } from "@/components/rewards/RewardsSummaryCard";
 
 export interface RewardsHeroContentProps {
   label: string;
@@ -105,13 +106,15 @@ export function RewardsHeroContent({
   const { data: personal } = usePersonalProgress(hasData);
   const p = progression ?? personal?.progression;
   const display = rewardPresentation(p);
-  const canonicalClaimed = p?.claimedFlow ?? 0;
+  // Same shared V1 + V2 totals as Earn and Rewards; never V1-only claimable.
+  const { totals } = useUnifiedRewards();
+  const canonicalClaimed = totals.claimedFlow ?? p?.claimedFlow ?? 0;
   const stateUnavailable = !p;
-  const ready = (display.claimable ?? 0) > 0;
+  const ready = (totals.claimableFlow ?? 0) > 0;
   const readyToConvert = false;
-  const readinessLine = display.readiness;
+  const readinessLine = ready ? `${(totals.claimableFlow ?? 0).toLocaleString("en-US")} ${FLOW_TOKEN} ready to claim` : display.readiness;
   const stageEyebrow = ready ? 'FLOW available to claim' : 'Toward next FLOW batch';
-  const ctaText = ready ? 'Claim FLOW' : 'Points breakdown';
+  const ctaText = ready ? 'Claim your FLOW' : 'Points breakdown';
   const highlight = ready;
 
   return (
@@ -196,7 +199,7 @@ export function RewardsHeroContent({
             </span>
             {!pending && !ready && !stateUnavailable && (canonicalClaimed ?? 0) > 0 && (
               <span className="block truncate font-mono text-[9px] uppercase tracking-[0.08em] opacity-65">
-                Past: {formatPts(canonicalClaimed ?? 0)} {FLOW_TOKEN} claimed
+                {formatPts(canonicalClaimed ?? 0)} {FLOW_TOKEN} claimed
               </span>
             )}
             {!pending && !ready && !readyToConvert && !stateUnavailable && (canonicalClaimed ?? 0) === 0 && (

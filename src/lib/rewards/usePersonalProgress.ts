@@ -50,7 +50,8 @@ export function usePersonalProgress(enabled: boolean) {
     // V34.2: refresh after a successful bind without a page reload (bypasses server cache).
     const onBound = () => { cache = null; void load(true); };
     window.addEventListener("flowbridge:wallet-bound", onBound);
-    return () => { off = true; window.removeEventListener("flowbridge:wallet-bound", onBound); };
+    window.addEventListener("flowbridge:rewards-refresh", onBound);
+    return () => { off = true; window.removeEventListener("flowbridge:wallet-bound", onBound); window.removeEventListener("flowbridge:rewards-refresh", onBound); };
   }, [enabled]);
   return { data, loading };
 }

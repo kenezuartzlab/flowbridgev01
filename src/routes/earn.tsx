@@ -20,7 +20,6 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { SignInButton } from "@/components/auth/SignInButton";
 import {
   ListRow,
-  MetricStrip,
   SafeAreaPage,
   SectionHeader,
   StatusPill,
@@ -30,7 +29,6 @@ import {
 } from "@/components/ui-kit/primitives";
 import { useAccountData } from "@/lib/app/useAccountData";
 import { useCampaignProgress } from "@/lib/campaign/useCampaignProgress";
-import { rewardPresentation } from "@/lib/rewards/rewardPresentation";
 import { formatUsd } from "@/lib/format";
 import {
   FLOW_TOKEN,
@@ -47,6 +45,7 @@ const FLOW_POINTS_V2_DAILY_CAP = DEFAULT_FLOW_POINTS_V2_POLICY.dailyCoreSwapCap;
 
 import { MainnetFlowClaimCard } from "@/components/rewards/MainnetFlowClaimCard";
 import { FlowRewardsVaultV2Panel } from "@/components/rewards/FlowRewardsVaultV2Panel";
+import { RewardsSummaryCard, useUnifiedRewards } from "@/components/rewards/RewardsSummaryCard";
 import { RewardProgressPanel } from "@/components/rewards/RewardProgressPanel";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
 import { RewardPolicyDetails } from '@/components/rewards/RewardPolicyDetails';
@@ -142,7 +141,7 @@ function EarnPage() {
   );
 
   const { data: personal, loading: progressLoading } = usePersonalProgress(!!user);
-  const display = rewardPresentation(personal?.progression);
+  const { totals: unified } = useUnifiedRewards();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -185,34 +184,22 @@ function EarnPage() {
         {/* V30.2B P2E — BOT Mainnet 677 published-epoch claim. Wallet-keyed and
             entirely separate from the testnet authorization flow, so it does not
             depend on being signed in. */}
-        {personal ? <RewardProgressPanel p={personal.progression} area="earn" detailed /> : user && <p className="p-4 text-sm text-muted" role="status">{progressLoading ? "Checking your eligible points and payout rounds…" : "Reward eligibility is temporarily unavailable. Refresh to retry; your stored points are not a claimable balance."}</p>}
-        <FlowRewardsVaultV2Panel />
-        <MainnetFlowClaimCard />
+        <Surface className="space-y-4 p-4">
+          {user && <RewardsSummaryCard />}
+          <FlowRewardsVaultV2Panel />
+          <details open={unified.v1ClaimableFlow > 0} className="border-t border-hairline pt-3">
+            <summary className="cursor-pointer text-sm font-semibold">Previous reward rounds{unified.v1ClaimableFlow > 0 ? ` · ${unified.v1ClaimableFlow.toLocaleString("en-US")} FLOW to claim` : ""}</summary>
+            <div className="mt-3"><MainnetFlowClaimCard /></div>
+          </details>
+        </Surface>
 
         {user && (
           <>
-            <MetricStrip
-              items={[
-                {
-                  label: `FLOW Points`,
-                  value: loading && !incentives ? "—" : personal ? formatPts(personal.progression.earnedPoints) : "—",
-                  hint: PTS,
-                },
-                {
-                  // V12.4A §6 — this is the remaining TOKEN payout delta, in FLOW,
-                  // not a second points balance.
-                  // Mainnet FLOW claims are LOCKED until funding + reconciliation pass.
-                  label: "Claimable now",
-                  value: display.claimable === null ? "—" : formatPts(display.claimable),
-                  hint: `${FLOW_TOKEN} · open payout round`,
-                },
-                {
-                  label: "Campaign PTS",
-                  value: campaignAuthed ? formatPts(campaignPointsTotal) : "—",
-                  hint: "verified tasks",
-                },
-              ]}
-            />
+            <details className="rounded-2xl border border-hairline bg-card">
+              <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">How rewards work &amp; details</summary>
+              {personal ? <RewardProgressPanel p={personal.progression} area="earn" detailed /> : <p className="p-4 text-sm text-muted" role="status">{progressLoading ? "Checking your eligible points and payout rounds…" : "Reward eligibility is temporarily unavailable. Refresh to retry."}</p>}
+              <p className="border-t border-hairline p-4 text-[12px] leading-relaxed text-muted">Points are not automatically FLOW. Verified, funded Mainnet Points are credited to your FLOW Rewards Wallet in batches, then you claim them with your wallet. Campaign PTS: {campaignAuthed ? formatPts(campaignPointsTotal) : "—"} (verified tasks). Community follows are optional, not a claim requirement.</p>
+            </details>
 
             {/* Status band — level (engagement only) and lifetime outcomes. */}
             <Surface>
@@ -243,10 +230,6 @@ function EarnPage() {
               </div>
             </Surface>
 
-            <Surface id="claim">
-              <SectionHeader title="When can I claim?" hint={display.readiness} />
-              <p className="border-t border-hairline p-4 text-[12px] leading-relaxed text-muted">Points are not automatically FLOW. Any positive amount of verified, funded Mainnet PTS not already allocated can be approved by Ops; then it must be published in a payout round. Historical rounds 1–3 used a 1,000-Point minimum; it no longer applies to new payouts. The claim above becomes available only during its open window, for the allocated wallet. Community follows are optional, not a claim requirement.</p>
-            </Surface>
 
             {/* V13.2 — testnet vault live and funded; read-only surface, never a quoted rate. */}
             <Link

@@ -6,7 +6,7 @@ import { getActiveProvider } from '@/lib/wallet/activeProvider';
 import { VAULT_V2_ABI } from './vaultV2Abi.generated';
 import { VAULT_V2_CONFIG, vaultClaimGate } from './vaultV2';
 import { readVaultV2, vaultClient } from './vaultV2Read';
-import { flexibleGate, quoteFingerprint, type ClaimStakeOperation, type ClaimStakePort, type FlexibleQuote, type Intent, type Step } from './vaultV2ClaimStake';
+import { flexibleGate, quoteFingerprint, termsChangeReason, type ClaimStakeOperation, type ClaimStakePort, type FlexibleQuote, type Intent, type Step } from './vaultV2ClaimStake';
 
 const identityAbi = parseAbi(['function token() view returns(address)','function controller() view returns(address)','function treasury() view returns(address)','function MAX_POSITIONS_PER_WALLET() view returns(uint256)','function currentFlowPerSecond(uint8) view returns(uint256)','function currentEpochEnd() view returns(uint256)','event PositionOpened(uint256 indexed positionId,address indexed owner,uint8 productId,uint256 principal,uint16 genesisRateBps,uint16 floorRateBps,uint40 genesisEndAt,uint40 maturityAt,bool genesisApplied)']);
 export async function readFlexibleQuote(wallet: Address, principal: bigint): Promise<FlexibleQuote> {
@@ -68,7 +68,7 @@ export function createClaimStakePort(config: typeof VAULT_V2_CONFIG, wallet: Add
     if (op.mode==='stake') {
       const q = await readFlexibleQuote(wallet,BigInt(op.principal));
       flexibleGate(q,op.token,BigInt(op.claimAmount));
-      if (q.stakingVault.toLowerCase()!==op.stakingVault.toLowerCase() || quoteFingerprint(q)!==op.terms) throw new Error('Staking terms changed. Review before continuing.');
+      if (q.stakingVault.toLowerCase()!==op.stakingVault.toLowerCase() || quoteFingerprint(q)!==op.terms) throw new Error(`${termsChangeReason(op.terms,q)} Review before continuing.`);
       if (step!=='claim'&&q.balance<BigInt(op.principal)) throw new Error('Insufficient FLOW in your wallet.');
       if (step==='stake'&&q.allowance<BigInt(op.principal)) throw new Error('Exact staking approval required.');
     }
@@ -86,12 +86,17 @@ export function createClaimStakePort(config: typeof VAULT_V2_CONFIG, wallet: Add
     quote:principal=>readFlexibleQuote(wallet,principal),
     prepare:async(step,op)=>{await preflight(step,op);return {step,nonce:await c.getTransactionCount({address:wallet,blockTag:'pending'}),startBlock:(await c.getBlockNumber()).toString(),hash:null};},
     send:async(intent,op)=>{
-      const tx = await preflight(intent.step,op);
-      if (await c.getTransactionCount({address:wallet,blockTag:'pending'})!==intent.nonce) throw new Error('Wallet nonce changed. Verify pending transaction before continuing.');
-      const p = await getActiveProvider(); if(!p)throw new Error('Wallet disconnected.');
-      await identity();
+      // Every failure before eth_sendTransaction is provably not a broadcast; tag it so the intent is released.
+      const notSent = (e: unknown) => Object.assign(e instanceof Error ? e : new Error(String(e)), {notSent:true});
+      let tx: Awaited<ReturnType<typeof preflight>>; let p: Awaited<ReturnType<typeof getActiveProvider>>;
+      try {
+        tx = await preflight(intent.step,op);
+        if (await c.getTransactionCount({address:wallet,blockTag:'pending'})!==intent.nonce) throw new Error('Wallet has another pending transaction. Wait for it to confirm, then try again.');
+        p = await getActiveProvider(); if(!p)throw new Error('Wallet disconnected.');
+        await identity();
+      } catch (e) { throw notSent(e); }
       status(`Confirm ${intent.step==='claim'?'Claim FLOW':intent.step==='approve'?'exact FLOW approval':'Flexible stake'} in your wallet…`);
-      return await p.request({method:'eth_sendTransaction',params:[{from:wallet,...tx,value:'0x0',nonce:`0x${intent.nonce.toString(16)}`}]}) as Hex;
+      return await p!.request({method:'eth_sendTransaction',params:[{from:wallet,...tx,value:'0x0',nonce:`0x${intent.nonce.toString(16)}`}]}) as Hex;
     },
     verify:async(intent,op)=>{
       if (await c.getChainId()!==677) throw new Error('Wrong receipt RPC chain. Do not repeat transaction.');
