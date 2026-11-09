@@ -11,6 +11,7 @@ import { googleSignIn, emailSignIn, emailSignUp, requestPasswordReset } from "@/
 import { rememberReturnTo, sanitizeReturnTo } from "@/lib/authReturn";
 import { isInAppBrowser, inAppBrowserName } from "@/lib/in-app-browser";
 import { signInWithLinkedWallet } from "@/lib/walletLink";
+import { getActiveProvider } from '@/lib/wallet/activeProvider';
 import { getPendingReferralCode } from "@/lib/referrals/pendingReferral";
 import { OPEN_AUTH_DIALOG, type AuthMode } from "./authDialogEvents";
 
@@ -90,16 +91,18 @@ export function AuthDialog() {
   }); };
 
   const wallet = () => run(async () => {
-    const eth = (globalThis as any).ethereum;
+    const eth = await getActiveProvider();
     if (!eth?.request) throw new Error("No wallet found. Open FlowBridge in TokenPocket, MetaMask, Rabby or another wallet browser — or continue with email.");
-    const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
-    const address = accounts?.[0]?.toLowerCase();
+    const accounts = await eth.request({ method: "eth_requestAccounts" });
+    const address = Array.isArray(accounts) && typeof accounts[0] === 'string' ? accounts[0].toLowerCase() : null;
     if (!address) throw new Error("No wallet account selected.");
     const res = await signInWithLinkedWallet(address);
     if (res.status === "needs_binding") {
       setMode("signup");
       setView("email");
       setError("This wallet isn't linked to an account yet. Create your account with email (or Google) first — then link this wallet with one free signature.");
+    } else {
+      setOpen(false);
     }
   });
 

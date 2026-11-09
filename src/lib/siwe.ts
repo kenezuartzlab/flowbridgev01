@@ -59,10 +59,8 @@ export async function signInWithEthereum(args: {
   if (!data.session?.access_token || !data.session.refresh_token || !data.user) {
     throw new Error("Wallet signature was accepted, but the sign-in session was not created. Please try again.");
   }
-  await supabase.auth.setSession({
-    access_token: data.session.access_token,
-    refresh_token: data.session.refresh_token,
-  });
+  // verifyOtp already persists the session and emits SIGNED_IN. Re-setting it
+  // performs a second auth exchange and can strand mobile sign-in after success.
 
-  return { status: "signed_in", email: data.user?.email ?? verifyJson.email };
+  return { status: "signed_in", email: data.user.email ?? '' };
 }

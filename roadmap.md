@@ -1,3 +1,6 @@
+# Wallet sign-in incident — 2026-11-09
+- [x] Correct selected-provider signing, UTF-8 hex transport and single session exchange; 2,406 tests and preview build pass. 390px simulated wallet cancellation checked; real user-wallet sign-in remains unverified, production publication not requested.
+
 # Owner-approved legacy carryover completion — 2026-11-08
 - [x] Fix authenticated canonical staging/confirmation and immutable V1/V2 payment fences.
 - [x] Integrate approved partial legacy sources, separate goodwill budget and manual publisher lifecycle.

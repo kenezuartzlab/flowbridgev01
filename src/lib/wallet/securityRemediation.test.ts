@@ -45,7 +45,7 @@ describe('wallet provider message security', () => {
 describe('injected-wallet privacy', () => {
   it('detects a connected wallet without requests or ownership prompts', async () => {
     const request = vi.fn().mockResolvedValue(['0x' + '1'.repeat(40)]); const fetch = vi.fn();
-    vi.stubGlobal('ethereum', { request }); vi.stubGlobal('fetch', fetch);
+    Object.assign(host, { ethereum: { request } }); vi.stubGlobal('fetch', fetch);
     expect(await detectLinkedWallet()).toEqual({ address: '0x' + '1'.repeat(40) });
     expect(request).toHaveBeenCalledExactlyOnceWith({ method: 'eth_accounts' }); expect(fetch).not.toHaveBeenCalled();
   });
