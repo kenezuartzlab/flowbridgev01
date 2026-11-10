@@ -414,6 +414,20 @@
       "when": 1794140915713,
       "tag": "0058_carryover_acceptance_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1794273745881,
+      "tag": "0059_permanent_identity_and_scoped_recovery",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1794273929808,
+      "tag": "0060_audited_promotion_revisions",
+      "breakpoints": true
     }
   ]
 }

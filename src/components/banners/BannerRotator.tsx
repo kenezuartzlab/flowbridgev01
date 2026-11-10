@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Button } from '@/components/ui/button';
+import { Pause, Play } from 'lucide-react';
 
 /** True when the OS/browser asks for reduced motion. */
 function usePrefersReducedMotion() {
@@ -23,6 +25,7 @@ function usePrefersReducedMotion() {
 export function BannerRotator({
   slides,
   intervalMs = 4000,
+  delaysMs,
   className = "",
   showDots = true,
   slideKeys,
@@ -32,6 +35,7 @@ export function BannerRotator({
 }: {
   slides: ReactNode[];
   intervalMs?: number;
+  delaysMs?: number[];
   className?: string;
   showDots?: boolean;
   /** Stable identifiers aligned to `slides`, used for impression reporting. */
@@ -44,6 +48,7 @@ export function BannerRotator({
   const items = slides.filter(Boolean);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [manualPause, setManualPause] = useState(false);
   const startX = useRef<number | null>(null);
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefersReduced = usePrefersReducedMotion();
@@ -52,13 +57,13 @@ export function BannerRotator({
   const active = items.length ? index % items.length : 0;
 
   useEffect(() => {
-    if (items.length < 2 || paused || reduce) return;
-    const id = setInterval(
+    if (items.length < 2 || paused || manualPause || reduce) return;
+    const id = setTimeout(
       () => setIndex((i) => (i + 1) % items.length),
-      Math.max(1500, intervalMs),
+      Math.max(1500, delaysMs?.[active] ?? intervalMs),
     );
-    return () => clearInterval(id);
-  }, [items.length, intervalMs, paused, reduce]);
+    return () => clearTimeout(id);
+  }, [items.length, intervalMs, delaysMs, active, paused, manualPause, reduce]);
 
   useEffect(() => {
     return () => {
@@ -130,6 +135,7 @@ export function BannerRotator({
             aria-roledescription="slide"
             aria-label={`${i + 1} of ${items.length}`}
             aria-hidden={i !== active}
+            inert={i !== active}
             className={`[grid-area:1/1] ${reduce ? "" : "transition-opacity duration-500 ease-out"} ${
               i === active ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
@@ -142,7 +148,7 @@ export function BannerRotator({
       {showDots && (
         <div className="pointer-events-auto absolute inset-x-0 -bottom-2.5 flex items-center justify-center gap-1.5">
           {items.map((_, i) => (
-            <button
+            <Button
               key={i}
               type="button"
               aria-label={`Show banner ${i + 1} of ${items.length}`}
@@ -158,10 +164,11 @@ export function BannerRotator({
               }`}
             >
               <span className="sr-only">Banner {i + 1}</span>
-            </button>
+            </Button>
           ))}
         </div>
       )}
+      {!reduce && <Button type="button" variant="outline" size="icon" className="absolute right-2 bottom-2 h-8 w-8" aria-label={manualPause?'Resume promotions':'Pause promotions'} title={manualPause?'Resume promotions':'Pause promotions'} onClick={()=>setManualPause(v=>!v)}>{manualPause?<Play className="h-3 w-3"/>:<Pause className="h-3 w-3"/>}</Button>}
     </div>
   );
 }

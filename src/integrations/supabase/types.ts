@@ -834,6 +834,105 @@ export type Database = {
           },
         ]
       }
+      identity_pairs: {
+        Row: {
+          bound_at: string
+          current_wallet: string
+          email: string
+          original_wallet: string
+          recovery_used: boolean
+          user_id: string
+        }
+        Insert: {
+          bound_at?: string
+          current_wallet: string
+          email: string
+          original_wallet: string
+          recovery_used?: boolean
+          user_id: string
+        }
+        Update: {
+          bound_at?: string
+          current_wallet?: string
+          email?: string
+          original_wallet?: string
+          recovery_used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      identity_recovery_grants: {
+        Row: {
+          actor_id: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          ownership_evidence: string
+          reason: string
+          revoked_at: string | null
+          target_wallet: string
+          user_id: string
+        }
+        Insert: {
+          actor_id: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          ownership_evidence: string
+          reason: string
+          revoked_at?: string | null
+          target_wallet: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          ownership_evidence?: string
+          reason?: string
+          revoked_at?: string | null
+          target_wallet?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      identity_review_cases: {
+        Row: {
+          category: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      identity_wallet_history: {
+        Row: {
+          created_at: string
+          user_id: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
       legacy_carryover_budgets: {
         Row: {
           actor_user_id: string
@@ -1210,6 +1309,27 @@ export type Database = {
           referred_by?: string | null
           total_swap_volume_usd?: number
           wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      promotion_revisions: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          value: Json
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          value: Json
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          value?: Json
         }
         Relationships: []
       }
@@ -3351,6 +3471,31 @@ export type Database = {
         Args: { p_code: string; p_user: string }
         Returns: Json
       }
+      bind_verified_identity: {
+        Args: { p_nonce?: string; p_user_id: string; p_wallet: string }
+        Returns: {
+          binding_changes_count: number
+          claimed_tokens: number
+          created_at: string
+          email: string
+          flow_points: number
+          id: string
+          last_binding_change: string | null
+          points_referral_activity: number
+          points_referral_signup: number
+          points_self: number
+          referral_code: string | null
+          referred_by: string | null
+          total_swap_volume_usd: number
+          wallet_address: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       carryover_admin: {
         Args: { p_actor: string; p_wallet: string }
         Returns: string
@@ -3648,6 +3793,19 @@ export type Database = {
           p_wallet: string
         }
         Returns: boolean
+      }
+      set_identity_recovery: {
+        Args: {
+          p_actor: string
+          p_evidence: string
+          p_expiry: string
+          p_reason: string
+          p_revoke: boolean
+          p_target: string
+          p_user: string
+          p_wallet: string
+        }
+        Returns: undefined
       }
       stage_legacy_carryover:
         | {

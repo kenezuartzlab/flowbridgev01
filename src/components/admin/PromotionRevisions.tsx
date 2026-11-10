@@ -1,0 +1,8 @@
+import { useState } from 'react';
+import { getIdToken } from '@/lib/auth';
+import { Button } from '@/components/ui/button';
+export function PromotionRevisions({wallet,onRestored}:{wallet:string;onRestored:()=>void}) {
+  const [rows,setRows]=useState<{id:string;created_at:string}[]>([]);const [error,setError]=useState('');const [busy,setBusy]=useState(false);
+  async function call(id?:string){setBusy(true);setError('');try{const token=await getIdToken();const res=await fetch('/api/admin/promotion-revisions',{method:id?'POST':'GET',headers:{authorization:`Bearer ${token}`,'x-wallet-address':wallet,'content-type':'application/json'},...(id?{body:JSON.stringify({id})}:{})});const data=await res.json();if(!res.ok)throw new Error(data.error);if(id)onRestored();else setRows(data.revisions);}catch(e){setError(e instanceof Error?e.message:'Request failed');}finally{setBusy(false);}}
+  return <details className="border-t border-hairline pt-3"><summary>Published revision history</summary><Button className="my-3" variant="outline" disabled={busy} onClick={()=>void call()}>Load revisions</Button>{rows.map(r=><div key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm"><span>{new Date(r.created_at).toLocaleString()}</span><Button variant="outline" disabled={busy} onClick={()=>{if(window.confirm('Restore this promotion revision for all visitors?'))void call(r.id);}}>Restore revision</Button></div>)}{error&&<p role="alert">{error}</p>}</details>;
+}

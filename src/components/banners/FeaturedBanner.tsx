@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import giftAsset from "@/assets/gift-1.png.asset.json";
 import type { BannerSlide, BannerSurfaceKey } from "@/lib/config/appConfig";
 import { trackBannerClick } from "@/lib/banners/analytics";
+import { PromotionBanner } from './PromotionBanner';
 
 /**
  * Large "featured campaign" promo card (Home surface). Purely presentational —
@@ -20,6 +21,7 @@ export function FeaturedBanner({
   ctaLabel?: string;
   className?: string;
 }) {
+  if (slide.promotion) return <PromotionBanner slide={slide} surface={surface}/>;
   const art = slide.imageUrl || giftAsset.url;
   const href = slide.href || undefined;
   const full = slide.layout === "full" && !!slide.imageUrl;

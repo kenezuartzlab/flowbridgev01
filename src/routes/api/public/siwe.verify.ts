@@ -100,12 +100,19 @@ export const Route = createFileRoute("/api/public/siwe/verify")({
             return Response.json({ verified: true, needs_binding: true });
           }
 
+          // Never mint a session for a reassigned contact email. Session
+          // authority remains the exact authenticated account behind the pair.
+          const { data: identity } = await supabaseAdmin.auth.admin.getUserById(profile.id);
+          if (!identity.user?.email_confirmed_at || identity.user.email?.toLowerCase() !== profile.email.toLowerCase()) {
+            return Response.json({ error: 'Use email sign-in for secure account recovery.' }, { status: 403 });
+          }
+
           // Mint a one-time magiclink token_hash for the bound email.
           const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
             type: "magiclink",
             email: profile.email,
           });
-          if (linkErr || !linkData?.properties?.hashed_token) {
+          if (linkErr || !linkData?.properties?.hashed_token || linkData.user?.id !== profile.id) {
             return Response.json(
               { error: "Could not create sign-in session. Retry sign-in." },
               { status: 500 },

@@ -8,6 +8,7 @@ import { WALLETCONNECT_ENABLED } from "@/lib/wallet/walletConnectFlag";
 import { verifyAndBindWallet } from "@/lib/wallet/bindWallet";
 import { walletErrorMessage } from "@/lib/wallet/walletErrors";
 import { Button } from "@/components/ui/button";
+import { recoveryAvailable } from '@/lib/wallet/identityPolicy';
 
 /**
  * Wallet binding — V34.2 Verify & Bind.
@@ -35,11 +36,23 @@ export function BindWalletCard({
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [why, setWhy] = useState(false);
+  const [grant, setGrant] = useState<Parameters<typeof recoveryAvailable>[0]>(null);
+  useEffect(() => {
+    let alive = true;
+    setGrant(null);
+    if (signedIn && boundAddress) void getIdToken().then(async token => {
+      if (!token) return;
+      const res = await fetch('/api/users/identity', { headers: { authorization: `Bearer ${token}` } });
+      const data = await res.json(); if (alive && res.ok) setGrant(data.grant);
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, [signedIn, boundAddress, address]);
 
   const done = !!boundAddress;
   const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
   const choices = useMemo(() => buildWalletChoices(connectors, WALLETCONNECT_ENABLED), [connectors]);
   const sameAsBound = !!boundAddress && !!address && boundAddress.toLowerCase() === address.toLowerCase();
+  const recovery = recoveryAvailable(grant, address);
 
   // Never carry one wallet's binding messages into another wallet.
   useEffect(() => {
@@ -96,8 +109,9 @@ export function BindWalletCard({
         </span>
       </div>
       <p className="mt-2 text-[12px] leading-relaxed text-muted">
-        {done ? 'This wallet is linked to your account.' : '1. Connect your wallet. 2. Tap Verify & Bind. 3. Confirm the free ownership signature in your wallet.'}
+        {done ? 'Verified email & bound wallet — permanent' : 'Verify your email, connect your wallet, then confirm Verify & Bind. Your identity can be bound once.'}
       </p>
+      {done && <p className="mt-2 text-xs text-muted">Contact support for account recovery. Connecting another trading wallet does not change this identity.</p>}
 
       <div
         className={`mt-3 flex flex-col gap-2 rounded-xl border p-2.5 ${
@@ -118,14 +132,14 @@ export function BindWalletCard({
         </span>
 
         {isConnected ? (
-          sameAsBound ? null : (
+          sameAsBound || (done && !recovery) ? null : (
             <Button
               type="button"
               onClick={() => void bind()}
               disabled={!signedIn || busy}
               className="h-auto min-h-[44px] whitespace-normal px-3 font-mono text-[10.5px] font-black uppercase"
             >
-              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? "Verify & rebind wallet" : "Verify & bind wallet"}
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? "Verify approved recovery wallet" : "Verify & bind wallet"}
             </Button>
           )
         ) : choices.length === 0 ? (

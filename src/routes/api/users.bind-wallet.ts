@@ -18,6 +18,7 @@ export const Route = createFileRoute("/api/users/bind-wallet")({
         const { verifyWalletChallenge } = await import("@/lib/walletChallenge.server");
         const user = await getAuthUser(request);
         if (!user) return unauthorized();
+        if (!user.emailVerified) return jsonResponse({ error: "Verify your email before binding your wallet." }, 403);
         try {
           const body = (await request.json()) as {
             walletAddress?: string;
@@ -40,10 +41,10 @@ export const Route = createFileRoute("/api/users/bind-wallet")({
             nowMs: Date.now(),
           });
           if (!check.ok) return jsonResponse({ error: check.error }, 400);
-          const challenge = await verifyWalletChallenge(body);
+          const challenge = await verifyWalletChallenge(body, false);
           if (!challenge.ok) return jsonResponse({ error: challenge.error }, challenge.status);
 
-          const updated = await bindUserWallet(user.id, challenge.wallet);
+          const updated = await bindUserWallet(user.id, challenge.wallet, body.nonce);
           // V36.7: a signed wallet binding is an ownership proof for a pending referral.
           let referral: unknown = null;
           try {

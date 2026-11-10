@@ -2929,6 +2929,7 @@ export default function App() {
             return (
               <BannerRotator
                 intervalMs={surface.intervalMs}
+                delaysMs={surface.slides.map(s=>s.promotion?.delayMs??surface.intervalMs)}
                 slides={[...promoSlides, statusSlide]}
                 slideKeys={[...promoKeys, "status"]}
                 onSlideVisible={(key) => {

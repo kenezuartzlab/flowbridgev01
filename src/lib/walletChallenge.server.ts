@@ -23,6 +23,7 @@ export type WalletChallengeResult =
 
 export async function verifyWalletChallenge(
   input: WalletChallengeInput,
+  consume = true,
 ): Promise<WalletChallengeResult> {
   const { walletAddress, message, signature, nonce } = input;
   if (!walletAddress || !message || !signature || !nonce) {
@@ -78,6 +79,10 @@ export async function verifyWalletChallenge(
     }
   }
   if (!valid) return { ok: false, status: 401, error: "Invalid signature for this wallet." };
+
+  // Binding consumes inside the identity transaction; other ownership proofs
+  // retain the existing atomic single-use consumption below.
+  if (!consume) return { ok: true, wallet };
 
   // Consume the nonce before anything is granted.
   // V34.2: atomic consume — only the request that flips used_at wins, so a

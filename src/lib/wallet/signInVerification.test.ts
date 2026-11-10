@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildSignInMessage } from './signInMessage';
-const m = vi.hoisted(() => ({ consume: vi.fn(), verify: vi.fn(), generate: vi.fn(), limit: vi.fn(), profile: vi.fn() }));
+const m = vi.hoisted(() => ({ consume: vi.fn(), verify: vi.fn(), generate: vi.fn(), limit: vi.fn(), profile: vi.fn(), identity:vi.fn() }));
 vi.mock('viem', () => ({ verifyMessage: m.verify, verifyTypedData: m.verify }));
 vi.mock('./requestLimit.server', () => ({ checkWalletRequestLimit: m.limit }));
 vi.mock('@/integrations/supabase/client.server', () => ({ supabaseAdmin: { from: (table: string) => {
   let update = false;
   const q = { select: () => q, eq: () => q, is: () => q, gt: () => q, update: () => { update = true; return q; }, maybeSingle: async () => table === 'profiles' ? m.profile() : update ? m.consume() : { data: { id: 'nonce-row', wallet_address: '0x'+'1'.repeat(40), expires_at: new Date(Date.now()+60000).toISOString(), used_at: null } } };
   return q;
-}, auth: { admin: { generateLink: m.generate } } } }));
+}, auth: { admin: { generateLink: m.generate, getUserById:m.identity } } } }));
 import { Route } from '@/routes/api/public/siwe.verify';
 const wallet = '0x'+'1'.repeat(40), nonce = 'a'.repeat(48);
 function call(extra = {}) {
@@ -15,8 +15,16 @@ function call(extra = {}) {
   const handler = (Route.options as unknown as { server: { handlers: { POST: (p: {request:Request}) => Promise<Response> } } }).server.handlers.POST;
   return handler({ request: new Request('https://flowbridge.space/api/public/siwe/verify', { method:'POST', headers: { origin: 'https://flowbridge.space' }, body: JSON.stringify({ walletAddress: wallet, nonce, message, signature: '0x'+'1'.repeat(130), ...extra }) }) });
 }
-beforeEach(() => { vi.resetAllMocks(); m.verify.mockResolvedValue(true); m.limit.mockResolvedValue(null); m.consume.mockResolvedValue({data:{id:'nonce-row'}}); m.profile.mockResolvedValue({data:{email:'test@example.invalid'}}); m.generate.mockResolvedValue({data:{properties:{hashed_token:'test-only-token',verification_type:'magiclink'}}}); });
+beforeEach(() => { vi.resetAllMocks(); m.verify.mockResolvedValue(true); m.limit.mockResolvedValue(null); m.consume.mockResolvedValue({data:{id:'nonce-row'}}); m.profile.mockResolvedValue({data:{id:'account',email:'test@example.invalid'}}); m.identity.mockResolvedValue({data:{user:{id:'account',email:'test@example.invalid',email_confirmed_at:'2026-11-10'}}}); m.generate.mockResolvedValue({data:{user:{id:'account'},properties:{hashed_token:'test-only-token',verification_type:'magiclink'}}}); });
 describe('wallet proof single-use and privacy', () => {
+  it('never signs into an account with a reassigned or unverified email',async()=>{
+    m.identity.mockResolvedValue({data:{user:{email:'other@example.invalid',email_confirmed_at:null}}});
+    expect((await call()).status).toBe(403);expect(m.generate).not.toHaveBeenCalled();
+  });
+  it('never issues a token minted for another account ID',async()=>{
+    m.generate.mockResolvedValue({data:{user:{id:'other'},properties:{hashed_token:'untrusted'}}});
+    const res=await call();expect(res.status).toBe(500);expect(await res.json()).not.toHaveProperty('token_hash');
+  });
   it('two concurrent valid proofs yield one session, never two', async () => {
     let used = false;
     m.consume.mockImplementation(async () => { if (used) return {data:null}; used=true; return {data:{id:'nonce-row'}}; });

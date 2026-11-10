@@ -58,6 +58,9 @@ import { PartnerGovernancePanel } from "@/components/studio/PartnerGovernancePan
 import { ApplicationWorkspace } from "@/components/admin/ApplicationWorkspace";
 import { Button } from '@/components/ui/button';
 import { AdminUsersPanel } from "@/components/admin/AdminUsersPanel";
+import { IdentityControl } from '@/components/admin/IdentityControl';
+import { PromotionOptionsEditor } from '@/components/admin/PromotionOptionsEditor';
+import { PromotionRevisions } from '@/components/admin/PromotionRevisions';
 
 const SECTIONS = [
   "tokens",
@@ -74,6 +77,7 @@ const SECTIONS = [
   "governance",
   "application",
   "admins",
+  "identity",
 ] as const;
 
 export const Route = createFileRoute("/sets")({
@@ -113,7 +117,8 @@ type Tab =
   | "campaigns"
   | "governance"
   | "application"
-  | "admins";
+  | "admins"
+  | "identity";
 
 /** Grouped navigation so the panel reads like a real control panel. */
 const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
@@ -125,7 +130,7 @@ const NAV_GROUPS: { group: string; items: [Tab, string][] }[] = [
       ["pages", "Pages & Heroes"],
     ],
   },
-  { group: "Private", items: [["application", "BOT Application"], ["admins", "Admins & Operators"]] },
+  { group: "Private", items: [["application", "BOT Application"], ["admins", "Admins & Operators"], ["identity", "Identity Control"]] },
   {
     group: "Marketing",
     items: [
@@ -284,6 +289,8 @@ function AdminPage() {
         <ApplicationWorkspace wallet={wallet!} />
       ) : tab === "admins" ? (
         <AdminUsersPanel wallet={wallet!} />
+      ) : tab === "identity" ? (
+        wallet ? <IdentityControl wallet={wallet}/> : null
       ) : tab === "governance" ? (
         <PartnerGovernancePanel wallet={wallet!} />
       ) : (
@@ -1132,6 +1139,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
           href: "",
           theme: surface === "bridge" ? "bridge" : "swap",
           isActive: true,
+          promotion: { status:'draft',motion:'static',format:'compact' },
           layout: "compact",
           schedule: null,
         },
@@ -1152,8 +1160,8 @@ function BannersPanel({ wallet }: { wallet: string }) {
   const upload = async (index: number, file: File | undefined) => {
     if (!file) return;
     setError(null);
-    if (!/^image\/(png|jpeg|webp|gif|svg\+xml)$/.test(file.type)) {
-      setError("Use a PNG, JPG, WebP, GIF or SVG image.");
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) {
+      setError("Use a PNG, JPG, WebP or GIF image.");
       return;
     }
     if (file.size > 2_000_000) {
@@ -1197,6 +1205,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
     <div className="space-y-4">
       <div className={cardCls}>
         <span className={labelCls}>Banner surface</span>
+        <PromotionRevisions wallet={wallet} onRestored={()=>void fetchAdminConfig(wallet).then(c=>{setCfg(c);void loadAppConfig(true);})}/>
         <div className="flex flex-wrap gap-2">
           {BANNER_SURFACES.map((key) => (
             <button
@@ -1370,7 +1379,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
                   {uploading === i ? "Uploading…" : "Upload image"}
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
                     className="hidden"
                     onChange={(e) => {
                       void upload(i, e.target.files?.[0]);
@@ -1390,11 +1399,11 @@ function BannersPanel({ wallet }: { wallet: string }) {
               </div>
               <input
                 value={slide.imageUrl ?? ""}
-                placeholder="…or paste an image URL"
-                onChange={(e) => patchSlide(i, { imageUrl: e.target.value })}
+                readOnly
+                placeholder="Upload artwork above"
                 className={inputCls}
               />
-              <div className="text-[11px] text-muted">PNG, JPG, WebP, GIF or SVG · max 2 MB.</div>
+              <div className="text-[11px] text-muted">PNG, JPG, WebP or GIF · max 2 MB.</div>
             </div>
 
             <div className="space-y-1">
@@ -1420,6 +1429,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
               />
             </div>
 
+            <PromotionOptionsEditor slide={slide} wallet={wallet} onChange={promotion=>patchSlide(i,{promotion})}/>
             {/* Scheduling */}
             <div className="space-y-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3">
               <div className="flex items-center gap-1.5">

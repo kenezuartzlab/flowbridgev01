@@ -65,6 +65,7 @@ import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/a
 import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
+import { Route as ApiAdminIdentityRouteImport } from './routes/api/admin.identity'
 import { Route as ApiAdminLaunchPreparationRouteImport } from './routes/api/admin.launch-preparation'
 import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
 import { Route as ApiAdminMainnetPrerequisitesRouteImport } from './routes/api/admin.mainnet-prerequisites'
@@ -72,6 +73,7 @@ import { Route as ApiAdminMainnetReleaseFreezeRouteImport } from './routes/api/a
 import { Route as ApiAdminOpsRouteImport } from './routes/api/admin.ops'
 import { Route as ApiAdminPartnerGovernanceRouteImport } from './routes/api/admin.partner-governance'
 import { Route as ApiAdminPayoutOperationsRouteImport } from './routes/api/admin.payout-operations'
+import { Route as ApiAdminPromotionRevisionsRouteImport } from './routes/api/admin.promotion-revisions'
 import { Route as ApiAdminRewardsBudgetRouteImport } from './routes/api/admin.rewards-budget'
 import { Route as ApiAdminRewardsControlRouteImport } from './routes/api/admin.rewards-control'
 import { Route as ApiAdminRewardsPublishVerifyRouteImport } from './routes/api/admin.rewards-publish-verify'
@@ -110,6 +112,7 @@ import { Route as ApiStudioCampaignsRouteImport } from './routes/api/studio.camp
 import { Route as ApiStudioSessionRouteImport } from './routes/api/studio.session'
 import { Route as ApiUsersBindWalletRouteImport } from './routes/api/users.bind-wallet'
 import { Route as ApiUsersClaimRouteImport } from './routes/api/users.claim'
+import { Route as ApiUsersIdentityRouteImport } from './routes/api/users.identity'
 import { Route as ApiUsersIncentivesRouteImport } from './routes/api/users.incentives'
 import { Route as ApiUsersSocialsRouteImport } from './routes/api/users.socials'
 import { Route as ApiUsersSyncRouteImport } from './routes/api/users.sync'
@@ -416,6 +419,11 @@ const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
   path: '/api/admin/banner-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminIdentityRoute = ApiAdminIdentityRouteImport.update({
+  id: '/api/admin/identity',
+  path: '/api/admin/identity',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminLaunchPreparationRoute =
   ApiAdminLaunchPreparationRouteImport.update({
     id: '/api/admin/launch-preparation',
@@ -455,6 +463,12 @@ const ApiAdminPayoutOperationsRoute =
   ApiAdminPayoutOperationsRouteImport.update({
     id: '/api/admin/payout-operations',
     path: '/api/admin/payout-operations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminPromotionRevisionsRoute =
+  ApiAdminPromotionRevisionsRouteImport.update({
+    id: '/api/admin/promotion-revisions',
+    path: '/api/admin/promotion-revisions',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiAdminRewardsBudgetRoute = ApiAdminRewardsBudgetRouteImport.update({
@@ -649,6 +663,11 @@ const ApiUsersClaimRoute = ApiUsersClaimRouteImport.update({
   path: '/api/users/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUsersIdentityRoute = ApiUsersIdentityRouteImport.update({
+  id: '/api/users/identity',
+  path: '/api/users/identity',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiUsersIncentivesRoute = ApiUsersIncentivesRouteImport.update({
   id: '/api/users/incentives',
   path: '/api/users/incentives',
@@ -802,6 +821,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/identity': typeof ApiAdminIdentityRoute
   '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
@@ -809,6 +829,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/payout-operations': typeof ApiAdminPayoutOperationsRoute
+  '/api/admin/promotion-revisions': typeof ApiAdminPromotionRevisionsRoute
   '/api/admin/rewards-budget': typeof ApiAdminRewardsBudgetRoute
   '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
@@ -847,6 +868,7 @@ export interface FileRoutesByFullPath {
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
+  '/api/users/identity': typeof ApiUsersIdentityRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
@@ -923,6 +945,7 @@ export interface FileRoutesByTo {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/identity': typeof ApiAdminIdentityRoute
   '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
@@ -930,6 +953,7 @@ export interface FileRoutesByTo {
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/payout-operations': typeof ApiAdminPayoutOperationsRoute
+  '/api/admin/promotion-revisions': typeof ApiAdminPromotionRevisionsRoute
   '/api/admin/rewards-budget': typeof ApiAdminRewardsBudgetRoute
   '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
@@ -968,6 +992,7 @@ export interface FileRoutesByTo {
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
+  '/api/users/identity': typeof ApiUsersIdentityRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
@@ -1045,6 +1070,7 @@ export interface FileRoutesById {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/identity': typeof ApiAdminIdentityRoute
   '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
   '/api/admin/mainnet-prerequisites': typeof ApiAdminMainnetPrerequisitesRoute
@@ -1052,6 +1078,7 @@ export interface FileRoutesById {
   '/api/admin/ops': typeof ApiAdminOpsRoute
   '/api/admin/partner-governance': typeof ApiAdminPartnerGovernanceRoute
   '/api/admin/payout-operations': typeof ApiAdminPayoutOperationsRoute
+  '/api/admin/promotion-revisions': typeof ApiAdminPromotionRevisionsRoute
   '/api/admin/rewards-budget': typeof ApiAdminRewardsBudgetRoute
   '/api/admin/rewards-control': typeof ApiAdminRewardsControlRoute
   '/api/admin/rewards-publish-verify': typeof ApiAdminRewardsPublishVerifyRoute
@@ -1090,6 +1117,7 @@ export interface FileRoutesById {
   '/api/studio/session': typeof ApiStudioSessionRoute
   '/api/users/bind-wallet': typeof ApiUsersBindWalletRoute
   '/api/users/claim': typeof ApiUsersClaimRoute
+  '/api/users/identity': typeof ApiUsersIdentityRoute
   '/api/users/incentives': typeof ApiUsersIncentivesRoute
   '/api/users/socials': typeof ApiUsersSocialsRoute
   '/api/users/sync': typeof ApiUsersSyncRoute
@@ -1168,6 +1196,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/identity'
     | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
@@ -1175,6 +1204,7 @@ export interface FileRouteTypes {
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/payout-operations'
+    | '/api/admin/promotion-revisions'
     | '/api/admin/rewards-budget'
     | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
@@ -1213,6 +1243,7 @@ export interface FileRouteTypes {
     | '/api/studio/session'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
+    | '/api/users/identity'
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
@@ -1289,6 +1320,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/identity'
     | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
@@ -1296,6 +1328,7 @@ export interface FileRouteTypes {
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/payout-operations'
+    | '/api/admin/promotion-revisions'
     | '/api/admin/rewards-budget'
     | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
@@ -1334,6 +1367,7 @@ export interface FileRouteTypes {
     | '/api/studio/session'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
+    | '/api/users/identity'
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
@@ -1410,6 +1444,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/identity'
     | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
     | '/api/admin/mainnet-prerequisites'
@@ -1417,6 +1452,7 @@ export interface FileRouteTypes {
     | '/api/admin/ops'
     | '/api/admin/partner-governance'
     | '/api/admin/payout-operations'
+    | '/api/admin/promotion-revisions'
     | '/api/admin/rewards-budget'
     | '/api/admin/rewards-control'
     | '/api/admin/rewards-publish-verify'
@@ -1455,6 +1491,7 @@ export interface FileRouteTypes {
     | '/api/studio/session'
     | '/api/users/bind-wallet'
     | '/api/users/claim'
+    | '/api/users/identity'
     | '/api/users/incentives'
     | '/api/users/socials'
     | '/api/users/sync'
@@ -1532,6 +1569,7 @@ export interface RootRouteChildren {
   ApiAdminApplicationReadinessRoute: typeof ApiAdminApplicationReadinessRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
+  ApiAdminIdentityRoute: typeof ApiAdminIdentityRoute
   ApiAdminLaunchPreparationRoute: typeof ApiAdminLaunchPreparationRoute
   ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
   ApiAdminMainnetPrerequisitesRoute: typeof ApiAdminMainnetPrerequisitesRoute
@@ -1539,6 +1577,7 @@ export interface RootRouteChildren {
   ApiAdminOpsRoute: typeof ApiAdminOpsRoute
   ApiAdminPartnerGovernanceRoute: typeof ApiAdminPartnerGovernanceRoute
   ApiAdminPayoutOperationsRoute: typeof ApiAdminPayoutOperationsRoute
+  ApiAdminPromotionRevisionsRoute: typeof ApiAdminPromotionRevisionsRoute
   ApiAdminRewardsBudgetRoute: typeof ApiAdminRewardsBudgetRoute
   ApiAdminRewardsControlRoute: typeof ApiAdminRewardsControlRoute
   ApiAdminRewardsPublishVerifyRoute: typeof ApiAdminRewardsPublishVerifyRoute
@@ -1571,6 +1610,7 @@ export interface RootRouteChildren {
   ApiStudioSessionRoute: typeof ApiStudioSessionRoute
   ApiUsersBindWalletRoute: typeof ApiUsersBindWalletRoute
   ApiUsersClaimRoute: typeof ApiUsersClaimRoute
+  ApiUsersIdentityRoute: typeof ApiUsersIdentityRoute
   ApiUsersIncentivesRoute: typeof ApiUsersIncentivesRoute
   ApiUsersSocialsRoute: typeof ApiUsersSocialsRoute
   ApiUsersSyncRoute: typeof ApiUsersSyncRoute
@@ -1980,6 +2020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminBannerUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/identity': {
+      id: '/api/admin/identity'
+      path: '/api/admin/identity'
+      fullPath: '/api/admin/identity'
+      preLoaderRoute: typeof ApiAdminIdentityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/launch-preparation': {
       id: '/api/admin/launch-preparation'
       path: '/api/admin/launch-preparation'
@@ -2027,6 +2074,13 @@ declare module '@tanstack/react-router' {
       path: '/api/admin/payout-operations'
       fullPath: '/api/admin/payout-operations'
       preLoaderRoute: typeof ApiAdminPayoutOperationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/promotion-revisions': {
+      id: '/api/admin/promotion-revisions'
+      path: '/api/admin/promotion-revisions'
+      fullPath: '/api/admin/promotion-revisions'
+      preLoaderRoute: typeof ApiAdminPromotionRevisionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/rewards-budget': {
@@ -2293,6 +2347,13 @@ declare module '@tanstack/react-router' {
       path: '/api/users/claim'
       fullPath: '/api/users/claim'
       preLoaderRoute: typeof ApiUsersClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/identity': {
+      id: '/api/users/identity'
+      path: '/api/users/identity'
+      fullPath: '/api/users/identity'
+      preLoaderRoute: typeof ApiUsersIdentityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/users/incentives': {
@@ -2562,6 +2623,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminApplicationReadinessRoute: ApiAdminApplicationReadinessRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
+  ApiAdminIdentityRoute: ApiAdminIdentityRoute,
   ApiAdminLaunchPreparationRoute: ApiAdminLaunchPreparationRoute,
   ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,
   ApiAdminMainnetPrerequisitesRoute: ApiAdminMainnetPrerequisitesRoute,
@@ -2569,6 +2631,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminOpsRoute: ApiAdminOpsRoute,
   ApiAdminPartnerGovernanceRoute: ApiAdminPartnerGovernanceRoute,
   ApiAdminPayoutOperationsRoute: ApiAdminPayoutOperationsRoute,
+  ApiAdminPromotionRevisionsRoute: ApiAdminPromotionRevisionsRoute,
   ApiAdminRewardsBudgetRoute: ApiAdminRewardsBudgetRoute,
   ApiAdminRewardsControlRoute: ApiAdminRewardsControlRoute,
   ApiAdminRewardsPublishVerifyRoute: ApiAdminRewardsPublishVerifyRoute,
@@ -2601,6 +2664,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiStudioSessionRoute: ApiStudioSessionRoute,
   ApiUsersBindWalletRoute: ApiUsersBindWalletRoute,
   ApiUsersClaimRoute: ApiUsersClaimRoute,
+  ApiUsersIdentityRoute: ApiUsersIdentityRoute,
   ApiUsersIncentivesRoute: ApiUsersIncentivesRoute,
   ApiUsersSocialsRoute: ApiUsersSocialsRoute,
   ApiUsersSyncRoute: ApiUsersSyncRoute,

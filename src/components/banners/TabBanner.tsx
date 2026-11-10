@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import giftAsset from "@/assets/gift-1.png.asset.json";
 import type { BannerSlide, BannerSurfaceKey } from "@/lib/config/appConfig";
 import { trackBannerClick } from "@/lib/banners/analytics";
+import { PromotionBanner } from './PromotionBanner';
 
 const bridgeHero = "/__l5e/assets-v1/11289c81-991d-49ad-a2c1-b3e55906cf5c/bridge-hero.png";
 
@@ -73,6 +74,7 @@ export function TabBanner({
   /** Enables click analytics for admin-published slides. */
   surface?: BannerSurfaceKey;
 }) {
+  if (slide?.promotion) return <PromotionBanner slide={slide} surface={surface}/>;
   const base = COPY[variant];
   const title = slide?.title ?? base.title;
   const body = slide?.body ?? base.body;
@@ -96,7 +98,7 @@ export function TabBanner({
     <>
       {full ? (
         <img
-          src={art!}
+          src={art || undefined}
           alt=""
           aria-hidden
           loading="lazy"

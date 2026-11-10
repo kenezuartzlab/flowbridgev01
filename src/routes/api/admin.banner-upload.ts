@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { inspectBannerImage } from '@/lib/banners/imageValidation';
 
 const MAX_BYTES = 2_000_000;
-const ALLOWED = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"];
+const ALLOWED = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 // Admin-only banner artwork upload. Files land in the private "banners" bucket
 // and are served back through /api/banner-image/*.
@@ -18,22 +19,24 @@ export const Route = createFileRoute("/api/admin/banner-upload")({
         const file = form?.get("file");
         if (!(file instanceof File)) return jsonResponse({ error: "No file uploaded" }, 400);
         if (!ALLOWED.includes(file.type)) {
-          return jsonResponse({ error: "Use a PNG, JPG, WebP, GIF or SVG image." }, 400);
+          return jsonResponse({ error: "Use a PNG, JPG, WebP or GIF image." }, 400);
         }
         if (file.size > MAX_BYTES) {
           return jsonResponse({ error: "Image is larger than 2 MB." }, 400);
         }
 
-        const ext = (file.name.split(".").pop() ?? "png").toLowerCase().replace(/[^a-z0-9]/g, "");
-        const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext || "png"}`;
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const dimensions = inspectBannerImage(bytes, file.type);
+        if (!dimensions) return jsonResponse({ error:'Invalid image, or dimensions outside 32–8192px / 32 megapixels.' },400);
+        const path = `${gate.admin.userId}/${crypto.randomUUID()}.${dimensions.extension}`;
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { error } = await supabaseAdmin.storage
             .from("banners")
-            .upload(path, await file.arrayBuffer(), { contentType: file.type, upsert: false });
+            .upload(path, bytes, { contentType: file.type, upsert: false });
           if (error) throw error;
-          return jsonResponse({ url: `/api/banner-image/${path}`, size: file.size });
+          return jsonResponse({ url: `/api/banner-image/${path}`, size: file.size, width:dimensions.width,height:dimensions.height });
         } catch (e: any) {
           return jsonResponse({ error: e?.message ?? "Upload failed" }, 500);
         }

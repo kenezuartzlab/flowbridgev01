@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { promotionBannersSchema as advancedBannersSchema, safePromotionImage } from '@/lib/banners/promotionPolicy';
 
 const feesSchema = z.object({
   defaultSlippagePct: z.number().min(0.01).max(50),
@@ -179,7 +180,7 @@ const bodySchema = z.object({
   flags: flagsSchema.optional(),
   social: socialSchema.optional(),
   content: contentSchema.optional(),
-  banners: bannersSchema.optional(),
+  banners: advancedBannersSchema.optional(),
   partners: z.array(partnerSchema).max(40).optional(),
   quickActions: z.array(quickActionSchema).max(16).optional(),
 });
@@ -213,6 +214,16 @@ export const Route = createFileRoute("/api/admin/settings")({
 
         const { writeSetting, buildPublicConfig } = await import("@/lib/appConfig.server");
         try {
+          if (parsed.data.banners) {
+            const { readSettings } = await import('@/lib/appConfig.server');
+            const old = (await readSettings()).banners;
+            for (const [surface, value] of Object.entries(parsed.data.banners)) for (const slide of value.slides) {
+              // Preserve legacy artwork byte-for-byte, but new image sources
+              // must be our validated upload service, not arbitrary URLs.
+              const prior = old?.[surface]?.slides?.find((s: {id?:string}) => s.id === slide.id);
+              if (!safePromotionImage(slide.imageUrl??'') && slide.imageUrl !== prior?.imageUrl) return jsonResponse({ error:'Upload promotional artwork instead of entering an external image URL.' },400);
+            }
+          }
           for (const key of ["fees", "rewards", "flags", "social", "content", "banners", "partners", "quickActions", "pages"] as const) {
             const value = parsed.data[key];
             if (value) await writeSetting(key, value, gate.admin);

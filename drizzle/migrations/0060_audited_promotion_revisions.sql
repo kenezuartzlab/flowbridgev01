@@ -1,0 +1,5 @@
+CREATE TABLE public.promotion_revisions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), value jsonb NOT NULL, actor_id uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+GRANT ALL ON public.promotion_revisions TO service_role;
+ALTER TABLE public.promotion_revisions ENABLE ROW LEVEL SECURITY;
+CREATE FUNCTION public.record_promotion_revision() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF NEW.key='banners' AND (TG_OP='INSERT' OR OLD.value IS DISTINCT FROM NEW.value) THEN IF TG_OP='UPDATE' AND NOT EXISTS(SELECT 1 FROM public.promotion_revisions WHERE value=OLD.value) THEN INSERT INTO public.promotion_revisions(value,actor_id) VALUES(OLD.value,NEW.updated_by); END IF; INSERT INTO public.promotion_revisions(value,actor_id) VALUES(NEW.value,NEW.updated_by); END IF; RETURN NEW; END $$;
+CREATE TRIGGER promotion_revision_audit AFTER INSERT OR UPDATE ON public.app_settings FOR EACH ROW EXECUTE FUNCTION public.record_promotion_revision();

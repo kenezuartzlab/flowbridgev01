@@ -108,7 +108,7 @@ export async function ensureProfile(userId: string, email: string, referredByCod
         .single();
       return updated;
     }
-    if (existing.email !== email && email) {
+    if (!existing.wallet_address && existing.email !== email && email) {
       await supabaseAdmin.from("profiles").update({ email }).eq("id", userId);
     }
     return existing;
@@ -829,13 +829,12 @@ export async function getGlobalIncentiveStats() {
 }
 
 
-export async function bindUserWallet(userId: string, walletAddress: string) {
-  // Delegates to the SECURITY DEFINER RPC that safely bypasses the
-  // profile-guard trigger via a per-transaction GUC, enforces the 2×/30d
-  // rate limit, and validates the address format.
-  const { data, error } = await supabaseAdmin.rpc("admin_bind_wallet", {
+export async function bindUserWallet(userId: string, walletAddress: string, nonce?: string) {
+  if (!nonce) throw new Error("A fresh signed binding challenge is required.");
+  const { data, error } = await supabaseAdmin.rpc("bind_verified_identity", {
     p_user_id: userId,
     p_wallet: walletAddress,
+    p_nonce: nonce,
   });
   if (error) throw new Error("Unable to bind this wallet. Verify ownership or use secure account recovery.");
   return data;

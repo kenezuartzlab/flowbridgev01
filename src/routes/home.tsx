@@ -277,6 +277,7 @@ function HomePage() {
             slideKeys={campaignSlides.map((s) => s.id)}
             onSlideVisible={(key) => trackBannerImpression("home", key)}
             intervalMs={campaigns.intervalMs}
+            delaysMs={campaignSlides.map(s=>s.promotion?.delayMs??campaigns.intervalMs)}
             label="Featured campaigns"
             className="pb-1"
           />

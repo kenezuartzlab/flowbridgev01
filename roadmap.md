@@ -1,3 +1,9 @@
+# Identity and promotions — 2026-11-10
+- [ ] Audit and implement permanent verified identity and scoped audited recovery, preserving sign-in and historical recipients.
+- [ ] Extend existing promotions editor, upload validation, renderer and audited revisions.
+- [ ] Run regressions, security and mobile acceptance; publish only after compatibility gates pass.
+- [ ] Deliver separate wheel plan only; no wheel implementation.
+
 # Wallet sign-in incident — 2026-11-09
 - [x] Correct selected-provider signing, UTF-8 hex transport and single session exchange; 2,406 tests and preview build pass. 390px simulated wallet cancellation checked; real user-wallet sign-in remains unverified, production publication not requested.
 

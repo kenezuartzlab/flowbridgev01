@@ -5,6 +5,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { setLogoOverrides } from "@/lib/tokenLogos";
 import { DEFAULT_ANNOUNCEMENT } from './announcement';
+import { promotionSchema, type PromotionOptions } from '@/lib/banners/promotionPolicy';
 
 export interface FeeSettings {
   defaultSlippagePct: number;
@@ -129,6 +130,7 @@ export interface BannerSlide {
   /** compact = small icon, logo = larger logo, full = edge-to-edge artwork. */
   layout?: BannerLayout;
   schedule?: BannerSchedule | null;
+  promotion?: PromotionOptions;
 }
 
 export interface BannerSurface {
@@ -611,12 +613,13 @@ function mergeSlide(raw: any, index: number, surface: string): BannerSlide | nul
     isActive: raw.isActive !== false,
     layout,
     schedule: mergeSchedule(raw.schedule),
+    promotion: promotionSchema.safeParse(raw.promotion).success ? promotionSchema.parse(raw.promotion) : undefined,
   };
 }
 
 /** True when the slide is live now (enabled + inside its schedule window). */
 export function isSlideVisible(slide: BannerSlide, now: Date = new Date()): boolean {
-  if (slide.isActive === false) return false;
+  if (slide.isActive === false || slide.promotion?.status === 'draft') return false;
   const s = slide.schedule;
   if (!s) return true;
   const t = now.getTime();
@@ -1007,7 +1010,7 @@ export function getBannerSurface(config: AppConfig, key: BannerSurfaceKey): Bann
   const now = new Date();
   return {
     intervalMs: surface.intervalMs,
-    slides: surface.slides.filter((s) => isSlideVisible(s, now)),
+    slides: surface.slides.filter((s) => isSlideVisible(s, now)).sort((a,b)=>(b.promotion?.priority??0)-(a.promotion?.priority??0)),
   };
 }
 
