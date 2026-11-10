@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdventureRouteImport } from './routes/adventure'
 import { Route as ArcadeflixRouteImport } from './routes/arcadeflix'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as BotChainRouteImport } from './routes/bot-chain'
@@ -41,6 +42,7 @@ import { Route as TradeRouteImport } from './routes/trade'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as ApiAdventureRouteImport } from './routes/api/adventure'
 import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
 import { Route as ApiBannerEventsRouteImport } from './routes/api/banner-events'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
@@ -60,6 +62,7 @@ import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
 import { Route as CampaignsPartnersRouteImport } from './routes/campaigns/partners'
 import { Route as CampaignsStudioRouteImport } from './routes/campaigns/studio'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as ApiAdminAdventureRouteImport } from './routes/api/admin.adventure'
 import { Route as ApiAdminApplicationFilesRouteImport } from './routes/api/admin.application-files'
 import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/admin.application-materials'
 import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
@@ -150,6 +153,11 @@ const ActivityRoute = ActivityRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdventureRoute = AdventureRouteImport.update({
+  id: '/adventure',
+  path: '/adventure',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArcadeflixRoute = ArcadeflixRouteImport.update({
@@ -294,6 +302,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdventureRoute = ApiAdventureRouteImport.update({
+  id: '/api/adventure',
+  path: '/api/adventure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAssistantRoute = ApiAssistantRouteImport.update({
   id: '/api/assistant',
   path: '/api/assistant',
@@ -391,6 +404,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminAdventureRoute = ApiAdminAdventureRouteImport.update({
+  id: '/api/admin/adventure',
+  path: '/api/admin/adventure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminApplicationFilesRoute =
   ApiAdminApplicationFilesRouteImport.update({
     id: '/api/admin/application-files',
@@ -769,6 +787,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
+  '/adventure': typeof AdventureRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/bot-chain': typeof BotChainRoute
@@ -797,6 +816,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/adventure': typeof ApiAdventureRoute
   '/api/assistant': typeof ApiAssistantRouteWithChildren
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
@@ -816,6 +836,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/adventure': typeof ApiAdminAdventureRoute
   '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
@@ -893,6 +914,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
+  '/adventure': typeof AdventureRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/bot-chain': typeof BotChainRoute
@@ -921,6 +943,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/adventure': typeof ApiAdventureRoute
   '/api/assistant': typeof ApiAssistantRouteWithChildren
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
@@ -940,6 +963,7 @@ export interface FileRoutesByTo {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/adventure': typeof ApiAdminAdventureRoute
   '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
@@ -1018,6 +1042,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/activity': typeof ActivityRoute
   '/admin': typeof AdminRoute
+  '/adventure': typeof AdventureRoute
   '/arcadeflix': typeof ArcadeflixRoute
   '/assistant': typeof AssistantRoute
   '/bot-chain': typeof BotChainRoute
@@ -1046,6 +1071,7 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/adventure': typeof ApiAdventureRoute
   '/api/assistant': typeof ApiAssistantRouteWithChildren
   '/api/banner-events': typeof ApiBannerEventsRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
@@ -1065,6 +1091,7 @@ export interface FileRoutesById {
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/admin/adventure': typeof ApiAdminAdventureRoute
   '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
@@ -1144,6 +1171,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/activity'
     | '/admin'
+    | '/adventure'
     | '/arcadeflix'
     | '/assistant'
     | '/bot-chain'
@@ -1172,6 +1200,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/adventure'
     | '/api/assistant'
     | '/api/banner-events'
     | '/api/campaigns'
@@ -1191,6 +1220,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/adventure'
     | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
@@ -1268,6 +1298,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/activity'
     | '/admin'
+    | '/adventure'
     | '/arcadeflix'
     | '/assistant'
     | '/bot-chain'
@@ -1296,6 +1327,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/adventure'
     | '/api/assistant'
     | '/api/banner-events'
     | '/api/campaigns'
@@ -1315,6 +1347,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/adventure'
     | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
@@ -1392,6 +1425,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/activity'
     | '/admin'
+    | '/adventure'
     | '/arcadeflix'
     | '/assistant'
     | '/bot-chain'
@@ -1420,6 +1454,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/adventure'
     | '/api/assistant'
     | '/api/banner-events'
     | '/api/campaigns'
@@ -1439,6 +1474,7 @@ export interface FileRouteTypes {
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/admin/adventure'
     | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
@@ -1517,6 +1553,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   ActivityRoute: typeof ActivityRoute
   AdminRoute: typeof AdminRoute
+  AdventureRoute: typeof AdventureRoute
   ArcadeflixRoute: typeof ArcadeflixRoute
   AssistantRoute: typeof AssistantRoute
   BotChainRoute: typeof BotChainRoute
@@ -1545,6 +1582,7 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiAdventureRoute: typeof ApiAdventureRoute
   ApiAssistantRoute: typeof ApiAssistantRouteWithChildren
   ApiBannerEventsRoute: typeof ApiBannerEventsRoute
   ApiCampaignsRoute: typeof ApiCampaignsRouteWithChildren
@@ -1564,6 +1602,7 @@ export interface RootRouteChildren {
   CampaignsStudioRoute: typeof CampaignsStudioRoute
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiAdminAdventureRoute: typeof ApiAdminAdventureRoute
   ApiAdminApplicationFilesRoute: typeof ApiAdminApplicationFilesRoute
   ApiAdminApplicationMaterialsRoute: typeof ApiAdminApplicationMaterialsRoute
   ApiAdminApplicationReadinessRoute: typeof ApiAdminApplicationReadinessRoute
@@ -1654,6 +1693,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adventure': {
+      id: '/adventure'
+      path: '/adventure'
+      fullPath: '/adventure'
+      preLoaderRoute: typeof AdventureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/arcadeflix': {
@@ -1852,6 +1898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/adventure': {
+      id: '/api/adventure'
+      path: '/api/adventure'
+      fullPath: '/api/adventure'
+      preLoaderRoute: typeof ApiAdventureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/assistant': {
       id: '/api/assistant'
       path: '/api/assistant'
@@ -1983,6 +2036,13 @@ declare module '@tanstack/react-router' {
       path: '/.mcp/invoke-tool/$tool'
       fullPath: '/.mcp/invoke-tool/$tool'
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/adventure': {
+      id: '/api/admin/adventure'
+      path: '/api/admin/adventure'
+      fullPath: '/api/admin/adventure'
+      preLoaderRoute: typeof ApiAdminAdventureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/application-files': {
@@ -2569,6 +2629,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   ActivityRoute: ActivityRoute,
   AdminRoute: AdminRoute,
+  AdventureRoute: AdventureRoute,
   ArcadeflixRoute: ArcadeflixRoute,
   AssistantRoute: AssistantRoute,
   BotChainRoute: BotChainRoute,
@@ -2598,6 +2659,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiAdventureRoute: ApiAdventureRoute,
   ApiAssistantRoute: ApiAssistantRouteWithChildren,
   ApiBannerEventsRoute: ApiBannerEventsRoute,
   ApiCampaignsRoute: ApiCampaignsRouteWithChildren,
@@ -2618,6 +2680,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsStudioRoute: CampaignsStudioRoute,
   CampaignsIndexRoute: CampaignsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiAdminAdventureRoute: ApiAdminAdventureRoute,
   ApiAdminApplicationFilesRoute: ApiAdminApplicationFilesRoute,
   ApiAdminApplicationMaterialsRoute: ApiAdminApplicationMaterialsRoute,
   ApiAdminApplicationReadinessRoute: ApiAdminApplicationReadinessRoute,

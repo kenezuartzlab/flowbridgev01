@@ -1,0 +1,1 @@
+DO $$ DECLARE definition text; BEGIN SELECT pg_get_functiondef('public.adventure_sync(uuid)'::regprocedure) INTO definition; definition:=replace(definition,'l.reason=''CORE_SWAP''','l.program_id=''CORE_SWAP'' AND l.verified_usd>=5'); EXECUTE definition; END $$;

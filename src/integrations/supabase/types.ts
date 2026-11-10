@@ -56,6 +56,87 @@ export type Database = {
         }
         Relationships: []
       }
+      adventure_completions: {
+        Row: {
+          chain_id: number | null
+          completed_at: string
+          event_index: number | null
+          evidence_key: string
+          period_id: string
+          quest_id: string
+          tx_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          chain_id?: number | null
+          completed_at?: string
+          event_index?: number | null
+          evidence_key: string
+          period_id: string
+          quest_id: string
+          tx_hash?: string | null
+          user_id: string
+        }
+        Update: {
+          chain_id?: number | null
+          completed_at?: string
+          event_index?: number | null
+          evidence_key?: string
+          period_id?: string
+          quest_id?: string
+          tx_hash?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      adventure_config: {
+        Row: {
+          cooldown_seconds: number
+          id: boolean
+          preview_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          cooldown_seconds?: number
+          id?: boolean
+          preview_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          cooldown_seconds?: number
+          id?: boolean
+          preview_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      adventure_quiz_challenges: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          id: string
+          period_id: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          id?: string
+          period_id: string
+          topic: string
+          user_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          id?: string
+          period_id?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_action_intents: {
         Row: {
           canonical: Json
@@ -3375,6 +3456,27 @@ export type Database = {
           points_awarded: number
         }[]
       }
+      adventure_assert_preview: { Args: { p_user: string }; Returns: undefined }
+      adventure_preview_setting: {
+        Args: {
+          p_actor: string
+          p_cooldown: number
+          p_enabled: boolean
+          p_reason: string
+          p_wallet: string
+        }
+        Returns: undefined
+      }
+      adventure_quiz: {
+        Args: {
+          p_answers?: Json
+          p_challenge?: string
+          p_topic: string
+          p_user: string
+        }
+        Returns: Json
+      }
+      adventure_sync: { Args: { p_user: string }; Returns: Json }
       approve_reward_schedule: {
         Args: {
           p_actor: string

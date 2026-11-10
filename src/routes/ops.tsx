@@ -12,6 +12,7 @@ import { BudgetControlsTab } from "@/components/ops/BudgetControlsTab";
 import { VoterRewardsTab } from "@/components/ops/VoterRewardsTab";
 import { RewardsControlCenter } from "@/components/ops/RewardsControlCenter";
 import { RewardsVaultV2Tab } from "@/components/ops/RewardsVaultV2Tab";
+import { AdventureAdmin } from '@/components/adventure/AdventureAdmin';
 
 export const Route = createFileRoute("/ops")({
   head: () => ({
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/ops")({
 });
 
 type PeriodKey = "today" | "7d" | "30d";
-const TABS = ["Overview", "Router V4", "Trade", "Liquidity Gaps", "Token Demand", "DEX Health", "Journey", "Engagement", "BOT Chain", "Indexing", "Errors", "Alerts", "Growth", "Control Center", "Rewards", "Budgets", "Voter Rewards", "Vault V2"] as const;
+const TABS = ["Overview", "Router V4", "Trade", "Liquidity Gaps", "Token Demand", "DEX Health", "Journey", "Engagement", "BOT Chain", "Indexing", "Errors", "Alerts", "Growth", "Control Center", "Rewards", "Budgets", "Voter Rewards", "Vault V2", "Adventure"] as const;
 type Tab = (typeof TABS)[number];
 
 async function fetchReport(period: PeriodKey, wallet: string | undefined): Promise<{ status: number; report: OpsReport | null; reason?: string }> {
@@ -177,7 +178,7 @@ function OpsPage() {
 
       {q.isLoading && <p className="text-[13px] text-muted">Running live read-only checks…</p>}
       {q.isError && <div role="alert" className="space-y-2 text-[13px] text-danger"><p>{q.error.message} Status is UNKNOWN until the check succeeds.</p><Button variant="outline" size="sm" onClick={() => q.refetch()} disabled={q.isFetching}><RefreshCw />Retry operator check</Button><Link to="/account" className="ml-3 text-primary underline">Go to account</Link></div>}
-      {tab === "Vault V2" ? <RewardsVaultV2Tab wallet={address} /> : tab === "Control Center" ? <RewardsControlCenter wallet={address} onOpen={(t) => setTab(t)} /> : tab === "Rewards" ? <RewardsSolvencyTab wallet={address} /> : tab === "Budgets" ? <BudgetControlsTab wallet={address} /> : tab === "Voter Rewards" ? <VoterRewardsTab wallet={address ?? ""} /> : r && <TabBody tab={tab} r={r} />}
+      {tab === "Adventure" ? <AdventureAdmin wallet={address}/> : tab === "Vault V2" ? <RewardsVaultV2Tab wallet={address} /> : tab === "Control Center" ? <RewardsControlCenter wallet={address} onOpen={(t) => setTab(t)} /> : tab === "Rewards" ? <RewardsSolvencyTab wallet={address} /> : tab === "Budgets" ? <BudgetControlsTab wallet={address} /> : tab === "Voter Rewards" ? <VoterRewardsTab wallet={address ?? ""} /> : r && <TabBody tab={tab} r={r} />}
     </main>
   );
 }

@@ -1,0 +1,10 @@
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { adventureRequest } from '@/lib/adventure/api';
+import { Button } from '@/components/ui/button';
+export function AdventureAdmin({ wallet }: {wallet?:string}) {
+  const q = useQuery({queryKey:['adventure-admin',wallet],queryFn:()=>adventureRequest<{preview_enabled:boolean;cooldown_seconds:number}>(undefined,wallet,true),retry:false});
+  const [reason,setReason] = useState(''); const [cooldown,setCooldown] = useState(60); const [message,setMessage] = useState(''); const [busy,setBusy] = useState(false);
+  async function save() { setBusy(true); try { await adventureRequest({preview_enabled:!q.data?.preview_enabled,cooldown_seconds:cooldown,reason},wallet,true); await q.refetch(); setMessage('Preview setting saved and audited.'); } catch(e) {setMessage(e instanceof Error ? e.message : 'Not saved.');} finally {setBusy(false);} }
+  return <section className="space-y-4 py-4"><h2 className="text-lg font-bold">Adventure preview</h2><p className="text-sm text-muted">Fixed catalog, decorative badges only. Restricted to verified Super Admin accounts. Public launch remains disabled.</p>{q.error && <p role="alert">{q.error.message}</p>}<p>{q.data?.preview_enabled ? 'Preview running' : 'Preview OFF'}</p><label className="block text-sm">Quiz cooldown (seconds)<input type="number" min={30} max={3600} value={cooldown} onChange={e=>setCooldown(Number(e.target.value))} className="ml-2 w-24 rounded border border-input bg-background p-2"/></label><label className="block text-sm">Reason<textarea value={reason} onChange={e=>setReason(e.target.value)} maxLength={500} className="mt-2 block w-full rounded border border-input bg-background p-2"/></label><Button disabled={!q.data || busy || reason.trim().length<10} onClick={()=>void save()}>{q.data?.preview_enabled ? 'Pause preview' : 'Start restricted preview'}</Button><p role="status">{message}</p></section>;
+}

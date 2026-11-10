@@ -435,6 +435,27 @@
       "when": 1794275184690,
       "tag": "0061_identity_promotion_service_only_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1794277787069,
+      "tag": "0062_adventure_non_economic_achievements",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1794277929090,
+      "tag": "0063_adventure_canonical_evidence_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1794277972548,
+      "tag": "0064_adventure_verified_program_filter",
+      "breakpoints": true
     }
   ]
 }

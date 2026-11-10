@@ -33,6 +33,7 @@ import { RewardsHeroContent } from "@/components/rewards/RewardsHeroContent";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
 import { OpportunityFeed } from "@/components/home/OpportunityFeed";
 import { JourneyCard } from "@/components/home/JourneyCard";
+import { AdventureEntry } from '@/components/adventure/AdventureEntry';
 import { OnboardingOverlay } from "@/components/growth/OnboardingOverlay";
 import { NotificationCenter } from "@/components/growth/NotificationCenter";
 import { NextActionCard } from "@/components/growth/NextActionCard";
@@ -192,6 +193,7 @@ function HomePage() {
          * recommendation and without creating anything economic.
          */}
         <JourneyCard />
+        <AdventureEntry />
 
         {/*
          * V28 §3 — account completion: one value message, one primary action.

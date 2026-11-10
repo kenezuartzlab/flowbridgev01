@@ -51,6 +51,7 @@ import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
 import { RewardPolicyDetails } from '@/components/rewards/RewardPolicyDetails';
 import { ReferralRewards } from '@/components/rewards/ReferralRewards';
 import { EarnLiquidityFees } from "@/components/liquidity/EarnLiquidityFees";
+import { AdventureEntry } from '@/components/adventure/AdventureEntry';
 
 
 
@@ -165,6 +166,7 @@ function EarnPage() {
       />
 
       <SafeAreaPage>
+        <AdventureEntry />
         {authReady && !user ? (
           <Surface padded className="space-y-3">
             <div className="flex items-center gap-2">

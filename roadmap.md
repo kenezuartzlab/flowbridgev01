@@ -1,3 +1,9 @@
+# Adventure — safe non-chance-based build
+- [x] Default-OFF static catalog, locked canonical evidence, single-use timed quizzes, 3-action daily / 5-type weekly cosmetic badges; no XP balance or economic writes. Migrations 0062–0064 applied; zero live config/completion/challenge rows.
+- [x] Compact shared Home/Earn entry, accessible Adventure page and audited Super Admin-only preview toggle/cooldown; no public activation path. Static copy/order/targets deliberately retained for this held release.
+- [x] 2,448 tests/241 files; isolated eight-way sync, replay/referral/duplicate/threshold/grant checks and real isolated SQL-backed quiz→badge UI at 320/390/430/1280 reduced-motion PASS; signed-in live OFF gate and automatic build/type gate PASS.
+- [ ] Production remains HOLD/OFF: 2 high and 11 moderate dependency advisories, stale deep scans and real-wallet sign-in acceptance unresolved; no unrelated held features published. Full live quest flow intentionally not enabled; tested against disposable database only.
+
 # Identity and promotions — 2026-11-10
 - [x] Same-release follow-up: invalid UUID fixture corrected without validator changes; 2,430 tests/239 files pass, disposable identity races and banner rollback pass, signed-in admin/access negatives and 320/390/430/1280 reduced-motion crop checks pass; automatic build/type gate OK.
 - [x] Permanent identity/recovery verified: live 0059/0060 readback, 27 compatible pairs, no duplicates/grants; additive 0061 revokes default public privileges only. No identity, recipient or financial changes.
