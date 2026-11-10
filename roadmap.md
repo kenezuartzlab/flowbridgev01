@@ -1,3 +1,9 @@
+# Growth Integration V1 — preview only
+- [x] Refined existing verified receipts, canonical next actions, recipient-reviewed claims and referral sharing; no execution or economic changes.
+- [x] Restricted Adventure entry/content to successful existing gated preview reads; cosmetic presentation only.
+- [x] Three privacy-safe registered events; 2,456 tests/242 files PASS, automatic build/type gate OK, 320/390/430/1280 reduced-motion checks; acceptance: docs/security/GROWTH_INTEGRATION_V1_20261110.md.
+- [ ] Release HOLD: 2 high/11 moderate advisories, stale deep scans and real-wallet sign-in/financial acceptance remain unresolved; no publication/activation authorized.
+
 # Adventure — safe non-chance-based build
 - [x] Default-OFF static catalog, locked canonical evidence, single-use timed quizzes, 3-action daily / 5-type weekly cosmetic badges; no XP balance or economic writes. Migrations 0062–0064 applied; zero live config/completion/challenge rows.
 - [x] Compact shared Home/Earn entry, accessible Adventure page and audited Super Admin-only preview toggle/cooldown; no public activation path. Static copy/order/targets deliberately retained for this held release.

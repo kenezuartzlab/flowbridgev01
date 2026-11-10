@@ -3,7 +3,7 @@
  * First Trade and DONE/NOW/NEXT progress. Navigation only; nothing is signed.
  */
 import { Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ArrowRight, CheckCircle2, Circle, CircleDot, Share2 } from "lucide-react";
 import { useAccountActivation } from "@/lib/growth/useAccountActivation";
 import { forYouNow, resolveNextAction } from "@/lib/growth/nextAction";
@@ -11,7 +11,7 @@ import { missionProgress } from "@/lib/growth/missionProgress";
 import { buildShareUrl, REFERRAL_NOTE } from "@/lib/growth/shareReferral";
 import { trackProductEvent } from "@/lib/ops/productEvents";
 import { usePersonalProgress } from "@/lib/rewards/usePersonalProgress";
-import { RewardProgressPanel } from "@/components/rewards/RewardProgressPanel";
+import { Button } from '@/components/ui/button';
 
 const WHY = [
   "Trade across approved BOT ecosystem liquidity (BDEX and CaSwap)",
@@ -22,6 +22,7 @@ const WHY = [
 
 export function NextActionCard({ confirmedTrades }: { confirmedTrades: number }) {
   const a = useAccountActivation();
+  const [shareNotice, setShareNotice] = useState("");
   const input = {
     signedIn: a.signedIn,
     emailVerified: a.emailVerified,
@@ -47,12 +48,13 @@ export function NextActionCard({ confirmedTrades }: { confirmedTrades: number })
     try {
       if (navigator.share) await navigator.share({ title: "FlowBridge", text: "Smart trading on BOT Chain", url });
       else await navigator.clipboard.writeText(url);
-    } catch { /* user closed share sheet */ }
+      setShareNotice("Shared or copied.");
+    } catch { setShareNotice("Sharing cancelled."); }
   }
 
   if (a.loading) return null;
   return (
-    <section aria-labelledby="next-action-title" className="fb-surface space-y-3 p-4" data-testid="next-action-card">
+    <section aria-labelledby="next-action-title" className="space-y-3 border-y border-hairline py-4" data-testid="next-action-card">
       <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">For you now</p>
       <h2 id="next-action-title" className="text-[15px] font-bold leading-snug">{nba ? nba.label : forYouNow(input)}</h2>
       <p className="text-[12px] leading-relaxed text-muted">{next.reason}</p>
@@ -72,25 +74,24 @@ export function NextActionCard({ confirmedTrades }: { confirmedTrades: number })
         </ul>
       )}
 
-      <Link
+      <Button asChild className="h-auto min-h-11 w-full whitespace-normal"><Link
         to={next.id === "FIRST_TRADE" ? "/trade" : next.href}
-        onClick={() => trackProductEvent(next.id === "MAKE_ELIGIBLE_TRADE" ? "eligible_reward_activity_started" : next.id === "CLAIM_FLOW" ? "claim_started" : "explore_opened", "home")}
+        onClick={() => trackProductEvent(next.id === "MAKE_ELIGIBLE_TRADE" ? "eligible_reward_activity_started" : "explore_opened", "home")}
         className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-[13px] font-bold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {next.id === "FIRST_TRADE" ? "Find a route" : next.label} <ArrowRight aria-hidden className="h-4 w-4" />
-      </Link>
+      </Link></Button>
       {next.secondary && (
         <Link to={next.secondary.href} className="block text-center text-[12px] font-semibold text-primary underline-offset-2 hover:underline">
           {next.secondary.label}
         </Link>
       )}
 
-      {personal && <RewardProgressPanel p={personal.progression} area="home" />}
 
       {a.signedIn && (
         <div aria-label="Your progress" className="border-t border-hairline pt-3">
           <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-muted">Progress · {mission.done}/{mission.total}</p>
-          <ul className="space-y-1">
+          <ul className="flex flex-wrap gap-x-4 gap-y-2">
             {mission.steps.map((s) => (
               <li key={s.id} className="flex items-center gap-2 text-[11.5px]">
                 {s.status === "DONE" ? <CheckCircle2 aria-hidden className="h-3.5 w-3.5 text-primary" /> : s.status === "NOW" ? <CircleDot aria-hidden className="h-3.5 w-3.5 text-primary" /> : <Circle aria-hidden className="h-3.5 w-3.5 text-muted" />}
@@ -102,10 +103,11 @@ export function NextActionCard({ confirmedTrades }: { confirmedTrades: number })
         </div>
       )}
 
-      <button type="button" onClick={share} className="flex items-center gap-1.5 text-[11px] font-semibold text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <Button variant="ghost" type="button" onClick={share} className="flex items-center gap-1.5 text-[11px] font-semibold text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Share2 aria-hidden className="h-3.5 w-3.5" /> Share FlowBridge
         <span className="sr-only">. {REFERRAL_NOTE}</span>
-      </button>
+      </Button>
+      <p role="status" className="text-xs text-muted">{shareNotice}</p>
     </section>
   );
 }

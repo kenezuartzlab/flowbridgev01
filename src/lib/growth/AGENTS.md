@@ -1,0 +1,3 @@
+# Growth presentation
+- Claim lifecycle and celebration derive only from canonical round statuses and receipt-plus-isClaimed results; claimPresentation is render-only. Why: submission and historical totals must never imply eligibility or success.
+- Post-action navigation reuses nextAction/nextBestAction and existing activation cooldowns; it never creates economic awards or action intents. Why: recognition must not change execution or duplicate rewards.

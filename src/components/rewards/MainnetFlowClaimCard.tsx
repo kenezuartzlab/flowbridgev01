@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Coins, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
+import { ChevronDown, Coins, ExternalLink, Loader2, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { createPublicClient, encodeFunctionData, http, type Hex } from 'viem';
 
 import { SectionHeader, StatusPill, Surface } from '@/components/ui-kit/primitives';
@@ -15,6 +15,8 @@ import {
   type RoundView,
 } from '@/lib/rewards/mainnetClaimRounds';
 import { trackProductEvent } from '@/lib/ops/productEvents';
+import { Button } from '@/components/ui/button';
+import { CLAIM_STAGES, claimStage, hasConfirmedClaim } from '@/lib/growth/claimPresentation';
 import { getActiveProvider } from '@/lib/wallet/activeProvider';
 
 /**
@@ -47,7 +49,7 @@ export function formatFlow(raw: string | null | undefined, maxFrac = 4): string 
 
 const short = (a?: string | null) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—');
 const asDate = (s?: number | null) =>
-  s ? new Date(s * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short', timeZoneName: 'short' }) : '—';
+  s ? new Date(s * 1000).toLocaleString(undefined, { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', timeZoneName:'short' }) : '—';
 
 const LABEL: Record<RoundStatus, string> = {
   CLAIMABLE: 'Ready to claim',
@@ -71,6 +73,7 @@ export function MainnetFlowClaimCard() {
   const [results, setResults] = useState<ClaimStepResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [review, setReview] = useState(false);
   const stopRef = useRef(false);
   const claim = useMainnetFlowClaim(wallet);
   const { rounds } = claim;
@@ -150,7 +153,10 @@ export function MainnetFlowClaimCard() {
         onStep: (epochId, phase, hash) => setStep({ epochId, phase, hash }),
       });
       setResults(out);
-      if (out.some((r) => r.outcome === 'claimed')) trackProductEvent('claim_confirmed', 'earn');
+      if (hasConfirmedClaim(out)) {
+        trackProductEvent('claim_confirmed', 'earn');
+        window.__lovableEvents?.track?.('project.flow_claim_confirmed', { surface:'rewards' });
+      }
       const bad = out.find((r) => r.outcome !== 'claimed' && r.outcome !== 'skipped');
       if (bad) {
         setError(
@@ -190,7 +196,7 @@ export function MainnetFlowClaimCard() {
           </p>
         ) : (
           <>
-            <div className="rounded-2xl border border-hairline bg-card/60 p-3">
+            <div className="rounded-lg border border-hairline bg-card/60 p-3">
               <p className="text-[11px] font-bold uppercase tracking-wide text-muted-soft">Claimable now · {short(wallet)}</p>
               <p className="mt-1 text-2xl font-black tabular-nums text-foreground">
                 {claim.loading ? '…' : total} <span className="text-sm font-bold text-muted">FLOW</span>
@@ -209,25 +215,26 @@ export function MainnetFlowClaimCard() {
             {rounds.active.length ? (
               <ul className="space-y-2" aria-label="Reward rounds">
                 {rounds.active.map((r) => (
-                  <RoundRow key={`${r.epochId}:${r.index}`} r={r} busy={running} step={step} onClaim={(p) => void claimRounds([p])} />
+                  <RoundRow key={`${r.epochId}:${r.index}`} r={r} />
                 ))}
               </ul>
             ) : null}
 
             {rounds.history.length ? (
               <div>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   onClick={() => setShowHistory((v) => !v)}
                   className="inline-flex min-h-[40px] items-center gap-1 text-[12px] font-bold text-muted"
                   aria-expanded={showHistory}
                 >
                   History ({rounds.history.length}) <ChevronDown className={`h-3.5 w-3.5 ${showHistory ? 'rotate-180' : ''}`} aria-hidden />
-                </button>
+                </Button>
                 {showHistory ? (
                   <ul className="mt-1 space-y-2">
                     {rounds.history.map((r) => (
-                      <RoundRow key={`${r.epochId}:${r.index}`} r={r} busy step={null} onClaim={() => undefined} />
+                      <RoundRow key={`${r.epochId}:${r.index}`} r={r} />
                     ))}
                   </ul>
                 ) : null}
@@ -248,6 +255,7 @@ export function MainnetFlowClaimCard() {
           </p>
         ) : null}
 
+        {hasConfirmedClaim(results) && <div role="status" className="growth-confirmed growth-reveal flex items-center gap-3 rounded-lg border p-3"><CheckCircle2 className="text-success" aria-hidden/><div><p className="font-semibold">FLOW claimed</p><p className="text-xs text-muted">Receipt confirmed and claimed state verified on-chain.</p></div></div>}
         {results.length ? (
           <ul className="space-y-1 text-[12px]">
             {results.map((r) => (
@@ -266,39 +274,46 @@ export function MainnetFlowClaimCard() {
           </ul>
         ) : null}
 
-        {error ? <p className="text-[12px] leading-relaxed text-destructive">{error}</p> : null}
+        {error ? <p role="alert" className="text-[12px] leading-relaxed text-danger">{error}</p> : null}
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <button
+          <Button
             type="button"
             onClick={() => void (wallet ? claim.refresh() : connect())}
             disabled={connecting || claim.loading || running}
-            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl border border-hairline bg-card px-4 text-[13px] font-bold text-foreground transition-colors hover:border-primary/40 disabled:opacity-45"
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-hairline bg-card px-4 text-[13px] font-bold text-foreground transition-colors hover:border-primary/40 disabled:opacity-45"
           >
             {connecting || claim.loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ShieldCheck className="h-4 w-4" aria-hidden />}
             {wallet ? 'Re-check live state' : 'Connect wallet'}
-          </button>
+          </Button>
           {running && count > 1 ? (
-            <button
+            <Button
               type="button"
               onClick={() => (stopRef.current = true)}
-              className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-2xl border border-hairline bg-card px-4 text-[13px] font-bold text-foreground"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-hairline bg-card px-4 text-[13px] font-bold text-foreground"
             >
               Stop after this round
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
-              onClick={() => void claimRounds(rounds.claimable)}
+              onClick={() => setReview(true)}
               disabled={!count || running || claim.loading}
-              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:border disabled:border-hairline disabled:bg-card disabled:text-muted"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:border disabled:border-hairline disabled:bg-card disabled:text-muted"
             >
               {running ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Coins className="h-4 w-4" aria-hidden />}
-              {running ? 'Claiming…' : count > 1 ? `Claim available FLOW (${count} confirmations)` : count === 1 ? `Claim ${total} FLOW` : 'Claim FLOW'}
-            </button>
+              {running ? 'Claiming…' : 'Claim FLOW'}
+            </Button>
           )}
         </div>
 
+        {review && !running && <section aria-label="Confirm FLOW recipient" className="space-y-3 border-y border-hairline py-4">
+          <h3 className="font-semibold">Confirm your recipient</h3>
+          <p className="text-sm font-semibold">{total} FLOW · BOT Mainnet</p>
+          <p className="break-all font-mono text-xs">{wallet}</p>
+          <p className="text-xs text-muted">{count} round{count === 1 ? '' : 's'} · one wallet confirmation and BOT gas fee per transaction. Nothing is signed until you continue.</p>
+          <div className="flex flex-wrap gap-2"><Button className="h-auto min-h-11 whitespace-normal" disabled={!count || claim.loading} onClick={()=>{setReview(false); void claimRounds(rounds.claimable);}}>Continue in wallet</Button><Button variant="ghost" onClick={()=>setReview(false)}>Cancel</Button></div>
+        </section>}
         {claim.explorerTxUrl ? (
           <a href={claim.explorerTxUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-muted">
             View the reward distributor <ExternalLink className="h-3 w-3" aria-hidden />
@@ -315,17 +330,7 @@ export function MainnetFlowClaimCard() {
   );
 }
 
-function RoundRow({
-  r,
-  busy,
-  step,
-  onClaim,
-}: {
-  r: RoundView;
-  busy: boolean;
-  step: Step | null;
-  onClaim: (p: ClaimablePreparation) => void;
-}) {
+function RoundRow({ r }: { r: RoundView }) {
   const dateLine =
     r.status === 'OPENS_LATER'
       ? `Opens ${asDate(r.claimStart)}`
@@ -335,7 +340,7 @@ function RoundRow({
           ? `Closed ${asDate(r.claimEnd)}`
           : r.message;
   return (
-    <li className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline bg-card/60 px-3 py-2">
+    <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hairline bg-card/60 px-3 py-2">
       <div className="min-w-0">
         <p className="text-[12.5px] font-black text-foreground">
           Round #{r.epochId} · {formatFlow(r.amount)} FLOW
@@ -349,16 +354,7 @@ function RoundRow({
           </a>
         ) : null}
       </div>
-      {r.status === 'CLAIMABLE' && r.preparation ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => onClaim(r.preparation!)}
-          className="inline-flex min-h-[40px] items-center rounded-full bg-primary px-3 text-[12px] font-bold text-primary-foreground disabled:opacity-45"
-        >
-          {step?.epochId === r.epochId ? 'Claiming…' : 'Claim'}
-        </button>
-      ) : null}
+      {claimStage(r.status) !== null && <ol aria-label={`Round ${r.epochId} lifecycle`} className="grid w-full grid-cols-3 gap-1 text-[10px] sm:grid-cols-5">{CLAIM_STAGES.map((label,i)=><li key={label} aria-current={i===claimStage(r.status)?'step':undefined} className={i<=(claimStage(r.status)??-1)?'font-semibold text-primary':'text-muted'}>{i<=(claimStage(r.status)??-1)?'✓':'○'} {label}</li>)}</ol>}
     </li>
   );
 }

@@ -600,3 +600,9 @@ html.light .text-red-400 { color: #B91C1C !important; }
 html.light .text-emerald-300,
 html.light .text-emerald-400,
 html.light .text-green-400 { color: #15803D !important; }
+
+/* Growth: finite confirmed feedback, themed in both modes. */
+.growth-confirmed { background: linear-gradient(120deg, color-mix(in srgb, var(--fb-success) 12%, var(--fb-card)), var(--fb-card)); border-color: var(--fb-glass-border-hover); }
+.growth-reveal { animation: growth-reveal 420ms ease-out both; }
+@keyframes growth-reveal { from { opacity:0; transform:translateY(6px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+@media (prefers-reduced-motion:reduce) { .growth-reveal { animation:none; } }

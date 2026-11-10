@@ -1,4 +1,5 @@
 import { WatchRouteButton } from "@/components/growth/WatchRouteButton";
+import { PostActionActivationCard } from '@/components/growth/PostActionActivationCard';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
@@ -1117,6 +1118,7 @@ export function UniversalSwapCard({
       }
 
       if (lastTx) {
+        window.__lovableEvents?.track?.('project.swap_confirmed', {surface:'trade'});
         setLastTx(lastTx);
         toast.success(
           `Swapped ${tokenIn.symbol} → ${tokenOut.symbol}`,
@@ -1557,9 +1559,10 @@ export function UniversalSwapCard({
       )}
 
       {lastTx && !txError && (
-        <div className="bg-primary/10 border border-primary/25 rounded-xl p-3 flex items-center justify-between gap-2 text-[12px] font-mono">
+        <div className="growth-confirmed growth-reveal space-y-3 rounded-lg border p-4 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-col gap-0.5">
-            <span className="text-primary font-black uppercase tracking-widest">Swap Confirmed</span>
+            <span className="text-primary font-semibold">Swap confirmed on-chain ✓</span>
             <span className="text-muted">Receipt status: success</span>
           </div>
           <a
@@ -1571,6 +1574,9 @@ export function UniversalSwapCard({
             {shortHash(lastTx)}
             <ExternalLink className="w-3 h-3" />
           </a>
+        </div>
+        <p className="text-xs text-muted">Rewards: pending verification. Only a canonical verified ledger award counts; no Points estimate is assumed.</p>
+        <PostActionActivationCard outcomeSuccessful />
         </div>
       )}
 

@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import confetti from 'canvas-confetti';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, CheckCircle2 } from 'lucide-react';
 import { TransactionModalFrame } from './TransactionModalFrame';
 import { Button } from '@/components/ui/button';
 import { shouldDismissBridgeReceipt } from '@/lib/bridge/trackingState';
@@ -29,45 +28,6 @@ export function ReceiptModal({
   status = 'success'
 }: ReceiptModalProps) {
   useEffect(() => {
-    if (isOpen && status === 'success' && txType === 'swap') {
-      // Primary celebratory burst of confetti in center
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.55 },
-        colors: ['#32FF8B', '#00D7B2', '#010C1B', '#F0F7F3', '#FFD700']
-      });
-
-      // Left side delayed booster rocket
-      const delayLeft = setTimeout(() => {
-        confetti({
-          particleCount: 60,
-          angle: 60,
-          spread: 60,
-          origin: { x: 0, y: 0.75 },
-          colors: ['#32FF8B', '#00D7B2', '#F0F7F3']
-        });
-      }, 250);
-
-      // Right side delayed booster rocket
-      const delayRight = setTimeout(() => {
-        confetti({
-          particleCount: 60,
-          angle: 120,
-          spread: 60,
-          origin: { x: 1, y: 0.75 },
-          colors: ['#32FF8B', '#00D7B2', '#F0F7F3']
-        });
-      }, 400);
-
-      return () => {
-        clearTimeout(delayLeft);
-        clearTimeout(delayRight);
-      };
-    }
-  }, [isOpen, status, txType]);
-
-  useEffect(() => {
     if (!isOpen || !shouldDismissBridgeReceipt({type:txType, status, hash:txHash, trackedHash, persisted:trackingPersisted})) return;
     const timer = setTimeout(onClose, 3000);
     return () => clearTimeout(timer);
@@ -77,8 +37,9 @@ export function ReceiptModal({
 
   return <TransactionModalFrame id="receipt_modal" title={status === 'failed' ? 'Transaction failed' : txType === 'bridge' ? 'Bridge submitted' : 'Swap confirmed on-chain'} onClose={onClose}
     footer={<Button className="w-full h-11" onClick={onClose}>{txType === 'bridge' && trackingPersisted && status === 'success' ? 'Track transaction' : 'Close receipt'}</Button>}>
+    {txType === 'swap' && status === 'success' && <div role="status" className="growth-confirmed growth-reveal flex items-center gap-3 rounded-lg border p-4"><CheckCircle2 className="h-8 w-8 shrink-0 text-success" aria-hidden/><div><p className="font-semibold">Swap complete</p><p className="text-xs text-muted">Confirmed on-chain. Your next move is yours.</p></div></div>}
     <p className="text-xs text-muted">{status === 'failed' ? 'The origin transaction reverted on-chain. It is not a successful transaction.' : txType === 'bridge' ? 'Origin transaction submitted. Destination delivery is separate and must be verified in the tracker.' : 'The swap was mined successfully and verified from the final chain receipt.'}</p>
     {txHash && <a href={`${txUrlPrefix}${txHash}`} target="_blank" rel="noopener noreferrer" className="block break-all text-xs text-primary">{txHash} <ExternalLink className="inline w-3 h-3" /></a>}
-    {txType === 'swap' && <><p className="text-xs text-muted">The Protocol Fee shown during confirmation was included in this swap.</p><PostActionActivationCard outcomeSuccessful={status === 'success'} onClose={onClose} /></>}
+    {txType === 'swap' && status === 'success' && <><p className="text-xs text-muted">The Protocol Fee shown during confirmation was included in this swap.</p><p className="text-xs text-muted">Rewards: pending verification. A confirmed swap is not yet a verified Points award.</p><PostActionActivationCard outcomeSuccessful={status === 'success'} onClose={onClose} /></>}
   </TransactionModalFrame>;
 }

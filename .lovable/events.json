@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "events": {
+    "project.flow_claim_confirmed": {
+      "event_schema_version": 1,
+      "description": "A sequential FLOW round claim completed with successful receipt and on-chain claimed confirmation.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface"
+        ],
+        "properties": {
+          "surface": {
+            "type": "string",
+            "enum": [
+              "rewards"
+            ]
+          }
+        }
+      }
+    },
+    "project.referral_link_shared": {
+      "event_schema_version": 1,
+      "description": "The user successfully copied or shared their existing referral link; this is not qualification.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "method"
+        ],
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "copy",
+              "share"
+            ]
+          }
+        }
+      }
+    },
+    "project.swap_confirmed": {
+      "event_schema_version": 1,
+      "description": "The existing swap handler has received successful receipts for all required swap legs.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface"
+        ],
+        "properties": {
+          "surface": {
+            "type": "string",
+            "enum": [
+              "trade"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
