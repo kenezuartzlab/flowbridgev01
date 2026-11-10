@@ -73,10 +73,12 @@ export function MainnetFlowClaimCard() {
   const [results, setResults] = useState<ClaimStepResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
-  const [review, setReview] = useState(false);
+  const [review, setReview] = useState<ClaimablePreparation[] | null>(null);
   const stopRef = useRef(false);
   const claim = useMainnetFlowClaim(wallet);
   const { rounds } = claim;
+  const reviewValid = review !== null && JSON.stringify(review) === JSON.stringify(rounds.claimable);
+  useEffect(() => { if (review && !reviewValid) setReview(null); }, [review, reviewValid]);
 
   useEffect(() => {
     void getActiveProvider()
@@ -85,6 +87,17 @@ export function MainnetFlowClaimCard() {
         if (a) setWallet(a?.[0] ? a[0].toLowerCase() : null);
       })
       .catch(() => undefined);
+    const timer = setInterval(() => {
+      void getActiveProvider().then(async (eth) => {
+        const accounts = eth ? await eth.request({ method: 'eth_accounts' }) : [];
+        const next = Array.isArray(accounts) && typeof accounts[0] === 'string' ? accounts[0].toLowerCase() : null;
+        setWallet(previous => {
+          if (previous !== next) { stopRef.current = true; setReview(null); setResults([]); }
+          return next;
+        });
+      }).catch(() => undefined);
+    }, 1500);
+    return () => clearInterval(timer);
   }, []);
 
   const connect = async () => {
@@ -134,6 +147,13 @@ export function MainnetFlowClaimCard() {
             await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexChain }] });
             if ((await eth.request({ method: 'eth_chainId' })) !== hexChain) throw new Error('Switch your wallet to BOT Mainnet.');
           }
+          // Exact read-only contract execution checks current proof/window/
+          // pause/cancellation/backing before each separate wallet request.
+          await client.simulateContract({
+            account: p.account, address: p.distributor, abi: MERKLE_DISTRIBUTOR_CLAIM_ABI,
+            functionName: 'claim',
+            args: [BigInt(p.epochId), BigInt(p.index), p.account, BigInt(p.amount), p.proof as readonly Hex[]],
+          });
         },
         send: async (p) => {
           const data = encodeFunctionData({
@@ -297,7 +317,7 @@ export function MainnetFlowClaimCard() {
           ) : (
             <Button
               type="button"
-              onClick={() => setReview(true)}
+              onClick={() => setReview(rounds.claimable.map(p => ({ ...p, proof: [...p.proof] })))}
               disabled={!count || running || claim.loading}
               className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-[13px] font-black text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:border disabled:border-hairline disabled:bg-card disabled:text-muted"
             >
@@ -307,12 +327,12 @@ export function MainnetFlowClaimCard() {
           )}
         </div>
 
-        {review && !running && <section aria-label="Confirm FLOW recipient" className="space-y-3 border-y border-hairline py-4">
+        {review && reviewValid && !running && <section aria-label="Confirm FLOW recipient" className="space-y-3 border-y border-hairline py-4">
           <h3 className="font-semibold">Confirm your recipient</h3>
           <p className="text-sm font-semibold">{total} FLOW · BOT Mainnet</p>
           <p className="break-all font-mono text-xs">{wallet}</p>
           <p className="text-xs text-muted">{count} round{count === 1 ? '' : 's'} · one wallet confirmation and BOT gas fee per transaction. Nothing is signed until you continue.</p>
-          <div className="flex flex-wrap gap-2"><Button className="h-auto min-h-11 whitespace-normal" disabled={!count || claim.loading} onClick={()=>{setReview(false); void claimRounds(rounds.claimable);}}>Continue in wallet</Button><Button variant="ghost" onClick={()=>setReview(false)}>Cancel</Button></div>
+          <div className="flex flex-wrap gap-2"><Button className="h-auto min-h-11 whitespace-normal" disabled={!count || claim.loading || !reviewValid} onClick={()=>{const selected=review;setReview(null); void claimRounds(selected);}}>Continue in wallet</Button><Button variant="ghost" onClick={()=>setReview(null)}>Cancel</Button></div>
         </section>}
         {claim.explorerTxUrl ? (
           <a href={claim.explorerTxUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-muted">

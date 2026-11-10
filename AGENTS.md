@@ -9,6 +9,8 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
+- Public round reads use a read-only shared snapshot; claim reviews freeze selection and simulate before sending. Why: prevent stale claims.
+
 - Permanent identity is enforced by service-only identity_pairs/history and bind_verified_identity; signed first binding consumes its nonce atomically, while only targeted audited recovery updates the current pair and never historical recipients. Why: profile guards alone do not protect privileged mutation or racing recovery.
 - Advanced promotions extend existing banner settings with validated promotion options, byte-checked owned uploads and service-only revision history; legacy slides keep their renderer until explicitly edited. Why: preserve analytics and old presentation without arbitrary executable media or public drafts.
 - Public config filters draft promotions through publicPromotions; admin config keeps them. Why: renderer-only hiding still discloses unpublished content in network responses.

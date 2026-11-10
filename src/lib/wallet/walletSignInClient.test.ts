@@ -12,6 +12,17 @@ beforeEach(() => {
   m.signIn.mockImplementation(async (args) => ({ status: 'signed_in', signature: await args.signMessage('FlowBridge sign-in\nFree signature.') }));
 });
 describe('wallet sign-in transport', () => {
+  it('switching accounts during the popup rejects the proof before session exchange', async () => {
+    let signed = false;
+    m.request.mockImplementation(async ({ method }) => {
+      if (method === 'eth_chainId') return '0x2a5';
+      if (method === 'personal_sign') { signed = true; return 'signature'; }
+      return [signed ? '0x' + 'b'.repeat(40) : address];
+    });
+    await expect(signInWithLinkedWallet(address)).rejects.toThrow('account changed');
+    expect(m.request.mock.calls.filter(([a]) => a.method === 'personal_sign')).toHaveLength(1);
+    expect(m.otp).not.toHaveBeenCalled();
+  });
   it('uses the selected provider and signs exact UTF-8 hex bytes on chain 677', async () => {
     await signInWithLinkedWallet(address.toUpperCase().replace('0X', '0x'));
     const call = m.request.mock.calls.find(([a]) => a.method === 'personal_sign')?.[0];

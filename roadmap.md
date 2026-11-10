@@ -1,3 +1,9 @@
+# Release-readiness gate — preview only
+- [x] Fresh dependency audit: 12 original advisory rows cleared, 1 high Zod/WalletConnect remains; all-scope dev minimatch moderate/deepmerge low recorded, no suppressions.
+- [x] Fresh available hosted scans + independent deeper source audit; claim timeout/freshness/review and public GET write paths corrected; platform deep engines remain unavailable/stale.
+- [x] 2,464 tests/243 files; 166 focused; disposable identity/Adventure checks; 26 banner checks plus actual-card isolated read/review at 320/390/430/1280; automatic build OK. Acceptance: docs/security/RELEASE_READINESS_GATE_20261110.md.
+- [ ] HOLD: compatible wallet dependency patch, fresh platform deep engines, physical-wallet acceptance, cross-worker discovery budget and final hosted pipeline remain external/unverified gates; no production publication, activation or financial authorization.
+
 # Mobile banner correction — preview only
 - [x] Tiny internal dots and translucent 24px pause control; 26 live-preview navigation/swipe/pause/reduced-motion checks at 320/390/430/1280 PASS; 2,456 tests/242 files PASS; automatic build/type gate OK. Artwork, intervals, analytics, admin settings and draft privacy unchanged.
 - [ ] Production remains HOLD; no publication or feature/economic changes authorized.

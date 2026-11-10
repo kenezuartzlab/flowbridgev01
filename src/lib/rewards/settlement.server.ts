@@ -92,8 +92,8 @@ export async function indexHistoricalRounds(admin: Admin, liveEpochCount: number
 }
 
 /** Indexed records (builder + historical) whose root is LIVE on chain and drift-free. */
-export async function discoverPublishedBatches(admin: Admin, liveEpochCount: number) {
-  const indexing = await indexHistoricalRounds(admin, liveEpochCount).catch(() => []);
+export async function discoverPublishedBatches(admin: Admin, liveEpochCount: number, readOnly = false) {
+  const indexing = readOnly ? [] : await indexHistoricalRounds(admin, liveEpochCount).catch(() => []);
   const { data } = await admin.from("reward_settlement_batches").select("id,fingerprint,epoch_id,root,total_wei,claim_start,claim_end,leaves,publication_verified_at,source")
     .eq("chain_id", MAINNET_CHAIN_ID).eq("distributor", DISTRIBUTOR.toLowerCase()).lte("epoch_id", liveEpochCount).order("epoch_id", { ascending: true });
   const out: { batch: StoredBatch; source: RoundSource; verification: ReturnType<typeof verifyPublishedRound> }[] = [];
@@ -118,7 +118,7 @@ export async function discoverPublishedBatches(admin: Admin, liveEpochCount: num
       batch, receiptStatus: "success", liveEpochCount, epoch: ep, paused: chain?.paused ?? true,
       balanceWei: chain?.balanceWei ?? 0n, totalReservedWei: chain?.totalReservedWei ?? 1n, chainId: MAINNET_CHAIN_ID, distributor: DISTRIBUTOR,
     });
-    if (verification.complete && !row.publication_verified_at && row.epoch_id <= 2) {
+    if (!readOnly && verification.complete && !row.publication_verified_at && row.epoch_id <= 2) {
       await admin.from("reward_settlement_batches").update({ publication_verified_at: new Date().toISOString() })
         .eq("epoch_id", row.epoch_id).eq("root", row.root);
     }
@@ -141,7 +141,7 @@ export function getPublishedRoundsCached(admin: Admin): Promise<PublishedSnapsho
   const p = (async () => {
     const live = await readChainState();
     if (!live) return { live: null, found: Object.assign([], { indexing: [] }) as any };
-    return { live, found: await discoverPublishedBatches(admin, live.epochCount) };
+    return { live, found: await discoverPublishedBatches(admin, live.epochCount, true) };
   })();
   roundsCache = { at: Date.now(), p };
   p.then((s) => { if (!s.live) roundsCache = null; }, () => { roundsCache = null; });

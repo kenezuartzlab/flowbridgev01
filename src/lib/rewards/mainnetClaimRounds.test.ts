@@ -85,6 +85,45 @@ const prep = (epochId: number): ClaimablePreparation => ({
 });
 
 describe('sequential claiming', () => {
+  it('fresh contract simulation rejects a paused or expired round before wallet sending', async () => {
+    let sends = 0;
+    const out = await runSequentialClaims([prep(4)], {
+      preflight: async () => { throw new Error('claim window closed'); },
+      readClaimed: async () => false,
+      send: async () => { sends++; return 'unused'; }, waitReceipt: async () => 'success',
+    });
+    expect(out).toEqual([{epochId:4,outcome:'rejected',error:'claim window closed'}]);
+    expect(sends).toBe(0);
+  });
+  it('receipt timeout preserves the submitted hash and stops before another round', async () => {
+    let sends = 0;
+    const out = await runSequentialClaims([prep(3), prep(4)], {
+      preflight: async () => undefined, readClaimed: async () => false,
+      send: async () => { sends++; return '0xsubmitted'; },
+      waitReceipt: async () => { throw new Error('timeout'); },
+    });
+    expect(out).toEqual([{ epochId: 3, outcome: 'unconfirmed', hash: '0xsubmitted' }]);
+    expect(sends).toBe(1);
+  });
+  it('failed post-receipt claimed read remains unconfirmed, never not sent', async () => {
+    let reads = 0;
+    const out = await runSequentialClaims([prep(4)], {
+      preflight: async () => undefined,
+      readClaimed: async () => { if (++reads === 2) throw new Error('RPC down'); return false; },
+      send: async () => '0xsubmitted', waitReceipt: async () => 'success',
+    });
+    expect(out).toEqual([{ epochId: 4, outcome: 'unconfirmed', hash: '0xsubmitted' }]);
+  });
+  it('reload re-reads canonical claimed state and never sends an already paid leaf', async () => {
+    let sends = 0;
+    const out = await runSequentialClaims([prep(4), prep(4)], {
+      preflight: async () => { throw new Error('must not reach wallet'); },
+      readClaimed: async () => true,
+      send: async () => { sends++; return 'unused'; }, waitReceipt: async () => 'success',
+    });
+    expect(out.map(r => r.outcome)).toEqual(['skipped', 'skipped']);
+    expect(sends).toBe(0);
+  });
   it('next signature only after prior receipt success and claimed re-read', async () => {
     const log: string[] = [];
     const claimed = new Set<number>();

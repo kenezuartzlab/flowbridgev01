@@ -18,7 +18,10 @@ async def ready(page):
     await page.goto('http://localhost:8080/trade', wait_until='domcontentloaded')
     carousel = page.get_by_role('group', name='Promotions', exact=True)
     await carousel.wait_for(state='visible')
-    # The startup splash is mounted above the already-loaded workspace.
+    # SSR renders controls before hydration reads the motion preference.
+    # Wait for that observable state, not a fixed cold-start compilation delay.
+    if await page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches"):
+        await carousel.get_by_role('button', name='Pause promotions').wait_for(state='hidden', timeout=45000)
     await page.wait_for_timeout(6500)
     return carousel
 

@@ -52,7 +52,12 @@ export async function signInWithLinkedWallet(address: string) {
       }
       // EIP-1193 wallets expect UTF-8 bytes, not a raw multiline string.
       // Encoding changes transport only: the server verifies the same message.
-      return eth.request({ method: 'personal_sign', params: [stringToHex(msg), normalized] });
+      const signature = await eth.request({ method: 'personal_sign', params: [stringToHex(msg), normalized] });
+      const current = await eth.request({ method: 'eth_accounts' });
+      if (!Array.isArray(current) || current[0]?.toLowerCase() !== normalized) {
+        throw new Error('Wallet account changed. Start sign-in again with the selected wallet.');
+      }
+      return signature;
     },
   });
 }

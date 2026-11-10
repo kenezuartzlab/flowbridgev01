@@ -12,7 +12,7 @@
  * No amount, address or proof ever comes from user input.
  */
 import { LAST_HISTORICAL_EPOCH, PUBLIC_MAINNET_FLOW_CLAIMS } from './publicClaimPolicy';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPublicClient, http, type Hex } from 'viem';
 
 import { botMainnet } from '@/lib/wagmi';
@@ -153,11 +153,17 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
   const [state, setState] = useState<MainnetClaimState>(IDLE);
   const [rounds, setRounds] = useState<RoundsSummary>(EMPTY_ROUNDS);
   const [loading, setLoading] = useState(false);
+  const generation = useRef(0);
 
   const read = useCallback(async () => {
+    const requestId = ++generation.current;
+    const current = () => requestId === generation.current;
     setLoading(true);
+    setRounds(EMPTY_ROUNDS);
+    setState(IDLE);
     try {
       const { list: candidates, discoveryFailed } = await allEntitlements(wallet);
+      if (!current()) return;
       if (!candidates.length) {
         setRounds(EMPTY_ROUNDS);
         if (discoveryFailed && wallet) {
@@ -181,13 +187,14 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
         return;
       }
       const client = createPublicClient({ chain: botMainnet, transport: http() });
-      const [epochCount, paused, totalReserved, balance] = (await Promise.all([
+      const [epochCount, paused, totalReserved, balance, block] = await Promise.all([
         client.readContract({ address: distributor, abi: READ_ABI, functionName: 'epochCount' }),
         client.readContract({ address: distributor, abi: READ_ABI, functionName: 'paused' }),
         client.readContract({ address: distributor, abi: READ_ABI, functionName: 'totalReserved' }),
         client.readContract({ address: token, abi: ERC20_BALANCE_ABI, functionName: 'balanceOf', args: [distributor] }),
-      ])) as [bigint, boolean, bigint, bigint];
-      const nowSeconds = Math.floor(Date.now() / 1000);
+        client.getBlock(),
+      ]);
+      const nowSeconds = Number(block.timestamp);
       const views = await Promise.all(
         candidates.map(async (c): Promise<RoundView> => {
           let r: EpochRead | null = null;
@@ -210,6 +217,7 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
         }),
       );
       const summary = summarizeRounds(views);
+      if (!current()) return;
       setRounds(summary);
       const first = summary.active[0] ?? summary.history[0];
       const ent = candidates.find((c) => c.leaf.epochId === first?.epochId) ?? null;
@@ -234,15 +242,18 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
         explorerTxUrl: `${botMainnet.blockExplorers.default.url}/address/${distributor}`,
       });
     } catch {
+      if (!current()) return;
       setRounds(EMPTY_ROUNDS);
       setState({ ...IDLE, status: 'READ_FAILED', message: 'Live reward state could not be read from BOT Mainnet. Claiming stays disabled until it can.' });
     } finally {
-      setLoading(false);
+      if (current()) setLoading(false);
     }
   }, [wallet]);
 
   useEffect(() => {
     void read();
+    const timer = setInterval(() => void read(), 30_000);
+    return () => { ++generation.current; clearInterval(timer); };
   }, [read]);
 
   return { ...state, rounds, loading, refresh: read };

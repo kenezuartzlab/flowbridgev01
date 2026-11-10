@@ -139,7 +139,7 @@ export function summarizeRounds(rounds: RoundView[]): RoundsSummary {
   const uniq = [...seen.values()].sort(
     (a, b) => ORDER[a.status] - ORDER[b.status] || (a.claimEnd ?? Infinity) - (b.claimEnd ?? Infinity) || a.epochId - b.epochId,
   );
-  const claimable = uniq.filter((r) => r.status === 'CLAIMABLE' && r.preparation).map((r) => r.preparation!);
+  const claimable = uniq.flatMap((r) => r.status === 'CLAIMABLE' && r.preparation ? [r.preparation] : []);
   const total = claimable.reduce((s, p) => s + BigInt(p.amount), 0n);
   return {
     active: uniq.filter((r) => !HISTORY.includes(r.status)),
@@ -178,6 +178,7 @@ export async function runSequentialClaims(preps: ClaimablePreparation[], d: Sequ
   const out: ClaimStepResult[] = [];
   for (const p of preps) {
     if (d.shouldStop?.()) break;
+    let submittedHash: string | null = null;
     try {
       if (await d.readClaimed(p)) {
         out.push({ epochId: p.epochId, outcome: 'skipped', reason: 'already claimed' });
@@ -186,6 +187,7 @@ export async function runSequentialClaims(preps: ClaimablePreparation[], d: Sequ
       await d.preflight(p);
       d.onStep?.(p.epochId, 'signing');
       const hash = await d.send(p);
+      submittedHash = hash;
       d.onStep?.(p.epochId, 'submitted', hash);
       const status = await d.waitReceipt(hash);
       if (status !== 'success') {
@@ -200,7 +202,9 @@ export async function runSequentialClaims(preps: ClaimablePreparation[], d: Sequ
       }
       out.push({ epochId: p.epochId, outcome: 'claimed', hash });
     } catch (e: any) {
-      out.push({ epochId: p.epochId, outcome: 'rejected', error: e?.shortMessage ?? e?.message ?? 'Cancelled' });
+      out.push(submittedHash
+        ? { epochId: p.epochId, outcome: 'unconfirmed', hash: submittedHash }
+        : { epochId: p.epochId, outcome: 'rejected', error: e?.shortMessage ?? e?.message ?? 'Cancelled' });
       break;
     }
   }
