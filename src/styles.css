@@ -1,6 +1,16 @@
 @import "tailwindcss" source(none);
 @source "../src";
 
+.banner-pagination { pointer-events:none; }
+.banner-dot { pointer-events:auto; background:transparent; color:var(--fb-carousel-ink); }
+.banner-dot:hover { background:transparent; }
+.banner-dot-mark { background:var(--fb-carousel-ink); opacity:.55; box-shadow:var(--fb-carousel-mark-shadow); transition:opacity 150ms ease-out; }
+.banner-dot[aria-current=true] .banner-dot-mark,.banner-dot:hover .banner-dot-mark { opacity:1; }
+.banner-dot:focus-visible,.banner-playback:focus-visible { outline:2px solid var(--fb-carousel-ink); outline-offset:-2px; }
+.banner-playback { background:var(--fb-carousel-surface); color:var(--fb-carousel-ink); backdrop-filter:blur(6px); }
+.banner-playback:hover { background:var(--fb-carousel-surface-hover); color:var(--fb-carousel-ink); }
+@media(prefers-reduced-motion:reduce) { .banner-dot-mark { transition:none; } }
+
 .promotion-banner { background:var(--promotion-bg); color:var(--promotion-fg); border-radius:var(--promotion-radius); min-height:100px; }
 .promotion-format-landscape { aspect-ratio:16/9; }
 .promotion-format-portrait { aspect-ratio:4/5; max-height:640px; }
@@ -54,6 +64,11 @@
   --fb-banner-from: #1D4ED8;
   --fb-banner-to: #0EA5E9;
   --fb-banner-foreground: #FFFFFF;
+  /* Image-overlay controls retain contrast in either page theme. */
+  --fb-carousel-ink: #FFFFFF;
+  --fb-carousel-surface: rgba(1, 12, 27, .28);
+  --fb-carousel-surface-hover: rgba(1, 12, 27, .5);
+  --fb-carousel-mark-shadow: 0 0 1px 1px rgba(1, 12, 27, .65);
   /* Per-variant banner emphasis (dark) */
   --fb-banner-swap-from: #6D28D9;
   --fb-banner-swap-to: #0EA5E9;

@@ -1,3 +1,7 @@
+# Mobile banner correction — preview only
+- [x] Tiny internal dots and translucent 24px pause control; 26 live-preview navigation/swipe/pause/reduced-motion checks at 320/390/430/1280 PASS; 2,456 tests/242 files PASS; automatic build/type gate OK. Artwork, intervals, analytics, admin settings and draft privacy unchanged.
+- [ ] Production remains HOLD; no publication or feature/economic changes authorized.
+
 # Growth Integration V1 — preview only
 - [x] Refined existing verified receipts, canonical next actions, recipient-reviewed claims and referral sharing; no execution or economic changes.
 - [x] Restricted Adventure entry/content to successful existing gated preview reads; cosmetic presentation only.

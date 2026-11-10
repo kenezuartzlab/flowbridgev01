@@ -102,9 +102,9 @@ export function BannerRotator({
       onBlurCapture={() => setPaused(false)}
     >
       <div
-        className="grid touch-pan-y rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B]"
+        className="grid touch-pan-y rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         tabIndex={0}
-        aria-live="polite"
+        aria-live={paused || manualPause || reduce ? "polite" : "off"}
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") {
             e.preventDefault();
@@ -146,29 +146,28 @@ export function BannerRotator({
       </div>
 
       {showDots && (
-        <div className="pointer-events-auto absolute inset-x-0 -bottom-2.5 flex items-center justify-center gap-1.5">
+        <div className="banner-pagination absolute inset-x-0 bottom-0 flex items-center justify-center">
           {items.map((_, i) => (
             <Button
               key={i}
               type="button"
+              variant="ghost"
+              size="icon"
               aria-label={`Show banner ${i + 1} of ${items.length}`}
               aria-current={i === active}
               onClick={() => {
                 setIndex(i);
                 holdAutoplay();
               }}
-              className={`h-2.5 min-w-[10px] rounded-full outline-none transition-all focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#010C1B] ${
-                i === active
-                  ? "w-4 bg-primary"
-                  : "w-2.5 bg-foreground/30 hover:bg-foreground/50"
-              }`}
+              className="banner-dot h-6 w-6 shrink-0 rounded-full p-0 shadow-none focus-visible:ring-2"
             >
+              <span aria-hidden="true" className="banner-dot-mark h-1.5 w-1.5 rounded-full" />
               <span className="sr-only">Banner {i + 1}</span>
             </Button>
           ))}
         </div>
       )}
-      {!reduce && <Button type="button" variant="outline" size="icon" className="absolute right-2 bottom-2 h-8 w-8" aria-label={manualPause?'Resume promotions':'Pause promotions'} title={manualPause?'Resume promotions':'Pause promotions'} onClick={()=>setManualPause(v=>!v)}>{manualPause?<Play className="h-3 w-3"/>:<Pause className="h-3 w-3"/>}</Button>}
+      {!reduce && <Button type="button" variant="ghost" size="icon" className="banner-playback absolute right-1 top-1 h-6 w-6 rounded-full p-0 shadow-none [&_svg]:size-3" aria-label={manualPause?'Resume promotions':'Pause promotions'} title={manualPause?'Resume promotions':'Pause promotions'} onClick={()=>setManualPause(v=>!v)}>{manualPause?<Play/>:<Pause/>}</Button>}
     </div>
   );
 }
