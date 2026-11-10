@@ -13,7 +13,7 @@ export function PromotionBanner({slide,surface}:{slide:BannerSlide;surface?:Bann
     '--promotion-focal':`${p.focalX??50}% ${p.focalY??50}%`,'--promotion-mobile-focal':`${p.mobileFocalX??p.focalX??50}% ${p.mobileFocalY??p.focalY??50}%`,
     '--promotion-duration':`${p.transitionMs??500}ms`,'--promotion-speed':`${p.speedSeconds??15}s`,
   } as CSSProperties;
-  const content=<><picture className="promotion-art"><source media="(max-width: 640px)" srcSet={mobile||image||undefined}/>{image&&<img src={image} alt="" loading="lazy" decoding="async" className={p.fit==='contain'?'object-contain':'object-cover'}/>}</picture><div className="promotion-overlay"/>
+  const content=<><picture className="promotion-art"><source media="(max-width: 640px)" srcSet={mobile||image||undefined}/>{(image||mobile)&&<img src={image||mobile||undefined} alt="" loading="lazy" decoding="async" className={p.fit==='contain'?'object-contain':'object-cover'}/>}</picture><div className="promotion-overlay"/>
     <div className={`promotion-copy promotion-motion-${p.motion??'static'}`} data-direction={p.direction??'left'}>
       {p.sponsored&&<span className="text-xs font-medium">Sponsored</span>}<h3 className="break-words text-base font-bold leading-snug sm:text-lg">{slide.title}</h3>
       {slide.body&&<p className="mt-1 break-words text-sm leading-relaxed">{slide.body}</p>}

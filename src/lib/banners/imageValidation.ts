@@ -12,7 +12,7 @@ export function inspectBannerImage(bytes:Uint8Array,mime:string): {width:number;
     else if(kind==='VP8L'&&bytes.length>=25&&bytes[20]===47){const b=view.getUint32(21,true);width=(b&16383)+1;height=((b>>>14)&16383)+1;}
   } else if(mime==='image/jpeg' && bytes[0]===255&&bytes[1]===216) {
     extension='jpg';let i=2;
-    while(i+4<bytes.length){if(bytes[i]!==255)break;const marker=bytes[i+1];const size=view.getUint16(i+2);if(size<2||i+size+2>bytes.length)break;if([192,193,194,195,197,198,199,201,202,203,205,206,207].includes(marker)&&size>=7){height=view.getUint16(i+5);width=view.getUint16(i+7);break;}i+=size+2;}
+    while(i+4<bytes.length){if(bytes[i]!==255)break;const marker=bytes[i+1];const size=view.getUint16(i+2);if(size<2||i+size+2>bytes.length)break;if([192,193,194,195,197,198,199,201,202,203,205,206,207].includes(marker)&&size>=8){height=view.getUint16(i+5);width=view.getUint16(i+7);break;}i+=size+2;}
   }
   return width>=32&&height>=32&&width<=8192&&height<=8192&&width*height<=32_000_000 ? {width,height,extension}:null;
 }

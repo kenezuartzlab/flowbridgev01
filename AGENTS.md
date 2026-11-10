@@ -11,6 +11,7 @@
 
 - Permanent identity is enforced by service-only identity_pairs/history and bind_verified_identity; signed first binding consumes its nonce atomically, while only targeted audited recovery updates the current pair and never historical recipients. Why: profile guards alone do not protect privileged mutation or racing recovery.
 - Advanced promotions extend existing banner settings with validated promotion options, byte-checked owned uploads and service-only revision history; legacy slides keep their renderer until explicitly edited. Why: preserve analytics and old presentation without arbitrary executable media or public drafts.
+- Public config filters draft promotions through publicPromotions; admin config keeps them. Why: renderer-only hiding still discloses unpublished content in network responses.
 
 - Public visitor announcements reuse content settings and render once in VisitorAnnouncement at the root; the existing audited super-admin writer owns updates. Why: one editable message and session-scoped dismissal avoid conflicting promos and permission drift.
 - Rewards Vault V2 uses a separate non-upgradeable candidate and artifact-generated ABI; new earning-time immutable destinations fence post-cutover awards from every V1 writer, while all pre-cutover obligations remain legacy without mapping. Activation requires separately authorized verified deployment and cutover. Why: historical aggregates cannot safely be migrated or credited twice.

@@ -1,8 +1,9 @@
 # Identity and promotions — 2026-11-10
-- [ ] Audit and implement permanent verified identity and scoped audited recovery, preserving sign-in and historical recipients.
-- [ ] Extend existing promotions editor, upload validation, renderer and audited revisions.
-- [ ] Run regressions, security and mobile acceptance; publish only after compatibility gates pass.
-- [ ] Deliver separate wheel plan only; no wheel implementation.
+- [x] Same-release follow-up: invalid UUID fixture corrected without validator changes; 2,430 tests/239 files pass, disposable identity races and banner rollback pass, signed-in admin/access negatives and 320/390/430/1280 reduced-motion crop checks pass; automatic build/type gate OK.
+- [x] Permanent identity/recovery verified: live 0059/0060 readback, 27 compatible pairs, no duplicates/grants; additive 0061 revokes default public privileges only. No identity, recipient or financial changes.
+- [x] Promotions extended and corrected: public draft transport filtered, malformed JPEG rejected, mobile-only upload rendered; old banner/settings fingerprints unchanged.
+- [ ] Production publication HOLD: dependency scan has 2 high/11 moderate advisory rows, deep code scan stale, real wallet-sign-in acceptance unavailable. Existing production snapshot not republished; see docs/security/IDENTITY_PROMOTIONS_FOLLOWUP_20261110.md. No new owner decisions requested.
+- [x] Wheel remains plan-only; no wheel code or activation in this follow-up.
 
 # Wallet sign-in incident — 2026-11-09
 - [x] Correct selected-provider signing, UTF-8 hex transport and single session exchange; 2,406 tests and preview build pass. 390px simulated wallet cancellation checked; real user-wallet sign-in remains unverified, production publication not requested.

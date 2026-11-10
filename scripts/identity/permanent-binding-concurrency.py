@@ -10,6 +10,9 @@ try:
  local('initdb','-D',data,'-A','trust','--no-locale');local('pg_ctl','-D',data,'-o',f"-F -k {sock} -p {port} -c listen_addresses=''",'-w','start')
  sql("CREATE ROLE service_role;CREATE ROLE anon;CREATE ROLE authenticated;CREATE SCHEMA auth;CREATE TABLE auth.users(id uuid PRIMARY KEY,email text,email_confirmed_at timestamptz);CREATE TABLE profiles(id uuid PRIMARY KEY,email text,wallet_address text,created_at timestamptz DEFAULT now(),last_binding_change timestamptz,binding_changes_count int DEFAULT 0);CREATE TABLE app_admins(email text,role text,disabled bool);CREATE TABLE siwe_nonces(id uuid DEFAULT gen_random_uuid(),wallet_address text,nonce text,used_at timestamptz,expires_at timestamptz,created_at timestamptz DEFAULT now());CREATE TABLE admin_audit_events(actor_user_id uuid,actor_email text,actor_role text,object_type text,object_id text,action text,old_value jsonb,new_value jsonb,reason text);CREATE UNIQUE INDEX wallet_ci ON profiles(lower(wallet_address)) WHERE wallet_address IS NOT NULL;")
  sql(pathlib.Path('drizzle/migrations/0059_permanent_identity_and_scoped_recovery.sql').read_text())
+ sql("CREATE TABLE app_settings(key text PRIMARY KEY,value jsonb NOT NULL,updated_by uuid);")
+ sql(pathlib.Path('drizzle/migrations/0060_audited_promotion_revisions.sql').read_text())
+ sql(pathlib.Path('drizzle/migrations/0061_identity_promotion_service_only_privileges.sql').read_text())
  ids=[f'00000000-0000-0000-0000-{i:012}' for i in range(1,12)];wallets=['0x'+str(i)*40 for i in range(1,10)]
  for i,id in enumerate(ids):sql(f"INSERT INTO auth.users VALUES('{id}','u{i}@example.test',now());INSERT INTO profiles(id,email) VALUES('{id}','u{i}@example.test');")
  def bind(id,w,nonce):return sql(f"SELECT bind_verified_identity('{id}','{w}','{nonce}');",False)
@@ -36,6 +39,16 @@ try:
  assert sql(f"SELECT original_wallet FROM identity_pairs WHERE user_id='{ids[0]}';").stdout.strip()==wallets[0]
  assert sql("SELECT has_function_privilege('authenticated','bind_verified_identity(uuid,text,text)','EXECUTE');").stdout.strip()=='f'
  assert sql("SELECT has_table_privilege('anon','identity_pairs','SELECT');").stdout.strip()=='f'
+ for table in ['identity_pairs','identity_wallet_history','identity_review_cases','identity_recovery_grants','promotion_revisions']:
+  for role in ['anon','authenticated']:
+   assert sql(f"SELECT has_table_privilege('{role}','{table}','SELECT,INSERT,UPDATE,DELETE');").stdout.strip()=='f'
+ sql(f"INSERT INTO app_settings VALUES('banners','{{\"home\":{{\"slides\":[{{\"id\":\"legacy\"}}]}}}}','{ids[0]}');")
+ sql("UPDATE app_settings SET value='{\"home\":{\"slides\":[{\"id\":\"new\",\"promotion\":{\"status\":\"draft\"}}]}}' WHERE key='banners';")
+ assert sql("SELECT count(*) FROM promotion_revisions;").stdout.strip()=='2'
+ sql("UPDATE app_settings SET value=(SELECT value FROM promotion_revisions WHERE value::text LIKE '%legacy%' LIMIT 1) WHERE key='banners';")
+ assert sql("SELECT value->'home'->'slides'->0->>'id' FROM app_settings WHERE key='banners';").stdout.strip()=='legacy'
+ assert sql("SELECT count(*) FROM promotion_revisions;").stdout.strip()=='3'
+ print('Promotion publication/draft revision capture, legacy rollback and all private table privileges PASS (disposable DB)')
  print('Verified email, expiry, revoke, one recovery maximum, original recipient history, RPC/table access PASS')
 finally:
  if data.exists():subprocess.run(['pg_ctl','-D',str(data),'-m','immediate','stop'],preexec_fn=demote,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)

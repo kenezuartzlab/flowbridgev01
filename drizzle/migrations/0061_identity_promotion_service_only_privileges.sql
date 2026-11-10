@@ -1,0 +1,2 @@
+REVOKE ALL ON TABLE public.identity_pairs, public.identity_wallet_history, public.identity_review_cases, public.identity_recovery_grants, public.promotion_revisions FROM anon, authenticated, PUBLIC;
+GRANT ALL ON TABLE public.identity_pairs, public.identity_wallet_history, public.identity_review_cases, public.identity_recovery_grants, public.promotion_revisions TO service_role;

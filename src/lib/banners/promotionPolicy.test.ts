@@ -3,6 +3,7 @@ import { promotionSchema,promotionSlideSchema,safePromotionLink,safePromotionIma
 import { inspectBannerImage } from './imageValidation';
 import { mergeBanners,isSlideVisible,getBannerSurface,DEFAULT_APP_CONFIG } from '@/lib/config/appConfig';
 describe('promotion validation',()=>{
+  it('rejects a truncated JPEG frame without throwing',()=>{const bytes=new Uint8Array(24);bytes.set([255,216]);bytes[14]=255;bytes[15]=192;bytes[17]=7;expect(inspectBannerImage(bytes,'image/jpeg')).toBeNull();});
   it('permits HTTPS and local links but rejects executable or disguised links',()=>{expect(safePromotionLink('https://flowbridge.space/rewards')).toBe(true);expect(safePromotionLink('/rewards')).toBe(true);for(const url of ['javascript:alert(1)','data:text/html,hello','//evil.test','/\\evil.test','https://user:pass@evil.test','http://evil.test'])expect(safePromotionLink(url)).toBe(false);});
   it('accepts only owned artwork paths for new media',()=>{expect(safePromotionImage('/api/banner-image/abc.png')).toBe(true);for(const url of ['https://evil.test/x.svg','data:image/svg+xml,hi','/api/banner-image/../private'])expect(safePromotionImage(url)).toBe(false);});
   it('validates hex, overlay bounds, focal crop and radius',()=>{expect(promotionSchema.safeParse({backgroundColor:'#112233',textColor:'#FFFFFF',overlayAlpha:100,focalX:0,mobileFocalY:100,radius:8}).success).toBe(true);for(const p of [{overlayAlpha:101},{overlayAlpha:-1},{focalX:101},{radius:9},{textColor:'red;url(x)'}])expect(promotionSchema.safeParse(p).success).toBe(false);});

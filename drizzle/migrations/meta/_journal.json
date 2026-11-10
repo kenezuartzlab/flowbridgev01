@@ -428,6 +428,13 @@
       "when": 1794273929808,
       "tag": "0060_audited_promotion_revisions",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1794275184690,
+      "tag": "0061_identity_promotion_service_only_privileges",
+      "breakpoints": true
     }
   ]
 }
