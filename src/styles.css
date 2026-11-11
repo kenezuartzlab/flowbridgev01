@@ -18,8 +18,40 @@
 .promotion-art img { width:100%; height:100%; object-position:var(--promotion-focal); }
 .promotion-overlay { position:absolute; inset:0; background:var(--promotion-bg); opacity:var(--promotion-alpha); }
 .promotion-copy { position:relative; padding:20px; width:100%; min-width:0; }
+.promotion-copy h3 { font-size:16px; font-weight:700; overflow-wrap:anywhere; }
+.promotion-copy p { font-size:14px; overflow-wrap:anywhere; }
+.promotion-cta { font-size:14px; font-weight:700; }
+.promotion-disclosure { position:absolute; z-index:2; top:4px; right:32px; padding:1px 4px; border-radius:3px; font-size:8px; line-height:12px; background:var(--fb-promotion-dark-scrim); color:var(--fb-promotion-light-ink); }
+.promotion-modern { aspect-ratio:6/1; min-height:0; container-type:inline-size; }
+.banner-admin-preview { max-width:100%; }
+.banner-preview-mobile { width:390px; }
+.banner-preview-desktop { width:880px; }
+/* A status or legacy slide must not stretch a versioned artwork carousel. */
+[aria-roledescription=carousel]:has(.promotion-modern) > .grid { aspect-ratio:6/1; overflow:hidden; }
+[aria-roledescription=carousel]:has(.promotion-modern) > .grid > [aria-roledescription=slide] { min-height:0; height:100%; overflow:hidden; }
+[aria-roledescription=carousel]:has(.promotion-modern) > .grid > [aria-roledescription=slide] > * { height:100%; min-height:0; }
+.promotion-extension { position:absolute; inset:-16px; filter:blur(12px); pointer-events:none; }
+.promotion-extension img { width:100%; height:100%; object-fit:cover; }
+.promotion-modern .promotion-art img { object-position:center; }
+.promotion-modern .promotion-art img.object-cover { object-position:var(--promotion-focal); }
+.promotion-modern .promotion-copy-position { position:absolute; inset:4px 32px 24px 4px; display:flex; pointer-events:none; }
+.promotion-modern.promotion-sponsored .promotion-copy-position { right:100px; }
+.promotion-modern .promotion-align-left { justify-content:flex-start; text-align:left; }
+.promotion-modern .promotion-align-center { justify-content:center; text-align:center; }
+.promotion-modern .promotion-align-right { justify-content:flex-end; text-align:right; }
+.promotion-modern .promotion-position-top { align-items:flex-start; }
+.promotion-modern .promotion-position-middle { align-items:center; }
+.promotion-modern .promotion-position-bottom { align-items:flex-end; }
+.promotion-modern .promotion-copy { width:auto; max-width:100%; min-width:0; min-height:0; max-height:100%; padding:2px 4px; border-radius:3px; display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:6px; background:var(--fb-promotion-dark-scrim); color:var(--fb-promotion-light-ink); }
+.promotion-modern.promotion-scheme-dark .promotion-copy { background:var(--fb-promotion-light-scrim); color:var(--fb-promotion-dark-ink); }
+.promotion-modern .promotion-copy h3 { font-size:10px; line-height:12px; grid-column:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.promotion-modern .promotion-copy p { font-size:9px; line-height:10px; grid-column:1 / -1; grid-row:2; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.promotion-modern .promotion-cta { font-size:9px; line-height:12px; grid-column:2; grid-row:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90px; }
+@media(min-width:641px) { .promotion-modern .promotion-copy h3 { font-size:12px; line-height:16px; } .promotion-modern .promotion-copy p,.promotion-modern .promotion-cta { font-size:10px; line-height:14px; } }
 .promotion-motion-fade { animation:promotion-fade var(--promotion-duration) ease-out; }
 .promotion-motion-slide { animation:promotion-slide var(--promotion-duration) ease-out; }
+.promotion-modern .promotion-motion-slide { animation-name:promotion-compact-slide; }
+@keyframes promotion-compact-slide { from { transform:translateX(-2px); opacity:0; } to { transform:translateX(0); opacity:1; } }
 .promotion-motion-zoom { animation:promotion-zoom var(--promotion-duration) ease-out; }
 .promotion-motion-marquee { animation:promotion-marquee var(--promotion-speed) linear infinite alternate; }
 .promotion-motion-marquee[data-direction=right] { animation-direction:alternate-reverse; }
@@ -28,7 +60,7 @@
 @keyframes promotion-slide { from { transform:translateX(-10px); opacity:0; } to { transform:translateX(0); opacity:1; } }
 @keyframes promotion-zoom { from { transform:scale(.97); opacity:0; } to { transform:scale(1); opacity:1; } }
 @keyframes promotion-marquee { from { transform:translateX(-4px); } to { transform:translateX(4px); } }
-@media(max-width:640px) { .promotion-art img { object-position:var(--promotion-mobile-focal); } .promotion-copy { padding:16px; } }
+@media(max-width:640px) { .promotion-art img { object-position:var(--promotion-mobile-focal); } .promotion-copy { padding:16px; } .promotion-modern .promotion-art img.object-cover { object-position:var(--promotion-mobile-focal); } }
 @media(prefers-reduced-motion:reduce) { .promotion-copy { animation:none !important; transition:none !important; } }
 
 .transaction-modal-layer { position: fixed; z-index: 200; inset-inline: 0; top: var(--transaction-viewport-top, 0px); height: var(--transaction-viewport-height, 100dvh); display: flex; align-items: center; justify-content: center; padding: 8px; }
@@ -65,6 +97,10 @@
   --fb-banner-to: #0EA5E9;
   --fb-banner-foreground: #FFFFFF;
   /* Image-overlay controls retain contrast in either page theme. */
+  --fb-promotion-light-ink: #FFFFFF;
+  --fb-promotion-dark-ink: #111111;
+  --fb-promotion-dark-scrim: #18252d;
+  --fb-promotion-light-scrim: #FFFFFF;
   --fb-carousel-ink: #FFFFFF;
   --fb-carousel-surface: rgba(1, 12, 27, .28);
   --fb-carousel-surface-hover: rgba(1, 12, 27, .5);

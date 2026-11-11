@@ -36,26 +36,28 @@ async def main():
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
             carousel = await ready(page)
+            count = await carousel.locator('[aria-roledescription="slide"]').count()
+            assert count >= 3
             assert await carousel.get_by_role('button', name='Pause promotions').count() == 0
             checks += 1
             before = await active(carousel)
             await page.wait_for_timeout(4500)
             assert await active(carousel) == before  # no reduced-motion autoplay
             checks += 1
-            await carousel.get_by_role('button', name='Show banner 2 of 4').click()
-            assert await active(carousel) == '2 of 4'
+            await carousel.get_by_role('button', name=f'Show banner 2 of {count}').click()
+            assert await active(carousel) == f'2 of {count}'
             checks += 1
             grid = carousel.locator('[tabindex="0"]')
             await grid.focus()
             await page.keyboard.press('ArrowRight')
-            assert await active(carousel) == '3 of 4'
+            assert await active(carousel) == f'3 of {count}'
             checks += 1
             await grid.dispatch_event('pointerdown', {'clientX': 220})
             await grid.dispatch_event('pointerup', {'clientX': 120})
-            assert await active(carousel) == '4 of 4'
+            assert await active(carousel) == f'{4 if count > 3 else 1} of {count}'
             checks += 1
-            for i in range(1, 5):
-                await carousel.get_by_role('button', name=f'Show banner {i} of 4').click()
+            for i in range(1, count + 1):
+                await carousel.get_by_role('button', name=f'Show banner {i} of {count}').click()
                 await carousel.screenshot(path=str(OUT / f'{width}-slide-{i}.png'))
             await page.screenshot(path=str(OUT / f'{width}-page.png'))
             assert not errors, errors

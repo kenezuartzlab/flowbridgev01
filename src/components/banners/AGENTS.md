@@ -1,0 +1,2 @@
+- Versioned edited promotions and admin previews share live renderers and the carousel; legacy reads never opt into the new frame. Why: preserve old slides without misleading previews.
+- Keep versioned artwork at the shared 6:1 frame, use contained foreground over blurred extension, and keep sponsorship independent of text visibility. Why: embedded typography must not be cropped or duplicated.

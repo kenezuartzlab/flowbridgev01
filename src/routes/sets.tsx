@@ -47,7 +47,8 @@ import {
   type QuickAction,
 
 } from "@/lib/config/appConfig";
-import { TabBanner } from "@/components/banners/TabBanner";
+import { BannerSurfacePreview } from "@/components/banners/BannerSurfacePreview";
+import { editedPromotion } from '@/lib/banners/promotionPolicy';
 import { HeroCard } from "@/components/layout/HeroCard";
 import { ActionIcon, ACTION_ICON_NAMES, KIT_ICON_NAMES } from "@/components/ActionIcon";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
@@ -1117,7 +1118,13 @@ function BannersPanel({ wallet }: { wallet: string }) {
 
   const patchSlide = (index: number, next: Partial<BannerSlide>) =>
     patchSurface({
-      slides: current.slides.map((s, i) => (i === index ? { ...s, ...next } : s)),
+      slides: current.slides.map((s, i) => {
+        if(i!==index)return s;
+        const updated={...s,...next};
+        const promotion=editedPromotion(updated);
+        return {...updated,promotion:next.layout==='full'&&s.layout!=='full'
+          ? {...promotion,showTitle:false,showBody:false,showCta:false}:promotion};
+      }),
     });
 
   const patchSchedule = (index: number, next: Partial<NonNullable<BannerSlide["schedule"]>>) => {
@@ -1139,8 +1146,8 @@ function BannersPanel({ wallet }: { wallet: string }) {
           href: "",
           theme: surface === "bridge" ? "bridge" : "swap",
           isActive: true,
-          promotion: { status:'draft',motion:'static',format:'compact' },
-          layout: "compact",
+          promotion: { status:'draft',motion:'static',presentationVersion:2,fit:'contain',textScheme:'auto',showTitle:false,showBody:false,showCta:false },
+          layout: "full",
           schedule: null,
         },
       ],
@@ -1199,7 +1206,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
 
   if (loading) return <div className={cardCls}>Loading banners…</div>;
 
-  const livePreviewSlides = current.slides.filter((s) => isSlideVisible(s));
+  const livePreviewSlides = [...current.slides].sort((a,b)=>(b.promotion?.priority??0)-(a.promotion?.priority??0));
 
   return (
     <div className="space-y-4">
@@ -1253,9 +1260,10 @@ function BannersPanel({ wallet }: { wallet: string }) {
                 ["desktop", "Desktop"],
               ] as ["mobile" | "desktop", string][]
             ).map(([id, label]) => (
-              <button
+              <Button
                 key={id}
                 type="button"
+                variant="outline"
                 onClick={() => setPreviewDevice(previewDevice === id ? null : id)}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition ${
                   previewDevice === id
@@ -1264,7 +1272,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
                 }`}
               >
                 {label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -1272,21 +1280,20 @@ function BannersPanel({ wallet }: { wallet: string }) {
         {previewDevice && (
           <div className="overflow-x-auto">
             <div
-              className="mx-auto rounded-2xl border border-foreground/10 bg-background p-3 space-y-3"
-              style={{ width: previewDevice === "mobile" ? 360 : 640, maxWidth: "100%" }}
+              className={`banner-admin-preview ${previewDevice==='mobile'?'banner-preview-mobile':'banner-preview-desktop'} mx-auto`}
             >
               {livePreviewSlides.length === 0 ? (
                 <div className="text-[11px] text-muted">
-                  No banner is live right now for this surface (check schedules / visibility).
+                  No banners on this surface.
                 </div>
               ) : (
-                livePreviewSlides.map((s) => <TabBanner key={s.id} slide={s} />)
+                <BannerSurfacePreview slides={livePreviewSlides} surface={surface} intervalMs={current.intervalMs}/>
               )}
             </div>
           </div>
         )}
         <div className="text-[11px] text-muted">
-          Shows only slides that are live at this moment, exactly as users see them.
+          Unsaved preview · includes drafts. Nothing changes for visitors until saved.
         </div>
       </div>
 

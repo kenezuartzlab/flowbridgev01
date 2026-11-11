@@ -1,3 +1,8 @@
+# Fixed-ratio banner correction — preview only
+- [x] Shared 6:1 edited artwork frame and accurate Home/Swap/CA-BOT/Bridge previews; opt-in text controls and legacy read defaults; no settings writes.
+- [x] 2,470 tests/244 files, 1,568 isolated actual-component assertions plus whole-image/control-overlap checks, 26 current live-carousel checks; 320/390/430/1280, both motion modes; automatic build OK. Acceptance: docs/security/BANNER_FRAME_ACCEPTANCE_20261111.md.
+- [ ] Production remains HOLD; no settings writes, publication, activation or financial changes.
+
 # Release-readiness gate — preview only
 - [x] Fresh dependency audit: 12 original advisory rows cleared, 1 high Zod/WalletConnect remains; all-scope dev minimatch moderate/deepmerge low recorded, no suppressions.
 - [x] Fresh available hosted scans + independent deeper source audit; claim timeout/freshness/review and public GET write paths corrected; platform deep engines remain unavailable/stale.
