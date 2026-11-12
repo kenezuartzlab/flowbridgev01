@@ -68,8 +68,12 @@ async def main():
       assert 0<=gap<=2,gap;checks+=1
       assert boxes[0]['width']<=w and 40<=boxes[0]['height']<=56;checks+=1
       trade=page.locator('[data-nav-id]').nth(2);tb=await trade.bounding_box()
-      assert await trade.locator('.compact-ad-nav-trade').evaluate("el=>el.getBoundingClientRect().top<el.closest('nav').getBoundingClientRect().top"),'Raised Trade design must remain raised';checks+=1
-      assert await trade.locator('.compact-ad-nav-trade').evaluate("el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+1))}"),'Ad intercepts raised Trade hit target';checks+=1
+      assert await page.locator('.compact-ad-nav-trade').count()==0,'Raised Trade control must be gone';checks+=1
+      ic=await page.evaluate("()=>[...document.querySelectorAll('[data-nav-id]')].map(l=>{const i=l.querySelector('[data-nav-icon]').getBoundingClientRect(),t=l.lastElementChild.getBoundingClientRect(),r=l.getBoundingClientRect();return [i.top,i.height,i.width,t.top,t.bottom,r.top,r.height,l.closest('nav').getBoundingClientRect().top]})")
+      assert all(abs(v[k]-ic[0][k])<0.5 for v in ic for k in range(7)) and ic[0][0]>=ic[0][7],('Nav items not uniform',ic);checks+=1
+      clip=await page.locator('.compact-ad-dock .promotion-banner').evaluate("el=>getComputedStyle(el).clipPath");assert clip in ('none',''),clip;checks+=1
+      for l in await page.locator('[data-nav-id]').all():
+        lb=await l.bounding_box();assert await l.evaluate("(el,[x,y])=>el.contains(document.elementFromPoint(x,y))",[lb['x']+lb['width']/2,lb['y']+lb['height']/2]);checks+=1
       await trade.click(trial=True);checks+=1
       for link in await page.locator('[data-nav-id]').all():
         await link.click(trial=True);checks+=1

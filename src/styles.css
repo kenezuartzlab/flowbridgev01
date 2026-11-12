@@ -77,11 +77,10 @@
 .docked-ad-slot .promotion-disclosure { font-size:9px; max-width:38%; }
 .compact-position-above-nav-left .docked-ad-slot { margin-left:12px; margin-right:auto; }
 .compact-position-above-nav-right .docked-ad-slot { margin-right:12px; margin-left:auto; }
-/* Ads never change nav layout. A small cutout clears the existing raised Trade control. */
+/* Ads never change nav layout; the creative is a straight uninterrupted bar flush above the flat nav. */
 .compact-ad-dock { position:fixed; left:0; right:0; z-index:41; bottom:var(--fb-bottom-nav-offset,calc(62px + min(env(safe-area-inset-bottom,0px),10px))); pointer-events:none; }
 .compact-ad-dock .docked-ad-slot { pointer-events:none; margin:0 auto; }
 .compact-ad-dock .promotion-banner,.compact-ad-dock .docked-ad-close { pointer-events:auto; }
-@media(max-width:767px) { .compact-ad-dock .promotion-banner { clip-path:polygon(0 0,100% 0,100% 100%,var(--compact-trade-right,50%) 100%,var(--compact-trade-right,50%) var(--compact-trade-top,100%),var(--compact-trade-left,50%) var(--compact-trade-top,100%),var(--compact-trade-left,50%) 100%,0 100%); } }
 @media(min-width:768px) { .compact-ad-dock { bottom:16px; } .docked-ad-slot { max-width:480px; } .docked-ad-slot .promotion-banner { aspect-ratio:6/1; max-height:80px; } }
 @media(min-width:768px) { .compact-position-above-nav-right .docked-ad-slot { margin-right:80px; max-width:min(520px, calc(100% - 104px)); } }
 .promotion-modern .promotion-copy h3 { font-size:10px; line-height:12px; grid-column:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }

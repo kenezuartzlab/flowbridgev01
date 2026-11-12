@@ -83,14 +83,6 @@ export function DockedAd({settings:override,path:overridePath,preview=false,cent
       if(mobile){const top=nav.getBoundingClientRect().top;if(top>0)root.style.setProperty('--fb-bottom-nav-offset',`${Math.max(0,window.innerHeight-top)}px`);}
       const dock=document.querySelector('.compact-ad-dock');
       const art=dock?.querySelector('.promotion-banner');
-      const trade=nav?.querySelector('.compact-ad-nav-trade');
-      // Only the creative is cut away; never resize/reposition the menu or its controls.
-      if(dock instanceof HTMLElement&&art&&trade&&mobile){
-        const a=art.getBoundingClientRect(),t=trade.getBoundingClientRect();
-        dock.style.setProperty('--compact-trade-left',`${Math.max(0,t.left-a.left-4)}px`);
-        dock.style.setProperty('--compact-trade-right',`${Math.min(a.width,t.right-a.left+4)}px`);
-        dock.style.setProperty('--compact-trade-top',`${Math.max(0,t.top-a.top-4)}px`);
-      }
       root.style.setProperty('--compact-ad-reserve',`${dock?dock.getBoundingClientRect().height:0}px`);
     };
     const ro=new ResizeObserver(measure);let watched:Element|null=null;
