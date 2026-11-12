@@ -1,14 +1,14 @@
 import { describe,it,expect } from 'vitest';
-import { dockedAdSchema,promotionSchema,promotionSlideSchema,promotionVisibility,disclosureColors,type DockedAdSettings } from './promotionPolicy';
+import { compactPagePlacementSchema,dockedAdSchema,promotionSchema,promotionSlideSchema,promotionVisibility,disclosureColors,type DockedAdSettings } from './promotionPolicy';
 import { dismissalBlocks,selectDockedAd } from './dockedAdPolicy';
 import { DEFAULT_APP_CONFIG,mergeAppConfig,mergeBanners } from '@/lib/config/appConfig';
 import { publicPromotions } from './publicPromotions';
 
 const slide={id:'dock',title:'Artwork',imageUrl:'/api/banner-image/test.png',promotion:{presentationVersion:2 as const,status:'published' as const,sponsored:true}};
-const config=():DockedAdSettings=>({...dockedAdSchema.parse({enabled:true,surfaces:['swap'],slides:[slide]}),slides:[slide]});
+const config=():DockedAdSettings=>({...dockedAdSchema.parse({enabled:true,pages:{swap:compactPagePlacementSchema.parse({enabled:true,creativeIds:['dock']})},slides:[slide]}),slides:[slide]});
 describe('final banner rules',()=>{
   it('new placement defaults OFF with no surfaces or creatives',()=>expect(dockedAdSchema.parse({})).toMatchObject({enabled:false,surfaces:[],slides:[],autoHideSeconds:0}));
-  it('caps delivery at one highest ordered ad',()=>{const p=config();p.slides.push({...slide,id:'higher',promotion:{...slide.promotion,priority:10}});expect(selectDockedAd(p,'/trade',false)?.id).toBe('higher');});
+  it('caps delivery at one highest ordered ad',()=>{const p=config();p.slides.push({...slide,id:'higher',promotion:{...slide.promotion,priority:10}});p.pages.swap=compactPagePlacementSchema.parse({enabled:true,creativeIds:['higher','dock']});expect(selectDockedAd(p,'/trade',false)?.id).toBe('higher');});
   it('never delivers a draft, paused, expired or future ad',()=>{for(const s of [{...slide,promotion:{...slide.promotion,status:'draft' as const}},{...slide,isActive:false},{...slide,schedule:{endAt:'2026-11-10T00:00:00Z'}},{...slide,schedule:{startAt:'2026-11-20T00:00:00Z'}}]){const p=config();p.slides=[s];expect(selectDockedAd(p,'/trade',false,new Date('2026-11-12T00:00:00Z'))).toBeNull();}});
   it('limits delivery to configured surfaces and enabled settings',()=>{expect(selectDockedAd(config(),'/home',false)).toBeNull();expect(selectDockedAd({...config(),enabled:false},'/trade',false)).toBeNull();expect(selectDockedAd(config(),'/trade',true)).toBeNull();});
   it('session close reappears only in a new session',()=>{expect(dismissalBlocks(config(),{session:true,closedAt:null},0)).toBe(true);expect(dismissalBlocks(config(),{session:false,closedAt:null},0)).toBe(false);});

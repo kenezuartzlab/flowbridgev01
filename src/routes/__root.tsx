@@ -22,6 +22,7 @@ import { readPrefs, unlockPrefsFormatting } from "../lib/prefs";
 import { areaForPath, trackProductEvent } from "../lib/ops/productEvents";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { VisitorAnnouncement } from '@/components/banners/VisitorAnnouncement';
+import { DockedAd } from '@/components/banners/DockedAd';
 
 function NotFoundComponent() {
   return (
@@ -191,6 +192,7 @@ function RootComponent() {
       <AuthDialog />
       <VisitorAnnouncement />
       <Outlet />
+      <DockedAd central />
       <PublicFooter />
       <FlowAiLauncher />
       <Toaster position="top-right" richColors closeButton />

@@ -1,4 +1,5 @@
 # Final banner management — preview only
+- [x] Required addendum: central master plus independent actual-page placement rules, excluded sensitive routes, default-OFF new pages, page/global-scoped caps and 560 route-change browser assertions; no publication/settings writes. Acceptance: docs/security/COMPACT_AD_PAGE_MANAGER_20261112.md.
 - [x] Editable mandatory disclosure, Home-only ratios and transparent backed text; preserve legacy and compact trading frames.
 - [x] Default-OFF normal-flow docked placement, separate admin preview/configuration, schedules, session/cooldown dismissal and existing analytics; no settings writes.
 - [x] 2,484 tests/245 files, 2,114 browser assertions; automatic build/type gate OK; acceptance: docs/security/BANNER_MANAGEMENT_ACCEPTANCE_20261112.md.

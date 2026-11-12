@@ -6,6 +6,11 @@ export function publicPromotions(config: AppConfig): AppConfig {
   for (const key of BANNER_SURFACES) {
     banners[key] = { ...banners[key], slides: banners[key].slides.filter(slide => slide.promotion?.status !== 'draft') };
   }
-  if(banners.docked)banners.docked={...banners.docked,slides:banners.docked.enabled?banners.docked.slides.filter(s=>s.promotion?.status==='published'):[]};
+  if(banners.docked){
+    const slides=banners.docked.enabled?banners.docked.slides.filter(s=>s.promotion?.status==='published'):[];
+    const pages={...banners.docked.pages};
+    for(const key of Object.keys(pages) as (keyof typeof pages)[]){const p=pages[key];if(p)pages[key]={...p,creativeIds:p.creativeIds.filter(id=>slides.some(s=>s.id===id))};}
+    banners.docked={...banners.docked,pages,slides};
+  }
   return { ...config, banners };
 }

@@ -21,7 +21,7 @@ async def mount(page, mode, ratio='6:1', x='right', y='top', theme='dark', coold
       if(window.testRoot)window.testRoot.unmount();document.body.replaceChildren();const el=document.createElement('div');document.body.append(el);
       window.testRoot=(client.createRoot??client.default.createRoot)(el);
       const slide={id:'fixture-dock',title:'Owner artwork',imageUrl:'/api/banner-image/management.png',href:'/home',layout:'full',promotion:{presentationVersion:2,status:'published',fit:'contain',sponsored:true,disclosureLabel:'Ad · Brand',disclosureX:a.x,disclosureY:a.y,disclosureTheme:a.theme,disclosureOpacity:0,homeRatio:a.ratio,backgroundMode:'transparent',showTitle:false,showBody:false,showCta:false}};
-      const settings={enabled:true,surfaces:['swap'],slides:[slide],dismissal:a.cooldown?'cooldown':'session',cooldownMinutes:1,autoHideSeconds:a.auto};
+      const settings={enabled:true,pages:{swap:{enabled:true,creativeIds:[slide.id],dismissal:a.cooldown?'cooldown':'session',dismissalScope:'page',cooldownMinutes:1,autoHideSeconds:a.auto,startAt:null,endAt:null,position:'above-nav-center'}},slides:[slide]};
       function Content(){
         if(a.mode==='home')return React.createElement(React.Fragment,null,React.createElement('div',{'data-testid':'preview'},React.createElement(BannerSurfacePreview,{surface:'home',slides:[slide,{...slide,id:'second'}],intervalMs:60000})),React.createElement('div',{'data-testid':'live'},React.createElement(FeaturedBanner,{slide,surface:'home'})),React.createElement('div',{'data-testid':'trade'},React.createElement(TabBanner,{slide,surface:'swap'})));
         if(a.mode==='editor'){const [v,set]=React.useState(settings);return React.createElement(DockedAdEditor,{value:v,wallet:'',onChange:s=>{window.editedAd=s;set(s)}})}
@@ -73,10 +73,10 @@ async def main():
         await page.get_by_role('button',name='Review trade').focus();await slot.wait_for();checks+=1
         await page.get_by_role('button',name='Close ad',exact=True).click();await slot.wait_for(state='hidden');checks+=1
         await mount(page,'dock');assert await slot.count()==0;checks+=1
-        await page.evaluate('sessionStorage.removeItem("fb-docked-ad-dismissed")');await mount(page,'dock');await slot.wait_for();checks+=1
+        await page.evaluate('sessionStorage.removeItem("fb-compact-ad-v2:swap")');await mount(page,'dock');await slot.wait_for();checks+=1
         await page.get_by_role('button',name='Close ad',exact=True).click();await mount(page,'dock',cooldown=True);assert await slot.count()==0;checks+=1
-        await page.evaluate('localStorage.setItem("fb-docked-ad-close",String(Date.now()-60001))');await mount(page,'dock',cooldown=True);await slot.wait_for();checks+=1
-        await page.evaluate('sessionStorage.clear();localStorage.removeItem("fb-docked-ad-close")');await mount(page,'dock',auto=1);await slot.wait_for();await slot.wait_for(state='hidden',timeout=4000);checks+=1
+        await page.evaluate('localStorage.setItem("fb-compact-ad-v2:swap",String(Date.now()-60001))');await mount(page,'dock',cooldown=True);await slot.wait_for();checks+=1
+        await page.evaluate('sessionStorage.clear();localStorage.removeItem("fb-compact-ad-v2:swap")');await mount(page,'dock',auto=1);await slot.wait_for();await slot.wait_for(state='hidden',timeout=4000);checks+=1
         await mount(page,'editor');await page.get_by_text('Promotion design & publishing',exact=True).click();await page.get_by_label('Disclosure wording').fill('Promoted');await page.get_by_label('Disclosure horizontal').select_option('left');await page.get_by_label('Overlay background').select_option('transparent')
         assert await page.evaluate('window.editedAd.slides[0].promotion.disclosureLabel')=='Promoted';assert await page.evaluate('window.editedAd.slides[0].promotion.sponsored') is True
         assert await page.get_by_label('Paid promotion · disclosure required').is_disabled();checks+=3

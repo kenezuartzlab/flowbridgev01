@@ -10,7 +10,6 @@
  */
 import { Link, useRouterState } from "@tanstack/react-router";
 import { PRIMARY_NAV, isNavActive } from "@/components/shell/navModel";
-import { DockedAd } from '@/components/banners/DockedAd';
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -19,7 +18,7 @@ export function BottomNav() {
   return (
     <>
       {/* Normal document flow, never floating over trading controls or the keyboard. */}
-      <DockedAd/>
+      <div data-compact-ad-anchor />
       {/* Spacer so page content is never hidden behind the fixed bar */}
       <div aria-hidden className="h-[70px] md:hidden" />
       <nav
