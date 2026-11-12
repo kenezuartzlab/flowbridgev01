@@ -70,11 +70,16 @@
 .promotion-home .promotion-disclosure { font-size:var(--disclosure-size); }
 .docked-ad-slot { position:relative; width:calc(100% - 24px); max-width:520px; margin:8px auto 18px; padding-inline:env(safe-area-inset-left,0px) env(safe-area-inset-right,0px); }
 .docked-ad-slot .promotion-banner { aspect-ratio:6/1; max-height:86px; min-height:48px; }
-.docked-ad-close { position:absolute; right:2px; top:2px; z-index:3; width:24px; height:24px; color:var(--fb-promotion-light-ink); background:var(--fb-promotion-dark-scrim); border-radius:4px; }
+.docked-ad-close { position:absolute; right:0; top:50%; transform:translateY(-50%); z-index:3; width:44px; height:44px; background:transparent; color:var(--fb-promotion-light-ink); display:grid; place-items:center; }
+.docked-ad-close:hover { background:transparent; }
+.docked-ad-close-mark { display:grid; place-items:center; width:22px; height:22px; border-radius:4px; background:var(--fb-promotion-dark-scrim); }
 .docked-ad-slot .promotion-disclosure { font-size:9px; max-width:38%; }
 .compact-position-above-nav-left .docked-ad-slot { margin-left:12px; margin-right:auto; }
 .compact-position-above-nav-right .docked-ad-slot { margin-right:12px; margin-left:auto; }
-.compact-ad-fallback { padding-bottom:88px; }
+/* Fixed dock portalled to body: above the nav's top edge and raised Trade button, below dialogs (z-50). */
+.compact-ad-dock { position:fixed; left:0; right:0; z-index:41; bottom:calc(var(--fb-bottom-nav-h,62px) + 18px); pointer-events:none; }
+.compact-ad-dock .docked-ad-slot { pointer-events:auto; margin:0 auto; }
+@media(min-width:768px) { .compact-ad-dock { bottom:16px; } }
 @media(min-width:768px) { .compact-position-above-nav-right .docked-ad-slot { margin-right:80px; max-width:min(520px, calc(100% - 104px)); } }
 .promotion-modern .promotion-copy h3 { font-size:10px; line-height:12px; grid-column:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .promotion-modern .promotion-copy p { font-size:9px; line-height:10px; grid-column:1 / -1; grid-row:2; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }

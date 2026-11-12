@@ -17,10 +17,8 @@ export function BottomNav() {
 
   return (
     <>
-      {/* Normal document flow, never floating over trading controls or the keyboard. */}
-      <div data-compact-ad-anchor />
       {/* Spacer so page content is never hidden behind the fixed bar */}
-      <div aria-hidden className="h-[70px] md:hidden" />
+      <div aria-hidden className="h-[calc(70px+var(--compact-ad-reserve,0px))] md:h-[var(--compact-ad-reserve,0px)]" />
       <nav
         aria-label="Main navigation"
         className="fixed bottom-0 left-0 right-0 z-40 border-t border-hairline bg-card-alt backdrop-blur-xl md:hidden"

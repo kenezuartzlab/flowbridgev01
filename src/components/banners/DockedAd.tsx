@@ -15,7 +15,7 @@ import { useTradeTab } from '@/lib/trade/tradeSession';
 export function DockedAdCreative({slide,onClose,surface}:{slide:BannerSlide;onClose:()=>void;surface?:'home'|'swap'|'bridge'|'cabot'}) {
   return <aside className="docked-ad-slot" aria-label="Sponsored placement">
     <PromotionBanner surface={surface} slide={{...slide,promotion:{...slide.promotion,presentationVersion:2,sponsored:true,fit:'contain',showTitle:false,showBody:false,showCta:false,motion:'static'}}}/>
-    <Button type="button" variant="ghost" size="icon" className="docked-ad-close" aria-label="Close ad" title="Close ad" onClick={onClose}><X className="size-3"/></Button>
+    <Button type="button" variant="ghost" size="icon" className="docked-ad-close" aria-label="Close ad" title="Close ad" onClick={onClose}><span className="docked-ad-close-mark"><X className="size-3"/></span></Button>
   </aside>;
 }
 
@@ -29,8 +29,8 @@ export function DockedAd({settings:override,path:overridePath,preview=false,cent
   const path=page==='bridge'?'/bridge':page==='cabot'?'/cabot':page==='swap'?'/trade':pathname;
   const placement=page?settings?.pages?.[page]:undefined;
   const storageKey=page?dismissalKey(page,placement?.dismissalScope??'page'):null;
-  const [anchor,setAnchor]=useState<Element|null>(null);
-  useEffect(()=>{if(!central)return;const find=()=>setAnchor(document.querySelector('[data-compact-ad-anchor]'));find();const observer=new MutationObserver(find);observer.observe(document.body,{childList:true,subtree:true});return()=>observer.disconnect();},[central,pathname]);
+  const [mounted,setMounted]=useState(false);
+  useEffect(()=>{if(central)setMounted(true);},[central]);
   const [readyKey,setReadyKey]=useState<string|null>(null),[blockedKey,setBlockedKey]=useState<string|null>(null),[keyboard,setKeyboard]=useState(false),[now,setNow]=useState(()=>Date.now());
   const ready=preview||!!storageKey&&readyKey===storageKey;
   useEffect(()=>{
@@ -71,8 +71,21 @@ export function DockedAd({settings:override,path:overridePath,preview=false,cent
     if(!slide||!ready||keyboard||preview||!placement?.autoHideSeconds)return;
     const timer=setTimeout(close,placement.autoHideSeconds*1000);return()=>clearTimeout(timer);
   },[slide?.id,ready,keyboard,preview,placement?.autoHideSeconds,storageKey,page]);
-  if(!ready||keyboard||!slide)return null;
+  const visible=ready&&!keyboard&&!!slide;
+  // Reserve bottom content space only while the fixed dock is visible; collapses on close.
+  useEffect(()=>{
+    if(!central)return;
+    const root=document.documentElement;
+    if(!visible){root.style.removeProperty('--compact-ad-reserve');return;}
+    const measure=()=>{const nav=document.querySelector('nav[aria-label="Main navigation"]');const h=nav instanceof HTMLElement&&getComputedStyle(nav).display!=="none"?nav.getBoundingClientRect().height:0;if(h>0)root.style.setProperty('--fb-bottom-nav-h',`${h}px`);const dock=document.querySelector('.compact-ad-dock');root.style.setProperty('--compact-ad-reserve',`${dock?dock.getBoundingClientRect().height+8:0}px`);};
+    const ro=new ResizeObserver(measure);let watched:Element|null=null;
+    const attach=()=>{const nav=document.querySelector('nav[aria-label="Main navigation"]');if(nav&&nav!==watched){if(watched)ro.unobserve(watched);watched=nav;ro.observe(nav);}measure();};
+    attach();const mo=new MutationObserver(attach);mo.observe(document.body,{childList:true,subtree:true});const tick=setInterval(measure,500);window.addEventListener('resize',measure);
+    return()=>{clearInterval(tick);ro.disconnect();mo.disconnect();window.removeEventListener('resize',measure);root.style.removeProperty('--compact-ad-reserve');};
+  },[central,visible,slide?.id]);
+  if(!visible||!slide)return null;
   const surface=dockedSurface(path);
-  const creative=<div data-compact-page={page} className={`${central&&!anchor?'compact-ad-fallback ':''}compact-position-${placement?.position??'above-nav-center'}`}><DockedAdCreative slide={slide} onClose={close} surface={preview?undefined:!surface||surface==='explore'?'home':surface}/></div>;
-  return central&&anchor?createPortal(creative,anchor):creative;
+  const creative=<div data-compact-page={page} className={`${central?'compact-ad-dock ':''}compact-position-${placement?.position??'above-nav-center'}`}><DockedAdCreative slide={slide} onClose={close} surface={preview?undefined:!surface||surface==='explore'?'home':surface}/></div>;
+  if(central)return mounted?createPortal(creative,document.body):null;
+  return creative;
 }
