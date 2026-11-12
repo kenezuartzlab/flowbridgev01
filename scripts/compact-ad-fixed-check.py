@@ -1,5 +1,6 @@
 """Fixed mobile dock acceptance: real DockedAd + real BottomNav, actual scrolling; local fixture config, no writes."""
 import asyncio
+import json
 from io import BytesIO
 from pathlib import Path
 from PIL import Image, ImageDraw
@@ -25,13 +26,29 @@ async def main():
       // Local network fixture uses an allowed same-origin image path; no saved campaign/config.
       const slide={id:'first',title:'Fixture',imageUrl:'/assets/compact-fixture.png',promotion:{presentationVersion:2,status:'published',sponsored:true}};
       const cfg={enabled:true,pages:Object.fromEntries(COMPACT_AD_PAGES.filter(p=>p.eligible).map(p=>[p.id,compactPagePlacementSchema.parse({enabled:true,creativeIds:['first']})])),slides:[slide]};
-      function Root(){return R.createElement(R.Fragment,null,R.createElement('div',{style:{transform:'translateZ(0)'}},R.createElement(Outlet),R.createElement('footer',{id:'foot'},'Footer')),R.createElement(BottomNav),R.createElement(DockedAd,{settings:cfg,central:true}));}
+      function Root(){const [enabled,setEnabled]=R.useState(false);window.setAdEnabled=setEnabled;return R.createElement(R.Fragment,null,R.createElement('div',{style:{transform:'translateZ(0)'}},R.createElement(Outlet),R.createElement('footer',{id:'foot'},'Footer')),R.createElement(BottomNav),R.createElement(DockedAd,{settings:{...cfg,enabled},central:true}));}
       function View(){return R.createElement('main',null,R.createElement('input',{'aria-label':'Amount'}),Array.from({length:60},(_,i)=>R.createElement('p',{key:i,style:{height:'40px'}},'Recent activity row '+i)));}
       const root=createRootRoute({component:Root});const kids=['home','activity','sets'].map(path=>createRoute({getParentRoute:()=>root,path,component:View}));
       const router=createRouter({routeTree:root.addChildren(kids)});window.router=router;await router.navigate({to:'/activity'});
       document.body.replaceChildren();const el=document.createElement('div');document.body.append(el);(C.createRoot??C.default.createRoot)(el).render(R.createElement(RouterProvider,{router}));
     }''')
+    geometry="""()=>Object.fromEntries(['nav[aria-label="Main navigation"]','[data-nav-id]:nth-child(n)'].flatMap((s,i)=>i?Array.from(document.querySelectorAll('[data-nav-id]')).flatMap((e,j)=>[e,e.children[0],e.lastElementChild].map((el,k)=>[`${j}-${k}`,el.getBoundingClientRect().toJSON()])):[[s,document.querySelector(s).getBoundingClientRect().toJSON()]]))"""
+    await page.locator('[data-nav-id]').first.wait_for(state='attached');await page.wait_for_timeout(600)
+    baseline=await page.evaluate(geometry)
+    await page.screenshot(path=str(OUT/f'{w}-{motion}-off.png'))
+    await page.evaluate('()=>window.setAdEnabled(true)')
     slot=page.get_by_role('complementary',name='Sponsored placement');await slot.wait_for();await page.wait_for_timeout(600)
+    async def invariant(label):
+      nonlocal checks
+      actual=await page.evaluate(geometry)
+      if w<768:
+        for key,rect in baseline.items():
+          for axis in ('x','y','width','height'):
+            assert abs(rect[axis]-actual[key][axis])<=1,(label,key,axis,rect[axis],actual[key][axis])
+            checks+=1
+    await page.screenshot(path=str(OUT/f'{w}-{motion}-on.png'))
+    print('geometry OFF/ON',w,motion,json.dumps({'off':baseline,'on':await page.evaluate(geometry)}))
+    await invariant('activation')
     assert await page.evaluate("getComputedStyle(document.querySelector('.compact-ad-dock')).position")=='fixed';checks+=1
     assert await page.evaluate("document.querySelector('.compact-ad-dock').parentElement===document.body");checks+=1
     await page.wait_for_function("document.querySelector('.promotion-art img')?.naturalWidth===840");checks+=1
@@ -40,6 +57,7 @@ async def main():
     for i,frac in enumerate((0,.5,1,0)):
       await page.mouse.wheel(0,0);await page.evaluate('(f)=>scrollTo(0,(document.documentElement.scrollHeight-innerHeight)*f)',frac);await page.wait_for_timeout(120)
       boxes.append(await slot.bounding_box());await page.screenshot(path=str(OUT/f'{w}-{motion}-{i}.png'))
+      await invariant('scroll')
       if w<768:
         nb=await page.get_by_role('navigation',name='Main navigation').bounding_box();sb=boxes[-1]
         assert 0<=nb['y']-sb['y']-sb['height']<=2;checks+=1
@@ -49,7 +67,9 @@ async def main():
       nav=await page.get_by_role('navigation',name='Main navigation').bounding_box();gap=nav['y']-(boxes[0]['y']+boxes[0]['height'])
       assert 0<=gap<=2,gap;checks+=1
       assert boxes[0]['width']<=w and 40<=boxes[0]['height']<=56;checks+=1
-      trade=page.locator('[data-nav-id]').nth(2);tb=await trade.bounding_box();assert tb['y']>=boxes[0]['y']+boxes[0]['height'];checks+=1
+      trade=page.locator('[data-nav-id]').nth(2);tb=await trade.bounding_box()
+      assert await trade.locator('.compact-ad-nav-trade').evaluate("el=>el.getBoundingClientRect().top<el.closest('nav').getBoundingClientRect().top"),'Raised Trade design must remain raised';checks+=1
+      assert await trade.locator('.compact-ad-nav-trade').evaluate("el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+1))}"),'Ad intercepts raised Trade hit target';checks+=1
       await trade.click(trial=True);checks+=1
       for link in await page.locator('[data-nav-id]').all():
         await link.click(trial=True);checks+=1
@@ -65,12 +85,18 @@ async def main():
         sb=await slot.bounding_box();nb=await page.get_by_role('navigation',name='Main navigation').bounding_box()
         assert 0<=nb['y']-sb['y']-sb['height']<=2;checks+=1
         assert sb['height']<=56 and await page.evaluate('document.documentElement.scrollWidth<=innerWidth');checks+=1
+        on=await page.evaluate(geometry);await page.evaluate('()=>window.setAdEnabled(false)');await slot.wait_for(state='hidden');await page.wait_for_timeout(100)
+        off=await page.evaluate(geometry)
+        assert all(abs(r[a]-off[k][a])<=1 for k,r in on.items() for a in ('x','y','width','height'));checks+=1
+        await page.evaluate('()=>window.setAdEnabled(true)');await slot.wait_for();await page.wait_for_timeout(650)
     reserve=await page.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--compact-ad-reserve')");assert reserve and reserve!='0px';checks+=1
     sh=await page.evaluate('document.documentElement.scrollHeight');assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');checks+=1
-    await page.get_by_label('Amount').focus();await slot.wait_for(state='hidden');await page.get_by_label('Amount').blur();await slot.wait_for();checks+=1
+    await page.get_by_label('Amount').focus();await slot.wait_for(state='hidden');await invariant('keyboard');await page.get_by_label('Amount').blur();await slot.wait_for();checks+=1
     await page.evaluate('()=>{const d=document.createElement("div");d.setAttribute("role","dialog");d.id="m";document.body.append(d)}');await slot.wait_for(state='hidden');await page.evaluate('()=>document.getElementById("m").remove()');await slot.wait_for();checks+=1
-    await page.evaluate('()=>window.router.navigate({to:"/sets"})');await slot.wait_for(state='hidden');await page.evaluate('()=>window.router.navigate({to:"/activity"})');await slot.wait_for();checks+=1
+    await page.evaluate('()=>window.router.navigate({to:"/sets"})');await slot.wait_for(state='hidden');await invariant('sensitive route');await page.evaluate('()=>window.router.navigate({to:"/activity"})');await slot.wait_for();await invariant('route return');checks+=1
     await page.get_by_role('button',name='Close ad').click();await slot.wait_for(state='hidden');await page.wait_for_timeout(100)
+    await invariant('dismissal')
+    await page.screenshot(path=str(OUT/f'{w}-{motion}-dismissed.png'))
     assert await page.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--compact-ad-reserve')")=='';assert await page.evaluate('document.documentElement.scrollHeight')<sh;checks+=1
     await page.evaluate('()=>window.router.navigate({to:"/home"})');await slot.wait_for();await page.evaluate('()=>window.router.navigate({to:"/activity"})');await page.wait_for_timeout(150);assert await slot.count()==0;checks+=1
     assert not errs,errs;print(w,motion,'fixed dock PASS',boxes[0]);await ctx.close()

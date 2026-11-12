@@ -1,3 +1,8 @@
+# Compact-ad Trade-button regression — preview only
+- [x] RED reproduced 16px taller nav; removed ad-dependent margin override, measured creative-only hit-transparent cutout preserves unchanged raised Trade and nav.
+- [x] 3,750 actual-component + 560 placement checks, 2,532 full tests and automatic build/type gate PASS; real Home OFF/ON/dismissed geometry delta 0px at 320/390/430/1280 with screenshot QA. Acceptance: docs/security/COMPACT_AD_NAV_INVARIANCE_ACCEPTANCE_20261112.md.
+- [ ] HOLD: physical Samsung/wallet-browser acceptance and inherited release gates; no publication, live configuration or financial changes.
+
 # Final compact-ad mobile polish — preview only
 - [x] Slim contained artwork, measured flush nav alignment and right-border close target; preserve all placement/suppression rules.
 - [x] Verify scroll/resize/reduced-motion/dismissal at 320/390/430/1280, full tests and automatic build/type gate; acceptance: docs/security/COMPACT_AD_SLIM_FLUSH_ACCEPTANCE_20261112.md.

@@ -77,7 +77,22 @@ export function DockedAd({settings:override,path:overridePath,preview=false,cent
     if(!central)return;
     const root=document.documentElement;
     if(!visible){root.style.removeProperty('--compact-ad-reserve');return;}
-    const measure=()=>{const nav=document.querySelector('nav[aria-label="Main navigation"]');if(nav instanceof HTMLElement&&getComputedStyle(nav).display!=="none"){const top=nav.getBoundingClientRect().top;if(top>0)root.style.setProperty('--fb-bottom-nav-offset',`${Math.max(0,window.innerHeight-top)}px`);}const dock=document.querySelector('.compact-ad-dock');root.style.setProperty('--compact-ad-reserve',`${dock?dock.getBoundingClientRect().height:0}px`);};
+    const measure=()=>{
+      const nav=document.querySelector('nav[aria-label="Main navigation"]');
+      const mobile=nav instanceof HTMLElement&&getComputedStyle(nav).display!=="none";
+      if(mobile){const top=nav.getBoundingClientRect().top;if(top>0)root.style.setProperty('--fb-bottom-nav-offset',`${Math.max(0,window.innerHeight-top)}px`);}
+      const dock=document.querySelector('.compact-ad-dock');
+      const art=dock?.querySelector('.promotion-banner');
+      const trade=nav?.querySelector('.compact-ad-nav-trade');
+      // Only the creative is cut away; never resize/reposition the menu or its controls.
+      if(dock instanceof HTMLElement&&art&&trade&&mobile){
+        const a=art.getBoundingClientRect(),t=trade.getBoundingClientRect();
+        dock.style.setProperty('--compact-trade-left',`${Math.max(0,t.left-a.left-4)}px`);
+        dock.style.setProperty('--compact-trade-right',`${Math.min(a.width,t.right-a.left+4)}px`);
+        dock.style.setProperty('--compact-trade-top',`${Math.max(0,t.top-a.top-4)}px`);
+      }
+      root.style.setProperty('--compact-ad-reserve',`${dock?dock.getBoundingClientRect().height:0}px`);
+    };
     const ro=new ResizeObserver(measure);let watched:Element|null=null;
     const attach=()=>{const nav=document.querySelector('nav[aria-label="Main navigation"]');if(nav&&nav!==watched){if(watched)ro.unobserve(watched);watched=nav;ro.observe(nav);}measure();};
     attach();const mo=new MutationObserver(attach);mo.observe(document.body,{childList:true,subtree:true});const tick=setInterval(measure,500);window.addEventListener('resize',measure);window.visualViewport?.addEventListener('resize',measure);window.visualViewport?.addEventListener('scroll',measure);
