@@ -54,7 +54,7 @@ export function BottomNav() {
                     aria-hidden
                     className={
                       center
-                        ? `-mt-4 grid h-11 w-11 shrink-0 place-items-center rounded-2xl border transition-transform group-hover:scale-105 motion-reduce:transition-none ${
+                        ? `compact-ad-nav-trade -mt-4 grid h-11 w-11 shrink-0 place-items-center rounded-2xl border transition-transform group-hover:scale-105 motion-reduce:transition-none ${
                             active
                               ? "border-primary/45 bg-primary/20 text-primary shadow-[0_0_0_4px_color-mix(in_srgb,var(--fb-primary)_10%,transparent),0_8px_20px_-8px_color-mix(in_srgb,var(--fb-primary)_70%,transparent)]"
                               : "border-hairline bg-card text-muted group-hover:text-foreground"

@@ -68,18 +68,20 @@
 .promotion-modern .disclosure-x-center.disclosure-y-middle { transform:translate(-50%,-50%); }
 .promotion-modern .disclosure-theme-transparent::before { background:transparent; }
 .promotion-home .promotion-disclosure { font-size:var(--disclosure-size); }
-.docked-ad-slot { position:relative; width:calc(100% - 24px); max-width:520px; margin:8px auto 18px; padding-inline:env(safe-area-inset-left,0px) env(safe-area-inset-right,0px); }
-.docked-ad-slot .promotion-banner { aspect-ratio:6/1; max-height:86px; min-height:48px; }
-.docked-ad-close { position:absolute; right:0; top:50%; transform:translateY(-50%); z-index:3; width:44px; height:44px; background:transparent; color:var(--fb-promotion-light-ink); display:grid; place-items:center; }
+.docked-ad-slot { position:relative; width:calc(100% - 48px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)); max-width:392px; margin:0 auto; padding:0; }
+.docked-ad-slot .promotion-banner { aspect-ratio:7/1; max-height:56px; min-height:44px; }
+.docked-ad-close { position:absolute; right:-22px; top:50%; transform:translateY(-50%); z-index:3; width:44px; height:44px; background:transparent; color:var(--fb-promotion-light-ink); display:grid; place-items:center; }
 .docked-ad-close:hover { background:transparent; }
-.docked-ad-close-mark { display:grid; place-items:center; width:22px; height:22px; border-radius:4px; background:var(--fb-promotion-dark-scrim); }
+.docked-ad-close:focus-visible { outline:2px solid var(--fb-primary); outline-offset:-2px; }
+.docked-ad-close-mark { display:grid; place-items:center; width:18px; height:22px; border-radius:4px; background:color-mix(in srgb,var(--fb-promotion-dark-scrim) 70%,transparent); }
 .docked-ad-slot .promotion-disclosure { font-size:9px; max-width:38%; }
 .compact-position-above-nav-left .docked-ad-slot { margin-left:12px; margin-right:auto; }
 .compact-position-above-nav-right .docked-ad-slot { margin-right:12px; margin-left:auto; }
-/* Fixed dock portalled to body: above the nav's top edge and raised Trade button, below dialogs (z-50). */
-.compact-ad-dock { position:fixed; left:0; right:0; z-index:41; bottom:calc(var(--fb-bottom-nav-h,62px) + 18px); pointer-events:none; }
+/* Flush to measured nav top. Keep Trade inside the menu only while the dock is visible. */
+html:has(.compact-ad-dock) .compact-ad-nav-trade { margin-top:0; }
+.compact-ad-dock { position:fixed; left:0; right:0; z-index:41; bottom:var(--fb-bottom-nav-offset,calc(62px + min(env(safe-area-inset-bottom,0px),10px))); pointer-events:none; }
 .compact-ad-dock .docked-ad-slot { pointer-events:auto; margin:0 auto; }
-@media(min-width:768px) { .compact-ad-dock { bottom:16px; } }
+@media(min-width:768px) { .compact-ad-dock { bottom:16px; } .docked-ad-slot { max-width:480px; } .docked-ad-slot .promotion-banner { aspect-ratio:6/1; max-height:80px; } }
 @media(min-width:768px) { .compact-position-above-nav-right .docked-ad-slot { margin-right:80px; max-width:min(520px, calc(100% - 104px)); } }
 .promotion-modern .promotion-copy h3 { font-size:10px; line-height:12px; grid-column:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .promotion-modern .promotion-copy p { font-size:9px; line-height:10px; grid-column:1 / -1; grid-row:2; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }

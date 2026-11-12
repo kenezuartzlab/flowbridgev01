@@ -1,3 +1,8 @@
+# Final compact-ad mobile polish — preview only
+- [x] Slim contained artwork, measured flush nav alignment and right-border close target; preserve all placement/suppression rules.
+- [x] Verify scroll/resize/reduced-motion/dismissal at 320/390/430/1280, full tests and automatic build/type gate; acceptance: docs/security/COMPACT_AD_SLIM_FLUSH_ACCEPTANCE_20261112.md.
+- [ ] HOLD: physical-device acceptance and inherited release gates; no publication, live config or financial changes.
+
 # Final banner management — preview only
 - [x] Required addendum: central master plus independent actual-page placement rules, excluded sensitive routes, default-OFF new pages, page/global-scoped caps and 560 route-change browser assertions; no publication/settings writes. Acceptance: docs/security/COMPACT_AD_PAGE_MANAGER_20261112.md.
 - [x] Editable mandatory disclosure, Home-only ratios and transparent backed text; preserve legacy and compact trading frames.

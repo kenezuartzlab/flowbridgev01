@@ -14,7 +14,7 @@ import { useTradeTab } from '@/lib/trade/tradeSession';
 /** Same tiny creative for admin and visitors. Close is outside the link. */
 export function DockedAdCreative({slide,onClose,surface}:{slide:BannerSlide;onClose:()=>void;surface?:'home'|'swap'|'bridge'|'cabot'}) {
   return <aside className="docked-ad-slot" aria-label="Sponsored placement">
-    <PromotionBanner surface={surface} slide={{...slide,promotion:{...slide.promotion,presentationVersion:2,sponsored:true,fit:'contain',showTitle:false,showBody:false,showCta:false,motion:'static'}}}/>
+    <PromotionBanner surface={surface} slide={{...slide,promotion:{...slide.promotion,presentationVersion:2,sponsored:true,fit:'contain',radius:4,disclosureLabel:'Ad',disclosureX:'left',disclosureY:'top',disclosureInset:4,showTitle:false,showBody:false,showCta:false,motion:'static'}}}/>
     <Button type="button" variant="ghost" size="icon" className="docked-ad-close" aria-label="Close ad" title="Close ad" onClick={onClose}><span className="docked-ad-close-mark"><X className="size-3"/></span></Button>
   </aside>;
 }
@@ -77,11 +77,11 @@ export function DockedAd({settings:override,path:overridePath,preview=false,cent
     if(!central)return;
     const root=document.documentElement;
     if(!visible){root.style.removeProperty('--compact-ad-reserve');return;}
-    const measure=()=>{const nav=document.querySelector('nav[aria-label="Main navigation"]');const h=nav instanceof HTMLElement&&getComputedStyle(nav).display!=="none"?nav.getBoundingClientRect().height:0;if(h>0)root.style.setProperty('--fb-bottom-nav-h',`${h}px`);const dock=document.querySelector('.compact-ad-dock');root.style.setProperty('--compact-ad-reserve',`${dock?dock.getBoundingClientRect().height+8:0}px`);};
+    const measure=()=>{const nav=document.querySelector('nav[aria-label="Main navigation"]');if(nav instanceof HTMLElement&&getComputedStyle(nav).display!=="none"){const top=nav.getBoundingClientRect().top;if(top>0)root.style.setProperty('--fb-bottom-nav-offset',`${Math.max(0,window.innerHeight-top)}px`);}const dock=document.querySelector('.compact-ad-dock');root.style.setProperty('--compact-ad-reserve',`${dock?dock.getBoundingClientRect().height:0}px`);};
     const ro=new ResizeObserver(measure);let watched:Element|null=null;
     const attach=()=>{const nav=document.querySelector('nav[aria-label="Main navigation"]');if(nav&&nav!==watched){if(watched)ro.unobserve(watched);watched=nav;ro.observe(nav);}measure();};
-    attach();const mo=new MutationObserver(attach);mo.observe(document.body,{childList:true,subtree:true});const tick=setInterval(measure,500);window.addEventListener('resize',measure);
-    return()=>{clearInterval(tick);ro.disconnect();mo.disconnect();window.removeEventListener('resize',measure);root.style.removeProperty('--compact-ad-reserve');};
+    attach();const mo=new MutationObserver(attach);mo.observe(document.body,{childList:true,subtree:true});const tick=setInterval(measure,500);window.addEventListener('resize',measure);window.visualViewport?.addEventListener('resize',measure);window.visualViewport?.addEventListener('scroll',measure);
+    return()=>{clearInterval(tick);ro.disconnect();mo.disconnect();window.removeEventListener('resize',measure);window.visualViewport?.removeEventListener('resize',measure);window.visualViewport?.removeEventListener('scroll',measure);root.style.removeProperty('--compact-ad-reserve');root.style.removeProperty('--fb-bottom-nav-offset');};
   },[central,visible,slide?.id]);
   if(!visible||!slide)return null;
   const surface=dockedSurface(path);
