@@ -63,7 +63,8 @@
 .promotion-modern .disclosure-x-center { left:50%; transform:translateX(-50%); }
 .promotion-modern .disclosure-y-top { top:var(--disclosure-inset); }
 .promotion-modern .disclosure-y-bottom { bottom:calc(24px + var(--disclosure-inset)); }
-.promotion-modern .disclosure-y-middle { top:50%; transform:translateY(-50%); }
+.promotion-modern .disclosure-y-middle { top:25%; transform:translateY(-50%); }
+.promotion-home .disclosure-y-middle { top:clamp(8px, calc((100% - 32px) / 2), calc(100% - 38px)); }
 .promotion-modern .disclosure-x-center.disclosure-y-middle { transform:translate(-50%,-50%); }
 .promotion-modern .disclosure-theme-transparent::before { background:transparent; }
 .promotion-home .promotion-disclosure { font-size:var(--disclosure-size); }

@@ -17,7 +17,7 @@ async def mount(page, mode, ratio='6:1', x='right', y='top', theme='dark', coold
       const {TabBanner}=await import('/src/components/banners/TabBanner.tsx');
       const {DockedAd}=await import('/src/components/banners/DockedAd.tsx');
       const {DockedAdEditor}=await import('/src/components/admin/DockedAdEditor.tsx');
-      const {RouterProvider,createRootRoute,createRouter}=await import('/node_modules/.vite/deps/@tanstack_react-router.js');
+      const {RouterProvider,createRootRoute,createRouter}=await import('/node_modules/@tanstack/react-router/dist/esm/index.js');
       if(window.testRoot)window.testRoot.unmount();document.body.replaceChildren();const el=document.createElement('div');document.body.append(el);
       window.testRoot=(client.createRoot??client.default.createRoot)(el);
       const slide={id:'fixture-dock',title:'Owner artwork',imageUrl:'/api/banner-image/management.png',href:'/home',layout:'full',promotion:{presentationVersion:2,status:'published',fit:'contain',sponsored:true,disclosureLabel:'Ad · Brand',disclosureX:a.x,disclosureY:a.y,disclosureTheme:a.theme,disclosureOpacity:0,homeRatio:a.ratio,backgroundMode:'transparent',showTitle:false,showBody:false,showCta:false}};
@@ -60,7 +60,7 @@ async def main():
          for y in ('top','middle','bottom'):
           await mount(page,'home','6:1',x,y,'transparent')
           safe=await page.locator('[data-testid=preview]').evaluate('''el=>{const frame=el.querySelector('.promotion-banner').getBoundingClientRect(),label=el.querySelector('.promotion-disclosure').getBoundingClientRect();return label.left>=frame.left&&label.right<=frame.right&&label.top>=frame.top&&label.bottom<=frame.bottom&&[...el.querySelectorAll('.banner-dot,.banner-playback')].every(e=>{const r=e.getBoundingClientRect();return label.right<=r.left||label.left>=r.right||label.bottom<=r.top||label.top>=r.bottom})}''')
-          assert safe,(width,x,y)
+          assert safe,(width,x,y,await page.locator('[data-testid=preview]').evaluate('el=>[...el.querySelectorAll(".promotion-disclosure,.banner-dot,.banner-playback")].map(e=>({c:e.className,top:getComputedStyle(e).top,r:e.getBoundingClientRect().toJSON()}))'))
           backing=await page.locator('.promotion-disclosure span').first.evaluate('el=>getComputedStyle(el).backgroundColor');assert backing!='rgba(0, 0, 0, 0)'
           checks+=2
         await mount(page,'dock')

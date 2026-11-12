@@ -7,6 +7,7 @@ import { dismissalBlocks,dockedSurface,selectDockedAd } from '@/lib/banners/dock
 import type { DockedAdSettings } from '@/lib/banners/promotionPolicy';
 import { trackBannerImpression } from '@/lib/banners/analytics';
 import { PromotionBanner } from './PromotionBanner';
+import { useTradeTab } from '@/lib/trade/tradeSession';
 
 /** Same tiny creative for admin and visitors. Close is outside the link. */
 export function DockedAdCreative({slide,onClose,surface}:{slide:BannerSlide;onClose:()=>void;surface?:'home'|'swap'|'bridge'|'cabot'}) {
@@ -19,7 +20,8 @@ export function DockedAdCreative({slide,onClose,surface}:{slide:BannerSlide;onCl
 export function DockedAd({settings:override,path:overridePath,preview=false}:{settings?:DockedAdSettings;path?:string;preview?:boolean}) {
   const config=useAppConfig();
   const pathname=useRouterState({select:s=>s.location.pathname});
-  const settings=override??config.banners.docked,path=overridePath??pathname;
+  const [tab]=useTradeTab();
+  const settings=override??config.banners.docked,path=overridePath??((pathname==='/'||pathname==='/trade')?(tab==='BRIDGE'?'/bridge':tab==='CA/BOT'?'/cabot':'/trade'):pathname);
   const [ready,setReady]=useState(false),[blocked,setBlocked]=useState(false),[keyboard,setKeyboard]=useState(false),[now,setNow]=useState(()=>Date.now());
   useEffect(()=>{
     const refresh=()=>{
