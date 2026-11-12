@@ -1,2 +1,3 @@
 - Versioned edited promotions and admin previews share live renderers and the carousel; legacy reads never opt into the new frame. Why: preserve old slides without misleading previews.
-- Keep versioned artwork at the shared 6:1 frame, use contained foreground over blurred extension, and keep sponsorship independent of text visibility. Why: embedded typography must not be cropped or duplicated.
+- Keep versioned trading artwork at 6:1; Home alone supports configured bounded ratios; contained foreground uses blurred extension and paid disclosure is independent of copy. Why: inspectable artwork and consistent trading space must coexist.
+- Docked ads use normal document flow before the navigation spacer, a shared creative preview, mandatory disclosure, default-OFF validated settings and browser-only dismissal caps. Why: ads must never obscure execution or transport drafts.

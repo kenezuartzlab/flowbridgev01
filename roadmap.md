@@ -1,3 +1,8 @@
+# Final banner management — preview only
+- [ ] Editable mandatory disclosure, Home-only ratios and transparent backed text; preserve legacy and compact trading frames.
+- [ ] Default-OFF docked placement, separate admin preview/configuration, schedules, session/cooldown dismissal and existing analytics; no settings writes.
+- [ ] Focused/full tests and screenshot acceptance at 320/390/430/1280; production and release HOLD remain unchanged.
+
 # Fixed-ratio banner correction — preview only
 - [x] Shared 6:1 edited artwork frame and accurate Home/Swap/CA-BOT/Bridge previews; opt-in text controls and legacy read defaults; no settings writes.
 - [x] 2,470 tests/244 files, 1,568 isolated actual-component assertions plus whole-image/control-overlap checks, 26 current live-carousel checks; 320/390/430/1280, both motion modes; automatic build OK. Acceptance: docs/security/BANNER_FRAME_ACCEPTANCE_20261111.md.

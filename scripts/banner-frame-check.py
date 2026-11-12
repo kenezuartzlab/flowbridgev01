@@ -46,7 +46,9 @@ async def main():
                 page=await browser.new_page(viewport={'width':width,'height':844 if width<600 else 1800},reduced_motion=motion)
                 errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
                 await page.route('**/api/banner-image/fixture-*',lambda r:r.fulfill(content_type='image/png',body=fixtures[r.request.url.split('fixture-')[1].split('.')[0]]))
-                await page.goto('http://localhost:8080/trade',wait_until='domcontentloaded')
+                await page.route('**/__banner_acceptance',lambda r:r.fulfill(content_type='text/html',body='<html><head><link rel="stylesheet" href="/src/styles.css"><script type="module" src="/@vite/client"></script></head><body></body></html>'))
+                await page.goto('http://localhost:8080/__banner_acceptance',wait_until='domcontentloaded')
+                await page.evaluate("async()=>{const r=await import('/@react-refresh');r.default.injectIntoGlobalHook(window);window.$RefreshReg$=()=>{};window.$RefreshSig$=()=>x=>x;window.__vite_plugin_react_preamble_installed__=true}")
                 await page.wait_for_timeout(2000)
                 for surface in ('swap','cabot','home','bridge'):
                     for ratio in fixtures:

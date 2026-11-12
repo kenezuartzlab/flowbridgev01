@@ -13,6 +13,13 @@ const color=z.string().regex(/^#[0-9a-fA-F]{6}$/);
 export const promotionSchema=z.object({
   presentationVersion:z.literal(2).optional(),
   textScheme:z.enum(['auto','light','dark']).optional(),
+  backgroundMode:z.enum(['auto','light','dark','custom','transparent']).optional(),
+  homeRatio:z.enum(['6:1','3:1','16:9','1:1','4:5','9:16']).optional(),
+  disclosureLabel:z.string().trim().min(2).max(32).regex(/^(Sponsored|Ad|Promoted)(?: · [\p{L}\p{N} .&-]{1,20})?$/u,'Start with Sponsored, Ad or Promoted; optional attribution follows ·').optional(),
+  disclosureX:z.enum(['left','center','right']).optional(),disclosureY:z.enum(['top','middle','bottom']).optional(),
+  disclosureSize:z.number().int().min(8).max(16).optional(),disclosureInset:z.number().int().min(0).max(16).optional(),
+  disclosureTheme:z.enum(['light','dark','transparent','custom']).optional(),
+  disclosureBackground:color.optional(),disclosureForeground:color.optional(),disclosureOpacity:z.number().int().min(0).max(100).optional(),
   showTitle:z.boolean().optional(),showBody:z.boolean().optional(),showCta:z.boolean().optional(),
   textAlign:z.enum(['left','center','right']).optional(),textPosition:z.enum(['top','middle','bottom']).optional(),
   ctaLabel:z.string().trim().max(40).optional(), sponsored:z.boolean().optional(),
@@ -49,6 +56,20 @@ export function contrastRatio(background:string,foreground:string) {
   if(!color.safeParse(background).success||!color.safeParse(foreground).success) return 0;
   const a=luminance(background),b=luminance(foreground);return (Math.max(a,b)+0.05)/(Math.min(a,b)+0.05);
 }
+export function disclosureColors(p:PromotionOptions) {
+  const custom=p.disclosureTheme==='custom'&&contrastRatio(p.disclosureBackground??'',p.disclosureForeground??'')>=4.5;
+  return custom ? {bg:p.disclosureBackground,fg:p.disclosureForeground} : p.disclosureTheme==='light'
+    ? {bg:'var(--fb-promotion-light-scrim)',fg:'var(--fb-promotion-dark-ink)'}
+    : {bg:'var(--fb-promotion-dark-scrim)',fg:'var(--fb-promotion-light-ink)'};
+}
+export function promotionVisibility(slide:{isActive?:boolean;promotion?:PromotionOptions;schedule?:{startAt?:string|null;endAt?:string|null;days?:number[]|null}|null},now=new Date()) {
+  if(slide.promotion?.status==='draft')return 'Draft';
+  if(slide.isActive===false)return 'Paused';
+  if(slide.schedule?.endAt&&now.getTime()>Date.parse(slide.schedule.endAt))return 'Expired';
+  if(slide.schedule?.startAt&&now.getTime()<Date.parse(slide.schedule.startAt))return 'Scheduled';
+  if(slide.schedule?.days?.length&&!slide.schedule.days.includes(now.getDay()))return 'Scheduled';
+  return 'Live now';
+}
 export const promotionSlideSchema=z.object({
   id:z.string().trim().min(1).max(64).optional(),title:z.string().trim().min(1).max(80),body:z.string().trim().max(160).optional(),
   imageUrl:z.string().trim().max(500).nullable().optional(),href:z.string().trim().max(500).nullable().optional(),
@@ -59,5 +80,10 @@ export const promotionSlideSchema=z.object({
   if (!safePromotionLink(slide.href??'')) ctx.addIssue({code:'custom',message:'Use an internal path or HTTPS link',path:['href']});
   if (slide.schedule?.startAt&&slide.schedule.endAt&&Date.parse(slide.schedule.endAt)<=Date.parse(slide.schedule.startAt)) ctx.addIssue({code:'custom',message:'End must follow start',path:['schedule']});
   if(slide.promotion?.motion==='marquee' && (slide.title.length+(slide.body?.length??0)>120)) ctx.addIssue({code:'custom',message:'Marquee text must be 120 characters or fewer',path:['promotion','motion']});
+  const p=slide.promotion;
+  if(p?.disclosureTheme==='custom'&&contrastRatio(p.disclosureBackground??'',p.disclosureForeground??'')<4.5)ctx.addIssue({code:'custom',message:'Disclosure colors need at least 4.5:1 contrast',path:['promotion','disclosureForeground']});
+  if(p?.backgroundMode==='custom'&&contrastRatio(p.backgroundColor??'',p.textColor??'')<4.5)ctx.addIssue({code:'custom',message:'Custom text colors need at least 4.5:1 contrast',path:['promotion','textColor']});
 });
-export const promotionBannersSchema=z.object({cabot:z.object({intervalMs:z.number().min(1500).max(60000),slides:z.array(promotionSlideSchema).max(12)}),swap:z.object({intervalMs:z.number().min(1500).max(60000),slides:z.array(promotionSlideSchema).max(12)}),bridge:z.object({intervalMs:z.number().min(1500).max(60000),slides:z.array(promotionSlideSchema).max(12)}),home:z.object({intervalMs:z.number().min(1500).max(60000),slides:z.array(promotionSlideSchema).max(12)})});
+export const dockedAdSchema=z.object({enabled:z.boolean().default(false),surfaces:z.array(z.enum(['home','swap','bridge','cabot','explore'])).max(5).default([]),slides:z.array(promotionSlideSchema).max(12).default([]),dismissal:z.enum(['session','cooldown']).default('session'),cooldownMinutes:z.number().int().min(1).max(10080).default(1440),autoHideSeconds:z.number().int().min(0).max(300).default(0)}).superRefine((ad,ctx)=>{for(const [i,slide] of ad.slides.entries()){if(slide.promotion?.sponsored!==true||slide.promotion?.presentationVersion!==2||!slide.promotion?.status)ctx.addIssue({code:'custom',message:'Docked ads require versioned artwork, publication status and paid disclosure',path:['slides',i,'promotion']});if(!slide.imageUrl||!safePromotionImage(slide.imageUrl))ctx.addIssue({code:'custom',message:'Upload docked artwork before saving',path:['slides',i,'imageUrl']});}});
+export type DockedAdSettings=Omit<z.infer<typeof dockedAdSchema>,'slides'> & {slides:(z.infer<typeof promotionSlideSchema>&{id:string})[]};
+export const promotionBannersSchema=z.object({cabot:z.object({intervalMs:z.number().min(1500).max(60000),slides:z.array(promotionSlideSchema).max(12)}),swap:z.object({intervalMs:z.number().min(1500).max(60000),slides:z.array(promotionSlideSchema).max(12)}),bridge:z.object({intervalMs:z.number().min(1500).max(60000),slides:z.array(promotionSlideSchema).max(12)}),home:z.object({intervalMs:z.number().min(1500).max(60000),slides:z.array(promotionSlideSchema).max(12)}),docked:dockedAdSchema.optional()});

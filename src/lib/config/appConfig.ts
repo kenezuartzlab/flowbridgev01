@@ -5,7 +5,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { setLogoOverrides } from "@/lib/tokenLogos";
 import { DEFAULT_ANNOUNCEMENT } from './announcement';
-import { promotionSchema, type PromotionOptions } from '@/lib/banners/promotionPolicy';
+import { promotionSchema, dockedAdSchema, type DockedAdSettings, type PromotionOptions } from '@/lib/banners/promotionPolicy';
 
 export interface FeeSettings {
   defaultSlippagePct: number;
@@ -140,7 +140,7 @@ export interface BannerSurface {
 
 export type BannerSurfaceKey = "cabot" | "swap" | "bridge" | "home";
 
-export type BannerSettings = Record<BannerSurfaceKey, BannerSurface>;
+export type BannerSettings = Record<BannerSurfaceKey, BannerSurface> & { docked?: DockedAdSettings };
 
 /** One external/social link on a partner profile. */
 export interface PartnerLink {
@@ -652,6 +652,8 @@ export function mergeBanners(partial: any): BannerSettings {
       slides,
     };
   }
+  const docked=dockedAdSchema.safeParse(partial?.docked);
+  if(docked.success)out.docked={...docked.data,slides:docked.data.slides.map((s,i)=>({...s,id:s.id??`dock-${i}`}))};
   return out;
 }
 

@@ -48,7 +48,8 @@ import {
 
 } from "@/lib/config/appConfig";
 import { BannerSurfacePreview } from "@/components/banners/BannerSurfacePreview";
-import { editedPromotion } from '@/lib/banners/promotionPolicy';
+import { editedPromotion,promotionVisibility } from '@/lib/banners/promotionPolicy';
+import { DockedAdEditor } from '@/components/admin/DockedAdEditor';
 import { HeroCard } from "@/components/layout/HeroCard";
 import { ActionIcon, ACTION_ICON_NAMES, KIT_ICON_NAMES } from "@/components/ActionIcon";
 import { fetchTokenMetadata } from "@/lib/swap/erc20";
@@ -1332,7 +1333,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
                     : "border-foreground/15 bg-foreground/5 text-muted"
                 }`}
               >
-                {live ? "Live now" : "Not showing"}
+                {promotionVisibility(slide)}
               </span>
               <span className="text-muted">
                 {stat
@@ -1436,7 +1437,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
               />
             </div>
 
-            <PromotionOptionsEditor slide={slide} wallet={wallet} onChange={promotion=>patchSlide(i,{promotion})}/>
+            <PromotionOptionsEditor slide={slide} wallet={wallet} surface={surface} onChange={promotion=>patchSlide(i,{promotion})}/>
             {/* Scheduling */}
             <div className="space-y-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3">
               <div className="flex items-center gap-1.5">
@@ -1521,7 +1522,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
                 </select>
               </div>
               <Toggle
-                label={slide.isActive === false ? "Hidden" : "Live"}
+                label="Placement enabled"
                 value={slide.isActive !== false}
                 onChange={(v) => patchSlide(i, { isActive: v })}
               />
@@ -1530,6 +1531,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
         );
       })}
 
+      <DockedAdEditor wallet={wallet} value={cfg.banners.docked} onChange={docked=>setCfg({...cfg,banners:{...cfg.banners,docked}})}/>
       <div className={cardCls}>
         <button type="button" onClick={addSlide} className={btnGhost}>
           <Plus className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Add banner
@@ -1542,7 +1544,7 @@ function BannersPanel({ wallet }: { wallet: string }) {
         )}
         {saved && (
           <div className="flex items-center gap-2 text-primary">
-            <Check className="w-3.5 h-3.5" /> Saved — live for all users.
+            <Check className="w-3.5 h-3.5" /> Saved — drafts stay private; published placements follow their schedules.
           </div>
         )}
         <button type="button" onClick={save} disabled={saving} className={btnPrimary}>

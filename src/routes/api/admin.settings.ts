@@ -217,7 +217,7 @@ export const Route = createFileRoute("/api/admin/settings")({
           if (parsed.data.banners) {
             const { readSettings } = await import('@/lib/appConfig.server');
             const old = (await readSettings()).banners;
-            for (const [surface, value] of Object.entries(parsed.data.banners)) for (const slide of value.slides) {
+            for (const [surface, value] of Object.entries(parsed.data.banners)) for (const slide of value?.slides??[]) {
               // Preserve legacy artwork byte-for-byte, but new image sources
               // must be our validated upload service, not arbitrary URLs.
               const prior = old?.[surface]?.slides?.find((s: {id?:string}) => s.id === slide.id);

@@ -21,7 +21,7 @@ export function FeaturedBanner({
   ctaLabel?: string;
   className?: string;
 }) {
-  if (slide.promotion) return <PromotionBanner slide={slide} surface={surface}/>;
+  if (slide.promotion) return <PromotionBanner slide={slide} surface={surface} home/>;
   const art = slide.imageUrl || giftAsset.url;
   const href = slide.href || undefined;
   const full = slide.layout === "full" && !!slide.imageUrl;
