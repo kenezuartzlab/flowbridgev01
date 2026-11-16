@@ -28,6 +28,7 @@ import { requireSafeSwapDecision } from './lib/flowbridge/swapMethodPolicy';
 import { getContracts, ERC20_ABI, UNISWAP_V2_ROUTER_ABI, CASWAP_ROUTER_ABI, COMMUNITY_FEE_RECIPIENT, FLOWBRIDGE_ROUTER_ABI, FLOW_BRIDGE_ROUTER_V3_ABI, UNISWAP_V3_POOL_ABI, UNISWAP_V3_ROUTER_ABI, UNIVERSAL_ROUTER_ABI } from './lib/contracts';
 import { maxSwappableDisplay, totalRouterDebit } from './lib/swap/platformFee';
 import type { BridgeDeps } from './lib/bridge/evmBridge';
+import { isBridgeDirectionSelectable, isBridgePeerSelectable } from './lib/bridge/peerAvailability';
 import {
   ensureBridgeAllowance as ensureBridgeAllowanceCore,
   preflightBridgeDeposit as preflightBridgeDepositCore,
@@ -1176,6 +1177,7 @@ export default function App() {
   };
 
   const handleChangeBridgePeer = (p: 'BNB' | 'ETH' | 'TRX') => {
+    if (!isBridgePeerSelectable(p)) return;
     // Preserve current source side (BOT source stays BOT source)
     setBridgeDirection(prev => (prev.startsWith('BOT_TO_')
       ? (`BOT_TO_${p}` as any)
@@ -1864,6 +1866,10 @@ export default function App() {
 
   const completeStep3 = async (recipientParam?: string) => {
     setErrorMessage(null);
+    if (!isBridgeDirectionSelectable(bridgeDirection)) {
+      setErrorMessage('Tron bridging is unavailable. Select BNB or Ethereum.');
+      return;
+    }
     const amountVal = parseFloat(usdtAmount);
     if (!amountVal || amountVal <= 0) return;
 
@@ -1871,14 +1877,6 @@ export default function App() {
     // never signs a tx that BotBridge will revert.
     if (amountVal < 10) {
       setErrorMessage(`Bridge minimum is $10. Enter at least 10 USDT to continue.`);
-      return;
-    }
-
-    // BOT_TO_TRX is intentionally gated: we do not yet have a verified
-    // registered destination chain id or Tron address encoding path on the
-    // BOT-side gateway. Sending with a wrong id/encoding is unrecoverable.
-    if (bridgeDirection === 'BOT_TO_TRX') {
-      setErrorMessage('BOT → Tron bridging is coming soon (awaiting registered destination id). Use Tron → BOT for now.');
       return;
     }
 
@@ -2469,6 +2467,10 @@ export default function App() {
   else if (usdtAmount && !isApprovedForBridge) bridgeButtonLabel = "Approve USDT";
   else if (usdtAmount) bridgeButtonLabel = `Bridge to ${bridgeToName}`;
   let bridgeButtonDisabled = isActionLoading || belowBridgeMin || (isConnected && !usdtAmount);
+  if (!isBridgeDirectionSelectable(bridgeDirection)) {
+    bridgeButtonLabel = 'Tron bridge unavailable';
+    bridgeButtonDisabled = true;
+  }
 
   // Dynamic formatting for real and mock balances.
   // Truncated (never rounded) to 4 decimals so the displayed number is always
@@ -3195,6 +3197,7 @@ export default function App() {
               buttonLabel={bridgeButtonLabel}
               buttonDisabled={bridgeButtonDisabled}
               onSubmit={() => {
+                if (!isBridgeDirectionSelectable(bridgeDirection)) return;
                 // TRX source uses TronLink signing — bypass EVM network check
                 if (bridgeDirection === 'TRX_TO_BOT') {
                   if (tronStatus !== 'ready') {

@@ -3,6 +3,8 @@ import { cn } from '../../lib/utils';
 import { WarningPanel } from './WarningPanel';
 import { FeePanel } from './FeePanel';
 import { TokenIcon } from '../TokenIcon';
+import { Button } from '../ui/button';
+import { SELECTABLE_BRIDGE_PEERS } from '../../lib/bridge/peerAvailability';
 
 export type BridgePeer = 'BNB' | 'ETH' | 'TRX';
 export type BridgeDirection =
@@ -136,25 +138,28 @@ export function BridgeCard({
     estLen > 8  ? 'text-3xl' : 'text-4xl';
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4">
-      {/* PEER SELECTOR — pick the counter-chain (BNB / ETH / TRX). */}
+      {/* Only currently selectable peers; historical tracking is unchanged. */}
       {onPeerChange && (
         <div className="bg-card border border-hairline-strong rounded-2xl p-2 flex items-center gap-1.5 font-mono shadow-sm">
           <span className="text-[11px] font-black text-muted uppercase tracking-widest px-2 shrink-0">Bridge with</span>
-          <div className="grid grid-cols-3 gap-1 flex-1">
-            {(['BNB', 'ETH', 'TRX'] as const).map((p) => (
-              <button
+          <div className="grid grid-cols-2 gap-1 flex-1">
+            {SELECTABLE_BRIDGE_PEERS.map((p) => (
+              <Button
+                variant="outline"
+                size="sm"
                 key={p}
                 type="button"
+                aria-pressed={activePeer === p}
                 onClick={() => onPeerChange(p)}
                 className={cn(
                   'px-2 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all duration-150 active:scale-95 cursor-pointer border',
                   activePeer === p
-                    ? 'bg-primary/15 text-primary border-primary/40 shadow-[0_0_10px_rgba(50,255,139,0.25)]'
+                    ? 'bg-primary/15 text-primary border-primary/40'
                     : 'bg-background text-muted border-hairline hover:text-foreground hover:border-hairline-strong'
                 )}
               >
                 {p}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
