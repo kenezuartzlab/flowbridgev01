@@ -160,3 +160,7 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 ## BNB V1.5 (security hardening)
 - [x] V1.5 candidate (fee-in-WBNB fix F-1), 35 adversarial/fuzz tests, Slither triage, live read-only simulation + gas estimate, report
 - [ ] HOLD: professional audit, compiler bump, owner fee/recipient/provider/slippage, rehearsal, legal, physical wallet
+
+## BNB V1.6 (compiler hardening + validation)
+- [x] V1.6 candidate (V1.5 logic, solc 0.8.38/cancun), 42 local tests, Slither rerun + per-warning traces, read-only simulation + opcode probe, fresh full suite, report
+- [ ] Independent professional audit, owner fee/recipient/slippage decisions, deployment — blocked on owner authorization (HOLD)
