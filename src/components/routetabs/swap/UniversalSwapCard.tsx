@@ -1,6 +1,6 @@
 import { WatchRouteButton } from "@/components/growth/WatchRouteButton";
 import { PostActionActivationCard } from '@/components/growth/PostActionActivationCard';
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { formatUsd } from "../../../lib/format";
 import { ArrowDownUp, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { useAccount, useBalance, usePublicClient, useReadContract, useSignMessage, useWriteContract } from "wagmi";
@@ -92,6 +92,9 @@ export type SwapPhase =
   | { phase: "idle" };
 
 interface UniversalSwapCardProps {
+  chainPicker?: ReactNode;
+  cacheScope?: string;
+  onInteractionLock?: (locked: boolean) => void;
   pairMode?: SwapPairMode;
   isMainnet: boolean;
   isConnected: boolean;
@@ -135,9 +138,12 @@ export function UniversalSwapCard({
   txUrlPrefix,
   hydration = null,
   onHydrationApplied,
+  chainPicker,
+  cacheScope,
+  onInteractionLock,
 }: UniversalSwapCardProps) {
 
-  const { address } = useAccount();
+  const { address, chainId: walletChainId } = useAccount();
   const publicClient = usePublicClient();
   // Ops telemetry: tag every trade event with public pair symbols only.
   const trackTrade = (e: TradeOperationalEvent) => trackTradeOperationalEvent({ tokenIn: tokenIn.symbol, tokenOut: tokenOut.symbol, ...e });
@@ -223,6 +229,7 @@ export function UniversalSwapCard({
   const [reviewFee, setReviewFee] = useState<FeeBreakdown | null>(null);
   const [routerHealth, setRouterHealth] = useState<RouterV4Health | null>(null);
   const [routerHealthFailed, setRouterHealthFailed] = useState(false);
+  useEffect(() => { onInteractionLock?.(busy || confirmOpen); return () => onInteractionLock?.(false); }, [busy, confirmOpen, onInteractionLock]);
 
   // Reset curated tokens when the NETWORK actually changes (not on remount —
   // remount must restore the session draft instead of clobbering it).
@@ -281,15 +288,17 @@ export function UniversalSwapCard({
   useEffect(() => {
     if (address) trackProductEvent("wallet_connected", "trade", { once: true, network: balanceChainId });
   }, [address, balanceChainId]);
-  const balanceQuery = { enabled: !!address, refetchInterval: 12_000 } as const;
+  const balanceQuery = { enabled: !!address, refetchInterval: 12_000, gcTime: 0 } as const;
 
   const nativeBalance = useBalance({
+    scopeKey: cacheScope,
     address,
     chainId: balanceChainId,
     query: { ...balanceQuery, enabled: !!address && tokenIn.isNative },
   });
 
   const tokenInBalanceRead = useReadContract({
+    scopeKey: cacheScope,
     address: tokenIn.isNative ? undefined : (tokenIn.address as Address),
     abi: ERC20_ABI,
     functionName: "balanceOf",
@@ -299,11 +308,13 @@ export function UniversalSwapCard({
   });
 
   const nativeOutBalance = useBalance({
+    scopeKey: cacheScope,
     address,
     chainId: balanceChainId,
     query: { ...balanceQuery, enabled: !!address && tokenOut.isNative },
   });
   const tokenOutBalanceRead = useReadContract({
+    scopeKey: cacheScope,
     address: tokenOut.isNative ? undefined : (tokenOut.address as Address),
     abi: ERC20_ABI,
     functionName: "balanceOf",
@@ -336,7 +347,7 @@ export function UniversalSwapCard({
 
   // Always-on native BOT balance for the low-gas warning banner (independent
   // of whichever token the user is spending).
-  const nativeGasBalance = useBalance({ address, chainId: balanceChainId, query: balanceQuery });
+  const nativeGasBalance = useBalance({ address, chainId: balanceChainId, scopeKey: cacheScope, query: balanceQuery });
   const nativeGasLow = !!address && isNativeGasLow(nativeGasBalance.data?.value, 18, "BOT");
   const [gasSettingsOpen, setGasSettingsOpen] = useState(false);
 
@@ -361,11 +372,13 @@ export function UniversalSwapCard({
 
   // ── Allowance ─────────────────────────────────────────────────────────────
   const allowanceRead = useReadContract({
+    chainId: balanceChainId,
+    scopeKey: cacheScope,
     address: tokenIn.isNative ? undefined : (tokenIn.address as Address),
     abi: ERC20_ABI,
     functionName: "allowance",
     args: address ? [address, firstStepRouter] : undefined,
-    query: { enabled: !!address && !tokenIn.isNative },
+    query: { enabled: !!address && !tokenIn.isNative, gcTime: 0 },
   });
   const allowanceRaw = (allowanceRead.data as bigint | undefined) ?? 0n;
 
@@ -758,7 +771,7 @@ export function UniversalSwapCard({
 
 
   const handleSwap = async () => {
-    if (!address || !quote || !publicClient) return;
+    if (!address || !quote || !publicClient || !isNetworkCorrect || walletChainId !== balanceChainId) return;
     setBusy(true);
     setTxError(null);
     setLastTx(null);
@@ -1315,17 +1328,18 @@ export function UniversalSwapCard({
   return (
     <div className="flex flex-col flex-1 relative z-10 w-full space-y-4 font-sans">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div className="flex flex-col">
-          <span className="text-lg font-black text-foreground uppercase tracking-widest font-mono">
+      <div data-swap-heading className="grid h-8 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="text-lg font-black text-foreground uppercase font-mono">
             Swap
           </span>
+          {chainPicker}
         </div>
         <SlippagePopover value={slippage} onChange={setSlippage} />
       </div>
 
       {/* Card */}
-      <div className="bg-card border border-hairline-strong rounded-[20px] shadow-[var(--fb-shadow-md)] p-3 sm:p-3.5 relative space-y-2">
+      <div data-swap-form className="bg-card border border-hairline-strong rounded-[20px] shadow-[var(--fb-shadow-md)] p-3 sm:p-3.5 relative space-y-2">
         <TokenSide
           label="Sell"
           token={tokenIn}

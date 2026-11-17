@@ -1,0 +1,2 @@
+- Swap view switching is presentation-only; unmount the BOT execution card and clear its draft/DEX hints on a view change, and never mount it for BNB. Why: no cross-chain quote, token, review or approval state can survive selection.
+- Keep the chain picker in the existing 32px Swap heading, with an absolute 44px hit area; the shell badge is neutral on Swap. Why: chain context belongs to one compact control without extra rows.

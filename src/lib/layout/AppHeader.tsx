@@ -22,6 +22,7 @@ const RESEND_COOLDOWN_SECONDS = 60;
 const RESEND_COOLDOWN_KEY = 'fb_resend_verify_until';
 
 interface AppHeaderProps {
+  swapViewActive?: boolean;
   walletAddress?: string | null;
   onConnect?: () => void;
   onDisconnect?: () => void;
@@ -60,6 +61,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
+  swapViewActive = false,
   walletAddress,
   onConnect,
   onDisconnect,
@@ -379,13 +381,13 @@ export function AppHeader({
 
           </div>
           <div className="flex items-center gap-2 mt-2 min-w-0">
-            <Button variant="ghost" size="sm"
+            {swapViewActive ? <span className="inline-flex h-[23px] items-center rounded-md border border-hairline bg-card px-1.5 text-[9px] text-muted">Trading workspace</span> : <Button variant="ghost" size="sm"
               onClick={onToggleMainnet}
               title="Click to toggle Testnet / Mainnet"
               className="h-auto shrink-0 p-0"
             >
               <BotNetworkBadge isMainnet={isMainnet} />
-            </Button>
+            </Button>}
           </div>
         </div>
 

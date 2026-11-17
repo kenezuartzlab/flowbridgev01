@@ -1,3 +1,8 @@
+# Compact Swap chain selector — preview only
+- [ ] Inline picker, isolated BNB unavailable view and fresh BOT remount; preserve original vertical geometry.
+- [ ] Baseline parity, switch/focus/safety checks, full tests and acceptance report.
+- [ ] HOLD: physical-wallet rejection checks and inherited financial/security/publication gates; no activation.
+
 # BNB RWA V1.1 exact-pool / two-way quote gate — preview only
 - [x] Two official-operator BSC endpoints matched fixed pool/code/tokens at block 134073409; 66 genuine read-only calls, 20 quoter probes, zero transactions; 28 synthetic gate tests separate from evidence.
 - [x] Five bounded two-way sizes, exact-output probes, archived-not-fresh preview evidence and proposed limits; no provider/health/fee authorization inferred.

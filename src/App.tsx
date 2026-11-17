@@ -43,7 +43,8 @@ import { trackBannerImpression } from './lib/banners/analytics';
 
 import { BottomNav } from './components/nav/BottomNav';
 import { RouteProgress } from './components/routetabs/RouteProgress';
-import { UniversalSwapCard } from './components/routetabs/swap/UniversalSwapCard';
+import { SwapWorkspace } from './components/routetabs/swap/SwapWorkspace';
+import type { SwapView } from './lib/swap/viewContext';
 import { getCuratedTokens } from './lib/swap/tokenRegistry';
 import { BridgeCard } from './components/routetabs/BridgeCard';
 import { BridgeCampaignHint } from './components/app/BridgeCampaignHint';
@@ -414,6 +415,8 @@ export default function App() {
   // V15.3C — the selected product network is app-session state, held above the
   // router so navigating Home → Explore → Trade can never reset it to Mainnet.
   const [isMainnet, setMainnetSelection] = useSelectedNetwork();
+  const [swapView, setSwapView] = useState<SwapView>(isMainnet ? 677 : 968);
+  useEffect(() => { setSwapView(isMainnet ? 677 : 968); }, [isMainnet]);
   const setIsMainnet = (next: boolean | ((prev: boolean) => boolean)) =>
     setMainnetSelection(typeof next === 'function' ? next(isMainnet) : next);
 
@@ -2800,6 +2803,7 @@ export default function App() {
           }
           return (
             <AppHeader
+              swapViewActive={activeTab !== 'BRIDGE'}
               isMainnet={isMainnet}
               walletAddress={address}
               onConnect={handleConnect}
@@ -3018,7 +3022,7 @@ export default function App() {
           )}
 
           {/* Connected Network Warning / Auto-Switcher card */}
-          {isConnected && !isNetworkCorrect && (
+          {activeTab === 'BRIDGE' && isConnected && !isNetworkCorrect && (
             <div className="p-4 bg-[#F6BA00]/10 border border-[#F6BA00]/25 rounded-2xl flex flex-col gap-2.5 items-center text-center font-sans">
               <span className="text-xs font-black uppercase tracking-widest text-amber-200 font-mono">
                 Wrong Network Detected!
@@ -3080,7 +3084,9 @@ export default function App() {
 
 
           {(activeTab === 'BOT/USDT' || activeTab === 'CA/BOT') && (
-            <UniversalSwapCard
+            <SwapWorkspace
+              view={swapView}
+              onViewChange={(next) => { setSwapView(next); if (next !== 56) setIsMainnet(next === 677); }}
               key={activeTab}
               pairMode={activeTab === 'CA/BOT' ? 'CA/BOT' : 'ANY'}
               hydration={activeTab === 'BOT/USDT' ? swapHydrationPlan : null}
@@ -3088,7 +3094,7 @@ export default function App() {
 
               isConnected={isConnected}
               onConnect={handleConnect}
-              isNetworkCorrect={isNetworkCorrect}
+              isNetworkCorrect={!isConnected || currentChainId === swapView}
               onSwitchNetwork={handleSwitchNetwork}
               txUrlPrefix={isMainnet ? 'https://scan.botchain.ai/tx/' : 'https://scan.bohr.life/tx/'}
               getUsdPrice={(sym) => {
