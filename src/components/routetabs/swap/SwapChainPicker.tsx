@@ -24,7 +24,7 @@ export function SwapChainPicker({ view, walletChain, connected, disabled, onSele
         </Button>
       </PopoverTrigger>
     </div>
-    <PopoverContent aria-label="Swap chain selection" align="start" className="w-[272px] max-w-[calc(100vw-24px)] p-2 motion-reduce:animate-none">
+    <PopoverContent aria-label="Swap chain selection" align="start" className="w-[272px] max-w-[calc(100vw-24px)] border-hairline bg-card p-2 text-foreground motion-reduce:animate-none">
       <p className="px-2 pb-2 pt-1 text-xs font-bold">Trading view</p>
       {options.map(chain => <Button key={chain} variant="ghost" aria-pressed={view === chain} onClick={() => { onSelect(chain); setOpen(false); }} className="h-14 w-full justify-start gap-3 px-2">
         <ChainMark bnb={chain === 56} />
