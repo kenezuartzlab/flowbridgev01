@@ -123,6 +123,7 @@
     "prettier": "^3.7.3",
     "solc": "0.8.24",
     "solc-0.8.20": "npm:solc@0.8.20",
+    "solc-0.8.38": "npm:solc@0.8.38",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.3.4",

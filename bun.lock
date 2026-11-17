@@ -103,6 +103,7 @@
         "prettier": "^3.7.3",
         "solc": "0.8.24",
         "solc-0.8.20": "npm:solc@0.8.20",
+        "solc-0.8.38": "npm:solc@0.8.38",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.56.1",
         "vite": "^8.3.4",
@@ -1741,6 +1742,8 @@
     "solc": ["solc@0.8.24", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/solc/-/solc-0.8.24.tgz", { "dependencies": { "command-exists": "^1.2.8", "commander": "^8.1.0", "follow-redirects": "^1.12.1", "js-sha3": "0.8.0", "memorystream": "^0.3.1", "semver": "^5.5.0", "tmp": "0.0.33" }, "bin": { "solcjs": "solc.js" } }, "sha512-G5yUqjTUPc8Np74sCFwfsevhBPlUifUOfhYrgyu6CmYlC6feSw0YS6eZW47XDT23k3JYdKx5nJ+Q7whCEmNcoA=="],
 
     "solc-0.8.20": ["solc@0.8.20", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/solc/-/solc-0.8.20.tgz", { "dependencies": { "command-exists": "^1.2.8", "commander": "^8.1.0", "follow-redirects": "^1.12.1", "js-sha3": "0.8.0", "memorystream": "^0.3.1", "semver": "^5.5.0", "tmp": "0.0.33" }, "bin": { "solcjs": "solc.js" } }, "sha512-fPRnGspIEqmhu63RFO3pc79sLA7ZmzO0Uy0L5l6hEt2wAsq0o7UV6pXkAp3Mfv9IBhg7Px/oTu3a+y4gs3BWrQ=="],
+
+    "solc-0.8.38": ["solc@0.8.38", "", { "dependencies": { "command-exists": "^1.2.8", "commander": "^8.1.0", "follow-redirects": "^1.12.1", "js-sha3": "0.8.0", "memorystream": "^0.3.1", "semver": "^5.5.0", "tmp": "0.2.6" }, "bin": { "solcjs": "solc.js" } }, "sha512-DsDLa7uACQVVkE0DYNnUGC49b/yuCJ9ymWlcCEwmaJGcETPC6pTC+BXaRK9ADW8YVeMyxEKUtJsUwRAIG28jtQ=="],
 
     "sonic-boom": ["sonic-boom@4.2.1", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/sonic-boom/-/sonic-boom-4.2.1.tgz", { "dependencies": { "atomic-sleep": "^1.0.0" } }, "sha512-w6AxtubXa2wTXAUsZMMWERrsIRAdrK0Sc+FUytWvYAhBJLyuI4llrMIC1DtlNSdI99EI86KZum2MMq3EAZlF9Q=="],
 

@@ -1,0 +1,356 @@
+{
+  "status": "LOCAL CANDIDATE — NOT DEPLOYED, NOT AUDITED, NOT REGISTERED",
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "optimizerRuns": 200,
+  "evmVersion": "cancun",
+  "sourceKeccak": "0xad34078ce1fb1f6d4f31d723d3dfc17dc356ff2bb7e7c3f316f484ca9adf4242",
+  "creationBytecodeKeccak": "0xa56d2cbf2e1ba1b966fa6fd03ad90d054feac768a77bd7d7cb200a63a252156c",
+  "unlinkedRuntimeKeccak": "0x0505aee00187004bf97ee4b58ddd6d0b2d7f628a11a35c81016cb11c8b2dab0a",
+  "runtimeBytes": 5446,
+  "note": "Runtime contains immutables; compare only after constructor patching.",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wbnb",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "usdt",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "router",
+          "type": "address"
+        },
+        {
+          "internalType": "uint24",
+          "name": "poolFee",
+          "type": "uint24"
+        },
+        {
+          "internalType": "address",
+          "name": "feeRecipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "feeBps",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AllowanceNotCleared",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "BadAmount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "BadConfig",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "DeadlineTooFar",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Expired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InputMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InsufficientOutput",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Reentrancy",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ResidualBalance",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TransferFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnexpectedNative",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongChain",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "bnbToUsdt",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountIn",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "grossOut",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "fee",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "netOut",
+          "type": "uint256"
+        }
+      ],
+      "name": "Swapped",
+      "type": "event"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "fallback"
+    },
+    {
+      "inputs": [],
+      "name": "BPS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "CHAIN_ID",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "FEE_BPS",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "FEE_RECIPIENT",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_BNB_IN",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_DEADLINE_WINDOW",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_USDT_IN",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "POOL_FEE",
+      "outputs": [
+        {
+          "internalType": "uint24",
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ROUTER",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "USDT",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "WBNB",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "minNetOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        }
+      ],
+      "name": "swapExactBnbForUsdt",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "netOut",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amountIn",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "minNetOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        }
+      ],
+      "name": "swapExactUsdtForBnb",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "netOut",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ]
+}
