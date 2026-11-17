@@ -1,0 +1,2893 @@
+{
+  "schema": 1,
+  "gate": "BNB V1.3 sustained read-only observation",
+  "startedAt": "2026-11-17T10:29:30.061Z",
+  "completedAt": "2026-11-17T10:30:18.567Z",
+  "chainId": 56,
+  "executionEnabled": false,
+  "nativeBnbWrapping": "NOT_OBSERVED — WBNB ERC20 pool only; native BNB wrap/unwrap execution path not simulated",
+  "rpcSources": [
+    "https://bsc-dataseed.bnbchain.org",
+    "https://bsc-dataseed1.bnbchain.org"
+  ],
+  "rpcIndependence": "same operator; not independent quorum",
+  "historical": [
+    {
+      "offset": 200,
+      "blockNumber": 134103499,
+      "state": "UNKNOWN",
+      "reason": "RPC -32000: missing trie node"
+    },
+    {
+      "offset": 2000,
+      "blockNumber": 134101699,
+      "state": "UNKNOWN",
+      "reason": "RPC -32000: missing trie node"
+    },
+    {
+      "offset": 50000,
+      "blockNumber": 134053699,
+      "state": "UNKNOWN",
+      "reason": "RPC -32000: missing trie node"
+    }
+  ],
+  "live": [
+    {
+      "blockNumber": 134103700,
+      "blockHash": "0x6d72f1cca8188d777707e17fb51214d5b51b7a81b4ad6b3c6b35b22877049f73",
+      "peerBlockHash": "0x6d72f1cca8188d777707e17fb51214d5b51b7a81b4ad6b3c6b35b22877049f73",
+      "blockTime": "2026-11-17T10:29:30.000Z",
+      "observedAt": "2026-11-17T10:29:30.855Z",
+      "pools": {
+        "WBNB/USDT-500": {
+          "liquidity": "3337849275801092696960698",
+          "tick": -63775,
+          "sqrtPriceX96": "3266637525989679943785528134",
+          "buy10UsdtOut": "0.016991255516710217",
+          "buy100UsdtOut": "0.169912366365844088",
+          "matchedSellUsdt": "99.899778382794106231",
+          "sellSmallIn": "0.01",
+          "sellSmallUsdtOut": "5.879495209309201364",
+          "buyRateSmall": 588.5380271143238,
+          "buyRateLarge": 588.5386810792018,
+          "sellRateSmall": 587.9495209309201,
+          "directionalSpreadBps": 10.009467861660237,
+          "marginalImpactBps": 0.011111684341535977,
+          "roundTripLossBps": 10.022161720588674,
+          "ticks": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "gas": [
+            "115123",
+            "115123",
+            "114379",
+            "114379"
+          ]
+        },
+        "XAUt/USDT-500 (RWA, trading pending)": {
+          "liquidity": "113548857887989958",
+          "tick": 358868,
+          "sqrtPriceX96": "4911650086249585571422269361666931202",
+          "buy10UsdtOut": "0.0026",
+          "buy100UsdtOut": "0.026006",
+          "matchedSellUsdt": "99.891654584975447606",
+          "sellSmallIn": "0.002",
+          "sellSmallUsdtOut": "7.682595923158002223",
+          "buyRateSmall": 3846.153846153846,
+          "buyRateLarge": 3845.2664769668536,
+          "sellRateSmall": 3841.2979615790014,
+          "directionalSpreadBps": 12.641259864278886,
+          "marginalImpactBps": -2.3071598861812426,
+          "roundTripLossBps": 10.834541502455775,
+          "ticks": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "gas": [
+            "96065",
+            "105058",
+            "94986",
+            "89591"
+          ]
+        }
+      }
+    },
+    {
+      "blockNumber": 134103721,
+      "blockHash": "0x8f723c984d89cba18044b0dee09a1c3cf9b699bcc219bb25012df7df58ec4961",
+      "peerBlockHash": "0x8f723c984d89cba18044b0dee09a1c3cf9b699bcc219bb25012df7df58ec4961",
+      "blockTime": "2026-11-17T10:29:39.000Z",
+      "observedAt": "2026-11-17T10:29:40.342Z",
+      "pools": {
+        "WBNB/USDT-500": {
+          "liquidity": "3337849275801092696960698",
+          "tick": -63775,
+          "sqrtPriceX96": "3266637525989679943785528134",
+          "buy10UsdtOut": "0.016991255516710217",
+          "buy100UsdtOut": "0.169912366365844088",
+          "matchedSellUsdt": "99.899778382794106231",
+          "sellSmallIn": "0.01",
+          "sellSmallUsdtOut": "5.879495209309201364",
+          "buyRateSmall": 588.5380271143238,
+          "buyRateLarge": 588.5386810792018,
+          "sellRateSmall": 587.9495209309201,
+          "directionalSpreadBps": 10.009467861660237,
+          "marginalImpactBps": 0.011111684341535977,
+          "roundTripLossBps": 10.022161720588674,
+          "ticks": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "gas": [
+            "115123",
+            "115123",
+            "114379",
+            "114379"
+          ]
+        },
+        "XAUt/USDT-500 (RWA, trading pending)": {
+          "liquidity": "113548857887989958",
+          "tick": 358868,
+          "sqrtPriceX96": "4911636807048524819204591770942691880",
+          "buy10UsdtOut": "0.0026",
+          "buy100UsdtOut": "0.026006",
+          "matchedSellUsdt": "99.891114452784676565",
+          "sellSmallIn": "0.002",
+          "sellSmallUsdtOut": "7.682554381704290908",
+          "buyRateSmall": 3846.153846153846,
+          "buyRateLarge": 3845.2664769668536,
+          "sellRateSmall": 3841.2771908521454,
+          "directionalSpreadBps": 12.695400668596424,
+          "marginalImpactBps": -2.3071598861812426,
+          "roundTripLossBps": 10.888554721532051,
+          "ticks": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "gas": [
+            "96071",
+            "105058",
+            "94986",
+            "89591"
+          ]
+        }
+      }
+    },
+    {
+      "blockNumber": 134103742,
+      "blockHash": "0x27b7d41bf31cec1e8c8fe0ec48783a8258fe85d81eee03395b25053a7d6d8672",
+      "peerBlockHash": "0x27b7d41bf31cec1e8c8fe0ec48783a8258fe85d81eee03395b25053a7d6d8672",
+      "blockTime": "2026-11-17T10:29:48.000Z",
+      "observedAt": "2026-11-17T10:29:49.893Z",
+      "pools": {
+        "WBNB/USDT-500": {
+          "liquidity": "3337849275801092696960698",
+          "tick": -63775,
+          "sqrtPriceX96": "3266637525989679943785528134",
+          "buy10UsdtOut": "0.016991255516710217",
+          "buy100UsdtOut": "0.169912366365844088",
+          "matchedSellUsdt": "99.899778382794106231",
+          "sellSmallIn": "0.01",
+          "sellSmallUsdtOut": "5.879495209309201364",
+          "buyRateSmall": 588.5380271143238,
+          "buyRateLarge": 588.5386810792018,
+          "sellRateSmall": 587.9495209309201,
+          "directionalSpreadBps": 10.009467861660237,
+          "marginalImpactBps": 0.011111684341535977,
+          "roundTripLossBps": 10.022161720588674,
+          "ticks": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "gas": [
+            "115123",
+            "115123",
+            "114379",
+            "114379"
+          ]
+        },
+        "XAUt/USDT-500 (RWA, trading pending)": {
+          "liquidity": "113548857887989958",
+          "tick": 358868,
+          "sqrtPriceX96": "4911636807048524819204591770942691880",
+          "buy10UsdtOut": "0.0026",
+          "buy100UsdtOut": "0.026006",
+          "matchedSellUsdt": "99.891114452784676565",
+          "sellSmallIn": "0.002",
+          "sellSmallUsdtOut": "7.682554381704290908",
+          "buyRateSmall": 3846.153846153846,
+          "buyRateLarge": 3845.2664769668536,
+          "sellRateSmall": 3841.2771908521454,
+          "directionalSpreadBps": 12.695400668596424,
+          "marginalImpactBps": -2.3071598861812426,
+          "roundTripLossBps": 10.888554721532051,
+          "ticks": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "gas": [
+            "96071",
+            "105058",
+            "94986",
+            "89591"
+          ]
+        }
+      }
+    },
+    {
+      "blockNumber": 134103763,
+      "blockHash": "0x6a392b8c03bfeb7c7775313f157ac6560fdbe62c12c860ce946b8c18f54bea4d",
+      "peerBlockHash": "0x6a392b8c03bfeb7c7775313f157ac6560fdbe62c12c860ce946b8c18f54bea4d",
+      "blockTime": "2026-11-17T10:29:58.000Z",
+      "observedAt": "2026-11-17T10:29:59.331Z",
+      "pools": {
+        "WBNB/USDT-500": {
+          "liquidity": "3337849275801092696960698",
+          "tick": -63775,
+          "sqrtPriceX96": "3266637525989679943785528134",
+          "buy10UsdtOut": "0.016991255516710217",
+          "buy100UsdtOut": "0.169912366365844088",
+          "matchedSellUsdt": "99.899778382794106231",
+          "sellSmallIn": "0.01",
+          "sellSmallUsdtOut": "5.879495209309201364",
+          "buyRateSmall": 588.5380271143238,
+          "buyRateLarge": 588.5386810792018,
+          "sellRateSmall": 587.9495209309201,
+          "directionalSpreadBps": 10.009467861660237,
+          "marginalImpactBps": 0.011111684341535977,
+          "roundTripLossBps": 10.022161720588674,
+          "ticks": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "gas": [
+            "115123",
+            "115123",
+            "114379",
+            "114379"
+          ]
+        },
+        "XAUt/USDT-500 (RWA, trading pending)": {
+          "liquidity": "113548857887989958",
+          "tick": 358868,
+          "sqrtPriceX96": "4911636807048524819204591770942691880",
+          "buy10UsdtOut": "0.0026",
+          "buy100UsdtOut": "0.026006",
+          "matchedSellUsdt": "99.891114452784676565",
+          "sellSmallIn": "0.002",
+          "sellSmallUsdtOut": "7.682554381704290908",
+          "buyRateSmall": 3846.153846153846,
+          "buyRateLarge": 3845.2664769668536,
+          "sellRateSmall": 3841.2771908521454,
+          "directionalSpreadBps": 12.695400668596424,
+          "marginalImpactBps": -2.3071598861812426,
+          "roundTripLossBps": 10.888554721532051,
+          "ticks": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "gas": [
+            "96071",
+            "105058",
+            "94986",
+            "89591"
+          ]
+        }
+      }
+    },
+    {
+      "blockNumber": 134103784,
+      "blockHash": "0x2873007c70514ad2c73998f4e96c6b3dc3891380fd172b439b66667f5c6b0c17",
+      "peerBlockHash": "0x2873007c70514ad2c73998f4e96c6b3dc3891380fd172b439b66667f5c6b0c17",
+      "blockTime": "2026-11-17T10:30:07.000Z",
+      "observedAt": "2026-11-17T10:30:08.759Z",
+      "pools": {
+        "WBNB/USDT-500": {
+          "liquidity": "3337849275801092696960698",
+          "tick": -63775,
+          "sqrtPriceX96": "3266605372959702793834081614",
+          "buy10UsdtOut": "0.016990921033547495",
+          "buy100UsdtOut": "0.169909021539791846",
+          "matchedSellUsdt": "99.899778385221516976",
+          "sellSmallIn": "0.01",
+          "sellSmallUsdtOut": "5.879610953017203909",
+          "buyRateSmall": 588.5496130701588,
+          "buyRateLarge": 588.5502670414737,
+          "sellRateSmall": 587.9610953017204,
+          "directionalSpreadBps": 10.009467856650911,
+          "marginalImpactBps": 0.011111574971245375,
+          "roundTripLossBps": 10.022161477847291,
+          "ticks": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "gas": [
+            "115123",
+            "115123",
+            "114379",
+            "114379"
+          ]
+        },
+        "XAUt/USDT-500 (RWA, trading pending)": {
+          "liquidity": "113548857887989958",
+          "tick": 358868,
+          "sqrtPriceX96": "4911636807048524819204591770942691880",
+          "buy10UsdtOut": "0.0026",
+          "buy100UsdtOut": "0.026006",
+          "matchedSellUsdt": "99.891114452784676565",
+          "sellSmallIn": "0.002",
+          "sellSmallUsdtOut": "7.682554381704290908",
+          "buyRateSmall": 3846.153846153846,
+          "buyRateLarge": 3845.2664769668536,
+          "sellRateSmall": 3841.2771908521454,
+          "directionalSpreadBps": 12.695400668596424,
+          "marginalImpactBps": -2.3071598861812426,
+          "roundTripLossBps": 10.888554721532051,
+          "ticks": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "gas": [
+            "96071",
+            "105058",
+            "94986",
+            "89591"
+          ]
+        }
+      }
+    },
+    {
+      "blockNumber": 134103805,
+      "blockHash": "0xc3cc84cded143de80b3c779ae6df2f4fa5efa706dfa7468206830a68a9dacca2",
+      "peerBlockHash": "0xc3cc84cded143de80b3c779ae6df2f4fa5efa706dfa7468206830a68a9dacca2",
+      "blockTime": "2026-11-17T10:30:17.000Z",
+      "observedAt": "2026-11-17T10:30:18.196Z",
+      "pools": {
+        "WBNB/USDT-500": {
+          "liquidity": "3337849275801092696960698",
+          "tick": -63775,
+          "sqrtPriceX96": "3266605372959702793834081614",
+          "buy10UsdtOut": "0.016990921033547495",
+          "buy100UsdtOut": "0.169909021539791846",
+          "matchedSellUsdt": "99.899778385221516976",
+          "sellSmallIn": "0.01",
+          "sellSmallUsdtOut": "5.879610953017203909",
+          "buyRateSmall": 588.5496130701588,
+          "buyRateLarge": 588.5502670414737,
+          "sellRateSmall": 587.9610953017204,
+          "directionalSpreadBps": 10.009467856650911,
+          "marginalImpactBps": 0.011111574971245375,
+          "roundTripLossBps": 10.022161477847291,
+          "ticks": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "gas": [
+            "115123",
+            "115123",
+            "114379",
+            "114379"
+          ]
+        },
+        "XAUt/USDT-500 (RWA, trading pending)": {
+          "liquidity": "113548857887989958",
+          "tick": 358868,
+          "sqrtPriceX96": "4911636807048524819204591770942691880",
+          "buy10UsdtOut": "0.0026",
+          "buy100UsdtOut": "0.026006",
+          "matchedSellUsdt": "99.891114452784676565",
+          "sellSmallIn": "0.002",
+          "sellSmallUsdtOut": "7.682554381704290908",
+          "buyRateSmall": 3846.153846153846,
+          "buyRateLarge": 3845.2664769668536,
+          "sellRateSmall": 3841.2771908521454,
+          "directionalSpreadBps": 12.695400668596424,
+          "marginalImpactBps": -2.3071598861812426,
+          "roundTripLossBps": 10.888554721532051,
+          "ticks": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "gas": [
+            "96071",
+            "105058",
+            "94986",
+            "89591"
+          ]
+        }
+      }
+    }
+  ],
+  "evaluation": {
+    "WBNB/USDT-500": {
+      "overall": "PASS",
+      "criteria": [
+        {
+          "id": "distinct-blocks",
+          "state": "PASS",
+          "detail": "6 distinct of 6"
+        },
+        {
+          "id": "time-span",
+          "state": "PASS",
+          "detail": "47s"
+        },
+        {
+          "id": "peer-hash-and-reorg",
+          "state": "PASS",
+          "detail": "same-operator endpoints; not an independent quorum"
+        },
+        {
+          "id": "code-identity-stable",
+          "state": "PASS",
+          "detail": "bytecode hashes identical across samples"
+        },
+        {
+          "id": "liquidity-unlocked",
+          "state": "PASS",
+          "detail": "active liquidity > 0 and unlocked"
+        },
+        {
+          "id": "mid-drift",
+          "state": "PASS",
+          "detail": "0.20 bps"
+        },
+        {
+          "id": "round-trip-loss",
+          "state": "PASS",
+          "detail": "10.02 bps worst"
+        },
+        {
+          "id": "marginal-impact",
+          "state": "PASS",
+          "detail": "0.01 bps small vs large"
+        },
+        {
+          "id": "ticks-gas",
+          "state": "PASS",
+          "detail": "ticks 1, gas 115123"
+        }
+      ]
+    },
+    "XAUt/USDT-500 (RWA, trading pending)": {
+      "overall": "PASS",
+      "criteria": [
+        {
+          "id": "distinct-blocks",
+          "state": "PASS",
+          "detail": "6 distinct of 6"
+        },
+        {
+          "id": "time-span",
+          "state": "PASS",
+          "detail": "47s"
+        },
+        {
+          "id": "peer-hash-and-reorg",
+          "state": "PASS",
+          "detail": "same-operator endpoints; not an independent quorum"
+        },
+        {
+          "id": "code-identity-stable",
+          "state": "PASS",
+          "detail": "bytecode hashes identical across samples"
+        },
+        {
+          "id": "liquidity-unlocked",
+          "state": "PASS",
+          "detail": "active liquidity > 0 and unlocked"
+        },
+        {
+          "id": "mid-drift",
+          "state": "PASS",
+          "detail": "0.00 bps"
+        },
+        {
+          "id": "round-trip-loss",
+          "state": "PASS",
+          "detail": "10.89 bps worst"
+        },
+        {
+          "id": "marginal-impact",
+          "state": "PASS",
+          "detail": "2.31 bps small vs large"
+        },
+        {
+          "id": "ticks-gas",
+          "state": "PASS",
+          "detail": "ticks 0, gas 105058"
+        }
+      ]
+    }
+  },
+  "tokens": {
+    "USDT": {
+      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "codeBytes": 4413,
+      "codeHash": "0x97a48aa4c129657440dafdacd4c836389734d28cc4a0ca7403e68da660a74a59",
+      "implementation": "0x0000000000000000000000000000000000000000",
+      "implementationCodeHash": null,
+      "implementationBytes": null,
+      "admin": "0x0000000000000000000000000000000000000000",
+      "owner": "0xF68a4b64162906efF0fF6aE34E2bB1Cd42FEf62d",
+      "pausedNow": null,
+      "bytecodeSelectorHeuristic": [
+        "burn(uint256)",
+        "transferOwnership(address)"
+      ],
+      "classification": {
+        "state": "UNKNOWN",
+        "reasons": [
+          "privileged-owner",
+          "capability-selectors:burn(uint256),transferOwnership(address)",
+          "pause-state-unknown",
+          "verified-source-not-reviewed",
+          "legal-not-reviewed"
+        ]
+      }
+    },
+    "XAUt": {
+      "address": "0x21cAef8A43163Eea865baeE23b9C2E327696A3bf",
+      "codeBytes": 2227,
+      "codeHash": "0x4d9be648c5bf39973670d9f8b481d5d0b971e6a2db2deccc6b98cde21c5dd83e",
+      "implementation": "0x9151434b16b9763660705744891fa906f660ecc5",
+      "implementationCodeHash": "0x61466328a9d17e782f4a37d32db189f981ce32e45de6a4668c3f7bb1cd8d49ae",
+      "implementationBytes": 17861,
+      "admin": "0xedaba024be4d87974d5ab11c6dd586963cccb027",
+      "owner": "0x4DFF9b5b0143E642a3F63a5bcf2d1C328e600bf8",
+      "pausedNow": null,
+      "bytecodeSelectorHeuristic": [
+        "mint(address,uint256)",
+        "transferOwnership(address)"
+      ],
+      "classification": {
+        "state": "UNKNOWN",
+        "reasons": [
+          "upgradeable-proxy",
+          "privileged-owner",
+          "capability-selectors:mint(address,uint256),transferOwnership(address)",
+          "pause-state-unknown",
+          "verified-source-not-reviewed",
+          "legal-not-reviewed"
+        ]
+      }
+    },
+    "WBNB": {
+      "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "codeBytes": 3124,
+      "codeHash": "0xb7d84205eaaf83ce7b3940c6beaad6d22790255e34a9a2b486aa8cdfff118fe6",
+      "implementation": "0x0000000000000000000000000000000000000000",
+      "implementationCodeHash": null,
+      "implementationBytes": null,
+      "admin": "0x0000000000000000000000000000000000000000",
+      "owner": null,
+      "pausedNow": null,
+      "bytecodeSelectorHeuristic": [],
+      "classification": {
+        "state": "UNKNOWN",
+        "reasons": [
+          "pause-state-unknown",
+          "verified-source-not-reviewed",
+          "legal-not-reviewed"
+        ]
+      }
+    }
+  },
+  "callCount": 214,
+  "failedCalls": 5,
+  "calls": [
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_chainId",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_chainId",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_blockNumber",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe41cb",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe41cb",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fe41cb"
+      ],
+      "ok": false,
+      "error": "RPC -32000: missing trie node"
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe3ac3",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe3ac3",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fe3ac3"
+      ],
+      "ok": false,
+      "error": "RPC -32000: missing trie node"
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fd7f43",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fd7f43",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fd7f43"
+      ],
+      "ok": false,
+      "error": "RPC -32000: missing trie node"
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_blockNumber",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe4294",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe4294",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xb048bbc1ee6b733fffcfb9e9cef7375518e25997",
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x55d398326f99059ff775485246999027b3197955",
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x21caef8a43163eea865baee23b9c2e327696a3bf",
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x36696169c63e42cd08ce11f5deebbcebae652050",
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x83a0a8a723262651ae9c54bbba929f167443bc59",
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x1a686502"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x1a686502"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe4294"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe4294",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_blockNumber",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42a9",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42a9",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xb048bbc1ee6b733fffcfb9e9cef7375518e25997",
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x55d398326f99059ff775485246999027b3197955",
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x21caef8a43163eea865baee23b9c2e327696a3bf",
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x36696169c63e42cd08ce11f5deebbcebae652050",
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x83a0a8a723262651ae9c54bbba929f167443bc59",
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42a9"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42a9",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_blockNumber",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42be",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42be",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xb048bbc1ee6b733fffcfb9e9cef7375518e25997",
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x55d398326f99059ff775485246999027b3197955",
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x21caef8a43163eea865baee23b9c2e327696a3bf",
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x36696169c63e42cd08ce11f5deebbcebae652050",
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x83a0a8a723262651ae9c54bbba929f167443bc59",
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42be"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42be",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_blockNumber",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42d3",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42d3",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xb048bbc1ee6b733fffcfb9e9cef7375518e25997",
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x55d398326f99059ff775485246999027b3197955",
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x21caef8a43163eea865baee23b9c2e327696a3bf",
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x36696169c63e42cd08ce11f5deebbcebae652050",
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x83a0a8a723262651ae9c54bbba929f167443bc59",
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42d3"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42d3",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_blockNumber",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42e8",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42e8",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xb048bbc1ee6b733fffcfb9e9cef7375518e25997",
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x55d398326f99059ff775485246999027b3197955",
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x21caef8a43163eea865baee23b9c2e327696a3bf",
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x36696169c63e42cd08ce11f5deebbcebae652050",
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x83a0a8a723262651ae9c54bbba929f167443bc59",
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42e8"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42e8",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_blockNumber",
+      "params": [],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42fd",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42fd",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xb048bbc1ee6b733fffcfb9e9cef7375518e25997",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x55d398326f99059ff775485246999027b3197955",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x21caef8a43163eea865baee23b9c2e327696a3bf",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x36696169c63e42cd08ce11f5deebbcebae652050",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x83a0a8a723262651ae9c54bbba929f167443bc59",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xc45a0155"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x0dfe1681"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xd21220a7"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0xddca3f43"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x1a686502"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x83A0A8A723262651Ae9C54BBbA929F167443bC59",
+          "selector": "0x3850c7bd"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+          "selector": "0xc6a5026a"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "params": [
+        "0x7fe42fd",
+        false
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x55d398326f99059fF775485246999027B3197955",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getStorageAt",
+      "params": [
+        "0x55d398326f99059fF775485246999027B3197955",
+        "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getStorageAt",
+      "params": [
+        "0x55d398326f99059fF775485246999027B3197955",
+        "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x55d398326f99059fF775485246999027B3197955",
+          "selector": "0x8da5cb5b"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x55d398326f99059fF775485246999027B3197955",
+          "selector": "0x5c975abb"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": false,
+      "error": "RPC 3: execution reverted: 0x"
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x21cAef8A43163Eea865baeE23b9C2E327696A3bf",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getStorageAt",
+      "params": [
+        "0x21cAef8A43163Eea865baeE23b9C2E327696A3bf",
+        "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getStorageAt",
+      "params": [
+        "0x21cAef8A43163Eea865baeE23b9C2E327696A3bf",
+        "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x21cAef8A43163Eea865baeE23b9C2E327696A3bf",
+          "selector": "0x8da5cb5b"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0x21cAef8A43163Eea865baeE23b9C2E327696A3bf",
+          "selector": "0x5c975abb"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": false,
+      "error": "RPC 3: execution reverted: 0x"
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0x9151434b16b9763660705744891fa906f660ecc5",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "params": [
+        "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getStorageAt",
+      "params": [
+        "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getStorageAt",
+      "params": [
+        "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103",
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+          "selector": "0x8da5cb5b"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+          "selector": "0x5c975abb"
+        },
+        "0x7fe42fd"
+      ],
+      "ok": true
+    }
+  ]
+}

@@ -146,3 +146,7 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [ ] Next payout readiness: no confirmed unpaid approvals or Round #5 stored. CORE_SWAP has an authorized 1M ceiling but funding_verified=false; 415 verified Points lack reservations. The 299 signup delta remains blocked by REVIEWED_NONCLAIMABLE_HISTORICAL (981 stored-vs-accepted difference, 776 provenance-held swap Points and 30 unsupported later milestone Points). Requires explicit program backing authorization and an audited account evidence decision preserving historical exclusions; no financial action authorized here.
 - [x] Verify cited auto-approval mid-loop persistence: stale; current reads use persistBatch:false. Six focused files / 62 tests pass.
 - [ ] Direct bridge verified completion: confirmed missing authoritative destination correlation feed; integration plan awaiting approval and official evidence interface.
+
+## BNB V1.3 (2026-11-17)
+- [x] Sustained read-only observer, token safety facts, provider matrix, architecture proposal, acceptance report
+- [ ] HOLD: archive history, source/legal token review, provider access, fee approval/audit, RWA legal, physical wallet

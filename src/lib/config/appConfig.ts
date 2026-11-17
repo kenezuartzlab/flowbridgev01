@@ -2,7 +2,7 @@
 // Client-safe: reads the public /api/config endpoint and caches it in-module.
 // Defaults mirror the previous hardcoded values so behaviour never regresses
 // when the backend is unreachable.
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useSyncExternalStore, type CSSProperties } from "react";
 import { setLogoOverrides } from "@/lib/tokenLogos";
 import { DEFAULT_ANNOUNCEMENT } from './announcement';
 import { promotionSchema, dockedAdSchema, type DockedAdSettings, type PromotionOptions } from '@/lib/banners/promotionPolicy';
@@ -986,14 +986,20 @@ export function loadAppConfig(force = false): Promise<AppConfig> {
   return loadPromise;
 }
 
+// Server HTML always renders defaults. useSyncExternalStore uses the server snapshot
+// while hydrating (including lazily hydrated routes), then switches to loaded config.
+const subscribeConfig = (fn: () => void) => {
+  const l = () => fn();
+  listeners.add(l);
+  return () => {
+    listeners.delete(l);
+  };
+};
+const serverConfig = () => DEFAULT_APP_CONFIG;
 export function useAppConfig(): AppConfig {
-  const [cfg, setCfg] = useState<AppConfig>(current);
+  const cfg = useSyncExternalStore(subscribeConfig, getAppConfig, serverConfig);
   useEffect(() => {
-    listeners.add(setCfg);
     void loadAppConfig();
-    return () => {
-      listeners.delete(setCfg);
-    };
   }, []);
   return cfg;
 }

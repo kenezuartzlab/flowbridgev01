@@ -20,6 +20,7 @@ Object.assign(process.env, serverEnv);
 // WalletConnect fails with "EventEmitter is not a constructor". Server
 // (SSR/worker) builds keep the platform module.
 const EVENTS_POLYFILL = path.resolve(process.cwd(), "node_modules/events/events.js");
+const OPTIONAL_CONNECTOR_PEERS = ["@coinbase/wallet-sdk", "@metamask/connect-evm", "porto", "porto/internal"];
 function browserEventsPolyfill() {
   return {
     name: "flowbridge:browser-events-polyfill",
@@ -30,6 +31,13 @@ function browserEventsPolyfill() {
       const envName: string | undefined = this?.environment?.name;
       if (envName && envName !== "client") return null;
       if (id === "events" || id === "node:events") return EVENTS_POLYFILL;
+      // Unused optional wagmi connector peers (not installed): resolve to a stub that
+      // rejects at call time so the client bundle never fails on their dynamic imports.
+      if (OPTIONAL_CONNECTOR_PEERS.includes(id)) return "\0flowbridge-optional-peer";
+      return null;
+    },
+    load(id: string) {
+      if (id === "\0flowbridge-optional-peer") return 'throw new Error("Optional wallet connector is not installed");';
       return null;
     },
   };
