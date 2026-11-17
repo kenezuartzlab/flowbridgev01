@@ -150,3 +150,9 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 ## BNB V1.3 (2026-11-17)
 - [x] Sustained read-only observer, token safety facts, provider matrix, architecture proposal, acceptance report
 - [ ] HOLD: archive history, source/legal token review, provider access, fee approval/audit, RWA legal, physical wallet
+
+## BNB V1.4 (pre-deployment safety candidate)
+- [x] Native BNB/WBNB + Pancake V3 read-only mainnet simulation (block 134108781)
+- [x] Verified-source token review (USDT, WBNB candidate-eligible; XAUt blocked)
+- [x] Local adapter candidate + 25 adversarial tests + fence, owner decision sheet
+- [ ] HOLD: audit, owner fee/recipient/provider decision, funded rehearsal, provider access, legal, physical wallet
