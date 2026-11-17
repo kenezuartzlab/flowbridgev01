@@ -1,7 +1,13 @@
 # Compact Swap chain selector — preview only
-- [ ] Inline picker, isolated BNB unavailable view and fresh BOT remount; preserve original vertical geometry.
-- [ ] Baseline parity, switch/focus/safety checks, full tests and acceptance report.
+- [x] Inline picker, isolated BNB unavailable view and fresh BOT remount; preserve original vertical geometry.
+- [x] 640 browser checks / 20 width-theme-motion cases and 2,590 full tests passed before V1.2; exact-heading check and final report follow below.
 - [ ] HOLD: physical-wallet rejection checks and inherited financial/security/publication gates; no activation.
+
+# BNB Swap V1.2 — read-only general route feasibility
+- [x] Strict chain-scoped quote interface, deterministic freshness/context invalidation and separated AMM/aggregation/RFQ providers; no execution.
+- [x] 132 genuine fixed read-only RPC calls for WBNB/USDT and XAUt/USDT, source/evidence archive; compact preview-only inspection, no live UI quote promise.
+- [x] 2,633 tests and 5,306 browser assertions PASS; exact 32px heading; dated reports; automatic build OK, standalone type/hosted pipeline explicitly unverified.
+- [ ] HOLD: provider permission/API budgets, RWA issuer/legal/market rules, fee approval/security, physical wallets and hosted release acceptance.
 
 # BNB RWA V1.1 exact-pool / two-way quote gate — preview only
 - [x] Two official-operator BSC endpoints matched fixed pool/code/tokens at block 134073409; 66 genuine read-only calls, 20 quoter probes, zero transactions; 28 synthetic gate tests separate from evidence.

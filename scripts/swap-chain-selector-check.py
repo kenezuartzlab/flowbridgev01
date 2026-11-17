@@ -20,7 +20,7 @@ async def main():
      heading=page.locator('[data-swap-heading]'); form=page.locator('[data-swap-form]')
      async def geom():
       return await page.evaluate('''()=>{const h=document.querySelector('[data-swap-heading]').getBoundingClientRect(),f=document.querySelector('[data-swap-form]').getBoundingClientRect(),top=document.querySelector('header').getBoundingClientRect().bottom;return [h.height,f.top-h.top,f.top-top]}''')
-     await page.get_by_role('button',name='Pause banner rotation').click() if await page.get_by_role('button',name='Pause banner rotation').count() else None; g=await geom(); assert all(abs(x-y)<=2 for x,y in zip(g[:2],BASE[w][:2])),(w,g,BASE[w]);checks+=3
+     await page.get_by_role('button',name='Pause banner rotation').click() if await page.get_by_role('button',name='Pause banner rotation').count() else None; g=await geom(); assert g[0]==32 and abs(g[1]-BASE[w][1])<=2,(w,g,BASE[w]);checks+=3
      nav=await page.locator('[data-nav-id]').evaluate_all('(es)=>es.map(e=>e.getBoundingClientRect().toJSON())')
      assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');checks+=1
      picker=page.get_by_role('button',name='Select swap chain, BOT Mainnet',exact=True)
@@ -32,7 +32,7 @@ async def main():
      assert await dialog.get_by_role('button',name='BOT Mainnet · 677').get_attribute('aria-pressed')=='true';checks+=1
      for _ in range(6):
       await page.keyboard.press('Tab'); assert await page.evaluate('document.querySelector("[role=dialog]").contains(document.activeElement)');checks+=1
-     await page.keyboard.press('Escape'); await dialog.wait_for(state='hidden'); assert await picker.evaluate('e=>e===document.activeElement'); checks+=1
+     await page.keyboard.press('Escape'); await dialog.wait_for(state='hidden'); await page.wait_for_function('document.activeElement?.getAttribute("aria-label")==="Select swap chain, BOT Mainnet"'); assert await picker.evaluate('e=>e===document.activeElement'); checks+=1
      await picker.click(); await dialog.get_by_role('button',name='BNB Mainnet · 56').click(); await page.get_by_role('region',name='BNB read-only trading view').wait_for(); await page.wait_for_timeout(300)
      assert await page.get_by_text('BNB swaps coming after security approval',exact=True).count()==1;checks+=1
      assert await page.locator('[data-swap-form] input').count()==0;checks+=1
@@ -41,7 +41,7 @@ async def main():
      assert await page.get_by_role('button',name='Approve',exact=True).count()==0;checks+=1
      assert await page.get_by_text('XAUt/USDT · archived quote research →',exact=True).count()==1;checks+=1
      assert await page.locator('[data-nav-id]').evaluate_all('(es)=>es.map(e=>e.getBoundingClientRect().toJSON())')==nav;checks+=1
-     assert abs((await geom())[1]-g[1])<=2;checks+=1
+     assert (await geom())[0]==32 and abs((await geom())[1]-g[1])<=2;checks+=1
      await page.screenshot(path=str(OUT/f'{w}-{theme}-{motion}-bnb.png'))
      await page.get_by_role('button',name='Select swap chain, BNB preview',exact=True).click(); await dialog.wait_for()
      await page.screenshot(path=str(OUT/f'{w}-{theme}-{motion}-popover.png'))
@@ -49,7 +49,7 @@ async def main():
      assert await page.locator('[data-swap-form] input').first.input_value()=='';checks+=1
      assert await page.get_by_role('button',name='Connect Wallet',exact=True).count()==1;checks+=1
      assert await page.locator('[data-nav-id]').evaluate_all('(es)=>es.map(e=>e.getBoundingClientRect().toJSON())')==nav;checks+=1
-     assert all(abs(x-y)<=2 for x,y in zip((await geom())[:2],g[:2])),(w,theme,motion,g,await geom());checks+=3
+     assert (await geom())[0]==32 and abs((await geom())[1]-g[1])<=2,(w,theme,motion,g,await geom());checks+=3
      assert not errors,errors;checks+=1
      assert not any(any(s in data for s in ['eth_sendTransaction','personal_sign','wallet_switchEthereumChain','eth_sendRawTransaction','eth_getTransactionCount']) for _,_,data in requests);checks+=1
      await page.screenshot(path=str(OUT/f'{w}-{theme}-{motion}-bot.png'))

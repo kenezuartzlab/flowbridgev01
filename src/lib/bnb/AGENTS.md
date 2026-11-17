@@ -1,0 +1,3 @@
+- Keep BNB feasibility separate from BOT execution and token imports; fixed chain/asset/provider IDs are observation-only. Why: no generic token, router, MultiSend or RWA eligibility bypass may become executable.
+- Quote adapters return display evidence only, with context/freshness/provenance checks and no calldata/allowance/signer fields; browser adapters have no network transport. Why: archived observations and unconfigured providers cannot masquerade as actionable offers.
+- Local collectors allow only fixed official RPC methods/targets and factory-discovered exact-pair pools, archive public facts and never accept caller URLs or wallet data. Why: genuine evidence must not introduce arbitrary calls or user tracking.

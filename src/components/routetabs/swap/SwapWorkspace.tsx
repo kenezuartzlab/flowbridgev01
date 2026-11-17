@@ -4,6 +4,7 @@ import { useAccount } from 'wagmi';
 import { LockKeyhole } from 'lucide-react';
 import { UniversalSwapCard } from './UniversalSwapCard';
 import { SwapChainPicker } from './SwapChainPicker';
+import { BnbQuoteInspection } from './BnbQuoteInspection';
 import { clearSwapDraft, setDexPreference } from '@/lib/trade/tradeSession';
 import { isSwapView, type SwapView } from '@/lib/swap/viewContext';
 
@@ -30,6 +31,7 @@ export function SwapWorkspace({ view, onViewChange, ...props }: ComponentProps<t
       <LockKeyhole className="h-6 w-6 text-muted" />
       <p className="text-sm font-bold">BNB swaps coming after security approval</p>
       <p className="text-xs text-muted">Read-only research · no live trading or approvals</p>
+      {import.meta.env.DEV && <BnbQuoteInspection key={generation} contextId={generation} />}
       {import.meta.env.DEV && <Link to="/campaigns/rwa" className="inline-flex min-h-11 items-center text-xs font-bold text-primary">XAUt/USDT · archived quote research →</Link>}
     </div>
   </section>;
