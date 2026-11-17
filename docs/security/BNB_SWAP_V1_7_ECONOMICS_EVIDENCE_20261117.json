@@ -1,0 +1,1064 @@
+{
+  "generatedAt": "2026-11-17T12:00:27.855Z",
+  "scope": "read-only eth_call quotes at one pinned block; gas from V1.6 eth_estimateGas; no receipts",
+  "endpoints": [
+    "https://bsc-dataseed.bnbchain.org",
+    "https://bsc-dataseed1.bnbchain.org"
+  ],
+  "endpointsIndependent": false,
+  "block": {
+    "number": "134115821",
+    "hash": "0x0296199c936074f062727439acb1ec411a9adf85c677123456edf69ce930881c",
+    "timestamp": "2026-11-17T12:00:26.000Z",
+    "peerHashEqual": true
+  },
+  "gasSource": {
+    "direct": "187814",
+    "adapter": "282089",
+    "source": "docs/security/BNB_SWAP_V1_6_NATIVE_RPC_EVIDENCE_20261117.json (eth_estimateGas, state overrides, single block)"
+  },
+  "codes": {
+    "WBNB": {
+      "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "keccak": "0xb7d84205eaaf83ce7b3940c6beaad6d22790255e34a9a2b486aa8cdfff118fe6",
+      "bytes": 3124
+    },
+    "USDT": {
+      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "keccak": "0x97a48aa4c129657440dafdacd4c836389734d28cc4a0ca7403e68da660a74a59",
+      "bytes": 4413
+    },
+    "factory": {
+      "address": "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
+      "keccak": "0x8191d3ab1d55d3da9822199f28865415c99566b6f1aee4a4b16713f57930678c",
+      "bytes": 5151
+    },
+    "quoter": {
+      "address": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "keccak": "0x2734833b7d2a656d4797f4a7d959314654749a7424ec473267613ff26424138a",
+      "bytes": 8331
+    },
+    "router": {
+      "address": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "keccak": "0x61002a11263b2c38ff8d5ded90a655987ed98f171a31840ee0014dd7052bccda",
+      "bytes": 12154
+    }
+  },
+  "pools": [
+    {
+      "fee": 500,
+      "pool": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+      "factoryMatch": true,
+      "liquidity": "3346430043511643518522924",
+      "codeKeccak": "0xd7248234db5666b9ac33c1a14bfc68453197ce8708dae5c1306467a43f5da4d8"
+    },
+    {
+      "fee": 2500,
+      "pool": "0x1401ff943D08a7E098328C1d3a9d388923B115D2",
+      "factoryMatch": true,
+      "liquidity": "11728751682283047460535",
+      "codeKeccak": "0x11e25cf8f82ac2a56c9e3c6bd0829cc72e0e137066ecb211d04ccb339457c432"
+    }
+  ],
+  "gas": {
+    "gasPriceWei": "50000000",
+    "gasPriceGwei": "0.05",
+    "feeHistoryBaseFee": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x0"
+    ],
+    "feeHistoryReward50": [
+      [
+        "0x365c040"
+      ],
+      [
+        "0x365c040"
+      ],
+      [
+        "0x4417a40"
+      ],
+      [
+        "0x3197502"
+      ],
+      [
+        "0x3197502"
+      ]
+    ]
+  },
+  "reference": {
+    "usdtPerBnb": "594.283204495011013871",
+    "source": "QuoterV2 1 WBNB->USDT fee 500 same block"
+  },
+  "extraGasCost": {
+    "gasUnits": "94275",
+    "bnb": "0.00000471375",
+    "usdt": "0.002801302455188358"
+  },
+  "breakevenUsdtGross": {
+    "5bps": "5.602604910376716",
+    "10bps": "2.801302455188358"
+  },
+  "rows": [
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 500,
+      "sizeUsdtEq": 5,
+      "amountIn": "0.008413497070388727",
+      "grossOut": "5.000036108424772084",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "4.994455373136320785",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.002500018054212386",
+          "gasInOutput": "0.008382037743639658",
+          "net": "4.98915405262692004",
+          "costVsDirectBps": "10.60",
+          "platformGrossUsdtEq": "0.002500018054212386"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.005000036108424772",
+          "gasInOutput": "0.008382037743639658",
+          "net": "4.986654034572707654",
+          "costVsDirectBps": "15.60",
+          "platformGrossUsdtEq": "0.005000036108424772"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 500,
+      "sizeUsdtEq": 5,
+      "amountIn": "5",
+      "grossOut": "0.008405023948472906",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "0.008395633248472906",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.000004202511974236",
+          "gasInOutput": "0.00001410445",
+          "net": "0.00838671698649867",
+          "costVsDirectBps": "10.60",
+          "platformGrossUsdtEq": "0.002497482282977625"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.000008405023948472",
+          "gasInOutput": "0.00001410445",
+          "net": "0.008382514474524434",
+          "costVsDirectBps": "15.60",
+          "platformGrossUsdtEq": "0.00499496456595525"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 500,
+      "sizeUsdtEq": 25,
+      "amountIn": "0.042067485351943635",
+      "grossOut": "25.000174414564751322",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "24.994593679276300023",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.012500087207282375",
+          "gasInOutput": "0.008382037743639658",
+          "net": "24.979292289613829289",
+          "costVsDirectBps": "6.12",
+          "platformGrossUsdtEq": "0.012500087207282375"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.025000174414564751",
+          "gasInOutput": "0.008382037743639658",
+          "net": "24.966792202406546913",
+          "costVsDirectBps": "11.12",
+          "platformGrossUsdtEq": "0.025000174414564751"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 500,
+      "sizeUsdtEq": 25,
+      "amountIn": "25",
+      "grossOut": "0.042025109447207874",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "0.042015718747207874",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.000021012554723603",
+          "gasInOutput": "0.00001410445",
+          "net": "0.041989992442484271",
+          "costVsDirectBps": "6.12",
+          "platformGrossUsdtEq": "0.012487408355769571"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.000042025109447207",
+          "gasInOutput": "0.00001410445",
+          "net": "0.041968979887760667",
+          "costVsDirectBps": "11.12",
+          "platformGrossUsdtEq": "0.024974816711539736"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 500,
+      "sizeUsdtEq": 100,
+      "amountIn": "0.168269941407774542",
+      "grossOut": "100.000605744979351227",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "99.995025009690899928",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.050000302872489675",
+          "gasInOutput": "0.008382037743639658",
+          "net": "99.942223404363221894",
+          "costVsDirectBps": "5.28",
+          "platformGrossUsdtEq": "0.050000302872489675"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.100000605744979351",
+          "gasInOutput": "0.008382037743639658",
+          "net": "99.892223101490732218",
+          "costVsDirectBps": "10.28",
+          "platformGrossUsdtEq": "0.100000605744979351"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 500,
+      "sizeUsdtEq": 100,
+      "amountIn": "100",
+      "grossOut": "0.168100283361661297",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "0.168090892661661297",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.00008405014168083",
+          "gasInOutput": "0.00001410445",
+          "net": "0.168002128769980467",
+          "costVsDirectBps": "5.28",
+          "platformGrossUsdtEq": "0.049949587536343343"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.000168100283361661",
+          "gasInOutput": "0.00001410445",
+          "net": "0.167918078628299636",
+          "costVsDirectBps": "10.28",
+          "platformGrossUsdtEq": "0.099899175072687281"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 500,
+      "sizeUsdtEq": 500,
+      "amountIn": "0.841349707038872713",
+      "grossOut": "500.000577718373602984",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "499.994996983085151685",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.250000288859186801",
+          "gasInOutput": "0.008382037743639658",
+          "net": "499.742195391770776525",
+          "costVsDirectBps": "5.05",
+          "platformGrossUsdtEq": "0.250000288859186801"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.500000577718373602",
+          "gasInOutput": "0.008382037743639658",
+          "net": "499.492195102911589724",
+          "costVsDirectBps": "10.05",
+          "platformGrossUsdtEq": "0.500000577718373602"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 500,
+      "sizeUsdtEq": 500,
+      "amountIn": "500",
+      "grossOut": "0.840497298774393949",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "0.840487908074393949",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.000420248649387196",
+          "gasInOutput": "0.00001410445",
+          "net": "0.840062945675006753",
+          "costVsDirectBps": "5.05",
+          "platformGrossUsdtEq": "0.249746714042523185"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.000840497298774393",
+          "gasInOutput": "0.00001410445",
+          "net": "0.839642697025619556",
+          "costVsDirectBps": "10.05",
+          "platformGrossUsdtEq": "0.499493428085046965"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 500,
+      "sizeUsdtEq": 1000,
+      "amountIn": "1.682699414077745426",
+      "grossOut": "999.995027988022112249",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "999.98944725273366095",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.499997513994011056",
+          "gasInOutput": "0.008382037743639658",
+          "net": "999.486648436284461535",
+          "costVsDirectBps": "5.02",
+          "platformGrossUsdtEq": "0.499997513994011056"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.999995027988022112",
+          "gasInOutput": "0.008382037743639658",
+          "net": "998.986650922290450479",
+          "costVsDirectBps": "10.02",
+          "platformGrossUsdtEq": "0.999995027988022112"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 500,
+      "sizeUsdtEq": 1000,
+      "amountIn": "1000",
+      "grossOut": "1.680984302577497503",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "1.680974911877497503",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.000840492151288748",
+          "gasInOutput": "0.00001410445",
+          "net": "1.680129705976208755",
+          "costVsDirectBps": "5.02",
+          "platformGrossUsdtEq": "0.499490369020782762"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.001680984302577497",
+          "gasInOutput": "0.00001410445",
+          "net": "1.679289213824920006",
+          "costVsDirectBps": "10.02",
+          "platformGrossUsdtEq": "0.998980738041566119"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 2500,
+      "sizeUsdtEq": 5,
+      "amountIn": "0.008413497070388727",
+      "grossOut": "4.977766463368678189",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "4.97218572808022689",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.002488883231684339",
+          "gasInOutput": "0.008382037743639658",
+          "net": "4.966895542393354192",
+          "costVsDirectBps": "10.62",
+          "platformGrossUsdtEq": "0.002488883231684339"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.004977766463368678",
+          "gasInOutput": "0.008382037743639658",
+          "net": "4.964406659161669853",
+          "costVsDirectBps": "15.62",
+          "platformGrossUsdtEq": "0.004977766463368678"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 2500,
+      "sizeUsdtEq": 5,
+      "amountIn": "5",
+      "grossOut": "0.008408580617524611",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "0.008399189917524611",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.000004204290308762",
+          "gasInOutput": "0.00001410445",
+          "net": "0.008390271877215849",
+          "costVsDirectBps": "10.60",
+          "platformGrossUsdtEq": "0.0024985391173184"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.000008408580617524",
+          "gasInOutput": "0.00001410445",
+          "net": "0.008386067586907087",
+          "costVsDirectBps": "15.60",
+          "platformGrossUsdtEq": "0.004997078234636801"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 2500,
+      "sizeUsdtEq": 25,
+      "amountIn": "0.042067485351943635",
+      "grossOut": "24.887097551846851289",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "24.88151681655839999",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.012443548775923425",
+          "gasInOutput": "0.008382037743639658",
+          "net": "24.866271965327288206",
+          "costVsDirectBps": "6.12",
+          "platformGrossUsdtEq": "0.012443548775923425"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.024887097551846851",
+          "gasInOutput": "0.008382037743639658",
+          "net": "24.85382841655136478",
+          "costVsDirectBps": "11.12",
+          "platformGrossUsdtEq": "0.024887097551846851"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 2500,
+      "sizeUsdtEq": 25,
+      "amountIn": "25",
+      "grossOut": "0.042039966996194524",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "0.042030576296194524",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.000021019983498097",
+          "gasInOutput": "0.00001410445",
+          "net": "0.042004842562696427",
+          "costVsDirectBps": "6.12",
+          "platformGrossUsdtEq": "0.012491823151681336"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.000042039966996194",
+          "gasInOutput": "0.00001410445",
+          "net": "0.04198382257919833",
+          "costVsDirectBps": "11.12",
+          "platformGrossUsdtEq": "0.024983646303362672"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 2500,
+      "sizeUsdtEq": 100,
+      "amountIn": "0.168269941407774542",
+      "grossOut": "99.522377345314391504",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "99.516796610025940205",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.049761188672657195",
+          "gasInOutput": "0.008382037743639658",
+          "net": "99.464234118898094651",
+          "costVsDirectBps": "5.28",
+          "platformGrossUsdtEq": "0.049761188672657195"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.099522377345314391",
+          "gasInOutput": "0.008382037743639658",
+          "net": "99.414472930225437455",
+          "costVsDirectBps": "10.28",
+          "platformGrossUsdtEq": "0.099522377345314391"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 2500,
+      "sizeUsdtEq": 100,
+      "amountIn": "100",
+      "grossOut": "0.168115841218889567",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "0.168106450518889567",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.000084057920609444",
+          "gasInOutput": "0.00001410445",
+          "net": "0.168017678848280123",
+          "costVsDirectBps": "5.28",
+          "platformGrossUsdtEq": "0.049954210422967609"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.000168115841218889",
+          "gasInOutput": "0.00001410445",
+          "net": "0.167933620927670678",
+          "costVsDirectBps": "10.28",
+          "platformGrossUsdtEq": "0.099908420845935813"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 2500,
+      "sizeUsdtEq": 500,
+      "amountIn": "0.841349707038872713",
+      "grossOut": "497.027893488547308673",
+      "ticksCrossed": 2,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "497.022312753258857374",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.248513946744273654",
+          "gasInOutput": "0.008382037743639658",
+          "net": "496.770997504059395361",
+          "costVsDirectBps": "5.05",
+          "platformGrossUsdtEq": "0.248513946744273654"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.497027893488547308",
+          "gasInOutput": "0.008382037743639658",
+          "net": "496.522483557315121707",
+          "costVsDirectBps": "10.05",
+          "platformGrossUsdtEq": "0.497027893488547308"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 2500,
+      "sizeUsdtEq": 500,
+      "amountIn": "500",
+      "grossOut": "0.839407103048967242",
+      "ticksCrossed": 1,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "0.839397712348967242",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.000419703551524483",
+          "gasInOutput": "0.00001410445",
+          "net": "0.838973295047442759",
+          "costVsDirectBps": "5.05",
+          "platformGrossUsdtEq": "0.249422771537906722"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.000839407103048967",
+          "gasInOutput": "0.00001410445",
+          "net": "0.838553591495918275",
+          "costVsDirectBps": "10.05",
+          "platformGrossUsdtEq": "0.498845543075814038"
+        }
+      ]
+    },
+    {
+      "dir": "BNB->USDT",
+      "poolFee": 2500,
+      "sizeUsdtEq": 1000,
+      "amountIn": "1.682699414077745426",
+      "grossOut": "992.669948997870394912",
+      "ticksCrossed": 2,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.005580735288451299",
+          "net": "992.664368262581943613",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.496334974498935197",
+          "gasInOutput": "0.008382037743639658",
+          "net": "992.165231985627820057",
+          "costVsDirectBps": "5.02",
+          "platformGrossUsdtEq": "0.496334974498935197"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.992669948997870394",
+          "gasInOutput": "0.008382037743639658",
+          "net": "991.66889701112888486",
+          "costVsDirectBps": "10.02",
+          "platformGrossUsdtEq": "0.992669948997870394"
+        }
+      ]
+    },
+    {
+      "dir": "USDT->BNB",
+      "poolFee": 2500,
+      "sizeUsdtEq": 1000,
+      "amountIn": "1000",
+      "grossOut": "1.676051232100920206",
+      "ticksCrossed": 2,
+      "status": "SIMULATED_ETH_CALL",
+      "variants": [
+        {
+          "variant": "DIRECT_PANCAKE_V3",
+          "fee": "0",
+          "gasInOutput": "0.0000093907",
+          "net": "1.676041841400920206",
+          "costVsDirectBps": "0",
+          "platformGrossUsdtEq": "0"
+        },
+        {
+          "variant": "V1_6_ADAPTER_5bps",
+          "fee": "0.00083802561605046",
+          "gasInOutput": "0.00001410445",
+          "net": "1.675199102034869746",
+          "costVsDirectBps": "5.02",
+          "platformGrossUsdtEq": "0.498024548555373104"
+        },
+        {
+          "variant": "V1_6_ADAPTER_10bps",
+          "fee": "0.00167605123210092",
+          "gasInOutput": "0.00001410445",
+          "net": "1.674361076418819286",
+          "costVsDirectBps": "10.02",
+          "platformGrossUsdtEq": "0.996049097110746208"
+        }
+      ]
+    }
+  ],
+  "rpcCalls": [
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_chainId",
+      "at": "2026-11-17T12:00:27.556Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_blockNumber",
+      "at": "2026-11-17T12:00:27.646Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "at": "2026-11-17T12:00:27.700Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed1.bnbchain.org",
+      "method": "eth_getBlockByNumber",
+      "at": "2026-11-17T12:00:27.748Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "at": "2026-11-17T12:00:27.855Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "at": "2026-11-17T12:00:27.912Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "at": "2026-11-17T12:00:27.935Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "at": "2026-11-17T12:00:27.956Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "at": "2026-11-17T12:00:28.000Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.024Z",
+      "to": "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.046Z",
+      "to": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "at": "2026-11-17T12:00:28.066Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.093Z",
+      "to": "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.222Z",
+      "to": "0x1401ff943D08a7E098328C1d3a9d388923B115D2",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_getCode",
+      "at": "2026-11-17T12:00:28.242Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_gasPrice",
+      "at": "2026-11-17T12:00:28.285Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_feeHistory",
+      "at": "2026-11-17T12:00:28.306Z",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.329Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.444Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.474Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.496Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.586Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.628Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.650Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.712Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.736Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.758Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.781Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.822Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.856Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.884Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.909Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:28.985Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:29.008Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:29.033Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:29.054Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:29.165Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    },
+    {
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "method": "eth_call",
+      "at": "2026-11-17T12:00:29.188Z",
+      "to": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "ok": true
+    }
+  ],
+  "rpcCallCount": 38,
+  "rpcFailures": 0
+}

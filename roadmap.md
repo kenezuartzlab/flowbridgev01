@@ -164,3 +164,8 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 ## BNB V1.6 (compiler hardening + validation)
 - [x] V1.6 candidate (V1.5 logic, solc 0.8.38/cancun), 42 local tests, Slither rerun + per-warning traces, read-only simulation + opcode probe, fresh full suite, report
 - [ ] Independent professional audit, owner fee/recipient/slippage decisions, deployment — blocked on owner authorization (HOLD)
+
+## BNB V1.7 economics
+- [x] Read-only economics sampler, provider matrix, owner sheet, report
+- [ ] 0x authenticated quotes — blocked: owner API key
+- [ ] Independent audit — blocked: owner engagement
