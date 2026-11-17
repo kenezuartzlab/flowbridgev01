@@ -1,0 +1,167 @@
+{
+  "generatedAt": "2026-11-17T23:37:24.276Z",
+  "zeroExKeyPresent": false,
+  "pancakeSource": "V1.7 evidence block 134115821",
+  "rows": [
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 5,
+      "pancakeFee": 500,
+      "pancakeGross": "5.000036108424772084",
+      "pancakeDirectNet": "4.994455373136320785",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 5,
+      "pancakeFee": 500,
+      "pancakeGross": "0.008405023948472906",
+      "pancakeDirectNet": "0.008395633248472906",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 25,
+      "pancakeFee": 500,
+      "pancakeGross": "25.000174414564751322",
+      "pancakeDirectNet": "24.994593679276300023",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 25,
+      "pancakeFee": 500,
+      "pancakeGross": "0.042025109447207874",
+      "pancakeDirectNet": "0.042015718747207874",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 100,
+      "pancakeFee": 500,
+      "pancakeGross": "100.000605744979351227",
+      "pancakeDirectNet": "99.995025009690899928",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 100,
+      "pancakeFee": 500,
+      "pancakeGross": "0.168100283361661297",
+      "pancakeDirectNet": "0.168090892661661297",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 500,
+      "pancakeFee": 500,
+      "pancakeGross": "500.000577718373602984",
+      "pancakeDirectNet": "499.994996983085151685",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 500,
+      "pancakeFee": 500,
+      "pancakeGross": "0.840497298774393949",
+      "pancakeDirectNet": "0.840487908074393949",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 1000,
+      "pancakeFee": 500,
+      "pancakeGross": "999.995027988022112249",
+      "pancakeDirectNet": "999.98944725273366095",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 1000,
+      "pancakeFee": 500,
+      "pancakeGross": "1.680984302577497503",
+      "pancakeDirectNet": "1.680974911877497503",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 5,
+      "pancakeFee": 2500,
+      "pancakeGross": "4.977766463368678189",
+      "pancakeDirectNet": "4.97218572808022689",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 5,
+      "pancakeFee": 2500,
+      "pancakeGross": "0.008408580617524611",
+      "pancakeDirectNet": "0.008399189917524611",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 25,
+      "pancakeFee": 2500,
+      "pancakeGross": "24.887097551846851289",
+      "pancakeDirectNet": "24.88151681655839999",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 25,
+      "pancakeFee": 2500,
+      "pancakeGross": "0.042039966996194524",
+      "pancakeDirectNet": "0.042030576296194524",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 100,
+      "pancakeFee": 2500,
+      "pancakeGross": "99.522377345314391504",
+      "pancakeDirectNet": "99.516796610025940205",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 100,
+      "pancakeFee": 2500,
+      "pancakeGross": "0.168115841218889567",
+      "pancakeDirectNet": "0.168106450518889567",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 500,
+      "pancakeFee": 2500,
+      "pancakeGross": "497.027893488547308673",
+      "pancakeDirectNet": "497.022312753258857374",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 500,
+      "pancakeFee": 2500,
+      "pancakeGross": "0.839407103048967242",
+      "pancakeDirectNet": "0.839397712348967242",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "BNB->USDT",
+      "sizeUsd": 1000,
+      "pancakeFee": 2500,
+      "pancakeGross": "992.669948997870394912",
+      "pancakeDirectNet": "992.664368262581943613",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    },
+    {
+      "dir": "USDT->BNB",
+      "sizeUsd": 1000,
+      "pancakeFee": 2500,
+      "pancakeGross": "1.676051232100920206",
+      "pancakeDirectNet": "1.676041841400920206",
+      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+    }
+  ]
+}

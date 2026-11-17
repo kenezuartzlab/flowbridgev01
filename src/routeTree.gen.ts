@@ -69,6 +69,7 @@ import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/a
 import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
+import { Route as ApiAdminBnb0xPriceRouteImport } from './routes/api/admin.bnb-0x-price'
 import { Route as ApiAdminIdentityRouteImport } from './routes/api/admin.identity'
 import { Route as ApiAdminLaunchPreparationRouteImport } from './routes/api/admin.launch-preparation'
 import { Route as ApiAdminMainnetPreflightRouteImport } from './routes/api/admin.mainnet-preflight'
@@ -441,6 +442,11 @@ const ApiAdminBannerStatsRoute = ApiAdminBannerStatsRouteImport.update({
 const ApiAdminBannerUploadRoute = ApiAdminBannerUploadRouteImport.update({
   id: '/api/admin/banner-upload',
   path: '/api/admin/banner-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminBnb0xPriceRoute = ApiAdminBnb0xPriceRouteImport.update({
+  id: '/api/admin/bnb-0x-price',
+  path: '/api/admin/bnb-0x-price',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminIdentityRoute = ApiAdminIdentityRouteImport.update({
@@ -849,6 +855,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/bnb-0x-price': typeof ApiAdminBnb0xPriceRoute
   '/api/admin/identity': typeof ApiAdminIdentityRoute
   '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -977,6 +984,7 @@ export interface FileRoutesByTo {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/bnb-0x-price': typeof ApiAdminBnb0xPriceRoute
   '/api/admin/identity': typeof ApiAdminIdentityRoute
   '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -1106,6 +1114,7 @@ export interface FileRoutesById {
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
+  '/api/admin/bnb-0x-price': typeof ApiAdminBnb0xPriceRoute
   '/api/admin/identity': typeof ApiAdminIdentityRoute
   '/api/admin/launch-preparation': typeof ApiAdminLaunchPreparationRoute
   '/api/admin/mainnet-preflight': typeof ApiAdminMainnetPreflightRoute
@@ -1236,6 +1245,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/bnb-0x-price'
     | '/api/admin/identity'
     | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
@@ -1364,6 +1374,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/bnb-0x-price'
     | '/api/admin/identity'
     | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
@@ -1492,6 +1503,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-readiness'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
+    | '/api/admin/bnb-0x-price'
     | '/api/admin/identity'
     | '/api/admin/launch-preparation'
     | '/api/admin/mainnet-preflight'
@@ -1621,6 +1633,7 @@ export interface RootRouteChildren {
   ApiAdminApplicationReadinessRoute: typeof ApiAdminApplicationReadinessRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
+  ApiAdminBnb0xPriceRoute: typeof ApiAdminBnb0xPriceRoute
   ApiAdminIdentityRoute: typeof ApiAdminIdentityRoute
   ApiAdminLaunchPreparationRoute: typeof ApiAdminLaunchPreparationRoute
   ApiAdminMainnetPreflightRoute: typeof ApiAdminMainnetPreflightRoute
@@ -2098,6 +2111,13 @@ declare module '@tanstack/react-router' {
       path: '/api/admin/banner-upload'
       fullPath: '/api/admin/banner-upload'
       preLoaderRoute: typeof ApiAdminBannerUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/bnb-0x-price': {
+      id: '/api/admin/bnb-0x-price'
+      path: '/api/admin/bnb-0x-price'
+      fullPath: '/api/admin/bnb-0x-price'
+      preLoaderRoute: typeof ApiAdminBnb0xPriceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/identity': {
@@ -2707,6 +2727,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminApplicationReadinessRoute: ApiAdminApplicationReadinessRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
+  ApiAdminBnb0xPriceRoute: ApiAdminBnb0xPriceRoute,
   ApiAdminIdentityRoute: ApiAdminIdentityRoute,
   ApiAdminLaunchPreparationRoute: ApiAdminLaunchPreparationRoute,
   ApiAdminMainnetPreflightRoute: ApiAdminMainnetPreflightRoute,
