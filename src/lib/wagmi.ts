@@ -1,4 +1,4 @@
-import { http, createConfig, createStorage } from 'wagmi';
+import { http, fallback, createConfig, createStorage } from 'wagmi';
 import { defineChain } from 'viem';
 import { injected, walletConnect } from 'wagmi/connectors';
 import { WALLETCONNECT_ENABLED } from '@/lib/wallet/walletConnectFlag';
@@ -87,12 +87,19 @@ export const bscTestnet = defineChain({
   testnet: true,
 });
 
+export const ETHEREUM_RPC_URLS = [
+  'https://ethereum-rpc.publicnode.com',
+  'https://eth.drpc.org',
+] as const satisfies readonly string[];
+
 export const ethereum = defineChain({
   id: 1,
   name: 'Ethereum',
   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://eth.llamarpc.com'] },
+    // eth.llamarpc.com returned persistent HTTP 525 (2026-11-16); keep healthy
+    // public endpoints first with automatic fallback.
+    default: { http: [...ETHEREUM_RPC_URLS] },
   },
   blockExplorers: {
     default: { name: 'Etherscan', url: 'https://etherscan.io' },
@@ -157,7 +164,7 @@ export const wagmiConfig = createConfig({
     [bscMainnet.id]: http(),
     [botTestnet.id]: http(),
     [bscTestnet.id]: http(),
-    [ethereum.id]: http(),
+    [ethereum.id]: fallback(ETHEREUM_RPC_URLS.map((u) => http(u))),
     [sepolia.id]: http(),
     [polygon.id]: http(),
   },
