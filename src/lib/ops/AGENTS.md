@@ -1,0 +1,4 @@
+# Ops rewards rules
+- Existing unsigned batches are selected and revalidated through immutableBatch.ts against fresh funded eligibility and live contract timing; reads never overwrite their fingerprint, window or allocation. Why: hourly preview fingerprints previously diverged from stored immutable records and hid expired windows.
+- Ops draft previews are funded-only via summarizeFundedDraft in rewardFundingPlan.ts over the settlement readiness, with any reconciliation-vs-funded difference shown as excludedUnfundedPoints. Why: unfunded ledger points must never appear as a publishable payout amount.
+- Reserved balances blocked by account reconciliation carry reconciliationBlocked through shared progression/presentation; Ops read-only POST queries use the bounded read helper. Why: reserved funding must not imply payout eligibility, and stalled checks must terminate without retrying writes.
