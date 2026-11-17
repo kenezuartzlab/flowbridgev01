@@ -156,3 +156,7 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Verified-source token review (USDT, WBNB candidate-eligible; XAUt blocked)
 - [x] Local adapter candidate + 25 adversarial tests + fence, owner decision sheet
 - [ ] HOLD: audit, owner fee/recipient/provider decision, funded rehearsal, provider access, legal, physical wallet
+
+## BNB V1.5 (security hardening)
+- [x] V1.5 candidate (fee-in-WBNB fix F-1), 35 adversarial/fuzz tests, Slither triage, live read-only simulation + gas estimate, report
+- [ ] HOLD: professional audit, compiler bump, owner fee/recipient/provider/slippage, rehearsal, legal, physical wallet

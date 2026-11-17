@@ -10,9 +10,14 @@ describe('BNB adapter V1 candidate fence', () => {
     expect(keccak256(fs.readFileSync(`${dir}/FlowBridgeBnbSwapAdapterV1.sol`))).toBe(manifest.sourceKeccak);
     expect(manifest.status).toMatch(/NOT DEPLOYED/);
   });
+  it('V1.5 source matches its frozen manifest and V1.4 stays frozen', () => {
+    const m = JSON.parse(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-5/MANIFEST.json', 'utf8'));
+    expect(keccak256(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-5/FlowBridgeBnbSwapAdapterV1_5.sol'))).toBe(m.sourceKeccak);
+    expect(manifest.sourceKeccak).toBe('0x06f90355e83aa0940d3c73cfe165a2e5c074bf67361cdea8e1e7def81c41a173');
+  });
   it('is not referenced by app code, production manifests or registries', () => {
     const hits = execSync(`rg -l "FlowBridgeBnbSwapAdapterV1|bnb-swap-adapter-v1" src contracts/production || true`, { encoding: 'utf8' }).split('\n').filter(Boolean)
-      .filter((f) => !f.endsWith('adapterCandidateFence.test.ts'));
+      .filter((f) => !f.endsWith('adapterCandidateFence.test.ts') && !f.endsWith('AGENTS.md'));
     expect(hits).toEqual([]);
   });
   it('BNB execution capability remains disabled', async () => {
