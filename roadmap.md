@@ -1,3 +1,8 @@
+# BNB RWA discovery gate — 2026-11-17, preview only
+- [x] Read-only issuer catalog, verified XAUt identity, fail-closed eligibility and development-preview-only Explore entry; no live opening.
+- [x] 2,547 tests, 312 real catalog checks, 3,786 fixed-dock and 560 placement checks PASS; automatic build OK. Report: docs/security/BNB_RWA_READINESS_GATE_20261117.md.
+- [ ] HOLD: legal/provider approval, per-token verification, route/fee authorization and separately authorized financial acceptance; no public opening.
+
 # Tron bridge removal and Ethereum status — preview only
 - [x] Remove Tron from shared bridge choices and block stale Tron selections before wallet prompts; retain historical tracking.
 - [x] Browser selector/direction checks, 34 bridge tests and automatic build passed; Ethereum configured RPC repeatedly returned HTTP 525 while an independent endpoint confirmed gateway code. Acceptance: docs/security/TRON_BRIDGE_DISABLED_20261116.md.

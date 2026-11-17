@@ -1,6 +1,14 @@
 @import "tailwindcss" source(none);
 @source "../src";
 
+/* RWA image-overlay roles are fixed for contrast in both page themes. */
+:root { --rwa-cover-ink: #ffffff; --rwa-cover-scrim: rgba(12, 15, 16, .90); }
+.rwa-cover { min-height:260px; color:var(--rwa-cover-ink); background:var(--rwa-cover-scrim); }
+.rwa-cover-copy { background:var(--rwa-cover-scrim); }
+.rwa-enter { animation:rwa-reveal 220ms ease-out; }
+@keyframes rwa-reveal { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .rwa-enter { animation:none; } }
+
 .banner-pagination { pointer-events:none; }
 .banner-dot { pointer-events:auto; background:transparent; color:var(--fb-carousel-ink); }
 .banner-dot:hover { background:transparent; }

@@ -60,6 +60,7 @@ import { Route as CampaignsIndexRouteImport } from './routes/campaigns/index'
 import { Route as CampaignsSlugRouteImport } from './routes/campaigns/$slug'
 import { Route as CampaignsMeRouteImport } from './routes/campaigns/me'
 import { Route as CampaignsPartnersRouteImport } from './routes/campaigns/partners'
+import { Route as CampaignsRwaRouteImport } from './routes/campaigns/rwa'
 import { Route as CampaignsStudioRouteImport } from './routes/campaigns/studio'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiAdminAdventureRouteImport } from './routes/api/admin.adventure'
@@ -391,6 +392,11 @@ const CampaignsMeRoute = CampaignsMeRouteImport.update({
 const CampaignsPartnersRoute = CampaignsPartnersRouteImport.update({
   id: '/campaigns/partners',
   path: '/campaigns/partners',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsRwaRoute = CampaignsRwaRouteImport.update({
+  id: '/campaigns/rwa',
+  path: '/campaigns/rwa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampaignsStudioRoute = CampaignsStudioRouteImport.update({
@@ -833,6 +839,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
   '/campaigns/partners': typeof CampaignsPartnersRoute
+  '/campaigns/rwa': typeof CampaignsRwaRoute
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -960,6 +967,7 @@ export interface FileRoutesByTo {
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
   '/campaigns/partners': typeof CampaignsPartnersRoute
+  '/campaigns/rwa': typeof CampaignsRwaRoute
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -1088,6 +1096,7 @@ export interface FileRoutesById {
   '/campaigns/$slug': typeof CampaignsSlugRoute
   '/campaigns/me': typeof CampaignsMeRoute
   '/campaigns/partners': typeof CampaignsPartnersRoute
+  '/campaigns/rwa': typeof CampaignsRwaRoute
   '/campaigns/studio': typeof CampaignsStudioRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -1217,6 +1226,7 @@ export interface FileRouteTypes {
     | '/campaigns/$slug'
     | '/campaigns/me'
     | '/campaigns/partners'
+    | '/campaigns/rwa'
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
@@ -1344,6 +1354,7 @@ export interface FileRouteTypes {
     | '/campaigns/$slug'
     | '/campaigns/me'
     | '/campaigns/partners'
+    | '/campaigns/rwa'
     | '/campaigns/studio'
     | '/campaigns'
     | '/.mcp/invoke-tool/$tool'
@@ -1471,6 +1482,7 @@ export interface FileRouteTypes {
     | '/campaigns/$slug'
     | '/campaigns/me'
     | '/campaigns/partners'
+    | '/campaigns/rwa'
     | '/campaigns/studio'
     | '/campaigns/'
     | '/.mcp/invoke-tool/$tool'
@@ -1599,6 +1611,7 @@ export interface RootRouteChildren {
   CampaignsSlugRoute: typeof CampaignsSlugRoute
   CampaignsMeRoute: typeof CampaignsMeRoute
   CampaignsPartnersRoute: typeof CampaignsPartnersRoute
+  CampaignsRwaRoute: typeof CampaignsRwaRoute
   CampaignsStudioRoute: typeof CampaignsStudioRoute
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -2022,6 +2035,13 @@ declare module '@tanstack/react-router' {
       path: '/campaigns/partners'
       fullPath: '/campaigns/partners'
       preLoaderRoute: typeof CampaignsPartnersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/rwa': {
+      id: '/campaigns/rwa'
+      path: '/campaigns/rwa'
+      fullPath: '/campaigns/rwa'
+      preLoaderRoute: typeof CampaignsRwaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/campaigns/studio': {
@@ -2677,6 +2697,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsSlugRoute: CampaignsSlugRoute,
   CampaignsMeRoute: CampaignsMeRoute,
   CampaignsPartnersRoute: CampaignsPartnersRoute,
+  CampaignsRwaRoute: CampaignsRwaRoute,
   CampaignsStudioRoute: CampaignsStudioRoute,
   CampaignsIndexRoute: CampaignsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,

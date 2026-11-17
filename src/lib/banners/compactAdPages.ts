@@ -20,6 +20,7 @@ export const COMPACT_AD_PAGES = [
   {id:'liquidity',label:'Liquidity overview',route:'/liquidity',eligible:true},
   {id:'ecosystem-ranking',label:'Ecosystem ranking',route:'/ecosystem-ranking',eligible:true},
   {id:'campaigns',label:'Campaign directory',route:'/campaigns',eligible:true},
+  {id:'rwa-research',label:'RWA research (release HOLD)',route:'/campaigns/rwa',eligible:false},
   {id:'campaign-detail',label:'Public campaign',route:'/campaigns/$slug',eligible:true},
   {id:'campaign-partners',label:'Campaign partners',route:'/campaigns/partners',eligible:true},
   {id:'partners',label:'Partners',route:'/partners',eligible:true},

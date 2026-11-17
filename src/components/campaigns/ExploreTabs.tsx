@@ -9,6 +9,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 
 export const EXPLORE_VIEWS = [
   { id: "campaigns", label: "Campaigns", to: "/campaigns" },
+  ...(import.meta.env.DEV ? [{ id: "rwa", label: "RWA Markets", to: "/campaigns/rwa" } as const] : []),
   { id: "partners", label: "Partners", to: "/campaigns/partners" },
   { id: "progress", label: "My progress", to: "/campaigns/me" },
 ] as const;

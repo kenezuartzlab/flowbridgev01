@@ -17,6 +17,7 @@ export function AppTopBar({
   actions,
   avatar,
   initial = "G",
+  networkBadge,
   onEyebrowClick,
 }: {
   eyebrow?: string;
@@ -24,6 +25,8 @@ export function AppTopBar({
   actions?: ReactNode;
   avatar?: string | null;
   initial?: string;
+  /** Product-scoped badge; omitted preserves the canonical BOT environment badge. */
+  networkBadge?: ReactNode;
   /** When provided the eyebrow becomes a button (used to cycle greetings). */
   onEyebrowClick?: () => void;
 }) {
@@ -63,7 +66,7 @@ export function AppTopBar({
           <p className="break-words text-[15px] font-black leading-tight tracking-normal sm:text-[17px]">
             {title}
           </p>
-          <div className="mt-1"><BotNetworkBadge /></div>
+          <div className="mt-1">{networkBadge ?? <BotNetworkBadge />}</div>
         </div>
 
         {shellMode === "desktop" && <PrimaryNav className="shrink-0" />}
