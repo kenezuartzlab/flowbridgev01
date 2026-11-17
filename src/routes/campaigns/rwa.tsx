@@ -9,9 +9,9 @@ export const Route = createFileRoute("/campaigns/rwa")({
   beforeLoad: () => { if (!discoveryPreviewAllowed(import.meta.env.DEV)) throw notFound(); },
   head: () => ({ meta: [
     { title: "RWA Markets Research — FlowBridge" },
-    { name: "description", content: "Read-only BNB gold and issuer-specific tokenized securities research. Trading, eligibility and release remain on HOLD." },
+    { name: "description", content: "Read-only XAUt / USDT exact-pool verification and archived two-way PancakeSwap V3 simulations. Trading, eligibility and release remain on HOLD." },
     { property: "og:title", content: "RWA Markets Research — FlowBridge" },
-    { property: "og:description", content: "Research existing XAUt / USDT DEX listing evidence. All execution, eligibility and provider gates remain closed." },
+    { property: "og:description", content: "Inspect verified BSC pool identity and archived XAUt / USDT quote simulations. All execution, eligibility and provider gates remain closed." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     { name: "robots", content: "noindex, nofollow" },
   ] }),

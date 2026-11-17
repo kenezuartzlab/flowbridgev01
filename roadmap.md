@@ -1,3 +1,9 @@
+# BNB RWA V1.1 exact-pool / two-way quote gate — preview only
+- [x] Two official-operator BSC endpoints matched fixed pool/code/tokens at block 134073409; 66 genuine read-only calls, 20 quoter probes, zero transactions; 28 synthetic gate tests separate from evidence.
+- [x] Five bounded two-way sizes, exact-output probes, archived-not-fresh preview evidence and proposed limits; no provider/health/fee authorization inferred.
+- [x] 2,586 tests; 288 quote-panel, 392 catalog, 3,786 dock and 560 placement checks PASS; automatic build OK; acceptance report records evidence and limitations.
+- [ ] HOLD: issuer/proxy/transfer restrictions, sustained liquidity and reorg monitoring, legal/provider permission, fee-preserving adapter review and owner fee approval, dependency/physical-wallet/hosted-release gates; no activation/publication.
+
 # BNB RWA discovery gate — 2026-11-17, preview only
 - [x] Scope correction: existing DEX-traded assets only, exact XAUt/USDT pair snapshot and seven independent readiness thresholds; unsupported research separated from browse.
 - [x] 2,558 tests, 392 real catalog checks, 3,786 fixed-dock and 560 placement checks PASS; automatic build OK. Updated report: docs/security/BNB_RWA_READINESS_GATE_20261117.md.

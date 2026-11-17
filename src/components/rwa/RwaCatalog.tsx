@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { REVIEWED_AT, ONDO_PROHIBITED, ONDO_RESTRICTED, sourceUrl, explorerUrl, availability, browseAssets, researchAssets, readiness, READINESS_CHECKS, type ReadinessCheck, type RwaEntry, type SourceId } from "@/lib/rwa/registry";
 import gold from "@/assets/rwa-gold.jpg";
+import { RwaQuoteReadiness } from "./RwaQuoteReadiness";
 
 function SourceLink({ id, children }: { id: SourceId; children: React.ReactNode }) {
   const url = sourceUrl(id);
@@ -36,7 +37,7 @@ function AssetCard({ asset }: { asset: RwaEntry }) {
         <div><dt className="font-semibold">Eligibility</dt><dd className="mt-1 text-muted">{asset.eligibilityMode === "issuer-terms" ? "Issuer purchase, custody and redemption restrictions apply. Metal tokens are not ordinary stocks; access is not approved here." : "Securities access is closed in every region on FlowBridge. Legal review and provider-specific eligibility verification, including KYC where required, are pending. Self-attestation or a wallet connection does not establish eligibility."}</dd></div>
         <div><dt className="font-semibold">Rights & risk</dt><dd className="mt-1 text-muted">No guaranteed investor or shareholder rights. Issuer, custody, collateral, redemption, pricing, smart-contract and counterparty risks apply. Review the exact product terms.</dd></div>
         {asset.contract && <div><dt className="font-semibold">BNB BEP20 contract</dt><dd className="mt-1 break-all font-mono text-muted">{asset.contract}</dd></div>}
-        {asset.dexListing && <div><dt className="font-semibold">Reported existing AMM pair</dt><dd className="mt-1 break-all font-mono text-muted">{asset.dexListing.pair}</dd><dd className="mt-1 text-muted">USDT contract: <span className="break-all font-mono">{asset.dexListing.quoteContract}</span></dd><dd className="mt-1 text-muted">DEX Screener snapshot only; factory, pool health and quote execution remain unverified. This is not a PancakeSwapX RFQ route.</dd></div>}
+        {asset.dexListing && <div><dt className="font-semibold">Reported existing AMM pair</dt><dd className="mt-1 break-all font-mono text-muted">{asset.dexListing.pair}</dd><dd className="mt-1 text-muted">USDT contract: <span className="break-all font-mono">{asset.dexListing.quoteContract}</span></dd><dd className="mt-1 text-muted">Listing provenance is DEX Screener. Separate archived chain verification and simulations appear below; current health and provider-authorized execution remain unverified. This is not a PancakeSwapX RFQ route.</dd></div>}
       </dl>
       <dl className="mt-4 space-y-2 border-t border-hairline pt-3">{READINESS_CHECKS.map(key => <div key={key} className="flex items-start justify-between gap-3"><dt className="text-muted">{labels[key]}</dt><dd className={checks[key] === "verified" ? "text-success" : "text-warning"}>{checks[key] === "verified" ? "Evidence reviewed" : "Pending"}</dd></div>)}</dl>
       <div className="mt-3 space-y-1">{asset.evidence.map(e => <div key={e.source}><p className="text-muted">{e.claim}</p><SourceLink id={e.source}>{e.source === "xautDex" ? "Third-party DEX listing evidence" : "Official evidence"}</SourceLink></div>)}</div>
@@ -68,6 +69,7 @@ export function RwaCatalog() {
         <p className="text-xs leading-relaxed text-muted">{category === "metals" ? "XAUt / USDT is the first existing DEX candidate. Listing evidence is not an executable quote; trading remains closed." : "No individual token meets our issuer-contract and exact DEX-listing evidence threshold yet. Tokenized exposure is not ownership of ordinary shares or ETF units."}</p>
         <div className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3">{browseAssets(category).map(asset => <AssetCard key={asset.id} asset={asset}/>)}</div>
         {!browseAssets(category).length && <p className="border-y border-hairline py-5 text-sm font-semibold">No supported {category === "etfs" ? "ETF" : "stock"} tokens yet</p>}
+        {category === "metals" && <RwaQuoteReadiness/>}
         <details className="border-t border-hairline pt-2"><summary className="min-h-11 cursor-pointer py-3 text-xs font-semibold">Not supported · Research only</summary>
           <ul className="space-y-3 text-xs leading-relaxed text-muted">{researchAssets(category).map(asset => <li key={asset.id}><span className="font-semibold text-foreground">{asset.name}</span> — {asset.id === "ondo-catalog" ? "PancakeSwapX documents BNB Ondo support via off-chain filler / intent orders. Per-token issuer proof, exact RFQ route, current quotes and region approval are not verified." : asset.id === "bstocks-catalog" ? "Priority for verification after XAUt. The supplied PancakeSwap bStocks article currently returns a 404; individual issuer contracts and DEX routes are not verified." : "No issuer-confirmed BNB contract plus exact current DEX listing admitted here."}</li>)}</ul>
           {category !== "metals" && <><SourceLink id="pancake">PancakeSwap RWA support</SourceLink><div><SourceLink id="pancakeFaq">PancakeSwapX intent / filler model</SourceLink></div></>}
@@ -83,7 +85,7 @@ export function RwaCatalog() {
         <p className="mt-3 text-xs text-muted">xStocks excludes the U.S. and U.S. persons; other provider geography restrictions apply. bStocks restrictions and exact issuing entity remain pending. No shared whitelist, location collection or eligibility certification is offered.</p>
         <SourceLink id="ondoEligibility">Current Ondo eligibility</SourceLink>
       </details>
-      <p className="mt-3 text-xs text-muted">No prices, balances or executable quotes are presented. No token issuance, pool creation or funding, issuer partnerships, minting or redemption marketplace. Source review is not an audit of collateral or investment advice.</p>
+      <p className="mt-3 text-xs text-muted">No balances or current executable offers are presented. Archived pool simulations do not approve access. No token issuance, pool creation or funding, issuer partnerships, minting or redemption marketplace. Source review is not an audit of collateral or investment advice.</p>
     </section>
   </div>;
 }

@@ -53,7 +53,7 @@ export function readiness(id: string, chainId: number): Readiness {
   return {
     "issuer-contract": asset?.identity === "issuer-contract-confirmed" && asset.contract ? "verified" : "pending",
     "dex-listing": asset?.dexListing ? "verified" : "pending",
-    "exact-route": "pending", // Pair is reported, but factory/code/pool tokens are not yet independently verified.
+    "exact-route": "pending", // V1.1 archived local chain evidence is separate; no current release/provider gate is promoted.
     "executable-quote": "pending", "liquidity-slippage-fees": "pending",
     "eligibility": "pending", "provider-permission": "pending",
   };

@@ -2,3 +2,4 @@
 - RWA discovery is development-preview-only, with noindex and no public sitemap entry until separately approved. Why: release HOLD must also protect direct URLs.
 - Eligibility is informational and always closed in V1; collect no location, wallet or identity data. Why: self-attestation cannot replace provider-specific verification.
 - Main browse requires issuer-confirmed identity plus exact recognized DEX listing evidence; all seven readiness checks are independent and execution stays disabled. Why: catalogs and scraped pools cannot authorize generic trading or substitute for executable quotes.
+- Exact-pool evidence is collected by a fixed-method, fixed-target local read-only script with pinned-block peer checks; the preview shows an archived snapshot, not live provider authorization. Why: Quoter eth_call must never become execution, fee permission or fabricated freshness.

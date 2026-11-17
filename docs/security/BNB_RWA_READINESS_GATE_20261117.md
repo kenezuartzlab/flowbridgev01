@@ -2,6 +2,9 @@
 
 **Date:** 17 November 2026 UTC. **Release: HOLD. Discovery preview only. Live trading: OFF.**
 
+## V1.1 follow-up (supersedes earlier missing exact-pool/simulation evidence only)
+See `BNB_RWA_V1_1_QUOTE_ACCEPTANCE_20261117.md` and its genuine RPC transcript. At BSC block **134073409**, exact factory/pool/token identity and both QuoterV2 directions were verified using fixed read-only calls; five 5/25/100/500/1000 USDT sizes and both exact-output probes succeeded. The preview displays **archived, not fresh** evidence. Historical local simulations do not promote the registry's current executable-provider, health, eligibility, fees or release gates; all remain closed. Earlier pending-chain statements below describe the prior V1 review, not the new dated observation. No transaction, API activation or publication occurred.
+
 ## Owner scope correction — existing DEX liquidity only (supersedes a29ba93d catalog breadth)
 FlowBridge is a prospective aggregator of **already traded on-chain RWA assets**, not a tokenization platform or primary issuer marketplace. No issuance, new tokenization, pool creation/funding, issuer partnership, minting or redemption marketplace is implemented or planned here. Issuer redemption disclosures describe external product risks only.
 
