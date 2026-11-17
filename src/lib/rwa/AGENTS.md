@@ -1,3 +1,4 @@
 - Keep the RWA registry browser-safe, static and separate from swap token lists; identity evidence never authorizes execution. Why: discovery must not enable BNB via BOT routing.
 - RWA discovery is development-preview-only, with noindex and no public sitemap entry until separately approved. Why: release HOLD must also protect direct URLs.
 - Eligibility is informational and always closed in V1; collect no location, wallet or identity data. Why: self-attestation cannot replace provider-specific verification.
+- Main browse requires issuer-confirmed identity plus exact recognized DEX listing evidence; all seven readiness checks are independent and execution stays disabled. Why: catalogs and scraped pools cannot authorize generic trading or substitute for executable quotes.

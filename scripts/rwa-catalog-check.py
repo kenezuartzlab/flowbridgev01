@@ -24,7 +24,7 @@ async def main():
                     await page.evaluate('(light)=>document.documentElement.classList.toggle("light",light)', theme == 'light')
                     await page.wait_for_timeout(350)
                     await page.screenshot(path=str(OUT/f'{width}-{theme}-{motion}-start.png'))
-                    assert await page.locator('[data-rwa-asset]').count() == 2; checks += 1
+                    assert await page.locator('[data-rwa-asset]').count() == 1; checks += 1
                     assert await page.locator('img[alt^="Illustrative gold"]').evaluate('e=>e.complete && e.naturalWidth>0'); checks += 1
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'); checks += 1
                     nav = page.get_by_role('navigation',name='Main navigation')
@@ -33,17 +33,21 @@ async def main():
                     await page.get_by_role('link',name='Contract on BscScan').wait_for()
                     assert await page.get_by_role('link',name='Contract on BscScan').get_attribute('href') == 'https://bscscan.com/token/0x21cAef8A43163Eea865baeE23b9C2E327696A3bf'; checks += 1
                     await page.screenshot(path=str(OUT/f'{width}-{theme}-{motion}-gold.png'))
-                    for label, count in (('Tokenized Stocks',3), ('ETFs',2)):
+                    assert 'Listed on DEX / FlowBridge trading pending' in await page.locator('[data-rwa-asset="xaut-bnb"]').inner_text(); checks += 1
+                    assert '0x83A0A8A723262651Ae9C54BBbA929F167443bC59' in await page.locator('[data-rwa-asset="xaut-bnb"]').inner_text(); checks += 1
+                    assert await page.locator('[data-rwa-asset="xaum-research"]').count() == 0; checks += 1
+                    for label, count in (('Tokenized Stocks',0), ('ETFs',0)):
                         await page.get_by_role('tab',name=label,exact=True).click()
                         assert await page.locator('[data-rwa-asset]').count() == count; checks += 1
-                        await page.locator('[data-rwa-asset="ondo-catalog"]').get_by_role('button',name='Identity, risks & sources').click()
-                        await page.locator('[data-rwa-asset="ondo-catalog"]').get_by_role('link',name='Issuer / product disclosures').wait_for()
-                        assert await page.locator('[data-rwa-asset="ondo-catalog"]').get_by_role('link',name='Issuer / product disclosures').get_attribute('href') == 'https://docs.ondo.finance/ondo-global-markets/eligibility'; checks += 1
+                        await page.get_by_text('Not supported · Research only',exact=True).click()
+                        assert await page.get_by_role('link',name='PancakeSwap RWA support',exact=True).get_attribute('href') == 'https://docs.pancakeswap.finance/trade/pancakeswap-x/rwas'; checks += 1
+                        assert 'Per-token issuer proof' in await page.get_by_test_id('rwa-catalog').inner_text(); checks += 1
                         assert await page.get_by_role('link',name='Contract on BscScan').count() == 0; checks += 1
                         assert await page.get_by_role('button', name='Buy',exact=True).count() == 0; checks += 1
                         assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'); checks += 1
                         await page.screenshot(path=str(OUT/f'{width}-{theme}-{motion}-{label.split()[0]}.png'))
                     if motion == 'reduce':
+                        await page.get_by_role('tab',name='Gold & Metals',exact=True).click()
                         assert await page.locator('[data-rwa-asset]').first.evaluate('e=>getComputedStyle(e).animationName') == 'none'; checks += 1
                     if baseline:
                         await page.evaluate('scrollTo(0,document.documentElement.scrollHeight)')

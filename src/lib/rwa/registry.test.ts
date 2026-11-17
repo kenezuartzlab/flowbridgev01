@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { RWA_REGISTRY, SOURCES, REVIEWED_AT, ONDO_PROHIBITED, ONDO_RESTRICTED, availability, explorerUrl, sourceUrl, discoveryPreviewAllowed, RWA_TRADING_ENABLED } from "./registry";
+import { RWA_REGISTRY, SOURCES, REVIEWED_AT, ONDO_PROHIBITED, ONDO_RESTRICTED, availability, explorerUrl, sourceUrl, discoveryPreviewAllowed, RWA_TRADING_ENABLED, browseAssets, researchAssets, readiness, passesReadiness, READINESS_CHECKS, type Readiness } from "./registry";
+import { requireFlowBridgeExecution, requireFlowBridgeV4Execution } from "../flowbridge/executionRegistry";
+import { getCuratedTokens } from "../swap/tokenRegistry";
 import { planExecution, NATIVE_V3_MULTI_CANDIDATE } from "../swap/executionCapability";
 import type { SwapStep } from "../swap/quoter";
 
@@ -11,7 +13,7 @@ describe("BNB RWA discovery gates", () => {
   });
   it("never authorizes preview assets for buy, claim or approval", () => {
     expect(RWA_TRADING_ENABLED).toBe(false);
-    for (const a of RWA_REGISTRY) expect(availability(a.id, 56)).toEqual({canBuy:false, canClaim:false, canApprove:false, state:a.kind === "securities-catalog" ? "legal-provider-hold" : "integration-hold"});
+    for (const a of RWA_REGISTRY) expect(availability(a.id, 56)).toEqual({canBuy:false, canClaim:false, canApprove:false, state:a.id === "xaut-bnb" ? "dex-listed-pending" : "research-only"});
   });
   it("rejects all unauthorized networks and unknown assets", () => {
     for (const chain of [1, 97, 677, 968, 0, -1, NaN]) {
@@ -65,5 +67,38 @@ describe("BNB RWA discovery gates", () => {
   it("does not open discovery in a published build", () => {
     expect(discoveryPreviewAllowed(false)).toBe(false);
     expect(discoveryPreviewAllowed(true)).toBe(true);
+  });
+  it("keeps unlisted issuer catalogs out of main browse", () => {
+    expect(browseAssets("metals").map(a => a.id)).toEqual(["xaut-bnb"]);
+    expect(browseAssets("stocks")).toEqual([]);
+    expect(browseAssets("etfs")).toEqual([]);
+    expect(researchAssets("metals").map(a => a.id)).toEqual(["xaum-research"]);
+    expect(researchAssets("stocks").map(a => a.id)).toEqual(["ondo-catalog", "xstocks-catalog", "bstocks-catalog"]);
+  });
+  it("records exact existing XAUt USDT AMM listing without claiming an RFQ route", () => {
+    expect(browseAssets("metals")[0]?.dexListing).toEqual({provider:"PancakeSwap V3",mode:"amm-v3",pair:"0x83A0A8A723262651Ae9C54BBbA929F167443bC59",quoteSymbol:"USDT",quoteContract:"0x55d398326f99059fF775485246999027B3197955",source:"xautDex",reviewedAt:REVIEWED_AT});
+  });
+  it("never converts scraped listing evidence into current quote or eligibility proof", () => {
+    expect(readiness("xaut-bnb",56)).toEqual({"issuer-contract":"verified", "dex-listing":"verified", "exact-route":"pending", "executable-quote":"pending", "liquidity-slippage-fees":"pending", "eligibility":"pending", "provider-permission":"pending"});
+    expect(passesReadiness(readiness("xaut-bnb",56))).toBe(false);
+    expect(passesReadiness(readiness("unknown",56))).toBe(false);
+    expect(passesReadiness(readiness("xaut-bnb",677))).toBe(false);
+  });
+  for (const key of READINESS_CHECKS) it(`requires ${key} independently before readiness can pass`, () => {
+    const verified = Object.fromEntries(READINESS_CHECKS.map(k => [k,"verified"])) as Readiness;
+    expect(passesReadiness(verified)).toBe(true);
+    expect(passesReadiness({...verified,[key]:"pending"})).toBe(false);
+    expect(passesReadiness({} as Readiness)).toBe(false);
+    expect(RWA_TRADING_ENABLED).toBe(false);
+  });
+  it("rejects generic BNB execution and never imports RWA identities into BOT swap lists", () => {
+    for(const chain of [56,97]) {
+      expect(() => requireFlowBridgeExecution(chain)).toThrow("not configured");
+      expect(() => requireFlowBridgeV4Execution(chain)).toThrow("not configured");
+    }
+    for(const mainnet of [true,false]) {
+      const tokens = getCuratedTokens(mainnet);
+      expect(tokens.some(t => t.address.toLowerCase() === "0x21caef8a43163eea865baee23b9c2e327696a3bf")).toBe(false);
+    }
   });
 });

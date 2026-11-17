@@ -1,7 +1,7 @@
 # BNB RWA discovery gate — 2026-11-17, preview only
-- [x] Read-only issuer catalog, verified XAUt identity, fail-closed eligibility and development-preview-only Explore entry; no live opening.
-- [x] 2,547 tests, 312 real catalog checks, 3,786 fixed-dock and 560 placement checks PASS; automatic build OK. Report: docs/security/BNB_RWA_READINESS_GATE_20261117.md.
-- [ ] HOLD: legal/provider approval, per-token verification, route/fee authorization and separately authorized financial acceptance; no public opening.
+- [x] Scope correction: existing DEX-traded assets only, exact XAUt/USDT pair snapshot and seven independent readiness thresholds; unsupported research separated from browse.
+- [x] 2,558 tests, 392 real catalog checks, 3,786 fixed-dock and 560 placement checks PASS; automatic build OK. Updated report: docs/security/BNB_RWA_READINESS_GATE_20261117.md.
+- [ ] HOLD: XAUt independent pool/quote/health verification, legal/provider permission, bStocks working first-party and Ondo per-asset issuer/DEX proof, separately authorized BNB security/financial acceptance; no public opening.
 
 # Tron bridge removal and Ethereum status — preview only
 - [x] Remove Tron from shared bridge choices and block stale Tron selections before wallet prompts; retain historical tracking.
