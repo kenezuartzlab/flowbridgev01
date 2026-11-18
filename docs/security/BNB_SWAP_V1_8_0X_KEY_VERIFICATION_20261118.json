@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-11-18T04:14:18.196Z",
+  "initialStatusCounts": {
+    "INDICATIVE_UNEXECUTABLE": 18,
+    "RATE_LIMITED": 2
+  },
+  "retries": [
+    {
+      "sizeUsd": 500,
+      "result": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "841350000000000000",
+        "buyAmount": "497346221689076868430",
+        "minBuyAmount": "492372759472186099746",
+        "fees": {
+          "zeroExFee": "747140042597511580",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "245092",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "12254600000000",
+        "blockNumber": 134245602,
+        "sources": [
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:14:16.046Z",
+        "latencyMs": 343
+      }
+    },
+    {
+      "sizeUsd": 500,
+      "result": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "500000000000000000000",
+        "buyAmount": "843191587920066259",
+        "minBuyAmount": "834759672040865596",
+        "fees": {
+          "zeroExFee": "750000000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "237447",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "11872350000000",
+        "blockNumber": 134245605,
+        "sources": [
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:14:17.194Z",
+        "latencyMs": 145
+      }
+    }
+  ],
+  "authenticatedProbe": {
+    "httpStatus": 200,
+    "cacheControl": "no-store",
+    "result": {
+      "provider": "0x",
+      "status": "INDICATIVE_UNEXECUTABLE",
+      "executable": false,
+      "direction": "USDT->WBNB",
+      "sellAmount": "5000000000000000000",
+      "buyAmount": "8427337878877632",
+      "minBuyAmount": "8343064500088856",
+      "fees": {
+        "zeroExFee": "7500000000000000",
+        "integratorFee": null,
+        "gasFee": null,
+        "feeToken": "sell"
+      },
+      "gasUnits": "191633",
+      "gasPriceWei": "50000000",
+      "totalNetworkFeeWei": "9581650000000",
+      "blockNumber": 134245557,
+      "sources": [
+        "Uniswap_V3"
+      ],
+      "observedAt": "2026-11-18T04:13:55.598Z",
+      "latencyMs": 453
+    }
+  },
+  "restrictions": "Read-only indicative prices; no execution or activation; historical Pancake data is not contemporaneous"
+}

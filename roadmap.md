@@ -167,5 +167,9 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 
 ## BNB V1.7 economics
 - [x] Read-only economics sampler, provider matrix, owner sheet, report
-- [ ] 0x authenticated quotes — blocked: owner API key
+- [x] 0x authenticated indicative prices — saved key verified on 2026-11-18; all ten size/direction combinations observed successfully, including two separately recorded retries; trading remains disabled.
 - [ ] Independent audit — blocked: owner engagement
+
+## BNB V1.8 saved-key verification (2026-11-18)
+- [x] Real read-only 0x comparison, authenticated admin endpoint HTTP 200/no-store/non-executable, and 101 targeted tests passed.
+- [ ] HOLD: contemporaneous provider economics, terms/legal, independent audit, owner fee/recipient/slippage authorization and physical-wallet acceptance; no activation or publication.

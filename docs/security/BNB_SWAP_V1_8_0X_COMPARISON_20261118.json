@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-17T23:37:24.276Z",
-  "zeroExKeyPresent": false,
+  "generatedAt": "2026-11-18T04:13:02.524Z",
+  "zeroExKeyPresent": true,
   "pancakeSource": "V1.7 evidence block 134115821",
   "rows": [
     {
@@ -9,7 +9,30 @@
       "pancakeFee": 500,
       "pancakeGross": "5.000036108424772084",
       "pancakeDirectNet": "4.994455373136320785",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "8413000000000000",
+        "buyAmount": "4977372848131145820",
+        "minBuyAmount": "4927599119649834362",
+        "fees": {
+          "zeroExFee": "7477275184974188",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "273758",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "13687900000000",
+        "blockNumber": 134245436,
+        "sources": [
+          "Thena_V3"
+        ],
+        "observedAt": "2026-11-18T04:13:01.074Z",
+        "latencyMs": 354
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -17,7 +40,30 @@
       "pancakeFee": 500,
       "pancakeGross": "0.008405023948472906",
       "pancakeDirectNet": "0.008395633248472906",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "5000000000000000000",
+        "buyAmount": "8426222761262197",
+        "minBuyAmount": "8341960533649575",
+        "fees": {
+          "zeroExFee": "7500000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "191663",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "9583150000000",
+        "blockNumber": 134245436,
+        "sources": [
+          "Uniswap_V3"
+        ],
+        "observedAt": "2026-11-18T04:13:01.211Z",
+        "latencyMs": 136
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -25,7 +71,30 @@
       "pancakeFee": 500,
       "pancakeGross": "25.000174414564751322",
       "pancakeDirectNet": "24.994593679276300023",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "42067000000000000",
+        "buyAmount": "24884914578241760480",
+        "minBuyAmount": "24636065432459342875",
+        "fees": {
+          "zeroExFee": "37383447037919522",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "274797",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "13739850000000",
+        "blockNumber": 134245437,
+        "sources": [
+          "Thena_V3"
+        ],
+        "observedAt": "2026-11-18T04:13:01.345Z",
+        "latencyMs": 134
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -33,7 +102,30 @@
       "pancakeFee": 500,
       "pancakeGross": "0.042025109447207874",
       "pancakeDirectNet": "0.042015718747207874",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "25000000000000000000",
+        "buyAmount": "42144846866440513",
+        "minBuyAmount": "41723398397776108",
+        "fees": {
+          "zeroExFee": "37500000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "347621",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "17381050000000",
+        "blockNumber": 134245437,
+        "sources": [
+          "IziSwap"
+        ],
+        "observedAt": "2026-11-18T04:13:01.482Z",
+        "latencyMs": 137
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -41,7 +133,30 @@
       "pancakeFee": 500,
       "pancakeGross": "100.000605744979351227",
       "pancakeDirectNet": "99.995025009690899928",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "168270000000000000",
+        "buyAmount": "99534934002419011200",
+        "minBuyAmount": "98539584662394821088",
+        "fees": {
+          "zeroExFee": "149526691040188808",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "245128",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "12256400000000",
+        "blockNumber": 134245437,
+        "sources": [
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:13:01.618Z",
+        "latencyMs": 136
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -49,7 +164,30 @@
       "pancakeFee": 500,
       "pancakeGross": "0.168100283361661297",
       "pancakeDirectNet": "0.168090892661661297",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "100000000000000000000",
+        "buyAmount": "168526780931163280",
+        "minBuyAmount": "166841513121851647",
+        "fees": {
+          "zeroExFee": "150000000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "237447",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "11872350000000",
+        "blockNumber": 134245438,
+        "sources": [
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:13:01.761Z",
+        "latencyMs": 143
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -57,7 +195,13 @@
       "pancakeFee": 500,
       "pancakeGross": "500.000577718373602984",
       "pancakeDirectNet": "499.994996983085151685",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "RATE_LIMITED",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "reason": "http-429"
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -65,7 +209,13 @@
       "pancakeFee": 500,
       "pancakeGross": "0.840497298774393949",
       "pancakeDirectNet": "0.840487908074393949",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "RATE_LIMITED",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "reason": "http-429"
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -73,7 +223,30 @@
       "pancakeFee": 500,
       "pancakeGross": "999.995027988022112249",
       "pancakeDirectNet": "999.98944725273366095",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "1682699000000000000",
+        "buyAmount": "995397336583701414410",
+        "minBuyAmount": "985443363217864400266",
+        "fees": {
+          "zeroExFee": "1495339013395645599",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "984416",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "49220800000000",
+        "blockNumber": 134245438,
+        "sources": [
+          "Kipseli"
+        ],
+        "observedAt": "2026-11-18T04:13:02.112Z",
+        "latencyMs": 146
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -81,7 +254,31 @@
       "pancakeFee": 500,
       "pancakeGross": "1.680984302577497503",
       "pancakeDirectNet": "1.680974911877497503",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "1000000000000000000000",
+        "buyAmount": "1685275491745239284",
+        "minBuyAmount": "1668422736827786891",
+        "fees": {
+          "zeroExFee": "1500000000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "481380",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "24069000000000",
+        "blockNumber": 134245438,
+        "sources": [
+          "IziSwap",
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:13:02.250Z",
+        "latencyMs": 138
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -89,7 +286,30 @@
       "pancakeFee": 2500,
       "pancakeGross": "4.977766463368678189",
       "pancakeDirectNet": "4.97218572808022689",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "8413000000000000",
+        "buyAmount": "4977372848131145820",
+        "minBuyAmount": "4927599119649834362",
+        "fees": {
+          "zeroExFee": "7477275184974188",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "273758",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "13687900000000",
+        "blockNumber": 134245436,
+        "sources": [
+          "Thena_V3"
+        ],
+        "observedAt": "2026-11-18T04:13:01.074Z",
+        "latencyMs": 354
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -97,7 +317,30 @@
       "pancakeFee": 2500,
       "pancakeGross": "0.008408580617524611",
       "pancakeDirectNet": "0.008399189917524611",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "5000000000000000000",
+        "buyAmount": "8426222761262197",
+        "minBuyAmount": "8341960533649575",
+        "fees": {
+          "zeroExFee": "7500000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "191663",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "9583150000000",
+        "blockNumber": 134245436,
+        "sources": [
+          "Uniswap_V3"
+        ],
+        "observedAt": "2026-11-18T04:13:01.211Z",
+        "latencyMs": 136
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -105,7 +348,30 @@
       "pancakeFee": 2500,
       "pancakeGross": "24.887097551846851289",
       "pancakeDirectNet": "24.88151681655839999",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "42067000000000000",
+        "buyAmount": "24884914578241760480",
+        "minBuyAmount": "24636065432459342875",
+        "fees": {
+          "zeroExFee": "37383447037919522",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "274797",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "13739850000000",
+        "blockNumber": 134245437,
+        "sources": [
+          "Thena_V3"
+        ],
+        "observedAt": "2026-11-18T04:13:01.345Z",
+        "latencyMs": 134
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -113,7 +379,30 @@
       "pancakeFee": 2500,
       "pancakeGross": "0.042039966996194524",
       "pancakeDirectNet": "0.042030576296194524",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "25000000000000000000",
+        "buyAmount": "42144846866440513",
+        "minBuyAmount": "41723398397776108",
+        "fees": {
+          "zeroExFee": "37500000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "347621",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "17381050000000",
+        "blockNumber": 134245437,
+        "sources": [
+          "IziSwap"
+        ],
+        "observedAt": "2026-11-18T04:13:01.482Z",
+        "latencyMs": 137
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -121,7 +410,30 @@
       "pancakeFee": 2500,
       "pancakeGross": "99.522377345314391504",
       "pancakeDirectNet": "99.516796610025940205",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "168270000000000000",
+        "buyAmount": "99534934002419011200",
+        "minBuyAmount": "98539584662394821088",
+        "fees": {
+          "zeroExFee": "149526691040188808",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "245128",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "12256400000000",
+        "blockNumber": 134245437,
+        "sources": [
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:13:01.618Z",
+        "latencyMs": 136
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -129,7 +441,30 @@
       "pancakeFee": 2500,
       "pancakeGross": "0.168115841218889567",
       "pancakeDirectNet": "0.168106450518889567",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "100000000000000000000",
+        "buyAmount": "168526780931163280",
+        "minBuyAmount": "166841513121851647",
+        "fees": {
+          "zeroExFee": "150000000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "237447",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "11872350000000",
+        "blockNumber": 134245438,
+        "sources": [
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:13:01.761Z",
+        "latencyMs": 143
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -137,7 +472,30 @@
       "pancakeFee": 2500,
       "pancakeGross": "497.027893488547308673",
       "pancakeDirectNet": "497.022312753258857374",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "841350000000000000",
+        "buyAmount": "497699661929806699250",
+        "minBuyAmount": "492722665310508632257",
+        "fees": {
+          "zeroExFee": "747670999393800760",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "984906",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "49245300000000",
+        "blockNumber": 134245439,
+        "sources": [
+          "Kipseli"
+        ],
+        "observedAt": "2026-11-18T04:13:02.387Z",
+        "latencyMs": 137
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -145,7 +503,31 @@
       "pancakeFee": 2500,
       "pancakeGross": "0.839407103048967242",
       "pancakeDirectNet": "0.839397712348967242",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "500000000000000000000",
+        "buyAmount": "842649085754123837",
+        "minBuyAmount": "834222594896582599",
+        "fees": {
+          "zeroExFee": "750000000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "481110",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "24055500000000",
+        "blockNumber": 134245439,
+        "sources": [
+          "IziSwap",
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:13:02.523Z",
+        "latencyMs": 136
+      }
     },
     {
       "dir": "BNB->USDT",
@@ -153,7 +535,30 @@
       "pancakeFee": 2500,
       "pancakeGross": "992.669948997870394912",
       "pancakeDirectNet": "992.664368262581943613",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "WBNB->USDT",
+        "sellAmount": "1682699000000000000",
+        "buyAmount": "995397336583701414410",
+        "minBuyAmount": "985443363217864400266",
+        "fees": {
+          "zeroExFee": "1495339013395645599",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "buy"
+        },
+        "gasUnits": "984416",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "49220800000000",
+        "blockNumber": 134245438,
+        "sources": [
+          "Kipseli"
+        ],
+        "observedAt": "2026-11-18T04:13:02.112Z",
+        "latencyMs": 146
+      }
     },
     {
       "dir": "USDT->BNB",
@@ -161,7 +566,31 @@
       "pancakeFee": 2500,
       "pancakeGross": "1.676051232100920206",
       "pancakeDirectNet": "1.676041841400920206",
-      "zeroEx": "BLOCKED_NO_CREDENTIALS"
+      "zeroEx": {
+        "provider": "0x",
+        "status": "INDICATIVE_UNEXECUTABLE",
+        "executable": false,
+        "direction": "USDT->WBNB",
+        "sellAmount": "1000000000000000000000",
+        "buyAmount": "1685275491745239284",
+        "minBuyAmount": "1668422736827786891",
+        "fees": {
+          "zeroExFee": "1500000000000000000",
+          "integratorFee": null,
+          "gasFee": null,
+          "feeToken": "sell"
+        },
+        "gasUnits": "481380",
+        "gasPriceWei": "50000000",
+        "totalNetworkFeeWei": "24069000000000",
+        "blockNumber": 134245438,
+        "sources": [
+          "IziSwap",
+          "LunarBase"
+        ],
+        "observedAt": "2026-11-18T04:13:02.250Z",
+        "latencyMs": 138
+      }
     }
   ]
 }

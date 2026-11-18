@@ -3,8 +3,13 @@
 Status: **PREVIEW ONLY · HOLD**. Not an independent audit. No deploy, signing, swap, publish, fee, fee recipient, DB or rewards change. RWA BLOCKED. BOT Router V4 untouched. V1.6 candidate frozen (6 Slither HIGH triaged false-positive but still open for auditor), 9 dependency advisories open.
 
 ## Key status
-- `ZEROX_API_KEY`: **ABSENT** (project secrets list checked; value never read or shown). All 0x results = `KEY_MISSING` / `BLOCKED_NO_CREDENTIALS`.
-- **No real 0x quote was obtained. Every 0x number in tests is a mock fixture.**
+- Initial V1.8 run: key absent; all provider rows blocked. This historical outcome is superseded by the follow-up below, not by mock data.
+- **2026-11-18 saved-key follow-up: SET**, confirmed through the secret-name listing and successful real provider responses. Value never displayed or recorded; used only by existing server transport.
+- Comparison collector: 20 rows, **18 indicative-success rows (including cached reuse) and 2 provider HTTP 429 rows**. The two $500 directions subsequently returned real indicative prices in separately recorded retries. All ten size/direction combinations have successful observations; row count is not a count of independent provider requests.
+- Authenticated admin endpoint verified with the requesting user's session and canonical bound-wallet context: HTTP 200, `cache-control: no-store`, `INDICATIVE_UNEXECUTABLE`, `executable: false`. No wallet signing or transaction occurred.
+- Evidence: `BNB_SWAP_V1_8_0X_COMPARISON_20261118.json` and `BNB_SWAP_V1_8_0X_KEY_VERIFICATION_20261118.json`. Real 0x blocks started at 134245436; authenticated probe block 134245557. Test fixtures remain synthetic and separate.
+- Observed USDT-selling responses charge **0.15% in sell-token USDT** (e.g. 0.0075 USDT for 5 USDT); WBNB-selling responses report a buy-token USDT fee consistent with 15 bps on output before that fee. This is evidence for these requests, not a contractual fee guarantee or approval of a FlowBridge fee. Integrator fee was null.
+- Fresh verification: `bunx vitest run src/lib/bnb/zeroExPrice.test.ts src/lib/bnb/quoteAdapter.test.ts src/lib/bnb/routeEconomics.test.ts`: **101/101 tests, 3/3 files**. Full suite and layout checks below are the earlier V1.8 results, not rerun in this key-only follow-up. No application code or screen changed.
 
 ## What was built
 | File | Role |
@@ -26,6 +31,8 @@ Response rules (fail closed): `liquidityAvailable` must be true; chainId if pres
 - Dock/nav/ad: **3,786 assertions PASS**. No UI changed.
 
 ## Comparison (Pancake from V1.7 read-only evidence, block 134115821, 2026-11-17 12:00:26 UTC; not re-sampled)
+The following table records the initial no-key run. Current real 0x results are in the follow-up JSON evidence. Pancake data is historical and 0x data is from November 18: **do not rank providers or infer revenue superiority from these non-contemporaneous observations**. WBNB quotes also exclude native wrapping/unwrapping overhead; no native execution is verified by this key check.
+
 | Dir | $ | 0.05% net | 0.25% net | 0x |
 |---|---|---|---|---|
 | BNB→USDT | 5 | 4.99446 USDT | 4.97219 | BLOCKED_NO_CREDENTIALS |
@@ -43,4 +50,4 @@ All 20 rows in the JSON. Net = gross minus gas once. Latency/block disparity for
 Sources: docs.0x.org supported-chains, allowanceholder-getprice, core-concepts/contracts, monetize guide; 0x.org/pricing; help.0x.org account tiers.
 
 ## Remaining gates
-Real 0x data; whether 0x fee applies to BNB/USDT; 0x terms/legal; independent audit of V1.6 or 0x integration; fee rate + recipient; slippage policy; phone-wallet signing; cross-isolate rate limit if ever public; dependency advisories; RWA (XAUt freeze/burn/upgrade) BLOCKED.
+Contemporaneous Pancake/0x net economics and native overhead; contractual 0x fee/terms/legal review (15 bps observed, not guaranteed); independent audit of V1.6 or 0x integration; fee rate + recipient; slippage policy; phone-wallet signing; cross-isolate rate limit if ever public; dependency advisories; RWA (XAUt freeze/burn/upgrade) BLOCKED. Key access is verified; no trading readiness, activation, publication or financial authority follows from it.
