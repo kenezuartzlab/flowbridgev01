@@ -1,0 +1,18 @@
+import { it,expect } from 'vitest';
+import { parseZeroExPrice,ZeroExGuard,type ZeroExRequest } from './zeroExPrice';
+import { fetchZeroExPrice } from './zeroExPrice.server';
+import { BNB_ASSETS } from './quoteAdapter';
+const req:ZeroExRequest={direction:'USDT->WBNB',sellAmount:'5000000000000000000'};
+const body=()=>({liquidityAvailable:true,blockNumber:'100',buyToken:BNB_ASSETS.WBNB.address,sellToken:BNB_ASSETS.USDT.address,sellAmount:req.sellAmount,buyAmount:'8000000000000000',minBuyAmount:'7900000000000000',gas:'200000',gasPrice:'50000000',totalNetworkFee:'9000000000000',fees:{zeroExFee:{amount:'7500000000000000',token:BNB_ASSETS.USDT.address},integratorFee:null,gasFee:null},issues:{simulationIncomplete:false}});
+const ctx={now:1000,observedAt:1000,latencyMs:10,latestBlock:100};
+it('uses actual network fee not gas limit times price twice',()=>{const r=parseZeroExPrice(req,body(),ctx);expect(r.status).toBe('INDICATIVE_UNEXECUTABLE');expect(r.totalNetworkFeeWei).toBe('9000000000000');expect(r.feeSemantics).toBe('UNVERIFIED');});
+it('future block is stale',()=>expect(parseZeroExPrice(req,{...body(),blockNumber:'103'},ctx).status).toBe('STALE'));
+it('future observation is stale',()=>expect(parseZeroExPrice(req,body(),{...ctx,observedAt:1001}).status).toBe('STALE'));
+it.each([null,[],undefined])('missing/invalid fee structure rejects %j',fees=>expect(parseZeroExPrice(req,{...body(),fees},ctx).status).toBe('MALFORMED'));
+it('additional fee categories fail closed',()=>expect(parseZeroExPrice(req,{...body(),fees:{...body().fees,newFee:{amount:'1'}}},ctx).status).toBe('MALFORMED'));
+it('multi integrator fee bypass fails closed',()=>expect(parseZeroExPrice(req,{...body(),fees:{...body().fees,integratorFees:[{amount:'1'}]}},ctx).status).toBe('MALFORMED'));
+it('unparseable network fee fails closed',()=>expect(parseZeroExPrice(req,{...body(),totalNetworkFee:'oops'},ctx).status).toBe('MALFORMED'));
+it('cache cannot revive stale observations via fresh insert time',()=>{const g=new ZeroExGuard();g.store(req,parseZeroExPrice(req,body(),ctx),40_000);expect(g.cached(req,40_001)).toBeNull();});
+it('server rejects RWA request before any network call',async()=>{let calls=0;const r=await fetchZeroExPrice({direction:'XAUt->USDT' as ZeroExRequest['direction'],sellAmount:'1'},{caller:'test',apiKey:'fixture',fetchImpl:async()=>{calls++;return new Response();}});expect(r.status).toBe('BLOCKED_REQUEST');expect(calls).toBe(0);});
+it('latest-block change invalidates cached observation',async()=>{const guard=new ZeroExGuard();guard.store(req,parseZeroExPrice(req,body(),ctx),1000);let calls=0;const r=await fetchZeroExPrice(req,{caller:'test',apiKey:'fixture',guard,now:()=>1001,latestBlock:150,fetchImpl:async()=>{calls++;return Response.json(body());}});expect(calls).toBe(1);expect(r.status).toBe('STALE');});
+it('streaming response size is bounded before full buffering',async()=>{const r=await fetchZeroExPrice(req,{caller:'test',apiKey:'fixture',guard:new ZeroExGuard(),fetchImpl:async()=>new Response('x'.repeat(200001),{headers:{'content-type':'application/json'}})});expect(r.status).toBe('MALFORMED');expect(r.reason).toBe('size');});

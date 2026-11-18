@@ -1,4 +1,9 @@
 # Compact Swap chain selector — preview only
+## BNB V1.9 contemporaneous comparison (preview only)
+- [x] Fresh bounded authenticated 0x/Pancake sampler, integer fee/gas ranking safeguards; ten successes, no eligible fee-verified winner.
+- [x] Evidence/report, final 2865 tests, 640 selector and 3786 nav/ad assertions PASS; no financial actions or publication.
+- [ ] HOLD: independent audit, contractual fee semantics/terms/legal, owner fee/recipient/slippage, physical wallets and hosted release.
+
 - [x] Inline picker, isolated BNB unavailable view and fresh BOT remount; preserve original vertical geometry.
 - [x] 640 browser checks / 20 width-theme-motion cases and 2,590 full tests passed before V1.2; exact-heading check and final report follow below.
 - [ ] HOLD: physical-wallet rejection checks and inherited financial/security/publication gates; no activation.

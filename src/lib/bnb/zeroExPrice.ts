@@ -29,6 +29,7 @@ export interface ZeroExPublicResult {
   provider: '0x'; status: ZeroExStatus; executable: false; direction?: ZeroExDirection;
   sellAmount?: string; buyAmount?: string; minBuyAmount?: string;
   fees?: { zeroExFee: string | null; integratorFee: string | null; gasFee: string | null; feeToken: 'buy' | 'sell' | null };
+  feeSemantics?: 'UNVERIFIED'; simulationIncomplete?: boolean;
   gasUnits?: string; gasPriceWei?: string; totalNetworkFeeWei?: string; blockNumber?: number;
   sources?: string[]; observedAt?: string; latencyMs?: number; reason?: string;
 }
@@ -87,7 +88,8 @@ function feeAmount(f: unknown, buy: string, sell: string): { amount: string | nu
 
 /**
  * Strictly validate a /price body against the exact request and project it onto a public, non-executable DTO.
- * Fees are reported once each; gas is reported once (as gas units * gasPrice) and never also folded into buyAmount.
+ * Fees are reported, never deducted from buyAmount here (net semantics unverified).
+ * Current schema: totalNetworkFee may be below gas limit * gasPrice; use it once when supplied.
  */
 export function parseZeroExPrice(req: ZeroExRequest, body: unknown, ctx: { now: number; latestBlock?: number; observedAt: number; latencyMs: number }): ZeroExPublicResult {
   const dir = req.direction; const d = ZEROX_DIRECTIONS[dir];
@@ -103,24 +105,28 @@ export function parseZeroExPrice(req: ZeroExRequest, body: unknown, ctx: { now: 
   const min = uint(b.minBuyAmount); if (min === null || min > buy) return fail('MALFORMED', 'minBuyAmount', dir);
   const gas = uint(b.gas); const gp = uint(b.gasPrice); if (gas === null || gp === null || gas > 10_000_000n) return fail('MALFORMED', 'gas', dir);
   const tnf = uint(b.totalNetworkFee, true);
-  if (tnf !== null && tnf !== gas * gp) return fail('MALFORMED', 'gas-double-count', dir);
+  if (b.totalNetworkFee != null && tnf === null) return fail('MALFORMED', 'network-fee', dir);
+  if (tnf !== null && (tnf === 0n || tnf > gas * gp)) return fail('MALFORMED', 'gas-double-count', dir);
   const blockNumber = typeof b.blockNumber === 'string' && /^\d{1,12}$/.test(b.blockNumber) ? Number(b.blockNumber) : NaN;
   if (!Number.isFinite(blockNumber)) return fail('MALFORMED', 'blockNumber', dir);
-  if (ctx.now - ctx.observedAt > ZEROX_MAX_AGE_MS) return fail('STALE', 'age', dir);
+  if (!Number.isFinite(ctx.now) || !Number.isFinite(ctx.observedAt) || ctx.now < ctx.observedAt || ctx.latencyMs < 0 || ctx.now - ctx.observedAt > ZEROX_MAX_AGE_MS) return fail('STALE', 'age', dir);
+  if (ctx.latestBlock !== undefined && blockNumber > ctx.latestBlock + 2) return fail('STALE', 'future-block', dir);
   if (ctx.latestBlock !== undefined && ctx.latestBlock - blockNumber > ZEROX_MAX_BLOCK_LAG) return fail('STALE', 'block-lag', dir);
-  const fees = (b.fees ?? {}) as Record<string, unknown>;
-  if (typeof fees !== 'object') return fail('MALFORMED', 'fees', dir);
+  const fees = b.fees as Record<string, unknown>;
+  if (!fees || typeof fees !== 'object' || Array.isArray(fees)) return fail('MALFORMED', 'fees', dir);
+  if (Object.keys(fees).some(k=>!['zeroExFee','integratorFee','integratorFees','gasFee'].includes(k)) || (fees.integratorFees != null && (!Array.isArray(fees.integratorFees) || fees.integratorFees.length > 0))) return fail('MALFORMED','unexpected-fees',dir);
   const zx = feeAmount(fees.zeroExFee, buyT, sellT); const ig = feeAmount(fees.integratorFee, buyT, sellT); const gf = feeAmount(fees.gasFee, buyT, sellT);
   if (zx === 'bad' || ig === 'bad' || gf === 'bad') return fail('MALFORMED', 'fee-shape', dir);
   if (ig.amount !== null && ig.amount !== '0') return fail('MALFORMED', 'unexpected-integrator-fee', dir); // none configured
-  for (const f of [zx, gf]) if (f.amount !== null && f.token === 'buy' && BigInt(f.amount) >= buy) return fail('MALFORMED', 'fee-exceeds-output', dir);
+  for (const f of [zx, gf]) if (f.amount !== null && ((f.token === 'buy' && BigInt(f.amount) >= buy) || (f.token === 'sell' && BigInt(f.amount) >= sell))) return fail('MALFORMED', 'fee-exceeds-output', dir);
   const fills = ((b.route as Record<string, unknown> | undefined)?.fills ?? []) as unknown[];
   const sources = Array.isArray(fills) ? [...new Set(fills.map((f) => String((f as Record<string, unknown>)?.source ?? '')).filter((s) => /^[\w .-]{1,40}$/.test(s)))].slice(0, 10) : [];
   return {
     provider: '0x', status: 'INDICATIVE_UNEXECUTABLE', executable: false, direction: dir,
     sellAmount: sell.toString(), buyAmount: buy.toString(), minBuyAmount: min.toString(),
     fees: { zeroExFee: zx.amount, integratorFee: ig.amount, gasFee: gf.amount, feeToken: zx.token ?? gf.token },
-    gasUnits: gas.toString(), gasPriceWei: gp.toString(), totalNetworkFeeWei: (gas * gp).toString(), blockNumber, sources,
+    feeSemantics: 'UNVERIFIED', simulationIncomplete: (b.issues as Record<string,unknown> | undefined)?.simulationIncomplete !== false,
+    gasUnits: gas.toString(), gasPriceWei: gp.toString(), totalNetworkFeeWei: (tnf ?? gas * gp).toString(), blockNumber, sources,
     observedAt: new Date(ctx.observedAt).toISOString(), latencyMs: ctx.latencyMs,
   };
 }
@@ -132,8 +138,8 @@ export class ZeroExGuard {
   inFlight = 0;
   constructor(readonly maxPerMinutePerCaller = 12, readonly maxPerMinuteGlobal = 30, readonly maxInFlight = 2) {}
   key(r: ZeroExRequest) { return `${r.direction}:${r.sellAmount}`; }
-  cached(r: ZeroExRequest, now: number) { const c = this.cache.get(this.key(r)); if (c && now - c.at < ZEROX_CACHE_TTL_MS) return c.v; if (c) this.cache.delete(this.key(r)); return null; }
-  store(r: ZeroExRequest, v: ZeroExPublicResult, now: number) { if (v.status === 'INDICATIVE_UNEXECUTABLE') { this.cache.set(this.key(r), { at: now, v }); if (this.cache.size > 50) this.cache.delete(this.cache.keys().next().value!); } }
+  cached(r: ZeroExRequest, now: number) { const c = this.cache.get(this.key(r)); const observed=Date.parse(c?.v.observedAt??''); if (c && now>=c.at && now-c.at<ZEROX_CACHE_TTL_MS && Number.isFinite(observed) && now>=observed && now-observed<=ZEROX_MAX_AGE_MS) return c.v; if (c) this.cache.delete(this.key(r)); return null; }
+  store(r: ZeroExRequest, v: ZeroExPublicResult, now: number) { if (v.status === 'INDICATIVE_UNEXECUTABLE') { this.cache.set(this.key(r), { at: now, v }); const oldest=this.cache.keys().next().value; if (this.cache.size > 50 && oldest !== undefined) this.cache.delete(oldest); } }
   invalidate() { this.cache.clear(); }
   allow(caller: string, now: number): boolean {
     const take = (k: string, max: number) => { const w = (this.hits.get(k) ?? []).filter((t) => now - t < 60_000); if (w.length >= max) { this.hits.set(k, w); return false; } return true; };

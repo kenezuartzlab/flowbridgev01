@@ -1,0 +1,309 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/dev-server[39m
+
+ [32m✓[39m src/lib/rewards/flowPointsV2Identity.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 565[2mms[22m[39m
+     [33m[2m✓[22m[39m fails closed without a verified activity id [33m 553[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2Authorization.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 173[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/signInVerification.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 312[2mms[22m[39m
+ [32m✓[39m src/lib/bnb/adapterCandidateFence.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 624[2mms[22m[39m
+     [33m[2m✓[22m[39m is not referenced by app code, production manifests or registries [33m 374[2mms[22m[39m
+ [32m✓[39m src/lib/activity/verifySwapRoute.integration.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 3101[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/flowDeploymentPlan.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 2474[2mms[22m[39m
+     [33m[2m✓[22m[39m mints exactly the supply to the treasury and binds token/owner/signer [33m 2341[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publisherRecoveryApi.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 794[2mms[22m[39m
+     [33m[2m✓[22m[39m missing or expired reviewed batches never acquire a publication lock [33m 594[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2Scale.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 820[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/ownershipVerification.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1995[2mms[22m[39m
+     [33m[2m✓[22m[39m accepts real standard/TokenPocket signatures without registration: compact=false [33m 1786[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publisherAuthorization.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 531[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects signed-out callers before database access [33m 385[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/requestLimit.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 489[2mms[22m[39m
+     [33m[2m✓[22m[39m fails closed when unconfigured or the shared limit cannot be checked [33m 462[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/signupBonusPolicy.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 88[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/mainnetReleaseFreeze.test.ts [2m([22m[2m36 tests[22m[2m)[22m[33m 389[2mms[22m[39m
+ [32m✓[39m src/lib/adventure/api.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 317[2mms[22m[39m
+ [32m✓[39m src/lib/ai/federation/federation.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 5145[2mms[22m[39m
+     [33m[2m✓[22m[39m degrades honestly on timeout and keeps the breaker bounded [33m 5007[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/approvalQueue.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/lib/ai/federation/insightReconciler.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/ownershipClient.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 755[2mms[22m[39m
+     [33m[2m✓[22m[39m supports TokenPocket without account registration or transactions [33m 505[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/settlementSafety.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 336[2mms[22m[39m
+ [32m✓[39m src/lib/growth/growth.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 256[2mms[22m[39m
+ [32m✓[39m src/lib/rwa/quoteReadiness.test.ts [2m([22m[2m28 tests[22m[2m)[22m[32m 242[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/peerAvailability.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2Identity.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 237[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/flowPointsV2.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m src/lib/multisend/planner.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/lib/ai/agentInterop.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 154[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/adapterDispatch.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+ [32m✓[39m src/lib/banners/compactAdPages.test.ts [2m([22m[2m49 tests[22m[2m)[22m[32m 159[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/budgetControls.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 126[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/historicalRoundIndex.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 165[2mms[22m[39m
+ [32m✓[39m src/lib/proposalPolicy.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 399[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects oversized UTF-8 request payloads [33m 340[2mms[22m[39m
+ [32m✓[39m src/lib/siwe.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 426[2mms[22m[39m
+     [33m[2m✓[22m[39m exchanges the single-use token once without a redundant setSession [33m 390[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/identityAdminAccess.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 276[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publicRoundsGate.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 230[2mms[22m[39m
+ [32m✓[39m src/lib/securityHeaders.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 152[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/wallet.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+[90mstdout[2m | contracts/production/rewards-vault-v2/test/vault.evm.test.ts[2m > [22m[2mVault V2 executed Solidity[2m > [22m[2mfrozen runtime stays below EIP-170 and deployment fits current BOT block limit
+[22m[39mDeployment execution / intrinsic-inclusive gas 1217650 1370886
+
+ [32m✓[39m src/lib/flowbridge/routerV4AbiParity.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 101[2mms[22m[39m
+ [32m✓[39m src/lib/walletChallenge.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 120[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/scheduleRenewal.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 203[2mms[22m[39m
+ [32m✓[39m src/lib/partner/partnerAuthority.test.ts [2m([22m[2m26 tests[22m[2m)[22m[33m 327[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publicationRecovery.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 67[2mms[22m[39m
+ [32m✓[39m src/lib/activity/swapActivityVerifier.test.ts [2m([22m[2m36 tests[22m[2m)[22m[33m 341[2mms[22m[39m
+ [32m✓[39m src/lib/securityWrites.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 274[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/trackingState.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/frozenBatchQueue.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 163[2mms[22m[39m
+ [32m✓[39m src/lib/ai/federation/deliberation.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2Settings.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/lib/admin/opsRead.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 156[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/bridgeDelivery.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/v302bP2aCanaryDecision.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 123[2mms[22m[39m
+ [32m✓[39m contracts/candidates/bnb-swap-adapter-v1/test/adapter.evm.test.ts [2m([22m[2m25 tests[22m[2m)[22m[33m 3186[2mms[22m[39m
+[90mstdout[2m | contracts/production/rewards-vault-v2/test/vault.evm.test.ts[2m > [22m[2mVault V2 executed Solidity[2m > [22m[2m100 recipients executes within 8 million gas
+[22m[39m100 recipient execution / intrinsic-inclusive gas 5659147 5714911
+
+ [32m✓[39m src/lib/staking/flowStakingLock.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/mainnetClaimRounds.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 72[2mms[22m[39m
+ [32m✓[39m src/lib/campaign/campaignEngine.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m contracts/production/rewards-vault-v2/test/vault.evm.test.ts [2m([22m[2m25 tests[22m[2m)[22m[33m 4674[2mms[22m[39m
+     [33m[2m✓[22m[39m frozen runtime stays below EIP-170 and deployment fits current BOT block limit [33m 376[2mms[22m[39m
+     [33m[2m✓[22m[39m exact prefunding allows credit and claim leaving zero backing and liabilities [33m 411[2mms[22m[39m
+     [33m[2m✓[22m[39m 100 recipients executes within 8 million gas [33m 1165[2mms[22m[39m
+     [33m[2m✓[22m[39m property: liabilities equal sum of accumulated credits less claims [33m 501[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/autoApproval.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/lib/partner/partnerRevisions.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/privacyEndpoints.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 165[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/rewardStateTruth.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 48[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2PublisherRecovery.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 215[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/approvedSubsetSettlement.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/rewardsSummary.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 90[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/mainnetPrerequisites.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 54[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2Ingestion.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/lib/ai/flowAi.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/lib/banners/dockedAdPolicy.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 79[2mms[22m[39m
+ [32m✓[39m src/lib/ai/scenario/scenarioEngine.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 57[2mms[22m[39m
+ [32m✓[39m src/lib/activity/activityVerifier.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 151[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/fundingPreparationGate.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/lib/ai/walletStateAnswers.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m src/lib/bnb/zeroExPrice.test.ts [2m([22m[2m49 tests[22m[2m)[22m[32m 199[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageGFundingReadiness.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 80[2mms[22m[39m
+ [32m✓[39m src/lib/growth/conversion.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/legacyCarryover.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 94[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publishLifecycle.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2Publisher.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 93[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageDDeployer.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/lib/ai/intentHandoff.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2ClaimStakeRead.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+ [32m✓[39m src/lib/ai/opportunity/opportunityFeed.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32m✓[39m src/lib/banners/promotionPolicy.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/adapterPreview.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2ClaimStakeRecovery.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/deploymentTransportClosure.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 91[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publicationVerification.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 76[2mms[22m[39m
+ [32m✓[39m src/lib/ai/actionLifecycleConsistency.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 128[2mms[22m[39m
+ [32m✓[39m src/lib/flowbridge/executionRegistry.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/lib/activity/activityVerification.server.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 192[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2Allocator.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/immutableBatch.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 107[2mms[22m[39m
+ [32m✓[39m src/lib/ops/ops.test.ts [2m([22m[2m27 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/rewardProgression.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 187[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/settlementPlanner.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 104[2mms[22m[39m
+ [32m✓[39m src/lib/multisend/session.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/lib/campaign/campaignSettlement.server.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 132[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/mainnetFlowPointsV2.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/adapterRefund.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+ [32m✓[39m src/lib/liquidity/liquidity.test.ts [2m([22m[2m49 tests[22m[2m)[22m[32m 68[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/v302aRedeployCandidate.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageC2Settlement.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2ClaimStake.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m src/lib/ai/preparationRouting.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publicClaimPolicy.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 115[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/mainnetClaimSecurity.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 138[2mms[22m[39m
+ [32m✓[39m src/lib/rwa/registry.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 197[2mms[22m[39m
+ [32m✓[39m src/lib/staking/mainnetLockedStaking.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+ [32m✓[39m src/lib/staking/flowStakingRegistry.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/adapterStatus.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 106[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/flowClaimAuthority.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+ [32m✓[39m src/lib/activity/mainnetRouterV3Evidence.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 82[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageCDeployer.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/historicalReconciliation.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/flowAccrualPolicy.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m src/lib/staking/stakingV2Matrix.parity.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/lib/growth/activation.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/destinationSafety.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageE1Settlement.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageE3Settlement.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m src/lib/ai/experience/experienceModel.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/lib/identity/participationProfile.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 64[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/productionContractPackage.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/merkleClaim.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 48[2mms[22m[39m
+ [32m✓[39m src/lib/ai/walletBinding.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/evmBridge.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m src/lib/bnb/zeroExV19.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 235[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/adapterExecution.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 134[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/payoutRoundStatus.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/lib/liquidity/executionSafety.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+[90mstdout[2m | contracts/candidates/bnb-swap-adapter-v1-5/test/adapter.evm.test.ts[2m > [22m[2mV1.5 hardening — findings and adversarial properties[2m > [22m[2mlocal gas (mock router; informative only, not mainnet): adapter overhead measured
+[22m[39mlocal-mock adapter BNB->USDT execution gas 149134
+
+[90mstdout[2m | contracts/candidates/bnb-swap-adapter-v1-6/test/adapter.evm.test.ts[2m > [22m[2mV1.6 (V1.5 logic) hardening — findings and adversarial properties[2m > [22m[2mlocal gas (mock router; informative only, not mainnet): adapter overhead measured
+[22m[39mlocal-mock adapter BNB->USDT execution gas 148447
+
+ [32m✓[39m contracts/candidates/bnb-swap-adapter-v1-5/test/adapter.evm.test.ts [2m([22m[2m35 tests[22m[2m)[22m[33m 18008[2mms[22m[39m
+     [33m[2m✓[22m[39m constructor rejects wrong chain [33m 341[2mms[22m[39m
+     [33m[2m✓[22m[39m FIX F-1 (V1.5): rejecting / gas-burning fee recipient code cannot block USDT->BNB; fee arrives as WBNB [33m 342[2mms[22m[39m
+     [33m[2m✓[22m[39m fuzz (seeded, 120 runs): random sizes/rates/directions keep net+fee=gross, zero residual delta, zero allowance [33m 12604[2mms[22m[39m
+     [33m[2m✓[22m[39m repeated swaps under monotonic pool drift stay exact [33m 691[2mms[22m[39m
+ [32m✓[39m src/lib/ai/actionRender.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/lib/ai/journey/journeyResolver.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/lib/activity/officialBridgeEvent.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/lib/ai/actionSession.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/mainnetDeploymentGate.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/lib/swap/verifiedSwapAttribution.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/fundingQueue.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/claimMinimumPolicy.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+ [32m✓[39m src/lib/ai/conversationStore.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m src/lib/bnb/comparisonRanking.test.ts [2m([22m[2m37 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/lib/campaign/campaignAction.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m contracts/candidates/bnb-swap-adapter-v1-6/test/adapter.evm.test.ts [2m([22m[2m42 tests[22m[2m)[22m[33m 18634[2mms[22m[39m
+     [33m[2m✓[22m[39m constructor rejects wrong chain [33m 337[2mms[22m[39m
+     [33m[2m✓[22m[39m fuzz (seeded, 120 runs): random sizes/rates/directions keep net+fee=gross, zero residual delta, zero allowance [33m 11360[2mms[22m[39m
+     [33m[2m✓[22m[39m repeated swaps under monotonic pool drift stay exact [33m 647[2mms[22m[39m
+     [33m[2m✓[22m[39m repeated alternating swaps with unsolicited dust: allowance always 0, dust never moves, lock always released [33m 1084[2mms[22m[39m
+ [32m✓[39m src/lib/bnb/quoteAdapter.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 86[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/v32ClaimCanary.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 138[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/payoutRecovery.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/lib/adventure/catalog.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/rewardsSolvencyGate.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/pointsAccessHardening.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/v302bCanonicalRegistry.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 100[2mms[22m[39m
+ [32m✓[39m src/lib/trade/tradeSession.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/lib/multisend/deployments.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageEPreflight.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 76[2mms[22m[39m
+ [32m✓[39m src/lib/multisend/qr.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/lib/application/officialLaunch.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/payoutBatch.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/lib/ai/handoffResolution.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageE2Settlement.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 96[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/securityGate.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2CreditVerification.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 73[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageC1Settlement.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/components/shell/navModel.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/rewardPresentation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/lib/ai/actionIntent.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m src/lib/ai/mission/stakeHandoff.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageADeployer.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/bindingHostSecurity.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32m✓[39m src/lib/staking/flowStakingPolicy.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m src/lib/ai/handoffHydration.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 86[2mms[22m[39m
+ [32m✓[39m src/lib/swap/routeGuard.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 71[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publishGate.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/mainnetPreflight.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/lib/partner/partnerLifecycle.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/v302aR1Preflight.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/directDispatch.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/approvalQueueHold.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/lib/ai/actionContinuation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/directBridgeStatus.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/fundingPreparation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/payoutSweep.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 72[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/securityRemediation.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 48[2mms[22m[39m
+ [32m✓[39m src/components/ops/vaultPublisherControls.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/lib/banners/promotionPresentation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/settlementQueue.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/lib/bnb/routeEconomics.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publisherReconciliation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageF1WiringPreflight.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/mainnetDecisionPack.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 87[2mms[22m[39m
+ [32m✓[39m src/lib/layout/tradeShell.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m src/lib/ai/hardening/v24Invariants.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 125[2mms[22m[39m
+ [32m✓[39m src/lib/activity/activityIntent.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/lib/network/networkSession.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 67[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/mainnetEpochManifest.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/lib/staking/mainnetLockedProducts.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 72[2mms[22m[39m
+ [32m✓[39m src/lib/ai/mission/mission.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 104[2mms[22m[39m
+ [32m✓[39m src/lib/application/launchTracker.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 132[2mms[22m[39m
+ [32m✓[39m src/lib/banners/eventSchema.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 67[2mms[22m[39m
+ [32m✓[39m src/lib/multisend/csv.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32m✓[39m src/lib/spreadsheetExport.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 72[2mms[22m[39m
+ [32m✓[39m src/lib/ai/decision/decisionEngine.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 105[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/evidenceReview.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2MainnetLimits.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/walletErrors.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageDSettlement.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/lib/flowbridge/swapMethodPolicy.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/lib/activity/activityCanonicalKey.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 123[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/rewardEvidenceAssessment.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/approvedRewardPolicy.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/lib/ops/payoutStatus.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/lib/bnb/sustainedCriteria.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/lib/campaign/campaignStudio.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/lib/network/walletNetworkLabel.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/identityPolicy.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/autoApprovalRead.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/lib/application/applicationProfile.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/lib/swap/routeExplain.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m src/lib/ai/economicsGuard.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 57[2mms[22m[39m
+ [32m✓[39m src/lib/ai/opportunity/missionTemplates.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m src/lib/ai/productStateAnswers.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/lib/network/canonicalNetworks.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/lib/referrals/referralFunnel.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/walletSignInClient.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/lib/campaign/campaignMetrics.server.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 65[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/signInMessage.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/lib/swap/reviewSnapshot.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+ [32m✓[39m src/lib/config/announcement.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 103[2mms[22m[39m
+ [32m✓[39m src/lib/banners/publicPromotions.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/approvalPreparation.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/lib/referrals/pendingReferral.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/ecosystem/voterRewards.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/routerSizeGate.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/lib/wallet/walletConnectFlag.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/rewardIntegrity.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/lib/growth/claimPresentation.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/groupedEvidenceDecision.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/lib/swap/viewContext.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageBDeployer.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+[2m6:08:25 AM[22m [33m[1m[vite][22m[39m (ssr) warning: /dev-server/src/lib/ecosystem/ranking.functions.ts:27:36 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:ssr
+  File: /dev-server/src/lib/ecosystem/ranking.functions.ts
+ [32m✓[39m src/lib/rewards/flowRewardsRegistry.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2Queue.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/rewardProgressionV365.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/lib/network/environmentCapabilities.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/lib/ai/mission/claimHandoff.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/lib/swap/quoter.v3.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageBSettlement.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/lib/deploy/stageAAuthorization.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/vaultV2AbiParity.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/lib/swap/pairMode.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publisherRecovery.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/groupedEvidenceReview.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/lib/swap/swapLifecycle.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/publisherRestoration.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/rewardPolicyPresentation.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/lib/partner/partnerSuspensionReads.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/fundedDraftSummary.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/lib/swap/operationalTelemetry.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/referralPresentation.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/swap/routerV4Health.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/lib/ecosystem/rankingPage.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/lib/rewards/legacyCarryoverPrivacy.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/swap/feeDisclosure.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/staking/mainnetGenesisStaking.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/lib/bridge/officialEthConfig.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m261 passed[39m[22m[90m (261)[39m
+[2m      Tests [22m [1m[32m2865 passed[39m[22m[90m (2865)[39m
+[2m   Start at [22m 06:07:30
+[2m   Duration [22m 58.69s[2m (transform 85.94s, setup 0ms, import 399.92s, tests 79.40s, environment 147ms)[22m
+
