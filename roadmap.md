@@ -1,3 +1,9 @@
+# BNB V1.10 custom execution audit readiness — preview only
+- [x] Record OWNER_PREFERRED_ARCHITECTURE_PENDING_APPROVALS without changing BOT execution, BNB activation, fees or 0x diagnostic restrictions.
+- [x] Reproduce frozen V1.6 identities; fresh six-HIGH Slither evidence, 256-case fuzz expansion and seven-transaction real-bytecode local fork PASS; no mainnet activity.
+- [x] Auditor handoff, 14-risk register, launch gates, owner matrix and explicit single-pool/no-pause/donation limitations; 2,883 tests, 640 selector, 3,786 nav/ad and 288 RWA assertions PASS.
+- [ ] HOLD: choose pool/pause audit scope and engage independent auditor; fee/treasury, dependencies, legal/RPC, physical wallets, deployment/canary and hosted release need separate approvals.
+
 # Compact Swap chain selector — preview only
 ## BNB V1.9 contemporaneous comparison (preview only)
 - [x] Fresh bounded authenticated 0x/Pancake sampler, integer fee/gas ranking safeguards; ten successes, no eligible fee-verified winner.

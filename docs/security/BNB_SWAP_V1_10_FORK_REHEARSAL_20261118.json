@@ -1,0 +1,151 @@
+{
+  "generatedAt": "2026-11-18T08:41:46.326Z",
+  "status": "PASS",
+  "release": "HOLD",
+  "independentAudit": "NOT_DONE",
+  "scope": "LOCAL_ANVIL_FORK_WITH_REAL_CHAIN56_BYTECODE_AND_LOCAL_ONLY_CANDIDATE_DEPLOYMENT",
+  "mainnetTransactions": 0,
+  "signatures": 0,
+  "realFees": 0,
+  "proposalFeeBps": 5,
+  "feeApproved": false,
+  "rpcIndependence": "UPSTREAM_OFFICIAL_ENDPOINT_IS_NOT_AN_INDEPENDENT_QUORUM",
+  "accounts": "Anvil unlocked synthetic defaults; no private keys read or used",
+  "checks": {
+    "sameStateBnbToUsdt": {
+      "directOut": "592227572753632595",
+      "adapterNet": "591931458967255779",
+      "proposalFee": "296113786376816",
+      "directGas": "160094",
+      "adapterGas": "223387",
+      "extraGas": "63293",
+      "residual": {
+        "native": "0",
+        "wbnb": "0",
+        "usdt": "0",
+        "wbnbRouterAllowance": "0",
+        "usdtRouterAllowance": "0"
+      }
+    },
+    "usdtToNative": {
+      "amountIn": "5000000000000000000",
+      "grossOut": "8434259301292353",
+      "proposalFeeWbnb": "4217129650646",
+      "netNativeOut": "8430042171641707",
+      "residual": {
+        "native": "0",
+        "wbnb": "0",
+        "usdt": "0",
+        "wbnbRouterAllowance": "0",
+        "usdtRouterAllowance": "0"
+      }
+    },
+    "crossWalletCannotSpendUserAllowance": "REVERTED_AS_REQUIRED",
+    "minimumNetPlusOneWei": "REVERTED_AS_REQUIRED",
+    "staleQuoteAfterRealPoolStateChange": "REVERTED_AS_REQUIRED",
+    "quoteSnapshot": {
+      "gross": "592227643991593729",
+      "exactNetAccepted": true,
+      "staleAfterOneBnbPoolMoveRejected": true
+    },
+    "expiredDeadline": "REVERTED_AS_REQUIRED",
+    "deadlineTooFar": "REVERTED_AS_REQUIRED",
+    "noPauseEntryPoint": "REVERTED_AS_REQUIRED",
+    "donationsAndForcedNative": {
+      "residual": {
+        "native": "2000000000000000000",
+        "wbnb": "0",
+        "usdt": "1000000000000000000",
+        "wbnbRouterAllowance": "0",
+        "usdtRouterAllowance": "0"
+      },
+      "recoverable": false,
+      "note": "No sweep exists; donated assets remain stranded by design."
+    },
+    "chain56AndNoGenericPath": {
+      "constructorAndCalls": "Synthetic suite separately verifies chain fail-closed behavior",
+      "xaut": "BLOCKED",
+      "pause": "ABSENT; UI kill switch cannot stop direct calls"
+    }
+  },
+  "transactions": [
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x9cb53a8148d6ecc044aea7862d45e58cfd140b9030bef882feb8e50bac358608",
+      "status": "success",
+      "gasUsed": "1266479"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0xc772ec03bf8079bcbc6962985977fa4aef0bc55ea4c23c6b48733a8f07512787",
+      "status": "success",
+      "gasUsed": "223387"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x1ea34d11ac7c00b4ea0a94ba88f652edc4696e8db4929e4804e4f7f4bb0bd662",
+      "status": "success",
+      "gasUsed": "160094"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x84e4de2715ec5eb74eac73a84e94118ce9bd840d151e97f7e9388f190530e410",
+      "status": "success",
+      "gasUsed": "233556"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0xca332eec74ecc63de0ae89b80ef18312906b65388367470abf418d3c81a59706",
+      "status": "success",
+      "gasUsed": "168786"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x82dc3d706536646ef2ee3b6532e48af549263a470da76c72a99f40925cddf6d9",
+      "status": "success",
+      "gasUsed": "51603"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x0f1caf3203a7927885d7437dc9381e5c509bc414e369a6a6b9301feb5a01822c",
+      "status": "success",
+      "gasUsed": "177421"
+    }
+  ],
+  "fork": {
+    "upstream": "https://bsc-dataseed.bnbchain.org",
+    "block": 134281222,
+    "localUrl": "http://127.0.0.1:8545",
+    "chainId": 56
+  },
+  "realBytecode": {
+    "WBNB": {
+      "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "keccak256": "0xb7d84205eaaf83ce7b3940c6beaad6d22790255e34a9a2b486aa8cdfff118fe6",
+      "bytes": 3124
+    },
+    "USDT": {
+      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "keccak256": "0x97a48aa4c129657440dafdacd4c836389734d28cc4a0ca7403e68da660a74a59",
+      "bytes": 4413
+    },
+    "PancakeV3SwapRouter": {
+      "address": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "keccak256": "0x61002a11263b2c38ff8d5ded90a655987ed98f171a31840ee0014dd7052bccda",
+      "bytes": 12154
+    }
+  },
+  "localCandidate": {
+    "address": "0x99fbd04bbe2269b0aa348da932937b5e2461e490",
+    "deployment": "LOCAL_FORK_ONLY_NOT_MAINNET",
+    "runtimeKeccak": "0xa04593111a3350124e35a558e8a0c72ee3a69f58114741ef1a0d22a083428c99"
+  },
+  "summary": {
+    "localTransactions": 7,
+    "directOutUsdt": "0.592227572753632595",
+    "adapterNetUsdt": "0.591931458967255779",
+    "proposalFeeUsdt": "0.000296113786376816",
+    "extraGas": "63293",
+    "mainnetTransactions": 0
+  }
+}
