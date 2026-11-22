@@ -1,0 +1,32 @@
+{
+  "classification": "PRIVATE",
+  "sourceRemediationCompleted": true,
+  "sourceFreezeCommit": "582e43ee77d03e43ff2c1f358b0f6a140720ccc7",
+  "packetComplete": true,
+  "freshExportLockedInstall": "PASS",
+  "exportTests": {
+    "passed": 89,
+    "total": 89
+  },
+  "projectTests": {
+    "passed": 3024,
+    "total": 3024
+  },
+  "oneByteTamperRejected": true,
+  "artifactReproduced": true,
+  "realForkEvidence": "15 LOCAL-ONLY transactions; archived at block 135034233",
+  "externalVerification": "NOT_OBTAINED; no firm engaged, packet not sent",
+  "thirdPartySignedReport": null,
+  "paymentsAgreementsAuthorized": false,
+  "mainnetAdapterDeployment": null,
+  "mainnetDeploymentTx": null,
+  "deploymentPublishingActivationAuthorized": false,
+  "openAuditBlockers": [
+    "Owner-selected independent firm and confidentiality/engagement authorization",
+    "Firm-signed report naming exact final freeze",
+    "Six HIGH static traces pending auditor review",
+    "Compatible WalletConnect Zod patch; dev minimatch compatibility",
+    "Separate guardian/fee/MEV/legal/wallet/deployment/publication approvals"
+  ],
+  "scope": "Self-run tooling reproduction is not independent third-party verification"
+}

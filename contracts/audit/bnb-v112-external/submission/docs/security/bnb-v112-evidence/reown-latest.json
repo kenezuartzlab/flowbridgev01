@@ -1,0 +1,6 @@
+{
+  "zod": "3.22.4",
+  "@reown/appkit-common": "2.0.0",
+  "@walletconnect/logger": "3.0.2",
+  "@reown/appkit-polyfills": "2.0.0"
+}

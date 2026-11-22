@@ -1,0 +1,1 @@
+- Keep tier previews offline audit diagnostics; no application imports or executable DTOs. Why: simulation ranking must not become trading authorization.

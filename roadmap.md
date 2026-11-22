@@ -1,3 +1,9 @@
+# Private external audit submission — final V1.12
+- [x] Confirm no unfinished task; remediation finished at 582e43ee, frozen V1.12 is the latest candidate.
+- [x] Private complete source/test/artifact/evidence packet at contracts/audit/bnb-v112-external/submission; exact V1.12 source freeze and bytecode reproduction.
+- [x] Fresh locked export install, 89 isolated tests, one-byte tamper rejection and 3,024 project tests PASS; privacy inventory and ready-for-quote checklist complete.
+- [ ] Independent signed audit blocked on owner-selected firm, agreement and separately authorized engagement; no contact, payment or deployment authorized.
+
 # BNB V1.12 remediation — preview only
 - [x] Confirm V1.11 branding/candidate work committed first; preserve all frozen candidates.
 - [x] Six HIGH traces reviewed without suppression; V1.12 configuration/net-floor hardening, 74 candidate tests and 15 real-bytecode LOCAL fork transactions PASS.

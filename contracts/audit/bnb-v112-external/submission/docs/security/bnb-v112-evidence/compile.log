@@ -1,0 +1,55 @@
+{
+ "status": "LOCAL CANDIDATE — NOT DEPLOYED, NOT AUDITED, NOT REGISTERED",
+ "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+ "optimizerRuns": 200,
+ "evmVersion": "cancun",
+ "sourceKeccak": "0xb5d725ee678e28c1e6f235b8b4fd1ef62b35780ddbbc6003aa5f3b45b5c8a478",
+ "creationBytecodeKeccak": "0xa6f9011514704f5d9c64431eebc73266459e809185a80ad0f98b12d9844d2f53",
+ "unlinkedRuntimeKeccak": "0x2a612be879adb602f0b1f8f0179883d8b920407136510130b4719e6dbecb1866",
+ "runtimeBytes": 6582,
+ "immutableReferences": {
+  "117": [
+   {
+    "length": 32,
+    "start": 564
+   },
+   {
+    "length": 32,
+    "start": 2618
+   }
+  ],
+  "146": [
+   {
+    "length": 32,
+    "start": 864
+   },
+   {
+    "length": 32,
+    "start": 4243
+   },
+   {
+    "length": 32,
+    "start": 5104
+   }
+  ],
+  "148": [
+   {
+    "length": 32,
+    "start": 742
+   },
+   {
+    "length": 32,
+    "start": 4123
+   },
+   {
+    "length": 32,
+    "start": 4986
+   },
+   {
+    "length": 32,
+    "start": 5752
+   }
+  ]
+ },
+ "note": "Runtime contains immutables; compare only after constructor patching."
+}

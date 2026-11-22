@@ -1,0 +1,125 @@
+'solc --version' running
+'solc contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --optimize --optimize-runs 200 --evm-version cancun --allow-paths .,/dev-server/contracts/candidates/bnb-swap-adapter-v1-12' running
+
+Detector: reentrancy-balance
+Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#96-113):
+	External call allowing reentrancy:
+	- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#105)
+	Balance read before the call:
+	- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#102)
+	Possible stale balance used after the call in a condition:
+	- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#106)
+		- stale variable `wbnbBefore`
+Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#96-113):
+	External call allowing reentrancy:
+	- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#105)
+	Balance read before the call:
+	- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#103)
+	Possible stale balance used after the call in a condition:
+	- got != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#109)
+		- stale variable `got`
+Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#96-113):
+	External call allowing reentrancy:
+	- gross = _swap(WBNB,USDT,amountIn,q.poolFee,minNetOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#107)
+		- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:_grossMinimum(minNetOut),sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#143-146)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	Balance read before the call:
+	- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#103)
+	Possible stale balance used after the call in a condition:
+	- got != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#109)
+		- stale variable `got`
+Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#115-139):
+	External call allowing reentrancy:
+	- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#124)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	Balance read before the call:
+	- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#122)
+	Possible stale balance used after the call in a condition:
+	- IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#125)
+		- stale variable `usdtBefore`
+Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#115-139):
+	External call allowing reentrancy:
+	- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#124)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	Balance read before the call:
+	- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#121)
+	Possible stale balance used after the call in a condition:
+	- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#127)
+		- stale variable `wbnbBefore`
+Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#115-139):
+	External call allowing reentrancy:
+	- gross = _swap(USDT,WBNB,amountIn,q.poolFee,minNetOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#126)
+		- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:_grossMinimum(minNetOut),sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#143-146)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	Balance read before the call:
+	- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#121)
+	Possible stale balance used after the call in a condition:
+	- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#127)
+		- stale variable `wbnbBefore`
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities
+
+Detector: reentrancy-events
+Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#96-113):
+	External calls:
+	- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#105)
+	- gross = _swap(WBNB,USDT,amountIn,q.poolFee,minNetOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#107)
+		- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:_grossMinimum(minNetOut),sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#143-146)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	- netOut = _settle(USDT,gross,minNetOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#110)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	External calls sending eth:
+	- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#105)
+	Event emitted after the call(s):
+	- Swapped(msg.sender,true,amountIn,gross,gross - netOut,netOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#112)
+Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#115-139):
+	External calls:
+	- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#124)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	- gross = _swap(USDT,WBNB,amountIn,q.poolFee,minNetOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#126)
+		- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:_grossMinimum(minNetOut),sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#143-146)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	- _safeTransfer(WBNB,FEE_RECIPIENT,fee) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#133)
+		- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+	- IWBNB(WBNB).withdraw(netOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#134)
+	- _sendNative(msg.sender,netOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#136)
+		- (ok,None) = to.call{value: v}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#172)
+	External calls sending eth:
+	- _sendNative(msg.sender,netOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#136)
+		- (ok,None) = to.call{value: v}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#172)
+	Event emitted after the call(s):
+	- Swapped(msg.sender,false,amountIn,gross,fee,netOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#138)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4
+
+Detector: timestamp
+FlowBridgeBnbSwapAdapterV1_12.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#96-113) uses timestamp for comparisons
+	Dangerous comparisons:
+	- got != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#109)
+FlowBridgeBnbSwapAdapterV1_12.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#115-139) uses timestamp for comparisons
+	Dangerous comparisons:
+	- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#127)
+	- netOut < minNetOut (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#130)
+	- fee != 0 (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#133)
+	- address(this).balance - nativeBefore != netOut (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#135)
+FlowBridgeBnbSwapAdapterV1_12._settle(address,uint256,uint256) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#160-166) uses timestamp for comparisons
+	Dangerous comparisons:
+	- netOut < minNetOut (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#163)
+	- fee != 0 (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#165)
+FlowBridgeBnbSwapAdapterV1_12._call(address,bytes) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#173-176) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ! ok || (r.length != 0 && ! abi.decode(r,(bool))) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#175)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+Detector: low-level-calls
+Low level call in FlowBridgeBnbSwapAdapterV1_12._sendNative(address,uint256) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#172):
+	- (ok,None) = to.call{value: v}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#172)
+Low level call in FlowBridgeBnbSwapAdapterV1_12._call(address,bytes) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#173-176):
+	- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+
+Detector: naming-convention
+Contract FlowBridgeBnbSwapAdapterV1_12 (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#26-180) is not in CapWords
+Variable FlowBridgeBnbSwapAdapterV1_12.GUARDIAN (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#38) is not in mixedCase
+Variable FlowBridgeBnbSwapAdapterV1_12.FEE_RECIPIENT (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#46) is not in mixedCase
+Variable FlowBridgeBnbSwapAdapterV1_12.FEE_BPS (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#47) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol analyzed (4 contracts with 101 detectors), 18 result(s) found

@@ -1,0 +1,398 @@
+{
+  "fetchedAt": "2026-11-17T11:04Z",
+  "source": "https://sourcify.dev/server/v2/contract/56/<address>?fields=all (first-party Sourcify verification repository)",
+  "contracts": {
+    "WBNB": {
+      "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "match": "match",
+      "runtimeMatch": "match",
+      "creationMatch": "match",
+      "verifiedAt": "2024-08-08T13:04:34Z",
+      "contractName": "WBNB",
+      "compiler": "0.4.18+commit.9cf6e910",
+      "onchainRuntimeKeccak": "0xb7d84205eaaf83ce7b3940c6beaad6d22790255e34a9a2b486aa8cdfff118fe6",
+      "sourceFiles": {
+        "WBNB.sol": {
+          "keccak": null,
+          "bytes": 37757
+        }
+      }
+    },
+    "USDT": {
+      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "match": "match",
+      "runtimeMatch": "match",
+      "creationMatch": "match",
+      "verifiedAt": "2024-08-08T12:32:05Z",
+      "contractName": "BEP20USDT",
+      "compiler": "0.5.16+commit.9c3226ce",
+      "onchainRuntimeKeccak": "0x97a48aa4c129657440dafdacd4c836389734d28cc4a0ca7403e68da660a74a59",
+      "sourceFiles": {
+        "BEP20USDT.sol": {
+          "keccak": null,
+          "bytes": 19319
+        }
+      }
+    },
+    "PancakeV3SwapRouter": {
+      "address": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "match": "match",
+      "runtimeMatch": "match",
+      "creationMatch": "match",
+      "verifiedAt": "2024-11-11T03:00:21Z",
+      "contractName": "SwapRouter",
+      "compiler": "0.7.6+commit.7338295f",
+      "onchainRuntimeKeccak": "0x61002a11263b2c38ff8d5ded90a655987ed98f171a31840ee0014dd7052bccda",
+      "sourceFiles": {
+        "contracts/SwapRouter.sol": {
+          "keccak": null,
+          "bytes": 9160
+        },
+        "contracts/base/Multicall.sol": {
+          "keccak": null,
+          "bytes": 964
+        },
+        "contracts/libraries/Path.sol": {
+          "keccak": null,
+          "bytes": 2787
+        },
+        "contracts/base/SelfPermit.sol": {
+          "keccak": null,
+          "bytes": 2003
+        },
+        "contracts/libraries/BytesLib.sol": {
+          "keccak": null,
+          "bytes": 4200
+        },
+        "contracts/base/BlockTimestamp.sol": {
+          "keccak": null,
+          "bytes": 428
+        },
+        "contracts/interfaces/IMulticall.sol": {
+          "keccak": null,
+          "bytes": 705
+        },
+        "contracts/libraries/PoolAddress.sol": {
+          "keccak": null,
+          "bytes": 1828
+        },
+        "contracts/base/PeripheryPayments.sol": {
+          "keccak": null,
+          "bytes": 2459
+        },
+        "contracts/interfaces/ISelfPermit.sol": {
+          "keccak": null,
+          "bytes": 3882
+        },
+        "contracts/interfaces/ISwapRouter.sol": {
+          "keccak": null,
+          "bytes": 2728
+        },
+        "contracts/base/PeripheryValidation.sol": {
+          "keccak": null,
+          "bytes": 297
+        },
+        "contracts/libraries/TransferHelper.sol": {
+          "keccak": null,
+          "bytes": 2538
+        },
+        "contracts/interfaces/external/IWETH9.sol": {
+          "keccak": null,
+          "bytes": 376
+        },
+        "contracts/base/PeripheryImmutableState.sol": {
+          "keccak": null,
+          "bytes": 716
+        },
+        "contracts/libraries/CallbackValidation.sol": {
+          "keccak": null,
+          "bytes": 1503
+        },
+        "contracts/base/PeripheryPaymentsWithFee.sol": {
+          "keccak": null,
+          "bytes": 1988
+        },
+        "contracts/interfaces/IPeripheryPayments.sol": {
+          "keccak": null,
+          "bytes": 1506
+        },
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+          "keccak": null,
+          "bytes": 2696
+        },
+        "@openzeppelin/contracts/drafts/IERC20Permit.sol": {
+          "keccak": null,
+          "bytes": 2115
+        },
+        "contracts/interfaces/IPeripheryImmutableState.sol": {
+          "keccak": null,
+          "bytes": 548
+        },
+        "contracts/interfaces/IPeripheryPaymentsWithFee.sol": {
+          "keccak": null,
+          "bytes": 1182
+        },
+        "@pancakeswap/v3-core/contracts/libraries/SafeCast.sol": {
+          "keccak": null,
+          "bytes": 1048
+        },
+        "@pancakeswap/v3-core/contracts/libraries/TickMath.sol": {
+          "keccak": null,
+          "bytes": 8645
+        },
+        "contracts/interfaces/external/IERC20PermitAllowed.sol": {
+          "keccak": null,
+          "bytes": 1203
+        },
+        "@pancakeswap/v3-core/contracts/libraries/LowGasSafeMath.sol": {
+          "keccak": null,
+          "bytes": 1696
+        },
+        "@pancakeswap/v3-core/contracts/interfaces/IPancakeV3Pool.sol": {
+          "keccak": null,
+          "bytes": 817
+        },
+        "@pancakeswap/v3-core/contracts/interfaces/pool/IPancakeV3PoolState.sol": {
+          "keccak": null,
+          "bytes": 6511
+        },
+        "@pancakeswap/v3-core/contracts/interfaces/pool/IPancakeV3PoolEvents.sol": {
+          "keccak": null,
+          "bytes": 6224
+        },
+        "@pancakeswap/v3-core/contracts/interfaces/pool/IPancakeV3PoolActions.sol": {
+          "keccak": null,
+          "bytes": 6304
+        },
+        "@pancakeswap/v3-core/contracts/interfaces/pool/IPancakeV3PoolImmutables.sol": {
+          "keccak": null,
+          "bytes": 1811
+        },
+        "@pancakeswap/v3-core/contracts/interfaces/callback/IPancakeV3SwapCallback.sol": {
+          "keccak": null,
+          "bytes": 1293
+        },
+        "@pancakeswap/v3-core/contracts/interfaces/pool/IPancakeV3PoolDerivedState.sol": {
+          "keccak": null,
+          "bytes": 2602
+        },
+        "@pancakeswap/v3-core/contracts/interfaces/pool/IPancakeV3PoolOwnerActions.sol": {
+          "keccak": null,
+          "bytes": 1299
+        },
+        "@bagelswap/v3-core/contracts/interfaces/IBagelV3Pool.sol": {
+          "keccak": null,
+          "bytes": 787
+        },
+        "@bagelswap/v3-core/contracts/interfaces/callback/IBagelV3SwapCallback.sol": {
+          "keccak": null,
+          "bytes": 1279
+        },
+        "@bagelswap/v3-core/contracts/interfaces/pool/IBagelV3PoolActions.sol": {
+          "keccak": null,
+          "bytes": 6296
+        },
+        "@bagelswap/v3-core/contracts/interfaces/pool/IBagelV3PoolDerivedState.sol": {
+          "keccak": null,
+          "bytes": 2600
+        },
+        "@bagelswap/v3-core/contracts/interfaces/pool/IBagelV3PoolEvents.sol": {
+          "keccak": null,
+          "bytes": 6222
+        },
+        "@bagelswap/v3-core/contracts/interfaces/pool/IBagelV3PoolImmutables.sol": {
+          "keccak": null,
+          "bytes": 1807
+        },
+        "@bagelswap/v3-core/contracts/interfaces/pool/IBagelV3PoolOwnerActions.sol": {
+          "keccak": null,
+          "bytes": 1297
+        },
+        "@bagelswap/v3-core/contracts/interfaces/pool/IBagelV3PoolState.sol": {
+          "keccak": null,
+          "bytes": 6509
+        },
+        "@bagelswap/v3-core/contracts/libraries/LowGasSafeMath.sol": {
+          "keccak": null,
+          "bytes": 1696
+        },
+        "@bagelswap/v3-core/contracts/libraries/SafeCast.sol": {
+          "keccak": null,
+          "bytes": 1048
+        },
+        "@bagelswap/v3-core/contracts/libraries/TickMath.sol": {
+          "keccak": null,
+          "bytes": 8645
+        }
+      }
+    },
+    "XAUtProxy": {
+      "address": "0x21cAef8A43163Eea865baeE23b9C2E327696A3bf",
+      "match": "exact_match",
+      "runtimeMatch": "exact_match",
+      "creationMatch": "exact_match",
+      "verifiedAt": "2026-08-12T18:24:41Z",
+      "contractName": "TransparentUpgradeableProxy",
+      "compiler": "0.8.9+commit.e5eed63a",
+      "onchainRuntimeKeccak": "0x4d9be648c5bf39973670d9f8b481d5d0b971e6a2db2deccc6b98cde21c5dd83e",
+      "sourceFiles": {
+        "@openzeppelin/contracts/proxy/Proxy.sol": {
+          "keccak": null,
+          "bytes": 3247
+        },
+        "@openzeppelin/contracts/utils/Address.sol": {
+          "keccak": null,
+          "bytes": 9159
+        },
+        "@openzeppelin/contracts/utils/StorageSlot.sol": {
+          "keccak": null,
+          "bytes": 2671
+        },
+        "@openzeppelin/contracts/interfaces/IERC1967.sol": {
+          "keccak": null,
+          "bytes": 665
+        },
+        "@openzeppelin/contracts/proxy/beacon/IBeacon.sol": {
+          "keccak": null,
+          "bytes": 450
+        },
+        "@openzeppelin/contracts/interfaces/draft-IERC1822.sol": {
+          "keccak": null,
+          "bytes": 879
+        },
+        "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol": {
+          "keccak": null,
+          "bytes": 1291
+        },
+        "@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol": {
+          "keccak": null,
+          "bytes": 6186
+        },
+        "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol": {
+          "keccak": null,
+          "bytes": 8279
+        },
+        "@openzeppelin/contracts/access/Ownable.sol": {
+          "keccak": null,
+          "bytes": 2623
+        },
+        "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol": {
+          "keccak": null,
+          "bytes": 2096
+        },
+        "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol": {
+          "keccak": null,
+          "bytes": 2040
+        },
+        "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol": {
+          "keccak": null,
+          "bytes": 2860
+        },
+        "@openzeppelin/contracts/utils/Context.sol": {
+          "keccak": null,
+          "bytes": 844
+        }
+      }
+    },
+    "XAUtImplementation": {
+      "address": "0x9151434b16b9763660705744891fA906F660EcC5",
+      "match": "exact_match",
+      "runtimeMatch": "exact_match",
+      "creationMatch": "exact_match",
+      "verifiedAt": "2026-09-24T21:51:29Z",
+      "contractName": "TetherTokenOFTExtension",
+      "compiler": "0.8.4+commit.c7e474f2",
+      "onchainRuntimeKeccak": "0x61466328a9d17e782f4a37d32db189f981ce32e45de6a4668c3f7bb1cd8d49ae",
+      "sourceFiles": {
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol": {
+          "keccak": null,
+          "bytes": 2510
+        },
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol": {
+          "keccak": null,
+          "bytes": 1742
+        },
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol": {
+          "keccak": null,
+          "bytes": 12132
+        },
+        "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol": {
+          "keccak": null,
+          "bytes": 2737
+        },
+        "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol": {
+          "keccak": null,
+          "bytes": 639
+        },
+        "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol": {
+          "keccak": null,
+          "bytes": 3368
+        },
+        "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-IERC20PermitUpgradeable.sol": {
+          "keccak": null,
+          "bytes": 2182
+        },
+        "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol": {
+          "keccak": null,
+          "bytes": 1057
+        },
+        "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol": {
+          "keccak": null,
+          "bytes": 1353
+        },
+        "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol": {
+          "keccak": null,
+          "bytes": 5850
+        },
+        "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol": {
+          "keccak": null,
+          "bytes": 4676
+        },
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol": {
+          "keccak": null,
+          "bytes": 786
+        },
+        "contracts/Tether/EIP3009.sol": {
+          "keccak": null,
+          "bytes": 9247
+        },
+        "contracts/Tether/TetherToken.sol": {
+          "keccak": null,
+          "bytes": 2959
+        },
+        "contracts/Tether/TetherTokenV2.sol": {
+          "keccak": null,
+          "bytes": 13426
+        },
+        "contracts/Tether/WithBlockedList.sol": {
+          "keccak": null,
+          "bytes": 976
+        },
+        "contracts/Tether/interfaces/IERC1271.sol": {
+          "keccak": null,
+          "bytes": 1491
+        },
+        "contracts/Tether/util/ECRecover.sol": {
+          "keccak": null,
+          "bytes": 4103
+        },
+        "contracts/Tether/util/MessageHashUtils.sol": {
+          "keccak": null,
+          "bytes": 2406
+        },
+        "contracts/Tether/util/SignatureChecker.sol": {
+          "keccak": null,
+          "bytes": 3599
+        },
+        "contracts/Wrappers/interfaces/IERC7802.sol": {
+          "keccak": null,
+          "bytes": 1428
+        },
+        "contracts/Wrappers/OFTExtension.sol": {
+          "keccak": null,
+          "bytes": 2572
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "classification": "PRIVATE_EXTERNAL_AUDIT_SUBMISSION_NOT_PUBLIC",
+  "anchorCommit": "582e43ee77d03e43ff2c1f358b0f6a140720ccc7",
+  "candidatePath": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol",
+  "sha256": "feb06ff5e1e392b2264dca4f86cb40c07af2a033fbd557ea10f2e9d2e333575b",
+  "sourceKeccak": "0xb5d725ee678e28c1e6f235b8b4fd1ef62b35780ddbbc6003aa5f3b45b5c8a478",
+  "creationBytecodeKeccak": "0xa6f9011514704f5d9c64431eebc73266459e809185a80ad0f98b12d9844d2f53",
+  "unlinkedRuntimeKeccak": "0x2a612be879adb602f0b1f8f0179883d8b920407136510130b4719e6dbecb1866",
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "optimizer": {
+    "enabled": true,
+    "runs": 200
+  },
+  "evmVersion": "cancun",
+  "solidityImports": [],
+  "sourceClosureFiles": [
+    "FlowBridgeBnbSwapAdapterV1_12.sol"
+  ],
+  "sourceChangeInvalidatesFreeze": true,
+  "independentAudit": "NOT_ENGAGED_NOT_SIGNED",
+  "deploymentAuthorized": false
+}

@@ -1,0 +1,7 @@
+Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+width 320
+width 360
+width 390
+width 430
+width 1280
+PASS 640 assertions / 20 real preview cases

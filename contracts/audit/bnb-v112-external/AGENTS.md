@@ -1,0 +1,3 @@
+- Keep the external audit packet private, outside app imports/public assets, and copy only explicitly selected source and aggregate or synthetic evidence. Why: audit submission must not expose keys, customer records or unrelated application strategy.
+- Verify the final candidate's byte-identical source and compiler artifact before packaging; any subsequent source change invalidates the freeze. Why: a signed auditor report must name the exact reviewed artifact.
+- Label every fork address and transaction local-only; no automated test or analyzer is an independent signed audit. Why: tooling evidence cannot authorize mainnet execution.
