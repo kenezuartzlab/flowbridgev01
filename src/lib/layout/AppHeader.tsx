@@ -286,13 +286,6 @@ export function AppHeader({
           show: !!(walletAddress && onShowHistory),
         },
         {
-          id: 'donate',
-          label: 'Support',
-          icon: <Heart className="w-4 h-4 fill-primary/20 text-primary/80" />,
-          onClick: () => { onDonateClick?.(); setMenuOpen(false); },
-          show: !!onDonateClick,
-        },
-        {
           id: 'account',
           label: 'Settings & more',
           icon: <CircleUser className="w-4 h-4" />,

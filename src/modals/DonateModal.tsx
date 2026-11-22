@@ -319,12 +319,7 @@ export function DonateModal({
     }
   };
 
-  // Initialize suggestions from backend database
-  useEffect(() => {
-    if (isOpen) {
-      fetchSuggestions();
-    }
-  }, [isOpen]);
+  // Community proposal reads are retired; rewards never fetch that history.
 
   // Update amount input when coin changes to fit standard sizes
   const handleCoinChange = (coinId: string) => {
@@ -487,7 +482,7 @@ export function DonateModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !isRewardsMode) return null;
   if (isRewardsMode) return <ModalPortal><div className="fixed inset-0 z-[200] overflow-y-auto bg-background text-foreground" role="dialog" aria-modal="true" aria-label="FLOW Rewards">
     <div className="mx-auto max-w-3xl px-4 pb-32 pt-4"><div className="sticky top-0 z-10 mb-3 flex justify-end bg-background py-2"><Button variant="outline" size="icon" onClick={onClose} aria-label="Close rewards" title="Close rewards"><X /></Button></div><RewardsExperience /></div>
   </div></ModalPortal>;

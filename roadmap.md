@@ -1,3 +1,8 @@
+# Contribution and community proposals — disabled
+- [x] Remove Support menu/footer entry points and prevent the non-rewards modal from rendering; preserve Rewards.
+- [x] Proposal reads, publishing and voting return 410 without accessing stored history.
+- [x] Six tests passed; live proposal read/publish/vote requests return 410; loaded Trade page retains swaps without contribution links, build OK. No publication or history deletion.
+
 # Claim-screen monitoring fixes — preview only
 - [x] Preserve recipient review and last verified totals through same-wallet refresh; invalidate on changed/failed reads or wallet changes.
 - [x] Route the Home claim action to /earn#mainnet-flow-claim and verify claim-card destination.

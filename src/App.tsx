@@ -2816,10 +2816,6 @@ export default function App() {
               theme={theme}
               onToggleTheme={handleToggleTheme}
               onShowHistory={() => setIsHistoryModalOpen(true)}
-              onDonateClick={() => {
-                setDonateModalInitialTab('donate');
-                setIsDonateModalOpen(true);
-              }}
               onRewardsClick={() => {
                 setDonateModalInitialTab('incentives');
                 setIsDonateModalOpen(true);
@@ -3286,13 +3282,6 @@ export default function App() {
 
       {/* Very tiny footer centered at bottom of layout */}
       <footer className="relative z-10 text-center py-5 select-none transition-opacity duration-300 flex flex-col items-center gap-2 font-mono uppercase">
-        <button
-          onClick={() => setIsDonateModalOpen(true)}
-          className="text-[10px] tracking-[0.05em] text-primary hover:text-primary font-black cursor-pointer transition-colors flex items-center justify-center gap-1.5 hover:underline bg-primary/5 hover:bg-primary/10 border border-primary/20 py-1 px-3.5 rounded-full shadow-sm active:scale-95"
-          title="Support decentralized builders & request new ecosystem tools!"
-        >
-          <span className="inline-block animate-pulse">💖</span> Support FlowBridge & Request Features
-        </button>
         <div className="flex items-center gap-3 mt-1">
           {appConfig.social.x && (
             <a
