@@ -1,0 +1,3 @@
+- Keep this frozen remediation candidate outside app imports and production deployment tooling. Why: local testing is not trading authorization.
+- Preserve measured balances and exact net floors; no analyzer suppression. Why: transfer and callback safety outrank cosmetic finding counts.
+- Generate ABI, hashes and immutable references from the pinned compiler artifact. Why: auditors must reproduce candidate identity.

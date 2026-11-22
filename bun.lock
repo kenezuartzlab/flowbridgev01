@@ -55,7 +55,7 @@
         "entities": "4.5.0",
         "events": "3.3.0",
         "input-otp": "^1.4.2",
-        "launch-editor": "^2.14.2",
+        "launch-editor": "2.14.2",
         "lucide-react": "^1.21.0",
         "motion": "^12.40.0",
         "qrcode": "^1.5.4",
@@ -106,7 +106,7 @@
         "solc-0.8.38": "npm:solc@0.8.38",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.56.1",
-        "vite": "^8.3.4",
+        "vite": "8.3.4",
         "vitest": "4.1.12",
       },
     },
@@ -122,7 +122,7 @@
     "fast-uri": "3.1.9",
     "follow-redirects": "1.16.3",
     "glob": "14.0.4",
-    "hono": "4.13.11",
+    "hono": "4.13.19",
     "ip-address": "10.7.4",
     "js-yaml": "4.3.2",
     "launch-editor": "2.14.2",
@@ -1337,7 +1337,7 @@
 
     "hasown": ["hasown@2.0.4", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/hasown/-/hasown-2.0.4.tgz", { "dependencies": { "function-bind": "^1.1.2" } }, "sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A=="],
 
-    "hono": ["hono@4.13.11", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/hono/-/hono-4.13.11.tgz", {}, "sha512-/SMX/RQNJn7oNmFwH6DtwDqcrzZU2otm1FD6OJe2cWF6cfy/F8hq0XVBv7xW3FTJshRQwuBnXHDq2kNsdZnshg=="],
+    "hono": ["hono@4.13.19", "", {}, "sha512-KmXvQAXwcAHV+muzbIwoJ23niEB5nMoDVr9WcRkU8mvjUECm/1+7v4Jgp7P7a+H6MLFrh+vXrGonGrGS+RQfkA=="],
 
     "hookable": ["hookable@6.1.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/hookable/-/hookable-6.1.1.tgz", {}, "sha512-U9LYDy1CwhMCnprUfeAZWZGByVbhd54hwepegYTK7Pi5NvqEj63ifz5z+xukznehT7i6NIZRu89Ay1AZmRsLEQ=="],
 

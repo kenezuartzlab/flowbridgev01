@@ -8,6 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- Only bun.lock: avoid drift.
 
 - Public round reads use a read-only shared snapshot; claim reviews freeze selection and simulate before sending. Why: prevent stale claims.
 

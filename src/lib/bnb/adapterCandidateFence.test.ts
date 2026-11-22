@@ -27,6 +27,17 @@ describe('BNB adapter V1 candidate fence', () => {
       .filter((f) => !f.endsWith('adapterCandidateFence.test.ts') && !f.endsWith('AGENTS.md'));
     expect(hits).toEqual([]);
   });
+  it('V1.11 stays hash-pinned while V1.12 remains an isolated frozen audit candidate', () => {
+    const previous = JSON.parse(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-11/MANIFEST.json', 'utf8'));
+    expect(previous.sourceKeccak).toBe('0xba6803f62aee20a030aea1bc963ab859f15a822eade21c3a556f9082b020bc67');
+    expect(keccak256(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol'))).toBe(previous.sourceKeccak);
+    const next = JSON.parse(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-12/MANIFEST.json', 'utf8'));
+    expect(keccak256(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol'))).toBe(next.sourceKeccak);
+    expect(next.sourceKeccak).not.toBe(previous.sourceKeccak);
+    expect(next.status).toContain('NOT DEPLOYED');
+    // Contract-qualified internalType changes with version; wire types/selectors must not.
+    expect(JSON.parse(JSON.stringify(next.abi).replaceAll('FlowBridgeBnbSwapAdapterV1_12', 'FlowBridgeBnbSwapAdapterV1_11'))).toEqual(previous.abi);
+  });
   it('BNB execution capability remains disabled', async () => {
     const m = await import('@/lib/bnb/quoteAdapter');
     for (const p of Object.values(m.BNB_PROVIDERS) as any[]) expect(JSON.stringify(p)).not.toMatch(/calldata|spender|signer/i);

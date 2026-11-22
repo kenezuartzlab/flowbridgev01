@@ -1,3 +1,9 @@
+# BNB V1.12 remediation — preview only
+- [x] Confirm V1.11 branding/candidate work committed first; preserve all frozen candidates.
+- [x] Six HIGH traces reviewed without suppression; V1.12 configuration/net-floor hardening, 74 candidate tests and 15 real-bytecode LOCAL fork transactions PASS.
+- [x] Hono production findings 9→1; 3,021 full tests PASS; 640 selector/201 logo/3,786 dock/288 RWA checks PASS; frozen hashes and audit packet complete.
+- [ ] External blockers: independent auditor sign-off (six HIGH open), upstream-compatible Zod 3 fix, dev minimatch major compatibility, physical wallets and all separate live-launch approvals.
+
 # BNB V1.11 candidate and official branding — preview only
 - [x] Original official BNB symbol shared across picker/token badges; 201 logo checks, 20 light/dark/motion cases and fallback PASS; 32px heading preserved.
 - [x] New isolated two-tier immutable-guardian candidate; 44 EVM tests including 128 seeded swaps; 15 real-bytecode LOCAL fork transactions PASS; old candidates unchanged.
