@@ -106,6 +106,7 @@ import { Route as ApiProfileParticipationRouteImport } from './routes/api/profil
 import { Route as ApiPublicRewardPolicyRouteImport } from './routes/api/public/reward-policy'
 import { Route as ApiPublicRewardRoundsRouteImport } from './routes/api/public/reward-rounds'
 import { Route as ApiPublicVoterRewardsRouteImport } from './routes/api/public/voter-rewards'
+import { Route as ApiPublicVoterRewardsSummaryRouteImport } from './routes/api/public/voter-rewards-summary'
 import { Route as ApiPublicWalletLookupRouteImport } from './routes/api/public/wallet-lookup'
 import { Route as ApiPublicWalletProofRouteImport } from './routes/api/public/wallet-proof'
 import { Route as ApiRewardsClaimAuthorizationRouteImport } from './routes/api/rewards.claim-authorization'
@@ -637,6 +638,12 @@ const ApiPublicVoterRewardsRoute = ApiPublicVoterRewardsRouteImport.update({
   path: '/api/public/voter-rewards',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicVoterRewardsSummaryRoute =
+  ApiPublicVoterRewardsSummaryRouteImport.update({
+    id: '/api/public/voter-rewards-summary',
+    path: '/api/public/voter-rewards-summary',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicWalletLookupRoute = ApiPublicWalletLookupRouteImport.update({
   id: '/api/public/wallet-lookup',
   path: '/api/public/wallet-lookup',
@@ -892,6 +899,7 @@ export interface FileRoutesByFullPath {
   '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
   '/api/public/voter-rewards': typeof ApiPublicVoterRewardsRoute
+  '/api/public/voter-rewards-summary': typeof ApiPublicVoterRewardsSummaryRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/public/wallet-proof': typeof ApiPublicWalletProofRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -1021,6 +1029,7 @@ export interface FileRoutesByTo {
   '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
   '/api/public/voter-rewards': typeof ApiPublicVoterRewardsRoute
+  '/api/public/voter-rewards-summary': typeof ApiPublicVoterRewardsSummaryRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/public/wallet-proof': typeof ApiPublicWalletProofRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -1151,6 +1160,7 @@ export interface FileRoutesById {
   '/api/public/reward-policy': typeof ApiPublicRewardPolicyRoute
   '/api/public/reward-rounds': typeof ApiPublicRewardRoundsRoute
   '/api/public/voter-rewards': typeof ApiPublicVoterRewardsRoute
+  '/api/public/voter-rewards-summary': typeof ApiPublicVoterRewardsSummaryRoute
   '/api/public/wallet-lookup': typeof ApiPublicWalletLookupRoute
   '/api/public/wallet-proof': typeof ApiPublicWalletProofRoute
   '/api/rewards/claim-authorization': typeof ApiRewardsClaimAuthorizationRoute
@@ -1282,6 +1292,7 @@ export interface FileRouteTypes {
     | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
     | '/api/public/voter-rewards'
+    | '/api/public/voter-rewards-summary'
     | '/api/public/wallet-lookup'
     | '/api/public/wallet-proof'
     | '/api/rewards/claim-authorization'
@@ -1411,6 +1422,7 @@ export interface FileRouteTypes {
     | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
     | '/api/public/voter-rewards'
+    | '/api/public/voter-rewards-summary'
     | '/api/public/wallet-lookup'
     | '/api/public/wallet-proof'
     | '/api/rewards/claim-authorization'
@@ -1540,6 +1552,7 @@ export interface FileRouteTypes {
     | '/api/public/reward-policy'
     | '/api/public/reward-rounds'
     | '/api/public/voter-rewards'
+    | '/api/public/voter-rewards-summary'
     | '/api/public/wallet-lookup'
     | '/api/public/wallet-proof'
     | '/api/rewards/claim-authorization'
@@ -1664,6 +1677,7 @@ export interface RootRouteChildren {
   ApiPublicRewardPolicyRoute: typeof ApiPublicRewardPolicyRoute
   ApiPublicRewardRoundsRoute: typeof ApiPublicRewardRoundsRoute
   ApiPublicVoterRewardsRoute: typeof ApiPublicVoterRewardsRoute
+  ApiPublicVoterRewardsSummaryRoute: typeof ApiPublicVoterRewardsSummaryRoute
   ApiPublicWalletLookupRoute: typeof ApiPublicWalletLookupRoute
   ApiPublicWalletProofRoute: typeof ApiPublicWalletProofRoute
   ApiRewardsClaimAuthorizationRoute: typeof ApiRewardsClaimAuthorizationRoute
@@ -2372,6 +2386,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicVoterRewardsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/voter-rewards-summary': {
+      id: '/api/public/voter-rewards-summary'
+      path: '/api/public/voter-rewards-summary'
+      fullPath: '/api/public/voter-rewards-summary'
+      preLoaderRoute: typeof ApiPublicVoterRewardsSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/wallet-lookup': {
       id: '/api/public/wallet-lookup'
       path: '/api/public/wallet-lookup'
@@ -2758,6 +2779,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRewardPolicyRoute: ApiPublicRewardPolicyRoute,
   ApiPublicRewardRoundsRoute: ApiPublicRewardRoundsRoute,
   ApiPublicVoterRewardsRoute: ApiPublicVoterRewardsRoute,
+  ApiPublicVoterRewardsSummaryRoute: ApiPublicVoterRewardsSummaryRoute,
   ApiPublicWalletLookupRoute: ApiPublicWalletLookupRoute,
   ApiPublicWalletProofRoute: ApiPublicWalletProofRoute,
   ApiRewardsClaimAuthorizationRoute: ApiRewardsClaimAuthorizationRoute,

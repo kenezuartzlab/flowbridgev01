@@ -1,3 +1,8 @@
+# Voter reward privacy — selected security fix
+- [x] Public vote responses contain rank/votes only, never private credits or payouts.
+- [x] Private summary requires a fresh single-use wallet signature with read-only scope; it cannot authorize the separate payout endpoint.
+- [x] 40 ownership/privacy/vote tests PASS; live unsigned summary denied, actual component hides private balance behind explicit verification with no automatic signature. Build OK; no payout or publication. Successful private reads tested with mocked verification; physical wallet signing not exercised.
+
 # Contribution and community proposals — disabled
 - [x] Remove Support menu/footer entry points and prevent the non-rewards modal from rendering; preserve Rewards.
 - [x] Proposal reads, publishing and voting return 410 without accessing stored history.

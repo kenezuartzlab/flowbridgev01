@@ -5,7 +5,7 @@ import { validateOwnershipMessage } from "@/lib/wallet/ownershipMessage";
 const addr = z.string().trim().regex(/^0x[a-fA-F0-9]{40}$/);
 const json = (b: unknown, status = 200) => Response.json(b, { status, headers: { "Cache-Control": "no-store" } });
 
-// Public on-chain vote tallies; a wallet's own reward balance; and FLOW claims that require a fresh ownership signature.
+// Public on-chain vote tallies only; FLOW claims require a fresh ownership signature.
 export const Route = createFileRoute("/api/public/voter-rewards")({
   server: { handlers: {
     GET: async ({ request }) => {
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/public/voter-rewards")({
           const wallet = w.data.toLowerCase();
           const all = await s.rankedVoters(from, to, 100_000);
           const idx = all.findIndex((x) => x.wallet === wallet);
-          mine = { rank: idx >= 0 ? idx + 1 : null, votes: idx >= 0 ? all[idx].votes : 0, ...(await s.walletSummary(wallet)) };
+          mine = { rank: idx >= 0 ? idx + 1 : null, votes: idx >= 0 ? all[idx].votes : 0 };
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: cfg } = await supabaseAdmin.from("vote_payout_config").select("enabled,min_claim_flow").eq("id", 1).maybeSingle();
