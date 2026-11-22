@@ -1,0 +1,18 @@
+Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+320 dark reduce PASS
+320 dark no-preference PASS
+320 light reduce PASS
+320 light no-preference PASS
+390 dark reduce PASS
+390 dark no-preference PASS
+390 light reduce PASS
+390 light no-preference PASS
+430 dark reduce PASS
+430 dark no-preference PASS
+430 light reduce PASS
+430 light no-preference PASS
+1280 dark reduce PASS
+1280 dark no-preference PASS
+1280 light reduce PASS
+1280 light no-preference PASS
+288 quote panel assertions PASS

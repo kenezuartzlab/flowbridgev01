@@ -1,0 +1,24 @@
+Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+320 dark reduce PASS
+320 dark no-preference PASS
+320 light reduce PASS
+320 light no-preference PASS
+390 dark reduce PASS
+390 dark no-preference PASS
+Traceback (most recent call last):
+  File "/dev-server/scripts/rwa-quote-panel-check.py", line 46, in <module>
+    asyncio.run(main())
+    ~~~~~~~~~~~^^^^^^^^
+  File "/nix/store/9qkpw9669q6w9nl6bmh2k35nq76i52nf-python3-3.13.18/lib/python3.13/asyncio/runners.py", line 196, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/nix/store/9qkpw9669q6w9nl6bmh2k35nq76i52nf-python3-3.13.18/lib/python3.13/asyncio/runners.py", line 119, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/nix/store/9qkpw9669q6w9nl6bmh2k35nq76i52nf-python3-3.13.18/lib/python3.13/asyncio/base_events.py", line 726, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/dev-server/scripts/rwa-quote-panel-check.py", line 30, in main
+    assert '4.992251 USDT' in await panel.inner_text(); checks+=1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
