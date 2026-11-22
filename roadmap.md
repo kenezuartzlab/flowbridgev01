@@ -1,3 +1,9 @@
+# Bridge tracking completion — BOT / BNB
+- [x] Verified the owner's BOT→BNB transfer: source success at 07:33:45 UTC, exact nonce-linked release plus USDT transfer at 07:35:23 UTC; no financial writes.
+- [x] Timestamp-bounded discovery, adaptive RPC ranges, stale receipt fallback and previous-head overlap prevent missed delayed-index releases; 174 bridge/activity tests PASS, preview build OK.
+- [x] Actual tracker with real receipts passes both directions at 384/1280 with injected stale receipt and delayed log indexing; real app restored transfer→Completed→Done→refresh verified, no wallet writes.
+- [x] Full suite: 3,043 PASS / 5 FAIL (275 files); failures all in unchanged securityWrites.test.ts expecting proposal writes that now correctly return retirement 410. Unrelated proposal behavior/tests left untouched. No publication or sending changes.
+
 # Voter reward privacy — selected security fix
 - [x] Public vote responses contain rank/votes only, never private credits or payouts.
 - [x] Private summary requires a fresh single-use wallet signature with read-only scope; it cannot authorize the separate payout endpoint.

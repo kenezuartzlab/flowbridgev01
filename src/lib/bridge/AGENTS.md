@@ -1,0 +1,1 @@
+- Destination discovery uses deliverySearch for timestamp-bounded starts, adaptive log ranges and overlap against the previous scanned head; full matchDelivery receipt verification still decides completion. Why: changing block spacing, RPC limits and delayed indexes must not strand completed transfers or fabricate delivery.

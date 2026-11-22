@@ -3,6 +3,7 @@ import { createPublicClient, http, fallback, type Chain, type PublicClient } fro
 import { botMainnet, botTestnet, bscMainnet, bscTestnet, ethereum, sepolia } from '@/lib/wagmi';
 import { trackingState, isCurrentTrackingResult, rememberDestination, storedDestinationFor, type TrackingEvidence } from './trackingState';
 import { bridgeRoute, decodeSourceDeposit, matchDelivery, BRIDGE_EVENTS_ABI, type SourceDeposit, type BridgeRoute } from './bridgeDelivery';
+import { deliveryStartBlock, deliveryPollCursor, readDeliveryChunk } from './deliverySearch';
 
 const clientFor = (chain: Chain) => createPublicClient({ chain, transport: fallback(chain.rpcUrls.default.http.map(url => http(url, { timeout: 12000 }))) });
 /** Event-log capable endpoints (several default RPCs reject eth_getLogs). Read-only. */
@@ -15,7 +16,6 @@ const LOG_RPCS: Record<number, string[]> = {
 const logClient = (chainId: number) => createPublicClient({ transport: fallback(LOG_RPCS[chainId].map(u => http(u, { timeout: 15000 }))) }) as PublicClient;
 const CHUNK: Record<number, bigint> = { 677: 10000n, 968: 10000n, 56: 5000n, 97: 5000n, 1: 1000n };
 const MAX_CHUNKS_PER_POLL = 3;
-const BLOCK_SECONDS: Record<number, number> = { 677: 0.7, 968: 0.7, 56: 0.4, 97: 0.4, 1: 11 };
 
 export type TrackingDirection = 'BOT_TO_BNB' | 'BNB_TO_BOT' | 'BOT_TO_ETH' | 'ETH_TO_BOT' | 'BOT_TO_TRX' | 'TRX_TO_BOT';
 const required: Record<number, number> = { 677: 3, 968: 1, 56: 15, 97: 3, 1: 12, 11155111: 3 };
@@ -42,6 +42,8 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
     let canceled = false;
     let busy = false;
     let cursor: bigint | null = null;
+    let searchStart: bigint | null = null;
+    let scannedHead: bigint | null = null;
     let deposit: SourceDeposit | null = null;
     let done = false;
     const route = bridgeRoute(direction, isMainnet);
@@ -75,7 +77,8 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
         // Refresh: re-verify a previously linked release directly instead of trusting storage.
         const stored = storedDestinationFor(txHash);
         if (stored) {
-          const v = await verifyDestinationTx(dest, stored as `0x${string}`, deposit, route, recipient);
+          // Stale storage or an unavailable receipt must not block log discovery.
+          const v = await verifyDestinationTx(dest, stored as `0x${string}`, deposit, route, recipient).catch(() => null);
           if (v) {
             commit({ ...base, destinationSubmitted: true, destinationTxHash: stored, destinationConfirmed: v.confirmed, destinationTokenArrival: v.confirmed, destinationConfirmedAt: v.at });
             if (v.confirmed) done = true;
@@ -84,19 +87,19 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
         }
         commit(base);
         const destLatest = await dest.getBlockNumber();
-        if (cursor == null) {
-          // Start before the source block time. Spacing is deliberately under-estimated
-          // (starts earlier, never later) to keep request counts low on rate-limited RPCs.
-          const head = await dest.getBlock({ blockNumber: destLatest });
-          const back = BigInt(Math.ceil((Number(head.timestamp) - sourceConfirmedAt / 1000 + 600) / BLOCK_SECONDS[route.destination.chainId]));
-          cursor = destLatest > back ? destLatest - back : 0n;
+        if (searchStart == null) {
+          searchStart = await deliveryStartBlock(destLatest, block.timestamp, async n => (await dest.getBlock({ blockNumber: n })).timestamp);
         }
+        const chunk = CHUNK[route.destination.chainId];
+        if (!chunk) throw new Error('Unsupported destination log range');
+        cursor = deliveryPollCursor(cursor ?? searchStart, destLatest, searchStart, chunk * 2n, scannedHead ?? destLatest);
         let from: bigint = cursor;
+        const depositArgs = { depositer: deposit.depositer as `0x${string}`, recipient: deposit.recipient as `0x${string}` };
+        const nonce = deposit.nonce;
         for (let i = 0; i < MAX_CHUNKS_PER_POLL && from <= destLatest; i++) {
-          const to: bigint = from + CHUNK[route.destination.chainId] - 1n > destLatest ? destLatest : from + CHUNK[route.destination.chainId] - 1n;
-          const logs = await dest.getLogs({ address: route.destination.gateway as `0x${string}`, event: BRIDGE_EVENTS_ABI[1], args: { depositer: deposit.depositer as `0x${string}`, recipient: deposit.recipient as `0x${string}` }, fromBlock: from, toBlock: to });
+          const { logs, next } = await readDeliveryChunk(from, destLatest, chunk, (fromBlock, toBlock) => dest.getLogs({ address: route.destination.gateway as `0x${string}`, event: BRIDGE_EVENTS_ABI[1], args: depositArgs, fromBlock, toBlock }));
           if (!isCurrentTrackingResult(key, currentKey.current, canceled)) return;
-          const hit = logs.find(l => l.args.originDepositNonce === deposit!.nonce && l.args.originChainId === BigInt(route.source.chainId));
+          const hit = logs.find(l => l.args.originDepositNonce === nonce && l.args.originChainId === BigInt(route.source.chainId));
           if (hit?.transactionHash) {
             const destHash = hit.transactionHash;
             const v = await verifyDestinationTx(dest, destHash, deposit, route, recipient);
@@ -106,9 +109,10 @@ export function useBridgeTracking({ active, txHash, direction, isMainnet, wallet
               return; // keep cursor so confirmations are re-read on the next poll
             }
           }
-          from = to + 1n;
+          from = next;
           cursor = from;
         }
+        scannedHead = destLatest;
       } catch {
         if (isCurrentTrackingResult(key, currentKey.current, canceled)) setObserved(prev => ({ key, evidence: prev.key === key ? prev.evidence : {}, error: true }));
       } finally { busy = false; }
