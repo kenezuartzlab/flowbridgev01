@@ -1,3 +1,8 @@
+# Claim-screen monitoring fixes — preview only
+- [x] Preserve recipient review and last verified totals through same-wallet refresh; invalidate on changed/failed reads or wallet changes.
+- [x] Route the Home claim action to /earn#mainnet-flow-claim and verify claim-card destination.
+- [x] 76 claim safety tests and actual-hook/card 30-second polling checks at 1280/384 PASS, including paused/failed reads and wallet changes; build OK. Synthetic read-only evidence only, zero wallet writes; real funded claims not exercised or authorized.
+
 # Private external audit submission — final V1.12
 - [x] Confirm no unfinished task; remediation finished at 582e43ee, frozen V1.12 is the latest candidate.
 - [x] Private complete source/test/artifact/evidence packet at contracts/audit/bnb-v112-external/submission; exact V1.12 source freeze and bytecode reproduction.

@@ -3,6 +3,8 @@
  * every number comes from the server progression; nothing is signed here.
  */
 import { useEffect } from "react";
+import { Link } from "@tanstack/react-router";
+import { Button } from '@/components/ui/button';
 import type { RewardProgression } from "@/lib/rewards/rewardProgression";
 import { trackProductEvent, type ProductArea } from "@/lib/ops/productEvents";
 import { RewardPolicyDetails } from './RewardPolicyDetails';
@@ -33,7 +35,7 @@ export function RewardProgressPanel({ p, area, detailed = false }: { p: RewardPr
         <p className="text-[22px] font-bold tabular-nums">{f(s.claimableNow)} FLOW</p>
         <p className="text-[12px] leading-relaxed" role="status">{s.message}</p>
         {s.claimableNow === 0 && <p className="mt-1 text-[11px] font-semibold text-muted">Blocked by: {BLOCKER_LABEL[s.blocker]}</p>}
-        {s.claimableNow > 0 && <a href="#mainnet-flow-claim" className="mt-2 inline-flex min-h-[40px] items-center rounded-full bg-primary px-4 text-[12px] font-bold text-primary-foreground">Claim in wallet</a>}
+        {s.claimableNow > 0 && <Button asChild className="mt-2 inline-flex min-h-[40px] items-center rounded-full px-4 text-[12px] font-bold"><Link to="/earn" hash="mainnet-flow-claim">Claim in wallet</Link></Button>}
       </div>
       <p id={`rp-${area}`} className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">{p.reconciliationBlocked ? 'Reserved funding · reconciliation held' : 'Eligible toward next FLOW batch'}</p>
       <div>

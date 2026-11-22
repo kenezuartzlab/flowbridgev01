@@ -154,13 +154,19 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
   const [rounds, setRounds] = useState<RoundsSummary>(EMPTY_ROUNDS);
   const [loading, setLoading] = useState(false);
   const generation = useRef(0);
+  const snapshotWallet = useRef(wallet);
 
   const read = useCallback(async () => {
     const requestId = ++generation.current;
     const current = () => requestId === generation.current;
     setLoading(true);
-    setRounds(EMPTY_ROUNDS);
-    setState(IDLE);
+    // Keep the last verified snapshot during same-wallet reads. A completed
+    // failed/changed read still replaces it below and invalidates any review.
+    if (snapshotWallet.current !== wallet) {
+      snapshotWallet.current = wallet;
+      setRounds(EMPTY_ROUNDS);
+      setState(IDLE);
+    }
     try {
       const { list: candidates, discoveryFailed } = await allEntitlements(wallet);
       if (!current()) return;
@@ -256,5 +262,9 @@ export function useMainnetFlowClaim(wallet: string | null | undefined): UseMainn
     return () => { ++generation.current; clearInterval(timer); };
   }, [read]);
 
+  // Never expose the previous wallet's snapshot before its reset effect runs.
+  if (snapshotWallet.current !== wallet) {
+    return { ...IDLE, rounds: EMPTY_ROUNDS, loading: true, refresh: read };
+  }
   return { ...state, rounds, loading, refresh: read };
 }

@@ -219,7 +219,7 @@ export function MainnetFlowClaimCard() {
             <div className="rounded-lg border border-hairline bg-card/60 p-3">
               <p className="text-[11px] font-bold uppercase tracking-wide text-muted-soft">Claimable now · {short(wallet)}</p>
               <p className="mt-1 text-2xl font-black tabular-nums text-foreground">
-                {claim.loading ? '…' : total} <span className="text-sm font-bold text-muted">FLOW</span>
+                {claim.loading && !rounds.active.length && !rounds.history.length ? '…' : total} <span className="text-sm font-bold text-muted">FLOW</span>
               </p>
               <p className="mt-1 text-[11.5px] text-muted">
                 {count > 1
