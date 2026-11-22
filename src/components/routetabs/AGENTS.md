@@ -1,0 +1,1 @@
+- BNB network/token symbols use BnbChainMark and original official assets, never generic coin substitutes; BOT artwork is independent. Why: preserve identity and official proportions across themes.

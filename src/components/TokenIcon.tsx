@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "../lib/utils";
 import { logoCandidates, normalizeSymbol, symbolHue } from "../lib/tokenLogos";
+import { BnbChainMark } from './BnbChainMark';
 
 /** Shared size scale so every surface renders identical token circles. */
 export const TOKEN_ICON_SIZES = { sm: 24, md: 32, lg: 40, xl: 56 } as const;
@@ -40,6 +41,8 @@ export function TokenIcon({ symbol, size, preset = "sm", className }: TokenIconP
     className,
   );
   const style = { width: px, height: px, minWidth: px, minHeight: px } as const;
+
+  if (['bnb', 'wbnb'].includes(normalizeSymbol(symbol))) return <BnbChainMark size={px} className={className} />;
 
   if (src) {
     return (

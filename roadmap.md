@@ -1,3 +1,9 @@
+# BNB V1.11 candidate and official branding — preview only
+- [x] Original official BNB symbol shared across picker/token badges; 201 logo checks, 20 light/dark/motion cases and fallback PASS; 32px heading preserved.
+- [x] New isolated two-tier immutable-guardian candidate; 44 EVM tests including 128 seeded swaps; 15 real-bytecode LOCAL fork transactions PASS; old candidates unchanged.
+- [x] Frozen artifact/ABI handoff, six HIGH static findings OPEN, fresh 9-row production dependency scan; 2,944 tests and 640 selector/3,786 nav-ad/288 RWA checks PASS; automatic build OK, standalone typecheck unverified.
+- [ ] HOLD: independent auditor and re-audit, guardian/pause policy, fee/treasury, execution limits/MEV, legal/liquidity/independent RPC, dependencies, logo-use permission, physical wallets and separately authorized deployment/funded rehearsal/publication.
+
 # BNB V1.10 custom execution audit readiness — preview only
 - [x] Record OWNER_PREFERRED_ARCHITECTURE_PENDING_APPROVALS without changing BOT execution, BNB activation, fees or 0x diagnostic restrictions.
 - [x] Reproduce frozen V1.6 identities; fresh six-HIGH Slither evidence, 256-case fuzz expansion and seven-transaction real-bytecode local fork PASS; no mainnet activity.

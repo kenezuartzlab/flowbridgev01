@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+import {compile,standardInput} from '../contracts/candidates/bnb-swap-adapter-v1-11/scripts/compile.mjs';
+const dir='contracts/candidates/bnb-swap-adapter-v1-11',source='FlowBridgeBnbSwapAdapterV1_11.sol';
+const artifact=compile()[source].FlowBridgeBnbSwapAdapterV1_11;
+const manifest=JSON.parse(fs.readFileSync(`${dir}/MANIFEST.json`));
+if(JSON.stringify(artifact.abi)!==JSON.stringify(manifest.abi))throw Error('ABI mismatch');
+const sha=p=>createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const slither=JSON.parse(fs.readFileSync('docs/security/BNB_SWAP_V1_11_SLITHER_20261122.json'));
+const files=[source,'MANIFEST.json','README.md','AGENTS.md','scripts/compile.mjs','test/Mocks.sol','test/adapter.evm.test.ts'].map(f=>`${dir}/${f}`);
+const out={status:'OWNER_PREFERRED_ARCHITECTURE_PENDING_APPROVALS',independentAudit:'NOT_DONE',executionEnabled:false,release:'HOLD',chainId:56,sourceFiles:files.map(path=>({path,sha256:sha(path)})),manifest,standardJson:standardInput(),abi:artifact.abi,creationBytecode:`0x${artifact.evm.bytecode.object}`,unlinkedRuntimeBytecode:`0x${artifact.evm.deployedBytecode.object}`,immutableReferences:artifact.evm.deployedBytecode.immutableReferences,highTraces:slither.results.detectors.filter(r=>r.impact==='High').map((r,i)=>({id:`V111-H${i+1}`,status:'OPEN_PENDING_INDEPENDENT_AUDIT',...r})),frozenV16:{sourceSha256:sha('contracts/candidates/bnb-swap-adapter-v1-6/FlowBridgeBnbSwapAdapterV1_6.sol'),manifestSha256:sha('contracts/candidates/bnb-swap-adapter-v1-6/MANIFEST.json'),findings:'SIX_HIGH_REMAIN_OPEN'},forkEvidence:'docs/security/BNB_SWAP_V1_11_FORK_REHEARSAL_20261122.json',commands:['bun contracts/candidates/bnb-swap-adapter-v1-11/scripts/compile.mjs','bunx vitest run','nix shell nixpkgs#foundry -c bun scripts/bnb-v111-fork-rehearsal.ts','BNB_FORK_BLOCK=135032507 nix shell nixpkgs#foundry -c bun scripts/bnb-v111-fork-rehearsal.ts','python3 scripts/qa/bnb-v111-logo-check.py','bun scripts/bnb-v111-audit-handoff.mjs']};
+fs.writeFileSync('docs/security/BNB_SWAP_V1_11_AUDITOR_HANDOFF_20261122.json',JSON.stringify(out,null,2)+'\n');console.log('handoff',out.highTraces.length,'OPEN HIGH',files.length,'frozen files');

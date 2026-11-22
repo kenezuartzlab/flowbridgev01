@@ -1,0 +1,127 @@
+{
+  "scope": "bun audit includes development dependencies; production scanner counted 9 rows separately",
+  "bunAudit": {
+    "hono": [
+      {
+        "id": 1246368,
+        "url": "https://github.com/advisories/GHSA-4m76-xfj5-7975",
+        "title": "Hono: `mount()` and `app.mount()` can forward a path that bypasses middleware scoped inside the mount prefix",
+        "severity": "moderate",
+        "vulnerable_versions": "<4.13.16",
+        "cwe": [
+          "CWE-288"
+        ],
+        "cvss": {
+          "score": 5.3,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+        }
+      },
+      {
+        "id": 1246369,
+        "url": "https://github.com/advisories/GHSA-h7mg-cq63-vhpq",
+        "title": "Hono: RegExpRouter skips wildcard middleware for some route sets and for paths with an encoded line terminator",
+        "severity": "moderate",
+        "vulnerable_versions": ">=4.1.4 <=4.13.15",
+        "cwe": [
+          "CWE-863"
+        ],
+        "cvss": {
+          "score": 5.3,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+        }
+      },
+      {
+        "id": 1246370,
+        "url": "https://github.com/advisories/GHSA-3gg2-335m-rxc6",
+        "title": "Hono: `css` helper does not escape a closing tag split between the template and an interpolated value, allowing HTML injection",
+        "severity": "low",
+        "vulnerable_versions": ">=3.12.0 <=4.13.15",
+        "cwe": [
+          "CWE-79"
+        ],
+        "cvss": {
+          "score": 3.4,
+          "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:N/A:N"
+        }
+      },
+      {
+        "id": 1246373,
+        "url": "https://github.com/advisories/GHSA-46wx-v44x-9hh2",
+        "title": "Hono: `csrf()` does not check requests sent by hyperlink auditing (`text/ping`)",
+        "severity": "moderate",
+        "vulnerable_versions": "<4.13.16",
+        "cwe": [
+          "CWE-352"
+        ],
+        "cvss": {
+          "score": 5.3,
+          "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:N/I:H/A:N"
+        }
+      },
+      {
+        "id": 1246374,
+        "url": "https://github.com/advisories/GHSA-4h7h-rv7c-7m2v",
+        "title": "Hono: `validator('form')` skips validation for `multipart/form-data` requests with extra parameters",
+        "severity": "moderate",
+        "vulnerable_versions": ">=4.5.1 <=4.13.15",
+        "cwe": [
+          "CWE-20",
+          "CWE-1471"
+        ],
+        "cvss": {
+          "score": 5.3,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N"
+        }
+      }
+    ],
+    "minimatch": [
+      {
+        "id": 1244623,
+        "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+        "title": "minimatch has potential denial of service via globparts amplification",
+        "severity": "moderate",
+        "vulnerable_versions": ">=7.0.0 <11.0.1",
+        "cwe": [
+          "CWE-405"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        }
+      }
+    ],
+    "zod": [
+      {
+        "id": 1243066,
+        "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+        "title": "Zod can exhaust memory while validating oversized constrained collections",
+        "severity": "high",
+        "vulnerable_versions": "<4.6.6",
+        "cwe": [
+          "CWE-770"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        }
+      }
+    ]
+  },
+  "bunCounts": {
+    "moderate": 5,
+    "low": 1,
+    "high": 1
+  },
+  "productionScan": {
+    "rows": 9,
+    "high": 1,
+    "moderate": 8,
+    "highPackages": [
+      "zod through WalletConnect"
+    ],
+    "moderatePackages": [
+      "hono through accounts and mcp-js"
+    ]
+  },
+  "remediation": "NOT_PERFORMED_RELEASE_HOLD"
+}

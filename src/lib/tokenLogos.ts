@@ -9,6 +9,7 @@
  * Keep every entry lowercase-keyed by symbol so lookups are case-insensitive.
  */
 
+import officialBnb from '@/assets/bnb-chain-symbol-yellow.svg.asset.json';
 const CDN = "https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color";
 
 /** Symbols that ship with a local brand PNG (with an SVG fallback in /public). */
@@ -25,8 +26,6 @@ const REMOTE_SLUGS: Record<string, string> = {
   wbtc: "wbtc",
   eth: "eth",
   weth: "eth",
-  bnb: "bnb",
-  wbnb: "bnb",
   usdt: "usdt",
   usdc: "usdc",
   busd: "busd",
@@ -69,6 +68,7 @@ export function setLogoOverrides(map: Record<string, string>) {
 /** Ordered list of candidate image URLs for a symbol (may be empty). */
 export function logoCandidates(symbol: string): string[] {
   const key = normalizeSymbol(symbol);
+  if (key === 'bnb' || key === 'wbnb') return [officialBnb.url];
   const out: string[] = [];
   const override = overrides[key];
   if (override) out.push(override);

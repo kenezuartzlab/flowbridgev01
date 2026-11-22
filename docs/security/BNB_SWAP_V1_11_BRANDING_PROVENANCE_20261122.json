@@ -1,0 +1,38 @@
+{
+  "verifiedAt": "2026-11-22T06:37:03.657254+00:00",
+  "guidelines": "https://www.bnbchain.org/en/brand-guidelines",
+  "permission": "NOT_OBTAINED_PUBLIC_LAUNCH_HOLD",
+  "usage": "network/token identification only, no partnership or endorsement",
+  "minimumSymbolPx": 15,
+  "minimumHorizontalWordmarkPx": 97,
+  "assets": {
+    "yellow": {
+      "officialSource": "https://www.bnbchain.org/images/brand-guidelines/svg/BNB%20Chain_Symbol_Yellow.svg",
+      "sha256": "b8ff1ce0b5af2e2d9bcf5ec89fedd5224079f4f7267e306e23e8d691024f5eff",
+      "bytes": 1070,
+      "viewBox": "0 0 96 96",
+      "width": "96",
+      "height": "96",
+      "fill": [
+        "#F0B90B"
+      ],
+      "pathSha256": "22a3c944d5849eee8642ec989b1981a56805888dce95386f72a51dfdb48ce8c1",
+      "pointerFile": "src/assets/bnb-chain-symbol-yellow.svg.asset.json",
+      "unmodified": true
+    },
+    "black": {
+      "officialSource": "https://www.bnbchain.org/images/brand-guidelines/svg/BNB%20Chain_Symbol_Black.svg",
+      "sha256": "95621a88c55cadaff217977c9929f9443894bf56a8d8d195165cf25c2dc9e536",
+      "bytes": 1070,
+      "viewBox": "0 0 96 96",
+      "width": "96",
+      "height": "96",
+      "fill": [
+        "#0B0E11"
+      ],
+      "pathSha256": "22a3c944d5849eee8642ec989b1981a56805888dce95386f72a51dfdb48ce8c1",
+      "pointerFile": "src/assets/bnb-chain-symbol-black.svg.asset.json",
+      "unmodified": true
+    }
+  }
+}

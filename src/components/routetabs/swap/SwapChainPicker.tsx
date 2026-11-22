@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import officialBot from '@/assets/bot-chain-official-wordmark.png.asset.json';
 import type { SwapView } from '@/lib/swap/viewContext';
+import { BnbChainMark } from '@/components/BnbChainMark';
 
 function ChainMark({ bnb }: { bnb: boolean }) {
   return bnb
-    ? <span aria-hidden className="chain-bnb-mark grid h-4 w-4 shrink-0 place-items-center text-[13px]">◆</span>
+    ? <BnbChainMark />
     : <span aria-hidden className="block h-4 w-4 shrink-0 overflow-hidden"><img src={officialBot.url} alt="" className="h-4 w-[82px] max-w-none" /></span>;
 }
 

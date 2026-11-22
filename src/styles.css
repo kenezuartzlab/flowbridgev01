@@ -4,6 +4,9 @@
 /* Official BNB gold mark remains identifiable in either theme. */
 :root { --chain-bnb-gold: #f0b90b; }
 .chain-bnb-mark { color:var(--chain-bnb-gold); }
+.bnb-symbol-black { display:none; }
+html.light .bnb-symbol-yellow { display:none; }
+html.light .bnb-symbol-black { display:block; }
 
 /* RWA image-overlay roles are fixed for contrast in both page themes. */
 :root { --rwa-cover-ink: #ffffff; --rwa-cover-scrim: rgba(12, 15, 16, .90); }

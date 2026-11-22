@@ -1,0 +1,2 @@
+- This frozen two-tier guardian candidate stays outside application imports and production deployment tooling. Why: local audit evidence cannot authorize financial execution.
+- Compile with the pinned compiler into MANIFEST.json; ABI and immutable references are derived from that same artifact. Why: audit identity must be reproducible.
