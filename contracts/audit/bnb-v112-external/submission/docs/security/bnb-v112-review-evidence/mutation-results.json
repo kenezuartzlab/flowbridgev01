@@ -1,0 +1,114 @@
+{
+  "tool": "hand-written textual mutants + vitest review suite (MOCK EVM)",
+  "frozenSourceSha256": "feb06ff5e1e392b2264dca4f86cb40c07af2a033fbd557ea10f2e9d2e333575b",
+  "observedAt": "2026-11-25T15:21:30.455Z",
+  "killed": 15,
+  "total": 15,
+  "results": [
+    {
+      "id": "M01 minNetOut==0 accepted (BNB in)",
+      "mutantSha256": "2a928fd09b3b9b42757e4837903d3748f79f08bd0e5c4f092fba1e37241f9998",
+      "exitCode": 1,
+      "failedTests": 1,
+      "status": "KILLED"
+    },
+    {
+      "id": "M02 minNetOut==0 accepted (USDT in)",
+      "mutantSha256": "62866ebccfe18251a9d8e6406f35520d47d08f0ccf82e7a647abd1d0761f5521",
+      "exitCode": 1,
+      "failedTests": 1,
+      "status": "KILLED"
+    },
+    {
+      "id": "M03 msg.value vs q.amountIn unchecked",
+      "mutantSha256": "e0822713f10e853fb0811b24c0271cdd603bb05218fbe1b3249f8e45919be07d",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M04 deadline==now rejected",
+      "mutantSha256": "2aed122e55c269f84584e5d030166266d00f4f7add54312e64577705ab132e99",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M05 deadline window off-by-one",
+      "mutantSha256": "23cd0668f7c07fc2da4af86efe04c509e25eae9f5c89c3328c1cf134550dd276",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M06 deadline window removed",
+      "mutantSha256": "95091eed61409cd1e705f2290999f9284bf114bb921b2fce1cec28cf9965cf4a",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M07 quote age off-by-one",
+      "mutantSha256": "c9231d1908bb332a406eead00b21f07b7f75a7785f57ae721c176077c77d5843",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M08 quote age removed",
+      "mutantSha256": "99002c3978e03244bb5582f5d9f430cf778cee02f7be4b9e3b20c0c47c4f0efc",
+      "exitCode": 1,
+      "failedTests": 4,
+      "status": "KILLED"
+    },
+    {
+      "id": "M09 block lag off-by-one",
+      "mutantSha256": "995126a8ba54a4bc2ded27e1195749fccdfe2d6e9bd8a7da49953ce002869d69",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M10 block lag removed",
+      "mutantSha256": "295d09f86df30ca1773aba4e1c360c44663e8f15208f210ebd13fbdabdcf312f",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M11 blockhash binding removed",
+      "mutantSha256": "c5c9658cde2a61bd21388c2a8d5f76e3d26db65f77b0ad7885e85f1394e6e5e8",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M12 fee recipient == this accepted",
+      "mutantSha256": "2afbb9cdc2cf739d226f6e4e6072af3a98c5e47d4f0aff23ad0c2106e688e8d3",
+      "exitCode": 1,
+      "failedTests": 1,
+      "status": "KILLED"
+    },
+    {
+      "id": "M13 non-minimal gross floor",
+      "mutantSha256": "3f64d134cabd73da248f9c5362aea78cdf76e2c8f4c36ce6a83247a78d208407",
+      "exitCode": 1,
+      "failedTests": 9,
+      "status": "KILLED"
+    },
+    {
+      "id": "M14 one-wei gross floor (V1.11 regression)",
+      "mutantSha256": "b2f08fcbb602dc29e11c8f32ad211ac476726c3090698988e4ca2d98390dc2b5",
+      "exitCode": 1,
+      "failedTests": 9,
+      "status": "KILLED"
+    },
+    {
+      "id": "M15 PauseChanged value inverted",
+      "mutantSha256": "945dcf2b1e877fafe9531e41c3a57cdd87ef0f725fa7532436228f86f87ae7f7",
+      "exitCode": 1,
+      "failedTests": 1,
+      "status": "KILLED"
+    }
+  ]
+}

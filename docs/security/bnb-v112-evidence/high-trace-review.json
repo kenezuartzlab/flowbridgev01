@@ -1,58 +1,89 @@
 {
-  "highBefore": 6,
+  "version": "V1.12",
+  "regeneratedFrom": "docs/security/bnb-v112-evidence/slither-after.json",
+  "sourcePath": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol",
+  "sourceSha256": "feb06ff5e1e392b2264dca4f86cb40c07af2a033fbd557ea10f2e9d2e333575b",
   "highAfter": 6,
+  "highBefore": 6,
   "suppressed": 0,
   "professionalAudit": "NOT_DONE",
+  "note": "Self-review dispositions only. Not an independent audit. Correction of EV-01: previous file embedded V1.11 trace text.",
   "traces": [
     {
       "id": "V112-H1",
-      "beforeId": "56c616dd50d285538ec4f8ac5b489c4eb2ff25175bc3d16baefee0b93d574020",
+      "detector": "reentrancy-balance",
+      "slitherId": "09610da3fc920ec7f7cdb6f2cff7e9d335e36255717247573d73a77525f962ba",
+      "contract": "FlowBridgeBnbSwapAdapterV1_12",
+      "path": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol",
+      "firstElement": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#L115-L139",
       "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
-      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- gross = _swap(WBNB,USDT,amountIn,q.poolFee) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#107)\n\t\t- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:1,sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#143-146)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#167)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#103)\n\tPossible stale balance used after the call in a condition:\n\t- got != gross (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#109)\n\t\t- stale variable `got`\n",
-      "balancePath": "USDT delta after router and approve",
-      "targetedEvidence": "Router callback; both swap directions and pause fail Reentrancy. Extra callback-window output donation fails InputMismatch.",
-      "tests": "router callback cannot reenter; balance isolation",
-      "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
-      "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
-    },
-    {
-      "id": "V112-H2",
-      "beforeId": "5c56596ccba88f7ec622093832259749d27057136b2d76a2c20eb5fe5ba3618b",
-      "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
-      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#124)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#167)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#122)\n\tPossible stale balance used after the call in a condition:\n\t- IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#125)\n\t\t- stale variable `usdtBefore`\n",
-      "balancePath": "USDT input delta after transferFrom",
-      "targetedEvidence": "USDT transferFrom callback at point 4 attempts both swaps and pause; lock is already set, all fail Reentrancy. Fee-on-transfer fails InputMismatch.",
-      "tests": "token callback point 4; fee-on-transfer",
-      "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
-      "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
-    },
-    {
-      "id": "V112-H3",
-      "beforeId": "974b3eb55e130541b6d81cb80bc33c6341fd6fe77d550570d21750f816042b24",
-      "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
-      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- gross = _swap(USDT,WBNB,amountIn,q.poolFee) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#126)\n\t\t- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:1,sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#143-146)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#167)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#121)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#127)\n\t\t- stale variable `wbnbBefore`\n",
-      "balancePath": "WBNB output delta after router/approve",
-      "targetedEvidence": "Exact input allowance plus output equality; router under/overpay, donation and under-report revert atomically.",
-      "tests": "malicious router modes; balance isolation",
-      "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
-      "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
-    },
-    {
-      "id": "V112-H4",
-      "beforeId": "a013e06c3e34ec8dc5013499ee5724b8decb2c703061ee91924945b5a7f111e7",
-      "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
-      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#105)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#102)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#106)\n\t\t- stale variable `wbnbBefore`\n",
-      "balancePath": "WBNB delta after deposit",
-      "targetedEvidence": "Adversarial deposit point 1 cannot enter either swap/pause. Real fixed WBNB deposit only credits msg.sender and emits; no user hook.",
-      "tests": "token callback point 1",
-      "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
-      "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
-    },
-    {
-      "id": "V112-H5",
-      "beforeId": "c4b5d62ddc42eaf3c0457a057cbed231f580a7122656850b28cf4f564b388b75",
-      "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
-      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#124)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#167)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#121)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#127)\n\t\t- stale variable `wbnbBefore`\n",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#124)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#121)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#127)\n\t\t- stale variable `wbnbBefore`\n",
+      "elements": [
+        {
+          "type": "function",
+          "name": "swapExactUsdtForBnb",
+          "lines": [
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139
+          ],
+          "code": "function swapExactUsdtForBnb(QuoteSnapshot calldata q) external guarded(q) returns (uint256 netOut) {\n        uint256 amountIn = q.amountIn;\n        uint256 minNetOut = q.minNetOut;\n        if (q.tokenIn != USDT || q.tokenOut != WBNB) revert BadSnapshot();\n        if (amountIn == 0 || amountIn > MAX_USDT_IN || minNetOut == 0) revert BadAmount();\n        uint256 nativeBefore = address(this).balance;\n        uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));\n        uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));\n\n        _safeTransferFrom(USDT, msg.sender, address(this), amountIn);\n        if (IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn) revert InputMismatch(); // fee-on-transfer rejected\n        uint256 gross = _swap(USDT, WBNB, amountIn, q.poolFee, minNetOut);\n        if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross) revert InputMismatch();\n        uint256 fee = gross * FEE_BPS / BPS;\n        netOut = gross - fee;\n        if (netOut < minNetOut) revert InsufficientOutput();\n        // V1.5: fee is paid in WBNB (plain ERC20 transfer, recipient code never executes), so a fee recipient\n        // that later gains code (EIP-7702) cannot revert or gas-grief user swaps. Only netOut is unwrapped.\n        if (fee != 0) _safeTransfer(WBNB, FEE_RECIPIENT, fee);\n        IWBNB(WBNB).withdraw(netOut);\n        if (address(this).balance - nativeBefore != netOut) revert InputMismatch();\n        _sendNative(msg.sender, netOut);\n        _assertNoResidual(nativeBefore, wbnbBefore, usdtBefore);\n        emit Swapped(msg.sender, false, amountIn, gross, fee, netOut);\n    }"
+        },
+        {
+          "type": "node",
+          "name": "_safeTransferFrom(USDT,msg.sender,address(this),amountIn)",
+          "lines": [
+            124
+          ],
+          "code": "_safeTransferFrom(USDT, msg.sender, address(this), amountIn);"
+        },
+        {
+          "type": "node",
+          "name": "(ok,r) = t.call(d)",
+          "lines": [
+            174
+          ],
+          "code": "(bool ok, bytes memory r) = t.call(d);"
+        },
+        {
+          "type": "node",
+          "name": "wbnbBefore = IWBNB(WBNB).balanceOf(address(this))",
+          "lines": [
+            121
+          ],
+          "code": "uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));"
+        },
+        {
+          "type": "node",
+          "name": "IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross",
+          "lines": [
+            127
+          ],
+          "code": "if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross) revert InputMismatch();"
+        }
+      ],
       "balancePath": "WBNB delta after USDT transferFrom",
       "targetedEvidence": "USDT point 4 cannot change swap state; WBNB final equality prevents unrelated delta being settled as user output.",
       "tests": "token callback point 4; residual invariants",
@@ -60,13 +91,392 @@
       "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
     },
     {
-      "id": "V112-H6",
-      "beforeId": "cf143410c8d370e7cdc54edbaef25bb4d4e12ea0a2774f3101ab82b5323ee202",
+      "id": "V112-H2",
+      "detector": "reentrancy-balance",
+      "slitherId": "4849d9de94aa031072b5392a2beb6a20258f183b2def0b7a6447c1738d18e38d",
+      "contract": "FlowBridgeBnbSwapAdapterV1_12",
+      "path": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol",
+      "firstElement": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#L115-L139",
       "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
-      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#105)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#103)\n\tPossible stale balance used after the call in a condition:\n\t- got != gross (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#109)\n\t\t- stale variable `got`\n",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- gross = _swap(USDT,WBNB,amountIn,q.poolFee,minNetOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#126)\n\t\t- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:_grossMinimum(minNetOut),sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#143-146)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#121)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#127)\n\t\t- stale variable `wbnbBefore`\n",
+      "elements": [
+        {
+          "type": "function",
+          "name": "swapExactUsdtForBnb",
+          "lines": [
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139
+          ],
+          "code": "function swapExactUsdtForBnb(QuoteSnapshot calldata q) external guarded(q) returns (uint256 netOut) {\n        uint256 amountIn = q.amountIn;\n        uint256 minNetOut = q.minNetOut;\n        if (q.tokenIn != USDT || q.tokenOut != WBNB) revert BadSnapshot();\n        if (amountIn == 0 || amountIn > MAX_USDT_IN || minNetOut == 0) revert BadAmount();\n        uint256 nativeBefore = address(this).balance;\n        uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));\n        uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));\n\n        _safeTransferFrom(USDT, msg.sender, address(this), amountIn);\n        if (IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn) revert InputMismatch(); // fee-on-transfer rejected\n        uint256 gross = _swap(USDT, WBNB, amountIn, q.poolFee, minNetOut);\n        if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross) revert InputMismatch();\n        uint256 fee = gross * FEE_BPS / BPS;\n        netOut = gross - fee;\n        if (netOut < minNetOut) revert InsufficientOutput();\n        // V1.5: fee is paid in WBNB (plain ERC20 transfer, recipient code never executes), so a fee recipient\n        // that later gains code (EIP-7702) cannot revert or gas-grief user swaps. Only netOut is unwrapped.\n        if (fee != 0) _safeTransfer(WBNB, FEE_RECIPIENT, fee);\n        IWBNB(WBNB).withdraw(netOut);\n        if (address(this).balance - nativeBefore != netOut) revert InputMismatch();\n        _sendNative(msg.sender, netOut);\n        _assertNoResidual(nativeBefore, wbnbBefore, usdtBefore);\n        emit Swapped(msg.sender, false, amountIn, gross, fee, netOut);\n    }"
+        },
+        {
+          "type": "node",
+          "name": "gross = _swap(USDT,WBNB,amountIn,q.poolFee,minNetOut)",
+          "lines": [
+            126
+          ],
+          "code": "uint256 gross = _swap(USDT, WBNB, amountIn, q.poolFee, minNetOut);"
+        },
+        {
+          "type": "node",
+          "name": "gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:_grossMinimum(minNetOut),sqrtPriceLimitX96:0}))",
+          "lines": [
+            143,
+            144,
+            145,
+            146
+          ],
+          "code": "gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({\n            tokenIn: tokenIn, tokenOut: tokenOut, fee: poolFee, recipient: address(this),\n            deadline: block.timestamp, amountIn: amountIn, amountOutMinimum: _grossMinimum(minNetOut), sqrtPriceLimitX96: 0\n        }));"
+        },
+        {
+          "type": "node",
+          "name": "(ok,r) = t.call(d)",
+          "lines": [
+            174
+          ],
+          "code": "(bool ok, bytes memory r) = t.call(d);"
+        },
+        {
+          "type": "node",
+          "name": "wbnbBefore = IWBNB(WBNB).balanceOf(address(this))",
+          "lines": [
+            121
+          ],
+          "code": "uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));"
+        },
+        {
+          "type": "node",
+          "name": "IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross",
+          "lines": [
+            127
+          ],
+          "code": "if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross) revert InputMismatch();"
+        }
+      ],
+      "balancePath": "WBNB output delta after router/approve",
+      "targetedEvidence": "Exact input allowance plus output equality; router under/overpay, donation and under-report revert atomically.",
+      "tests": "malicious router modes; balance isolation",
+      "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
+      "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
+    },
+    {
+      "id": "V112-H3",
+      "detector": "reentrancy-balance",
+      "slitherId": "77982985d134360260bbc49474be9a69ef7eaa0978f4038ce446627e369f7a32",
+      "contract": "FlowBridgeBnbSwapAdapterV1_12",
+      "path": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol",
+      "firstElement": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#L96-L113",
+      "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#105)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#103)\n\tPossible stale balance used after the call in a condition:\n\t- got != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#109)\n\t\t- stale variable `got`\n",
+      "elements": [
+        {
+          "type": "function",
+          "name": "swapExactBnbForUsdt",
+          "lines": [
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113
+          ],
+          "code": "function swapExactBnbForUsdt(QuoteSnapshot calldata q) external payable guarded(q) returns (uint256 netOut) {\n        uint256 amountIn = msg.value;\n        uint256 minNetOut = q.minNetOut;\n        if (q.tokenIn != WBNB || q.tokenOut != USDT || q.amountIn != amountIn) revert BadSnapshot();\n        if (amountIn == 0 || amountIn > MAX_BNB_IN || minNetOut == 0) revert BadAmount();\n        uint256 nativeBefore = address(this).balance - amountIn;\n        uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));\n        uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));\n\n        IWBNB(WBNB).deposit{value: amountIn}();\n        if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn) revert InputMismatch();\n        uint256 gross = _swap(WBNB, USDT, amountIn, q.poolFee, minNetOut);\n        uint256 got = IERC20Min(USDT).balanceOf(address(this)) - usdtBefore;\n        if (got != gross) revert InputMismatch();\n        netOut = _settle(USDT, gross, minNetOut);\n        _assertNoResidual(nativeBefore, wbnbBefore, usdtBefore);\n        emit Swapped(msg.sender, true, amountIn, gross, gross - netOut, netOut);\n    }"
+        },
+        {
+          "type": "node",
+          "name": "IWBNB(WBNB).deposit{value: amountIn}()",
+          "lines": [
+            105
+          ],
+          "code": "IWBNB(WBNB).deposit{value: amountIn}();"
+        },
+        {
+          "type": "node",
+          "name": "usdtBefore = IERC20Min(USDT).balanceOf(address(this))",
+          "lines": [
+            103
+          ],
+          "code": "uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));"
+        },
+        {
+          "type": "node",
+          "name": "got != gross",
+          "lines": [
+            109
+          ],
+          "code": "if (got != gross) revert InputMismatch();"
+        }
+      ],
       "balancePath": "USDT delta after WBNB deposit",
       "targetedEvidence": "WBNB point 1 fails every nested entry; deposit-induced unexpected output fails equality or residual checks.",
       "tests": "token callback point 1; residual invariants",
+      "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
+      "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
+    },
+    {
+      "id": "V112-H4",
+      "detector": "reentrancy-balance",
+      "slitherId": "ace35dc9742acd4816ec67ddf54531465e6e69a4aa44a7157d5037b440a80025",
+      "contract": "FlowBridgeBnbSwapAdapterV1_12",
+      "path": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol",
+      "firstElement": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#L115-L139",
+      "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#124)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#122)\n\tPossible stale balance used after the call in a condition:\n\t- IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#125)\n\t\t- stale variable `usdtBefore`\n",
+      "elements": [
+        {
+          "type": "function",
+          "name": "swapExactUsdtForBnb",
+          "lines": [
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139
+          ],
+          "code": "function swapExactUsdtForBnb(QuoteSnapshot calldata q) external guarded(q) returns (uint256 netOut) {\n        uint256 amountIn = q.amountIn;\n        uint256 minNetOut = q.minNetOut;\n        if (q.tokenIn != USDT || q.tokenOut != WBNB) revert BadSnapshot();\n        if (amountIn == 0 || amountIn > MAX_USDT_IN || minNetOut == 0) revert BadAmount();\n        uint256 nativeBefore = address(this).balance;\n        uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));\n        uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));\n\n        _safeTransferFrom(USDT, msg.sender, address(this), amountIn);\n        if (IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn) revert InputMismatch(); // fee-on-transfer rejected\n        uint256 gross = _swap(USDT, WBNB, amountIn, q.poolFee, minNetOut);\n        if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross) revert InputMismatch();\n        uint256 fee = gross * FEE_BPS / BPS;\n        netOut = gross - fee;\n        if (netOut < minNetOut) revert InsufficientOutput();\n        // V1.5: fee is paid in WBNB (plain ERC20 transfer, recipient code never executes), so a fee recipient\n        // that later gains code (EIP-7702) cannot revert or gas-grief user swaps. Only netOut is unwrapped.\n        if (fee != 0) _safeTransfer(WBNB, FEE_RECIPIENT, fee);\n        IWBNB(WBNB).withdraw(netOut);\n        if (address(this).balance - nativeBefore != netOut) revert InputMismatch();\n        _sendNative(msg.sender, netOut);\n        _assertNoResidual(nativeBefore, wbnbBefore, usdtBefore);\n        emit Swapped(msg.sender, false, amountIn, gross, fee, netOut);\n    }"
+        },
+        {
+          "type": "node",
+          "name": "_safeTransferFrom(USDT,msg.sender,address(this),amountIn)",
+          "lines": [
+            124
+          ],
+          "code": "_safeTransferFrom(USDT, msg.sender, address(this), amountIn);"
+        },
+        {
+          "type": "node",
+          "name": "(ok,r) = t.call(d)",
+          "lines": [
+            174
+          ],
+          "code": "(bool ok, bytes memory r) = t.call(d);"
+        },
+        {
+          "type": "node",
+          "name": "usdtBefore = IERC20Min(USDT).balanceOf(address(this))",
+          "lines": [
+            122
+          ],
+          "code": "uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));"
+        },
+        {
+          "type": "node",
+          "name": "IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn",
+          "lines": [
+            125
+          ],
+          "code": "if (IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn) revert InputMismatch(); // fee-on-transfer rejected"
+        }
+      ],
+      "balancePath": "USDT input delta after transferFrom",
+      "targetedEvidence": "USDT transferFrom callback at point 4 attempts both swaps and pause; lock is already set, all fail Reentrancy. Fee-on-transfer fails InputMismatch.",
+      "tests": "token callback point 4; fee-on-transfer",
+      "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
+      "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
+    },
+    {
+      "id": "V112-H5",
+      "detector": "reentrancy-balance",
+      "slitherId": "c41c7617f6a1978e6e53d2c596e12a260c1c6daa009d187f51fde2a8da6f91b9",
+      "contract": "FlowBridgeBnbSwapAdapterV1_12",
+      "path": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol",
+      "firstElement": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#L96-L113",
+      "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#105)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#102)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#106)\n\t\t- stale variable `wbnbBefore`\n",
+      "elements": [
+        {
+          "type": "function",
+          "name": "swapExactBnbForUsdt",
+          "lines": [
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113
+          ],
+          "code": "function swapExactBnbForUsdt(QuoteSnapshot calldata q) external payable guarded(q) returns (uint256 netOut) {\n        uint256 amountIn = msg.value;\n        uint256 minNetOut = q.minNetOut;\n        if (q.tokenIn != WBNB || q.tokenOut != USDT || q.amountIn != amountIn) revert BadSnapshot();\n        if (amountIn == 0 || amountIn > MAX_BNB_IN || minNetOut == 0) revert BadAmount();\n        uint256 nativeBefore = address(this).balance - amountIn;\n        uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));\n        uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));\n\n        IWBNB(WBNB).deposit{value: amountIn}();\n        if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn) revert InputMismatch();\n        uint256 gross = _swap(WBNB, USDT, amountIn, q.poolFee, minNetOut);\n        uint256 got = IERC20Min(USDT).balanceOf(address(this)) - usdtBefore;\n        if (got != gross) revert InputMismatch();\n        netOut = _settle(USDT, gross, minNetOut);\n        _assertNoResidual(nativeBefore, wbnbBefore, usdtBefore);\n        emit Swapped(msg.sender, true, amountIn, gross, gross - netOut, netOut);\n    }"
+        },
+        {
+          "type": "node",
+          "name": "IWBNB(WBNB).deposit{value: amountIn}()",
+          "lines": [
+            105
+          ],
+          "code": "IWBNB(WBNB).deposit{value: amountIn}();"
+        },
+        {
+          "type": "node",
+          "name": "wbnbBefore = IWBNB(WBNB).balanceOf(address(this))",
+          "lines": [
+            102
+          ],
+          "code": "uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));"
+        },
+        {
+          "type": "node",
+          "name": "IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn",
+          "lines": [
+            106
+          ],
+          "code": "if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn) revert InputMismatch();"
+        }
+      ],
+      "balancePath": "WBNB delta after deposit",
+      "targetedEvidence": "Adversarial deposit point 1 cannot enter either swap/pause. Real fixed WBNB deposit only credits msg.sender and emits; no user hook.",
+      "tests": "token callback point 1",
+      "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
+      "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
+    },
+    {
+      "id": "V112-H6",
+      "detector": "reentrancy-balance",
+      "slitherId": "e7689040ae9d3324a0e09c4c798f14631b8d468fca0aafddddb2f7b86d7fd112",
+      "contract": "FlowBridgeBnbSwapAdapterV1_12",
+      "path": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol",
+      "firstElement": "contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#L96-L113",
+      "status": "HIGH_OPEN_PENDING_INDEPENDENT_AUDIT",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_12.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_12.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- gross = _swap(WBNB,USDT,amountIn,q.poolFee,minNetOut) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#107)\n\t\t- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:_grossMinimum(minNetOut),sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#143-146)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#174)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#103)\n\tPossible stale balance used after the call in a condition:\n\t- got != gross (contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol#109)\n\t\t- stale variable `got`\n",
+      "elements": [
+        {
+          "type": "function",
+          "name": "swapExactBnbForUsdt",
+          "lines": [
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113
+          ],
+          "code": "function swapExactBnbForUsdt(QuoteSnapshot calldata q) external payable guarded(q) returns (uint256 netOut) {\n        uint256 amountIn = msg.value;\n        uint256 minNetOut = q.minNetOut;\n        if (q.tokenIn != WBNB || q.tokenOut != USDT || q.amountIn != amountIn) revert BadSnapshot();\n        if (amountIn == 0 || amountIn > MAX_BNB_IN || minNetOut == 0) revert BadAmount();\n        uint256 nativeBefore = address(this).balance - amountIn;\n        uint256 wbnbBefore = IWBNB(WBNB).balanceOf(address(this));\n        uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));\n\n        IWBNB(WBNB).deposit{value: amountIn}();\n        if (IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn) revert InputMismatch();\n        uint256 gross = _swap(WBNB, USDT, amountIn, q.poolFee, minNetOut);\n        uint256 got = IERC20Min(USDT).balanceOf(address(this)) - usdtBefore;\n        if (got != gross) revert InputMismatch();\n        netOut = _settle(USDT, gross, minNetOut);\n        _assertNoResidual(nativeBefore, wbnbBefore, usdtBefore);\n        emit Swapped(msg.sender, true, amountIn, gross, gross - netOut, netOut);\n    }"
+        },
+        {
+          "type": "node",
+          "name": "gross = _swap(WBNB,USDT,amountIn,q.poolFee,minNetOut)",
+          "lines": [
+            107
+          ],
+          "code": "uint256 gross = _swap(WBNB, USDT, amountIn, q.poolFee, minNetOut);"
+        },
+        {
+          "type": "node",
+          "name": "gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:_grossMinimum(minNetOut),sqrtPriceLimitX96:0}))",
+          "lines": [
+            143,
+            144,
+            145,
+            146
+          ],
+          "code": "gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({\n            tokenIn: tokenIn, tokenOut: tokenOut, fee: poolFee, recipient: address(this),\n            deadline: block.timestamp, amountIn: amountIn, amountOutMinimum: _grossMinimum(minNetOut), sqrtPriceLimitX96: 0\n        }));"
+        },
+        {
+          "type": "node",
+          "name": "(ok,r) = t.call(d)",
+          "lines": [
+            174
+          ],
+          "code": "(bool ok, bytes memory r) = t.call(d);"
+        },
+        {
+          "type": "node",
+          "name": "usdtBefore = IERC20Min(USDT).balanceOf(address(this))",
+          "lines": [
+            103
+          ],
+          "code": "uint256 usdtBefore = IERC20Min(USDT).balanceOf(address(this));"
+        },
+        {
+          "type": "node",
+          "name": "got != gross",
+          "lines": [
+            109
+          ],
+          "code": "if (got != gross) revert InputMismatch();"
+        }
+      ],
+      "balancePath": "USDT delta after router and approve",
+      "targetedEvidence": "Router callback; both swap directions and pause fail Reentrancy. Extra callback-window output donation fails InputMismatch.",
+      "tests": "router callback cannot reenter; balance isolation",
       "exploitPreconditions": "Requires bypassing lock or malicious immutable-target balance semantics; no profitable exploit reproduced. Arbitrary lying token balanceOf cannot be secured by generic delta arithmetic.",
       "assumptions": "Fixed non-proxy WBNB/USDT and fixed Pancake V3 router bytecode, verified in local fork evidence; no generic token/router selection. STATICCALL balance reads cannot write state. Owner mint/chain governance and legal risks remain."
     }

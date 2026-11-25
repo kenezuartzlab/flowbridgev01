@@ -1,0 +1,275 @@
+// V1.12 initial-review test gaps (TG-01..TG-11). MOCK EVM ONLY: @ethereumjs/vm with mock WBNB/USDT/router,
+// not a BSC client and not real target bytecode. The frozen V1.12 source is compiled unchanged unless
+// V112_MUTANT_SOURCE points at a /tmp mutant (used only by mutation-run.mjs to prove these tests can fail).
+import fs from 'node:fs';
+import { beforeEach, describe, expect, it } from 'vitest';
+import solc from 'solc-0.8.38';
+import { createVM } from '@ethereumjs/vm';
+import { createCustomCommon, Mainnet, Hardfork } from '@ethereumjs/common';
+import { Account, createAddressFromString, bytesToHex, hexToBytes } from '@ethereumjs/util';
+import { decodeEventLog, decodeFunctionResult, encodeDeployData, encodeFunctionData, getContractAddress, keccak256, toHex } from 'viem';
+
+const DIR = 'contracts/candidates/bnb-swap-adapter-v1-12';
+const SRC = 'FlowBridgeBnbSwapAdapterV1_12.sol';
+const FROZEN_SHA = 'feb06ff5e1e392b2264dca4f86cb40c07af2a033fbd557ea10f2e9d2e333575b';
+const mutant = process.env['V112_MUTANT_SOURCE'];
+const source = fs.readFileSync(mutant ?? `${DIR}/${SRC}`, 'utf8');
+const input = { language: 'Solidity', sources: { [SRC]: { content: source }, 'Mocks.sol': { content: fs.readFileSync(`${DIR}/test/Mocks.sol`, 'utf8') }, 'ReviewMocks.sol': { content: fs.readFileSync('contracts/audit/bnb-v112-review/ReviewMocks.sol', 'utf8') } },
+  settings: { optimizer: { enabled: true, runs: 200 }, evmVersion: 'cancun', outputSelection: { '*': { '*': ['abi', 'evm.bytecode.object', 'evm.deployedBytecode.object'] } } } };
+const out = JSON.parse(solc.compile(JSON.stringify(input)));
+const errs = (out.errors ?? []).filter((e: any) => e.severity === 'error');
+if (errs.length) throw new Error(errs.map((e: any) => e.formattedMessage).join('\n'));
+const A = out.contracts[SRC].FlowBridgeBnbSwapAdapterV1_12, M = out.contracts['Mocks.sol'], RM = out.contracts['ReviewMocks.sol'];
+const W = M.MockWBNB, U = M.MockUSDT, R = M.MockRouter, H = M.TestRecipient;
+const w = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', u = '0x55d398326f99059fF775485246999027B3197955', r = '0x1b81D678ffb9C0263b24A97847620C99d213eB14';
+const user = '0x00000000000000000000000000000000000000a1', other = '0x00000000000000000000000000000000000000b2', guardian = '0x00000000000000000000000000000000000000c3', fee = '0x000000000000000000000000000000000f1b00fe';
+const XAUT = '0x21cAef8A43163Eea865baeE23b9C2E327696A3bf';
+const E = 10n ** 18n, NOW = 1_800_000_000n, BLOCK = 300n, MAX = 2n ** 256n - 1n;
+const blockHash = (n: bigint) => keccak256(toHex(`bnb56-block-${n}`));
+let vm: any, adapter = '', feeBps = 5;
+const common = (id = 56) => createCustomCommon({ chainId: id }, Mainnet, { hardfork: Hardfork.Cancun });
+// Per-number hashes so a snapshot is bound to the exact quoted block, not any non-zero hash.
+const blockchain: any = { getBlock: async (n: any) => ({ hash: () => hexToBytes(blockHash(BigInt(n))) }) };
+async function run(from: string, to: string | undefined, data: string, value = 0n) {
+  return vm.evm.runCall({ caller: createAddressFromString(from), ...(to ? { to: createAddressFromString(to) } : {}), data: hexToBytes(data as `0x${string}`), value, gasLimit: 30_000_000n,
+    block: { header: { timestamp: NOW, number: BLOCK, gasLimit: 30_000_000n, coinbase: createAddressFromString(user), baseFeePerGas: 0n, prevRandao: new Uint8Array(32), difficulty: 0n } } });
+}
+const enc = (abi: any, fn: string, args: any[] = []) => encodeFunctionData({ abi, functionName: fn, args });
+const deploy = (a: any, args: any[] = []) => run(user, undefined, encodeDeployData({ abi: a.abi, bytecode: `0x${a.evm.bytecode.object}`, args }));
+const call = (abi: any, to: string, fn: string, args: any[] = [], from = user, value = 0n) => run(from, to, enc(abi, fn, args), value);
+async function ok(...a: Parameters<typeof call>) { const x = await call(...a); expect(x.execResult.exceptionError).toBeUndefined(); return x; }
+async function read(abi: any, to: string, fn: string, args: any[] = []) { const x = await ok(abi, to, fn, args); return decodeFunctionResult({ abi, functionName: fn, data: bytesToHex(x.execResult.returnValue) }) as any; }
+const sel = (sig: string) => keccak256(new TextEncoder().encode(sig)).slice(0, 10);
+async function rejects(p: Promise<any>, sig: string | null) {
+  const x = await p; expect(x.execResult.exceptionError).toBeDefined();
+  const ret = bytesToHex(x.execResult.returnValue);
+  if (sig === null) expect(ret).toBe('0x'); else expect(ret.slice(0, 10)).toBe(sig.startsWith('0x') ? sig : sel(sig));
+  return x;
+}
+const snap = (sell = false, p: any = {}) => ({ user, chainId: 56n, tokenIn: sell ? u : w, tokenOut: sell ? w : u, router: r, poolFee: 500, amountIn: sell ? 6n * E : E / 100n, minNetOut: 1n,
+  deadline: NOW + 30n, quotedAt: NOW, quoteBlock: BLOCK - 1n, quoteBlockHash: blockHash(BLOCK - 1n), ...p });
+const swap = (sell = false, p: any = {}, from = user, value?: bigint, to = adapter) => call(A.abi, to, sell ? 'swapExactUsdtForBnb' : 'swapExactBnbForUsdt', [snap(sell, p)], from, value ?? (sell ? 0n : (p.amountIn ?? E / 100n)));
+const native = async (a: string) => (await vm.stateManager.getAccount(createAddressFromString(a)))?.balance ?? 0n;
+const bal = (t: 'w' | 'u', a: string) => read(t === 'w' ? W.abi : U.abi, t === 'w' ? w : u, 'balanceOf', [a]);
+const residual = async (a = adapter) => [await native(a), await bal('w', a), await bal('u', a), await read(W.abi, w, 'allowance', [a, r]), await read(U.abi, u, 'allowance', [a, r])];
+async function setNative(a: string, v: bigint) { const acc = (await vm.stateManager.getAccount(createAddressFromString(a))) ?? new Account(); acc.balance = v; await vm.stateManager.putAccount(createAddressFromString(a), acc); }
+async function fresh(bps = 5, code = { w: true, u: true, r: true }) {
+  vm = await createVM({ common: common(), blockchain });
+  for (const a of [user, other, guardian]) await vm.stateManager.putAccount(createAddressFromString(a), new Account(0n, 10n ** 25n));
+  for (const [k, addr, art] of [['w', w, W], ['u', u, U], ['r', r, R]] as const) if (code[k]) await vm.stateManager.putCode(createAddressFromString(addr), hexToBytes(`0x${art.evm.deployedBytecode.object}`));
+  if (!code.w || !code.u || !code.r) return;
+  await ok(R.abi, r, 'setRate', [w, 600n * E]); await ok(R.abi, r, 'setRate', [u, E / 600n]);
+  await ok(U.abi, u, 'mint', [user, 100_000n * E]); await ok(U.abi, u, 'mint', [r, 10_000_000n * E]);
+  await ok(W.abi, w, 'deposit', [], user, 10_000n * E); await ok(W.abi, w, 'transfer', [r, 5_000n * E]);
+  feeBps = bps; adapter = await deployAdapter(bps);
+  await ok(U.abi, u, 'approve', [adapter, MAX]);
+}
+async function deployAdapter(bps: number, g = guardian, f = fee) { const d = await deploy(A, [g, f, bps]); expect(d.execResult.exceptionError).toBeUndefined(); return d.createdAddress.toString(); }
+const zero = [0n, 0n, 0n, 0n, 0n];
+const userOut = (sell: boolean) => sell ? native(user) : bal('u', user);
+const feeOut = (sell: boolean) => bal(sell ? 'w' : 'u', fee);
+const grossOf = (sell: boolean, amt: bigint) => sell ? amt * (E / 600n) / E : amt * 600n * E / E;
+const grossMin = (net: bigint, bps: number) => (net - 1n) * 10000n / BigInt(10000 - bps) + 1n;
+
+beforeEach(async () => { await fresh(5); });
+
+describe('V1.12 review: exact frozen identity', () => {
+  it('compiles the unchanged frozen source (sha256) unless an explicit mutant run', async () => {
+    const { createHash } = await import('node:crypto');
+    const sha = createHash('sha256').update(fs.readFileSync(`${DIR}/${SRC}`)).digest('hex');
+    expect(sha).toBe(FROZEN_SHA);
+    if (!mutant) expect(createHash('sha256').update(source).digest('hex')).toBe(FROZEN_SHA);
+  });
+});
+
+describe('TG-01 zero net floor', () => {
+  for (const sell of [false, true]) it(`${sell ? 'USDT->BNB' : 'BNB->USDT'} minNetOut=0 -> BadAmount, no state change`, async () => {
+    const before = await userOut(sell); await rejects(swap(sell, { minNetOut: 0n }), 'BadAmount()');
+    expect(await userOut(sell)).toBe(before); expect(await residual()).toEqual(zero);
+  });
+});
+
+describe('TG-02 msg.value binding', () => {
+  for (const d of [-1n, 1n]) it(`BNB msg.value = amountIn ${d > 0 ? '+' : '-'}1 wei -> BadSnapshot`, async () => {
+    await rejects(swap(false, {}, user, E / 100n + d), 'BadSnapshot()'); expect(await residual()).toEqual(zero);
+  });
+  it('nonpayable USDT->BNB rejects attached native value with empty revert data', async () => {
+    const before = await bal('u', user); await rejects(swap(true, {}, user, 1n), null); expect(await bal('u', user)).toBe(before);
+  });
+});
+
+describe('TG-03 settlement at 0 and 10 bps, including fee dust', () => {
+  for (const bps of [0, 10]) for (const sell of [false, true]) it(`${bps} bps ${sell ? 'USDT->BNB' : 'BNB->USDT'} exact user/treasury deltas`, async () => {
+    await fresh(bps); const amt = sell ? 6n * E : E / 100n; const gross = grossOf(sell, amt); const f = gross * BigInt(bps) / 10000n;
+    const ub = await userOut(sell), fb = await feeOut(sell);
+    const x = await swap(sell, { amountIn: amt, minNetOut: gross - f }); expect(x.execResult.exceptionError).toBeUndefined();
+    expect(await userOut(sell) - ub).toBe(gross - f); expect(await feeOut(sell) - fb).toBe(f); expect(await residual()).toEqual(zero);
+  });
+  for (const sell of [false, true]) it(`10 bps fee dust rounds to zero for ${sell ? 'USDT->BNB' : 'BNB->USDT'}`, async () => {
+    await fresh(10); const amt = sell ? 599_000n : 1n; const gross = grossOf(sell, amt); expect(gross * 10n / 10000n).toBe(0n);
+    const ub = await userOut(sell), fb = await feeOut(sell);
+    expect((await swap(sell, { amountIn: amt, minNetOut: gross })).execResult.exceptionError).toBeUndefined();
+    expect(await userOut(sell) - ub).toBe(gross); expect(await feeOut(sell) - fb).toBe(0n); expect(await residual()).toEqual(zero);
+  });
+});
+
+describe('TG-04 _grossMinimum minimality (observed at the router)', () => {
+  for (const bps of [0, 5, 10]) it(`seeded 40 nets at ${bps} bps: smallest gross yielding net; net=1 -> 1`, async () => {
+    await fresh(bps); let seed = 4242 + bps;
+    const nets = [1n, 2n, 9999n, 10000n, 10001n, 6n * E - 6n * E * BigInt(bps) / 10000n];
+    for (let i = 0; i < 34; i++) { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; nets.push(BigInt(1 + seed) * BigInt(1 + (seed % 9973)) % (6n * E) + 1n); }
+    for (const net of nets) {
+      const gross = 6n * E; const feeAt = (g: bigint) => g - g * BigInt(bps) / 10000n;
+      const x = await swap(false, { minNetOut: net });
+      if (feeAt(gross) >= net) expect(x.execResult.exceptionError).toBeUndefined(); else continue;
+      const floor = await read(R.abi, r, 'lastMinimum');
+      expect(floor).toBe(grossMin(net, bps)); expect(feeAt(floor)).toBeGreaterThanOrEqual(net);
+      if (floor > 1n) expect(feeAt(floor - 1n)).toBeLessThan(net);
+      if (net === 1n) expect(floor).toBe(1n);
+    }
+    expect(await residual()).toEqual(zero);
+  }, 60_000);
+  for (const bps of [0, 5, 10]) for (const sell of [false, true]) it(`net=MAX at ${bps} bps ${sell ? 'USDT->BNB' : 'BNB->USDT'} fails closed with Panic(0x11), no residual`, async () => {
+    await fresh(bps); const ub = await userOut(sell);
+    const x = await rejects(swap(sell, { minNetOut: MAX }), '0x4e487b71');
+    expect(BigInt(`0x${bytesToHex(x.execResult.returnValue).slice(10)}`)).toBe(0x11n);
+    expect(await userOut(sell)).toBe(ub); expect(await residual()).toEqual(zero);
+  });
+});
+
+describe('TG-05 exact selectors for wrong snapshots', () => {
+  const rows: [string, boolean, any, string][] = [
+    ['snapshot chainId 677', false, { chainId: 677n }, 'BadSnapshot()'], ['foreign router', false, { router: other }, 'BadSnapshot()'],
+    ['unknown tier 100', false, { poolFee: 100 }, 'BadSnapshot()'], ['unknown tier 10000', false, { poolFee: 10000 }, 'BadSnapshot()'],
+    ['cross-wallet user', false, { user: other }, 'BadSnapshot()'], ['XAUt input', false, { tokenIn: XAUT }, 'BadSnapshot()'],
+    ['BNB dir output WBNB', false, { tokenOut: w }, 'BadSnapshot()'], ['BNB dir reversed tokens', false, { tokenIn: u, tokenOut: w }, 'BadSnapshot()'],
+    ['amountIn 0 with value 0', false, { amountIn: 0n }, 'BadAmount()'], ['BNB over 1 ether', false, { amountIn: E + 1n }, 'BadAmount()'],
+    ['31s old', false, { quotedAt: NOW - 31n }, 'BadSnapshot()'], ['future quotedAt', false, { quotedAt: NOW + 1n }, 'BadSnapshot()'],
+    ['current block', false, { quoteBlock: BLOCK, quoteBlockHash: blockHash(BLOCK) }, 'BadSnapshot()'], ['future block', false, { quoteBlock: BLOCK + 1n }, 'BadSnapshot()'],
+    ['101 blocks old', false, { quoteBlock: BLOCK - 101n, quoteBlockHash: blockHash(BLOCK - 101n) }, 'BadSnapshot()'],
+    ['hash of another block', false, { quoteBlockHash: blockHash(BLOCK - 2n) }, 'BadSnapshot()'], ['zero hash', false, { quoteBlockHash: `0x${'00'.repeat(32)}` }, 'BadSnapshot()'],
+    ['USDT dir input WBNB', true, { tokenIn: w }, 'BadSnapshot()'], ['USDT dir output USDT', true, { tokenOut: u }, 'BadSnapshot()'],
+    ['USDT dir XAUt input', true, { tokenIn: XAUT }, 'BadSnapshot()'], ['USDT dir XAUt output', true, { tokenOut: XAUT }, 'BadSnapshot()'],
+    ['USDT dir reversed tokens', true, { tokenIn: w, tokenOut: u }, 'BadSnapshot()'], ['USDT dir chain 677', true, { chainId: 677n }, 'BadSnapshot()'],
+    ['USDT dir cross-wallet', true, { user: other }, 'BadSnapshot()'], ['USDT amount 0', true, { amountIn: 0n }, 'BadAmount()'],
+    ['USDT over 1000', true, { amountIn: 1000n * E + 1n }, 'BadAmount()'],
+  ];
+  for (const [name, sell, p, sig] of rows) it(`${name} -> ${sig}`, async () => { await rejects(swap(sell, p), sig); expect(await residual()).toEqual(zero); });
+  it('chain 677 runtime -> WrongChain for both swaps and pause', async () => {
+    vm = await createVM({ common: common(677), stateManager: vm.stateManager, blockchain });
+    await rejects(swap(false), 'WrongChain()'); await rejects(swap(true), 'WrongChain()'); await rejects(call(A.abi, adapter, 'setPaused', [true], guardian), 'WrongChain()');
+  });
+});
+
+describe('TG-06 exact time/block boundaries', () => {
+  const pass: [string, any][] = [['deadline == now', { deadline: NOW }], ['deadline == now+120', { deadline: NOW + 120n }], ['quotedAt == now', { quotedAt: NOW }],
+    ['quotedAt == now-30', { quotedAt: NOW - 30n }], ['quoteBlock == number-1', {}], ['quoteBlock == number-100', { quoteBlock: BLOCK - 100n, quoteBlockHash: blockHash(BLOCK - 100n) }]];
+  for (const [name, p] of pass) for (const sell of [false, true]) it(`accepts ${name} (${sell ? 'USDT' : 'BNB'} in)`, async () => { expect((await swap(sell, p)).execResult.exceptionError).toBeUndefined(); });
+  const fail: [string, any, string][] = [['deadline now-1', { deadline: NOW - 1n }, 'Expired()'], ['deadline now+121', { deadline: NOW + 121n }, 'DeadlineTooFar()'],
+    ['quotedAt now-31', { quotedAt: NOW - 31n }, 'BadSnapshot()'], ['quoteBlock number-101', { quoteBlock: BLOCK - 101n, quoteBlockHash: blockHash(BLOCK - 101n) }, 'BadSnapshot()'],
+    ['quoteBlock number-257 (beyond blockhash window)', { quoteBlock: BLOCK - 257n, quoteBlockHash: blockHash(BLOCK - 257n) }, 'BadSnapshot()']];
+  for (const [name, p, sig] of fail) it(`rejects ${name} -> ${sig}`, async () => { await rejects(swap(false, p), sig); });
+  it('snapshot checks precede deadline checks (stale snapshot with expired deadline reports BadSnapshot)', async () => {
+    await rejects(swap(false, { quotedAt: NOW - 31n, deadline: NOW - 1n }), 'BadSnapshot()');
+  });
+});
+
+describe('TG-07 constructor configuration', () => {
+  it('feeRecipient == predicted adapter address -> BadConfig', async () => {
+    const nonce = (await vm.stateManager.getAccount(createAddressFromString(user))).nonce; const predicted = getContractAddress({ from: user, nonce });
+    await rejects(deploy(A, [guardian, predicted, 5]), 'BadConfig()');
+  });
+  it('guardian == feeRecipient is PERMITTED by V1.12 (policy note, not approval)', async () => { await deployAdapter(5, guardian, guardian); });
+  for (const missing of ['w', 'u', 'r'] as const) it(`non-contract ${missing === 'w' ? 'WBNB' : missing === 'u' ? 'USDT' : 'ROUTER'} -> BadConfig`, async () => {
+    await fresh(5, { w: missing !== 'w', u: missing !== 'u', r: missing !== 'r' }); await rejects(deploy(A, [guardian, fee, 5]), 'BadConfig()');
+  });
+  for (const [name, t] of [['WBNB', w], ['USDT', u], ['ROUTER', r]] as const) it(`CONFIRMED GAP AF-03: feeRecipient == ${name} is accepted by V1.12`, async () => { await deployAdapter(5, guardian, t); });
+});
+
+describe('TG-08 callback and pause attempts', () => {
+  for (const [name, payload] of [['USDT->BNB', () => enc(A.abi, 'swapExactUsdtForBnb', [snap(true)])], ['setPaused', () => enc(A.abi, 'setPaused', [true])]] as const)
+    it(`router callback attempting ${name} hits Reentrancy`, async () => {
+      await ok(R.abi, r, 'setMode', [4]); await ok(R.abi, r, 'setReentry', [payload()]);
+      expect((await swap()).execResult.exceptionError).toBeUndefined();
+      expect((await read(R.abi, r, 'lastError')).slice(0, 10)).toBe(sel('Reentrancy()')); expect(await read(A.abi, adapter, 'paused')).toBe(false);
+    });
+  it('guardian contract as payout receiver cannot pause mid-transfer (Reentrancy)', async () => {
+    const h = (await deploy(H)).createdAddress.toString(); const a = await deployAdapter(5, h, fee);
+    await ok(H.abi, h, 'setup', [a, enc(A.abi, 'setPaused', [true]), false]); await ok(U.abi, u, 'mint', [h, 6n * E]);
+    await ok(H.abi, h, 'execute', [u, enc(A.abi, 'swapExactUsdtForBnb', [snap(true, { user: h })]), 6n * E]);
+    expect((await read(H.abi, h, 'lastError')).slice(0, 10)).toBe(sel('Reentrancy()')); expect(await read(A.abi, a, 'paused')).toBe(false);
+    // Outside a swap the same guardian contract can pause.
+    await ok(H.abi, h, 'setup', [a, '0x', false]);
+  });
+  it('extra native refunds from router/any contract -> UnexpectedNative', async () => {
+    await setNative(r, 10n * E); await rejects(run(r, adapter, '0x', 1n), 'UnexpectedNative()'); await rejects(run(guardian, adapter, '0x1234', 1n), 'UnexpectedNative()');
+    const n = (await deploy(RM.NativeRefunder)).createdAddress.toString();
+    const x = await ok(RM.NativeRefunder.abi, n, 'push', [adapter], user, 5n);
+    const [okFlag, err] = decodeFunctionResult({ abi: RM.NativeRefunder.abi, functionName: 'push', data: bytesToHex(x.execResult.returnValue) }) as any;
+    expect(okFlag).toBe(false); expect(err.slice(0, 10)).toBe(sel('UnexpectedNative()')); expect(await native(adapter)).toBe(0n);
+  });
+});
+
+describe('TG-09 event fields', () => {
+  const logsOf = (x: any) => x.execResult.logs.map(([addr, topics, data]: any) => ({ address: bytesToHex(addr), ...decodeEventLog({ abi: A.abi, topics: topics.map((t: any) => bytesToHex(t)), data: bytesToHex(data) }) }));
+  for (const sell of [false, true]) it(`Swapped(${sell ? 'USDT->BNB' : 'BNB->USDT'}) carries user/direction/amountIn/gross/fee/net; no tier field`, async () => {
+    const amt = sell ? 6n * E : E / 100n; const gross = grossOf(sell, amt); const f = gross * 5n / 10000n;
+    const x = await swap(sell, { amountIn: amt, poolFee: 2500 });
+    const ev = logsOf(x).filter((l: any) => l.address.toLowerCase() === adapter.toLowerCase());
+    expect(ev).toHaveLength(1); expect(ev[0].eventName).toBe('Swapped');
+    expect(ev[0].args).toEqual({ user: expect.stringMatching(/^0x0+a1$/i), bnbToUsdt: !sell, amountIn: amt, grossOut: gross, fee: f, netOut: gross - f });
+    expect(Object.keys(ev[0].args)).not.toContain('poolFee');
+  });
+  it('PauseChanged(true/false) emitted exactly with value', async () => {
+    for (const v of [true, false]) { const x = await ok(A.abi, adapter, 'setPaused', [v], guardian); const ev = logsOf(x); expect(ev).toHaveLength(1); expect(ev[0]).toMatchObject({ eventName: 'PauseChanged', args: { paused: v } }); }
+  });
+});
+
+describe('TG-10 donations are intentionally unrecoverable and excluded from settlement', () => {
+  it('WBNB donation, large asset donation, repeated donation->swap keep exact baseline', async () => {
+    await ok(W.abi, w, 'transfer', [adapter, 3n]);
+    await ok(W.abi, w, 'transfer', [adapter, 100n * E]); await ok(U.abi, u, 'transfer', [adapter, 1000n * E]); await setNative(adapter, 50n * E);
+    let base = await residual();
+    for (let i = 0; i < 6; i++) {
+      const sell = i % 2 === 1; const amt = sell ? 6n * E : E / 100n; const gross = grossOf(sell, amt); const f = gross * 5n / 10000n;
+      const ub = await userOut(sell), fb = await feeOut(sell);
+      expect((await swap(sell, { amountIn: amt })).execResult.exceptionError).toBeUndefined();
+      expect(await userOut(sell) - ub).toBe(gross - f); expect(await feeOut(sell) - fb).toBe(f); expect(await residual()).toEqual(base);
+      await ok(U.abi, u, 'transfer', [adapter, BigInt(i + 1)]); base = await residual();
+    }
+    expect(A.abi.filter((x: any) => x.type === 'function').map((x: any) => x.name)).not.toEqual(expect.arrayContaining(['sweep', 'rescue', 'withdraw']));
+  });
+});
+
+describe('TG-11 seeded mock fuzz with reverted sequences (MOCK targets only)', () => {
+  it('600 mixed ops: valid swaps, invalid snapshots, pause/unpause, donations; invariants hold', async () => {
+    let seed = 0x1120_2611, okCount = 0, revCount = 0;
+    const rnd = (n: number) => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed % n; };
+    const bad = [{ minNetOut: 0n }, { poolFee: 3000 }, { user: other }, { quotedAt: NOW - 31n }, { deadline: NOW + 121n }, { quoteBlockHash: blockHash(1n) }, { minNetOut: MAX }];
+    let base = await residual(); let isPaused = false;
+    for (let i = 0; i < 600; i++) {
+      const op = rnd(10); const sell = rnd(2) === 1;
+      if (op === 0) { isPaused = !isPaused; await ok(A.abi, adapter, 'setPaused', [isPaused], guardian); continue; }
+      if (op === 1) { await ok(U.abi, u, 'transfer', [adapter, BigInt(1 + rnd(1000))]); base = await residual(); continue; }
+      const amt = sell ? BigInt(1 + rnd(2000)) * 10n ** 15n : BigInt(1 + rnd(50000)) * 10n ** 12n;
+      const patch = op < 4 ? bad[rnd(bad.length)] : {};
+      const ub = await userOut(sell), fb = await feeOut(sell);
+      const x = await swap(sell, { amountIn: amt, ...patch });
+      if (isPaused || op < 4) { expect(x.execResult.exceptionError).toBeDefined(); revCount++; expect(await userOut(sell)).toBe(ub); expect(await feeOut(sell)).toBe(fb); }
+      else { expect(x.execResult.exceptionError).toBeUndefined(); okCount++; const g = grossOf(sell, amt), f = g * 5n / 10000n; expect(await userOut(sell) - ub).toBe(g - f); expect(await feeOut(sell) - fb).toBe(f); }
+      expect(await residual()).toEqual(base);
+    }
+    expect(okCount).toBeGreaterThan(100); expect(revCount).toBeGreaterThan(100);
+  }, 240_000);
+});
+
+describe('TG-12 (mock portion): contract recipients and 2300-gas stipend', () => {
+  it('adapter receive() succeeds under the 2300 stipend WBNB.withdraw uses (Mock WBNB uses transfer)', async () => {
+    expect((await swap(true)).execResult.exceptionError).toBeUndefined();
+  });
+  it('contract recipient needing >2300 gas receives full native payout (call forwards gas)', async () => {
+    const h = (await deploy(RM.HeavyReceiver)).createdAddress.toString(); await ok(RM.HeavyReceiver.abi, h, 'setAdapter', [adapter]); await ok(U.abi, u, 'mint', [h, 6n * E]);
+    const before = await native(h); await ok(RM.HeavyReceiver.abi, h, 'run', [u, enc(A.abi, 'swapExactUsdtForBnb', [snap(true, { user: h })]), 6n * E]);
+    const g = grossOf(true, 6n * E); expect(await native(h) - before).toBe(g - g * 5n / 10000n); expect(await residual()).toEqual(zero);
+  });
+});

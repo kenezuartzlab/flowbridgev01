@@ -1,0 +1,175 @@
+{
+  "generatedAt": "2026-11-25T15:16:57.542Z",
+  "scope": "LOCAL_ANVIL_FORK_ONLY_NOT_MAINNET",
+  "mainnetTransactions": 0,
+  "signatures": 0,
+  "independentAudit": "NOT_DONE",
+  "release": "HOLD",
+  "client": "anvil (foundry) fork of BSC state; not a BSC validator client; archive/historical state not required (latest-20 fork)",
+  "rpcProvenance": {
+    "upstream": "https://bsc-dataseed.bnbchain.org",
+    "independence": "SINGLE_OPERATOR_NOT_QUORUM"
+  },
+  "checks": {
+    "quoterParity": [
+      {
+        "tier": 500,
+        "direction": "BNB->USDT",
+        "amountIn": "10000000000000000",
+        "quoterGross": "5316923242515561803",
+        "adapterGross": "5316923242515561803",
+        "exact": true,
+        "status": "success"
+      },
+      {
+        "tier": 500,
+        "direction": "USDT->BNB",
+        "amountIn": "5000000000000000000",
+        "quoterGross": "9394533383725481",
+        "adapterGross": "9394533383725481",
+        "exact": true,
+        "status": "success"
+      },
+      {
+        "tier": 2500,
+        "direction": "BNB->USDT",
+        "amountIn": "10000000000000000",
+        "quoterGross": "5317797130631021862",
+        "adapterGross": "5317797130631021862",
+        "exact": true,
+        "status": "success"
+      },
+      {
+        "tier": 2500,
+        "direction": "USDT->BNB",
+        "amountIn": "5000000000000000000",
+        "quoterGross": "9355451689795451",
+        "adapterGross": "9355451689795451",
+        "exact": true,
+        "status": "success"
+      }
+    ],
+    "priceMove": {
+      "quotedGross": "5316923157249304105",
+      "grossAfterMove": "5288466637346091806",
+      "netFloor": "5314264695670679453",
+      "staleSnapshotReverted": true,
+      "refreshedSnapshotSameFloorReverted": true,
+      "userBalanceUnchanged": true,
+      "note": "Net floor, not snapshot freshness, provides the price protection (AF-01)."
+    },
+    "tierDepth": [
+      {
+        "tier": 500,
+        "out0_001": "528846728575767215",
+        "out1": "528839531304294595023",
+        "impactBpsAtCap": 0
+      },
+      {
+        "tier": 2500,
+        "out0_001": "531790614278536893",
+        "out1": "530390472560950310201",
+        "impactBpsAtCap": 26
+      }
+    ],
+    "realWbnbWithdrawStipend": {
+      "status": "success"
+    },
+    "contractRecipient": "MOCK_ONLY (review.evm.test.ts TG-12 HeavyReceiver); not repeated on fork"
+  },
+  "localTransactions": [
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "local candidate deploy",
+      "hash": "0xc16a929fbea08dc8adc8948ca70f824833d67926757ee556e6aedb0e3d02db2d",
+      "status": "success",
+      "gasUsed": "1513241"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "parity 500 BNB->USDT",
+      "hash": "0xdd948600225d5ab4fe6db6100890cba14f8cb7a749ec6eea9ebad9190dfe5d89",
+      "status": "success",
+      "gasUsed": "215538"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "parity 500 USDT->BNB",
+      "hash": "0x7436c883672fedc713284ed4d795f3e7e2d33a1be6254ca92aefa84137ad1ac9",
+      "status": "success",
+      "gasUsed": "239064"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "parity 2500 BNB->USDT",
+      "hash": "0x55cec5099272ab8f3eb78d26dd8a2f1fccd47f4bdd1340214412d421e459f8a6",
+      "status": "success",
+      "gasUsed": "202323"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "parity 2500 USDT->BNB",
+      "hash": "0xe155fcbe02d7223e8ce7528179e879d9abac6978d63faf3fb07f5063d8c20f8b",
+      "status": "success",
+      "gasUsed": "206908"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "mover wrap",
+      "hash": "0xd84dcd7c7f7a08d919c57d5ecc9ad62abac57497fb46f54ba0341bc545baccd2",
+      "status": "success",
+      "gasUsed": "45038"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "mover approve",
+      "hash": "0x2fee8651fd8f7fdbd90df815bf23ddea555fe28ae1718dda18b5d6c3929af65d",
+      "status": "success",
+      "gasUsed": "46064"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "mover price move",
+      "hash": "0x3f3e6999e349863918e6006e540473391a53a5fa61267ffcd34e6b704ba6fe6e",
+      "status": "success",
+      "gasUsed": "338285"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "label": "stipend check",
+      "hash": "0xa2565bf318baa52d6cce3763bb6f611c32d88ea00b3a7f47bc09840f668c0d45",
+      "status": "success",
+      "gasUsed": "225243"
+    }
+  ],
+  "fork": {
+    "block": 135677280,
+    "blockHash": "0x0df8e707c64e2fbd563ba87cf58eaaaed9f566ed309bdec94d82f85d79999b3f",
+    "timestamp": "1795619807",
+    "WBNBCodeKeccak": "0xb7d84205eaaf83ce7b3940c6beaad6d22790255e34a9a2b486aa8cdfff118fe6",
+    "USDTCodeKeccak": "0x97a48aa4c129657440dafdacd4c836389734d28cc4a0ca7403e68da660a74a59",
+    "ROUTERCodeKeccak": "0x61002a11263b2c38ff8d5ded90a655987ed98f171a31840ee0014dd7052bccda"
+  },
+  "pools": [
+    {
+      "tier": 500,
+      "pool": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+      "liquidity": "1727192892174934917516456"
+    },
+    {
+      "tier": 2500,
+      "pool": "0x1401ff943D08a7E098328C1d3a9d388923B115D2",
+      "liquidity": "8716068880223330626004"
+    }
+  ],
+  "localCandidate": {
+    "address": "0x6bd69ffdc10d166dc8a804e6117ab4afc75805c2",
+    "deployment": "LOCAL_FORK_ONLY_NOT_MAINNET"
+  },
+  "residual": {
+    "native": "0",
+    "wbnb": "0",
+    "usdt": "0"
+  },
+  "status": "PASS_LOCAL_ONLY"
+}

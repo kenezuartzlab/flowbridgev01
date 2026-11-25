@@ -1,0 +1,28 @@
+{
+  "observedAt": "2026-11-25T15:17:32.090Z",
+  "rpc": "https://bsc-dataseed.bnbchain.org",
+  "independence": "SINGLE_OPERATOR_NOT_QUORUM",
+  "head": 135677376,
+  "samples": [
+    {
+      "span": 100,
+      "seconds": 45,
+      "avgIntervalSec": 0.45
+    },
+    {
+      "span": 1000,
+      "seconds": 450,
+      "avgIntervalSec": 0.45
+    },
+    {
+      "span": 10000,
+      "seconds": 4502,
+      "avgIntervalSec": 0.4502
+    }
+  ],
+  "blocksWithinMaxQuoteAge30s": 66,
+  "maxBlockLag100Seconds": 45,
+  "bindingConstraint": "MAX_QUOTE_AGE (30s) binds first at observed cadence",
+  "flipCadenceSec": 0.3,
+  "note": "If average interval falls below 0.3s, 100 blocks < 30s and MAX_BLOCK_LAG becomes the tighter bound. Timestamps are 1-second resolution."
+}

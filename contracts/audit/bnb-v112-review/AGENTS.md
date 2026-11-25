@@ -1,0 +1,2 @@
+- Review tests compile the frozen V1.12 source unchanged and live outside the frozen candidate directory; mutants exist only under /tmp. Why: closing test gaps must never alter the audited source freeze.
+- HIGH trace evidence is regenerated from Slither output by scripts/bnb-v112-high-traces.mjs and matched by finding key, never array position. Why: stale or misordered traces misled the reviewer (EV-01).

@@ -24,12 +24,13 @@ const json = (file, value) => write(file, JSON.stringify(value, null, 2) + '\n')
 // A disposable export restores the original names before running its isolated harness.
 const copy = (file) => write(file.endsWith('.test.ts') ? `${file}.audit` : file, fs.readFileSync(file));
 const files = [
-  ...execFileSync('git', ['ls-files', candidate, 'contracts/candidates/bnb-swap-adapter-v1-11', 'contracts/audit/bnb-v111'], { encoding: 'utf8' }).trim().split('\n'),
+  ...execFileSync('git', ['ls-files', candidate, 'contracts/candidates/bnb-swap-adapter-v1-11', 'contracts/audit/bnb-v111', 'contracts/audit/bnb-v112-review'], { encoding: 'utf8' }).trim().split('\n'),
   'scripts/bnb-v112-fork-rehearsal.ts', 'src/lib/bnb/quoteAdapter.ts', 'src/lib/rwa/quoteReadiness.ts',
   'docs/security/BNB_SWAP_V1_12_FORK_REHEARSAL_20261122.json',
   'docs/security/BNB_SWAP_V1_12_REMEDIATION_ACCEPTANCE_20261122.md',
   'docs/security/BNB_SWAP_V1_4_SOURCE_ARCHIVE_20261117.json',
-  ...execFileSync('git', ['ls-files', 'docs/security/bnb-v112-evidence'], { encoding: 'utf8' }).trim().split('\n'),
+  ...execFileSync('git', ['ls-files', 'docs/security/bnb-v112-evidence', 'docs/security/bnb-v112-review-evidence'], { encoding: 'utf8' }).trim().split('\n'),
+  'docs/security/BNB_SWAP_V1_12_INITIAL_REVIEW_RESPONSE_20261125.md', 'scripts/bnb-v112-high-traces.mjs', 'scripts/bnb-v112-review-fork.ts', 'scripts/bnb-v112-block-cadence.mjs',
 ];
 for (const file of files) {
   if (!file || file.split('/').some((segment) => ['.git', 'node_modules', '.env'].includes(segment))) throw Error('Forbidden packet path');
@@ -41,7 +42,7 @@ json('evidence/original-package.json', pkg);
 pkg.scripts = { test: 'bun restore-tests.mjs && vitest run', 'audit:verify': 'bun verify.mjs' };
 json('package.json', pkg);
 json('tsconfig.json', { compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', paths: { '@/*': ['./src/*'] }, allowImportingTsExtensions: true, noEmit: true, strict: true } });
-write('vitest.config.ts', "import { defineConfig } from 'vitest/config';\nimport { fileURLToPath } from 'node:url';\nexport default defineConfig({ resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } }, test: { include: ['contracts/candidates/bnb-swap-adapter-v1-12/test/**/*.test.ts', 'contracts/audit/bnb-v111/**/*.test.ts'] } });\n");
+write('vitest.config.ts', "import { defineConfig } from 'vitest/config';\nimport { fileURLToPath } from 'node:url';\nexport default defineConfig({ resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } }, test: { include: ['contracts/candidates/bnb-swap-adapter-v1-12/test/**/*.test.ts', 'contracts/audit/bnb-v111/**/*.test.ts', 'contracts/audit/bnb-v112-review/review.evm.test.ts'] } });\n");
 json('artifacts/standard-input.json', standardInput());
 json('artifacts/compiled-artifact.json', artifact);
 json('artifacts/MANIFEST.full.json', { ...manifest, creationBytecode: `0x${artifact.evm.bytecode.object}`, unlinkedRuntimeBytecode: `0x${artifact.evm.deployedBytecode.object}` });
@@ -52,7 +53,7 @@ const hits = productionFiles.filter((file) => /FlowBridgeBnbSwapAdapter|bnb-swap
 if (hits.length || fork.mainnetTransactions !== 0 || fork.localCandidate?.deployment !== 'LOCAL_FORK_ONLY_NOT_MAINNET') throw Error('Mainnet absence evidence gate failed');
 json('SOURCE_FREEZE.json', { classification: 'PRIVATE_EXTERNAL_AUDIT_SUBMISSION_NOT_PUBLIC', anchorCommit: anchor, candidatePath: `${candidate}/${source}`, sha256: sha(sourceBytes), sourceKeccak: manifest.sourceKeccak, creationBytecodeKeccak: manifest.creationBytecodeKeccak, unlinkedRuntimeKeccak: manifest.unlinkedRuntimeKeccak, compiler: manifest.compiler, optimizer: { enabled: true, runs: 200 }, evmVersion: manifest.evmVersion, solidityImports: [], sourceClosureFiles: [source], sourceChangeInvalidatesFreeze: true, independentAudit: 'NOT_ENGAGED_NOT_SIGNED', deploymentAuthorized: false });
 json('evidence/mainnet-deployment-status.json', { status: 'NO_BNB_MAINNET_ADAPTER_DEPLOYMENT_RECORDED', mainnetAdapterAddress: null, mainnetDeploymentTransaction: null, productionRegistryMatches: hits, inspectedFiles: productionFiles.map((file) => ({ path: file, sha256: sha(fs.readFileSync(file)) })), forkScope: 'LOCAL_ONLY', localTransactions: fork.transactions.length, mainnetTransactions: fork.mainnetTransactions, note: 'Absence is scoped to project manifests/evidence, not an assertion about arbitrary third-party deployments. Local candidate addresses/hashes are synthetic Anvil observations, never mainnet deployment proof.' });
-json('evidence/fresh-dependency-audit.json', JSON.parse(fs.readFileSync('/tmp/bnb-audit-submit/dependency-audit.json', 'utf8')));
-json('evidence/fresh-dependency-audit-provenance.json', { command: 'bun audit --json', observedAt: '2026-11-22T07:09:52Z', lockfileSha256: sha(fs.readFileSync('bun.lock')), productionOpen: 'Zod 3.22.4 via WalletConnect/AppKit (HIGH)', developmentOpen: 'minimatch 10.2.5 via TypeScript ESLint (moderate)', suppressed: 0, independentAudit: false });
+json('evidence/fresh-dependency-audit.json', JSON.parse(fs.readFileSync('docs/security/bnb-v112-review-evidence/dependency-audit-20261125.json', 'utf8'))); // EV-02: tracked, timestamped, lockfile-hashed evidence
+json('evidence/fresh-dependency-audit-provenance.json', { command: 'bun audit --json', observedAt: '2026-11-25T15:18:00Z', lockfileSha256: sha(fs.readFileSync('bun.lock')), productionOpen: 'Zod 3.22.4 via WalletConnect/AppKit (HIGH)', developmentOpen: 'minimatch 10.2.5 via TypeScript ESLint (moderate)', suppressed: 0, independentAudit: false });
 json('evidence/fork-reproduction.json', { block: fork.fork.block, blockHash: fork.fork.blockHash, command: `BNB_FORK_BLOCK=${fork.fork.block} nix shell nixpkgs#foundry -c bun scripts/bnb-v112-fork-rehearsal.ts`, note: 'Run only in a disposable private copy; outputs overwrite only that copy. Upstream archive availability can block reproduction. All writes target 127.0.0.1:8547, never the BNB RPC.' });
 console.log(`Private packet staged at ${target}; documentation and integrity inventory must be completed before submission.`);

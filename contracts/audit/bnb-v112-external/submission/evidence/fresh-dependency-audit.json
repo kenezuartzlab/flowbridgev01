@@ -1,34 +1,45 @@
 {
-  "minimatch": [
-    {
-      "id": 1244623,
-      "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
-      "title": "minimatch has potential denial of service via globparts amplification",
-      "severity": "moderate",
-      "vulnerable_versions": ">=7.0.0 <11.0.1",
-      "cwe": [
-        "CWE-405"
-      ],
-      "cvss": {
-        "score": 0,
-        "vectorString": null
+  "command": "bun audit --json",
+  "observedAt": "2026-11-25T15:18:00Z",
+  "lockfileSha256": "122dd676931b7698e02915675549a982b950e5a2c077faccadd9329fcae27c57",
+  "exitCode": 1,
+  "result": {
+    "minimatch": [
+      {
+        "id": 1244623,
+        "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+        "title": "minimatch has potential denial of service via globparts amplification",
+        "severity": "moderate",
+        "vulnerable_versions": ">=7.0.0 <11.0.1",
+        "cwe": [
+          "CWE-405"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        }
       }
-    }
-  ],
-  "zod": [
-    {
-      "id": 1243066,
-      "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
-      "title": "Zod can exhaust memory while validating oversized constrained collections",
-      "severity": "high",
-      "vulnerable_versions": "<4.6.6",
-      "cwe": [
-        "CWE-770"
-      ],
-      "cvss": {
-        "score": 7.5,
-        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+    ],
+    "zod": [
+      {
+        "id": 1243066,
+        "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+        "title": "Zod can exhaust memory while validating oversized constrained collections",
+        "severity": "high",
+        "vulnerable_versions": "<4.6.6",
+        "cwe": [
+          "CWE-770"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        }
       }
-    }
-  ]
+    ]
+  },
+  "classification": {
+    "zod": "PRODUCTION transitive via @walletconnect/ethereum-provider 2.23.10 (pins zod 3.22.4); fix only in zod 4.6.6 (major) - no compatible override; UNRESOLVED",
+    "minimatch": "DEV-only transitive via TypeScript ESLint tooling; moderate; UNRESOLVED (major-range bump)"
+  },
+  "suppressed": 0
 }

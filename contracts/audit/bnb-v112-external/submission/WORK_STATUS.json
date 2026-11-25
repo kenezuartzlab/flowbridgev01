@@ -5,8 +5,8 @@
   "packetComplete": true,
   "freshExportLockedInstall": "PASS",
   "exportTests": {
-    "passed": 89,
-    "total": 89
+    "passed": 174,
+    "total": 174
   },
   "projectTests": {
     "passed": 3024,
@@ -28,5 +28,25 @@
     "Compatible WalletConnect Zod patch; dev minimatch compatibility",
     "Separate guardian/fee/MEV/legal/wallet/deployment/publication approvals"
   ],
-  "scope": "Self-run tooling reproduction is not independent third-party verification"
+  "scope": "Self-run tooling reproduction is not independent third-party verification",
+  "initialReviewResponse": {
+    "date": "2026-11-25",
+    "report": "docs/security/BNB_SWAP_V1_12_INITIAL_REVIEW_RESPONSE_20261125.md",
+    "sourceChanged": false,
+    "evidenceCorrected": [
+      "EV-01 high-trace-review.json regenerated for V1.12",
+      "EV-02 tracked dependency evidence"
+    ],
+    "exportTests": {
+      "passed": 174,
+      "total": 174
+    },
+    "mutantsKilled": "15/15",
+    "ownerDecisionsPending": [
+      "D-01 AF-01",
+      "D-02 AF-02",
+      "D-03 AF-03",
+      "D-04 AF-04"
+    ]
+  }
 }

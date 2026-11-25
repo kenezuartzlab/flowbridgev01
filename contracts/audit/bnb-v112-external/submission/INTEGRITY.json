@@ -37,8 +37,8 @@
     },
     {
       "path": "WORK_STATUS.json",
-      "sha256": "912bd89bb1addaf5ee4f3b1dcaf78791c673cfb7a2e3fb9562dd0e57a9a630e0",
-      "bytes": 1196
+      "sha256": "ebc85cc06fc8d7e88db0abdaa71b543eb015a3f13a9f77f842388aadce2d4fd1",
+      "bytes": 1718
     },
     {
       "path": "artifacts/MANIFEST.full.json",
@@ -74,6 +74,31 @@
       "path": "contracts/audit/bnb-v111/quotePreview.ts",
       "sha256": "46af000cd362bed4208f0c60448c03a10a3540eaed3d192c69253ffbb8e87d00",
       "bytes": 3782
+    },
+    {
+      "path": "contracts/audit/bnb-v112-review/AGENTS.md",
+      "sha256": "aa8726ad45d409364cda3dece687679dc63af4a4469e55b6efa7699aec19a554",
+      "bytes": 408
+    },
+    {
+      "path": "contracts/audit/bnb-v112-review/ReviewMocks.sol",
+      "sha256": "10142f55c7df564fcf64dd737a1c75f7d95e22a047e9a7e6b7d96de5ba86d220",
+      "bytes": 848
+    },
+    {
+      "path": "contracts/audit/bnb-v112-review/evidence.test.ts.audit",
+      "sha256": "bda7a7ac5631682ee06257f0483928413beb213aec28ed7def17b2a043a0be59",
+      "bytes": 3278
+    },
+    {
+      "path": "contracts/audit/bnb-v112-review/mutation-run.mjs",
+      "sha256": "08fd3198abc97692a02523afc3b7ed6f7c990ef10573ae65b37355cbdda6ab0e",
+      "bytes": 4229
+    },
+    {
+      "path": "contracts/audit/bnb-v112-review/review.evm.test.ts.audit",
+      "sha256": "a9ac5e1db2335c1b399711a7c57786cf5ba7f05f570fc1aa8459d765c620b1f0",
+      "bytes": 23540
     },
     {
       "path": "contracts/candidates/bnb-swap-adapter-v1-11/AGENTS.md",
@@ -151,6 +176,11 @@
       "bytes": 9995
     },
     {
+      "path": "docs/security/BNB_SWAP_V1_12_INITIAL_REVIEW_RESPONSE_20261125.md",
+      "sha256": "3336c42eb50542a8abad13f6025d8ebdcc8ba618e290c37ea49cbea44d728967",
+      "bytes": 11766
+    },
+    {
       "path": "docs/security/BNB_SWAP_V1_12_REMEDIATION_ACCEPTANCE_20261122.md",
       "sha256": "a19ad315e13b332f0104ca850b59325005a29169be2bcccc4592d9f4023440aa",
       "bytes": 6500
@@ -186,9 +216,14 @@
       "bytes": 37376
     },
     {
+      "path": "docs/security/bnb-v112-evidence/high-trace-before-v111.json",
+      "sha256": "9d8e64eb7207d970e069e05d4e344f7b26b4fc8f76281a60f883a682980afd0a",
+      "bytes": 6973
+    },
+    {
       "path": "docs/security/bnb-v112-evidence/high-trace-review.json",
-      "sha256": "117a159cb90f5d34dbf4966767acd17dd7bb5c857d1e933645d351c633e3f297",
-      "bytes": 11513
+      "sha256": "cee6d948c20542e81c28a4d375b1a2b674a57751c8ed05d4b4942aadd69815ae",
+      "bytes": 32370
     },
     {
       "path": "docs/security/bnb-v112-evidence/logo-final.log",
@@ -246,19 +281,49 @@
       "bytes": 13290
     },
     {
+      "path": "docs/security/bnb-v112-review-evidence/block-cadence.json",
+      "sha256": "28fbe0645e199d7f4944461d71b1e677e8188116473d6207752525cd00af6ae3",
+      "bytes": 754
+    },
+    {
+      "path": "docs/security/bnb-v112-review-evidence/dependency-audit-20261125.json",
+      "sha256": "022657ad538d5194c45d48b697bcc13906b924ea00bc1d6f30edc055f619bb09",
+      "bytes": 1418
+    },
+    {
+      "path": "docs/security/bnb-v112-review-evidence/fork-review.json",
+      "sha256": "17100160803b6643a32980da628320810772c24ce427a174967a833a2a1724d5",
+      "bytes": 5325
+    },
+    {
+      "path": "docs/security/bnb-v112-review-evidence/mutation-results.json",
+      "sha256": "65c1e626e9f0cd4a6d3c353ec69a221e19e01cf65029826f0459736034442c47",
+      "bytes": 3541
+    },
+    {
+      "path": "docs/security/bnb-v112-review-evidence/slither-rerun-20261125.json",
+      "sha256": "f1bde1c29f853b4db016cf98d3dcd74f1d9601c4be87fad52b34b2f8bbad559e",
+      "bytes": 546959
+    },
+    {
+      "path": "docs/security/bnb-v112-review-evidence/verification.json",
+      "sha256": "9bbde8d37eca8671dc6be6ac3b978388ce43767696325f23fe617aef8a918e85",
+      "bytes": 1081
+    },
+    {
       "path": "evidence/fork-reproduction.json",
       "sha256": "8093fa969b9a8e6c65cee9b394f356cf1e139c82b0bae8cd0499b09321415543",
       "bytes": 412
     },
     {
       "path": "evidence/fresh-dependency-audit-provenance.json",
-      "sha256": "a99b812e61a1bf7770e579feb6adab34a27f583915aebe5f453f16ff513ca41d",
+      "sha256": "8e67ed0c1ff3c2c46e178435bc5e8ca6037a1152b7af3b621473a7732ac1ed96",
       "bytes": 352
     },
     {
       "path": "evidence/fresh-dependency-audit.json",
-      "sha256": "69405cb3960c779a36352ab877479a63e5ff5e4abf07376c72e1ce732fa48c92",
-      "bytes": 836
+      "sha256": "f7633f495cf70d6caeb274a5f0954b2e9d032f5850766b2e63c3febf8f0ee709",
+      "bytes": 1419
     },
     {
       "path": "evidence/independent-install-tests.log",
@@ -296,9 +361,24 @@
       "bytes": 564
     },
     {
+      "path": "scripts/bnb-v112-block-cadence.mjs",
+      "sha256": "188b2118a4d19ba064cdfb5d7e181aaeee2793e31489112b928b5982d9bf8c3d",
+      "bytes": 1778
+    },
+    {
       "path": "scripts/bnb-v112-fork-rehearsal.ts",
       "sha256": "2204f5c51910757a09dcb2a53d84cc717f99f864670f4d47a59e7ab06083d8a2",
       "bytes": 22873
+    },
+    {
+      "path": "scripts/bnb-v112-high-traces.mjs",
+      "sha256": "c6032c67f0f4d073ce430c6d8d7783b4bbcd3e875aeb9fc46a856f250f5dd590",
+      "bytes": 4740
+    },
+    {
+      "path": "scripts/bnb-v112-review-fork.ts",
+      "sha256": "6545d833c205e4ec3a90001756fa53f97e561ab733ac86470c37e419808ba7a3",
+      "bytes": 10798
     },
     {
       "path": "source/FlowBridgeBnbSwapAdapterV1_12.sol",
@@ -327,8 +407,8 @@
     },
     {
       "path": "vitest.config.ts",
-      "sha256": "671ee7ed14efe8876f5680a7eec9cef5cda6a239479297923dbeb242e8eee0d4",
-      "bytes": 327
+      "sha256": "f239a67e313b99281468ccfa0ad8ce6ae56dfc791ab941568f7851d1bb0e8407",
+      "bytes": 381
     }
   ]
 }

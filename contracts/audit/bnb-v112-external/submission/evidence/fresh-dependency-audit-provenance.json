@@ -1,6 +1,6 @@
 {
   "command": "bun audit --json",
-  "observedAt": "2026-11-22T07:09:52Z",
+  "observedAt": "2026-11-25T15:18:00Z",
   "lockfileSha256": "122dd676931b7698e02915675549a982b950e5a2c077faccadd9329fcae27c57",
   "productionOpen": "Zod 3.22.4 via WalletConnect/AppKit (HIGH)",
   "developmentOpen": "minimatch 10.2.5 via TypeScript ESLint (moderate)",

@@ -1,0 +1,38 @@
+{
+  "version": "V1.11 (BEFORE baseline, labelled)",
+  "source": "contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol",
+  "regeneratedFrom": "docs/security/bnb-v112-evidence/slither-before.json",
+  "supersededFile": "previous high-trace-review.json (mislabelled V1.12, actually V1.11 text)",
+  "traces": [
+    {
+      "id": "V111-H1",
+      "slitherId": "56c616dd50d285538ec4f8ac5b489c4eb2ff25175bc3d16baefee0b93d574020",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- gross = _swap(WBNB,USDT,amountIn,q.poolFee) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#107)\n\t\t- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:1,sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#143-146)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#167)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#103)\n\tPossible stale balance used after the call in a condition:\n\t- got != gross (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#109)\n\t\t- stale variable `got`\n"
+    },
+    {
+      "id": "V111-H2",
+      "slitherId": "5c56596ccba88f7ec622093832259749d27057136b2d76a2c20eb5fe5ba3618b",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#124)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#167)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#122)\n\tPossible stale balance used after the call in a condition:\n\t- IERC20Min(USDT).balanceOf(address(this)) - usdtBefore != amountIn (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#125)\n\t\t- stale variable `usdtBefore`\n"
+    },
+    {
+      "id": "V111-H3",
+      "slitherId": "974b3eb55e130541b6d81cb80bc33c6341fd6fe77d550570d21750f816042b24",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- gross = _swap(USDT,WBNB,amountIn,q.poolFee) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#126)\n\t\t- gross = IPancakeV3SwapRouter(ROUTER).exactInputSingle(IPancakeV3SwapRouter.ExactInputSingleParams({tokenIn:tokenIn,tokenOut:tokenOut,fee:poolFee,recipient:address(this),deadline:block.timestamp,amountIn:amountIn,amountOutMinimum:1,sqrtPriceLimitX96:0})) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#143-146)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#167)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#121)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#127)\n\t\t- stale variable `wbnbBefore`\n"
+    },
+    {
+      "id": "V111-H4",
+      "slitherId": "a013e06c3e34ec8dc5013499ee5724b8decb2c703061ee91924945b5a7f111e7",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#105)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#102)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != amountIn (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#106)\n\t\t- stale variable `wbnbBefore`\n"
+    },
+    {
+      "id": "V111-H5",
+      "slitherId": "c4b5d62ddc42eaf3c0457a057cbed231f580a7122656850b28cf4f564b388b75",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactUsdtForBnb(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#115-139):\n\tExternal call allowing reentrancy:\n\t- _safeTransferFrom(USDT,msg.sender,address(this),amountIn) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#124)\n\t\t- (ok,r) = t.call(d) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#167)\n\tBalance read before the call:\n\t- wbnbBefore = IWBNB(WBNB).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#121)\n\tPossible stale balance used after the call in a condition:\n\t- IWBNB(WBNB).balanceOf(address(this)) - wbnbBefore != gross (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#127)\n\t\t- stale variable `wbnbBefore`\n"
+    },
+    {
+      "id": "V111-H6",
+      "slitherId": "cf143410c8d370e7cdc54edbaef25bb4d4e12ea0a2774f3101ab82b5323ee202",
+      "trace": "Reentrancy in FlowBridgeBnbSwapAdapterV1_11.swapExactBnbForUsdt(FlowBridgeBnbSwapAdapterV1_11.QuoteSnapshot) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#96-113):\n\tExternal call allowing reentrancy:\n\t- IWBNB(WBNB).deposit{value: amountIn}() (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#105)\n\tBalance read before the call:\n\t- usdtBefore = IERC20Min(USDT).balanceOf(address(this)) (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#103)\n\tPossible stale balance used after the call in a condition:\n\t- got != gross (contracts/candidates/bnb-swap-adapter-v1-11/FlowBridgeBnbSwapAdapterV1_11.sol#109)\n\t\t- stale variable `got`\n"
+    }
+  ]
+}

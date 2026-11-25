@@ -1,0 +1,44 @@
+{
+  "observedAt": "2026-11-25T15:24:30Z",
+  "sourceSha256": "feb06ff5e1e392b2264dca4f86cb40c07af2a033fbd557ea10f2e9d2e333575b",
+  "sourceChanged": false,
+  "reviewTests": {
+    "passed": 85,
+    "total": 85,
+    "scope": "MOCK EVM (@ethereumjs/vm), not BSC client"
+  },
+  "evidenceTests": {
+    "passed": 7,
+    "total": 7
+  },
+  "mutation": {
+    "killed": 15,
+    "total": 15
+  },
+  "fork": {
+    "status": "PASS_LOCAL_ONLY",
+    "localOnly": true,
+    "mainnetTransactions": 0
+  },
+  "slither": {
+    "version": "0.11.5",
+    "findings": 18,
+    "high": 6,
+    "suppressed": 0,
+    "idsIdenticalToAfter": true
+  },
+  "exportIsolated": {
+    "lockedInstall": "PASS",
+    "passed": 174,
+    "total": 174
+  },
+  "fullProject": {
+    "files": 277,
+    "passed": 3135,
+    "failed": 5,
+    "total": 3140,
+    "failures": "src/lib/securityWrites.test.ts x5 \u2014 pre-existing: community proposal endpoints were deliberately retired (410) in an earlier request; unrelated to the adapter"
+  },
+  "packetVerify": "PASS (bun verify.mjs)",
+  "independentAudit": "NOT_ENGAGED_NOT_SIGNED"
+}
