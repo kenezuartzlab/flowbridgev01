@@ -1,0 +1,135 @@
+{
+  "tool": "hand-written textual mutants + vitest review suite (MOCK EVM)",
+  "frozenSourceSha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425",
+  "observedAt": "2026-11-25T15:46:35.859Z",
+  "killed": 18,
+  "total": 18,
+  "results": [
+    {
+      "id": "M01 minNetOut==0 accepted (BNB in)",
+      "mutantSha256": "5a9ac011b01a2c3ac1fc28e4b57292c72b4d12b4e264e9260443630f541425ea",
+      "exitCode": 1,
+      "failedTests": 1,
+      "status": "KILLED"
+    },
+    {
+      "id": "M02 minNetOut==0 accepted (USDT in)",
+      "mutantSha256": "3182fcd6a349f3fd3f0001ed888f87ffc6d4dddcb36d567dd140b1adc2c51422",
+      "exitCode": 1,
+      "failedTests": 1,
+      "status": "KILLED"
+    },
+    {
+      "id": "M03 msg.value vs q.amountIn unchecked",
+      "mutantSha256": "1a417319719794a36ed5a4ac74771025852a14c541c4cd67fd8ea6585434eb81",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M04 deadline==now rejected",
+      "mutantSha256": "f2a7688fe26201f15a0f1c32ce8721145b4718c92ec54bdbc9dc3242c1f4da60",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M05 deadline window off-by-one",
+      "mutantSha256": "51a3b8d3b9030c910b898cc8a958e47fc16f1667008c3a76afe44bb8f6b91585",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M06 deadline window removed",
+      "mutantSha256": "9cdb4646aa8bfbe9aa360f9d5fac8a3817d3f5256d2acc59437881d9c5aa8af0",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M07 quote age off-by-one",
+      "mutantSha256": "ef76b767b720f6105a9621c9c9a0621d008abd0ffa4a5db3a35f077477abf98f",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M08 quote age removed",
+      "mutantSha256": "7774a03b228cfa0263cd9dc19f5e9b3b178a65ffb101a24241d2422c9c903e03",
+      "exitCode": 1,
+      "failedTests": 4,
+      "status": "KILLED"
+    },
+    {
+      "id": "M09 block lag off-by-one",
+      "mutantSha256": "690be0765a9430f679cac1f00cde4a11238ebe928fd4fc89fc5f8c64168f8a8d",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M10 block lag removed",
+      "mutantSha256": "d780e1b6ecb6f3a5ab2e5116580299122856519560c3d7a77a86ee8ffab646a1",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M11 blockhash binding removed",
+      "mutantSha256": "6836f3da9e01e697d0f9116ec9b5a709acc6468644eea22446b735e1ce07dd21",
+      "exitCode": 1,
+      "failedTests": 2,
+      "status": "KILLED"
+    },
+    {
+      "id": "M12 fee recipient == this accepted",
+      "mutantSha256": "3884234472e1df4939acf1f096db2609e1ed9c2abd7b95063c09d7930338bda3",
+      "exitCode": 1,
+      "failedTests": 1,
+      "status": "KILLED"
+    },
+    {
+      "id": "M13 non-minimal gross floor",
+      "mutantSha256": "ea53dae411d80616f40eb624bbf47907e28d6a203e28d348ad7fb8c534d65168",
+      "exitCode": 1,
+      "failedTests": 9,
+      "status": "KILLED"
+    },
+    {
+      "id": "M14 one-wei gross floor (V1.11 regression)",
+      "mutantSha256": "a0c792122b24e9bd2fdd3ddad404f89e01e95693f8e4e3ac1ddf6fca2ef88cc4",
+      "exitCode": 1,
+      "failedTests": 9,
+      "status": "KILLED"
+    },
+    {
+      "id": "M15 PauseChanged value inverted",
+      "mutantSha256": "9201c286cf9d60004be5ec16291a30294a112fc369c5c64f8c6b922718e77fa5",
+      "exitCode": 1,
+      "failedTests": 1,
+      "status": "KILLED"
+    },
+    {
+      "id": "M16 V1.13 fixed-target guardian check removed",
+      "mutantSha256": "f4fb0848a2d70ec3c6ff335e62dbefa8f2784316b454aa552188b36efe20e8d1",
+      "exitCode": 1,
+      "failedTests": 3,
+      "status": "KILLED"
+    },
+    {
+      "id": "M17 V1.13 fixed-target fee recipient check removed",
+      "mutantSha256": "251a6812b70f95b760352634a8544860553d51e29a3aed940f51b619b4e640e8",
+      "exitCode": 1,
+      "failedTests": 12,
+      "status": "KILLED"
+    },
+    {
+      "id": "M18 V1.13 router omitted from fixed targets",
+      "mutantSha256": "8a4b63cb1729b8abd514174c04442e5e46c9c1c7b89483ba06daefc00f947821",
+      "exitCode": 1,
+      "failedTests": 5,
+      "status": "KILLED"
+    }
+  ]
+}

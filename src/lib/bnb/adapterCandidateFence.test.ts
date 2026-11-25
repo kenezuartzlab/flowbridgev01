@@ -38,6 +38,17 @@ describe('BNB adapter V1 candidate fence', () => {
     // Contract-qualified internalType changes with version; wire types/selectors must not.
     expect(JSON.parse(JSON.stringify(next.abi).replaceAll('FlowBridgeBnbSwapAdapterV1_12', 'FlowBridgeBnbSwapAdapterV1_11'))).toEqual(previous.abi);
   });
+  it('V1.12 stays byte-frozen while V1.13 is a separate constructor-guardrail candidate with identical wire ABI', async () => {
+    const { createHash } = await import('node:crypto');
+    const sha = (f: string) => createHash('sha256').update(fs.readFileSync(f)).digest('hex');
+    expect(sha('contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol')).toBe('feb06ff5e1e392b2264dca4f86cb40c07af2a033fbd557ea10f2e9d2e333575b');
+    expect(sha('contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol')).toBe('5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425');
+    const v12 = JSON.parse(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-12/MANIFEST.json', 'utf8'));
+    const v13 = JSON.parse(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-13/MANIFEST.json', 'utf8'));
+    expect(keccak256(fs.readFileSync('contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol'))).toBe(v13.sourceKeccak);
+    expect(v13.status).toContain('NOT DEPLOYED');
+    expect(JSON.parse(JSON.stringify(v13.abi).replaceAll('FlowBridgeBnbSwapAdapterV1_13', 'FlowBridgeBnbSwapAdapterV1_12'))).toEqual(v12.abi);
+  });
   it('BNB execution capability remains disabled', async () => {
     const m = await import('@/lib/bnb/quoteAdapter');
     for (const p of Object.values(m.BNB_PROVIDERS) as any[]) expect(JSON.stringify(p)).not.toMatch(/calldata|spender|signer/i);

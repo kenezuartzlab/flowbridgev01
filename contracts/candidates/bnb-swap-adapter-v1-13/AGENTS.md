@@ -1,0 +1,2 @@
+- Keep this frozen V1.13 candidate outside app imports and production deployment tooling. Why: community/local review is not trading authorization.
+- Only change vs V1.12 is the constructor fixed-target guardrail; any further source change needs a new candidate directory. Why: each freeze must map to one reviewed hash.

@@ -11,12 +11,15 @@ type Handler=(args:{request:Request;params?:{id:string}})=>Promise<Response>;
 function handler(route:{options:unknown},method:string){return (route.options as {server:{handlers:Record<string,Handler>}}).server.handlers[method];}
 const request=(body:unknown={})=>new Request('http://localhost/api',{method:'POST',body:JSON.stringify(body)});
 beforeEach(()=>{vi.resetAllMocks();m.auth.mockResolvedValue({id:'account',emailVerified:true});m.create.mockResolvedValue({id:'proposal'});m.vote.mockResolvedValue({proposal:{id:'proposal',votes:1},alreadyVoted:false});});
-describe('community write authentication',()=>{
-  it('unauthenticated submissions cannot write',async()=>{m.auth.mockResolvedValue(null);expect((await handler(proposals,'POST')({request:request({category:'Feature',text:'Valid'})})).status).toBe(401);expect(m.create).not.toHaveBeenCalled();});
-  it('authenticated submissions use anonymous public authorship',async()=>{expect((await handler(proposals,'POST')({request:request({category:'Feature',text:'Valid',author:'spoofed'})})).status).toBe(201);expect(m.create).toHaveBeenCalledWith('Feature','Valid','Anonymous Supporter');});
-  it('oversized input never writes',async()=>{expect((await handler(proposals,'POST')({request:request({category:'Feature',text:'x'.repeat(1001)})})).status).toBe(400);expect(m.create).not.toHaveBeenCalled();});
-  it('unauthenticated votes never increment',async()=>{m.auth.mockResolvedValue(null);expect((await handler(votes,'POST')({request:request(),params:{id:'proposal'}})).status).toBe(401);expect(m.vote).not.toHaveBeenCalled();});
-  it('votes use only the authenticated account identity',async()=>{expect((await handler(votes,'POST')({request:request({userId:'attacker'}),params:{id:'proposal'}})).status).toBe(200);expect(m.vote).toHaveBeenCalledWith('proposal','account');});
+// Proposal/contribution writes were permanently retired (owner directive; see communityRetired).
+// Former auth/validation expectations are stale: every caller, authenticated or not, must get 410 and nothing may write.
+describe('retired community proposal writes',()=>{
+  const states=[['unauthenticated',null],['verified account',{id:'account',emailVerified:true}]] as const;
+  for(const [label,user] of states){
+    it(`proposal submissions are retired for ${label} callers and never write`,async()=>{m.auth.mockResolvedValue(user);for(const body of [{category:'Feature',text:'Valid',author:'spoofed'},{category:'Feature',text:'x'.repeat(1001)}]){expect((await handler(proposals,'POST')({request:request(body)})).status).toBe(410);}expect(m.create).not.toHaveBeenCalled();});
+    it(`proposal votes are retired for ${label} callers and never increment`,async()=>{m.auth.mockResolvedValue(user);expect((await handler(votes,'POST')({request:request({userId:'attacker'}),params:{id:'proposal'}})).status).toBe(410);expect(m.vote).not.toHaveBeenCalled();});
+  }
+  it('proposal reads are retired too',async()=>{expect((await handler(proposals,'GET')({request:new Request('http://localhost/api')})).status).toBe(410);});
 });
 describe('site settings authorization',()=>{
   it('ordinary operators cannot change fees or rewards',async()=>{m.gate.mockResolvedValue({ok:true,admin:{role:'internal_operator'}});expect((await handler(settings,'PUT')({request:request({fees:{}})})).status).toBe(403);expect(m.write).not.toHaveBeenCalled();});

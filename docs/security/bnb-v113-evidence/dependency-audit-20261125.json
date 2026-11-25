@@ -1,0 +1,18 @@
+{
+  "observedAt": "2026-11-25T15:43Z",
+  "tool": "Lovable dependency_scan against bun.lock (production deps, 71 packages)",
+  "findings": [
+    {
+      "package": "@walletconnect/ethereum-provider@2.23.10 (direct)",
+      "severity": "high",
+      "advisory": "Zod memory exhaustion validating oversized constrained collections",
+      "vulnerablePath": "@walletconnect/ethereum-provider -> @reown/appkit-wallet -> zod@3.22.4 (exact pin)",
+      "otherZodCopies": { "root": "zod@4.6.6 (fixed version)", "@coinbase/cdp-sdk/zod": "3.25.76" },
+      "status": "UNRESOLVED",
+      "whyNotFixed": "appkit-wallet pins zod 3.22.4 exactly; overriding to zod 4 is an incompatible major change and no patched upstream WalletConnect release was available in this check.",
+      "runtimeExposure": "WalletConnect is OFF on production hosts unless VITE_WALLETCONNECT_ENABLED=true (not set); ON in preview. The package is lazily imported only when the connector is enabled. Injected wallets do not depend on it.",
+      "removalOption": "OWNER DECISION: removing @walletconnect/ethereum-provider would clear the advisory but permanently removes WalletConnect (mobile QR) including preview; not done."
+    }
+  ],
+  "devOnly": "minimatch moderate (dev tooling) remains as previously recorded; not production path."
+}

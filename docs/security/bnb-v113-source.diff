@@ -1,0 +1,38 @@
+--- contracts/candidates/bnb-swap-adapter-v1-12/FlowBridgeBnbSwapAdapterV1_12.sol	2026-11-25 15:36:12.738340532 +0000
++++ contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol	2026-11-25 15:37:50.618883399 +0000
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: MIT
+ pragma solidity 0.8.38;
+ 
+-/// @title V1.12 LOCAL AUDIT CANDIDATE ONLY — NOT DEPLOYED / NOT AUDITED
++/// @title V1.13 LOCAL AUDIT CANDIDATE ONLY — NOT DEPLOYED / NOT AUDITED
+ /// @notice Fixed BNB56 pair/router, two fee tiers, caller-bound recent quote snapshot,
+ /// immutable emergency guardian, net-minimum settlement. No sweep, arbitrary calls or mutable fees.
+ interface IERC20Min {
+@@ -23,7 +23,7 @@
+     function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+ }
+ 
+-contract FlowBridgeBnbSwapAdapterV1_12 {
++contract FlowBridgeBnbSwapAdapterV1_13 {
+     uint256 public constant CHAIN_ID = 56;
+     uint256 public constant MAX_DEADLINE_WINDOW = 120; // ceiling only; independent snapshot age <=30s
+     uint256 public constant BPS = 10_000;
+@@ -77,6 +77,9 @@
+         if (block.chainid != CHAIN_ID) revert WrongChain();
+         if (WBNB.code.length == 0 || USDT.code.length == 0 || ROUTER.code.length == 0) revert BadConfig();
+         if (guardian == address(0) || guardian == address(this) || feeRecipient == address(0) || feeRecipient == address(this)) revert BadConfig();
++        // V1.13 guardrail: fixed protocol contracts cannot act as guardian (they cannot call setPaused) and must not
++        // receive fees (tokens held by WBNB/USDT/router are unrecoverable or would be mistaken for pool/contract balances).
++        if (_isFixedTarget(guardian) || _isFixedTarget(feeRecipient)) revert BadConfig();
+         if (feeBps != 0 && feeBps != 5 && feeBps != 10) revert BadConfig(); // PROPOSAL fixtures, not approved fees
+         GUARDIAN = guardian; FEE_RECIPIENT = feeRecipient; FEE_BPS = feeBps;
+     }
+@@ -169,6 +172,7 @@
+         if (address(this).balance != n || IWBNB(WBNB).balanceOf(address(this)) != w || IERC20Min(USDT).balanceOf(address(this)) != u) revert ResidualBalance();
+     }
+ 
++    function _isFixedTarget(address a) private pure returns (bool) { return a == WBNB || a == USDT || a == ROUTER; }
+     function _sendNative(address to, uint256 v) private { (bool ok,) = to.call{value: v}(""); if (!ok) revert TransferFailed(); }
+     function _call(address t, bytes memory d) private {
+         (bool ok, bytes memory r) = t.call(d);

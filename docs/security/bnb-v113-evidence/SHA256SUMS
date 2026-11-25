@@ -1,0 +1,17 @@
+5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425  contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol
+e2da9d46b6979d626e1483fdbbb8761287c9c64189ef2dbb68fc29c9e3d32c37  contracts/candidates/bnb-swap-adapter-v1-13/MANIFEST.json
+3845d8669ed27a8d97f026d2a2fccecc2a57ecff44e9721069c0c885ffca3544  contracts/candidates/bnb-swap-adapter-v1-13/scripts/compile.mjs
+a354567e0b016f4d1d8be344392aaab3fb19fab567eb3b8afc1f2a8f877ac9c2  contracts/candidates/bnb-swap-adapter-v1-13/test/Mocks.sol
+6dc5c3cdae2c9a61d7bb7ba98fc7604066ae652fbdbcec51a05102d89cb5a54e  contracts/candidates/bnb-swap-adapter-v1-13/test/adapter.evm.test.ts
+b898618f2e6c79c05bcea86edc9712ea4cbeb9e5d0068f23fc88593c6793af5e  docs/security/bnb-v113-source.diff
+bf939d957689365a303c5c3ce8d80385c0c56791ca7382ef872518a804356490  docs/security/bnb-v113-evidence/dependency-audit-20261125.json
+9cb62a707cba7203bf03af6cf575aabe502b9797a8f0c95b2165abce0224a700  docs/security/bnb-v113-evidence/fork-rehearsal-v113.json
+6e2ca19161d93b8c6702edee3dcf497ef9f8919ae2d5eb7ad9b3c138602f7a2a  docs/security/bnb-v113-evidence/fork.log
+f65f90abcbb3203b650660e176d271f13cfcb9aad9e284532b6e8b5f94e57ba3  docs/security/bnb-v113-evidence/full-suite.log
+8ad11daa60e19cdc276848846e449be996015c9f090ef2c7d665c203990adab7  docs/security/bnb-v113-evidence/high-trace-v113.json
+5e1b6036ab2998e87ce2a1bd4d8ecc9c4bb87463ea13bbf0d2856b0feab261ad  docs/security/bnb-v113-evidence/mutation-results.json
+4e231d54cedb2d8c609038bc90f6a99f7cd9b8741a7112a0bee35ac4c5b4412b  docs/security/bnb-v113-evidence/mutation-run.log
+f1bde1c29f853b4db016cf98d3dcd74f1d9601c4be87fad52b34b2f8bbad559e  docs/security/bnb-v113-evidence/slither-v112.json
+73cde3b4f65aa2b0786744b0d41057d89354c0d5a259f56bd5c49a8a91a017d9  docs/security/bnb-v113-evidence/slither-v112.log
+0c34d2464404b0c54e30188f75a6ed3a87d706cf0d1b3aceaab9225fa243ba1e  docs/security/bnb-v113-evidence/slither-v113.json
+b838e4c87901748a19992d1e2330162368fb14f222ae1deda9e030e3321d8691  docs/security/bnb-v113-evidence/slither-v113.log

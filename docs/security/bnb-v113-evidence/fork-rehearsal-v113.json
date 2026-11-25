@@ -1,0 +1,301 @@
+{
+  "generatedAt": "2026-11-25T15:40:49.292Z",
+  "status": "PASS",
+  "release": "HOLD",
+  "independentAudit": "NOT_DONE",
+  "scope": "LOCAL_ANVIL_FORK_WITH_REAL_CHAIN56_BYTECODE_AND_LOCAL_ONLY_CANDIDATE_DEPLOYMENT",
+  "mainnetTransactions": 0,
+  "signatures": 0,
+  "realFees": 0,
+  "proposalFeeBps": 5,
+  "feeApproved": false,
+  "rpcIndependence": "UPSTREAM_OFFICIAL_ENDPOINT_IS_NOT_AN_INDEPENDENT_QUORUM",
+  "accounts": "Anvil unlocked synthetic defaults; no private keys read or used",
+  "checks": {
+    "sameStateBnbToUsdt": {
+      "directOut": "536391092375939993",
+      "adapterNet": "536122896829752024",
+      "proposalFee": "268195546187969",
+      "directGas": "160068",
+      "adapterGas": "229156",
+      "extraGas": "69088",
+      "residual": {
+        "native": "0",
+        "wbnb": "0",
+        "usdt": "0",
+        "wbnbRouterAllowance": "0",
+        "usdtRouterAllowance": "0"
+      }
+    },
+    "usdtToNative": {
+      "amountIn": "5000000000000000000",
+      "grossOut": "9312236230724489",
+      "proposalFeeWbnb": "4656118115362",
+      "netNativeOut": "9307580112609127",
+      "residual": {
+        "native": "0",
+        "wbnb": "0",
+        "usdt": "0",
+        "wbnbRouterAllowance": "0",
+        "usdtRouterAllowance": "0"
+      }
+    },
+    "crossWalletCannotSpendUserAllowance": "REVERTED_AS_REQUIRED",
+    "minimumNetPlusOneWei": "REVERTED_AS_REQUIRED",
+    "staleQuoteAfterRealPoolStateChange": "REVERTED_AS_REQUIRED",
+    "quoteSnapshot": {
+      "gross": "536391225377581580",
+      "exactNetAccepted": true,
+      "staleAfterOneBnbPoolMoveRejected": true
+    },
+    "expiredDeadline": "REVERTED_AS_REQUIRED",
+    "deadlineTooFar": "REVERTED_AS_REQUIRED",
+    "unauthorizedPause": "REVERTED_AS_REQUIRED",
+    "guardianPauseBuy": "REVERTED_AS_REQUIRED",
+    "guardianPauseSell": "REVERTED_AS_REQUIRED",
+    "unauthorizedUnpause": "REVERTED_AS_REQUIRED",
+    "bothTiersBothDirections": [
+      {
+        "tier": 500,
+        "buyGross": "536391225377581580",
+        "buyNet": "536123029764892790",
+        "buyGas": "196937",
+        "sellGas": "225308",
+        "residual": {
+          "native": "0",
+          "wbnb": "0",
+          "usdt": "0",
+          "wbnbRouterAllowance": "0",
+          "usdtRouterAllowance": "0"
+        },
+        "quoteBlock": "135680462",
+        "quoteHash": "0x5cf7fb2ea76b9786d624a853e2b73c06e63717098c83cc9b9713f51f43914e73",
+        "quotedAt": "1795621240"
+      },
+      {
+        "tier": 2500,
+        "buyGross": "536476528924328753",
+        "buyNet": "536208290659866589",
+        "buyGas": "216020",
+        "sellGas": "225760",
+        "residual": {
+          "native": "0",
+          "wbnb": "0",
+          "usdt": "0",
+          "wbnbRouterAllowance": "0",
+          "usdtRouterAllowance": "0"
+        },
+        "quoteBlock": "135680462",
+        "quoteHash": "0x5cf7fb2ea76b9786d624a853e2b73c06e63717098c83cc9b9713f51f43914e73",
+        "quotedAt": "1795621240"
+      }
+    ],
+    "xautHardDenied": "REVERTED_AS_REQUIRED",
+    "unknownPoolTier": "REVERTED_AS_REQUIRED",
+    "snapshotWrongChain": "REVERTED_AS_REQUIRED",
+    "snapshotWrongRouter": "REVERTED_AS_REQUIRED",
+    "snapshotWrongWallet": "REVERTED_AS_REQUIRED",
+    "stale31Seconds": "REVERTED_AS_REQUIRED",
+    "reorgHashRejected": "REVERTED_AS_REQUIRED",
+    "nativePayoutFailureRealBytecode": "REVERTED_AS_REQUIRED",
+    "nativeFailureInputRefund": true,
+    "donationsAndForcedNative": {
+      "residual": {
+        "native": "2000000000000000000",
+        "wbnb": "0",
+        "usdt": "1000000000000000000",
+        "wbnbRouterAllowance": "0",
+        "usdtRouterAllowance": "0"
+      },
+      "recoverable": false,
+      "note": "No sweep exists; donated assets remain stranded by design."
+    },
+    "chain56AndNoGenericPath": {
+      "constructorAndCalls": "Synthetic suite separately verifies chain fail-closed behavior",
+      "xaut": "BLOCKED",
+      "pause": "IMMUTABLE_TEST_GUARDIAN; unauthorized calls rejected; live guardian NOT APPROVED"
+    }
+  },
+  "transactions": [
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x32655ff140e1794036601be3f637e8be6a01a29a4dc33060fa69d344574efcb0",
+      "status": "success",
+      "gasUsed": "1516340"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x41bd1187a219cfb09e774d6a62053483b50d61ccc73ad5b00c6f94a024d27376",
+      "status": "success",
+      "gasUsed": "229156"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0xd1bc6876a298578e0e4c10ba2d5fd0264bdf5e2e7acd7de1942d3a14fcd886cd",
+      "status": "success",
+      "gasUsed": "160068"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x3e1f7bdc2b9bdd91f1c6819c6ce16c7abeb5189044003305afdf08b3b17cd20a",
+      "status": "success",
+      "gasUsed": "238988"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x71cc93fe9d97c71e93ab002f9a5621409163c92bcecb90003ddbda80be165395",
+      "status": "success",
+      "gasUsed": "160068"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0xc8e0196a52075cc2c3b14846cb2d6afd990e33910dc66a697e0517fe4fc802b6",
+      "status": "success",
+      "gasUsed": "46914"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x7be3530049d5736799f80074c1da9a0f35211000f425479e9c93c9d86dc85422",
+      "status": "success",
+      "gasUsed": "25002"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x33446f637ddee5e2600cf0de4f6166222c8d4841d909aa27ed9e8bcbb8353a9c",
+      "status": "success",
+      "gasUsed": "196937"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x89a18e66083b67423a6bb916dd731450d80c404374cebf1dda6b8bc73b191e64",
+      "status": "success",
+      "gasUsed": "225308"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x6702d9e6a42080597ba5e8d93bcbf0903c62175b19db3f11527f3ea35fd9a1dd",
+      "status": "success",
+      "gasUsed": "216020"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x9424a0b232283b90a5de3cf698f01086aefa163dbf16fd1edbd4cd8c81c2ce6d",
+      "status": "success",
+      "gasUsed": "225760"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0xbd75ec85cd85312315e8cf03e49a7faf3043340741bdbd216672986c4cf26cc0",
+      "status": "success",
+      "gasUsed": "500391"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x9d8525e22701a7c75f443a61759066ab65b4e3420c0fe941b2b96f53768c01aa",
+      "status": "success",
+      "gasUsed": "69339"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0xdf3378180d59473dc01871c2425fb6338d06cd7db96cb33171bcc4fdcaaeaf86",
+      "status": "success",
+      "gasUsed": "51603"
+    },
+    {
+      "scope": "LOCAL_ONLY",
+      "hash": "0x4dfff6e2cde2b31c8455cddeb40631ea5ddb2f8b551757da1c49792b9b9c643f",
+      "status": "success",
+      "gasUsed": "204044"
+    }
+  ],
+  "fork": {
+    "upstream": "https://bsc-dataseed.bnbchain.org",
+    "block": 135680459,
+    "localUrl": "http://127.0.0.1:8548",
+    "chainId": 56,
+    "blockHash": "0xe1377cf0ea5f2572257a842c64f5ffcd20c347296b50e8625e5f420c77140ad5",
+    "timestamp": "1795621239"
+  },
+  "realBytecode": {
+    "WBNB": {
+      "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "keccak256": "0xb7d84205eaaf83ce7b3940c6beaad6d22790255e34a9a2b486aa8cdfff118fe6",
+      "bytes": 3124
+    },
+    "USDT": {
+      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "keccak256": "0x97a48aa4c129657440dafdacd4c836389734d28cc4a0ca7403e68da660a74a59",
+      "bytes": 4413
+    },
+    "PancakeV3SwapRouter": {
+      "address": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "keccak256": "0x61002a11263b2c38ff8d5ded90a655987ed98f171a31840ee0014dd7052bccda",
+      "bytes": 12154
+    }
+  },
+  "verifiedPools": [
+    {
+      "tier": 500,
+      "pool": "0x36696169C63e42cd08ce11f5deeBbCeBae652050",
+      "factory": "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
+      "token0": "0x55d398326f99059fF775485246999027B3197955",
+      "token1": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "liquidity": "1740035048242482426677789",
+      "codeKeccak": "0xd7248234db5666b9ac33c1a14bfc68453197ce8708dae5c1306467a43f5da4d8",
+      "block": 135680459,
+      "blockHash": "0xe1377cf0ea5f2572257a842c64f5ffcd20c347296b50e8625e5f420c77140ad5",
+      "factoryVerified": true
+    },
+    {
+      "tier": 2500,
+      "pool": "0x1401ff943D08a7E098328C1d3a9d388923B115D2",
+      "factory": "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
+      "token0": "0x55d398326f99059fF775485246999027B3197955",
+      "token1": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "liquidity": "8718383238041001651702",
+      "codeKeccak": "0x11e25cf8f82ac2a56c9e3c6bd0829cc72e0e137066ecb211d04ccb339457c432",
+      "block": 135680459,
+      "blockHash": "0xe1377cf0ea5f2572257a842c64f5ffcd20c347296b50e8625e5f420c77140ad5",
+      "factoryVerified": true
+    }
+  ],
+  "gasPriceWei": "1000000000",
+  "localCandidate": {
+    "address": "0x6bd69ffdc10d166dc8a804e6117ab4afc75805c2",
+    "deployment": "LOCAL_FORK_ONLY_NOT_MAINNET",
+    "runtimeKeccak": "0xd24f3e2b94a9a5cc04c5435ad55ca0a05b3068b22ecbd15cad5e6ea476a00696"
+  },
+  "offlineTierPreview": {
+    "status": "SIMULATION_PREVIEW_ONLY",
+    "executable": false,
+    "proposalOnly": true,
+    "approved": false,
+    "selectedTier": 500,
+    "costs": [
+      {
+        "tier": 500,
+        "grossOutput": "536391225377581580",
+        "proposalFeeOutput": "268195612688790",
+        "simulatedGasOutput": "105635278752184783",
+        "netAfterFeeAndGas": "430487751012708007"
+      },
+      {
+        "tier": 2500,
+        "grossOutput": "536476528924328753",
+        "proposalFeeOutput": "268238264462164",
+        "simulatedGasOutput": "115871232506065172",
+        "netAfterFeeAndGas": "420337058153801417"
+      }
+    ],
+    "gasEvidence": "LOCAL_FORK_SIMULATION_NOT_LIVE_GUARANTEE",
+    "feeApproved": false
+  },
+  "summary": {
+    "localTransactions": 15,
+    "directOutUsdt": "0.536391092375939993",
+    "adapterNetUsdt": "0.536122896829752024",
+    "proposalFeeUsdt": "0.000268195546187969",
+    "extraGas": "69088",
+    "mainnetTransactions": 0
+  }
+}
