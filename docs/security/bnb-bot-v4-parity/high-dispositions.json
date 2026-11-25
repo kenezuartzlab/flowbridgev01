@@ -1,0 +1,91 @@
+{
+  "tool": "slither 0.11.6, fresh run this review",
+  "suppressions": 0,
+  "note": "Similarity to deployed BOT V4 (which has 4 reentrancy-balance + 1 arbitrary-send-eth HIGH in fresh Slither) does NOT resolve these.",
+  "findings": [
+    {
+      "key": "swapExactBnbForUsdt|deposit|wbnbBefore",
+      "slitherId": "35bbdd20078e1184ac60bb820046e27ed822c6b0b4d5afe4b93a15db21ab7190",
+      "externalCall": "WBNB.deposit L108",
+      "balanceRead": "wbnbBefore L105 -> delta!=amountIn L109",
+      "guard": "guarded(): locked!=1 -> Reentrancy(); lock also blocks setPaused",
+      "stateMutation": "only lock flag; no stored balances/credits",
+      "destinations": "fixed WBNB/USDT/ROUTER constants; immutable FEE_RECIPIENT, output to msg.sender",
+      "botComparison": "BOT swapNativeToTokenV3MultiSafe: wBefore then deposit (BOT Slither reentrancy-balance, same shape)",
+      "hostileRepro": "WBNB fixed WETH9-style code, no callbacks; lock held. Donation only causes revert. Ported: token hook point 1, forced donations.",
+      "exploitReproduced": false,
+      "status": "OPEN",
+      "classification": "Intentional balance-delta check, no exploit reproduced (local mocks only); needs independent human review"
+    },
+    {
+      "key": "swapExactUsdtForBnb|_safeTransferFrom|wbnbBefore",
+      "slitherId": "39e09e6f46da48fcc6637535a3b9e68eee3d28e0824aacb871a95734f7d2311a",
+      "externalCall": "USDT.transferFrom L127",
+      "balanceRead": "wbnbBefore L124 -> delta!=gross L130",
+      "guard": "guarded(): locked!=1 -> Reentrancy(); lock also blocks setPaused",
+      "stateMutation": "only lock flag; no stored balances/credits",
+      "destinations": "fixed WBNB/USDT/ROUTER constants; immutable FEE_RECIPIENT, output to msg.sender",
+      "botComparison": "BOT swapTokenToNativeV3MultiSafe wBefore read after pull (BOT reads later; BNB earlier)",
+      "hostileRepro": "BSC USDT has no hooks; mocked hooks points 4/5 receive Reentrancy(). Earlier snapshot only makes check stricter.",
+      "exploitReproduced": false,
+      "status": "OPEN",
+      "classification": "Intentional balance-delta check, no exploit reproduced (local mocks only); needs independent human review"
+    },
+    {
+      "key": "swapExactUsdtForBnb|_swap|wbnbBefore",
+      "slitherId": "643f5e0602aefd6a089f4c1f47c3b480c40efd862a9280d9f9efc0a0de4a0042",
+      "externalCall": "Pancake exactInputSingle",
+      "balanceRead": "wbnbBefore L124 -> delta!=gross L130",
+      "guard": "guarded(): locked!=1 -> Reentrancy(); lock also blocks setPaused",
+      "stateMutation": "only lock flag; no stored balances/credits",
+      "destinations": "fixed WBNB/USDT/ROUTER constants; immutable FEE_RECIPIENT, output to msg.sender",
+      "botComparison": "BOT swapTokenToNativeV3MultiSafe wBefore/_v3ExactInput (BOT Slither HIGH)",
+      "hostileRepro": "Lock + fixed router; in-callback donation/under-report rejected (ported modes 5/6/7).",
+      "exploitReproduced": false,
+      "status": "OPEN",
+      "classification": "Intentional balance-delta check, no exploit reproduced (local mocks only); needs independent human review"
+    },
+    {
+      "key": "swapExactBnbForUsdt|_swap|usdtBefore",
+      "slitherId": "be23b08d0d903b9351a60acae031b18c0e8eebda8d91d548a981504a9ca86d4f",
+      "externalCall": "Pancake exactInputSingle L146-149",
+      "balanceRead": "usdtBefore L106 -> got!=gross L112",
+      "guard": "guarded(): locked!=1 -> Reentrancy(); lock also blocks setPaused",
+      "stateMutation": "only lock flag; no stored balances/credits",
+      "destinations": "fixed WBNB/USDT/ROUTER constants; immutable FEE_RECIPIENT, output to msg.sender",
+      "botComparison": "BOT _v3ExactInput + outBefore delta (BOT Slither reentrancy-balance)",
+      "hostileRepro": "Router reentry -> Reentrancy() (ported both directions); under/over-report modes 5/7 revert.",
+      "exploitReproduced": false,
+      "status": "OPEN",
+      "classification": "Intentional balance-delta check, no exploit reproduced (local mocks only); needs independent human review"
+    },
+    {
+      "key": "swapExactUsdtForBnb|_safeTransferFrom|usdtBefore",
+      "slitherId": "c6ff56409ede0d3e80f9c35555eb7abc485d20e1c0c07a72f52387c59ad9d176",
+      "externalCall": "USDT.transferFrom L127",
+      "balanceRead": "usdtBefore L125 -> delta!=amountIn L128",
+      "guard": "guarded(): locked!=1 -> Reentrancy(); lock also blocks setPaused",
+      "stateMutation": "only lock flag; no stored balances/credits",
+      "destinations": "fixed WBNB/USDT/ROUTER constants; immutable FEE_RECIPIENT, output to msg.sender",
+      "botComparison": "BOT _collectExactTokenInput (BOT Slither reentrancy-balance HIGH)",
+      "hostileRepro": "This delta IS the fee-on-transfer rejection; removing it weakens safety (ported FeeOnTransfer).",
+      "exploitReproduced": false,
+      "status": "OPEN",
+      "classification": "Intentional balance-delta check, no exploit reproduced (local mocks only); needs independent human review"
+    },
+    {
+      "key": "swapExactBnbForUsdt|deposit|usdtBefore",
+      "slitherId": "d34aa27be72a6343f53d92f611f0082b8e1c60a5272c143d0f5771e019b313a1",
+      "externalCall": "WBNB.deposit L108 (precedes router)",
+      "balanceRead": "usdtBefore L106 -> got!=gross L112",
+      "guard": "guarded(): locked!=1 -> Reentrancy(); lock also blocks setPaused",
+      "stateMutation": "only lock flag; no stored balances/credits",
+      "destinations": "fixed WBNB/USDT/ROUTER constants; immutable FEE_RECIPIENT, output to msg.sender",
+      "botComparison": "BOT swapNativeToTokenV3MultiSafe: outBefore=balanceOf(to)",
+      "hostileRepro": "In-call USDT donation makes got!=gross revert (ported mode 6); no credit to caller.",
+      "exploitReproduced": false,
+      "status": "OPEN",
+      "classification": "Intentional balance-delta check, no exploit reproduced (local mocks only); needs independent human review"
+    }
+  ]
+}

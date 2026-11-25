@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-11-25T16:17:35.963Z",
+  "source": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+  "metadataSourceUnit": "src/FlowBridgeRouterV4.sol",
+  "sourceSha256": "7082d896c7408d0ef05caa7791168b4cf886f9d72b5bfe27721f16b80bdad66a",
+  "compiler": "0.8.20+commit.a1b79de6.Emscripten.clang",
+  "settings": "optimizer 200, viaIR, shanghai, ipfs metadata",
+  "immutableReferences": 0,
+  "localRuntimeBytes": 21838,
+  "localRuntimeSha256": "5d58f5907432b8fd2cbab4a4c94fdd64a2642e45767ca123087d2d63843fc15a",
+  "readmeRuntimeSha256": "a42e53b15977c57b81fa63c575b9cb39100b873c50a523b68f02df7bd8bec41d",
+  "localMatchesReadme": false,
+  "mainnet": {
+    "chainId": 677,
+    "address": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+    "rpc": "https://rpc.botchain.ai",
+    "block": {
+      "number": 31518675,
+      "hash": "0x8c2868e9c39b8b1397fc8d8f595c4bd5137fbbc3730ca206aeb2e43ffe0184f1",
+      "timestamp": 1795623455
+    },
+    "liveRuntimeBytes": 21838,
+    "liveRuntimeSha256": "a42e53b15977c57b81fa63c575b9cb39100b873c50a523b68f02df7bd8bec41d",
+    "exactMatch": false,
+    "matchExcludingMetadata": true,
+    "error": null
+  }
+}

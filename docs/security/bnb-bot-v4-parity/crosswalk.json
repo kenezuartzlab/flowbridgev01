@@ -1,0 +1,490 @@
+{
+  "generatedAt": "deterministic",
+  "sources": {
+    "bot": {
+      "path": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+      "sha256": "7082d896c7408d0ef05caa7791168b4cf886f9d72b5bfe27721f16b80bdad66a"
+    },
+    "bnb": {
+      "path": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+      "sha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425"
+    }
+  },
+  "rows": [
+    {
+      "area": "router-target",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT: owner registry (routerId, type V3, active). BNB: constant ROUTER + q.router==ROUTER. Registry intentionally not copied.",
+      "tests": "[test_UnregisteredOrDisabledRouter / test_WrongRouterType]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _requireRouter(",
+          "startLine": 1248,
+          "endLine": 1252,
+          "sha256": "4dac168880c9e639e08d72cc336c2b6077e4f104ec15b82b7efc45556a0cf753"
+        },
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function registerRouter(",
+          "startLine": 534,
+          "endLine": 554,
+          "sha256": "2462b8cfebd73a66b58e1a896e1e4fae69337ae39ead69feb7f374efba5e0de2"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "address public constant ROUTER",
+          "startLine": 35,
+          "endLine": 35,
+          "sha256": "c2969b259b5e6a077caa5ca1305e5448e29029d671fceaab0c6f5272bc306338"
+        },
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "modifier guarded(",
+          "startLine": 60,
+          "endLine": 74,
+          "sha256": "6b3be601711df93833012dde55c1f8588153237c6a44405d212e54a0b33696ae"
+        }
+      ]
+    },
+    {
+      "area": "wrap-unwrap",
+      "classification": "REUSABLE PATTERN",
+      "note": "Both deposit exactly swapAmount and check wrapped delta; both unwrap only the measured output delta. BNB additionally rejects native from anyone but WBNB.",
+      "tests": "[test_NativeToToken_/TokenToNative_MultiPool_FeeOnce_NoResidue]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function swapNativeToTokenV3MultiSafe(",
+          "startLine": 1039,
+          "endLine": 1065,
+          "sha256": "31fec5e0c62a5ff83b8ec60a4de11b6b9b156deee86284857d03523f7d6d972a"
+        },
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function swapTokenToNativeV3MultiSafe(",
+          "startLine": 1068,
+          "endLine": 1094,
+          "sha256": "6942a2d4494114c4a35900836c88a8c29a722ec490a344ab4f095e74245d499f"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function swapExactBnbForUsdt(",
+          "startLine": 99,
+          "endLine": 116,
+          "sha256": "0bdbfb939edd066932639a35db4f6060e6b5def4e10e3282d02dcd7e6b60dd54"
+        },
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function swapExactUsdtForBnb(",
+          "startLine": 118,
+          "endLine": 142,
+          "sha256": "7382b574766347ada7c82aa0b047b86c7192459a70e59173b3305aa8fed01951"
+        }
+      ]
+    },
+    {
+      "area": "token-pull",
+      "classification": "REUSABLE PATTERN",
+      "note": "Pull then require exact balance delta (fee-on-transfer/rebasing rejected).",
+      "tests": "[test_FeeOnTransferInput_Reverts]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _collectExactTokenInput(",
+          "startLine": 1283,
+          "endLine": 1288,
+          "sha256": "169f0d7c7822acae19391747f0f310117503ddf7d600e0b4659b172f05b637bd"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function swapExactUsdtForBnb(",
+          "startLine": 118,
+          "endLine": 142,
+          "sha256": "7382b574766347ada7c82aa0b047b86c7192459a70e59173b3305aa8fed01951"
+        }
+      ]
+    },
+    {
+      "area": "exact-approval-clear",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT: forceApprove exact, clear afterwards, then residual==expected. BNB: exact approve, and a non-zero leftover allowance REVERTS (stricter: router must consume exactly amountIn).",
+      "tests": "[test_Regression_V3MultiSafe_ClearsAllowance_NoResidue / test_MaliciousRouterPullingLess]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _v3ExactInput(",
+          "startLine": 1128,
+          "endLine": 1150,
+          "sha256": "3a95549ae1f5fbcee66395f9b21c3a13b9c2888344542f7d1934530987e8878f"
+        },
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _clearAllowance(",
+          "startLine": 1290,
+          "endLine": 1294,
+          "sha256": "822374310730fb8451ba97523d639f69c76dec24ce251d8b5de1020ee8d1533a"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function _swap(",
+          "startLine": 144,
+          "endLine": 154,
+          "sha256": "462dc854591533c7f8836c0d2d53e0110315b397a22cca549b93018f2b3366d1"
+        }
+      ]
+    },
+    {
+      "area": "fee-accounting",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT: fee on INPUT, owner-mutable bps, user maxProtocolFee bound, msg.value==swap+fee. BNB: fee on OUTPUT, constructor-immutable 0/5/10 bps, no setter; USDT->BNB fee paid in WBNB (never native).",
+      "tests": "[FeeOnce ports, test_FeeChangedAfterQuote → immutable]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _takeFee(",
+          "startLine": 1269,
+          "endLine": 1273,
+          "sha256": "551d1939ce93dc13a5bceb5209220dd0e42cbe9413a29f7120dba26fca93a7d1"
+        },
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _takeNativeFee(",
+          "startLine": 1275,
+          "endLine": 1280,
+          "sha256": "6536deda01a9eae5ed4789d1b7889c83b6120a309d01aaf2bdc4ede1e6291c66"
+        },
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function computeRouterFee(",
+          "startLine": 487,
+          "endLine": 499,
+          "sha256": "c576e8468f33a711b9d902c46c1981976dbee7978a9f7ceac79aea76d3e69eb8"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function _settle(",
+          "startLine": 163,
+          "endLine": 169,
+          "sha256": "3f86bd1f22c77d9fbc193770d9c91cae9a1368b5ffd99373614efc17a0b4c7c6"
+        },
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function swapExactUsdtForBnb(",
+          "startLine": 118,
+          "endLine": 142,
+          "sha256": "7382b574766347ada7c82aa0b047b86c7192459a70e59173b3305aa8fed01951"
+        }
+      ]
+    },
+    {
+      "area": "output-floor",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT: router min == user min (fee already removed from input), re-checked on delta. BNB: router gets smallest gross yielding net, then measured net re-checked.",
+      "tests": "[test_AmountOutMinimum_Reverts_StateUnchanged / test_RouterIgnoringMin]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function swapNativeToTokenV3MultiSafe(",
+          "startLine": 1039,
+          "endLine": 1065,
+          "sha256": "31fec5e0c62a5ff83b8ec60a4de11b6b9b156deee86284857d03523f7d6d972a"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function _grossMinimum(",
+          "startLine": 159,
+          "endLine": 161,
+          "sha256": "59de144b173e0183c40192f8412b01970bec389180507077c6a9ac1b3af6e133"
+        },
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function _settle(",
+          "startLine": 163,
+          "endLine": 169,
+          "sha256": "3f86bd1f22c77d9fbc193770d9c91cae9a1368b5ffd99373614efc17a0b4c7c6"
+        }
+      ]
+    },
+    {
+      "area": "deadline-quote-snapshot",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT: deadline>=now only. BNB adds 120s ceiling, 30s quote age, 1..100 block lag with blockhash. Caller-asserted, not an oracle.",
+      "tests": "[test_StaleDeadline_Reverts + stale quote ports]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _validateDeadline(",
+          "startLine": 1296,
+          "endLine": 1298,
+          "sha256": "78c6d055abe8f71251c5a2912352de26180ec5c70271a96dca5d6aa4a58c70b0"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "modifier guarded(",
+          "startLine": 60,
+          "endLine": 74,
+          "sha256": "6b3be601711df93833012dde55c1f8588153237c6a44405d212e54a0b33696ae"
+        }
+      ]
+    },
+    {
+      "area": "slippage-mev",
+      "classification": "UNSUPPORTED",
+      "note": "Neither contract sets sqrtPriceLimitX96 or authenticates price; protection == user-approved minimum only. Sandwich within the floor is possible on both.",
+      "tests": "[AF-01, no test can prove MEV safety]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _v3ExactInput(",
+          "startLine": 1128,
+          "endLine": 1150,
+          "sha256": "3a95549ae1f5fbcee66395f9b21c3a13b9c2888344542f7d1934530987e8878f"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function _swap(",
+          "startLine": 144,
+          "endLine": 154,
+          "sha256": "462dc854591533c7f8836c0d2d53e0110315b397a22cca549b93018f2b3366d1"
+        }
+      ]
+    },
+    {
+      "area": "governance-pause",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT: Ownable2Step owner pause/unpause/fees/registry/rescue. BNB: one immutable GUARDIAN pause flag, no rescue/owner.",
+      "tests": "[test_Paused_Reverts / test_UnauthorizedAdministration]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function pause()",
+          "startLine": 281,
+          "endLine": 284,
+          "sha256": "6c9235bc754615849fb3c4c3dc19f8beff96047f5186009c8e59babf1ddfaed9"
+        },
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function unpause()",
+          "startLine": 286,
+          "endLine": 289,
+          "sha256": "c5a8cdc8cf8b987bd1bfa8d6509c8d6a3908eca20dcc7bb8f868c01266612e50"
+        },
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "modifier whenNotPaused(",
+          "startLine": 272,
+          "endLine": 275,
+          "sha256": "6d12749d5e57f774c196e5f99fc95ad2f755cec7adf2781fe4f138a48a3f01d9"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function setPaused(",
+          "startLine": 87,
+          "endLine": 93,
+          "sha256": "3c64a54cbade3aa27b4c4c7410c2a454e55604e12bb44c2d2564cea8fc9620d2"
+        }
+      ]
+    },
+    {
+      "area": "pool-tier-path",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT: encoded multi-hop path endpoints validated, hops unrestricted. BNB: single hop, tiers 500/2500 only; pool chosen by Pancake router from factory (no per-pool code check onchain).",
+      "tests": "[test_MalformedPath → tier tests]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _validateV3Path(",
+          "startLine": 1328,
+          "endLine": 1333,
+          "sha256": "5c9826766f4782493bc13e85b47cb4a18f1a659c5f82fb328c1a75ff1bdac7d8"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "modifier guarded(",
+          "startLine": 60,
+          "endLine": 74,
+          "sha256": "6b3be601711df93833012dde55c1f8588153237c6a44405d212e54a0b33696ae"
+        }
+      ]
+    },
+    {
+      "area": "balance-delta-donations",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT accepts native from anyone and owner can rescue; BNB rejects stray native, keeps donations permanently untouched (no sweep).",
+      "tests": "[test_ForcedBalancesNotUsableByCallers]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _v3ExactInput(",
+          "startLine": 1128,
+          "endLine": 1150,
+          "sha256": "3a95549ae1f5fbcee66395f9b21c3a13b9c2888344542f7d1934530987e8878f"
+        },
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "receive() external payable {}",
+          "startLine": 1361,
+          "endLine": 1361,
+          "sha256": "c49b6864bd344719c0c7f67a70df7ae0696c4872fda458082125a70fa4fa5e73"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function _assertNoResidual(",
+          "startLine": 171,
+          "endLine": 173,
+          "sha256": "55fe881d016e6a0270311d89626592a778cf6d471e204f65fc05a9ad4beb67b4"
+        },
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "receive() external payable",
+          "startLine": 96,
+          "endLine": 96,
+          "sha256": "a0ef1eb4a241599357d6f92dfe5c1e9ef3febed0fd27bcb2a155f44922fe23e2"
+        }
+      ]
+    },
+    {
+      "area": "reentrancy",
+      "classification": "REUSABLE PATTERN",
+      "note": "Single global lock; BNB lock also blocks setPaused during a swap.",
+      "tests": "[test_Reentrancy_Blocked]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "modifier nonReentrant(",
+          "startLine": 215,
+          "endLine": 220,
+          "sha256": "b103ff27a9be63abecf4ff9cacc9d869998f8138a494503d26b8c811da83d363"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "modifier guarded(",
+          "startLine": 60,
+          "endLine": 74,
+          "sha256": "6b3be601711df93833012dde55c1f8588153237c6a44405d212e54a0b33696ae"
+        }
+      ]
+    },
+    {
+      "area": "native-delivery",
+      "classification": "REUSABLE PATTERN",
+      "note": "Full-gas call; failure reverts everything. BNB recipient is always msg.sender (no `to`).",
+      "tests": "[test_FailedBotDelivery_RevertsEverything]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function swapTokenToNativeV3MultiSafe(",
+          "startLine": 1068,
+          "endLine": 1094,
+          "sha256": "6942a2d4494114c4a35900836c88a8c29a722ec490a344ab4f095e74245d499f"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "function _sendNative(",
+          "startLine": 176,
+          "endLine": 176,
+          "sha256": "942d416839f3823a190cec56b3d957d1b948adaad4c4ba88d0e9e4f01ded5910"
+        }
+      ]
+    },
+    {
+      "area": "events",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT emits routerId/tokens/user/to/amounts/fee. BNB Swapped omits pool tier (AF-08).",
+      "tests": "[event field port]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function _emitSwap(",
+          "startLine": 1347,
+          "endLine": 1359,
+          "sha256": "f54f0777099791792b90b15f1819c61268ad509a804952a21a9cfc47648d5219"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "event Swapped",
+          "startLine": 55,
+          "endLine": 55,
+          "sha256": "e18553cb307aeb26d1303b09cb8ebea261d326afc50200906d660ab23b909182"
+        }
+      ]
+    },
+    {
+      "area": "arbitrary-calls",
+      "classification": "BOT-ONLY",
+      "note": "BOT has owner rescue; neither exposes calldata execution. BNB has no bytes/address user inputs.",
+      "tests": "[test_NoBridgeProxyExecutionSelectorExists]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "function rescueERC20(",
+          "startLine": 1233,
+          "endLine": 1236,
+          "sha256": "300900a5845f282dacc2a8497a2f991907ef534a61ba82e116f686dc6e5b0877"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "fallback() external payable",
+          "startLine": 97,
+          "endLine": 97,
+          "sha256": "1e08e128d3b5b265b1d04e0ab95b07e5d904b890c1636a6237d37e84e1dbaa6c"
+        }
+      ]
+    },
+    {
+      "area": "chain-compiler",
+      "classification": "NEEDS BNB ADAPTATION",
+      "note": "BOT 0.8.20 viaIR shanghai, no chainid check. BNB 0.8.38 cancun, chainid==56 in constructor and every call.",
+      "tests": "[wrong chain port]",
+      "bot": [
+        {
+          "file": "contracts/production/router-v4-native-v3-multi/FlowBridgeRouterV4.sol",
+          "signature": "pragma solidity",
+          "startLine": 2,
+          "endLine": 2,
+          "sha256": "fdb6936d67d87f2988b790ced920fc1628bfe6b84159a0f2743ffa3a17eacac2"
+        }
+      ],
+      "bnb": [
+        {
+          "file": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+          "signature": "uint256 public constant CHAIN_ID",
+          "startLine": 27,
+          "endLine": 27,
+          "sha256": "462d4feb9bfb88fb720d565b86b3b70d0c7090a7410053b54c7acaa6115d83b1"
+        }
+      ]
+    }
+  ]
+}
