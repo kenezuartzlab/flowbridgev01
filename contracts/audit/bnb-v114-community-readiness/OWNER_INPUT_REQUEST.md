@@ -1,14 +1,21 @@
-# REQUEST AT THE RIGHT TIME — owner inputs deferred
+# OWNER INPUTS — direct-EOA exception recorded, final gates pending
 
-Current status: **GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER**. This is deliberate, not a development failure and not a fabricated configuration. Do not request or invent addresses now.
+Current status: **OWNER_DIRECT_EOA_CHOICE_RECORDED / OWNER_EOA_EXCEPTION_PROPOSED**. This is not deployment, role-configuration, fee, funding or publication authorization.
 
-Request the following only after independent human review, wallet acceptance readiness and explicit separately authorized deployment planning:
+The earlier deferred Safe-collection checklist is retained as the preferred governance standard: separate BNB56 Safes, preferably 2-of-3. The owner has instead deliberately preferred these direct regular-wallet EOAs:
 
-1. **Guardian Safe:** a deployed BNB-chain (chain ID 56) Safe contract address. Independently read its deployed code, owners and threshold at a recorded block. Prefer **2-of-3** (proposal only, not configured).
-2. **Treasury Safe:** a different deployed BNB-chain Safe contract address. Independently read its code, owners and threshold at a recorded block. Prefer **2-of-3**. Reject WBNB, USDT, the Pancake router, zero/placeholder addresses, duplicate owners, threshold below 2 and fully overlapping owner sets.
-3. **Fee and payout consent:** choose 0, 5 or 10 bps and explicitly consent to output-fee payment to the Treasury Safe. No rate or recipient is selected now.
-4. **Pause/recovery policy:** document who proposes, approves and executes pause/unpause and how Safe owner recovery is handled. The candidate guardian is immutable and pause-only; there is no sweep or upgrade role.
-5. **Review limits:** confirm slippage, maximum size and whether to retain user-approved `minNetOut` without server quote signing or introduce a separately reviewed signed-quote trust root. Current candidate ceilings are 1 BNB / 1,000 USDT input, 30 seconds / 100 blocks quote freshness and 120-second deadline ceiling.
-6. **Final source acceptance:** record the UTC date on which the exact reviewed source SHA256 is accepted. Any later source change creates a new candidate and resets review.
+- Guardian: `0x351E236a636c8be4Fa0B602cb096d72346D1a412`
+- Treasury: `0xb7322660B40561ae7C224F963e51583e923F7fC8`
+
+The following remain separate decisions or evidence gates:
+
+1. **Explicit risk acknowledgment:** read and separately accept every item in `DIRECT_EOA_RISK_ACKNOWLEDGMENT.json`. The owner preference message itself does not acknowledge those risks.
+2. **Fee and payout consent:** select 0, 5 or 10 bps and explicitly consent to payment to the direct EOA Treasury. The recipient preference is recorded, but no rate or actual payable configuration is selected.
+3. **Issuer/transfer evidence:** Treasury USDT issuer restriction is **UNKNOWN**, not safe or clear. Empty address code does not establish blocklist status, balance or transferability.
+4. **Pause/recovery policy:** document single-key pause/unpause operations and the absence of Guardian or Treasury rotation without redeployment. Never collect keys or recovery phrases.
+5. **Control verification:** do not claim ownership or key custody unless a deliberate off-chain signature-verification step is separately authorized and completed. No signature is requested now.
+6. **Fresh final-preparation evidence:** repeat both exact address observations on BNB Chain official and PublicNode at one new pinned chain-56 block, with matching block hash and empty code. Historic block 135,782,648 is not final-preparation evidence.
+7. **Review limits:** confirm slippage, maximum size and user-approved `minNetOut` without server quote signing, or separately review a new signed-quote trust root.
+8. **Final source acceptance:** record the UTC date for the exact reviewed source SHA256. Any later Solidity change creates a new candidate and resets review.
 
 **Never request private keys, seed phrases, recovery phrases, session keys or signed deployment transactions.**

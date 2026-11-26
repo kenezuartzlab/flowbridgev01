@@ -1,0 +1,38 @@
+{
+  "schema": "FLOWBRIDGE_BNB_V1_13_DIRECT_EOA_CONSTRUCTOR_PREVIEW_V1",
+  "privateReviewEvidence": true,
+  "status": "OWNER_DIRECT_EOA_CHOICE_RECORDED",
+  "exception": "OWNER_EOA_EXCEPTION_PROPOSED",
+  "sourceSha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425",
+  "compiler": "solc 0.8.38; optimizer 200; evm cancun",
+  "constructorPreview": {
+    "guardian": "0x351E236a636c8be4Fa0B602cb096d72346D1a412",
+    "feeRecipient": "0xb7322660B40561ae7C224F963e51583e923F7fC8",
+    "feeBps": null
+  },
+  "feeScenarios": [
+    { "feeBps": 0, "chosen": false },
+    { "feeBps": 5, "chosen": false },
+    { "feeBps": 10, "chosen": false }
+  ],
+  "historicObservation": {
+    "chainId": 56,
+    "blockNumber": 135782648,
+    "blockHash": "0xef694504e51e2949ed0b71fa4470cb1a4c1fee3cf60962d14b34be3994c35828",
+    "addressCode": "EMPTY_AT_BOTH_PROVIDERS_FOR_BOTH_ADDRESSES",
+    "refreshRequiredAtFinalDeploymentPreparation": true
+  },
+  "treasuryIssuerRestriction": "UNKNOWN",
+  "ownershipControlEvidence": "UNVERIFIED",
+  "riskAcknowledgment": "PENDING",
+  "constructorCalldataIncluded": false,
+  "deploymentAuthorized": false,
+  "fundingAuthorized": false,
+  "roleConfigurationAuthorized": false,
+  "releaseReady": false,
+  "notes": [
+    "Read-only argument preview only; this file intentionally contains no encoded constructor calldata.",
+    "Empty code is EOA-or-undeployed evidence at the historic snapshot, not proof of key custody or ownership.",
+    "No private keys, recovery phrases, signatures, funds, mainnet writes or live role selection."
+  ]
+}

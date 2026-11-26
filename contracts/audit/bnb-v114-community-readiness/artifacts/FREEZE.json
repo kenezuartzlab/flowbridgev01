@@ -53,9 +53,11 @@
       }
     ]
   },
-  "reviewWorkflow": "V1.15 — private substantive signed human responses only",
+  "reviewWorkflow": "V1.16 — private substantive signed human responses only",
   "reviewStatus": "ZERO_REVIEWERS",
   "responseExpiryDays": 90,
   "revisionRule": "Any Solidity, ABI or runtime change requires a new candidate and resets all responses",
-  "ownerInput": "OWNER_PROVIDED_EOA_FAILS_SAFE_POLICY"
+  "ownerInput": "OWNER_DIRECT_EOA_CHOICE_RECORDED",
+  "governanceException": "OWNER_EOA_EXCEPTION_PROPOSED",
+  "riskAcknowledgment": "PENDING"
 }

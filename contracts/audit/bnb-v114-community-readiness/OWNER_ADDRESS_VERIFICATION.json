@@ -26,6 +26,21 @@
     "feeBpsSelected": null,
     "writesAttempted": 0
   },
+  "ownerGovernanceChoice": {
+    "recordedAt": "2026-11-26",
+    "status": "OWNER_DIRECT_EOA_CHOICE_RECORDED",
+    "exception": "OWNER_EOA_EXCEPTION_PROPOSED",
+    "preferredStandard": "SEPARATE_BNB56_SAFES_PREFER_2_OF_3",
+    "guardianPreference": "0x351E236a636c8be4Fa0B602cb096d72346D1a412",
+    "treasuryPreference": "0xb7322660B40561ae7C224F963e51583e923F7fC8",
+    "feeBpsSelected": null,
+    "riskAcknowledgment": "PENDING",
+    "ownershipControlEvidence": "UNVERIFIED",
+    "finalPreparationRefreshRequired": true,
+    "deploymentAuthorized": false,
+    "roleConfigurationAuthorized": false,
+    "releaseReady": false
+  },
   "block": {
     "requestedNumber": 135782648,
     "observations": [

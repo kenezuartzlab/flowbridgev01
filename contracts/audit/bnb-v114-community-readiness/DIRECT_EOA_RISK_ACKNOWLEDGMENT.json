@@ -1,0 +1,40 @@
+{
+  "schema": "FLOWBRIDGE_BNB_DIRECT_EOA_RISK_ACKNOWLEDGMENT_V1",
+  "privateReviewEvidence": true,
+  "status": "PENDING",
+  "ownerChoiceMessageIsAcknowledgment": false,
+  "acknowledgedBy": null,
+  "acknowledgedAt": null,
+  "acceptedRiskIds": [],
+  "requiredRisks": [
+    {
+      "id": "SINGLE_KEY_PAUSE_CONTROL",
+      "ownerReadableRisk": "One Guardian private key can pause and unpause every user swap."
+    },
+    {
+      "id": "GUARDIAN_COMPROMISE",
+      "ownerReadableRisk": "Guardian key compromise lets an attacker toggle pause and disrupt trading."
+    },
+    {
+      "id": "IMMUTABLE_GUARDIAN_LOSS",
+      "ownerReadableRisk": "Lost Guardian key has no recovery or rotation; if paused, users may remain blocked indefinitely without redeployment."
+    },
+    {
+      "id": "IMMUTABLE_TREASURY_COMPROMISE",
+      "ownerReadableRisk": "Treasury key compromise can divert fees already received; future fees remain sent to the same immutable address."
+    },
+    {
+      "id": "ISSUER_RESTRICTION_UNKNOWN",
+      "ownerReadableRisk": "USDT issuer blocklist or transfer restrictions are not disproven by empty address code and may prevent fee payment."
+    },
+    {
+      "id": "NO_ROTATION_WITHOUT_REDEPLOYMENT",
+      "ownerReadableRisk": "Neither immutable Guardian nor immutable feeRecipient can be rotated without deploying and separately reviewing a new contract."
+    }
+  ],
+  "requiredBeforeFutureLaunchAuthorization": "A separate explicit owner acknowledgment of every listed risk is required. The direct-EOA preference message does not provide it.",
+  "ownershipVerification": "Do not claim wallet ownership or key custody unless a deliberate off-chain signature-verification step is separately authorized and completed.",
+  "secretCollection": "Never request private keys, seed phrases or recovery phrases.",
+  "deploymentAuthorized": false,
+  "signatureRequested": false
+}

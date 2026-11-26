@@ -2,6 +2,10 @@
 
 **Snapshot result: both addresses are VERIFIED_EOA. Governance policy: FAILS_SAFE_POLICY. Launch: HOLD / NO-GO.**
 
+## V1.16 owner-choice addendum
+
+After this historical observation, the owner deliberately preferred direct regular-wallet EOAs for both roles. V1.16 records **OWNER_DIRECT_EOA_CHOICE_RECORDED / OWNER_EOA_EXCEPTION_PROPOSED**: D-02 Guardian preference is selected subject to a separate explicit risk acknowledgment, and D-03 Treasury recipient preference is selected with fee bps still unselected. The preferred 2-of-3 Safe policy remains unchanged. Historic evidence must be refreshed during final deployment preparation; empty code does not prove control, custody, USDT issuer status or balance. See `docs/security/BNB_V1_16_DIRECT_EOA_GOVERNANCE_READINESS_20261126.md` and the private packet records. No role configuration, deployment, fee or launch authorization resulted.
+
 This was read-only identity verification of owner-provided public inputs, not deployment planning, role selection, fee activation, ownership inference or an independent human audit. No mainnet write, signature, approval, deployment, Safe creation, funds movement, production publication or BNB/RWA execution occurred. V1.13 Solidity is unchanged at SHA256 `5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425`.
 
 ## Exact observation
@@ -31,7 +35,7 @@ Existing V1.15 policy requires two distinct verified Safe-compatible multisigs w
 - `GUARDIAN_NOT_VERIFIED_SAFE`, `GUARDIAN_THRESHOLD_BELOW_2`
 - `TREASURY_NOT_VERIFIED_SAFE`, `TREASURY_THRESHOLD_BELOW_2`
 
-The recommendation is to create or retarget separate BNB56 Safe multisigs with threshold ≥2 only through separately authorized deployment planning. The policy was not relaxed. Neither supplied address was inserted into Solidity, frontend/public assets, production configuration, deployment manifests, wallet auto-connect, signing, Guardian selection or Treasury/fee activation. D-02/D-03 and fee bps remain pending; explicit deployment-gate approval is still required even if suitable Safes are supplied later.
+The preferred standard remains separate BNB56 Safe multisigs with threshold ≥2. The later direct-EOA choice is an isolated exact-address exception, not a relaxation of `assessSafePolicy`. Neither supplied address was inserted into Solidity, frontend/public assets, production configuration, deployment manifests, wallet auto-connect or signing. D-02/D-03 now record limited direct-EOA preferences only; explicit risk acknowledgment, fee-bps consent, issuer-clear evidence and deployment-gate approval remain required.
 
 ## Implementation and verification
 

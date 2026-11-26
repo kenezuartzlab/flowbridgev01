@@ -1,0 +1,58 @@
+{
+  "schema": "FLOWBRIDGE_BNB_V1_16_VALIDATION_V1",
+  "privateReviewEvidence": true,
+  "status": "DEVELOPMENT_PASS_LAUNCH_HOLD",
+  "ownerChoice": "OWNER_DIRECT_EOA_CHOICE_RECORDED",
+  "exception": "OWNER_EOA_EXCEPTION_PROPOSED",
+  "sourceSha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425",
+  "sourceUnchanged": true,
+  "focusedTests": {
+    "files": 3,
+    "tests": 61,
+    "passed": 61,
+    "launchReadiness": 29,
+    "addressVerification": 11,
+    "directEoaLocalEvm": 21
+  },
+  "fullSuite": {
+    "files": 287,
+    "tests": 3504,
+    "passed": 3504,
+    "baseline": 3472
+  },
+  "typecheck": "PASS",
+  "productionBuild": "PASS",
+  "responsive": {
+    "interfaceCodeChanged": false,
+    "swapSelectorAssertions": 640,
+    "swapCases": 20,
+    "compactAdNavAssertions": 5036,
+    "widths": [320, 360, 390, 430, 1280],
+    "themes": ["light", "dark"],
+    "motion": ["reduce", "no-preference"],
+    "firstSelectorAttempt": "TIMEOUT_DURING_PREVIEW_INITIALIZATION",
+    "selectorRetry": "PASS"
+  },
+  "localEvm": {
+    "mainnetConnected": false,
+    "mainnetDeployment": false,
+    "mainnetWrites": 0,
+    "walletSignatures": 0,
+    "fundsMovedOnMainnet": 0,
+    "constructorCalldataArtifactIncluded": false
+  },
+  "openGates": {
+    "riskAcknowledgment": "PENDING",
+    "feeBpsSelected": null,
+    "treasuryIssuerRestriction": "UNKNOWN",
+    "walletControl": "UNVERIFIED",
+    "finalObservationRefresh": "REQUIRED",
+    "humanAttestations": 0,
+    "slitherHighOpen": 6,
+    "physicalDevices": "UNVERIFIED",
+    "walletConnectZodHigh": "OPEN_INSTALLED_GLOBALLY_DISABLED",
+    "BNB_EXECUTION_ENABLED": false,
+    "LAUNCH_HOLD": true,
+    "launchGateGo": false
+  }
+}

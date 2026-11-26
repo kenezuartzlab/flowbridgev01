@@ -26,9 +26,9 @@ fs.writeFileSync(`${OUT}/artifacts/FREEZE.json`, JSON.stringify({
   abiSha256: EXPECT_ABI, runtimeUnlinkedSha256: EXPECT_RUNTIME_FILE,
   compiler: man.compiler, optimizerRuns: 200, evmVersion: 'cancun', creationKeccak: man.creationBytecodeKeccak, runtimeKeccak: man.unlinkedRuntimeKeccak,
   immutableReferences: c.evm.deployedBytecode.immutableReferences,
-  reviewWorkflow: 'V1.15 — private substantive signed human responses only', reviewStatus: 'ZERO_REVIEWERS',
+  reviewWorkflow: 'V1.16 — private substantive signed human responses only', reviewStatus: 'ZERO_REVIEWERS',
   responseExpiryDays: 90, revisionRule: 'Any Solidity, ABI or runtime change requires a new candidate and resets all responses',
-  ownerInput: 'OWNER_PROVIDED_EOA_FAILS_SAFE_POLICY',
+  ownerInput: 'OWNER_DIRECT_EOA_CHOICE_RECORDED', governanceException: 'OWNER_EOA_EXCEPTION_PROPOSED', riskAcknowledgment: 'PENDING',
 }, null, 2) + '\n');
 const extra = [
   'src/lib/bnb/launchReadiness.ts', 'src/lib/bnb/launchReadiness.test.ts',
@@ -39,6 +39,8 @@ const extra = [
   'scripts/bnb-v114-packet.mjs', 'scripts/bnb-v115-bundle-audit.mjs', 'scripts/bnb-v115-wallet-browser-check.py',
   'scripts/compact-ad-fixed-check.py',
   'contracts/audit/bnb-v113-community/review.v113.evm.test.ts',
+  'contracts/audit/bnb-v113-community/direct-eoa.v116.evm.test.ts',
+  'docs/security/BNB_V1_16_DIRECT_EOA_GOVERNANCE_READINESS_20261126.md',
 ];
 const include = [SRC, 'contracts/candidates/bnb-swap-adapter-v1-13/MANIFEST.json', ...extra,
   ...fs.readdirSync('docs/security/bnb-bot-v4-parity').map((f) => 'docs/security/bnb-bot-v4-parity/' + f),
