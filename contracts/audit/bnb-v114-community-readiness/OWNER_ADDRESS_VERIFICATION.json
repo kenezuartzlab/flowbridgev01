@@ -1,0 +1,243 @@
+{
+  "schema": "FLOWBRIDGE_BNB_OWNER_ADDRESS_VERIFICATION_V1",
+  "generatedAt": "2026-11-26T04:27:36.757Z",
+  "scope": "OWNER_PROVIDED_READ_ONLY_IDENTITY_OBSERVATION",
+  "privateReadinessRecord": true,
+  "sourceProvenance": {
+    "ownerMessageUtc": "2026-11-26T04:25:00Z",
+    "endpoints": [
+      {
+        "id": "BNB_CHAIN_OFFICIAL",
+        "url": "https://bsc-dataseed.bnbchain.org",
+        "provenance": "https://docs.bnbchain.org/bnb-smart-chain/developers/json_rpc/json-rpc-endpoint/"
+      },
+      {
+        "id": "PUBLICNODE",
+        "url": "https://bsc-rpc.publicnode.com",
+        "provenance": "https://bsc.publicnode.com/"
+      }
+    ],
+    "frozenV113SourceSha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425"
+  },
+  "execution": {
+    "BNB_EXECUTION_ENABLED": false,
+    "deploymentAuthorized": false,
+    "roleSelectionAuthorized": false,
+    "feeBpsSelected": null,
+    "writesAttempted": 0
+  },
+  "block": {
+    "requestedNumber": 135782648,
+    "observations": [
+      {
+        "endpointId": "BNB_CHAIN_OFFICIAL",
+        "chainId": 56,
+        "blockNumber": 135782648,
+        "blockHash": "0xef694504e51e2949ed0b71fa4470cb1a4c1fee3cf60962d14b34be3994c35828",
+        "blockTime": "2026-11-26T04:27:34.000Z"
+      },
+      {
+        "endpointId": "PUBLICNODE",
+        "chainId": 56,
+        "blockNumber": 135782648,
+        "blockHash": "0xef694504e51e2949ed0b71fa4470cb1a4c1fee3cf60962d14b34be3994c35828",
+        "blockTime": "2026-11-26T04:27:34.000Z"
+      }
+    ]
+  },
+  "addresses": {
+    "guardian": {
+      "status": "VERIFIED_EOA",
+      "canonical": "0x351E236a636c8be4Fa0B602cb096d72346D1a412",
+      "reasons": [],
+      "threshold": null,
+      "ownersCount": null,
+      "ownersHash": null,
+      "observations": [
+        {
+          "endpointId": "BNB_CHAIN_OFFICIAL",
+          "chainId": 56,
+          "blockNumber": 135782648,
+          "blockHash": "0xef694504e51e2949ed0b71fa4470cb1a4c1fee3cf60962d14b34be3994c35828",
+          "codeHash": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "codeBytes": 0,
+          "safe": null,
+          "safeError": null,
+          "rpcError": null
+        },
+        {
+          "endpointId": "PUBLICNODE",
+          "chainId": 56,
+          "blockNumber": 135782648,
+          "blockHash": "0xef694504e51e2949ed0b71fa4470cb1a4c1fee3cf60962d14b34be3994c35828",
+          "codeHash": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "codeBytes": 0,
+          "safe": null,
+          "safeError": null,
+          "rpcError": null
+        }
+      ]
+    },
+    "treasury": {
+      "status": "VERIFIED_EOA",
+      "canonical": "0xb7322660B40561ae7C224F963e51583e923F7fC8",
+      "reasons": [],
+      "threshold": null,
+      "ownersCount": null,
+      "ownersHash": null,
+      "observations": [
+        {
+          "endpointId": "BNB_CHAIN_OFFICIAL",
+          "chainId": 56,
+          "blockNumber": 135782648,
+          "blockHash": "0xef694504e51e2949ed0b71fa4470cb1a4c1fee3cf60962d14b34be3994c35828",
+          "codeHash": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "codeBytes": 0,
+          "safe": null,
+          "safeError": null,
+          "rpcError": null
+        },
+        {
+          "endpointId": "PUBLICNODE",
+          "chainId": 56,
+          "blockNumber": 135782648,
+          "blockHash": "0xef694504e51e2949ed0b71fa4470cb1a4c1fee3cf60962d14b34be3994c35828",
+          "codeHash": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "codeBytes": 0,
+          "safe": null,
+          "safeError": null,
+          "rpcError": null
+        }
+      ]
+    }
+  },
+  "treasuryIssuerBlocklist": {
+    "token": "BSC_USDT",
+    "tokenAddress": "0x55d398326f99059fF775485246999027B3197955",
+    "perEndpoint": {
+      "BNB_CHAIN_OFFICIAL": {
+        "method": null,
+        "supported": false,
+        "blocked": null,
+        "status": "UNKNOWN_NO_SUPPORTED_AUTHORITATIVE_METHOD"
+      },
+      "PUBLICNODE": {
+        "method": null,
+        "supported": false,
+        "blocked": null,
+        "status": "UNKNOWN_NO_SUPPORTED_AUTHORITATIVE_METHOD"
+      }
+    },
+    "status": "UNKNOWN"
+  },
+  "safeMultisigPolicy": {
+    "status": "FAILS_SAFE_POLICY",
+    "reasons": [
+      "GUARDIAN_NOT_VERIFIED_SAFE",
+      "GUARDIAN_THRESHOLD_BELOW_2",
+      "TREASURY_NOT_VERIFIED_SAFE",
+      "TREASURY_THRESHOLD_BELOW_2"
+    ],
+    "recommendation": "Create or retarget separate BNB56 Safe multisigs with threshold >=2 through a separately authorized deployment-planning gate; do not relax policy silently.",
+    "canConfigureRoles": false
+  },
+  "ownerAddressesDisclosure": "Only owner count and hash retained; individual Safe owner addresses are redacted.",
+  "rpcCalls": [
+    {
+      "endpoint": "BNB_CHAIN_OFFICIAL",
+      "method": "eth_blockNumber",
+      "ok": true
+    },
+    {
+      "endpoint": "BNB_CHAIN_OFFICIAL",
+      "method": "eth_chainId",
+      "ok": true
+    },
+    {
+      "endpoint": "BNB_CHAIN_OFFICIAL",
+      "method": "eth_getBlockByNumber",
+      "ok": true
+    },
+    {
+      "endpoint": "PUBLICNODE",
+      "method": "eth_chainId",
+      "ok": true
+    },
+    {
+      "endpoint": "PUBLICNODE",
+      "method": "eth_getBlockByNumber",
+      "ok": true
+    },
+    {
+      "endpoint": "BNB_CHAIN_OFFICIAL",
+      "method": "eth_getCode",
+      "target": "0x351E236a636c8be4Fa0B602cb096d72346D1a412",
+      "block": "0x817e0f8",
+      "ok": true
+    },
+    {
+      "endpoint": "PUBLICNODE",
+      "method": "eth_getCode",
+      "target": "0x351E236a636c8be4Fa0B602cb096d72346D1a412",
+      "block": "0x817e0f8",
+      "ok": true
+    },
+    {
+      "endpoint": "BNB_CHAIN_OFFICIAL",
+      "method": "eth_getCode",
+      "target": "0xb7322660B40561ae7C224F963e51583e923F7fC8",
+      "block": "0x817e0f8",
+      "ok": true
+    },
+    {
+      "endpoint": "PUBLICNODE",
+      "method": "eth_getCode",
+      "target": "0xb7322660B40561ae7C224F963e51583e923F7fC8",
+      "block": "0x817e0f8",
+      "ok": true
+    },
+    {
+      "endpoint": "BNB_CHAIN_OFFICIAL",
+      "method": "eth_call",
+      "target": "0x55d398326f99059fF775485246999027B3197955",
+      "selector": "0xe47d6060",
+      "block": "0x817e0f8",
+      "ok": false,
+      "error": "EXECUTION_REVERTED"
+    },
+    {
+      "endpoint": "BNB_CHAIN_OFFICIAL",
+      "method": "eth_call",
+      "target": "0x55d398326f99059fF775485246999027B3197955",
+      "selector": "0x59bf1abe",
+      "block": "0x817e0f8",
+      "ok": false,
+      "error": "EXECUTION_REVERTED"
+    },
+    {
+      "endpoint": "PUBLICNODE",
+      "method": "eth_call",
+      "target": "0x55d398326f99059fF775485246999027B3197955",
+      "selector": "0xe47d6060",
+      "block": "0x817e0f8",
+      "ok": false,
+      "error": "EXECUTION_REVERTED"
+    },
+    {
+      "endpoint": "PUBLICNODE",
+      "method": "eth_call",
+      "target": "0x55d398326f99059fF775485246999027B3197955",
+      "selector": "0x59bf1abe",
+      "block": "0x817e0f8",
+      "ok": false,
+      "error": "EXECUTION_REVERTED"
+    }
+  ],
+  "rpcCallCount": 13,
+  "writeMethodCount": 0,
+  "limitations": [
+    "Public RPC agreement is evidence, not wallet ownership or independent human review.",
+    "Safe-compatible ABI does not prove official factory provenance unless separately verified.",
+    "No contract writes, access tests, signatures, deployment or fee activation."
+  ]
+}

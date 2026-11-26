@@ -57,5 +57,5 @@
   "reviewStatus": "ZERO_REVIEWERS",
   "responseExpiryDays": 90,
   "revisionRule": "Any Solidity, ABI or runtime change requires a new candidate and resets all responses",
-  "ownerInput": "GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER"
+  "ownerInput": "OWNER_PROVIDED_EOA_FAILS_SAFE_POLICY"
 }

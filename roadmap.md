@@ -1,3 +1,9 @@
+# BNB V1.15 owner-provided address verification — preview only
+- [x] Both original EIP-55 strings valid and canonical; two independent BNB56 providers agreed at block 135,782,648 / hash 0xef694504…c35828 / 2026-11-26T04:27:34Z. Both are VERIFIED_EOA with empty-code keccak; Treasury issuer blocklist UNKNOWN after authoritative-method probes reverted.
+- [x] Added 11 pure tests for checksum/EOA/contract/non-Safe/Safe, threshold, chain/RPC/block/code failures, protocol targets and zero writes; private evidence records no owner identities and no role selection.
+- [x] 29 focused and 3,472 full tests PASS; typecheck/build PASS; V1.13 frozen, execution/WalletConnect/XAUt holds unchanged. Report: docs/security/BNB_V1_15_OWNER_ADDRESS_VERIFICATION_20261126.md.
+- [ ] HOLD: both proposed EOAs fail threshold-≥2 Safe policy; separate Safe creation/retargeting, fee consent, D-01…D-05, human/device/security gates and explicit deployment approval remain.
+
 # BNB V1.15 owner-input-deferred review + wallet dry-run — preview only
 - [x] Preserved frozen V1.13 identity; added GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER development readiness, future Safe-facts validation and request-at-right-time checklist. No addresses, keys, role configuration or on-chain writes.
 - [x] Upgraded the private V1.14 packet with exact reviewer commands, questionnaire, signed-response rules/status, six HIGH dispositions and reproducible 43-file evidence; ZERO_REVIEWERS / 0 human attestations.

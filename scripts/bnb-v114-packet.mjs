@@ -28,10 +28,11 @@ fs.writeFileSync(`${OUT}/artifacts/FREEZE.json`, JSON.stringify({
   immutableReferences: c.evm.deployedBytecode.immutableReferences,
   reviewWorkflow: 'V1.15 — private substantive signed human responses only', reviewStatus: 'ZERO_REVIEWERS',
   responseExpiryDays: 90, revisionRule: 'Any Solidity, ABI or runtime change requires a new candidate and resets all responses',
-  ownerInput: 'GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER',
+  ownerInput: 'OWNER_PROVIDED_EOA_FAILS_SAFE_POLICY',
 }, null, 2) + '\n');
 const extra = [
   'src/lib/bnb/launchReadiness.ts', 'src/lib/bnb/launchReadiness.test.ts',
+  'src/lib/bnb/addressVerification.ts', 'src/lib/bnb/addressVerification.test.ts', 'scripts/bnb-owner-address-verify.ts',
   'src/lib/bnb/communityPeerReview.ts', 'src/lib/bnb/communityPeerReview.test.ts',
   'src/lib/bnb/walletDryRun.ts', 'src/lib/bnb/walletDryRun.test.ts',
   'src/lib/bnb/executionReviewPolicy.ts', 'src/lib/bnb/executionReviewPolicy.test.ts',

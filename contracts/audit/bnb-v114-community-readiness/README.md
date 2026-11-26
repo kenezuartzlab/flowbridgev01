@@ -25,6 +25,6 @@ Current status: **ZERO_REVIEWERS / 0 substantive signed human responses / no cer
 ## Revision and expiry
 Responses expire 90 days after signing and immediately upon any Solidity, ABI or runtime-bytecode change. A source change requires a new candidate directory and packet revision and resets reviewed status to ZERO_REVIEWERS. Test-only changes do not change contract identity, but must change `SHA256SUMS` and be disclosed to reviewers.
 
-Owner Guardian/Treasury collection is **GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER**. See `OWNER_INPUT_REQUEST.md`: request only after human review, wallet acceptance readiness and separately authorized deployment planning. Never request private keys or recovery phrases.
+Owner Guardian/Treasury addresses were supplied on 2026-11-26 for read-only verification only. `OWNER_ADDRESS_VERIFICATION.json` records both as **VERIFIED_EOA** at the pinned BNB56 block, not Safes; they fail the threshold-≥2 multisig policy and are not selected for deployment or fees. `OWNER_INPUT_REQUEST.md` retains the original deferred-collection checklist as historical context. Separate Safe creation/retargeting, deployment planning, fee-bps consent and owner approval remain required. Never request private keys or recovery phrases.
 
 Contents include the six OPEN HIGH traces, threat model, exact artifacts, questionnaire, response template, local harness instructions, manual device plan, owner-input checklist and hashes over the BOT V4 parity evidence and candidate tests.
