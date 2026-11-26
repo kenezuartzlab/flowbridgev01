@@ -1,0 +1,1 @@
+- WALLETCONNECT_SECURITY_HOLD in walletConnectFlag.ts forces WalletConnect off on every host; only a code change may lift it. Why: the installed WalletConnect chain pins a vulnerable zod and must stay unreachable.
