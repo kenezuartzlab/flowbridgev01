@@ -11,7 +11,7 @@ async def main():
  art=Image.new('RGB',(840,140),'#183b42');draw=ImageDraw.Draw(art);draw.text((64,50),'FLOWBRIDGE',fill='white',font_size=36);draw.text((630,55),'Explore >',fill='#32ff8b',font_size=28);buffer=BytesIO();art.save(buffer,format='PNG')
  async with async_playwright() as p:
   b=await p.chromium.launch(headless=True)
-  for w in (320,390,430,1280):
+  for w in (320,360,390,430,1280):
    for motion in ('reduce','no-preference'):
     ctx=await b.new_context(viewport={'width':w,'height':844 if w<600 else 1800},reduced_motion=motion);page=await ctx.new_page();errs=[];page.on('pageerror',lambda e:errs.append(str(e)))
     await page.route('**/__fixed',lambda r:r.fulfill(content_type='text/html',body='<html><head><link rel="stylesheet" href="/src/styles.css"><script type="module" src="/@vite/client"></script></head><body></body></html>'))

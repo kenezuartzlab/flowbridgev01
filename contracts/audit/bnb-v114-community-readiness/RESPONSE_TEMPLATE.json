@@ -1,0 +1,19 @@
+{
+  "schema": "flowbridge-bnb-v113-human-response-v1",
+  "status": "BLANK_TEMPLATE_NOT_A_RESPONSE",
+  "reviewer": { "name": "", "contact": "" },
+  "signedAt": "",
+  "validUntil": "",
+  "sourceSha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425",
+  "abiSha256": "d4453c306a097b9141ef62403bcefa3c436a7fd90dcc888805e75d94e5b9b856",
+  "runtimeKeccak": "0x8410959bb5c8d0d69f4a1ab9c3c4cc9a4748e6cf35af58c73f6fa53ae059469f",
+  "signature": { "kind": "PGP", "value": "" },
+  "findings": [
+    { "slitherId": "35bbdd20078e1184ac60bb820046e27ed822c6b0b4d5afe4b93a15db21ab7190", "outcome": "UNVERIFIED", "justification": "" },
+    { "slitherId": "39e09e6f46da48fcc6637535a3b9e68eee3d28e0824aacb871a95734f7d2311a", "outcome": "UNVERIFIED", "justification": "" },
+    { "slitherId": "643f5e0602aefd6a089f4c1f47c3b480c40efd862a9280d9f9efc0a0de4a0042", "outcome": "UNVERIFIED", "justification": "" },
+    { "slitherId": "be23b08d0d903b9351a60acae031b18c0e8eebda8d91d548a981504a9ca86d4f", "outcome": "UNVERIFIED", "justification": "" },
+    { "slitherId": "c6ff56409ede0d3e80f9c35555eb7abc485d20e1c0c07a72f52387c59ad9d176", "outcome": "UNVERIFIED", "justification": "" },
+    { "slitherId": "d34aa27be72a6343f53d92f611f0082b8e1c60a5272c143d0f5771e019b313a1", "outcome": "UNVERIFIED", "justification": "" }
+  ]
+}

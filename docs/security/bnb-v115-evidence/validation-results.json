@@ -1,0 +1,78 @@
+{
+  "fullSuite": {
+    "files": 285,
+    "tests": 3461,
+    "status": "PASS"
+  },
+  "focusedWallet": {
+    "files": 16,
+    "tests": 138,
+    "status": "PASS"
+  },
+  "focusedNewAndAdjacent": {
+    "files": 6,
+    "tests": 87,
+    "status": "PASS"
+  },
+  "localExploitHarness": {
+    "files": 3,
+    "tests": 257,
+    "status": "PASS",
+    "details": {
+      "BotV4Parity.evm.test.ts": 85,
+      "adapter.evm.test.ts": 74,
+      "review.v113.evm.test.ts": 98
+    }
+  },
+  "typecheck": "PASS",
+  "build": "PASS",
+  "browserWallets": {
+    "MetaMask": "PASS_SIMULATED",
+    "TokenPocket": "PASS_SIMULATED",
+    "Rabby": "PASS_SIMULATED",
+    "sdkRequests": 0,
+    "walletWriteRequests": 0,
+    "physicalDevices": "UNVERIFIED"
+  },
+  "swapResponsive": {
+    "assertions": 640,
+    "cases": 20,
+    "widths": [
+      320,
+      360,
+      390,
+      430,
+      1280
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "motion": [
+      "reduce",
+      "no-preference"
+    ],
+    "status": "PASS"
+  },
+  "compactAdAndNavigation": {
+    "assertions": 5036,
+    "widths": [
+      320,
+      360,
+      390,
+      430,
+      1280
+    ],
+    "status": "PASS"
+  },
+  "officialBrand": {
+    "assertions": 201,
+    "cases": 20,
+    "status": "PASS"
+  },
+  "privatePacket": {
+    "files": 43,
+    "reproducedTwiceIdentically": true,
+    "sha256sumsSha256": "b999b2510ab3ea528ce497e1b10e4ce4b617eaaa6c9802f742321d945dc0d002"
+  }
+}

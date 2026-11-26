@@ -1,0 +1,80 @@
+{
+  "status": "PASS",
+  "viewport": [
+    390,
+    844
+  ],
+  "wallets": [
+    {
+      "wallet": "MetaMask",
+      "account": "0x00000000000000000000000000000000000000a1",
+      "calls": [
+        "eth_requestAccounts",
+        "eth_accounts",
+        "eth_chainId",
+        "personal_sign",
+        "eth_sendTransaction"
+      ],
+      "mode": "NON_EXECUTABLE_REVIEW",
+      "reasons": [
+        "EXECUTION_DISABLED"
+      ],
+      "canSign": false,
+      "canSubmit": false,
+      "fee": "3000000000000000",
+      "net": "5997000000000000000",
+      "gas": "UNAVAILABLE",
+      "signError": "DRY_RUN_FORBIDS_personal_sign",
+      "sendError": "DRY_RUN_FORBIDS_eth_sendTransaction"
+    },
+    {
+      "wallet": "TokenPocket",
+      "account": "0x00000000000000000000000000000000000000a1",
+      "calls": [
+        "eth_requestAccounts",
+        "eth_accounts",
+        "eth_chainId",
+        "personal_sign",
+        "eth_sendTransaction"
+      ],
+      "mode": "NON_EXECUTABLE_REVIEW",
+      "reasons": [
+        "EXECUTION_DISABLED"
+      ],
+      "canSign": false,
+      "canSubmit": false,
+      "fee": "3000000000000000",
+      "net": "5997000000000000000",
+      "gas": "UNAVAILABLE",
+      "signError": "DRY_RUN_FORBIDS_personal_sign",
+      "sendError": "DRY_RUN_FORBIDS_eth_sendTransaction"
+    },
+    {
+      "wallet": "Rabby",
+      "account": "0x00000000000000000000000000000000000000a1",
+      "calls": [
+        "eth_requestAccounts",
+        "eth_accounts",
+        "eth_chainId",
+        "personal_sign",
+        "eth_sendTransaction"
+      ],
+      "mode": "NON_EXECUTABLE_REVIEW",
+      "reasons": [
+        "EXECUTION_DISABLED"
+      ],
+      "canSign": false,
+      "canSubmit": false,
+      "fee": "3000000000000000",
+      "net": "5997000000000000000",
+      "gas": "UNAVAILABLE",
+      "signError": "DRY_RUN_FORBIDS_personal_sign",
+      "sendError": "DRY_RUN_FORBIDS_eth_sendTransaction"
+    }
+  ],
+  "walletConnectSdkRequests": [],
+  "walletWriteRequests": [],
+  "pageErrors": [],
+  "physicalDevices": "UNVERIFIED",
+  "screenshot": "/tmp/browser/bnb-v115-wallet/390-bnb-no-execution.png"
+}

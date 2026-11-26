@@ -2,6 +2,8 @@
   "status": "LOCAL CANDIDATE — NOT DEPLOYED, NOT AUDITED, NO HUMAN SIGN-OFF",
   "source": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
   "sourceSha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425",
+  "abiSha256": "d4453c306a097b9141ef62403bcefa3c436a7fd90dcc888805e75d94e5b9b856",
+  "runtimeUnlinkedSha256": "f9919c16f1ac98b1c0195150b7373006113d33b1c83385aafca7b8d77ade8f9e",
   "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
   "optimizerRuns": 200,
   "evmVersion": "cancun",
@@ -50,5 +52,10 @@
         "start": 5752
       }
     ]
-  }
+  },
+  "reviewWorkflow": "V1.15 — private substantive signed human responses only",
+  "reviewStatus": "ZERO_REVIEWERS",
+  "responseExpiryDays": 90,
+  "revisionRule": "Any Solidity, ABI or runtime change requires a new candidate and resets all responses",
+  "ownerInput": "GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER"
 }

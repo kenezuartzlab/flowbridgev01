@@ -1,16 +1,29 @@
 import { describe, expect, it } from 'vitest';
 import { keccak256, toBytes, getAddress } from 'viem';
-import { assessGovernance, isChecksumAddress, illustrateFees, DECISIONS, launchGate, FIXED_PROTOCOL_TARGETS, type SafeFacts } from './launchReadiness';
+import { assessGovernance, developmentReadiness, isChecksumAddress, illustrateFees, DECISIONS, launchGate, FIXED_PROTOCOL_TARGETS, OWNER_INPUT_CHECKLIST, OWNER_INPUT_STATUS, type SafeFacts } from './launchReadiness';
 import { reviewBnbSwap } from './executionReviewPolicy';
 
 const k = (s: string) => keccak256(toBytes(s)).slice(2);
 const A = getAddress('0x' + '11'.repeat(20)), B = getAddress('0x' + '22'.repeat(20));
 const o = [getAddress('0x' + 'a1'.repeat(20)), getAddress('0x' + 'b2'.repeat(20)), getAddress('0x' + 'c3'.repeat(20))];
-const safe = (address: string, p: Partial<SafeFacts> = {}): SafeFacts => ({ address, chainId: 56, hasCode: true, owners: o, threshold: 2, ...p });
+const safe = (address: string, p: Partial<SafeFacts> = {}): SafeFacts => ({ address, chainId: 56, hasCode: true, owners: o, threshold: 2, observedAtBlock: 135_800_000, evidence: 'READ_ONLY_CHAIN56_RPC', ...p });
+
+describe('owner-input-deferred development readiness', () => {
+  it('passes non-executable development while launch and execution stay disabled', () => {
+    expect(developmentReadiness()).toEqual({ status: 'PASS_FOR_NON_EXECUTABLE_DEVELOPMENT', ownerInput: 'GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER', launch: 'HOLD', executionEnabled: false, financialActionsAuthorized: false });
+  });
+  it('requests two Safes, fees/consent, pause/recovery, review limits and final hash date only later', () => {
+    expect(OWNER_INPUT_CHECKLIST.map((item) => item.id)).toEqual(['OI-01', 'OI-02', 'OI-03', 'OI-04', 'OI-05']);
+    expect(OWNER_INPUT_CHECKLIST.every((item) => item.status === OWNER_INPUT_STATUS)).toBe(true);
+    expect(OWNER_INPUT_CHECKLIST[0]!.proposal).toContain('Prefer 2-of-3');
+    expect(JSON.stringify(OWNER_INPUT_CHECKLIST)).not.toMatch(/private key|recovery phrase collection\./i);
+  });
+});
 
 describe('governance readiness (synthetic addresses, never real roles)', () => {
-  it('NOT_CONFIGURED without owner-provided addresses', () => {
-    expect(assessGovernance(null, null, k)).toEqual({ status: 'NOT_CONFIGURED', reasons: ['NOT_PROVIDED'], canConfigureRoles: false });
+  it('defers missing owner addresses without treating placeholders as ready', () => {
+    expect(assessGovernance(null, null, k)).toEqual({ status: 'NOT_CONFIGURED', reasons: ['GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER'], canConfigureRoles: false });
+    expect(assessGovernance(safe('0x' + '00'.repeat(20)), safe(B), k).status).toBe('INVALID');
   });
   it('checksum validation', () => {
     expect(isChecksumAddress(A, k)).toBe(true);
@@ -22,7 +35,13 @@ describe('governance readiness (synthetic addresses, never real roles)', () => {
     expect(r.status).toBe('INVALID');
     for (const x of ['PROTOCOL_TARGET', 'THRESHOLD_TOO_LOW', 'NO_CODE', 'WRONG_CHAIN', 'GUARDIAN_EQUALS_TREASURY']) expect(r.reasons).toContain(x);
   });
-  it('distinct valid Safes are only READY_FOR_HUMAN_REVIEW, never role config', () => {
+  it('requires read-only observation provenance, valid unique owners and a valid block', () => {
+    const badOwners = assessGovernance(safe(A, { owners: [o[0]!, o[0]!], threshold: 2 }), safe(B), k);
+    expect(badOwners.reasons).toContain('INVALID_OWNER');
+    const noObservation = assessGovernance(safe(A, { observedAtBlock: 0 }), safe(B), k);
+    expect(noObservation.reasons).toContain('UNVERIFIED_CHAIN_OBSERVATION');
+  });
+  it('distinct valid 2-of-3 Safe facts are only READY_FOR_HUMAN_REVIEW, never role config', () => {
     const r = assessGovernance(safe(A), safe(B, { owners: [o[0]!, o[1]!] }), k);
     expect(r).toEqual({ status: 'READY_FOR_HUMAN_REVIEW', reasons: [], canConfigureRoles: false });
   });

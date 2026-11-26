@@ -1,0 +1,72 @@
+{
+  "schema": "flowbridge-bnb-v115-bundle-graph-v1",
+  "buildEntry": "index-D7iyRWRI.js",
+  "buildEntrySha256": "0dfab4c062ddb9c71d33c8306017c28b39304b4ebd85b26328d83e81ebef5a9b",
+  "clientJsFiles": 261,
+  "entryStaticFileCount": 32,
+  "entryStaticIncludesWalletConnectSdk": false,
+  "entryStaticIncludesReownZod3Schemas": false,
+  "walletConnectSecurityHoldRequired": true,
+  "walletConnectAdvisoryStatus": "OPEN_INSTALLED_NOT_PATCHED",
+  "coinbaseZod32576Status": "INSTALLED_VIA_WAGMI_BASE_ACCOUNT_NO_CDP_CLIENT_CHUNK_FOUND",
+  "wcConnectorChunks": [
+    "wagmi-DSQECd5j.js"
+  ],
+  "wcConnectorChunksEagerInEntry": [
+    "wagmi-DSQECd5j.js"
+  ],
+  "wcSdkEntries": [
+    "dist-BBEmemwr.js"
+  ],
+  "wcSdkStaticFileCount": 3,
+  "wcSdkDynamicClosureFileCount": 69,
+  "reownSchemaChunks": [
+    "ApiController-CBrB2BrO.js"
+  ],
+  "reownSchemaChunksDynamicOnly": true,
+  "patchedZod4ChunksInEntry": [
+    "schemas-C6Rg-Knd.js"
+  ],
+  "cdpChunks": [],
+  "dynamicReachableFileCount": 261,
+  "entryStaticFiles": [
+    "QueryClientProvider-ZBM5rZiO.js",
+    "_esm-CkkAvgMG.js",
+    "appConfig-B5DHVBIc.js",
+    "arrow-left-C1BDkByJ.js",
+    "button-BN65v-vo.js",
+    "ccip-E7JZgFNq.js",
+    "client-BhMTqKNc.js",
+    "createLucideIcon-ChI_5Sm_.js",
+    "dist-BUseg5Y0.js",
+    "dist-DsU4rN9p.js",
+    "exports-C_y0Jsjt.js",
+    "format-CKEWRSWE.js",
+    "index-D7iyRWRI.js",
+    "lazyRouteComponent-D4UCau1s.js",
+    "preload-helper-BLdHbfdN.js",
+    "promotionPolicy-B4eD8WWD.js",
+    "react-CbUQ0D_r.js",
+    "react-dom-DVatfbUM.js",
+    "redirect-DmtLUW0N.js",
+    "rolldown-runtime-DLMaRju-.js",
+    "schemas-C6Rg-Knd.js",
+    "secp256k1-D2h9uWww.js",
+    "sparkles-BL-Dus-H.js",
+    "tradeSession-CEbYLSto.js",
+    "useMatch-BIJ5EXMc.js",
+    "useNavigate-BV_L1oPi.js",
+    "useRouter-D_WIEzii.js",
+    "useRouterState-CYrUkCjV.js",
+    "utils-BkR7EQjg.js",
+    "utils-FREdMtAG.js",
+    "wagmi-DSQECd5j.js",
+    "x-diYxzwhq.js"
+  ],
+  "wcSdkStaticFiles": [
+    "dist-BBEmemwr.js",
+    "preload-helper-BLdHbfdN.js",
+    "rolldown-runtime-DLMaRju-.js"
+  ],
+  "note": "The eager wagmi connector wrapper and disabled flag strings are not the vulnerable SDK. The Reown/W3m schema path and SDK are dynamic-only in this build. This does not patch or remove installed Zod 3.22.4; global security hold remains mandatory."
+}

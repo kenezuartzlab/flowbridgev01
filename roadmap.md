@@ -1,3 +1,11 @@
+# BNB V1.15 owner-input-deferred review + wallet dry-run — preview only
+- [x] Preserved frozen V1.13 identity; added GUARDIAN_AND_TREASURY_DEFERRED_BY_OWNER development readiness, future Safe-facts validation and request-at-right-time checklist. No addresses, keys, role configuration or on-chain writes.
+- [x] Upgraded the private V1.14 packet with exact reviewer commands, questionnaire, signed-response rules/status, six HIGH dispositions and reproducible 43-file evidence; ZERO_REVIEWERS / 0 human attestations.
+- [x] Added pure simulated EIP-1193 MetaMask/TokenPocket/Rabby dry-run tests plus real-preview browser checks; no signing, transaction submission or live BNB CTA. Physical devices remain UNVERIFIED.
+- [x] Verified production bundle static/dynamic reachability, global WalletConnect hold, 138 focused wallet tests, current Zod/Coinbase/minimatch advisories; no removal or unsafe upgrade.
+- [x] 3,461 full tests, 257 exploit tests, fresh Slither 0.11.6 (18 findings/six HIGH OPEN), reproducible packet, typecheck/build, 640 selector/5,036 ad-nav/201 logo assertions PASS. Report: docs/security/BNB_V1_15_REVIEW_AND_WALLET_READINESS_20261126.md.
+- [ ] HOLD: genuine human review and six-HIGH dispositions, physical devices, D-01…D-05, installed Zod/minimatch advisories, separate deployment planning before Safe collection, and separate financial/deployment/publication authorization.
+
 # Bridge tracking completion — BOT / BNB
 - [x] Verified the owner's BOT→BNB transfer: source success at 07:33:45 UTC, exact nonce-linked release plus USDT transfer at 07:35:23 UTC; no financial writes.
 - [x] Timestamp-bounded discovery, adaptive RPC ranges, stale receipt fallback and previous-head overlap prevent missed delayed-index releases; 174 bridge/activity tests PASS, preview build OK.

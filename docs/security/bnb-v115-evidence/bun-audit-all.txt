@@ -1,0 +1,24 @@
+[0.06ms] ".env"
+bun audit v1.4.4 (38afee6c8)
+
+minimatch@3.1.5, 10.2.5, 11.0.5
+  eslint > @eslint/eslintrc > minimatch
+  typescript-eslint > @typescript-eslint/utils > @typescript-eslint/typescript-estree > minimatch
+  react-email > glob > minimatch
+  moderate: minimatch has potential denial of service via globparts amplification (>=7.0.0 <11.0.1) - https://github.com/advisories/GHSA-g3hv-75wg-m249
+
+zod@4.6.6, 3.25.76, 3.22.4
+  (direct dependency)
+  @lovable.dev/mcp-js > zod
+  @tanstack/router-plugin > @tanstack/router-generator > zod
+  accounts > zod
+  @tanstack/react-start > @tanstack/start-plugin-core > @tanstack/router-generator > zod
+  viem > ox > abitype > zod
+  @walletconnect/ethereum-provider > @reown/appkit > @reown/appkit-wallet > zod
+  wagmi > @wagmi/connectors > @base-org/account > @coinbase/cdp-sdk > zod
+  high: Zod can exhaust memory while validating oversized constrained collections (<4.6.6) - https://github.com/advisories/GHSA-mrhx-c7xc-m3w5
+
+2 vulnerabilities (1 high, 1 moderate)
+
+  bun audit fix           upgrade the vulnerable packages within their ranges
+  bun audit fix --latest  also cross major versions
