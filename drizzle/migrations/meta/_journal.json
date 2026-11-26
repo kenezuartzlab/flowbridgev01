@@ -456,6 +456,13 @@
       "when": 1794277972548,
       "tag": "0064_adventure_verified_program_filter",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1795703699447,
+      "tag": "0065_autotrade_v1_orders",
+      "breakpoints": true
     }
   ]
 }

@@ -67,6 +67,7 @@ import { Route as ApiAdminAdventureRouteImport } from './routes/api/admin.advent
 import { Route as ApiAdminApplicationFilesRouteImport } from './routes/api/admin.application-files'
 import { Route as ApiAdminApplicationMaterialsRouteImport } from './routes/api/admin.application-materials'
 import { Route as ApiAdminApplicationReadinessRouteImport } from './routes/api/admin.application-readiness'
+import { Route as ApiAdminAutotradeRouteImport } from './routes/api/admin.autotrade'
 import { Route as ApiAdminBannerStatsRouteImport } from './routes/api/admin.banner-stats'
 import { Route as ApiAdminBannerUploadRouteImport } from './routes/api/admin.banner-upload'
 import { Route as ApiAdminBnb0xPriceRouteImport } from './routes/api/admin.bnb-0x-price'
@@ -435,6 +436,11 @@ const ApiAdminApplicationReadinessRoute =
     path: '/api/admin/application-readiness',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminAutotradeRoute = ApiAdminAutotradeRouteImport.update({
+  id: '/api/admin/autotrade',
+  path: '/api/admin/autotrade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminBannerStatsRoute = ApiAdminBannerStatsRouteImport.update({
   id: '/api/admin/banner-stats',
   path: '/api/admin/banner-stats',
@@ -860,6 +866,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
+  '/api/admin/autotrade': typeof ApiAdminAutotradeRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/bnb-0x-price': typeof ApiAdminBnb0xPriceRoute
@@ -990,6 +997,7 @@ export interface FileRoutesByTo {
   '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
+  '/api/admin/autotrade': typeof ApiAdminAutotradeRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/bnb-0x-price': typeof ApiAdminBnb0xPriceRoute
@@ -1121,6 +1129,7 @@ export interface FileRoutesById {
   '/api/admin/application-files': typeof ApiAdminApplicationFilesRoute
   '/api/admin/application-materials': typeof ApiAdminApplicationMaterialsRoute
   '/api/admin/application-readiness': typeof ApiAdminApplicationReadinessRoute
+  '/api/admin/autotrade': typeof ApiAdminAutotradeRoute
   '/api/admin/banner-stats': typeof ApiAdminBannerStatsRoute
   '/api/admin/banner-upload': typeof ApiAdminBannerUploadRoute
   '/api/admin/bnb-0x-price': typeof ApiAdminBnb0xPriceRoute
@@ -1253,6 +1262,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
+    | '/api/admin/autotrade'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/bnb-0x-price'
@@ -1383,6 +1393,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
+    | '/api/admin/autotrade'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/bnb-0x-price'
@@ -1513,6 +1524,7 @@ export interface FileRouteTypes {
     | '/api/admin/application-files'
     | '/api/admin/application-materials'
     | '/api/admin/application-readiness'
+    | '/api/admin/autotrade'
     | '/api/admin/banner-stats'
     | '/api/admin/banner-upload'
     | '/api/admin/bnb-0x-price'
@@ -1644,6 +1656,7 @@ export interface RootRouteChildren {
   ApiAdminApplicationFilesRoute: typeof ApiAdminApplicationFilesRoute
   ApiAdminApplicationMaterialsRoute: typeof ApiAdminApplicationMaterialsRoute
   ApiAdminApplicationReadinessRoute: typeof ApiAdminApplicationReadinessRoute
+  ApiAdminAutotradeRoute: typeof ApiAdminAutotradeRoute
   ApiAdminBannerStatsRoute: typeof ApiAdminBannerStatsRoute
   ApiAdminBannerUploadRoute: typeof ApiAdminBannerUploadRoute
   ApiAdminBnb0xPriceRoute: typeof ApiAdminBnb0xPriceRoute
@@ -2111,6 +2124,13 @@ declare module '@tanstack/react-router' {
       path: '/api/admin/application-readiness'
       fullPath: '/api/admin/application-readiness'
       preLoaderRoute: typeof ApiAdminApplicationReadinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/autotrade': {
+      id: '/api/admin/autotrade'
+      path: '/api/admin/autotrade'
+      fullPath: '/api/admin/autotrade'
+      preLoaderRoute: typeof ApiAdminAutotradeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/banner-stats': {
@@ -2746,6 +2766,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminApplicationFilesRoute: ApiAdminApplicationFilesRoute,
   ApiAdminApplicationMaterialsRoute: ApiAdminApplicationMaterialsRoute,
   ApiAdminApplicationReadinessRoute: ApiAdminApplicationReadinessRoute,
+  ApiAdminAutotradeRoute: ApiAdminAutotradeRoute,
   ApiAdminBannerStatsRoute: ApiAdminBannerStatsRoute,
   ApiAdminBannerUploadRoute: ApiAdminBannerUploadRoute,
   ApiAdminBnb0xPriceRoute: ApiAdminBnb0xPriceRoute,

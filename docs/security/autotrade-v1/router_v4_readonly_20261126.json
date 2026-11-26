@@ -1,0 +1,15 @@
+{
+  "chainId": 677, "rpc": "https://rpc.botchain.ai", "block": 31625366,
+  "blockHash": "0xa330f94f42f3d2216e1447b283cfe2b3ef7c59cfd401ec25b3a5368b1cf6a460", "blockTime": "2026-11-26T14:31:13Z",
+  "routerV4": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+  "runtimeBytes": 21838, "runtimeKeccak256": "0x13f0ab2696d66683cadc3a82a220c232799b690db36c45ed7dd9f325a7619ad0",
+  "owner": "0x524Db06954de917025180057BCBeB36eC96A98c5", "ownerIsEOA": true, "pendingOwner": "0x0000000000000000000000000000000000000000",
+  "paused": false, "registryActivationDelay": 0, "routerCount": 1,
+  "routers": [{ "id": 0, "router": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929", "type": "V3", "wrappedNative": "0xD5452816194a3784dBa983426cCe7c122F4abd30", "active": true, "name": "BDEX V3", "version": "3" }],
+  "caswapV2": { "router": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD", "factory": "0x9c937EBC3748825026677e20B13b5e306494a38d", "WETH()": "reverts", "registeredInV4": false,
+    "quotes_1e18": { "CA->caWBOT": "16566580110468", "caWBOT->CA": "84036974", "CA->WBOT": "no pair", "CA->WBOT->USDT": "no pair", "CA->caWBOT->USDT": "no pair" } },
+  "bdexV2": { "router": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76", "factory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3", "registeredInV4": false, "WBOT->USDT_0.01": "126704", "CA->WBOT": "no pair" },
+  "bdexV3Pools": { "WBOT/USDT": [500, 3000, 10000], "FLOW/USDT": [10000], "CA/USDT": [10000], "CA/WBOT": [3000, 10000], "notes": "WBOT/USDT 10000 and CA/USDT 10000 quote reverts (no usable liquidity); CA/WBOT 3000 shallow" },
+  "tokens": { "CA": 18, "WBOT": 18, "USDT": 6, "FLOW": 18, "caWBOT": 18 },
+  "writes": 0, "signatures": 0
+}

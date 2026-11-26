@@ -341,6 +341,80 @@ export type Database = {
         }
         Relationships: []
       }
+      autotrade_events: {
+        Row: {
+          actor_email: string | null
+          created_at: string
+          event: Json
+          id: number
+          order_id: string
+          version: number
+        }
+        Insert: {
+          actor_email?: string | null
+          created_at?: string
+          event: Json
+          id?: number
+          order_id: string
+          version: number
+        }
+        Update: {
+          actor_email?: string | null
+          created_at?: string
+          event?: Json
+          id?: number
+          order_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autotrade_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "autotrade_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      autotrade_orders: {
+        Row: {
+          created_at: string
+          created_by_email: string
+          id: string
+          last_decision: Json | null
+          mode: string
+          order_json: Json
+          pair: string
+          state: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by_email: string
+          id?: string
+          last_decision?: Json | null
+          mode: string
+          order_json: Json
+          pair: string
+          state: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by_email?: string
+          id?: string
+          last_decision?: Json | null
+          mode?: string
+          order_json?: Json
+          pair?: string
+          state?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       banner_events: {
         Row: {
           created_at: string
