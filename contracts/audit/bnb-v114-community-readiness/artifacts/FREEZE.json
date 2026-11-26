@@ -59,5 +59,7 @@
   "revisionRule": "Any Solidity, ABI or runtime change requires a new candidate and resets all responses",
   "ownerInput": "OWNER_DIRECT_EOA_CHOICE_RECORDED",
   "governanceException": "OWNER_EOA_EXCEPTION_PROPOSED",
-  "riskAcknowledgment": "PENDING"
+  "riskAcknowledgment": "PENDING",
+  "feeBpsSelected": 5,
+  "feeStatus": "FEE_RATE_SELECTED_PAYABLE_CONFIGURATION_NOT_AUTHORIZED"
 }

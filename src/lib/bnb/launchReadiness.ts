@@ -3,6 +3,8 @@
 import { BNB_EXECUTION_ENABLED } from './executionReviewPolicy';
 
 export const LAUNCH_HOLD = true as const;
+/** V1.17 owner-selected output-side rate (0.05%). Economics input only: never configures, deploys or charges. */
+export const OWNER_SELECTED_FEE_BPS = 5 as const;
 export const OWNER_INPUT_STATUS = 'OWNER_DIRECT_EOA_CHOICE_RECORDED' as const;
 export const OWNER_EOA_EXCEPTION_STATUS = 'OWNER_EOA_EXCEPTION_PROPOSED' as const;
 export const PREFERRED_GOVERNANCE_STANDARD = 'SEPARATE_BNB56_SAFES_PREFER_2_OF_3' as const;
@@ -27,7 +29,7 @@ export const HISTORIC_OWNER_EOA_EVIDENCE = {
 /** The earlier Safe recommendation remains the preferred standard, not a silently relaxed rule. */
 export const OWNER_INPUT_CHECKLIST = [
   { id: 'OI-01', request: 'Direct regular-wallet EOAs are the owner preference for the exact Guardian and Treasury inputs; final EOA risk acknowledgment remains separate.', proposal: 'Prefer separate 2-of-3 BNB56 Safes; OWNER_EOA_EXCEPTION_PROPOSED is not deployment authorization.', status: OWNER_INPUT_STATUS },
-  { id: 'OI-02', request: 'Choose 0, 5 or 10 bps and explicitly consent to output-fee payment to the selected direct EOA Treasury.', proposal: 'Recipient preference is recorded; fee bps and payable configuration are not selected.', status: OWNER_INPUT_STATUS },
+  { id: 'OI-02', request: 'Owner selected 5 bps (0.05%) output-side fee to the selected direct EOA Treasury; actual payable configuration requires a later separate authorization.', proposal: 'Rate and recipient recorded; payable configuration NOT AUTHORIZED until all other gates pass.', status: 'FEE_RATE_SELECTED_PAYABLE_CONFIGURATION_NOT_AUTHORIZED' },
   { id: 'OI-03', request: 'Acknowledge single-key pause/unpause, immutable Guardian loss and immutable Treasury compromise risks, plus pause/recovery policy.', proposal: 'No rotation, sweep, upgrade, key or recovery-phrase collection.', status: OWNER_INPUT_STATUS },
   { id: 'OI-04', request: 'Confirm slippage, maximum swap size and user-approved minNetOut versus signed-quote policy.', proposal: 'Current review ceiling is 1 BNB / 1,000 USDT, 1% slippage and no server quote signing.', status: 'OWNER_DECISION_PENDING' },
   { id: 'OI-05', request: 'Refresh both exact addresses on two BNB56 RPCs at one new pinned block during final deployment preparation and record final source-hash acceptance UTC date.', proposal: 'Historical empty-code evidence is not final-preparation evidence; any source change resets review.', status: 'OWNER_DECISION_PENDING' },
@@ -55,7 +57,8 @@ export function developmentReadiness() {
     ownerInput: OWNER_INPUT_STATUS,
     governanceException: OWNER_EOA_EXCEPTION_STATUS,
     riskAcknowledgment: 'PENDING',
-    feeBpsSelected: null,
+    feeBpsSelected: OWNER_SELECTED_FEE_BPS,
+    payableConfigurationAuthorized: false,
     launch: 'HOLD',
     executionEnabled: BNB_EXECUTION_ENABLED,
     financialActionsAuthorized: false,
@@ -198,28 +201,29 @@ export function assessDirectEoaPair(i: DirectEoaPairInput, keccakHex: (s: string
     eligibleForFutureDeploymentReview: reasons.size === 0,
     reasons: [...reasons],
     refreshRequiredAtFinalPreparation: true,
-    feeBpsSelected: null,
+    feeBpsSelected: OWNER_SELECTED_FEE_BPS,
+    payableConfigurationAuthorized: false,
     releaseReady: false,
     canConfigureRoles: false,
   } as const;
 }
 
-/** Illustration only — no fee is chosen. Output-side fee on gross output, floor rounding as in V1.13. */
+/** Illustration of candidate rates; the owner-selected rate is OWNER_SELECTED_FEE_BPS (see feePolicy.ts). Output-side fee on gross output, floor rounding as in V1.13. */
 export const CANDIDATE_FEE_BPS = [0, 5, 10] as const;
 export function illustrateFees(grossOut: bigint) {
   return CANDIDATE_FEE_BPS.map((bps) => {
     const fee = (grossOut * BigInt(bps)) / 10_000n;
-    return { bps, fee, userNet: grossOut - fee, chosen: false as const };
+    return { bps, fee, userNet: grossOut - fee, chosen: bps === OWNER_SELECTED_FEE_BPS };
   });
 }
 
 export type DecisionId = 'D-01' | 'D-02' | 'D-03' | 'D-04' | 'D-05';
-export type DecisionStatus = 'OWNER_DECISION_PENDING' | 'OWNER_PREFERENCE_SELECTED_RISK_ACKNOWLEDGMENT_PENDING' | 'RECIPIENT_SELECTED_FEE_RATE_PENDING' | 'RESOLVED';
+export type DecisionStatus = 'OWNER_DECISION_PENDING' | 'OWNER_PREFERENCE_SELECTED_RISK_ACKNOWLEDGMENT_PENDING' | 'RECIPIENT_SELECTED_FEE_RATE_PENDING' | 'FEE_RATE_SELECTED_PAYABLE_CONFIGURATION_NOT_AUTHORIZED' | 'RESOLVED';
 export type Decision = { id: DecisionId; question: string; options: string[]; recommendation: string; status: DecisionStatus; selectedOption: string | null; decidedBy: 'OWNER' | null; decidedAt: string | null };
 export const DECISIONS: readonly Decision[] = [
   { id: 'D-01', question: 'Signed quote vs user-approved net floor', options: ['User-approved minNetOut only (no server signing)', 'Authenticated signed quote (new trust root)'], recommendation: 'User-approved minNetOut; quote snapshot is caller-provided, not an oracle; sandwich within slippage remains possible', status: 'OWNER_DECISION_PENDING', selectedOption: null, decidedBy: null, decidedAt: null },
   { id: 'D-02', question: 'Guardian roles and recovery', options: ['Immutable Safe multisig guardian (preferred)', 'Direct regular-wallet EOA (owner preference)', 'No guardian'], recommendation: 'Prefer a distinct BNB56 Safe, ideally 2-of-3; direct EOA is a proposed exception pending explicit risk acknowledgment', status: 'OWNER_PREFERENCE_SELECTED_RISK_ACKNOWLEDGMENT_PENDING', selectedOption: `Direct EOA Guardian ${OWNER_DIRECT_EOA_ADDRESSES.guardian}`, decidedBy: 'OWNER', decidedAt: '2026-11-26' },
-  { id: 'D-03', question: 'Fee recipient and rate', options: ['0 bps', '5 bps', '10 bps'], recommendation: 'Direct EOA recipient preference recorded; fee rate, issuer-clear status and actual payable configuration remain unapproved', status: 'RECIPIENT_SELECTED_FEE_RATE_PENDING', selectedOption: `Direct EOA Treasury ${OWNER_DIRECT_EOA_ADDRESSES.treasury}; fee bps UNSELECTED`, decidedBy: 'OWNER', decidedAt: '2026-11-26' },
+  { id: 'D-03', question: 'Fee recipient and rate', options: ['0 bps', '5 bps', '10 bps'], recommendation: '5 bps (0.05%) output-side rate and direct EOA recipient selected; issuer-clear status and actual payable configuration remain NOT AUTHORIZED', status: 'FEE_RATE_SELECTED_PAYABLE_CONFIGURATION_NOT_AUTHORIZED', selectedOption: `5 bps (0.05%) to direct EOA Treasury ${OWNER_DIRECT_EOA_ADDRESSES.treasury}; payable configuration NOT AUTHORIZED`, decidedBy: 'OWNER', decidedAt: '2026-11-26' },
   { id: 'D-04', question: 'Quote block-age ceiling and size/slippage policy', options: ['Keep 100 blocks / 30 s review and current caps', 'Tighten'], recommendation: 'Keep current review limits pending device testing; no signed oracle is configured', status: 'OWNER_DECISION_PENDING', selectedOption: null, decidedBy: null, decidedAt: null },
   { id: 'D-05', question: 'WalletConnect dependency removal', options: ['Keep installed, disabled everywhere (current)', 'Remove dependency', 'Wait for upstream zod fix'], recommendation: 'Keep disabled; advisory stays OPEN while installed', status: 'OWNER_DECISION_PENDING', selectedOption: null, decidedBy: null, decidedAt: null },
 ];

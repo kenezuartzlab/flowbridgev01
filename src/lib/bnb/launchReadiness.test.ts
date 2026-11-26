@@ -39,7 +39,7 @@ describe('owner direct-EOA choice and development readiness', () => {
   it('records the choice without selecting a fee or authorizing financial actions', () => {
     expect(developmentReadiness()).toEqual({
       status: 'PASS_FOR_NON_EXECUTABLE_DEVELOPMENT', ownerInput: 'OWNER_DIRECT_EOA_CHOICE_RECORDED',
-      governanceException: 'OWNER_EOA_EXCEPTION_PROPOSED', riskAcknowledgment: 'PENDING', feeBpsSelected: null,
+      governanceException: 'OWNER_EOA_EXCEPTION_PROPOSED', riskAcknowledgment: 'PENDING', feeBpsSelected: 5, payableConfigurationAuthorized: false,
       launch: 'HOLD', executionEnabled: false, financialActionsAuthorized: false,
     });
   });
@@ -87,7 +87,7 @@ describe('exact direct-EOA pair eligibility (synthetic final-preparation facts o
     const result = assessDirectEoaPair(pair(), k);
     expect(result).toMatchObject({
       ownerChoice: 'OWNER_DIRECT_EOA_CHOICE_RECORDED', exception: 'OWNER_EOA_EXCEPTION_PROPOSED',
-      safeVerified: false, eligibleForFutureDeploymentReview: true, reasons: [], feeBpsSelected: null,
+      safeVerified: false, eligibleForFutureDeploymentReview: true, reasons: [], feeBpsSelected: 5, payableConfigurationAuthorized: false,
       releaseReady: false, canConfigureRoles: false, refreshRequiredAtFinalPreparation: true,
     });
   });
@@ -144,11 +144,11 @@ describe('exact direct-EOA pair eligibility (synthetic final-preparation facts o
 });
 
 describe('fee illustration', () => {
-  it('0/5/10 bps on 1000 USDT gross, none chosen', () => {
+  it('0/5/10 bps on 1000 USDT gross, only owner-selected 5 bps marked chosen', () => {
     const g = 1000n * 10n ** 18n;
     const f = illustrateFees(g);
     expect(f.map((x) => x.fee)).toEqual([0n, 5n * 10n ** 17n, 10n ** 18n]);
-    expect(f.every((x) => x.chosen === false && x.fee + x.userNet === g)).toBe(true);
+    expect(f.every((x) => x.chosen === (x.bps === 5) && x.fee + x.userNet === g)).toBe(true);
   });
 });
 
@@ -156,8 +156,8 @@ describe('decisions & gate', () => {
   it('D-02 and D-03 record limited preferences; D-01/D-04/D-05 and all final gates remain open', () => {
     expect(DECISIONS.map((d) => d.id)).toEqual(['D-01', 'D-02', 'D-03', 'D-04', 'D-05']);
     expect(DECISIONS[1]).toMatchObject({ status: 'OWNER_PREFERENCE_SELECTED_RISK_ACKNOWLEDGMENT_PENDING', decidedBy: 'OWNER' });
-    expect(DECISIONS[2]).toMatchObject({ status: 'RECIPIENT_SELECTED_FEE_RATE_PENDING', decidedBy: 'OWNER' });
-    expect(DECISIONS[2]!.selectedOption).toContain('fee bps UNSELECTED');
+    expect(DECISIONS[2]).toMatchObject({ status: 'FEE_RATE_SELECTED_PAYABLE_CONFIGURATION_NOT_AUTHORIZED', decidedBy: 'OWNER' });
+    expect(DECISIONS[2]!.selectedOption).toContain('5 bps (0.05%)'); expect(DECISIONS[2]!.selectedOption).toContain('payable configuration NOT AUTHORIZED');
     for (const id of ['D-01', 'D-04', 'D-05']) expect(DECISIONS.find((d) => d.id === id)).toMatchObject({ status: 'OWNER_DECISION_PENDING', decidedBy: null });
     expect(openDecisionCount()).toBe(5);
   });

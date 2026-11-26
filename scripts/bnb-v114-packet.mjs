@@ -29,6 +29,7 @@ fs.writeFileSync(`${OUT}/artifacts/FREEZE.json`, JSON.stringify({
   reviewWorkflow: 'V1.16 — private substantive signed human responses only', reviewStatus: 'ZERO_REVIEWERS',
   responseExpiryDays: 90, revisionRule: 'Any Solidity, ABI or runtime change requires a new candidate and resets all responses',
   ownerInput: 'OWNER_DIRECT_EOA_CHOICE_RECORDED', governanceException: 'OWNER_EOA_EXCEPTION_PROPOSED', riskAcknowledgment: 'PENDING',
+  feeBpsSelected: 5, feeStatus: 'FEE_RATE_SELECTED_PAYABLE_CONFIGURATION_NOT_AUTHORIZED',
 }, null, 2) + '\n');
 const extra = [
   'src/lib/bnb/launchReadiness.ts', 'src/lib/bnb/launchReadiness.test.ts',
@@ -41,6 +42,9 @@ const extra = [
   'contracts/audit/bnb-v113-community/review.v113.evm.test.ts',
   'contracts/audit/bnb-v113-community/direct-eoa.v116.evm.test.ts',
   'docs/security/BNB_V1_16_DIRECT_EOA_GOVERNANCE_READINESS_20261126.md',
+  'src/lib/bnb/feePolicy.ts', 'src/lib/bnb/feePolicy.test.ts',
+  'contracts/audit/bnb-v117-fee-selection/fee5.v117.evm.test.ts',
+  'docs/security/BNB_V1_17_OWNER_FEE_SELECTION_20261126.md',
 ];
 const include = [SRC, 'contracts/candidates/bnb-swap-adapter-v1-13/MANIFEST.json', ...extra,
   ...fs.readdirSync('docs/security/bnb-bot-v4-parity').map((f) => 'docs/security/bnb-bot-v4-parity/' + f),

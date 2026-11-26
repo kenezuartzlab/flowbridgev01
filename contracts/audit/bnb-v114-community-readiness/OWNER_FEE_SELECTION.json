@@ -1,0 +1,19 @@
+{
+  "record": "V1.17 owner fee selection — PRIVATE, non-executable",
+  "decision": "D-03",
+  "feeBps": 5,
+  "ratePercent": "0.05%",
+  "side": "OUTPUT",
+  "math": "fee = floor(grossOut * 5 / 10000); userNet = grossOut - fee",
+  "feeAsset": { "BNB_TO_USDT": "USDT", "USDT_TO_BNB": "WBNB (user receives net native BNB)" },
+  "intendedRecipientEoa": "0xb7322660B40561ae7C224F963e51583e923F7fC8",
+  "guardianEoa": "0x351E236a636c8be4Fa0B602cb096d72346D1a412",
+  "status": "FEE_RATE_SELECTED_PAYABLE_CONFIGURATION_NOT_AUTHORIZED",
+  "ownerApproval": "Owner replied 'Ok proceed' to 5 bps proposal, 2026-11-26",
+  "payableConfigurationAuthorized": false,
+  "feesChargedNow": false,
+  "constructorCalldata": null,
+  "deployment": null,
+  "frozenSourceSha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425",
+  "openGates": ["D-01", "D-02 risk acknowledgment", "D-04", "D-05", "6 Slither HIGH OPEN", "0 signed human reviews", "physical devices UNVERIFIED", "WalletConnect/Zod HIGH OPEN", "treasury USDT issuer restriction UNKNOWN", "final two-RPC refresh"]
+}
