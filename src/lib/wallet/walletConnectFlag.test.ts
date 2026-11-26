@@ -1,26 +1,41 @@
 import { describe, expect, it } from "vitest";
-import { resolveWalletConnectEnabled } from "./walletConnectFlag";
+import { resolveWalletConnectEnabled, WALLETCONNECT_SECURITY_HOLD, PRODUCTION_WALLETCONNECT_ON } from "./walletConnectFlag";
 import { buildWalletChoices } from "./connectorChoices";
 
-describe("WalletConnect preview-only gate", () => {
-  it("is ON on the preview host with no env flag", () => {
-    expect(resolveWalletConnectEnabled(undefined, "id-preview--aa8f6129-829c-4b77-8e07-1eba517577f8.lovable.app")).toBe(true);
+const preview = "id-preview--aa8f6129-829c-4b77-8e07-1eba517577f8.lovable.app";
+const prod = ["flowbridge.space", "www.flowbridge.space", "notify.flowbridge.space", "flowbridgev01.lovable.app"];
+
+describe("WalletConnect V1.14 security hold (zod@3.22.4 advisory)", () => {
+  it("hold is active and production switch is off", () => {
+    expect(WALLETCONNECT_SECURITY_HOLD).toBe(true);
+    expect(PRODUCTION_WALLETCONNECT_ON).toBe(false);
   });
-  const prod = ["flowbridge.space", "www.flowbridge.space", "notify.flowbridge.space", "flowbridgev01.lovable.app"];
-  it("is ON on every production host after V34.2E activation", () => {
-    for (const h of prod) expect(resolveWalletConnectEnabled(undefined, h)).toBe(true);
+  it("is OFF on preview, localhost and every production host, even with env true", () => {
+    for (const h of [preview, "localhost:8080", ...prod]) {
+      expect(resolveWalletConnectEnabled(undefined, h)).toBe(false);
+      expect(resolveWalletConnectEnabled("true", h)).toBe(false);
+    }
   });
-  it("production switch OFF disables WalletConnect on production hosts", () => {
-    for (const h of prod) expect(resolveWalletConnectEnabled(undefined, h, false)).toBe(false);
-  });
-  it("explicit OFF kill switch wins on preview and production", () => {
-    expect(resolveWalletConnectEnabled("false", "localhost:8080")).toBe(false);
-    expect(resolveWalletConnectEnabled("off", "flowbridge.space")).toBe(false);
-  });
-  it("is OFF during SSR (no host)", () => {
+  it("is OFF during SSR", () => {
     expect(resolveWalletConnectEnabled("true", null)).toBe(false);
   });
-  it("adds WalletConnect without replacing installed wallets", () => {
+});
+
+describe("gate logic beneath the hold (only reachable if hold is lifted by code change)", () => {
+  it("preview ON without env when hold lifted", () => {
+    expect(resolveWalletConnectEnabled(undefined, preview, false, false)).toBe(true);
+  });
+  it("production requires switch or explicit env", () => {
+    for (const h of prod) {
+      expect(resolveWalletConnectEnabled(undefined, h, false, false)).toBe(false);
+      expect(resolveWalletConnectEnabled(undefined, h, true, false)).toBe(true);
+    }
+  });
+  it("explicit OFF wins", () => {
+    expect(resolveWalletConnectEnabled("false", "localhost:8080", true, false)).toBe(false);
+    expect(resolveWalletConnectEnabled("off", "flowbridge.space", true, false)).toBe(false);
+  });
+  it("installed wallets remain when WalletConnect is off", () => {
     const c = [
       { id: "io.metamask", name: "MetaMask", type: "injected" },
       { id: "walletConnect", name: "WalletConnect", type: "walletConnect" },

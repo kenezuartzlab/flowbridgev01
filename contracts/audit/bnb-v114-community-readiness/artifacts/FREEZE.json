@@ -1,0 +1,54 @@
+{
+  "status": "LOCAL CANDIDATE — NOT DEPLOYED, NOT AUDITED, NO HUMAN SIGN-OFF",
+  "source": "contracts/candidates/bnb-swap-adapter-v1-13/FlowBridgeBnbSwapAdapterV1_13.sol",
+  "sourceSha256": "5e82f02854d6cdd0a34ba16e2d2bc0e1c1e605319b4094ebfb2fe9549d6b0425",
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "optimizerRuns": 200,
+  "evmVersion": "cancun",
+  "creationKeccak": "0x84b4f23b60097ccb65b0e817a703e3a0e9eee5e5426bb81e60fefd2bdb22112e",
+  "runtimeKeccak": "0x8410959bb5c8d0d69f4a1ab9c3c4cc9a4748e6cf35af58c73f6fa53ae059469f",
+  "immutableReferences": {
+    "117": [
+      {
+        "length": 32,
+        "start": 564
+      },
+      {
+        "length": 32,
+        "start": 2618
+      }
+    ],
+    "146": [
+      {
+        "length": 32,
+        "start": 864
+      },
+      {
+        "length": 32,
+        "start": 4243
+      },
+      {
+        "length": 32,
+        "start": 5104
+      }
+    ],
+    "148": [
+      {
+        "length": 32,
+        "start": 742
+      },
+      {
+        "length": 32,
+        "start": 4123
+      },
+      {
+        "length": 32,
+        "start": 4986
+      },
+      {
+        "length": 32,
+        "start": 5752
+      }
+    ]
+  }
+}

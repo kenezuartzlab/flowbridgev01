@@ -12,7 +12,7 @@ async def main():
    print('width',w,flush=True)
    for theme in ['light','dark']:
     for motion in ['reduce','no-preference']:
-     ctx=await b.new_context(viewport={'width':w,'height':1800},reduced_motion=motion); page=await ctx.new_page(); errors=[]; requests=[]
+     ctx=await b.new_context(viewport={'width':w,'height':1800},reduced_motion=motion); page=await ctx.new_page(); page.set_default_timeout(30000); errors=[]; requests=[]
      page.on('pageerror',lambda e:errors.append(str(e)))
      page.on('request',lambda r:requests.append((r.method,r.url,r.post_data or '')))
      await page.goto('http://localhost:8080/trade'); await page.get_by_role('button',name='Select swap chain, BOT Mainnet',exact=True).wait_for(); await page.wait_for_timeout(3500)

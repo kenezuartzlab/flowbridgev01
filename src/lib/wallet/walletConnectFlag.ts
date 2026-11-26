@@ -37,13 +37,24 @@ export function isPreviewHost(host: string): boolean {
 }
 
 /** V34.2E — production activated after real-device acceptance. Set to false to disable WalletConnect on production hosts. */
-export const PRODUCTION_WALLETCONNECT_ON = true;
+export const PRODUCTION_WALLETCONNECT_ON = false;
+
+/**
+ * V1.14 security hold (fail closed on EVERY host, preview included): the installed
+ * @walletconnect/ethereum-provider -> @reown/appkit -> @reown/appkit-wallet chain pins zod@3.22.4
+ * (HIGH memory-exhaustion advisory). Latest upstream (appkit-wallet 2.0.0) still pins 3.22.4, so no
+ * compatible upgrade exists. This makes the code path UNREACHABLE; the vulnerable package stays INSTALLED
+ * until owner decision D-05. Only a code change (not an env var) may lift this hold.
+ */
+export const WALLETCONNECT_SECURITY_HOLD = true;
 
 export function resolveWalletConnectEnabled(
   raw: unknown,
   host: string | null,
   productionOn: boolean = PRODUCTION_WALLETCONNECT_ON,
+  securityHold: boolean = WALLETCONNECT_SECURITY_HOLD,
 ): boolean {
+  if (securityHold) return false;
   if (isExplicitOff(raw)) return false;
   if (!host) return false;
   if (PRODUCTION_HOSTS.includes(host.toLowerCase())) return productionOn || parseWalletConnectFlag(raw);
