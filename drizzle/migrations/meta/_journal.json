@@ -470,6 +470,13 @@
       "when": 1795825247836,
       "tag": "0066_autotrade_v1_1_worker_outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1795827615045,
+      "tag": "0067_autotrade_v1_2_outbox_fencing",
+      "breakpoints": true
     }
   ]
 }

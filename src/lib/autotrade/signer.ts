@@ -9,7 +9,7 @@ export interface TradingSigner { address: `0x${string}`; signTransaction(tx: unk
 export const SIGNER_POLICY = {
   custody: "MANAGED_NON_EXPORTABLE_PREFERRED",
   forbiddenRoles: ["router owner", "fee treasury", "rewards publisher", "vote payout", "vault publisher"],
-  maxBalanceUsdt: 5,
+  maxBalanceUsdt: 5, // single first-canary cap: 5 USDT-equivalent (quote-verified), plus a separate BOT gas reserve; supersedes the earlier "1 BOT" example
   allowedTargets: "Router V4 leg selectors + exact ERC20 approve/revoke to Router V4 only",
 } as const;
 /** Always NOT_CONFIGURED in this build: nothing is created, funded or able to sign. */

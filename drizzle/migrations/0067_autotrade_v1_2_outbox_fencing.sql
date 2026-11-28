@@ -1,0 +1,2 @@
+ALTER TABLE public.autotrade_outbox ADD COLUMN IF NOT EXISTS fencing bigint;
+COMMENT ON COLUMN public.autotrade_outbox.fencing IS 'Worker lease fencing token that reserved this effect; only an equal or newer token may advance it.';

@@ -74,7 +74,7 @@ describe("gas, nonces, outbox, receipts", () => {
     const b = outboxApply(outboxApply(e0, { type: "signed", txHash: "0xt" }), { type: "broadcast" });
     const rep = outboxApply(b, { type: "nonceUsedByOther" }); expect(rep.state).toBe("REPLACED");
     expect(outboxApply(rep, { type: "broadcast" })).toBe(rep);
-    expect(outboxApply(b, { type: "missing", afterMs: 31 * 60_000 }).state).toBe("DROPPED");
+    expect(outboxApply(b, { type: "missing", afterMs: 31 * 60_000 }).state).toBe("BROADCAST");
     expect(outboxApply(b, { type: "mined", block: 1, blockHash: "0x", status: "reverted" }).state).toBe("REVERTED");
   });
   it("actual output comes from Transfer logs to the trader only", () => {

@@ -441,6 +441,7 @@ export type Database = {
           account: string
           chain_id: number
           created_at: string
+          fencing: number | null
           idempotency_key: string
           mined_block: number | null
           mined_hash: string | null
@@ -456,6 +457,7 @@ export type Database = {
           account: string
           chain_id: number
           created_at?: string
+          fencing?: number | null
           idempotency_key: string
           mined_block?: number | null
           mined_hash?: string | null
@@ -471,6 +473,7 @@ export type Database = {
           account?: string
           chain_id?: number
           created_at?: string
+          fencing?: number | null
           idempotency_key?: string
           mined_block?: number | null
           mined_hash?: string | null

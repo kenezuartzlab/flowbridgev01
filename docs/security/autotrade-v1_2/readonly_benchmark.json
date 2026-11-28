@@ -1,0 +1,1403 @@
+{
+ "generatedAt": "2026-11-28T00:58:37.225Z",
+ "samples": 150,
+ "ok": 150,
+ "errors": 0,
+ "dns": {
+  "primary": [
+   "52.198.35.211"
+  ],
+  "explorer": [
+   "104.18.12.228",
+   "104.18.13.228"
+  ]
+ },
+ "cycleMs": {
+  "p50": 1524,
+  "p95": 1554,
+  "p99": 1604,
+  "max": 3377
+ },
+ "blockAgeMs": {
+  "p50": 2194,
+  "p95": 2815,
+  "p99": 2911,
+  "max": 3589
+ },
+ "headLag": {
+  "p50": 4,
+  "p95": 7,
+  "p99": 8,
+  "max": 8
+ },
+ "hashEqualAtCommon": 150,
+ "consensusMaxLag3": {
+  "RPC_HEAD_DIVERGENCE": 88,
+  "OK": 62
+ },
+ "consensusMaxLag10": {
+  "OK": 150
+ },
+ "caswap": {
+  "block": 31790757,
+  "blockHash": "0x1d4b879c836edb55ff3b6625ada3659067745eea825e4d124bcd27e15c749e33",
+  "factory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+  "caWbotPair": "0x0A0cfC8c3756D000bE19F0809A23f57522a594F6",
+  "token0": "0x546307af427902A75771434Df831d88219784E19",
+  "reserve0": "84038367",
+  "reserve1": "16566580112457",
+  "caWbotUsdtPair": "ERR"
+ },
+ "rows": [
+  {
+   "i": 0,
+   "lag": 2,
+   "cycleMs": 3377,
+   "blockAgeMs": 3589,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 1,
+   "lag": 6,
+   "cycleMs": 1544,
+   "blockAgeMs": 2433,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 2,
+   "lag": 1,
+   "cycleMs": 1531,
+   "blockAgeMs": 2265,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 3,
+   "lag": 3,
+   "cycleMs": 1545,
+   "blockAgeMs": 2111,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 4,
+   "lag": 6,
+   "cycleMs": 1540,
+   "blockAgeMs": 1952,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 5,
+   "lag": 8,
+   "cycleMs": 1538,
+   "blockAgeMs": 1791,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 6,
+   "lag": 1,
+   "cycleMs": 1559,
+   "blockAgeMs": 2651,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 7,
+   "lag": 4,
+   "cycleMs": 1522,
+   "blockAgeMs": 2474,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 8,
+   "lag": 6,
+   "cycleMs": 1551,
+   "blockAgeMs": 2326,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 9,
+   "lag": 1,
+   "cycleMs": 1572,
+   "blockAgeMs": 2200,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 10,
+   "lag": 3,
+   "cycleMs": 1523,
+   "blockAgeMs": 2024,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 11,
+   "lag": 6,
+   "cycleMs": 1526,
+   "blockAgeMs": 1851,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 12,
+   "lag": 0,
+   "cycleMs": 1529,
+   "blockAgeMs": 2682,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 13,
+   "lag": 3,
+   "cycleMs": 1527,
+   "blockAgeMs": 1511,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 14,
+   "lag": 5,
+   "cycleMs": 1536,
+   "blockAgeMs": 2348,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 15,
+   "lag": 0,
+   "cycleMs": 1531,
+   "blockAgeMs": 2180,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 16,
+   "lag": 2,
+   "cycleMs": 1548,
+   "blockAgeMs": 2029,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 17,
+   "lag": 4,
+   "cycleMs": 1528,
+   "blockAgeMs": 2858,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 18,
+   "lag": 7,
+   "cycleMs": 1525,
+   "blockAgeMs": 1683,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 19,
+   "lag": 1,
+   "cycleMs": 1542,
+   "blockAgeMs": 2525,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 20,
+   "lag": 4,
+   "cycleMs": 1544,
+   "blockAgeMs": 2371,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 21,
+   "lag": 6,
+   "cycleMs": 1538,
+   "blockAgeMs": 2209,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 22,
+   "lag": 2,
+   "cycleMs": 1530,
+   "blockAgeMs": 2040,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 23,
+   "lag": 4,
+   "cycleMs": 1538,
+   "blockAgeMs": 1879,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 24,
+   "lag": 7,
+   "cycleMs": 1554,
+   "blockAgeMs": 1734,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 25,
+   "lag": 1,
+   "cycleMs": 1523,
+   "blockAgeMs": 2558,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 26,
+   "lag": 3,
+   "cycleMs": 1523,
+   "blockAgeMs": 2382,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 27,
+   "lag": 6,
+   "cycleMs": 1565,
+   "blockAgeMs": 2247,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 28,
+   "lag": 0,
+   "cycleMs": 1526,
+   "blockAgeMs": 2074,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 29,
+   "lag": 3,
+   "cycleMs": 1530,
+   "blockAgeMs": 1905,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 30,
+   "lag": 5,
+   "cycleMs": 1537,
+   "blockAgeMs": 2743,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 31,
+   "lag": 8,
+   "cycleMs": 1526,
+   "blockAgeMs": 1571,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 32,
+   "lag": 2,
+   "cycleMs": 1529,
+   "blockAgeMs": 2401,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 33,
+   "lag": 5,
+   "cycleMs": 1539,
+   "blockAgeMs": 2241,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 34,
+   "lag": 7,
+   "cycleMs": 1522,
+   "blockAgeMs": 2064,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 35,
+   "lag": 1,
+   "cycleMs": 1547,
+   "blockAgeMs": 2911,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 36,
+   "lag": 4,
+   "cycleMs": 1535,
+   "blockAgeMs": 1748,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 37,
+   "lag": 6,
+   "cycleMs": 1528,
+   "blockAgeMs": 2577,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 38,
+   "lag": 1,
+   "cycleMs": 1532,
+   "blockAgeMs": 2409,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 39,
+   "lag": 3,
+   "cycleMs": 1604,
+   "blockAgeMs": 2315,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 40,
+   "lag": 6,
+   "cycleMs": 1517,
+   "blockAgeMs": 2133,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 41,
+   "lag": -1,
+   "cycleMs": 1525,
+   "blockAgeMs": 1958,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 42,
+   "lag": 2,
+   "cycleMs": 1529,
+   "blockAgeMs": 1788,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 43,
+   "lag": 4,
+   "cycleMs": 1521,
+   "blockAgeMs": 2610,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 44,
+   "lag": 6,
+   "cycleMs": 1522,
+   "blockAgeMs": 2434,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 45,
+   "lag": 1,
+   "cycleMs": 1522,
+   "blockAgeMs": 2257,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 46,
+   "lag": 3,
+   "cycleMs": 1547,
+   "blockAgeMs": 2105,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 47,
+   "lag": 6,
+   "cycleMs": 1526,
+   "blockAgeMs": 1933,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 48,
+   "lag": 0,
+   "cycleMs": 1525,
+   "blockAgeMs": 2759,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 49,
+   "lag": 3,
+   "cycleMs": 1530,
+   "blockAgeMs": 1590,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 50,
+   "lag": 5,
+   "cycleMs": 1528,
+   "blockAgeMs": 2418,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 51,
+   "lag": 0,
+   "cycleMs": 1527,
+   "blockAgeMs": 2246,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 52,
+   "lag": 2,
+   "cycleMs": 1525,
+   "blockAgeMs": 2072,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 53,
+   "lag": 4,
+   "cycleMs": 1536,
+   "blockAgeMs": 2909,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 54,
+   "lag": 7,
+   "cycleMs": 1525,
+   "blockAgeMs": 1736,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 55,
+   "lag": 1,
+   "cycleMs": 1519,
+   "blockAgeMs": 2557,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 56,
+   "lag": 4,
+   "cycleMs": 1533,
+   "blockAgeMs": 2391,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 57,
+   "lag": 6,
+   "cycleMs": 1531,
+   "blockAgeMs": 2223,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 58,
+   "lag": 2,
+   "cycleMs": 1537,
+   "blockAgeMs": 2061,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 59,
+   "lag": 4,
+   "cycleMs": 1526,
+   "blockAgeMs": 1889,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 60,
+   "lag": 7,
+   "cycleMs": 1535,
+   "blockAgeMs": 1726,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 61,
+   "lag": 0,
+   "cycleMs": 1519,
+   "blockAgeMs": 2546,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 62,
+   "lag": 2,
+   "cycleMs": 1521,
+   "blockAgeMs": 2368,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 63,
+   "lag": 5,
+   "cycleMs": 1525,
+   "blockAgeMs": 2194,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 64,
+   "lag": 0,
+   "cycleMs": 1551,
+   "blockAgeMs": 2048,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 65,
+   "lag": 3,
+   "cycleMs": 1519,
+   "blockAgeMs": 1868,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 66,
+   "lag": 5,
+   "cycleMs": 1525,
+   "blockAgeMs": 2694,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 67,
+   "lag": 8,
+   "cycleMs": 1534,
+   "blockAgeMs": 1530,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 68,
+   "lag": 2,
+   "cycleMs": 1524,
+   "blockAgeMs": 2355,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 69,
+   "lag": 5,
+   "cycleMs": 1526,
+   "blockAgeMs": 2182,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 70,
+   "lag": 7,
+   "cycleMs": 1527,
+   "blockAgeMs": 2010,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 71,
+   "lag": 1,
+   "cycleMs": 1537,
+   "blockAgeMs": 2849,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 72,
+   "lag": 4,
+   "cycleMs": 1511,
+   "blockAgeMs": 1662,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 73,
+   "lag": 6,
+   "cycleMs": 1519,
+   "blockAgeMs": 2483,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 74,
+   "lag": 0,
+   "cycleMs": 1545,
+   "blockAgeMs": 2330,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 75,
+   "lag": 2,
+   "cycleMs": 1524,
+   "blockAgeMs": 2154,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 76,
+   "lag": 5,
+   "cycleMs": 1513,
+   "blockAgeMs": 1968,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 77,
+   "lag": 7,
+   "cycleMs": 1511,
+   "blockAgeMs": 1781,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 78,
+   "lag": 1,
+   "cycleMs": 1508,
+   "blockAgeMs": 2590,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 79,
+   "lag": 4,
+   "cycleMs": 1528,
+   "blockAgeMs": 2420,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 80,
+   "lag": 6,
+   "cycleMs": 1512,
+   "blockAgeMs": 2233,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 81,
+   "lag": 1,
+   "cycleMs": 1508,
+   "blockAgeMs": 2043,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 82,
+   "lag": 3,
+   "cycleMs": 1511,
+   "blockAgeMs": 1854,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 83,
+   "lag": 5,
+   "cycleMs": 1511,
+   "blockAgeMs": 2666,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 84,
+   "lag": 0,
+   "cycleMs": 1512,
+   "blockAgeMs": 2479,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 85,
+   "lag": 2,
+   "cycleMs": 1510,
+   "blockAgeMs": 2290,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 86,
+   "lag": 5,
+   "cycleMs": 1547,
+   "blockAgeMs": 2139,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 87,
+   "lag": 7,
+   "cycleMs": 1507,
+   "blockAgeMs": 1947,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 88,
+   "lag": 2,
+   "cycleMs": 1512,
+   "blockAgeMs": 1760,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 89,
+   "lag": 4,
+   "cycleMs": 1514,
+   "blockAgeMs": 2575,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 90,
+   "lag": 6,
+   "cycleMs": 1513,
+   "blockAgeMs": 2389,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 91,
+   "lag": 2,
+   "cycleMs": 1519,
+   "blockAgeMs": 2209,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 92,
+   "lag": 4,
+   "cycleMs": 1526,
+   "blockAgeMs": 2035,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 93,
+   "lag": 7,
+   "cycleMs": 1515,
+   "blockAgeMs": 1850,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 94,
+   "lag": 1,
+   "cycleMs": 1508,
+   "blockAgeMs": 2659,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 95,
+   "lag": 4,
+   "cycleMs": 1513,
+   "blockAgeMs": 1473,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 96,
+   "lag": 6,
+   "cycleMs": 1507,
+   "blockAgeMs": 2281,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 97,
+   "lag": 0,
+   "cycleMs": 1524,
+   "blockAgeMs": 2106,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 98,
+   "lag": 3,
+   "cycleMs": 1504,
+   "blockAgeMs": 1912,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 99,
+   "lag": 5,
+   "cycleMs": 1505,
+   "blockAgeMs": 2718,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 100,
+   "lag": 8,
+   "cycleMs": 1519,
+   "blockAgeMs": 1539,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 101,
+   "lag": 2,
+   "cycleMs": 1513,
+   "blockAgeMs": 2354,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 102,
+   "lag": 5,
+   "cycleMs": 1504,
+   "blockAgeMs": 2159,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 103,
+   "lag": 7,
+   "cycleMs": 1520,
+   "blockAgeMs": 1979,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 104,
+   "lag": 1,
+   "cycleMs": 1534,
+   "blockAgeMs": 2815,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 105,
+   "lag": 4,
+   "cycleMs": 1512,
+   "blockAgeMs": 1628,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 106,
+   "lag": 6,
+   "cycleMs": 1510,
+   "blockAgeMs": 2440,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 107,
+   "lag": 1,
+   "cycleMs": 1513,
+   "blockAgeMs": 2254,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 108,
+   "lag": 3,
+   "cycleMs": 1511,
+   "blockAgeMs": 2067,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 109,
+   "lag": 5,
+   "cycleMs": 1504,
+   "blockAgeMs": 2872,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 110,
+   "lag": 8,
+   "cycleMs": 1520,
+   "blockAgeMs": 1693,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 111,
+   "lag": 1,
+   "cycleMs": 1511,
+   "blockAgeMs": 2504,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 112,
+   "lag": 4,
+   "cycleMs": 1518,
+   "blockAgeMs": 2323,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 113,
+   "lag": 6,
+   "cycleMs": 1506,
+   "blockAgeMs": 2131,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 114,
+   "lag": 1,
+   "cycleMs": 1510,
+   "blockAgeMs": 1942,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 115,
+   "lag": 3,
+   "cycleMs": 1517,
+   "blockAgeMs": 1760,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 116,
+   "lag": 5,
+   "cycleMs": 1509,
+   "blockAgeMs": 2570,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 117,
+   "lag": 0,
+   "cycleMs": 1509,
+   "blockAgeMs": 2381,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 118,
+   "lag": 2,
+   "cycleMs": 1523,
+   "blockAgeMs": 2205,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 119,
+   "lag": 5,
+   "cycleMs": 1536,
+   "blockAgeMs": 2041,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 120,
+   "lag": 7,
+   "cycleMs": 1524,
+   "blockAgeMs": 1866,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 121,
+   "lag": 2,
+   "cycleMs": 1566,
+   "blockAgeMs": 1733,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 122,
+   "lag": 4,
+   "cycleMs": 1508,
+   "blockAgeMs": 2542,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 123,
+   "lag": 6,
+   "cycleMs": 1520,
+   "blockAgeMs": 2363,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 124,
+   "lag": 2,
+   "cycleMs": 1510,
+   "blockAgeMs": 2174,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 125,
+   "lag": 4,
+   "cycleMs": 1514,
+   "blockAgeMs": 1989,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 126,
+   "lag": 7,
+   "cycleMs": 1534,
+   "blockAgeMs": 1824,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 127,
+   "lag": 0,
+   "cycleMs": 1510,
+   "blockAgeMs": 2634,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 128,
+   "lag": 3,
+   "cycleMs": 1503,
+   "blockAgeMs": 1438,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 129,
+   "lag": 5,
+   "cycleMs": 1529,
+   "blockAgeMs": 2268,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 130,
+   "lag": 7,
+   "cycleMs": 1539,
+   "blockAgeMs": 2108,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 131,
+   "lag": 2,
+   "cycleMs": 1527,
+   "blockAgeMs": 1937,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 132,
+   "lag": 4,
+   "cycleMs": 1519,
+   "blockAgeMs": 2757,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 133,
+   "lag": 7,
+   "cycleMs": 1513,
+   "blockAgeMs": 1570,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 134,
+   "lag": 1,
+   "cycleMs": 1540,
+   "blockAgeMs": 2411,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 135,
+   "lag": 4,
+   "cycleMs": 1517,
+   "blockAgeMs": 2229,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 136,
+   "lag": 6,
+   "cycleMs": 1513,
+   "blockAgeMs": 2043,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 137,
+   "lag": 1,
+   "cycleMs": 1511,
+   "blockAgeMs": 2855,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 138,
+   "lag": 4,
+   "cycleMs": 1510,
+   "blockAgeMs": 1667,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 139,
+   "lag": 6,
+   "cycleMs": 1510,
+   "blockAgeMs": 2478,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 140,
+   "lag": 1,
+   "cycleMs": 1520,
+   "blockAgeMs": 2300,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 141,
+   "lag": 3,
+   "cycleMs": 1536,
+   "blockAgeMs": 2136,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 142,
+   "lag": 6,
+   "cycleMs": 1522,
+   "blockAgeMs": 1960,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 143,
+   "lag": 8,
+   "cycleMs": 1505,
+   "blockAgeMs": 1766,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 144,
+   "lag": 1,
+   "cycleMs": 1512,
+   "blockAgeMs": 2578,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 145,
+   "lag": 4,
+   "cycleMs": 1569,
+   "blockAgeMs": 2448,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 146,
+   "lag": 6,
+   "cycleMs": 1519,
+   "blockAgeMs": 2269,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 147,
+   "lag": 1,
+   "cycleMs": 1504,
+   "blockAgeMs": 2074,
+   "r3": "OK",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 148,
+   "lag": 3,
+   "cycleMs": 1505,
+   "blockAgeMs": 1880,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  },
+  {
+   "i": 149,
+   "lag": 6,
+   "cycleMs": 1510,
+   "blockAgeMs": 1691,
+   "r3": "RPC_HEAD_DIVERGENCE",
+   "r10": "OK",
+   "hashEq": true
+  }
+ ]
+}

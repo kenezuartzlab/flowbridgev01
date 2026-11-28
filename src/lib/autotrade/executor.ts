@@ -117,7 +117,7 @@ export function outboxApply(e: OutboxEntry, ev: OutboxEvent): OutboxEntry {
       if (ev.hashAtMined !== n.minedHash) { n.state = "BROADCAST"; n.minedBlock = null; n.minedHash = null; return n; } // reorg: await re-inclusion, never re-sign
       if (ev.head - n.minedBlock! + 1 >= ev.minConf) n.state = "FINAL"; return n;
     case "nonceUsedByOther": n.state = "REPLACED"; return n; // nonce consumed by a different tx: leg did NOT fill
-    case "missing": if (n.state === "BROADCAST" && ev.afterMs > 30 * 60_000) n.state = "DROPPED"; return n;
+    case "missing": return n; // V1.2: never terminal on a timer — a late inclusion would be an unrecorded fill. Only nonceUsedByOther/mined resolve it.
   }
 }
 
