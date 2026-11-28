@@ -273,7 +273,7 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 
 ## AutoTrade operational readiness from e2e8f2c4
 - [x] Connect separate live durable intent/nonce/effect storage to managed transport and worker dispatch; source gate remains OFF.
-- [ ] Prove store/transport crash recovery and negative authorization with mock broker and local fork; run full regression.
+- [x] Prove store/transport crash recovery and negative authorization with mock broker and local fork; 3,793 full tests and 37 final worker/firewall checks pass, automated typecheck/build OK.
 - [x] Inspect actual published assets against preview and supported release options; authenticated published manual worker succeeds, but isolated release/source attestation and bound-wallet acceptance block publish/resume 334.
 - [ ] Restricted publish and schedule 334 recovery — blocked by verified deployed source/server artifact, isolated whole-release review, bound-wallet Ops acceptance and managed scheduler deadline verification.
 - [x] Expose Ops readiness and secure infrastructure setup; report exact external blockers and observed worker status.

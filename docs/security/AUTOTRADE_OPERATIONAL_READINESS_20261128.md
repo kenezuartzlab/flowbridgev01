@@ -57,4 +57,8 @@ After that release, verify the managed caller succeeds within its actual deadlin
 
 ## Final regression evidence
 
-Full regression was started against the 3,769-test baseline; final result is appended after the task completes. Automated preview typecheck/build was OK after implementation. No independent human audit/sign-off, production artifact attestation, real-device check or live-canary success is implied by these tests.
+Full regression: **3,793/3,793 tests passed, 307 files**, against the 3,769-test baseline (24 added); 221.38 seconds. After the final callback observation optimization, **37/37** targeted worker/source-lock/BNB-firewall tests passed, including deliberate source/bundle/artifact mutations. Automated preview typecheck/build was **OK**, latest signal `07:53:21 UTC`.
+
+Implementation/evidence commit: `d24ffa02227760fc051213be38c614f2460f3698`; the following documentation-only commit records these final results. No independent human audit/sign-off, production artifact attestation, real-device check or live-canary success is implied by these tests.
+
+Remaining external actions: verified deployed source/server artifact and isolated release review; legitimate bound-wallet operator walkthrough; independently operated RPC and seven-day evidence; provisioned/reviewed managed signer and broker; independent human security review; exact owner buy/sell/slippage/expiry and separate gas/order consent. Scheduler 334 requires the authorized bounded-callback deployment plus actual managed deadline/authentication evidence before resume. Live/public/registry flags remain OFF; zero actual accounts, live orders, signatures, funding and trades.
