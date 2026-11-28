@@ -2,7 +2,8 @@
 // No network, signer, constructor calldata, deployment or role configuration. Chain facts are read-only inputs.
 import { BNB_EXECUTION_ENABLED } from './executionReviewPolicy';
 
-export const LAUNCH_HOLD = true as const;
+import { LAUNCH_HOLD, BNB_SWAP_PUBLICATION_EMBARGO, BNB_SWAP_EMBARGO_REASON } from './bnbSwapEmbargo';
+export { LAUNCH_HOLD } from './bnbSwapEmbargo';
 /** V1.17 owner-selected output-side rate (0.05%). Economics input only: never configures, deploys or charges. */
 export const OWNER_SELECTED_FEE_BPS = 5 as const;
 export const OWNER_INPUT_STATUS = 'OWNER_DIRECT_EOA_CHOICE_RECORDED' as const;
@@ -242,6 +243,7 @@ export function launchGate(i: {
   walletControlVerified?: boolean;
 }) {
   const blockers: string[] = [];
+  if (BNB_SWAP_PUBLICATION_EMBARGO) blockers.push(BNB_SWAP_EMBARGO_REASON);
   if (LAUNCH_HOLD) blockers.push('LAUNCH_HOLD');
   if (!BNB_EXECUTION_ENABLED) blockers.push('EXECUTION_DISABLED');
   if (i.governance !== 'READY_FOR_HUMAN_REVIEW') blockers.push('GOVERNANCE_' + i.governance);

@@ -255,3 +255,9 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 ## BNB V1.8 saved-key verification (2026-11-18)
 - [x] Real read-only 0x comparison, authenticated admin endpoint HTTP 200/no-store/non-executable, and 101 targeted tests passed.
 - [ ] HOLD: contemporaneous provider economics, terms/legal, independent audit, owner fee/recipient/slippage authorization and physical-wallet acceptance; no activation or publication.
+
+# BNB Swap owner publication embargo
+- [x] Source-locked embargo, selective Trade removal and state normalization; preserve AutoTrade, BOT, bridge, MultiSend.
+- [x] Retire BNB Swap vendor endpoint; enforce source and shipping-bundle release firewall with mutation tests.
+- [x] Private reversible archive, frozen identity checks and restoration requirements.
+- [x] Unit/full tests, responsive browser checks, published-site observation and automated build signals; final verification evidence and commit recorded in the pause archive. Hosted release/CI enforcement and real devices are explicitly unverified; no publication authorized.

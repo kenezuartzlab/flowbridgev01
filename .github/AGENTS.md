@@ -1,0 +1,1 @@
+- The BNB Swap embargo workflow runs the source gate, mutation tests and guarded build with read-only repository permissions. Why: independent CI must catch archived feature reintroduction before a release review.

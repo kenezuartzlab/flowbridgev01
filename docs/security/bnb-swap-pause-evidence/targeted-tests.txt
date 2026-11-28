@@ -1,0 +1,34 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/dev-server[39m
+
+ [32m✓[39m src/lib/bnb/adapterCandidateFence.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 222[2mms[22m[39m
+ [32m✓[39m scripts/bnb-v110-audit-package.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/bnb/launchReadiness.test.ts [2m([22m[2m29 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/lib/swap/viewContext.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m scripts/bnb-swap-embargo.test.ts [2m([22m[2m31 tests[22m[2m)[22m[33m 28049[2mms[22m[39m
+     [33m[2m✓[22m[39m accepts the current source [33m 2016[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/lib/bnb/bnbSwapEmbargo.ts: BNB_SWAP_PUBLICATION_EMBARGO = true [33m 1501[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/lib/bnb/bnbSwapEmbargo.ts: BNB_EXECUTION_ENABLED = false [33m 1199[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/lib/bnb/bnbSwapEmbargo.ts: LAUNCH_HOLD = true [33m 1257[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/lib/bnb/bnbSwapEmbargo.ts: BNB_SWAP_PUBLICATION_EMBARGO = true [33m 1591[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/lib/swap/viewContext.ts: PUBLIC_SWAP_VIEWS = [677, 968] [33m 1684[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/components/routetabs/swap/SwapChainPicker.tsx: const options = PUBLIC_SWAP_VIEWS; [33m 1436[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/components/routetabs/swap/SwapWorkspace.tsx: import { SwapChainPicker } [33m 1538[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/components/routetabs/swap/SwapWorkspace.tsx: if (!isSwapView(view)) return null; [33m 1590[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/routes/api/admin.bnb-0x-price.ts: POST: bnbSwapGoneResponse [33m 1620[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/routes/api/admin.bnb-0x-price.ts: import { createFileRoute } [33m 1640[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/lib/flowbridge/executionRegistry.ts: configured: false,
+    chainId: OFFICIAL_CHAIN_IDS.bnbMainnet [33m 1794[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in src/lib/swap/executionCapability.ts: 968: { [33m 1718[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in package.json: node scripts/check-bnb-swap-embargo.mjs && vite build [33m 1477[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects mutation in vite.config.ts: bnbSwapEmbargoPlugin(),  [33m 1521[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects new public/deployable artifact public/bnb-swap-adapter-manifest.json [33m 1580[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects new public/deployable artifact contracts/production/bnb-swap-adapter/manifest.json [33m 1466[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a new direct public BNB Swap route [33m 1357[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[32m75 passed[39m[22m[90m (75)[39m
+[2m   Start at [22m 02:13:20
+[2m   Duration [22m 29.39s[2m (transform 490ms, setup 0ms, import 3.85s, tests 28.32s, environment 0ms)[22m
+

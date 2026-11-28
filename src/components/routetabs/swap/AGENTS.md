@@ -1,3 +1,3 @@
 - Swap view switching is presentation-only; unmount the BOT execution card and clear its draft/DEX hints on a view change, and never mount it for BNB. Why: no cross-chain quote, token, review or approval state can survive selection.
 - Keep the chain picker in the existing 32px Swap heading, with an absolute 44px hit area; the shell badge is neutral on Swap. Why: chain context belongs to one compact control without extra rows.
-- Keep BNB quote inspection development-only inside the existing unavailable form, using display-only BNB adapters without browser RPC. Why: provider placeholders and historical research must never become live offers or financial authorization.
+- Keep public Swap limited to BOT views and normalize unsupported contexts before mounting execution; BNB research stays outside runtime imports. Why: the source-locked embargo must hold in preview and future publishes.

@@ -1,7 +1,8 @@
 // V1.13 wallet/routing/MEV review policy — PREVIEW ONLY, pure, no network, no calldata/allowance/signer fields.
 // It decides whether a hypothetical review *would* be presentable; signing is never permitted while
 // BNB_EXECUTION_ENABLED is false. Mirrors V1.13 on-chain limits so the UI can never promise more than the contract checks.
-export const BNB_EXECUTION_ENABLED = false as const;
+import { BNB_EXECUTION_ENABLED } from './bnbSwapEmbargo';
+export { BNB_EXECUTION_ENABLED } from './bnbSwapEmbargo';
 export const REVIEW_LIMITS = {
   chainId: 56,
   tiers: [500, 2500] as const,

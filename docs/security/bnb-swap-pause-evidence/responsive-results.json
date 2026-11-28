@@ -1,0 +1,99 @@
+{
+  "viewports": [
+    {
+      "width": 320,
+      "botViews": [
+        677,
+        968
+      ],
+      "bnbSwapAbsent": true,
+      "geometry": {
+        "overflow": false,
+        "heading": 32
+      },
+      "errors": []
+    },
+    {
+      "width": 360,
+      "botViews": [
+        677,
+        968
+      ],
+      "bnbSwapAbsent": true,
+      "geometry": {
+        "overflow": false,
+        "heading": 32
+      },
+      "errors": []
+    },
+    {
+      "width": 390,
+      "botViews": [
+        677,
+        968
+      ],
+      "bnbSwapAbsent": true,
+      "geometry": {
+        "overflow": false,
+        "heading": 32
+      },
+      "errors": []
+    },
+    {
+      "width": 430,
+      "botViews": [
+        677,
+        968
+      ],
+      "bnbSwapAbsent": true,
+      "geometry": {
+        "overflow": false,
+        "heading": 32
+      },
+      "errors": []
+    },
+    {
+      "width": 1280,
+      "botViews": [
+        677,
+        968
+      ],
+      "bnbSwapAbsent": true,
+      "geometry": {
+        "overflow": false,
+        "heading": 32
+      },
+      "errors": []
+    }
+  ],
+  "endpoint": [
+    {
+      "method": "GET",
+      "status": 410
+    },
+    {
+      "method": "POST",
+      "status": 410
+    },
+    {
+      "method": "PUT",
+      "status": 410
+    },
+    {
+      "method": "PATCH",
+      "status": 410
+    },
+    {
+      "method": "DELETE",
+      "status": 410
+    },
+    {
+      "method": "HEAD",
+      "status": 410
+    },
+    {
+      "method": "OPTIONS",
+      "status": 204
+    }
+  ]
+}

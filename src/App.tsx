@@ -3082,7 +3082,7 @@ export default function App() {
           {(activeTab === 'BOT/USDT' || activeTab === 'CA/BOT') && (
             <SwapWorkspace
               view={swapView}
-              onViewChange={(next) => { setSwapView(next); if (next !== 56) setIsMainnet(next === 677); }}
+              onViewChange={(next) => { setSwapView(next); setIsMainnet(next === 677); }}
               key={activeTab}
               pairMode={activeTab === 'CA/BOT' ? 'CA/BOT' : 'ANY'}
               hydration={activeTab === 'BOT/USDT' ? swapHydrationPlan : null}

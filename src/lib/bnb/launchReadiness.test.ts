@@ -164,12 +164,12 @@ describe('decisions & gate', () => {
   it('gate is never GO even if every input is satisfied', () => {
     const g = launchGate({ governance: 'READY_FOR_HUMAN_REVIEW', humanReviewSignoffs: 2, decisionsOpen: 0, deviceTestsPassed: true, dependencyHighOpen: false, slitherHighOpen: 0, directEoaRiskAcknowledged: true, treasuryIssuerRestrictionClear: true, finalObservationRefreshed: true, walletControlVerified: true });
     expect(g.go).toBe(false);
-    expect(g.blockers).toEqual(['LAUNCH_HOLD', 'EXECUTION_DISABLED']);
+    expect(g.blockers).toEqual(['OWNER_PAUSED_FOR_AUTOTRADE_WORKSPACE', 'LAUNCH_HOLD', 'EXECUTION_DISABLED']);
   });
   it('current state lists every blocker including EOA-specific risks', () => {
     const g = launchGate({ governance: 'NOT_CONFIGURED', humanReviewSignoffs: 0, decisionsOpen: 5, deviceTestsPassed: false, dependencyHighOpen: true, slitherHighOpen: 6 });
     expect(g.go).toBe(false);
-    expect(g.blockers).toEqual(['LAUNCH_HOLD', 'EXECUTION_DISABLED', 'GOVERNANCE_NOT_CONFIGURED', 'HUMAN_REVIEW_PENDING', 'OWNER_DECISIONS_PENDING', 'DEVICE_TESTS_UNVERIFIED', 'DEPENDENCY_HIGH_OPEN', 'SLITHER_HIGH_OPEN', 'DIRECT_EOA_RISK_ACKNOWLEDGMENT_PENDING', 'TREASURY_ISSUER_RESTRICTION_UNKNOWN', 'FINAL_OBSERVATION_REFRESH_REQUIRED', 'WALLET_CONTROL_UNVERIFIED']);
+    expect(g.blockers).toEqual(['OWNER_PAUSED_FOR_AUTOTRADE_WORKSPACE', 'LAUNCH_HOLD', 'EXECUTION_DISABLED', 'GOVERNANCE_NOT_CONFIGURED', 'HUMAN_REVIEW_PENDING', 'OWNER_DECISIONS_PENDING', 'DEVICE_TESTS_UNVERIFIED', 'DEPENDENCY_HIGH_OPEN', 'SLITHER_HIGH_OPEN', 'DIRECT_EOA_RISK_ACKNOWLEDGMENT_PENDING', 'TREASURY_ISSUER_RESTRICTION_UNKNOWN', 'FINAL_OBSERVATION_REFRESH_REQUIRED', 'WALLET_CONTROL_UNVERIFIED']);
   });
 });
 

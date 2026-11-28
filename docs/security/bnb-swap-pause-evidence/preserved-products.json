@@ -1,0 +1,28 @@
+[
+  {
+    "path": "/?chainId=56#swap",
+    "bnbSwapEntryAbsent": true
+  },
+  {
+    "path": "/home?chainId=56",
+    "bnbSwapEntryAbsent": true
+  },
+  {
+    "path": "/explore?chainId=56",
+    "bnbSwapEntryAbsent": true
+  },
+  {
+    "path": "/trade?swapChain=56#bnb",
+    "bnbSwapEntryAbsent": true
+  },
+  {
+    "product": "BNB MultiSend",
+    "selected": true,
+    "noTransaction": true
+  },
+  {
+    "product": "BOT/BNB bridge",
+    "preserved": true,
+    "noTransaction": true
+  }
+]
