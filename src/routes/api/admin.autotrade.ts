@@ -1,13 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-
-const createBody = z.object({
-  action: z.literal("create"),
-  pair: z.enum(["CA/BOT", "CA/USDT", "BOT/USDT", "FLOW/USDT"]),
-  budget: z.string().regex(/^\d+(\.\d+)?$/), maxBuyPrice: z.string(), minSellPrice: z.string(), stopPrice: z.string().optional(),
-  slippageBps: z.number().int(), maxGasNative: z.string().regex(/^\d+(\.\d+)?$/), maxLoss: z.string().regex(/^\d+(\.\d+)?$/),
-  expiresInMinutes: z.number().int().min(1).max(7 * 24 * 60), repeat: z.literal(false).default(false),
-});
+import { paperCreateBody, orderFromPaperRequest, equivalentBudget } from "@/lib/autotrade/paperForm";
 const ctl = z.object({ action: z.enum(["pause", "resume", "cancel", "tick"]), id: z.string().uuid() });
 
 export const Route = createFileRoute("/api/admin/autotrade")({
@@ -18,7 +11,8 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       const gate = await requireAdmin(request); if (!gate.ok) return gate.response;
       const { db } = await import("@/lib/autotrade/store.server");
       const cfg = await import("@/lib/autotrade/config");
-      const { data } = await (await db()).from("autotrade_orders").select("id,pair,mode,state,order_json,last_decision,created_by_email,updated_at").order("created_at", { ascending: false }).limit(50);
+      const { data, error: ordersError } = await (await db()).from("autotrade_orders").select("id,pair,mode,state,order_json,last_decision,created_by_email,updated_at").order("created_at", { ascending: false }).limit(50);
+      if (ordersError) return jsonResponse({ error: "Paper orders could not be loaded. Retry; do not submit a replacement order." }, 503);
       const R = await import("@/lib/autotrade/registry");
       const { createPublicClient, http, parseAbi } = await import("viem");
       const pc = createPublicClient({ transport: http("https://rpc.botchain.ai", { timeout: 6_000 }) });
@@ -40,7 +34,7 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       const { infrastructurePresence } = await import("@/lib/autotrade/infrastructure.server");
       const { count: intentCount, error: intentError } = await dd.from("autotrade_managed_intents").select("effect_key", { count: "exact", head: true });
       const readiness = operationalReadiness({ ...infrastructurePresence(), intents: intentError ? null : intentCount ?? null, heartbeatAt: lease?.heartbeat_at ?? null, now: Date.now() });
-      return jsonResponse({ readiness, registry, candidates: R.VENUE_CANDIDATES, registryWrites: R.REGISTRY_WRITES_ENABLED, worker, control, live: cfg.AUTOTRADE_LIVE_ENABLED, public: cfg.AUTOTRADE_PUBLIC_ENABLED, pairs: cfg.AUTOTRADE_PAIRS.map((p) => p.id), excluded: cfg.EXCLUDED_VENUES, orders: data ?? [] });
+      return jsonResponse({ viewer: { role: gate.admin.role }, readiness, registry, candidates: R.VENUE_CANDIDATES, registryWrites: R.REGISTRY_WRITES_ENABLED, worker, control, live: cfg.AUTOTRADE_LIVE_ENABLED, public: cfg.AUTOTRADE_PUBLIC_ENABLED, pairs: cfg.AUTOTRADE_PAIRS.map((p) => p.id), excluded: cfg.EXCLUDED_VENUES, orders: data ?? [] });
     },
     POST: async ({ request }) => {
       const { requireAdmin } = await import("@/lib/admin/adminGate.server");
@@ -51,6 +45,12 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       try {
         const E = await import("@/lib/autotrade/engine");
         const C = await import("@/lib/autotrade/config");
+        if (body.action === "paper_reference") {
+          const { pair } = z.object({ pair: z.enum(["CA/BOT", "CA/USDT", "BOT/USDT", "FLOW/USDT"]) }).parse(body);
+          const { readPaperReference } = await import("@/lib/autotrade/reference.server");
+          try { return jsonResponse({ reference: await readPaperReference(pair) }); }
+          catch { return jsonResponse({ error: "Current reference unavailable. Retry; no price or order was inferred." }, 503); }
+        }
         if (body.action === "validate_infrastructure") {
           const { validateConfiguredInfrastructure } = await import("@/lib/autotrade/infrastructureValidation.server");
           return jsonResponse({ infrastructure: await validateConfiguredInfrastructure() });
@@ -66,21 +66,37 @@ export const Route = createFileRoute("/api/admin/autotrade")({
           catch { return jsonResponse({ error: "Canary estimate unavailable; no order was created. Retry with fresh verified chain data." }, 503); }
         }
         const S = await import("@/lib/autotrade/store.server");
-        const { parseUnits } = await import("viem");
         const d = await S.db();
         if (body.action === "create") {
-          const b = createBody.parse(body);
-          const pair = C.pairById(b.pair);
-          if (!pair) throw new Error("PAIR_UNKNOWN");
+          const b = paperCreateBody.parse(body);
+          const id = b.requestId ?? crypto.randomUUID();
+          const previous = async () => {
+            const { data: row, error } = await d.from("autotrade_orders").select("id,created_by_email,order_json").eq("id", id).maybeSingle();
+            if (error) return jsonResponse({ error: "Could not check whether this paper request was saved. Retry the same request, not a new order." }, 503);
+            if (!row) return null;
+            const savedRequest = row.order_json && typeof row.order_json === "object" && !Array.isArray(row.order_json) ? row.order_json["paperRequest"] : null;
+            if (row.created_by_email !== gate.admin.email || JSON.stringify(savedRequest) !== JSON.stringify(b)) return jsonResponse({ error: "This request ID belongs to different parameters. Refresh orders and review your saved request." }, 409);
+            return jsonResponse({ ok: true, id: row.id, replayed: true });
+          };
+          if (b.requestId) { const existing = await previous(); if (existing) return existing; }
+          let budget = b.budget;
+          if (b.budgetUnit === "USDT_EQUIVALENT") {
+            if (b.pair !== "CA/BOT" || !b.reviewedBudget) return jsonResponse({ error: "Review a fresh USDT-to-BOT conversion before saving." }, 400);
+            const { readPaperReference } = await import("@/lib/autotrade/reference.server");
+            try {
+              const reference = await readPaperReference(b.pair);
+              if (!reference.usdtPerBot || reference.expiresAt <= Date.now()) throw new Error("STALE_REFERENCE");
+              budget = equivalentBudget(b.budget, reference.usdtPerBot);
+            } catch { return jsonResponse({ error: "Fresh conversion unavailable. No order saved; refresh the reference and review again." }, 503); }
+            if (budget !== b.reviewedBudget) return jsonResponse({ error: "BOT conversion changed. No order saved; refresh the reference and review the new budget." }, 409);
+          }
           const now = Date.now();
-          const order = E.newOrder(crypto.randomUUID(), {
-            pair, mode: "paper", budgetQuote: parseUnits(b.budget, pair.quote.decimals),
-            maxBuyPrice: E.parsePrice(b.maxBuyPrice), minSellPrice: E.parsePrice(b.minSellPrice), stopPrice: b.stopPrice ? E.parsePrice(b.stopPrice) : null,
-            slippageBps: b.slippageBps, maxGasWeiPerLeg: parseUnits(b.maxGasNative, 18), maxLossQuote: parseUnits(b.maxLoss, pair.quote.decimals),
-            expiresAt: now + b.expiresInMinutes * 60_000, repeat: b.repeat,
-          }, now);
-          const { error } = await d.from("autotrade_orders").insert({ id: order.id, created_by_email: gate.admin.email, pair: pair.id, mode: "paper", state: order.state, order_json: S.serialize(order), version: 0 });
-          if (error) throw new Error("Could not save order.");
+          const order = orderFromPaperRequest(b, id, now, budget);
+          const { error } = await d.from("autotrade_orders").insert({ id: order.id, created_by_email: gate.admin.email, pair: order.spec.pair.id, mode: "paper", state: order.state, order_json: { ...S.serialize(order), paperRequest: b }, version: 0 });
+          if (error) {
+            if (error.code === "23505" && b.requestId) { const existing = await previous(); if (existing) return existing; }
+            return jsonResponse({ error: "Could not confirm paper order storage. Refresh orders or retry this same request; do not create a second order." }, 503);
+          }
           await d.from("admin_audit_events").insert({ actor_user_id: gate.admin.userId, actor_email: gate.admin.email, actor_role: gate.admin.role, object_type: "autotrade_order", object_id: order.id, action: "create_paper", old_value: null, new_value: S.serialize(order) });
           return jsonResponse({ ok: true, id: order.id });
         }
@@ -132,7 +148,7 @@ export const Route = createFileRoute("/api/admin/autotrade")({
         await S.commit(prev, next, gate.admin.email, { type: c.action });
         return jsonResponse({ ok: true, state: next.state });
       } catch (e: any) {
-        return jsonResponse({ error: e instanceof z.ZodError ? "Invalid input." : (e?.message ?? "Failed") }, 400);
+        return jsonResponse({ error: e instanceof z.ZodError ? `${e.issues[0]?.path.join(" ") ?? "Order"}: ${e.issues[0]?.message ?? "check the value"}` : (e?.message ?? "Request failed. Refresh orders before retrying.") }, 400);
       }
     },
   } },

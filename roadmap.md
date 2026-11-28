@@ -290,3 +290,10 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Non-executable order ticket with owner-entered prices, expiry, slippage and total exposure.
 - [x] Focused/fork regression, current release/worker status and secure next-step report; full regression evidence added after completion.
 - [ ] Exact dedicated-account gas/order confirmation — blocked by unprovisioned signer/account, independent RPC and owner-entered targets; no funding or live approval inferred.
+
+## Urgent AutoTrade paper form defect (2026-11-28)
+- [x] Diagnose deployed artifact, production 403 attempts, off-screen error reproduction, legitimate owner gate and existing persistence schema without bypassing RBAC.
+- [x] Fix submission feedback, duplicate prevention, units/reference/review and mobile accessibility.
+- [x] Verify exact screenshot inputs, failure/success mocks, 390/1280 browser checks, 3,819 full regressions and release holds.
+- [ ] Real authorized paper creation — blocked by a legitimately connected bound-wallet actor; owner session alone returns 403 and no role/header/provider bypass was used.
+- [ ] Production publication — blocked unless existing isolated-release and human-security conditions pass.
