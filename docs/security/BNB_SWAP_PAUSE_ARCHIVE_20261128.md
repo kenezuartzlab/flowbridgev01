@@ -9,7 +9,7 @@ Status: **OWNER PAUSED / PUBLICATION EMBARGO / NO-GO**. Recorded 2026-11-28 UTC.
 This decision overrides all earlier BNB Swap readiness, preview, quote-diagnostic and future fee planning. Unrelated future publishes must not ship the paused BNB Swap experience. Only new, explicit owner approval can lift it; no environment variable, URL, admin session, chain switch or stored state may do so. No production publish is authorized by this removal task.
 
 - Before embargo: `5d67217a73e63ab1f9d9364cc080d683f2f30b63`.
-- After source freeze: recorded below in the final verification addendum; recover the exact commit with `git log --format='%H %s' -- scripts/check-bnb-swap-embargo.mjs src/lib/bnb/bnbSwapEmbargo.ts`.
+- After source freeze: **`46b21ec80fbdd96052059de20c0072ace449243e`** (embargo implementation commit); recover the exact commit with `git log --format='%H %s' -- scripts/check-bnb-swap-embargo.mjs src/lib/bnb/bnbSwapEmbargo.ts`.
 - This project also contains AutoTrade commits beginning `cb8517d3`, followed by V1.1 `fdb3d565` and V1.2 `2c59e67e`. **No history rollback was performed.** AutoTrade source, API, worker, signals, limits and historical CaSwap correction work are preserved.
 
 ## What is paused and how the release is fenced
@@ -97,3 +97,5 @@ A later authorized release uses the guarded `build` command; do not publish just
 - Seven guessed archived source/document/collector URLs returned **410**, including the frozen contract and quote adapter.
 - Automated preview build signal: **build OK**. Manual production build/typecheck was not run because this environment reserves these for the platform harness; emitted production closure is enforced by the installed Vite hook, but no production release artifact or hosted CI run was produced/verified here. This limitation is explicit rather than claiming a manual release build passed.
 - Frozen V1.13 SHA256 unchanged; private inventory contains **141** preserved file hashes. No secret value printed, read, changed or removed by embargo code.
+
+The final evidence-only follow-up commit records this source-freeze SHA and acceptance totals; it does not change the frozen Solidity or runtime policy.
