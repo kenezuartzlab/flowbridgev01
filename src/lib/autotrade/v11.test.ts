@@ -95,7 +95,8 @@ describe("hard gates", () => {
   });
   it("no signer exists; registry writes disabled; CaSwap not recommended", () => {
     expect(loadTradingSigner()).toEqual({ status: "NOT_CONFIGURED", signer: null });
-    expect(SIGNER_POLICY.proposedMaxBalanceUsdt).toBe(5);
+    expect(SIGNER_POLICY.approvedCanaryCapUsdt).toBe(5);
+    expect(SIGNER_POLICY.approvalStatus).toBe("APPROVED_CAP_ONLY");
     expect(SIGNER_POLICY).not.toHaveProperty("maxBalanceUsdt");
     expect(REGISTRY_WRITES_ENABLED).toBe(false);
     expect(VENUE_CANDIDATES.find((v) => v.key === "caswap-v2")).toMatchObject({ abiCompatible: true, usefulDepth: false, recommendation: "DO_NOT_REGISTER" });

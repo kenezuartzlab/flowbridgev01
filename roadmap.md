@@ -270,3 +270,10 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Retire BNB Swap vendor endpoint; enforce source and shipping-bundle release firewall with mutation tests.
 - [x] Private reversible archive, frozen identity checks and restoration requirements.
 - [x] Unit/full tests, responsive browser checks, published-site observation and automated build signals; final verification evidence and commit recorded in the pause archive. Hosted release/CI enforcement and real devices are explicitly unverified; no publication authorized.
+
+## AutoTrade V1.4 canary preparation
+- [x] Record owner 5 USDT APPROVED_CAP_ONLY, separate gas and order authorization.
+- [x] Add read-only cap/gas preparation and source-locked managed transport boundary.
+- [x] Verify transport regressions, fork/mock recovery, release firewall and fresh review; exact production artifact and bound-wallet acceptance remain unverified.
+- [ ] Restricted publication and scheduler recovery — blocked by verified production diff and bound-wallet Ops acceptance.
+- [ ] Live canary — blocked by independent RPC, provisioned managed signer/dedicated account, human security review, gas approval and exact order authorization.

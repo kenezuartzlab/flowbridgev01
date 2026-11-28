@@ -1,6 +1,8 @@
 /** Ops: AutoTrade V1 — paper-mode price-target orders (live trading disabled). */
 import { useEffect, useState } from "react";
 import { getIdToken } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { CANARY_APPROVAL } from "@/lib/autotrade/canaryPreparation";
 
 async function call(wallet: string, body?: unknown) {
   const token = await getIdToken();
@@ -17,7 +19,8 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
   const [s, setS] = useState<any>(null);
   const [err, setErr] = useState<string | null>(null);
   const [preview, setPreview] = useState<any>(null);
-  const [f, setF] = useState<Record<string, string>>({ pair: "BOT/USDT", slippageBps: "50", maxGasNative: "0.01", expiresInMinutes: "60" });
+  const [preparation, setPreparation] = useState<any>(null);
+  const [f, setF] = useState<Record<string, string>>({ pair: "CA/BOT", slippageBps: "50", expiresInMinutes: "60" });
   const load = () => call(wallet).then(setS).catch((e) => setErr(e.message));
   useEffect(() => { void load(); }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
   const run = async (b: unknown) => { setErr(null); try { await call(wallet, b); await load(); } catch (e: any) { setErr(e.message); } };
@@ -26,6 +29,16 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
     <div className="space-y-4">
       <p className="rounded-lg border border-hairline bg-card p-3 text-sm">Paper mode only. Live trading: <b>{s.live ? "ON" : "OFF"}</b> · Public: <b>{s.public ? "ON" : "OFF"}</b>. No wallet or key is used.</p>
       {err && <p className="text-sm text-destructive">{err}</p>}
+      <section className="space-y-2 border-b border-hairline pb-3 text-sm">
+        <p><b>{CANARY_APPROVAL.status}</b> · 5 USDT equivalent · CA/BOT · one buy/sell cycle</p>
+        <p className="text-muted">Gas approval pending · Order authorization pending · Dedicated account not provisioned</p>
+        <Button variant="outline" onClick={async () => { setPreparation(null); setErr(null); try { const j = await call(wallet, { action: "prepare_canary" }); setPreparation(j.preparation); } catch (e: any) { setErr(e.message); } }}>Refresh canary estimate</Button>
+        {preparation && <div className="text-xs text-muted space-y-1">
+          <p>Indicative cap: {preparation.indicativeBot} BOT · block {preparation.block} · {new Date(preparation.fetchedAt).toLocaleTimeString()}</p>
+          <p>Planning gas reserve: {preparation.gasReserveBot} BOT · approval pending</p>
+          <p>Not executable · independent price verification pending · exact gas simulation pending</p>
+        </div>}
+      </section>
       <div className="rounded-lg border border-hairline bg-card p-3 text-sm space-y-1">
         <div className="flex flex-wrap items-center gap-2"><b>Monitor</b>
           <span>{s.worker?.lease?.heartbeat_at ? `heartbeat ${new Date(s.worker.lease.heartbeat_at).toLocaleTimeString()} · block ${s.worker.lease.last_block ?? "—"}` : "not running yet"}</span>
@@ -50,7 +63,8 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
         <label className="text-xs">Pair<select className={input} value={f["pair"]} onChange={(e) => setF({ ...f, pair: e.target.value })}>{s.pairs.map((p: string) => <option key={p}>{p}</option>)}</select></label>
         {F.map(([k, l]) => <label key={k} className="text-xs">{l}<input className={input} inputMode="decimal" value={f[k] ?? ""} onChange={(e) => setF({ ...f, [k]: e.target.value })} /></label>)}
       </div>
-      <button className="rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground" onClick={() => run({ action: "create", pair: f["pair"], budget: f["budget"], maxBuyPrice: f["maxBuyPrice"], minSellPrice: f["minSellPrice"], stopPrice: f["stopPrice"] || undefined, slippageBps: Number(f["slippageBps"]), maxGasNative: f["maxGasNative"], maxLoss: f["maxLoss"], expiresInMinutes: Number(f["expiresInMinutes"]), repeat: false })}>Create paper order</button>
+      <p className="text-xs text-muted">Single cycle · repeat OFF · buy and sell targets not selected</p>
+      <Button onClick={() => run({ action: "create", pair: f["pair"], budget: f["budget"], maxBuyPrice: f["maxBuyPrice"], minSellPrice: f["minSellPrice"], stopPrice: f["stopPrice"] || undefined, slippageBps: Number(f["slippageBps"]), maxGasNative: f["maxGasNative"], maxLoss: f["maxLoss"], expiresInMinutes: Number(f["expiresInMinutes"]), repeat: false })}>Create paper order</Button>
       <div className="space-y-2">
         {s.orders.map((o: any) => (
           <div key={o.id} className="rounded-lg border border-hairline bg-card p-3 text-sm">

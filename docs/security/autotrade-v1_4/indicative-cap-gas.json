@@ -1,0 +1,14 @@
+{
+  "kind": "READ_ONLY_SAME_OPERATOR_INDICATIVE_NOT_ORDER",
+  "block": "31806541",
+  "fetchedAt": "2026-11-28T04:16:02.071Z",
+  "usdt6PerBot": "12736133",
+  "crossUsdt6PerBot": "12736133",
+  "capBot": "0.392583840008580312",
+  "gasPriceWei": "20000000000",
+  "gasReserveBot": "0.03215844",
+  "gasApproval": "PENDING_OWNER_APPROVAL",
+  "independent": false,
+  "gasBasis": "BOT/USDT quote proxy, not exact CA/BOT simulation",
+  "headOffset": 8
+}

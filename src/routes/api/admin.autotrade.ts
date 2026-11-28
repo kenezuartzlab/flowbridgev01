@@ -47,12 +47,18 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       try {
         const E = await import("@/lib/autotrade/engine");
         const C = await import("@/lib/autotrade/config");
+        if (body.action === "prepare_canary") {
+          const { readCanaryPreparation } = await import("@/lib/autotrade/preparation.server");
+          try { return jsonResponse({ preparation: await readCanaryPreparation() }); }
+          catch { return jsonResponse({ error: "Canary estimate unavailable; no order was created. Retry with fresh verified chain data." }, 503); }
+        }
         const S = await import("@/lib/autotrade/store.server");
         const { parseUnits } = await import("viem");
         const d = await S.db();
         if (body.action === "create") {
           const b = createBody.parse(body);
-          const pair = C.pairById(b.pair)!;
+          const pair = C.pairById(b.pair);
+          if (!pair) throw new Error("PAIR_UNKNOWN");
           const now = Date.now();
           const order = E.newOrder(crypto.randomUUID(), {
             pair, mode: "paper", budgetQuote: parseUnits(b.budget, pair.quote.decimals),

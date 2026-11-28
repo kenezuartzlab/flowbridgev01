@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ admin: vi.fn(), cron: vi.fn(), worker: vi.fn() }));
+const mocks = vi.hoisted(() => ({ admin: vi.fn(), cron: vi.fn(), worker: vi.fn(), preparation: vi.fn() }));
 vi.mock("@/lib/admin/adminGate.server", () => ({ requireAdmin: mocks.admin }));
 vi.mock("@/integrations/supabase/cron-auth", () => ({ authenticateCronRequest: mocks.cron }));
 vi.mock("@/lib/autotrade/worker.server", () => ({ runWorker: mocks.worker }));
+vi.mock("@/lib/autotrade/preparation.server", () => ({ readCanaryPreparation: mocks.preparation }));
 
 import { Route as AdminRoute } from "@/routes/api/admin.autotrade";
 import { Route as HookRoute } from "@/routes/api/public/hooks/autotrade-worker";
@@ -27,7 +28,7 @@ describe("AutoTrade HTTP authorization", () => {
 
   it("allows operators to inspect but forbids every operator mutation", async () => {
     mocks.admin.mockResolvedValue({ ok: true, admin: { role: "internal_operator", email: "operator@example.invalid" } });
-    for (const action of ["create", "tick", "pause", "resume", "cancel", "emergency", "registry_preview"]) {
+    for (const action of ["create", "tick", "pause", "resume", "cancel", "emergency", "registry_preview", "prepare_canary"]) {
       const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action }) }) });
       expect(response.status).toBe(403);
     }
@@ -46,5 +47,20 @@ describe("AutoTrade HTTP authorization", () => {
     expect(response.status).toBe(200);
     expect(mocks.worker).toHaveBeenCalledWith("cron");
     expect(await response.json()).toMatchObject({ decided: 0, lastBlock: null, latencyMs: 1 });
+  });
+  it("authorized estimate reads back cap-only facts without creating an order", async () => {
+    mocks.admin.mockResolvedValue({ ok: true, admin: { role: "super_admin" } });
+    mocks.preparation.mockResolvedValue({ status: "APPROVED_CAP_ONLY", capUsdt: "5", orderCreated: false, executable: false });
+    const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action: "prepare_canary" }) }) });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ preparation: { status: "APPROVED_CAP_ONLY", capUsdt: "5", orderCreated: false, executable: false } });
+    expect(mocks.worker).not.toHaveBeenCalled();
+  });
+  it("failed price read returns unavailable rather than a cached executable estimate", async () => {
+    mocks.admin.mockResolvedValue({ ok: true, admin: { role: "super_admin" } });
+    mocks.preparation.mockRejectedValue(new Error("RPC_SECRET_DETAIL"));
+    const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action: "prepare_canary" }) }) });
+    expect(response.status).toBe(503);
+    expect(JSON.stringify(await response.json())).not.toContain("RPC_SECRET_DETAIL");
   });
 });
