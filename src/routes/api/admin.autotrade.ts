@@ -6,7 +6,7 @@ const createBody = z.object({
   pair: z.enum(["CA/BOT", "CA/USDT", "BOT/USDT", "FLOW/USDT"]),
   budget: z.string().regex(/^\d+(\.\d+)?$/), maxBuyPrice: z.string(), minSellPrice: z.string(), stopPrice: z.string().optional(),
   slippageBps: z.number().int(), maxGasNative: z.string().regex(/^\d+(\.\d+)?$/), maxLoss: z.string().regex(/^\d+(\.\d+)?$/),
-  expiresInMinutes: z.number().int().min(1).max(7 * 24 * 60), repeat: z.boolean().default(false),
+  expiresInMinutes: z.number().int().min(1).max(7 * 24 * 60), repeat: z.literal(false).default(false),
 });
 const ctl = z.object({ action: z.enum(["pause", "resume", "cancel", "tick"]), id: z.string().uuid() });
 
@@ -82,16 +82,32 @@ export const Route = createFileRoute("/api/admin/autotrade")({
         const prev = S.deserialize(row.order_json);
         if (c.action === "tick") {
           if (prev.spec.mode !== "paper") return jsonResponse({ error: "LIVE_DISABLED" }, 403);
-          const side = prev.state === "HOLDING" ? "sell" : "buy";
-          const amt = side === "buy" ? prev.spec.budgetQuote : prev.acquiredBase;
-          const { quoteLeg } = await import("@/lib/autotrade/quotes.server");
-          const q = await quoteLeg(prev.spec.pair, side, E.splitRouterFee(amt, C.ROUTER_V4_FEE_BPS_BDEX_V3).swapAmount).catch(() => null);
-          if (!q) { await d.from("autotrade_orders").update({ last_decision: { kind: "reject", reason: "QUOTE_UNAVAILABLE", at: new Date().toISOString() } }).eq("id", prev.id); return jsonResponse({ decision: { kind: "reject", reason: "QUOTE_UNAVAILABLE" } }); }
-          const { order, decision } = E.paperStep(prev, q, Date.now(), C.ROUTER_V4_FEE_BPS_BDEX_V3);
-          const dec = JSON.parse(JSON.stringify({ ...decision, quote: q, at: new Date().toISOString() }, (_k, v) => typeof v === "bigint" ? v.toString() : v));
-          if (order !== prev) await S.commit(prev, order, gate.admin.email, { type: "paper_tick", decision: dec }, dec);
-          else await d.from("autotrade_orders").update({ last_decision: dec, updated_at: new Date().toISOString() }).eq("id", prev.id).eq("version", prev.version);
-          return jsonResponse({ decision: dec, state: order.state });
+          const holder = crypto.randomUUID();
+          const { data: fencing, error: leaseError } = await d.rpc("autotrade_acquire_lease", { _name: "autotrade-main", _holder: holder, _ttl_seconds: 30 });
+          if (leaseError) throw new Error("LEASE_UNAVAILABLE");
+          if (fencing === null || fencing === undefined) return jsonResponse({ error: "Worker is active; retry shortly." }, 409);
+          try {
+            const { data: control, error: controlError } = await d.from("autotrade_control").select("emergency_paused").eq("id", true).maybeSingle();
+            if (controlError || !control || control.emergency_paused) return jsonResponse({ error: "Worker is paused or unavailable." }, 409);
+            const side = prev.state === "HOLDING" ? "sell" : "buy";
+            const amt = side === "buy" ? prev.spec.budgetQuote : prev.acquiredBase;
+            const { quoteLeg } = await import("@/lib/autotrade/quotes.server");
+            const q = (prev.state === "ARMED" || prev.state === "HOLDING")
+              ? await quoteLeg(prev.spec.pair, side, E.splitRouterFee(amt, C.ROUTER_V4_FEE_BPS_BDEX_V3).swapAmount).catch(() => null)
+              : null;
+            const { MockPaperTransport, processTransportedPaperOrder } = await import("@/lib/autotrade/paperExecutor");
+            const { SupabasePaperExecutionStore } = await import("@/lib/autotrade/paperStore.server");
+            const result = await processTransportedPaperOrder({
+              order: prev, quote: q, now: Date.now(), store: new SupabasePaperExecutionStore(d), transport: new MockPaperTransport(),
+              lease: { holder, fencing: Number(fencing), leaseUntilMs: Date.now() + 30_000 },
+            });
+            const dec = JSON.parse(JSON.stringify({ ...result.decision, route: q?.route, quoteOnlyAlternatives: q?.quoteOnlyAlternatives, at: new Date().toISOString() }, (_k, v) => typeof v === "bigint" ? v.toString() : v));
+            const { error: decisionError } = await d.from("autotrade_orders").update({ last_decision: dec, updated_at: new Date().toISOString() }).eq("id", prev.id).eq("version", result.order.version);
+            if (decisionError) throw new Error("DECISION_UNAVAILABLE");
+            return jsonResponse({ decision: dec, state: result.order.state });
+          } finally {
+            await d.rpc("autotrade_release_lease", { _name: "autotrade-main", _holder: holder, _fencing: fencing });
+          }
         }
         const next = E.apply(prev, { type: c.action });
         await S.commit(prev, next, gate.admin.email, { type: c.action });

@@ -477,6 +477,20 @@
       "when": 1795827615045,
       "tag": "0067_autotrade_v1_2_outbox_fencing",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1795834317057,
+      "tag": "0068_autotrade_v1_3_atomic_paper_executor",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1795834432017,
+      "tag": "0069_autotrade_v1_3_receipt_block_evidence",
+      "breakpoints": true
     }
   ]
 }

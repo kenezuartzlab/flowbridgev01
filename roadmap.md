@@ -1,3 +1,12 @@
+# AutoTrade V1.3 final functional integration — paper-only
+- [x] Share conservative per-leg route comparison between manual Swap and AutoTrade; BDEX V3 default, alternative CaSwap quote-only with 500 bps directional fee cap and fail-closed registration/identity/fee/liquidity gates.
+- [x] Wire worker → mocked/fork executor transport with durable outbox/nonce/fence/pause, exact approvals, receipt reconciliation and signer payload checks; live/signer/independent-RPC remain OFF.
+- [x] Pause failing schedule 334, add authenticated worker/RBAC tests, preserve the BNB/RWA publication boundary and record the whole-release blocker; no publish.
+- [x] Document independent BOT node, managed non-exportable signer and dedicated-account requirements without credentials, accounts, funding or external signatures.
+- [x] Complete local CA/BOT buy→sell plus four-pair/adversarial/reward-exclusion tests; typecheck/build pass, 108 focused and 3,702 full-suite tests pass, evidence report added.
+- [ ] HOLD: resume schedule only after an authorized whole-project publish and observed heartbeat/metrics; connected bound-wallet create/tick acceptance remains blocked (403 without wallet).
+- [ ] HOLD: live trading, registry writes, public AutoTrade, owner price/budget, 5 USDT-equivalent trade cap and separate gas cap, real accounts/keys/funding/signatures.
+
 # Exact owner-route recheck — read-only / local fork
 - [x] Pin all four owner addresses at 31,793,279; prove BDEX USDT/WBOT 0.3% identity, all five V3 entries, immutable historical factories and complete bounded V2 CA-pool enumeration.
 - [x] 24 native and 6 atomic CA/USDT local-fork trades match actual V4 caller quotes, budgets, fees and selected allowance/residual checks; BDEX 1% wins all sampled comparisons. UniversalRouter incompatible; 0.3% CA tier fails two-sided quoting.

@@ -4,7 +4,7 @@ import { FLOW_BRIDGE_ROUTER_V4_GENERATED_ABI as V4 } from "@/lib/flowbridge/rout
 import { pairById, ROUTER_V4 } from "./config";
 import { assertAllowlisted, assertExecutionAllowed, buildLegCall, checkGas, nativeReceived, outboxApply, planAmounts, receivedFromLogs, reserveNonce, rpcConsensus, verifyDeployment, LEG_SELECTORS, ROUTER_V4_RUNTIME_KECCAK, type OutboxEntry } from "./executor";
 import { nextBlockToProcess, percentile, pickBatch, pool } from "./worker";
-import { loadTradingSigner } from "./signer";
+import { loadTradingSigner, SIGNER_POLICY } from "./signer";
 import { registerPreview, REGISTRY_WRITES_ENABLED, VENUE_CANDIDATES } from "./registry";
 
 const ME = "0x00000000000000000000000000000000000000aa" as Hex;
@@ -95,6 +95,8 @@ describe("hard gates", () => {
   });
   it("no signer exists; registry writes disabled; CaSwap not recommended", () => {
     expect(loadTradingSigner()).toEqual({ status: "NOT_CONFIGURED", signer: null });
+    expect(SIGNER_POLICY.proposedMaxBalanceUsdt).toBe(5);
+    expect(SIGNER_POLICY).not.toHaveProperty("maxBalanceUsdt");
     expect(REGISTRY_WRITES_ENABLED).toBe(false);
     expect(VENUE_CANDIDATES.find((v) => v.key === "caswap-v2")).toMatchObject({ abiCompatible: true, usefulDepth: false, recommendation: "DO_NOT_REGISTER" });
     expect(registerPreview("caswap-v2", ME).data.startsWith("0x")).toBe(true);

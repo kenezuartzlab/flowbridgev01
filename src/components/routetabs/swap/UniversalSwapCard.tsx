@@ -1468,6 +1468,13 @@ export function UniversalSwapCard({
                 <Row label="Trading fee" value={tradingFeeLabel} />
                 <Row label="Price impact" value={priceImpactLabel} />
                 <Row label="Quote basis" value="Executable (on-chain)" />
+                {quote.quoteOnlyAlternatives?.map((alternative) => (
+                  <Row
+                    key={alternative.key}
+                    label={`${alternative.venue} · quote only`}
+                    value={`${formatBalance4(formatUnits(alternative.amountOut, tokenOut.decimals))} ${tokenOut.symbol} · ${alternative.externalDirectionalFeeBps === null ? "fee unverified" : `${(alternative.externalDirectionalFeeBps / 100).toFixed(2)}% directional fee`} · not executable`}
+                  />
+                ))}
                 {guard.guarded && guard.policy ? (
                   <>
                     <Row

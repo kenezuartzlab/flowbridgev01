@@ -439,6 +439,7 @@ export type Database = {
       autotrade_outbox: {
         Row: {
           account: string
+          call_json: Json | null
           chain_id: number
           created_at: string
           fencing: number | null
@@ -447,6 +448,7 @@ export type Database = {
           mined_hash: string | null
           nonce: number
           order_id: string
+          parent_key: string
           side: string
           signed_raw: string | null
           state: string
@@ -455,6 +457,7 @@ export type Database = {
         }
         Insert: {
           account: string
+          call_json?: Json | null
           chain_id: number
           created_at?: string
           fencing?: number | null
@@ -463,6 +466,7 @@ export type Database = {
           mined_hash?: string | null
           nonce: number
           order_id: string
+          parent_key: string
           side: string
           signed_raw?: string | null
           state: string
@@ -471,6 +475,7 @@ export type Database = {
         }
         Update: {
           account?: string
+          call_json?: Json | null
           chain_id?: number
           created_at?: string
           fencing?: number | null
@@ -479,6 +484,7 @@ export type Database = {
           mined_hash?: string | null
           nonce?: number
           order_id?: string
+          parent_key?: string
           side?: string
           signed_raw?: string | null
           state?: string
@@ -3805,6 +3811,59 @@ export type Database = {
           _ttl_seconds: number
         }
         Returns: boolean
+      }
+      autotrade_paper_advance_effect: {
+        Args: {
+          _decision: Json
+          _event: Json
+          _expected_version: number
+          _fencing: number
+          _holder: string
+          _key: string
+          _next_order: Json
+          _order_id: string
+          _patch: Json
+          _require_unpaused: boolean
+        }
+        Returns: undefined
+      }
+      autotrade_paper_reserve_effect: {
+        Args: {
+          _account: string
+          _call_json: Json
+          _chain_id: number
+          _expected_version: number
+          _fencing: number
+          _holder: string
+          _key: string
+          _order_id: string
+          _parent_key: string
+          _side: string
+        }
+        Returns: {
+          account: string
+          call_json: Json | null
+          chain_id: number
+          created_at: string
+          fencing: number | null
+          idempotency_key: string
+          mined_block: number | null
+          mined_hash: string | null
+          nonce: number
+          order_id: string
+          parent_key: string
+          side: string
+          signed_raw: string | null
+          state: string
+          tx_hash: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "autotrade_outbox"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       autotrade_release_lease: {
         Args: { _fencing: number; _holder: string; _name: string }

@@ -1,6 +1,7 @@
 // AutoTrade V1 pure engine: price bounds -> exact minOut, quote guards, durable
 // state machine and paper fills. No network, no signing. Tested in engine.test.ts.
 import { AUTOTRADE_LIVE_ENABLED, GUARDS, type AutoTradePair } from "./config";
+import type { ComparedRoute } from "@/lib/swap/routeComparison";
 
 export interface Rational { num: bigint; den: bigint }
 export function parsePrice(s: string): Rational {
@@ -35,6 +36,9 @@ export interface Quote {
   /** independent second source amountOut for the same input (e.g. second RPC). */
   crossCheckOut: bigint | null;
   priceImpactBps: number; gasUnits: bigint; gasPriceWei: bigint;
+  /** Exact selected registered route and diagnostic-only alternatives. */
+  route?: ComparedRoute;
+  quoteOnlyAlternatives?: ComparedRoute[];
 }
 export type QuoteRejection = "STALE_QUOTE" | "STALE_BLOCK" | "NO_CROSS_CHECK" | "SOURCE_DEVIATION" | "INSUFFICIENT_LIQUIDITY" | "PRICE_IMPACT";
 export function checkQuote(q: Quote, now: number): QuoteRejection | null {

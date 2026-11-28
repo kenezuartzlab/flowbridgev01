@@ -24,6 +24,8 @@ import {
 import { FLOW_BRIDGE_ROUTER_LENS_ABI } from "@/lib/flowbridge/routerV4Abi";
 import { resolveFlowBridgeExecutionForNetwork } from "@/lib/flowbridge/executionRegistry";
 import { NATIVE_TOKEN_ADDRESS, type Token } from "./tokenRegistry";
+import { quoteAlternativeCaSwap } from "./caswapQuote";
+import { selectBestExecutableRoute, type ComparedRoute } from "./routeComparison";
 
 
 const FACTORY_ABI = parseAbi([
@@ -46,6 +48,7 @@ export interface SwapStep {
   expectedOut: bigint;
   // V3-only:
   v3Fee?: number;             // Uniswap V3 pool fee (e.g. 3000 = 0.3%)
+  pool?: Address;             // exact factory-verified V3 pool
   priceImpactBps?: number;    // derived from current vs post-quote pool price
   /** Leg endpoints (set by the Smart Route Engine; used to re-quote legs). */
   tokens?: [Token, Token];
@@ -57,6 +60,8 @@ export interface QuoteResult {
   steps: SwapStep[];
   symbolPath: string[];       // combined human path, e.g. ["CA","BOT","USDT"]
   path: Address[];            // first step's path (back-compat)
+  /** Fresh diagnostic alternatives. Never consumed by review, approval or execution. */
+  quoteOnlyAlternatives?: ComparedRoute[];
 }
 
 interface DexCfg {
@@ -224,8 +229,8 @@ async function v2Dexes(isMainnet: boolean): Promise<DexCfg[]> {
 // send a swap with an invented router ID.
 async function bdexV3Router(isMainnet: boolean): Promise<ActiveRouter | null> {
   const routers = await fetchActiveRouters(isMainnet);
-  const v3 = routers.find((r) => r.type === 1);
-  return v3 ?? null;
+  const configured = getContracts(isMainnet).bdexV3Router.toLowerCase();
+  return routers.find((r) => r.type === 1 && r.addr === configured) ?? null;
 }
 
 
@@ -411,7 +416,7 @@ async function bestV3Step(
       });
       const result = simulation.result as readonly [bigint, bigint, number, bigint];
       if (result[0] <= 0n) return null;
-      return { amountOut: result[0], fee, priceImpactBps: sqrtPriceImpactBps(slot0[0], result[1]) };
+      return { amountOut: result[0], fee, pool: pool.toLowerCase() as Address, priceImpactBps: sqrtPriceImpactBps(slot0[0], result[1]) };
     } catch { return null; }
   }));
   const best = quoted.filter((q): q is NonNullable<typeof q> => q !== null)
@@ -421,7 +426,7 @@ async function bestV3Step(
     dex: "bdex-v3", routerId: registryRouter.id, router: registryRouter.addr,
     path: [inAddr, outAddr], symbolPath: [tokenIn.symbol, tokenOut.symbol],
     inIsNative: !!tokenIn.isNative, outIsNative: !!tokenOut.isNative,
-    expectedOut: best.amountOut, v3Fee: best.fee, priceImpactBps: best.priceImpactBps,
+    expectedOut: best.amountOut, v3Fee: best.fee, pool: best.pool, priceImpactBps: best.priceImpactBps,
   };
 }
 
@@ -510,6 +515,26 @@ const USDT_TOKEN = (isMainnet: boolean): Token => {
   };
 };
 
+async function alternativeCaBotQuote(
+  client: ReturnType<typeof publicClient>,
+  isMainnet: boolean,
+  tokenIn: Token,
+  tokenOut: Token,
+  amountIn: bigint,
+): Promise<ComparedRoute | null> {
+  if (!isMainnet) return null;
+  const ca = getContracts(true).caToken.toLowerCase();
+  const buy = !!tokenIn.isNative && !tokenOut.isNative && tokenOut.address.toLowerCase() === ca;
+  const sell = !tokenIn.isNative && tokenIn.address.toLowerCase() === ca && !!tokenOut.isNative;
+  if (!buy && !sell) return null;
+  try {
+    const [blockNumber, gasPriceWei] = await Promise.all([client.getBlockNumber(), client.getGasPrice()]);
+    return await quoteAlternativeCaSwap({ client, blockNumber, amountIn, side: buy ? "buy" : "sell", gasPriceWei });
+  } catch {
+    return null; // An unavailable quote-only diagnostic never disables the registered route.
+  }
+}
+
 // Identical quote requests fired within a short window (swap card + confirm
 // modal + preview panel all ask for the same route) share a single search
 // instead of each doing a full round of RPC reads.
@@ -558,6 +583,7 @@ async function computeBestRoute(
   const caToken = c.caToken.toLowerCase() as Address;
   const client = publicClient(isMainnet);
   const allV2 = await v2Dexes(isMainnet);
+  const alternativePromise = alternativeCaBotQuote(client, isMainnet, tokenIn, tokenOut, amountIn);
 
   // Hop bases considered on every V2 route: wrapped-natives, USDT, CA, plus
   // any user-imported tokens. `bestOnV2Dex` filters out hops that don't have
@@ -772,7 +798,9 @@ async function computeBestRoute(
   const allowed = candidates.filter((q) => q.steps.every((s) => stepMatchesPref(s, pref)));
   if (allowed.length === 0) return null;
   allowed.sort((a, b) => (b.amountOut > a.amountOut ? 1 : b.amountOut < a.amountOut ? -1 : 0));
-  return allowed[0];
+  const selected = allowed[0]!;
+  const alternative = await alternativePromise;
+  return alternative ? { ...selected, quoteOnlyAlternatives: [alternative] } : selected;
 }
 
 /** Session DEX preference. Auto may use any approved on-chain-registered venue. */
@@ -845,8 +873,41 @@ async function bestLeg(
       expectedOut: r.amountOut, tokens: [tIn, tOut],
     });
   });
-  legs.sort((a, b) => (b.expectedOut > a.expectedOut ? 1 : b.expectedOut < a.expectedOut ? -1 : 0));
-  return legs[0] ?? null;
+  const c = getContracts(isMainnet);
+  const compared = legs.map((step) => {
+    const dex = allV2.find((d) => d.routerId === step.routerId);
+    const route: ComparedRoute = {
+      key: `registered:${step.routerId}:${step.path.join(">")}`,
+      venue: step.dex,
+      executionClass: "REGISTERED_EXECUTABLE",
+      routerId: step.routerId,
+      router: step.router,
+      factory: step.dex === "bdex-v3" ? c.bdexV3Factory.toLowerCase() : dex?.factory ?? ZERO,
+      pool: step.pool ?? ZERO,
+      wrappedNative: dex?.wnative ?? c.wbot.toLowerCase(),
+      caller: resolveFlowBridgeExecutionForNetwork(isMainnet).router,
+      path: step.path,
+      amountIn,
+      amountOut: step.expectedOut,
+      gasUnits: 0n,
+      gasPriceWei: 0n,
+      gasCostInOutput: null,
+      priceImpactBps: step.priceImpactBps ?? 0,
+      externalDirectionalFeeBps: 0,
+      feeMutable: false,
+      registered: true,
+      identityVerified: true,
+      wrapperVerified: true,
+      feeVerified: true,
+      liquidityVerified: true,
+      approvalVerified: true,
+      block: 0,
+      rejections: [],
+    };
+    return { step, route };
+  });
+  const best = selectBestExecutableRoute(compared.map((x) => x.route));
+  return compared.find((x) => x.route.key === best?.key)?.step ?? null;
 }
 
 /** Re-quote one leg of a multi-step route against the exact amount entering it. */

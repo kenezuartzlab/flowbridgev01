@@ -36,7 +36,7 @@ export const AUTOTRADE_PAIRS: readonly AutoTradePair[] = [
 
 /** Venues considered and why they are not used for AutoTrade V1 (evidence in docs). */
 export const EXCLUDED_VENUES = [
-  { venue: "CaSwap V2", reason: "Not registered in Router V4; pairs use caWBOT (not WBOT) and CA/caWBOT liquidity is negligible, so no CA/BOT or CA→WBOT→USDT atomic route." },
+  { venue: "CaSwap V2", reason: "Quote-only alternative: not registered in Router V4, uses caWBOT (not WBOT), and the verified mutable CA→caWBOT fee is 7,300 bps (73%), above the 500 bps safety cap. No atomic caWBOT/USDT route is eligible." },
   { venue: "BDEX V2", reason: "Not registered in Router V4; only WBOT/USDT exists and BDEX V3 0.3% quotes better." },
 ] as const;
 
