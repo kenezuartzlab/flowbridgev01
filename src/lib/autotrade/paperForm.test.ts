@@ -36,3 +36,32 @@ describe("owner paper screenshot parameters", () => {
     expect(() => buildPaperRequest({ ...screenshot, budgetUnit: "USDT_EQUIVALENT" }, { pair: "CA/BOT", price: "2", inverse: "0.5", usdtPerBot: "10", block: 1, fetchedAt: 1000, expiresAt: 16000 }, 1000)).toThrow("Max loss");
   });
 });
+describe("paper form defaults and inline errors", () => {
+  it("starts with simulation defaults and never a price", async () => {
+    const { initialPaperDraft } = await import("./paperForm");
+    const d = initialPaperDraft();
+    expect(d).toMatchObject({ slippagePercent: "0.5", expiresInMinutes: "60", maxGasNative: "0.01", stopPrice: "", maxBuyPrice: "", minSellPrice: "", maxLoss: "" });
+  });
+  it("accepts the follow-up screenshot (5 BOT, buy 2, sell 2.5) with defaults and blank max loss as the full budget", async () => {
+    const { initialPaperDraft, paperFieldErrors } = await import("./paperForm");
+    const d = { ...initialPaperDraft(), budget: "5", maxBuyPrice: "2", minSellPrice: "2.5" };
+    expect(paperFieldErrors(d, null, 1000)).toEqual({});
+    const body = buildPaperRequest(d, null, 1000);
+    expect(body).toMatchObject({ slippageBps: 50, expiresInMinutes: 60, maxGasNative: "0.01", maxLoss: "5" });
+    expect(body.stopPrice).toBeUndefined();
+  });
+  it("reports every blocking field at once, including zero stop and zero expiry", async () => {
+    const { paperFieldErrors } = await import("./paperForm");
+    const e = paperFieldErrors({ pair: "CA/BOT", budgetUnit: "QUOTE", budget: "5", maxBuyPrice: "2", minSellPrice: "2.5", stopPrice: "0", slippagePercent: "1", maxGasNative: "", maxLoss: "", expiresInMinutes: "0" }, null, 1000);
+    expect(Object.keys(e).sort()).toEqual(["expiresInMinutes", "maxGasNative", "stopPrice"]);
+  });
+  it("rejects max loss above the budget", async () => {
+    const { paperFieldErrors } = await import("./paperForm");
+    expect(paperFieldErrors({ ...screenshot, maxLoss: "6" }, null, 1000).maxLoss).toContain("cannot exceed");
+  });
+  it("needs no reference for a BOT budget but requires one for USDT entry", async () => {
+    const { paperFieldErrors } = await import("./paperForm");
+    expect(paperFieldErrors(screenshot, null, 1000).budget).toBeUndefined();
+    expect(paperFieldErrors({ ...screenshot, budgetUnit: "USDT_EQUIVALENT" }, null, 1000).budget).toContain("Refresh");
+  });
+});

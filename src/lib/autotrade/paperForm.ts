@@ -52,6 +52,61 @@ export function orderFromPaperRequest(body: PaperCreateBody, id: string, now: nu
     }, now);
   } catch (error) { throw new Error(error instanceof Error ? errors[error.message] ?? error.message : "Check your order parameters."); }
 }
+/** Simulation-only starting values. Prices are never defaulted. */
+export const PAPER_DEFAULTS = { slippagePercent: "0.5", expiresInMinutes: "60", maxGasNative: "0.01" } as const;
+export function initialPaperDraft(pair = "CA/BOT"): PaperDraft {
+  return { pair, budgetUnit: "QUOTE", budget: "", maxBuyPrice: "", minSellPrice: "", stopPrice: "", maxLoss: "", ...PAPER_DEFAULTS };
+}
+export type PaperField = "budget" | "maxBuyPrice" | "minSellPrice" | "stopPrice" | "slippagePercent" | "maxGasNative" | "maxLoss" | "expiresInMinutes";
+const positiveUnits = (value: string, decimals: number, label: string): bigint => {
+  const units = exactUnits(value, decimals, label);
+  if (units <= 0n) throw new Error(`${label}: must be greater than zero.`);
+  return units;
+};
+const message = (e: unknown) => (e instanceof Error ? e.message.replace(/^[^:]+: /, "") : "Check this value.");
+/** Every blocking problem, keyed by field, so the form can show them all inline. */
+export function paperFieldErrors(draft: PaperDraft, reference: PaperReference | null, now: number): Partial<Record<PaperField, string>> {
+  const out: Partial<Record<PaperField, string>> = {};
+  const pair = pairById(draft["pair"] ?? "");
+  if (!pair) return { budget: "Select a supported pair." };
+  const v = (k: PaperField) => (draft[k] ?? "").trim();
+  const usdt = draft["budgetUnit"] === "USDT_EQUIVALENT";
+  let budget: bigint | null = null;
+  if (!v("budget")) out.budget = "Enter a budget.";
+  else try {
+    if (usdt) {
+      positiveUnits(v("budget"), 6, "Budget");
+      if (pair.quote.symbol !== "BOT") out.budget = "USDT equivalent is only available for BOT budgets.";
+      else if (!reference?.usdtPerBot || reference.pair !== pair.id || reference.expiresAt <= now) out.budget = "Refresh the reference to convert USDT to BOT, or switch Budget entry to BOT.";
+      else budget = exactUnits(equivalentBudget(v("budget"), reference.usdtPerBot), 18, "Budget");
+    } else budget = positiveUnits(v("budget"), pair.quote.decimals, "Budget");
+  } catch (e) { out.budget = message(e); }
+  let buy: bigint | null = null, sell: bigint | null = null;
+  if (!v("maxBuyPrice")) out.maxBuyPrice = "Enter your buy target; no price is chosen for you.";
+  else try { buy = positiveUnits(v("maxBuyPrice"), 18, "Buy target"); } catch (e) { out.maxBuyPrice = message(e); }
+  if (!v("minSellPrice")) out.minSellPrice = "Enter your sell target; no price is chosen for you.";
+  else try { sell = positiveUnits(v("minSellPrice"), 18, "Sell target"); } catch (e) { out.minSellPrice = message(e); }
+  if (buy !== null && sell !== null && sell < buy) out.minSellPrice = "Sell target must be at or above the buy target.";
+  if (v("stopPrice")) {
+    try {
+      const stop = exactUnits(v("stopPrice"), 18, "Stop");
+      if (stop <= 0n) out.stopPrice = "Leave blank for no stop, or enter a positive price below the buy target.";
+      else if (buy !== null && stop >= buy) out.stopPrice = "Stop must be below the buy target.";
+    } catch (e) { out.stopPrice = message(e); }
+  }
+  try { percentToBps(v("slippagePercent")); } catch (e) { out.slippagePercent = v("slippagePercent") ? message(e) : "Enter slippage between 0.01% and 3% (0.5% suggested)."; }
+  if (!v("maxGasNative")) out.maxGasNative = "Enter a simulated gas limit per leg in BOT.";
+  else try { positiveUnits(v("maxGasNative"), 18, "Gas"); } catch (e) { out.maxGasNative = message(e); }
+  if (v("maxLoss")) {
+    try {
+      const loss = exactUnits(v("maxLoss"), pair.quote.decimals, "Max loss");
+      if (budget !== null && loss > budget) out.maxLoss = `Max loss cannot exceed the budget (${formatUnits(budget, pair.quote.decimals)} ${pair.quote.symbol}).`;
+    } catch (e) { out.maxLoss = message(e); }
+  }
+  const expiry = v("expiresInMinutes");
+  if (!/^\d+$/.test(expiry) || Number(expiry) < 1 || Number(expiry) > 10080) out.expiresInMinutes = "Enter whole minutes from 1 to 10,080 (60 suggested).";
+  return out;
+}
 export function buildPaperRequest(draft: PaperDraft, reference: PaperReference | null, now: number): PaperCreateBody {
   const pair = pairById(draft["pair"] ?? "");
   if (!pair) throw new Error("Select a supported pair.");
@@ -65,7 +120,9 @@ export function buildPaperRequest(draft: PaperDraft, reference: PaperReference |
   const body = paperCreateBody.safeParse({ action: "create", pair: pair.id, budget: draft["budget"] ?? "", budgetUnit,
     ...(reviewedBudget ? { reviewedBudget } : {}), maxBuyPrice: draft["maxBuyPrice"] ?? "", minSellPrice: draft["minSellPrice"] ?? "",
     ...(draft["stopPrice"]?.trim() ? { stopPrice: draft["stopPrice"] } : {}),
-    slippageBps: percentToBps(draft["slippagePercent"] ?? ""), maxGasNative: draft["maxGasNative"] ?? "", maxLoss: draft["maxLoss"] ?? "",
+    slippageBps: percentToBps(draft["slippagePercent"] ?? ""), maxGasNative: draft["maxGasNative"] ?? "",
+    // Blank max loss means the worst case is the whole budget, stated on review.
+    maxLoss: draft["maxLoss"]?.trim() ? draft["maxLoss"] : (reviewedBudget ?? draft["budget"] ?? ""),
     expiresInMinutes: Number(draft["expiresInMinutes"]), repeat: false,
   });
   if (!body.success) throw new Error(`${body.error.issues[0]?.path.join(" ") ?? "Order"}: ${body.error.issues[0]?.message ?? "check the value"}`);

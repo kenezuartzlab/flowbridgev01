@@ -5,6 +5,8 @@ import { CANARY_APPROVAL } from "@/lib/autotrade/canaryPreparation";
 import { callAutoTrade as call } from "@/lib/autotrade/clientRequest";
 import { AutoTradePaperForm } from "./AutoTradePaperForm";
 import { percentToBps } from "@/lib/autotrade/paperForm";
+import { opsPermissions } from "@/lib/autotrade/paperPermissions";
+const SUPER_ONLY = "Super admin only";
 const input = "w-full rounded-lg border border-hairline bg-card px-2 py-1.5 text-sm";
 
 export function AutoTradeTab({ wallet }: { wallet: string }) {
@@ -23,6 +25,7 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
   }, [preparation]);
   const run = async (b: unknown) => { setErr(null); try { await call(wallet, b); await load(); } catch (e: any) { setErr(e.message); } };
   if (!s) return <div className="space-y-2"><p role={err ? "alert" : "status"} className="text-sm text-muted">{err ?? "Loading AutoTrade…"}</p>{err && <Button type="button" variant="outline" onClick={() => { setErr(null); void load().catch(e => setErr(e.message)); }}>Retry AutoTrade</Button>}</div>;
+  const perms = s.viewer?.permissions ?? opsPermissions(s.viewer?.role);
   return (
     <div className="space-y-4">
       <p className="rounded-lg border border-hairline bg-card p-3 text-sm">Paper mode only. Live trading: <b>{s.live ? "ON" : "OFF"}</b> · Public: <b>{s.public ? "ON" : "OFF"}</b>. No wallet or key is used.</p>
@@ -31,7 +34,7 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
         <h3 className="font-semibold">Operational readiness · live OFF</h3>
         <ul className="space-y-1">{s.readiness.items.map((item: any) => <li key={item.key} className="flex flex-wrap justify-between gap-2"><span>{item.label}</span><span className="text-xs text-muted">{item.status.replaceAll("_", " ")}</span></li>)}</ul>
         <details><summary className="cursor-pointer text-xs">Bound-wallet acceptance</summary><ol className="list-decimal space-y-1 pl-5 text-xs text-muted">{s.readiness.acceptance.map((step: string) => <li key={step}>{step}</li>)}</ol></details>
-        <Button variant="outline" onClick={async () => { setErr(null); try { const result = await call(wallet, { action: "validate_infrastructure" }); setInfrastructure(result.infrastructure); } catch (e: any) { setErr(e.message); } }}>Check configured infrastructure</Button>
+        <Button variant="outline" disabled={!perms.infrastructure} title={perms.infrastructure ? undefined : SUPER_ONLY} onClick={async () => { setErr(null); try { const result = await call(wallet, { action: "validate_infrastructure" }); setInfrastructure(result.infrastructure); } catch (e: any) { setErr(e.message); } }}>Check configured infrastructure</Button>
         {infrastructure && <p className="text-xs text-muted">{infrastructure.status.replaceAll("_", " ")} · no signing requested</p>}
       </section>}
       <section className="space-y-2 border-b border-hairline pb-3 text-sm">
@@ -43,7 +46,7 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
             return <label className="text-xs" key={key}>{label}<input className={input} inputMode="decimal" value={canary[key as keyof typeof canary]} onChange={e => { setPreparation(null); setCanary({ ...canary, [key]: e.target.value }); }} /></label>;
           })}
         </div>
-        <Button type="button" variant="outline" onClick={async () => { setPreparation(null); setErr(null); try { const j = await call(wallet, { action: "prepare_canary", maxBuyPrice: canary.maxBuyPrice, minSellPrice: canary.minSellPrice, slippageBps: percentToBps(canary.slippagePercent), expiresInMinutes: Number(canary.expiresInMinutes) }); setPreparation(j.preparation); } catch (e: any) { setErr(e.message); } }}>Prepare review ticket</Button>
+        <Button type="button" variant="outline" disabled={!perms.canaryReview} title={perms.canaryReview ? undefined : SUPER_ONLY} onClick={async () => { setPreparation(null); setErr(null); try { const j = await call(wallet, { action: "prepare_canary", maxBuyPrice: canary.maxBuyPrice, minSellPrice: canary.minSellPrice, slippageBps: percentToBps(canary.slippagePercent), expiresInMinutes: Number(canary.expiresInMinutes) }); setPreparation(j.preparation); } catch (e: any) { setErr(e.message); } }}>Prepare review ticket</Button>
         {preparation && <div className="text-xs text-muted space-y-1">
           <p>Indicative cap: {preparation.indicativeBot} BOT · block {preparation.block} · {new Date(preparation.fetchedAt).toLocaleTimeString()}</p>
           <p>Proposed gas cap: {preparation.gasReserveBot} BOT / {preparation.gasReserveUsdt} USDT · approval pending</p>
@@ -60,7 +63,7 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
           <span>{s.worker?.lease?.heartbeat_at ? `heartbeat ${new Date(s.worker.lease.heartbeat_at).toLocaleTimeString()} · block ${s.worker.lease.last_block ?? "—"}` : "not running yet"}</span>
           <span className="text-xs text-muted">delay p50 {s.worker?.p50 ?? "—"} ms · p95 {s.worker?.p95 ?? "—"} ms · {s.worker?.samples ?? 0} samples · {s.worker?.lastConsensus ?? ""}</span></div>
         <div className="flex items-center gap-2">Emergency pause: <b>{s.control?.emergency_paused ? "ON" : "OFF"}</b>
-          <Button type="button" variant="outline" onClick={() => run({ action: "emergency", paused: !s.control?.emergency_paused })}>{s.control?.emergency_paused ? "Resume" : "Pause all"}</Button></div>
+          <Button type="button" variant="outline" disabled={!perms.emergency} title={perms.emergency ? undefined : SUPER_ONLY} onClick={() => run({ action: "emergency", paused: !s.control?.emergency_paused })}>{s.control?.emergency_paused ? "Resume" : "Pause all"}</Button></div>
       </div>
       <div className="rounded-lg border border-hairline bg-card p-3 text-sm space-y-1">
         <b>Router V4 venues (live read)</b>
@@ -70,12 +73,14 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
         </> : <p className="text-xs text-muted">Unavailable</p>}
         {s.candidates?.map((c: any) => <div key={c.key} className="text-xs border-t border-hairline pt-1">
           <b>{c.name}</b> · {c.recommendation === "DO_NOT_REGISTER" ? "not recommended" : "optional"} — {c.evidence}
-          <Button type="button" variant="outline" className="ml-2" onClick={async () => { try { const j = await call(wallet, { action: "registry_preview", key: c.key }); setPreview(j.preview); } catch (e: any) { setErr(e.message); } }}>Preview owner transaction</Button>
+          <Button type="button" variant="outline" className="ml-2" disabled={!perms.registryPreview} title={perms.registryPreview ? undefined : SUPER_ONLY} onClick={async () => { try { const j = await call(wallet, { action: "registry_preview", key: c.key }); setPreview(j.preview); } catch (e: any) { setErr(e.message); } }}>Preview owner transaction</Button>
         </div>)}
         {preview && <pre className="whitespace-pre-wrap break-all text-[11px] text-muted">{JSON.stringify(preview, null, 1)}</pre>}
         <p className="text-xs text-muted">Registry changes are disabled here; previews are for owner review only.</p>
       </div>
-      <AutoTradePaperForm key={wallet} wallet={wallet} pairs={s.pairs} role={s.viewer?.role} onCreated={load} />
+      <AutoTradePaperForm key={wallet} wallet={wallet} pairs={s.pairs} role={s.viewer?.role} permissions={perms} onCreated={load} />
+      {!perms.emergency && <p className="text-xs text-muted">Emergency pause, canary review, infrastructure checks and registry previews are disabled for your role (super admin only).</p>}
+      {!perms.controlAllPaper && <p className="text-xs text-muted">Showing only paper orders created by your account.</p>}
       <div className="space-y-2">
         {s.orders.map((o: any) => (
           <div key={o.id} className="rounded-lg border border-hairline bg-card p-3 text-sm">

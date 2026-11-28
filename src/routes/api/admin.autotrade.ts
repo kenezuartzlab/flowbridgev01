@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { paperCreateBody, orderFromPaperRequest, equivalentBudget } from "@/lib/autotrade/paperForm";
+import { authorizeAutoTradeAction, opsPermissions, paperQuotaDecision } from "@/lib/autotrade/paperPermissions";
 const ctl = z.object({ action: z.enum(["pause", "resume", "cancel", "tick"]), id: z.string().uuid() });
 
 export const Route = createFileRoute("/api/admin/autotrade")({
@@ -11,7 +12,11 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       const gate = await requireAdmin(request); if (!gate.ok) return gate.response;
       const { db } = await import("@/lib/autotrade/store.server");
       const cfg = await import("@/lib/autotrade/config");
-      const { data, error: ordersError } = await (await db()).from("autotrade_orders").select("id,pair,mode,state,order_json,last_decision,created_by_email,updated_at").order("created_at", { ascending: false }).limit(50);
+      const permissions = opsPermissions(gate.admin.role);
+      // Operators see only their own paper orders; super admins see every order.
+      let ordersQuery = (await db()).from("autotrade_orders").select("id,pair,mode,state,order_json,last_decision,created_by_email,updated_at");
+      if (!permissions.controlAllPaper) ordersQuery = ordersQuery.eq("created_by_email", gate.admin.email);
+      const { data, error: ordersError } = await ordersQuery.order("created_at", { ascending: false }).limit(50);
       if (ordersError) return jsonResponse({ error: "Paper orders could not be loaded. Retry; do not submit a replacement order." }, 503);
       const R = await import("@/lib/autotrade/registry");
       const { createPublicClient, http, parseAbi } = await import("viem");
@@ -34,14 +39,15 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       const { infrastructurePresence } = await import("@/lib/autotrade/infrastructure.server");
       const { count: intentCount, error: intentError } = await dd.from("autotrade_managed_intents").select("effect_key", { count: "exact", head: true });
       const readiness = operationalReadiness({ ...infrastructurePresence(), intents: intentError ? null : intentCount ?? null, heartbeatAt: lease?.heartbeat_at ?? null, now: Date.now() });
-      return jsonResponse({ viewer: { role: gate.admin.role }, readiness, registry, candidates: R.VENUE_CANDIDATES, registryWrites: R.REGISTRY_WRITES_ENABLED, worker, control, live: cfg.AUTOTRADE_LIVE_ENABLED, public: cfg.AUTOTRADE_PUBLIC_ENABLED, pairs: cfg.AUTOTRADE_PAIRS.map((p) => p.id), excluded: cfg.EXCLUDED_VENUES, orders: data ?? [] });
+      return jsonResponse({ viewer: { role: gate.admin.role, permissions }, readiness, registry, candidates: R.VENUE_CANDIDATES, registryWrites: R.REGISTRY_WRITES_ENABLED, worker, control, live: cfg.AUTOTRADE_LIVE_ENABLED, public: cfg.AUTOTRADE_PUBLIC_ENABLED, pairs: cfg.AUTOTRADE_PAIRS.map((p) => p.id), excluded: cfg.EXCLUDED_VENUES, orders: data ?? [] });
     },
     POST: async ({ request }) => {
       const { requireAdmin } = await import("@/lib/admin/adminGate.server");
       const { jsonResponse } = await import("@/lib/api-auth.server");
       const gate = await requireAdmin(request); if (!gate.ok) return gate.response;
-      if (gate.admin.role !== "super_admin") return jsonResponse({ error: "Super admin only." }, 403);
       const body = await request.json().catch(() => ({}));
+      const allowed = authorizeAutoTradeAction(gate.admin.role, body?.action);
+      if (!allowed.ok) return jsonResponse({ error: allowed.error }, allowed.status);
       try {
         const E = await import("@/lib/autotrade/engine");
         const C = await import("@/lib/autotrade/config");
@@ -79,6 +85,11 @@ export const Route = createFileRoute("/api/admin/autotrade")({
             return jsonResponse({ ok: true, id: row.id, replayed: true });
           };
           if (b.requestId) { const existing = await previous(); if (existing) return existing; }
+          const { readPaperQuota } = await import("@/lib/autotrade/paperQuota.server");
+          const quota = await readPaperQuota(gate.admin.email, Date.now());
+          if (!quota) return jsonResponse({ error: "Could not check your paper order limit. Nothing was saved; retry shortly." }, 503);
+          const quotaDecision = paperQuotaDecision(quota.createdLastHour, quota.active);
+          if (!quotaDecision.ok) return jsonResponse({ error: quotaDecision.error }, 429);
           let budget = b.budget;
           if (b.budgetUnit === "USDT_EQUIVALENT") {
             if (b.pair !== "CA/BOT" || !b.reviewedBudget) return jsonResponse({ error: "Review a fresh USDT-to-BOT conversion before saving." }, 400);
@@ -112,8 +123,9 @@ export const Route = createFileRoute("/api/admin/autotrade")({
           return jsonResponse({ preview: R.registerPreview(k, "0x524Db06954de917025180057BCBeB36eC96A98c5") });
         }
         const c = ctl.parse(body);
-        const { data: row } = await d.from("autotrade_orders").select("order_json").eq("id", c.id).maybeSingle();
+        const { data: row } = await d.from("autotrade_orders").select("order_json,created_by_email,mode").eq("id", c.id).maybeSingle();
         if (!row) return jsonResponse({ error: "Not found" }, 404);
+        if (allowed.ownOrderOnly && (row.created_by_email !== gate.admin.email || row.mode !== "paper")) return jsonResponse({ error: "Not found" }, 404);
         const prev = S.deserialize(row.order_json);
         if (c.action === "tick") {
           if (prev.spec.mode !== "paper") return jsonResponse({ error: "LIVE_DISABLED" }, 403);

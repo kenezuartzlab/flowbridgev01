@@ -28,12 +28,13 @@ describe("AutoTrade HTTP authorization", () => {
     expect(mocks.worker).not.toHaveBeenCalled();
   });
 
-  it("allows operators to inspect but forbids every operator mutation", async () => {
+  it("forbids operators every policy, canary, infrastructure and registry action", async () => {
     mocks.admin.mockResolvedValue({ ok: true, admin: { role: "internal_operator", email: "operator@example.invalid" } });
-    for (const action of ["create", "tick", "pause", "resume", "cancel", "emergency", "registry_preview", "prepare_canary", "validate_infrastructure"]) {
+    for (const action of ["emergency", "registry_preview", "prepare_canary", "validate_infrastructure", "set_live", "registry_write", undefined]) {
       const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action }) }) });
       expect(response.status).toBe(403);
     }
+    expect(mocks.preparation).not.toHaveBeenCalled(); expect(mocks.infrastructure).not.toHaveBeenCalled();
   });
 
   it("rejects an unauthenticated scheduler request before the worker", async () => {

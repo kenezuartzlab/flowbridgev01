@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { deserialize, serialize } from "./store.server";
-const mocks = vi.hoisted(() => ({ gate: vi.fn(), from: vi.fn(), reference: vi.fn() }));
+const mocks = vi.hoisted(() => ({ gate: vi.fn(), from: vi.fn(), reference: vi.fn(), quota: vi.fn() }));
+vi.mock("@/lib/autotrade/paperQuota.server", () => ({ readPaperQuota: mocks.quota }));
 vi.mock("@/lib/admin/adminGate.server", () => ({ requireAdmin: mocks.gate }));
 vi.mock("@/lib/autotrade/store.server", async importOriginal => ({ ...await importOriginal<typeof import("./store.server")>(), db: async () => ({ from: mocks.from }) }));
 vi.mock("@/lib/autotrade/reference.server", () => ({ readPaperReference: mocks.reference }));
@@ -16,6 +17,7 @@ const send = (body: unknown = screenshot) => handler({ request: new Request("htt
 beforeEach(() => {
   rows.clear(); storageFails = false; inserts = 0; raceConflict = false; vi.clearAllMocks();
   mocks.gate.mockResolvedValue({ ok: true, admin: { role: "super_admin", email: "owner@example.invalid", userId: "actor" } });
+  mocks.quota.mockResolvedValue({ createdLastHour: 0, active: 0 });
   mocks.from.mockImplementation((table: string) => {
     let id = "";
     const query = { select: () => query, eq: (_key: string, value: string) => { id = value; return query; },
@@ -58,8 +60,29 @@ describe("paper creation handler with isolated mock persistence (not owner accep
   it("rejects failed authentication before touching persistence", async () => {
     mocks.gate.mockResolvedValue({ ok: false, response: new Response("Unauthorized", { status: 401 }) }); expect((await send()).status).toBe(401); expect(mocks.from).not.toHaveBeenCalled();
   });
-  it("rejects operators without bypassing the super-admin writer", async () => {
-    mocks.gate.mockResolvedValue({ ok: true, admin: { role: "internal_operator" } }); expect((await send()).status).toBe(403); expect(mocks.from).not.toHaveBeenCalled();
+  it("lets a verified operator save a paper-only order attributed to that operator", async () => {
+    mocks.gate.mockResolvedValue({ ok: true, admin: { role: "internal_operator", email: "operator@example.invalid", userId: "op" } });
+    expect((await send()).status).toBe(200);
+    const row = rows.get(screenshot.requestId); if (!row) throw new Error("Missing row");
+    expect(row.mode).toBe("paper"); expect(row.created_by_email).toBe("operator@example.invalid"); expect(deserialize(row.order_json).spec.mode).toBe("paper");
+  });
+  it("ignores a client attempt to request live mode", async () => {
+    mocks.gate.mockResolvedValue({ ok: true, admin: { role: "internal_operator", email: "operator@example.invalid", userId: "op" } });
+    expect((await send({ ...screenshot, mode: "live" })).status).toBe(200);
+    const row = rows.get(screenshot.requestId); if (!row) throw new Error("Missing row");
+    expect(row.mode).toBe("paper"); expect(deserialize(row.order_json).spec.mode).toBe("paper");
+  });
+  it("refuses an unknown role before persistence", async () => {
+    mocks.gate.mockResolvedValue({ ok: true, admin: { role: "viewer", email: "x@example.invalid" } }); expect((await send()).status).toBe(403); expect(mocks.from).not.toHaveBeenCalled();
+  });
+  it("enforces the hourly per-account limit and saves nothing", async () => {
+    mocks.quota.mockResolvedValue({ createdLastHour: 10, active: 0 }); expect((await send()).status).toBe(429); expect(inserts).toBe(0);
+  });
+  it("enforces the active paper order limit and saves nothing", async () => {
+    mocks.quota.mockResolvedValue({ createdLastHour: 0, active: 5 }); expect((await send()).status).toBe(429); expect(inserts).toBe(0);
+  });
+  it("fails closed when the limit cannot be read", async () => {
+    mocks.quota.mockResolvedValue(null); expect((await send()).status).toBe(503); expect(inserts).toBe(0);
   });
   it("rechecks USDT equivalent against server evidence and refuses a changed conversion", async () => {
     mocks.reference.mockResolvedValue({ usdtPerBot: "10", expiresAt: Date.now() + 15000 });
@@ -70,5 +93,14 @@ describe("paper creation handler with isolated mock persistence (not owner accep
     expect((await send({ ...screenshot, budgetUnit: "USDT_EQUIVALENT", reviewedBudget: "0.5", maxLoss: "0.5" })).status).toBe(200);
     const row = rows.get(screenshot.requestId); if (!row) throw new Error("Missing row");
     expect(deserialize(row.order_json).spec.budgetQuote).toBe(5n * 10n ** 17n); expect(row.mode).toBe("paper");
+  });
+});describe("per-account paper order isolation", () => {
+  it("hides another account's order from an operator control request", async () => {
+    await send();
+    mocks.gate.mockResolvedValue({ ok: true, admin: { role: "internal_operator", email: "operator@example.invalid", userId: "op" } });
+    const response = await send({ action: "cancel", id: screenshot.requestId });
+    expect(response.status).toBe(404);
+    const row = rows.get(screenshot.requestId); if (!row) throw new Error("Missing row");
+    expect(deserialize(row.order_json).state).toBe("ARMED");
   });
 });

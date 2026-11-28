@@ -26,7 +26,8 @@ export async function callAutoTrade(wallet: string, body?: unknown, timeoutMs = 
     const json = await response.json().catch(() => null);
     if (!response.ok) {
       if (response.status === 401) throw new AutoTradeRequestError("Your session expired. Sign in again and reconnect your bound admin wallet.", 401);
-      if (response.status === 403) throw new AutoTradeRequestError(`${json?.error ?? "Access denied."} Paper order creation requires a super-admin session and that account’s connected bound wallet.`, 403);
+      if (response.status === 403) throw new AutoTradeRequestError(json?.error ?? "Access denied. Sign in with an approved Ops account and connect the wallet bound to it.", 403);
+      if (response.status === 429) throw new AutoTradeRequestError(json?.error ?? "Paper order limit reached. Nothing was saved; try again later.", 429);
       throw new AutoTradeRequestError(json?.error ?? `AutoTrade request failed (${response.status}). Refresh orders before retrying.`, response.status);
     }
     if (!json) throw new Error("Unexpected response. Refresh orders before retrying the unchanged review.");
