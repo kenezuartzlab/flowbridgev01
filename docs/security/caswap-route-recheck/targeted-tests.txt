@@ -1,0 +1,16 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/dev-server[39m
+
+ [32m✓[39m src/lib/autotrade/v11.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m src/lib/autotrade/v12.test.ts [2m([22m[2m35 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m scripts/autotrade/caswap-evidence.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m scripts/autotrade/caswap-route-recheck.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m scripts/autotrade/caswap-audit-policy.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/lib/autotrade/engine.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m122 passed[39m[22m[90m (122)[39m
+[2m   Start at [22m 01:45:39
+[2m   Duration [22m 3.23s[2m (transform 576ms, setup 0ms, import 3.61s, tests 236ms, environment 1ms)[22m
+

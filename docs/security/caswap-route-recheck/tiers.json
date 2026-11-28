@@ -1,0 +1,224 @@
+{
+  "pin": {
+    "number": "31793279",
+    "hash": "0xee9bbb333335be54df5b523e9bfbdfd84efccf2b5a369b07ff6227b79492f4b0",
+    "secondaryHash": "0xee9bbb333335be54df5b523e9bfbdfd84efccf2b5a369b07ff6227b79492f4b0",
+    "timestamp": "1795829408",
+    "time": "2026-11-28T01:30:08.000Z",
+    "chainId": 677,
+    "secondaryChainId": "RPC Request failed.",
+    "independentOperators": false
+  },
+  "kind": "MAINNET_READ_ONLY",
+  "mainnetWrites": 0,
+  "signatures": 0,
+  "historicalWrapper": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+  "historicalV4FeeExempt": false,
+  "pools": [
+    {
+      "fee": 3000,
+      "pool": "0x04A3511051a45543CFb5175f2fA6774a54BF0029",
+      "token0": "0x546307af427902A75771434Df831d88219784E19",
+      "token1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+      "feeRead": 3000,
+      "liquidity": "0",
+      "CA": "251584208611696727",
+      "WBOT": "1"
+    },
+    {
+      "fee": 10000,
+      "pool": "0x822dc160CC971510Cf87999004a28b4A7aEFD082",
+      "token0": "0x546307af427902A75771434Df831d88219784E19",
+      "token1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+      "feeRead": 10000,
+      "liquidity": "1542194232164151834286",
+      "CA": "592488258091620538193",
+      "WBOT": "262908864138937528261"
+    }
+  ],
+  "quotes": [
+    {
+      "fee": 3000,
+      "side": "buy",
+      "totalBudget": "100000000000000000",
+      "swapAmount": "99990000999900009",
+      "currentV4Bps": 1,
+      "quoted": "100893520473441144",
+      "normalizedOut": "0.100893520473441144"
+    },
+    {
+      "fee": 3000,
+      "side": "buy",
+      "totalBudget": "1000000000000000000",
+      "swapAmount": "999900009999000099",
+      "currentV4Bps": 1,
+      "quoted": "251129455985861634",
+      "normalizedOut": "0.251129455985861634"
+    },
+    {
+      "fee": 3000,
+      "side": "buy",
+      "totalBudget": "5000000000000000000",
+      "swapAmount": "4999500049995000499",
+      "currentV4Bps": 1,
+      "quoted": "251129455985861634",
+      "normalizedOut": "0.251129455985861634"
+    },
+    {
+      "fee": 3000,
+      "side": "sell",
+      "input": "1",
+      "UNKNOWN": "The contract function \"quoteExactInputSingle\" reverted with the following reason:\nSPL"
+    },
+    {
+      "fee": 3000,
+      "side": "sell",
+      "input": "10",
+      "UNKNOWN": "The contract function \"quoteExactInputSingle\" reverted with the following reason:\nSPL"
+    },
+    {
+      "fee": 3000,
+      "side": "sell",
+      "input": "100",
+      "UNKNOWN": "The contract function \"quoteExactInputSingle\" reverted with the following reason:\nSPL"
+    },
+    {
+      "fee": 10000,
+      "side": "buy",
+      "totalBudget": "100000000000000000",
+      "swapAmount": "99990000999900009",
+      "currentV4Bps": 1,
+      "quoted": "237332159507947407",
+      "normalizedOut": "0.237332159507947407"
+    },
+    {
+      "fee": 10000,
+      "side": "buy",
+      "totalBudget": "1000000000000000000",
+      "swapAmount": "999900009999000099",
+      "currentV4Bps": 1,
+      "quoted": "2371200674812881473",
+      "normalizedOut": "2.371200674812881473"
+    },
+    {
+      "fee": 10000,
+      "side": "buy",
+      "totalBudget": "5000000000000000000",
+      "swapAmount": "4999500049995000499",
+      "currentV4Bps": 1,
+      "quoted": "11809100220759753694",
+      "normalizedOut": "11.809100220759753694"
+    },
+    {
+      "fee": 10000,
+      "side": "sell",
+      "totalBudget": "1000000000000000000",
+      "swapAmount": "999900009999000099",
+      "currentV4Bps": 1,
+      "quoted": "412670849647030183",
+      "normalizedOut": "0.412670849647030183"
+    },
+    {
+      "fee": 10000,
+      "side": "sell",
+      "totalBudget": "10000000000000000000",
+      "swapAmount": "9999000099990000999",
+      "currentV4Bps": 1,
+      "quoted": "4111312018550397905",
+      "normalizedOut": "4.111312018550397905"
+    },
+    {
+      "fee": 10000,
+      "side": "sell",
+      "totalBudget": "100000000000000000000",
+      "swapAmount": "99990000999900009999",
+      "currentV4Bps": 1,
+      "quoted": "39597253768152191404",
+      "normalizedOut": "39.597253768152191404"
+    }
+  ],
+  "activeV2Calls": [
+    {
+      "id": "1",
+      "router": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "path": [
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        "0x546307af427902A75771434Df831d88219784E19"
+      ],
+      "input": "1",
+      "quote": {
+        "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+      }
+    },
+    {
+      "id": "1",
+      "router": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "path": [
+        "0x546307af427902A75771434Df831d88219784E19",
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30"
+      ],
+      "input": "1",
+      "quote": {
+        "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+      }
+    },
+    {
+      "id": "3",
+      "router": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "path": [
+        "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+        "0x546307af427902A75771434Df831d88219784E19"
+      ],
+      "input": "1",
+      "quote": [
+        "1000000000000000000",
+        "84036974"
+      ]
+    },
+    {
+      "id": "3",
+      "router": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "path": [
+        "0x546307af427902A75771434Df831d88219784E19",
+        "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6"
+      ],
+      "input": "1",
+      "quote": [
+        "1000000000000000000",
+        "16566580110468"
+      ]
+    },
+    {
+      "id": "4",
+      "router": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "path": [
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        "0x546307af427902A75771434Df831d88219784E19"
+      ],
+      "input": "1",
+      "quote": {
+        "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+      }
+    },
+    {
+      "id": "4",
+      "router": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "path": [
+        "0x546307af427902A75771434Df831d88219784E19",
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30"
+      ],
+      "input": "1",
+      "quote": {
+        "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+      }
+    }
+  ]
+}

@@ -1,0 +1,432 @@
+{
+  "kind": "MAINNET_READ_ONLY",
+  "pin": {
+    "number": "31793279",
+    "hash": "0xee9bbb333335be54df5b523e9bfbdfd84efccf2b5a369b07ff6227b79492f4b0",
+    "secondaryHash": "0xee9bbb333335be54df5b523e9bfbdfd84efccf2b5a369b07ff6227b79492f4b0",
+    "timestamp": "1795829408",
+    "time": "2026-11-28T01:30:08.000Z",
+    "chainId": 677,
+    "secondaryChainId": "RPC Request failed.",
+    "independentOperators": false
+  },
+  "mainnetWrites": 0,
+  "signatures": 0,
+  "verifiedSources": [
+    {
+      "address": "0x5508Ec3006e6d82ec3A3219f9C041FFcD5791Cd3",
+      "name": "CASwapRouter",
+      "verified": true,
+      "sourceRuntimeMatches": true,
+      "liveKeccak": "0xe2b92b08282833ecfef0484e3f16ca4327ddad243af33ab4ab98852475947c25",
+      "registrationRuntimeMatches": true,
+      "methods": [
+        "WDO",
+        "_isFeeWhitelistedUser",
+        "_isLiquidityWhitelistedUser",
+        "addLiquidity",
+        "addLiquidityETH",
+        "factory",
+        "getAmountIn",
+        "getAmountOut",
+        "getAmountsIn",
+        "getAmountsOut",
+        "owner",
+        "pairCodeHash",
+        "quote",
+        "removeLiquidity",
+        "removeLiquidityETH",
+        "removeLiquidityETHSupportingFeeOnTransferTokens",
+        "removeLiquidityETHWithPermit",
+        "removeLiquidityETHWithPermitSupportingFeeOnTransferTokens",
+        "removeLiquidityWithPermit",
+        "renounceOwnership",
+        "routerWhiteListContract",
+        "swapETHForExactTokens",
+        "swapExactETHForTokens",
+        "swapExactETHForTokensSupportingFeeOnTransferTokens",
+        "swapExactTokensForETH",
+        "swapExactTokensForETHSupportingFeeOnTransferTokens",
+        "swapExactTokensForTokens",
+        "swapExactTokensForTokensSupportingFeeOnTransferTokens",
+        "swapTokensForExactETH",
+        "swapTokensForExactTokens",
+        "transferOwnership"
+      ]
+    },
+    {
+      "address": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+      "name": "UniversalRouter",
+      "verified": true,
+      "sourceRuntimeMatches": true,
+      "liveKeccak": "0xa85bb5dbd8175be6672987cfa8f6a8b234871ec7704dd5bdc44c416b6fee8a57",
+      "registrationRuntimeMatches": true,
+      "methods": [
+        "SPOKE_POOL",
+        "V3_POSITION_MANAGER",
+        "V4_POSITION_MANAGER",
+        "eip712Domain",
+        "execute",
+        "execute",
+        "executeSigned",
+        "msgSender",
+        "noncesUsed",
+        "poolManager",
+        "signedRouteContext",
+        "uniswapV3SwapCallback",
+        "unlockCallback"
+      ],
+      "constructor": {
+        "weth9": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        "v2Factory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+        "v3Factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419"
+      },
+      "v2Compatibility": "NO_STANDARD_V2_SELECTORS"
+    },
+    {
+      "address": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+      "name": "UniswapV2Router02",
+      "verified": true,
+      "sourceRuntimeMatches": true,
+      "liveKeccak": "0xc94eea7c8625b1dabb7a974c27d65f8108d7a13f7e38fb5edef6242248f617cd",
+      "registrationRuntimeMatches": true,
+      "methods": [
+        "WETH",
+        "addLiquidity",
+        "addLiquidityETH",
+        "factory",
+        "getAmountIn",
+        "getAmountOut",
+        "getAmountsIn",
+        "getAmountsOut",
+        "quote",
+        "removeLiquidity",
+        "removeLiquidityETH",
+        "removeLiquidityETHSupportingFeeOnTransferTokens",
+        "removeLiquidityETHWithPermit",
+        "removeLiquidityETHWithPermitSupportingFeeOnTransferTokens",
+        "removeLiquidityWithPermit",
+        "swapETHForExactTokens",
+        "swapExactETHForTokens",
+        "swapExactETHForTokensSupportingFeeOnTransferTokens",
+        "swapExactTokensForETH",
+        "swapExactTokensForETHSupportingFeeOnTransferTokens",
+        "swapExactTokensForTokens",
+        "swapExactTokensForTokensSupportingFeeOnTransferTokens",
+        "swapTokensForExactETH",
+        "swapTokensForExactTokens"
+      ]
+    },
+    {
+      "address": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+      "name": "CASwapRouter",
+      "verified": true,
+      "sourceRuntimeMatches": true,
+      "liveKeccak": "0x9f2f6cc317d279510da679cdbd63493e05f0d8a34d7afc6c75889f3bbcfbc8bc",
+      "registrationRuntimeMatches": true,
+      "methods": [
+        "WBOT",
+        "addLiquidity",
+        "addLiquidityETH",
+        "factory",
+        "getAmountOut",
+        "getAmountOutNoFee",
+        "getAmountsOut",
+        "getAmountsOutForUser",
+        "getAmountsOutNoFee",
+        "isFeeExempt",
+        "isLpAllowed",
+        "quote",
+        "removeLiquidity",
+        "removeLiquidityETH",
+        "removeLiquidityETHWithPermit",
+        "removeLiquidityWithPermit",
+        "swapExactETHForTokens",
+        "swapExactTokensForETH",
+        "swapExactTokensForTokens"
+      ]
+    },
+    {
+      "address": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "name": "CASwapRouter",
+      "verified": true,
+      "sourceRuntimeMatches": true,
+      "liveKeccak": "0xbd9df451990d5cea43b51429df907bb561c8df3d091230e754365eb93b0b3f25",
+      "registrationRuntimeMatches": false,
+      "methods": [
+        "WBOT",
+        "addLiquidity",
+        "addLiquidityETH",
+        "factory",
+        "getAmountOut",
+        "getAmountOutNoFee",
+        "getAmountsOut",
+        "getAmountsOutForUser",
+        "getAmountsOutNoFee",
+        "isFeeExempt",
+        "isLpAllowed",
+        "quote",
+        "removeLiquidity",
+        "removeLiquidityETH",
+        "removeLiquidityETHWithPermit",
+        "removeLiquidityWithPermit",
+        "swapExactETHForTokens",
+        "swapExactTokensForETH",
+        "swapExactTokensForTokens"
+      ]
+    },
+    {
+      "address": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+      "name": "CASwapFactory",
+      "verified": true,
+      "sourceRuntimeMatches": true,
+      "liveKeccak": "0x09e0d549714bf56fea4099195618dde740daa315e38098c6d9b12ad38db65aa1",
+      "registrationRuntimeMatches": false,
+      "methods": [
+        "MAX_BATCH_SIZE_LIMIT",
+        "MAX_FEE_BPS",
+        "MAX_SWAP_LIMIT_CAP",
+        "SWAP_LIMIT_PERIOD",
+        "acceptFeeToSetter",
+        "allPairs",
+        "allPairsLength",
+        "blacklist",
+        "blacklistOn",
+        "buckets",
+        "caps",
+        "createPair",
+        "feeExempt",
+        "feeExemptOn",
+        "feeToSetter",
+        "getPair",
+        "isBlacklisted",
+        "isFeeExempt",
+        "isLpAllowed",
+        "isPair",
+        "isSwapLimitExempt",
+        "lpAllowlist",
+        "lpAllowlistOn",
+        "pairFeeBps",
+        "pairFeeReceivers",
+        "pendingFeeToSetter",
+        "router",
+        "setBlacklist",
+        "setBlacklistBatch",
+        "setBlacklistOn",
+        "setFeeExempt",
+        "setFeeExemptBatch",
+        "setFeeExemptOn",
+        "setFeeToSetter",
+        "setLpAllowlist",
+        "setLpAllowlistOn",
+        "setPairFeeBps",
+        "setPairFeeReceiver",
+        "setRouter",
+        "setSwapLimitExempt",
+        "setSwapLimitExemptBatch",
+        "setSwapLimitOn",
+        "setSwapLimitTokens",
+        "swapLimitExempt",
+        "swapLimitOn",
+        "swapLimits",
+        "sync"
+      ]
+    },
+    {
+      "address": "0xD9a990Ceff16CBCc9dC0CD669fC29CDf53759E41",
+      "name": "CASwapFactory",
+      "verified": true,
+      "sourceRuntimeMatches": true,
+      "liveKeccak": "0x1fa76b535f87477f3854a047da557d7f600305c36444c087ab4c6a47ceed719d",
+      "registrationRuntimeMatches": false,
+      "methods": [
+        "MAX_BATCH_SIZE_LIMIT",
+        "MAX_FEE_BPS",
+        "acceptFeeToSetter",
+        "allPairs",
+        "allPairsLength",
+        "createPair",
+        "feeExempt",
+        "feeExemptOn",
+        "feeToSetter",
+        "getPair",
+        "isFeeExempt",
+        "isLpAllowed",
+        "isPair",
+        "lpAllowlist",
+        "lpAllowlistOn",
+        "pairFeeBps",
+        "pairFeeReceivers",
+        "pendingFeeToSetter",
+        "router",
+        "setFeeExempt",
+        "setFeeExemptBatch",
+        "setFeeExemptOn",
+        "setFeeToSetter",
+        "setLpAllowlist",
+        "setLpAllowlistOn",
+        "setPairFeeBps",
+        "setPairFeeReceiver",
+        "setRouter",
+        "sync"
+      ]
+    }
+  ],
+  "historicalFactory": {
+    "configured": "0xEBb8E27312AF5eF867dD481EDdb74fAfE75F21A2",
+    "oldRouterActual": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+    "same": false,
+    "historicCApair": "0xAF05f84820288e2bd39E427AeF09b274056733d8",
+    "oldCApair": "0x0A0cfC8c3756D000bE19F0809A23f57522a594F6",
+    "historicCanonicalPair": "0x0000000000000000000000000000000000000000",
+    "oldCanonicalPair": "0x0000000000000000000000000000000000000000",
+    "oldSuppliedLPpair": "0x0000000000000000000000000000000000000000",
+    "historicDirectionalBuyFee": "0",
+    "historicDirectionalSellFee": "500",
+    "historicMaxFee": {
+      "UNKNOWN": "The contract function \"MAX_FEE_BPS\" reverted with the following reason:\nexecution reverted: 0x"
+    },
+    "historicRouter": {
+      "UNKNOWN": "The contract function \"router\" reverted with the following reason:\nexecution reverted: 0x"
+    }
+  },
+  "v2Paths": [
+    {
+      "v3Id": "4",
+      "router": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+      "factory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+      "caPair": "0xA8EE5bDFB9eF9FE5aAf503f1C826783e88B3B38F",
+      "intermediate": "0xf6c9D3ccbda48d36731190929842d7CaDce98313",
+      "intermediateDecimals": 18,
+      "join": "0x73507206933aa21B567263F8ea00FEf5063E97AC",
+      "joinReserves": [
+        "2761178697104295233",
+        "1824440876433543130509531",
+        1795829159
+      ],
+      "quotes": [
+        {
+          "side": "buy",
+          "totalBudget": "100000000000000000",
+          "assumedLocalV4InheritedBps": 10,
+          "amount": "99900099900099900",
+          "path": [
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            "0xf6c9D3ccbda48d36731190929842d7CaDce98313",
+            "0x546307af427902A75771434Df831d88219784E19"
+          ],
+          "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+          "result": [
+            "99900099900099900",
+            "63519423974189426849522",
+            "232226135820287472"
+          ]
+        },
+        {
+          "side": "buy",
+          "totalBudget": "1000000000000000000",
+          "assumedLocalV4InheritedBps": 10,
+          "amount": "999000999000999000",
+          "path": [
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            "0xf6c9D3ccbda48d36731190929842d7CaDce98313",
+            "0x546307af427902A75771434Df831d88219784E19"
+          ],
+          "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+          "result": [
+            "999000999000999000",
+            "483647070645246081083616",
+            "1405450826130692745"
+          ]
+        },
+        {
+          "side": "buy",
+          "totalBudget": "5000000000000000000",
+          "assumedLocalV4InheritedBps": 10,
+          "amount": "4995004995004995004",
+          "path": [
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            "0xf6c9D3ccbda48d36731190929842d7CaDce98313",
+            "0x546307af427902A75771434Df831d88219784E19"
+          ],
+          "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+          "result": [
+            "4995004995004995004",
+            "1173688003106440349424129",
+            "2551068457382324295"
+          ]
+        },
+        {
+          "side": "sell",
+          "totalBudget": "1000000000000000000",
+          "assumedLocalV4InheritedBps": 10,
+          "amount": "999000999000999000",
+          "path": [
+            "0x546307af427902A75771434Df831d88219784E19",
+            "0xf6c9D3ccbda48d36731190929842d7CaDce98313",
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30"
+          ],
+          "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+          "result": [
+            "999000999000999000",
+            "223592103312418081076587",
+            "300643246327617634"
+          ]
+        },
+        {
+          "side": "sell",
+          "totalBudget": "10000000000000000000",
+          "assumedLocalV4InheritedBps": 10,
+          "amount": "9990009990009990009",
+          "path": [
+            "0x546307af427902A75771434Df831d88219784E19",
+            "0xf6c9D3ccbda48d36731190929842d7CaDce98313",
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30"
+          ],
+          "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+          "result": [
+            "9990009990009990009",
+            "976233818326062340844513",
+            "960583755965877608"
+          ]
+        },
+        {
+          "side": "sell",
+          "totalBudget": "100000000000000000000",
+          "assumedLocalV4InheritedBps": 10,
+          "amount": "99900099900099900099",
+          "path": [
+            "0x546307af427902A75771434Df831d88219784E19",
+            "0xf6c9D3ccbda48d36731190929842d7CaDce98313",
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30"
+          ],
+          "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+          "result": [
+            "99900099900099900099",
+            "1471591831013252529181219",
+            "1230743699399536496"
+          ]
+        }
+      ]
+    }
+  ],
+  "v3Tiers": [
+    {
+      "fee": 100,
+      "pool": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "fee": 500,
+      "pool": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "fee": 3000,
+      "pool": "0x04A3511051a45543CFb5175f2fA6774a54BF0029"
+    },
+    {
+      "fee": 10000,
+      "pool": "0x822dc160CC971510Cf87999004a28b4A7aEFD082"
+    }
+  ],
+  "pinStillCanonical": true
+}

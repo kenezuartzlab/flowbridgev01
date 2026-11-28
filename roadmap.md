@@ -1,3 +1,8 @@
+# Exact owner-route recheck — read-only / local fork
+- [x] Pin all four owner addresses at 31,793,279; prove BDEX USDT/WBOT 0.3% identity, all five V3 entries, immutable historical factories and complete bounded V2 CA-pool enumeration.
+- [x] 24 native and 6 atomic CA/USDT local-fork trades match actual V4 caller quotes, budgets, fees and selected allowance/residual checks; BDEX 1% wins all sampled comparisons. UniversalRouter incompatible; 0.3% CA tier fails two-sided quoting.
+- [x] Exact mapping, fee/admin risks, source/runtime evidence and reproduction archived; 122 focused tests pass, preview build OK; no production or prior-evidence changes. Report: docs/security/CASWAP_EXACT_OWNER_ROUTES_RECHECK_20261128.md.
+
 # Targeted CaSwap registry correction audit
 - [x] Pin exact new/old CaSwap identities, V3/V4 registries, historical receipt routes, backing and realistic quotes at BOT block 31,792,262.
 - [x] Local-only V4 registration and four native buy/sell pairs pass output/fee/approval/residual checks; new CaSwap sell fee is 73%, so no default/activation recommendation.

@@ -1,0 +1,1131 @@
+{
+  "kind": "MAINNET_READ_ONLY",
+  "generatedAt": "2026-11-28T01:30:09.576Z",
+  "mainnetWrites": 0,
+  "signatures": 0,
+  "addresses": {
+    "supplied": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+    "old": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+    "v3": "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
+    "v4": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+    "ca": "0x546307af427902A75771434Df831d88219784E19",
+    "usdt": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+    "wbot": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+    "caWbot": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+    "bdex": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+    "quoter": "0x034A705b36067cff99ABf5C662Be881cBd8d0176",
+    "proposedLP": "0x64F418471a1A7932a190E10da5A8551dB5AbeC05",
+    "alternativePool": "0xf728515430E588EEc584b76E8f2C814871c609B3",
+    "caBdexPool": "0x822dc160CC971510Cf87999004a28b4A7aEFD082",
+    "historicConfiguredFactory": "0xEBb8E27312AF5eF867dD481EDdb74fAfE75F21A2"
+  },
+  "pin": {
+    "number": "31793279",
+    "hash": "0xee9bbb333335be54df5b523e9bfbdfd84efccf2b5a369b07ff6227b79492f4b0",
+    "secondaryHash": "0xee9bbb333335be54df5b523e9bfbdfd84efccf2b5a369b07ff6227b79492f4b0",
+    "timestamp": "1795829408",
+    "time": "2026-11-28T01:30:08.000Z",
+    "chainId": 677,
+    "secondaryChainId": "RPC Request failed.",
+    "independentOperators": false
+  },
+  "contracts": {
+    "old": {
+      "address": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+      "bytes": 15009,
+      "keccak": "0x9f2f6cc317d279510da679cdbd63493e05f0d8a34d7afc6c75889f3bbcfbc8bc",
+      "secondaryMatch": true,
+      "venue": {
+        "router": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+        "factory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+        "wrapper": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+        "directions": [
+          {
+            "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+            "to": "0x546307af427902A75771434Df831d88219784E19",
+            "feeBps": "0",
+            "receiver": "0xbCB5885d53C83aa0d6055Ba5BA0a2d865948eC86"
+          },
+          {
+            "from": "0x546307af427902A75771434Df831d88219784E19",
+            "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+            "feeBps": "3000",
+            "receiver": "0xbCB5885d53C83aa0d6055Ba5BA0a2d865948eC86"
+          }
+        ],
+        "exemption": {
+          "factoryV4": false,
+          "routerV4": false,
+          "factoryV3": false,
+          "enabled": true
+        },
+        "admin": "0xc2634355B7450dC50F65125858c0f0A868d60335",
+        "pendingAdmin": "0x0000000000000000000000000000000000000000",
+        "maxBps": "3000"
+      }
+    },
+    "supplied": {
+      "address": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "bytes": 13566,
+      "keccak": "0xbd9df451990d5cea43b51429df907bb561c8df3d091230e754365eb93b0b3f25",
+      "secondaryMatch": true,
+      "venue": {
+        "router": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+        "factory": "0xD9a990Ceff16CBCc9dC0CD669fC29CDf53759E41",
+        "wrapper": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+        "directions": [
+          {
+            "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+            "to": "0x546307af427902A75771434Df831d88219784E19",
+            "feeBps": "0",
+            "receiver": "0xDbf59d78e99aEdd331c880C399660BA6dA128Ce1"
+          },
+          {
+            "from": "0x546307af427902A75771434Df831d88219784E19",
+            "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+            "feeBps": "7300",
+            "receiver": "0xDbf59d78e99aEdd331c880C399660BA6dA128Ce1"
+          }
+        ],
+        "exemption": {
+          "factoryV4": false,
+          "routerV4": false,
+          "factoryV3": false,
+          "enabled": true
+        },
+        "admin": "0xc2634355B7450dC50F65125858c0f0A868d60335",
+        "pendingAdmin": "0x0000000000000000000000000000000000000000",
+        "maxBps": "10000"
+      }
+    },
+    "proposedLP": {
+      "address": "0x64F418471a1A7932a190E10da5A8551dB5AbeC05",
+      "bytes": 22142,
+      "keccak": "0x7e705f0c003c9e3930548c3e8f762cbb9431bcc83964bdfa71c044fdb6bee9d2",
+      "secondaryMatch": true
+    },
+    "alternativePool": {
+      "address": "0xf728515430E588EEc584b76E8f2C814871c609B3",
+      "bytes": 9771,
+      "keccak": "0x64c778fe2b91c50fa8d309f9cf2d9bfbbbbd955307a27e00cc691fb0331f6c66",
+      "secondaryMatch": true
+    },
+    "caBdexPool": {
+      "address": "0x822dc160CC971510Cf87999004a28b4A7aEFD082",
+      "bytes": 22142,
+      "keccak": "0x66e1aec361dcfe6d291d85eeb3e38a47e93d69d3ce2d57f9b6aa1af195e5c70c",
+      "secondaryMatch": true
+    },
+    "v3": {
+      "address": "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
+      "bytes": 17779,
+      "keccak": "0x30436920b0fb829855cca5bcdeadf41925318bbc5dd93ba7761434bdd3797bab",
+      "secondaryMatch": true
+    },
+    "v4": {
+      "address": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "bytes": 21838,
+      "keccak": "0x13f0ab2696d66683cadc3a82a220c232799b690db36c45ed7dd9f325a7619ad0",
+      "secondaryMatch": true
+    },
+    "0xD5452816194a3784dBa983426cCe7c122F4abd30": {
+      "address": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "bytes": 2317,
+      "keccak": "0x1de4f5357fdcd5dfca19fdb98fe059f6d63e6b8a8a9dc58cd39abdf6801419d6",
+      "secondaryMatch": true,
+      "decimals": 18,
+      "supply": "1353766061380647515697336",
+      "nativeBacking": "1353766061380647515697336"
+    },
+    "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6": {
+      "address": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "bytes": 2410,
+      "keccak": "0xe45a61e173c389ba8f44e04a1359c0b42f7cee5a9e1e7f448f0205c4f804e8d1",
+      "secondaryMatch": true,
+      "decimals": 18,
+      "supply": "400876199069117417503122",
+      "nativeBacking": "400876199069117417503122"
+    }
+  },
+  "pools": {
+    "0x64F418471a1A7932a190E10da5A8551dB5AbeC05": {
+      "address": "0x64F418471a1A7932a190E10da5A8551dB5AbeC05",
+      "bytes": 22142,
+      "keccak": "0x7e705f0c003c9e3930548c3e8f762cbb9431bcc83964bdfa71c044fdb6bee9d2",
+      "secondaryMatch": true,
+      "token0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+      "token1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+      "fee": 3000,
+      "reserves": {
+        "UNKNOWN": "The contract function \"getReserves\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "liquidity": "53895133195562394346",
+      "slot0": [
+        "22168685816059949583906430654830198",
+        250849,
+        667,
+        1024,
+        1024,
+        0,
+        true
+      ],
+      "decimals": [
+        6,
+        18
+      ],
+      "balances": [
+        "15244440767065",
+        "1222783967772621474795713"
+      ],
+      "normalizedBalances": [
+        "15244440.767065",
+        "1222783.967772621474795713"
+      ]
+    },
+    "0xf728515430E588EEc584b76E8f2C814871c609B3": {
+      "address": "0xf728515430E588EEc584b76E8f2C814871c609B3",
+      "bytes": 9771,
+      "keccak": "0x64c778fe2b91c50fa8d309f9cf2d9bfbbbbd955307a27e00cc691fb0331f6c66",
+      "secondaryMatch": true,
+      "token0": "0x546307af427902A75771434Df831d88219784E19",
+      "token1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "factory": "0xD9a990Ceff16CBCc9dC0CD669fC29CDf53759E41",
+      "fee": {
+        "UNKNOWN": "The contract function \"fee\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "reserves": [
+        "511421267378762046717661",
+        "387906965023615663157847",
+        1795829404
+      ],
+      "liquidity": {
+        "UNKNOWN": "The contract function \"liquidity\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "slot0": {
+        "UNKNOWN": "The contract function \"slot0\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "decimals": [
+        18,
+        18
+      ],
+      "balances": [
+        "511421267378762046717661",
+        "387906965023615663157847"
+      ],
+      "normalizedBalances": [
+        "511421.267378762046717661",
+        "387906.965023615663157847"
+      ],
+      "normalizedReserves": [
+        "511421.267378762046717661",
+        "387906.965023615663157847"
+      ]
+    },
+    "0x822dc160CC971510Cf87999004a28b4A7aEFD082": {
+      "address": "0x822dc160CC971510Cf87999004a28b4A7aEFD082",
+      "bytes": 22142,
+      "keccak": "0x66e1aec361dcfe6d291d85eeb3e38a47e93d69d3ce2d57f9b6aa1af195e5c70c",
+      "secondaryMatch": true,
+      "token0": "0x546307af427902A75771434Df831d88219784E19",
+      "token1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+      "fee": 10000,
+      "reserves": {
+        "UNKNOWN": "The contract function \"getReserves\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "liquidity": "1542194232164151834286",
+      "slot0": [
+        "51165307676172994738002167876",
+        -8746,
+        0,
+        1,
+        1,
+        0,
+        true
+      ],
+      "decimals": [
+        18,
+        18
+      ],
+      "balances": [
+        "592488258091620538193",
+        "262908864138937528261"
+      ],
+      "normalizedBalances": [
+        "592.488258091620538193",
+        "262.908864138937528261"
+      ]
+    },
+    "0xAF05f84820288e2bd39E427AeF09b274056733d8": {
+      "address": "0xAF05f84820288e2bd39E427AeF09b274056733d8",
+      "bytes": 10790,
+      "keccak": "0xe7bb7cdaecd62e19d4e93b29e86361d5035989b1fad0a9cbeb2cd5f8f7a96817",
+      "secondaryMatch": true,
+      "token0": "0x546307af427902A75771434Df831d88219784E19",
+      "token1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "factory": "0xEBb8E27312AF5eF867dD481EDdb74fAfE75F21A2",
+      "fee": {
+        "UNKNOWN": "The contract function \"fee\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "reserves": [
+        "1842936886016997232",
+        "2421151007012888625",
+        1790724559
+      ],
+      "liquidity": {
+        "UNKNOWN": "The contract function \"liquidity\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "slot0": {
+        "UNKNOWN": "The contract function \"slot0\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "decimals": [
+        18,
+        18
+      ],
+      "balances": [
+        "1842936886016997232",
+        "2421151007012888625"
+      ],
+      "normalizedBalances": [
+        "1.842936886016997232",
+        "2.421151007012888625"
+      ],
+      "normalizedReserves": [
+        "1.842936886016997232",
+        "2.421151007012888625"
+      ]
+    },
+    "0x0A0cfC8c3756D000bE19F0809A23f57522a594F6": {
+      "address": "0x0A0cfC8c3756D000bE19F0809A23f57522a594F6",
+      "bytes": 9771,
+      "keccak": "0x4a67a9d8a34306a34444caf1052e43a7b9ec2982e4d2e9ca6e069f5e2ae8561e",
+      "secondaryMatch": true,
+      "token0": "0x546307af427902A75771434Df831d88219784E19",
+      "token1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "factory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+      "fee": {
+        "UNKNOWN": "The contract function \"fee\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "reserves": [
+        "84038367",
+        "16566580112457",
+        1791254772
+      ],
+      "liquidity": {
+        "UNKNOWN": "The contract function \"liquidity\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "slot0": {
+        "UNKNOWN": "The contract function \"slot0\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "decimals": [
+        18,
+        18
+      ],
+      "balances": [
+        "84038367",
+        "16566580112457"
+      ],
+      "normalizedBalances": [
+        "0.000000000084038367",
+        "0.000016566580112457"
+      ],
+      "normalizedReserves": [
+        "0.000000000084038367",
+        "0.000016566580112457"
+      ]
+    },
+    "0xdc7547f3cEa82C6Af7fd420656cE532C6da9b98d": {
+      "address": "0xdc7547f3cEa82C6Af7fd420656cE532C6da9b98d",
+      "bytes": 11278,
+      "keccak": "0x64a136d77ad78fc7add3212f606e7740cdb83d2df4535991df71d605acaf2d37",
+      "secondaryMatch": true,
+      "token0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+      "token1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "factory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+      "fee": {
+        "UNKNOWN": "The contract function \"fee\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "reserves": [
+        "3238839989",
+        "254022038797572941391",
+        1795828427
+      ],
+      "liquidity": {
+        "UNKNOWN": "The contract function \"liquidity\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "slot0": {
+        "UNKNOWN": "The contract function \"slot0\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "decimals": [
+        6,
+        18
+      ],
+      "balances": [
+        "3238839989",
+        "254022038797572941391"
+      ],
+      "normalizedBalances": [
+        "3238.839989",
+        "254.022038797572941391"
+      ],
+      "normalizedReserves": [
+        "3238.839989",
+        "254.022038797572941391"
+      ]
+    },
+    "0xA8EE5bDFB9eF9FE5aAf503f1C826783e88B3B38F": {
+      "address": "0xA8EE5bDFB9eF9FE5aAf503f1C826783e88B3B38F",
+      "bytes": 11278,
+      "keccak": "0x64a136d77ad78fc7add3212f606e7740cdb83d2df4535991df71d605acaf2d37",
+      "secondaryMatch": true,
+      "token0": "0x546307af427902A75771434Df831d88219784E19",
+      "token1": "0xf6c9D3ccbda48d36731190929842d7CaDce98313",
+      "factory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+      "fee": {
+        "UNKNOWN": "The contract function \"fee\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "reserves": [
+        "5950954704521861956",
+        "1559516943412792752574723",
+        1795829159
+      ],
+      "liquidity": {
+        "UNKNOWN": "The contract function \"liquidity\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "slot0": {
+        "UNKNOWN": "The contract function \"slot0\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "decimals": [
+        18,
+        18
+      ],
+      "balances": [
+        "5950954704521861956",
+        "1559516943412792752574723"
+      ],
+      "normalizedBalances": [
+        "5.950954704521861956",
+        "1559516.943412792752574723"
+      ],
+      "normalizedReserves": [
+        "5.950954704521861956",
+        "1559516.943412792752574723"
+      ]
+    }
+  },
+  "registries": {
+    "v3": {
+      "count": "5",
+      "rows": [
+        {
+          "id": "0",
+          "entry": [
+            "0x5508Ec3006e6d82ec3A3219f9C041FFcD5791Cd3",
+            0,
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            false,
+            "CaSwap V2",
+            "2.0"
+          ],
+          "fee": "0",
+          "factory": "0xEBb8E27312AF5eF867dD481EDdb74fAfE75F21A2",
+          "WBOT": {
+            "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+          },
+          "WETH": {
+            "UNKNOWN": "The contract function \"WETH\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "id": "1",
+          "entry": [
+            "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+            0,
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            true,
+            "BDex V2",
+            "2.0"
+          ],
+          "fee": "0",
+          "factory": {
+            "UNKNOWN": "The contract function \"factory\" reverted with the following reason:\nexecution reverted: 0x"
+          },
+          "WBOT": {
+            "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+          },
+          "WETH": {
+            "UNKNOWN": "The contract function \"WETH\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "id": "2",
+          "entry": [
+            "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+            1,
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            true,
+            "BDex V3",
+            "3.0"
+          ],
+          "fee": "0",
+          "factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+          "WBOT": {
+            "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+          },
+          "WETH": {
+            "UNKNOWN": "The contract function \"WETH\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "id": "3",
+          "entry": [
+            "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+            0,
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            true,
+            "CASwapRouter",
+            "3.0"
+          ],
+          "fee": "0",
+          "factory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+          "WBOT": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "WETH": {
+            "UNKNOWN": "The contract function \"WETH\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "id": "4",
+          "entry": [
+            "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+            0,
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            true,
+            "BDex UniswapV2R2",
+            "2.2"
+          ],
+          "fee": "0",
+          "factory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+          "WBOT": {
+            "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+          },
+          "WETH": "0xD5452816194a3784dBa983426cCe7c122F4abd30"
+        }
+      ],
+      "globalFeeBps": "10"
+    },
+    "v4": {
+      "count": "1",
+      "rows": [
+        {
+          "id": "0",
+          "entry": [
+            "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+            1,
+            "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+            true,
+            "BDEX V3",
+            "3"
+          ],
+          "fee": "1",
+          "factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+          "WBOT": {
+            "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+          },
+          "WETH": {
+            "UNKNOWN": "The contract function \"WETH\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        }
+      ],
+      "globalFeeBps": "10"
+    }
+  },
+  "factories": {
+    "0xEBb8E27312AF5eF867dD481EDdb74fAfE75F21A2": {
+      "address": "0xEBb8E27312AF5eF867dD481EDdb74fAfE75F21A2",
+      "bytes": 15469,
+      "keccak": "0x1f1c05172274a00f56dabe9f79d5353dd055eb74147dc60b719a418123c652b4",
+      "secondaryMatch": true,
+      "pairs": [
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "pair": "0xAF05f84820288e2bd39E427AeF09b274056733d8"
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        }
+      ],
+      "caPairs": [
+        {
+          "index": "1",
+          "pair": "0xAF05f84820288e2bd39E427AeF09b274056733d8",
+          "token0": "0x546307af427902A75771434Df831d88219784E19",
+          "token1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6"
+        }
+      ],
+      "allPairsLength": "2",
+      "enumeration": "COMPLETE_AT_PIN",
+      "admin": "0x69eA50F92C27c17d0b345d6E8C9ec30E0908c3B4",
+      "router": {
+        "UNKNOWN": "The contract function \"router\" reverted with the following reason:\nexecution reverted: 0x"
+      }
+    },
+    "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419": {
+      "address": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+      "bytes": 24535,
+      "keccak": "0xc399d72dd612d929895e1e2ca8b22a71460c0fcd72bfc16ef015ad3dc530ea7b",
+      "secondaryMatch": true,
+      "pairs": [
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "pair": {
+            "UNKNOWN": "The contract function \"getPair\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": {
+            "UNKNOWN": "The contract function \"getPair\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": {
+            "UNKNOWN": "The contract function \"getPair\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": {
+            "UNKNOWN": "The contract function \"getPair\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": {
+            "UNKNOWN": "The contract function \"getPair\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "t0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": {
+            "UNKNOWN": "The contract function \"getPair\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        }
+      ],
+      "caPairs": [],
+      "allPairsLength": {
+        "UNKNOWN": "The contract function \"allPairsLength\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "enumeration": "NOT_AVAILABLE",
+      "admin": {
+        "UNKNOWN": "The contract function \"feeToSetter\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "router": {
+        "UNKNOWN": "The contract function \"router\" reverted with the following reason:\nexecution reverted: 0x"
+      }
+    },
+    "0x9c937EBC3748825026677e20B13b5e306494a38d": {
+      "address": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+      "bytes": 19905,
+      "keccak": "0x09e0d549714bf56fea4099195618dde740daa315e38098c6d9b12ad38db65aa1",
+      "secondaryMatch": true,
+      "pairs": [
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "pair": "0x0A0cfC8c3756D000bE19F0809A23f57522a594F6"
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        }
+      ],
+      "caPairs": [
+        {
+          "index": "0",
+          "pair": "0x0A0cfC8c3756D000bE19F0809A23f57522a594F6",
+          "token0": "0x546307af427902A75771434Df831d88219784E19",
+          "token1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6"
+        }
+      ],
+      "allPairsLength": "1",
+      "enumeration": "COMPLETE_AT_PIN",
+      "admin": "0xc2634355B7450dC50F65125858c0f0A868d60335",
+      "router": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD"
+    },
+    "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3": {
+      "address": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+      "bytes": 13849,
+      "keccak": "0xee2069b7c90c2cfc70023528d5940d1390a305e8d4b83569d403de44a4fa2609",
+      "secondaryMatch": true,
+      "pairs": [
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0xdc7547f3cEa82C6Af7fd420656cE532C6da9b98d"
+        }
+      ],
+      "caPairs": [
+        {
+          "index": "85",
+          "pair": "0xA8EE5bDFB9eF9FE5aAf503f1C826783e88B3B38F",
+          "token0": "0x546307af427902A75771434Df831d88219784E19",
+          "token1": "0xf6c9D3ccbda48d36731190929842d7CaDce98313"
+        }
+      ],
+      "allPairsLength": "87",
+      "enumeration": "COMPLETE_AT_PIN",
+      "admin": "0x4a1aAD72622Ede44B4ffCba4c86E2eCbD2dD930e",
+      "router": {
+        "UNKNOWN": "The contract function \"router\" reverted with the following reason:\nexecution reverted: 0x"
+      }
+    },
+    "0xD9a990Ceff16CBCc9dC0CD669fC29CDf53759E41": {
+      "address": "0xD9a990Ceff16CBCc9dC0CD669fC29CDf53759E41",
+      "bytes": 15559,
+      "keccak": "0x1fa76b535f87477f3854a047da557d7f600305c36444c087ab4c6a47ceed719d",
+      "secondaryMatch": true,
+      "pairs": [
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "pair": "0xf728515430E588EEc584b76E8f2C814871c609B3"
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x546307af427902A75771434Df831d88219784E19",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "t1": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "t0": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "t1": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        }
+      ],
+      "caPairs": [
+        {
+          "index": "0",
+          "pair": "0xf728515430E588EEc584b76E8f2C814871c609B3",
+          "token0": "0x546307af427902A75771434Df831d88219784E19",
+          "token1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6"
+        }
+      ],
+      "allPairsLength": "1",
+      "enumeration": "COMPLETE_AT_PIN",
+      "admin": "0xc2634355B7450dC50F65125858c0f0A868d60335",
+      "router": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737"
+    }
+  },
+  "historical": [
+    {
+      "id": "0",
+      "router": "0x5508Ec3006e6d82ec3A3219f9C041FFcD5791Cd3",
+      "name": "CaSwap V2",
+      "block": "14558455",
+      "tx": "0x8123b090c7fbb16c9453d61be251cd212ab70e5458e93a12425d58c4e7dbbe46",
+      "receiptSuccess": true,
+      "receiptBlockHash": "0x8fa13dfee3221398f4c34af7a7d91ec00a4d645c58eb2be52f0ef1e095d090d4",
+      "historicalFactory": "0xEBb8E27312AF5eF867dD481EDdb74fAfE75F21A2",
+      "currentFactory": "0xEBb8E27312AF5eF867dD481EDdb74fAfE75F21A2",
+      "historicalWrapper": {
+        "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "historicalRegistry": [
+        "0x5508Ec3006e6d82ec3A3219f9C041FFcD5791Cd3",
+        0,
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        true,
+        "CaSwap V2",
+        "2.0"
+      ]
+    },
+    {
+      "id": "1",
+      "router": "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+      "name": "BDex V2",
+      "block": "14558457",
+      "tx": "0x0d0323fdcf97687a96bafc673472b90c7292e6e28f5ce509f557daebb467f428",
+      "receiptSuccess": true,
+      "receiptBlockHash": "0xd2b31d38573063aaf82351e0eee4255541395a7c10dbb8499d28dfaa52d69ecc",
+      "historicalFactory": {
+        "UNKNOWN": "The contract function \"factory\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "currentFactory": {
+        "UNKNOWN": "The contract function \"factory\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "historicalWrapper": {
+        "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "historicalRegistry": [
+        "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+        0,
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        true,
+        "BDex V2",
+        "2.0"
+      ]
+    },
+    {
+      "id": "2",
+      "router": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+      "name": "BDex V3",
+      "block": "14563526",
+      "tx": "0xb9de1a86fd0fd4d7e5168e48c24b0500f3c1e99f99eb6b3a7e4a39cd512ff9c2",
+      "receiptSuccess": true,
+      "receiptBlockHash": "0x025f06ea3cd9a3a6dda73e9bb649a0c42df18c93d0ff4bb769df22c66e00f5c1",
+      "historicalFactory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+      "currentFactory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+      "historicalWrapper": {
+        "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "historicalRegistry": [
+        "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+        1,
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        true,
+        "BDex V3",
+        "3.0"
+      ]
+    },
+    {
+      "id": "3",
+      "router": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+      "name": "CASwapRouter",
+      "block": "16480559",
+      "tx": "0xf0c593f2ae88bd27b0e54bc8c02d1809bc313d27ae4f33fb60e2f5bec86d85dd",
+      "receiptSuccess": true,
+      "receiptBlockHash": "0x330ce832fa90423e631b6b495aa721faa70ac73fa50c2e263d4d2cd03c489060",
+      "historicalFactory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+      "currentFactory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+      "historicalWrapper": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "historicalRegistry": [
+        "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+        0,
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        true,
+        "CASwapRouter",
+        "3.0"
+      ]
+    },
+    {
+      "id": "4",
+      "router": "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+      "name": "BDex UniswapV2R2",
+      "block": "16888925",
+      "tx": "0xe6dfa82889ea04ae5a1353af80b1efb670be790f675c9484e45986e00f61aa40",
+      "receiptSuccess": true,
+      "receiptBlockHash": "0xe342880965d48cdf4a194cc929857b747cf0a922c570c001f77384bae0ab5f26",
+      "historicalFactory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+      "currentFactory": "0x117115f3B72C8d1989178089A67D0C26f8EE0AA3",
+      "historicalWrapper": {
+        "UNKNOWN": "The contract function \"WBOT\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "historicalRegistry": [
+        "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+        0,
+        "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+        true,
+        "BDex UniswapV2R2",
+        "2.2"
+      ]
+    }
+  ],
+  "quotes": [
+    {
+      "venue": "old",
+      "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "input": "0.1",
+      "amount": "100000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "100000000000000000",
+        "84024447"
+      ],
+      "genericQuote": [
+        "100000000000000000",
+        "84024447"
+      ]
+    },
+    {
+      "venue": "old",
+      "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "input": "1",
+      "amount": "1000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "1000000000000000000",
+        "84036974"
+      ],
+      "genericQuote": [
+        "1000000000000000000",
+        "84036974"
+      ]
+    },
+    {
+      "venue": "old",
+      "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "input": "5",
+      "amount": "5000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "5000000000000000000",
+        "84038088"
+      ],
+      "genericQuote": [
+        "5000000000000000000",
+        "84038088"
+      ]
+    },
+    {
+      "venue": "old",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "input": "1",
+      "amount": "1000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "1000000000000000000",
+        "16566580110468"
+      ],
+      "genericQuote": [
+        "1000000000000000000",
+        "16566580110468"
+      ]
+    },
+    {
+      "venue": "old",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "input": "10",
+      "amount": "10000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "10000000000000000000",
+        "16566580112258"
+      ],
+      "genericQuote": [
+        "10000000000000000000",
+        "16566580112258"
+      ]
+    },
+    {
+      "venue": "old",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "input": "100",
+      "amount": "100000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "100000000000000000000",
+        "16566580112437"
+      ],
+      "genericQuote": [
+        "100000000000000000000",
+        "16566580112437"
+      ]
+    },
+    {
+      "venue": "supplied",
+      "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "input": "0.1",
+      "amount": "100000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "100000000000000000",
+        "131841184008243540"
+      ],
+      "genericQuote": [
+        "100000000000000000",
+        "131841184008243540"
+      ]
+    },
+    {
+      "venue": "supplied",
+      "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "input": "1",
+      "amount": "1000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "1000000000000000000",
+        "1318408781185060092"
+      ],
+      "genericQuote": [
+        "1000000000000000000",
+        "1318408781185060092"
+      ]
+    },
+    {
+      "venue": "supplied",
+      "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "input": "5",
+      "amount": "5000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "5000000000000000000",
+        "6591975931286719527"
+      ],
+      "genericQuote": [
+        "5000000000000000000",
+        "6591975931286719527"
+      ]
+    },
+    {
+      "venue": "supplied",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "input": "1",
+      "amount": "1000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "1000000000000000000",
+        "204791689245595673"
+      ],
+      "genericQuote": [
+        "1000000000000000000",
+        "204791689245595673"
+      ]
+    },
+    {
+      "venue": "supplied",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "input": "10",
+      "amount": "10000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "10000000000000000000",
+        "2047907161902900773"
+      ],
+      "genericQuote": [
+        "10000000000000000000",
+        "2047907161902900773"
+      ]
+    },
+    {
+      "venue": "supplied",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "input": "100",
+      "amount": "100000000000000000000",
+      "caller": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "userQuote": [
+        "100000000000000000000",
+        "20478098614578542234"
+      ],
+      "genericQuote": [
+        "100000000000000000000",
+        "20478098614578542234"
+      ]
+    }
+  ],
+  "registrationProvenance": {
+    "url": "https://scan.botchain.ai/api?module=logs&action=getLogs&fromBlock=0&toBlock=31793279&address=0x986962de6F00D0eC571b1a34Fa70AEeB445b5445&topic0=0x4033e0f1df8b1888b56adc162789cbb7a40b437206134bd55194ee6e9482b13c",
+    "status": "1",
+    "count": 5,
+    "cap": 1000,
+    "completeness": "INDEX_RESPONSE_NOT_COMPLETE_ARCHIVE_PROOF"
+  },
+  "bdexDerivation": {
+    "factory": "0x1C51c173323ec11BB4e3C4fD2314c225Dc4b5419",
+    "caWBOT10000": "0x822dc160CC971510Cf87999004a28b4A7aEFD082",
+    "usdtWBOT3000": "0x64F418471a1A7932a190E10da5A8551dB5AbeC05"
+  },
+  "pinStillCanonical": true
+}
