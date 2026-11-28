@@ -44,3 +44,11 @@
 5. Scheduler state was **not changed or restored**. This form fix does not establish scheduled endpoint authentication/deadline/heartbeat acceptance or remove any prior infrastructure blocker.
 
 Live/public/registry remain OFF; BNB publication embargo and execution/launch holds remain enforced. The approved live trade cap stays 5 USDT-equivalent; the old gas estimate is expired, and exact live prices/gas remain unapproved. No real orders, funding, signatures, broadcasts, registry actions or new accounts.
+
+## Follow-up: read-only operator notice (17:01 UTC)
+- Observed role mismatch (aggregate, no identities): two enabled admins exist, one `super_admin` and one `internal_operator`, both email-verified with a bound wallet. The most recent sign-in (16:04 UTC) was the operator account; the super admin last signed in 2026-11-26. The screenshot notice matches the operator branch, so the session and bound-wallet gate succeeded and only the role blocked creation.
+- Server policy before: every POST action required `super_admin`, including `paper_reference`, so the reference also failed for the operator.
+- Change: `src/lib/autotrade/paperPermissions.ts` decides actions. Verified Ops roles (app_admins + verified email + matching bound wallet, unchanged gate) may create paper orders, read references and manage only their own paper orders (others' orders return 404). Server forces `mode=paper`; quota 5 active / 10 per hour per account, fail-closed; existing audit row retained. Super-admin only: emergency, prepare_canary, validate_infrastructure, registry_preview. Unknown roles/actions rejected.
+- Form: simulation defaults, inline errors, next-action line, blank max loss = full budget shown on review, no price defaults.
+- Verification: 17-test handler suite (operator create, forced paper, unknown role, quota, isolation), 5 permission tests, form default/error tests; component browser check at 390/1280 for operator and super admin against a mocked API (not owner acceptance, not production).
+- Not changed: no role promotion, no live/public/registry flag, no publish.

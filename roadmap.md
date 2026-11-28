@@ -1,3 +1,9 @@
+# AutoTrade paper access follow-up (owner mobile screenshot, 2026-11-28)
+- [x] Root cause: the account signed in on mobile is the enabled Operator (internal_operator) admin, not the super admin; server allowed paper creation and reference reads to super admins only, so the form was read-only and the reference never loaded.
+- [x] Paper-only permission for verified Ops roles with matching bound wallet: create, reference and own-order Check now/pause/resume/cancel; mode forced to paper; per-account limits (5 active, 10/hour); audit kept. Emergency, canary, infrastructure and registry previews stay super-admin only.
+- [x] Simulation defaults (slippage 0.5%, expiry 60 min, gas 0.01 BOT/leg simulation limit, stop blank, blank max loss = full budget); inline errors for every field and a next-action line above the disabled button; BOT budget needs no USDT reference.
+- [ ] HOLD: owner acceptance on the real phone/wallet and publication (needs an approved release); live/public/registry remain OFF.
+
 # AutoTrade V1.3 final functional integration — paper-only
 - [x] Share conservative per-leg route comparison between manual Swap and AutoTrade; BDEX V3 default, alternative CaSwap quote-only with 500 bps directional fee cap and fail-closed registration/identity/fee/liquidity gates.
 - [x] Wire worker → mocked/fork executor transport with durable outbox/nonce/fence/pause, exact approvals, receipt reconciliation and signer payload checks; live/signer/independent-RPC remain OFF.

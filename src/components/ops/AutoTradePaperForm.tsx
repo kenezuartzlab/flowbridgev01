@@ -9,7 +9,7 @@ const input = "min-h-11 w-full min-w-0 rounded-md border border-hairline bg-card
 export function roleNotice(role: string | undefined, p: OpsPermissions): string {
   if (role === "super_admin") return "Super admin · bound wallet matched. You can create paper orders and use every Ops control.";
   if (p.createPaper) return "Operator · bound wallet matched. You can create and manage your own paper orders. Emergency pause, canary review, infrastructure checks and registry previews need a super admin.";
-  return "This account has no AutoTrade Ops role. Ask a super admin to add your verified email in Admin settings → Admin users.";
+  return "This account has no AutoTrade Ops role. Ask a super admin to add your verified email in Control Panel (/sets) → Admins & Operators.";
 }
 export function AutoTradePaperForm({ wallet, pairs, role, permissions, onCreated }: { wallet: string; pairs: string[]; role?: string; permissions?: OpsPermissions; onCreated: () => Promise<void> }) {
   const perms = permissions ?? opsPermissions(role);
