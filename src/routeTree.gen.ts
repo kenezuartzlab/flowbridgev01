@@ -129,6 +129,7 @@ import { Route as ApiCampaignsAdminIdRouteImport } from './routes/api/campaigns.
 import { Route as ApiProposalsIdVoteRouteImport } from './routes/api/proposals.$id.vote'
 import { Route as ApiPublicActivityVerifyRouteImport } from './routes/api/public/activity.verify'
 import { Route as ApiPublicActivityVerifySwapRouteImport } from './routes/api/public/activity.verify-swap'
+import { Route as ApiPublicHooksAutotradeWorkerRouteImport } from './routes/api/public/hooks/autotrade-worker'
 import { Route as ApiPublicHooksRewardsSweepRouteImport } from './routes/api/public/hooks/rewards-sweep'
 import { Route as ApiPublicReferralValidateRouteImport } from './routes/api/public/referral.validate'
 import { Route as ApiPublicSiweNonceRouteImport } from './routes/api/public/siwe.nonce'
@@ -757,6 +758,12 @@ const ApiPublicActivityVerifySwapRoute =
     path: '/api/public/activity/verify-swap',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAutotradeWorkerRoute =
+  ApiPublicHooksAutotradeWorkerRouteImport.update({
+    id: '/api/public/hooks/autotrade-worker',
+    path: '/api/public/hooks/autotrade-worker',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRewardsSweepRoute =
   ApiPublicHooksRewardsSweepRouteImport.update({
     id: '/api/public/hooks/rewards-sweep',
@@ -928,6 +935,7 @@ export interface FileRoutesByFullPath {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/hooks/autotrade-worker': typeof ApiPublicHooksAutotradeWorkerRoute
   '/api/public/hooks/rewards-sweep': typeof ApiPublicHooksRewardsSweepRoute
   '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -1059,6 +1067,7 @@ export interface FileRoutesByTo {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/hooks/autotrade-worker': typeof ApiPublicHooksAutotradeWorkerRoute
   '/api/public/hooks/rewards-sweep': typeof ApiPublicHooksRewardsSweepRoute
   '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -1191,6 +1200,7 @@ export interface FileRoutesById {
   '/api/proposals/$id/vote': typeof ApiProposalsIdVoteRoute
   '/api/public/activity/verify': typeof ApiPublicActivityVerifyRoute
   '/api/public/activity/verify-swap': typeof ApiPublicActivityVerifySwapRoute
+  '/api/public/hooks/autotrade-worker': typeof ApiPublicHooksAutotradeWorkerRoute
   '/api/public/hooks/rewards-sweep': typeof ApiPublicHooksRewardsSweepRoute
   '/api/public/referral/validate': typeof ApiPublicReferralValidateRoute
   '/api/public/siwe/nonce': typeof ApiPublicSiweNonceRoute
@@ -1324,6 +1334,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/hooks/autotrade-worker'
     | '/api/public/hooks/rewards-sweep'
     | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
@@ -1455,6 +1466,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/hooks/autotrade-worker'
     | '/api/public/hooks/rewards-sweep'
     | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
@@ -1586,6 +1598,7 @@ export interface FileRouteTypes {
     | '/api/proposals/$id/vote'
     | '/api/public/activity/verify'
     | '/api/public/activity/verify-swap'
+    | '/api/public/hooks/autotrade-worker'
     | '/api/public/hooks/rewards-sweep'
     | '/api/public/referral/validate'
     | '/api/public/siwe/nonce'
@@ -1709,6 +1722,7 @@ export interface RootRouteChildren {
   CampaignsAnalyticsIdRoute: typeof CampaignsAnalyticsIdRoute
   ApiPublicActivityVerifyRoute: typeof ApiPublicActivityVerifyRoute
   ApiPublicActivityVerifySwapRoute: typeof ApiPublicActivityVerifySwapRoute
+  ApiPublicHooksAutotradeWorkerRoute: typeof ApiPublicHooksAutotradeWorkerRoute
   ApiPublicHooksRewardsSweepRoute: typeof ApiPublicHooksRewardsSweepRoute
   ApiPublicReferralValidateRoute: typeof ApiPublicReferralValidateRoute
   ApiPublicSiweNonceRoute: typeof ApiPublicSiweNonceRoute
@@ -2560,6 +2574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicActivityVerifySwapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/autotrade-worker': {
+      id: '/api/public/hooks/autotrade-worker'
+      path: '/api/public/hooks/autotrade-worker'
+      fullPath: '/api/public/hooks/autotrade-worker'
+      preLoaderRoute: typeof ApiPublicHooksAutotradeWorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/rewards-sweep': {
       id: '/api/public/hooks/rewards-sweep'
       path: '/api/public/hooks/rewards-sweep'
@@ -2819,6 +2840,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsAnalyticsIdRoute: CampaignsAnalyticsIdRoute,
   ApiPublicActivityVerifyRoute: ApiPublicActivityVerifyRoute,
   ApiPublicActivityVerifySwapRoute: ApiPublicActivityVerifySwapRoute,
+  ApiPublicHooksAutotradeWorkerRoute: ApiPublicHooksAutotradeWorkerRoute,
   ApiPublicHooksRewardsSweepRoute: ApiPublicHooksRewardsSweepRoute,
   ApiPublicReferralValidateRoute: ApiPublicReferralValidateRoute,
   ApiPublicSiweNonceRoute: ApiPublicSiweNonceRoute,

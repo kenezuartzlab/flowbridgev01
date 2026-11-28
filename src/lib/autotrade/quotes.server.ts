@@ -5,15 +5,11 @@ import { createPublicClient, http, parseAbi, type Hex } from "viem";
 import { MAINNET_CONTRACTS as M } from "@/lib/contracts";
 import type { AutoTradePair } from "./config";
 import type { Quote } from "./engine";
+import { encodePath, legPath } from "./path";
 
 const QUOTER = M.bdexV3Quoter.toLowerCase() as Hex;
 const abi = parseAbi(["function quoteExactInput(bytes path,uint256 amountIn) returns (uint256,uint160[],uint32[],uint256)"]);
-export function encodePath(tokens: string[], fees: number[]): Hex {
-  return ("0x" + tokens.map((t, i) => t.slice(2).toLowerCase() + (i < fees.length ? fees[i]!.toString(16).padStart(6, "0") : "")).join("")) as Hex;
-}
-export function legPath(p: AutoTradePair, side: "buy" | "sell") {
-  return side === "sell" ? encodePath(p.path, p.fees) : encodePath([...p.path].reverse(), [...p.fees].reverse());
-}
+export { encodePath, legPath };
 
 export async function quoteLeg(p: AutoTradePair, side: "buy" | "sell", amountIn: bigint): Promise<Quote> {
   const primary = createPublicClient({ transport: http("https://rpc.botchain.ai", { timeout: 8_000 }) });

@@ -112,6 +112,9 @@ export async function ingestMainnetRouterV4Swap(
   );
   if (result.status !== 'VERIFIED') return result;
   const a = result.activity;
+  // AutoTrade trading accounts never earn swap rewards (bot activity is excluded).
+  const { data: botAcct } = await supabaseAdmin.from('autotrade_trading_accounts').select('address').eq('address', a.wallet.toLowerCase()).maybeSingle();
+  if (botAcct) return { status: 'REJECTED', reason: 'AutoTrade trading account is excluded from rewards' };
 
   const occurred = new Date(a.occurredAt * 1000);
   const { error: vaError } = await supabaseAdmin.from('verified_activities').upsert(

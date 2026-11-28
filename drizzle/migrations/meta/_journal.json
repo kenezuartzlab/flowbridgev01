@@ -463,6 +463,13 @@
       "when": 1795703699447,
       "tag": "0065_autotrade_v1_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1795825247836,
+      "tag": "0066_autotrade_v1_1_worker_outbox",
+      "breakpoints": true
     }
   ]
 }

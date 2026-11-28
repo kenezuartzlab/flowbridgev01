@@ -16,6 +16,7 @@ const F: [string, string][] = [["budget", "Budget (quote)"], ["maxBuyPrice", "Ma
 export function AutoTradeTab({ wallet }: { wallet: string }) {
   const [s, setS] = useState<any>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [preview, setPreview] = useState<any>(null);
   const [f, setF] = useState<Record<string, string>>({ pair: "BOT/USDT", slippageBps: "50", maxGasNative: "0.01", expiresInMinutes: "60" });
   const load = () => call(wallet).then(setS).catch((e) => setErr(e.message));
   useEffect(() => { void load(); }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -25,6 +26,26 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
     <div className="space-y-4">
       <p className="rounded-lg border border-hairline bg-card p-3 text-sm">Paper mode only. Live trading: <b>{s.live ? "ON" : "OFF"}</b> · Public: <b>{s.public ? "ON" : "OFF"}</b>. No wallet or key is used.</p>
       {err && <p className="text-sm text-destructive">{err}</p>}
+      <div className="rounded-lg border border-hairline bg-card p-3 text-sm space-y-1">
+        <div className="flex flex-wrap items-center gap-2"><b>Monitor</b>
+          <span>{s.worker?.lease?.heartbeat_at ? `heartbeat ${new Date(s.worker.lease.heartbeat_at).toLocaleTimeString()} · block ${s.worker.lease.last_block ?? "—"}` : "not running yet"}</span>
+          <span className="text-xs text-muted">delay p50 {s.worker?.p50 ?? "—"} ms · p95 {s.worker?.p95 ?? "—"} ms · {s.worker?.samples ?? 0} samples · {s.worker?.lastConsensus ?? ""}</span></div>
+        <div className="flex items-center gap-2">Emergency pause: <b>{s.control?.emergency_paused ? "ON" : "OFF"}</b>
+          <button className="rounded border border-hairline px-2 py-1 text-xs" onClick={() => run({ action: "emergency", paused: !s.control?.emergency_paused })}>{s.control?.emergency_paused ? "Resume" : "Pause all"}</button></div>
+      </div>
+      <div className="rounded-lg border border-hairline bg-card p-3 text-sm space-y-1">
+        <b>Router V4 venues (live read)</b>
+        {s.registry ? <>
+          <p className="text-xs text-muted break-all">Owner {s.registry.owner} · {s.registry.paused ? "paused" : "running"} · global fee {s.registry.globalFeeBps} bp</p>
+          {s.registry.routers.map((r: any) => <p key={r.id} className="text-xs break-all">#{r.id} {r.name} ({r.type}) {r.active ? "active" : "inactive"} · {r.router}</p>)}
+        </> : <p className="text-xs text-muted">Unavailable</p>}
+        {s.candidates?.map((c: any) => <div key={c.key} className="text-xs border-t border-hairline pt-1">
+          <b>{c.name}</b> · {c.recommendation === "DO_NOT_REGISTER" ? "not recommended" : "optional"} — {c.evidence}
+          <button className="ml-2 rounded border border-hairline px-2 py-0.5" onClick={async () => { try { const j = await call(wallet, { action: "registry_preview", key: c.key }); setPreview(j.preview); } catch (e: any) { setErr(e.message); } }}>Preview owner transaction</button>
+        </div>)}
+        {preview && <pre className="whitespace-pre-wrap break-all text-[11px] text-muted">{JSON.stringify(preview, null, 1)}</pre>}
+        <p className="text-xs text-muted">Registry changes are disabled here; previews are for owner review only.</p>
+      </div>
       <div className="grid gap-2 sm:grid-cols-3">
         <label className="text-xs">Pair<select className={input} value={f["pair"]} onChange={(e) => setF({ ...f, pair: e.target.value })}>{s.pairs.map((p: string) => <option key={p}>{p}</option>)}</select></label>
         {F.map(([k, l]) => <label key={k} className="text-xs">{l}<input className={input} inputMode="decimal" value={f[k] ?? ""} onChange={(e) => setF({ ...f, [k]: e.target.value })} /></label>)}

@@ -341,6 +341,27 @@ export type Database = {
         }
         Relationships: []
       }
+      autotrade_control: {
+        Row: {
+          emergency_paused: boolean
+          id: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          emergency_paused?: boolean
+          id?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          emergency_paused?: boolean
+          id?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       autotrade_events: {
         Row: {
           actor_email: string | null
@@ -412,6 +433,152 @@ export type Database = {
           state?: string
           updated_at?: string
           version?: number
+        }
+        Relationships: []
+      }
+      autotrade_outbox: {
+        Row: {
+          account: string
+          chain_id: number
+          created_at: string
+          idempotency_key: string
+          mined_block: number | null
+          mined_hash: string | null
+          nonce: number
+          order_id: string
+          side: string
+          signed_raw: string | null
+          state: string
+          tx_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          account: string
+          chain_id: number
+          created_at?: string
+          idempotency_key: string
+          mined_block?: number | null
+          mined_hash?: string | null
+          nonce: number
+          order_id: string
+          side: string
+          signed_raw?: string | null
+          state: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account?: string
+          chain_id?: number
+          created_at?: string
+          idempotency_key?: string
+          mined_block?: number | null
+          mined_hash?: string | null
+          nonce?: number
+          order_id?: string
+          side?: string
+          signed_raw?: string | null
+          state?: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autotrade_outbox_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "autotrade_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      autotrade_trading_accounts: {
+        Row: {
+          address: string
+          chain_id: number
+          created_at: string
+          status: string
+        }
+        Insert: {
+          address: string
+          chain_id: number
+          created_at?: string
+          status?: string
+        }
+        Update: {
+          address?: string
+          chain_id?: number
+          created_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      autotrade_worker_lease: {
+        Row: {
+          fencing: number
+          heartbeat_at: string | null
+          holder: string | null
+          last_block: number | null
+          last_error: string | null
+          lease_until: string
+          name: string
+        }
+        Insert: {
+          fencing?: number
+          heartbeat_at?: string | null
+          holder?: string | null
+          last_block?: number | null
+          last_error?: string | null
+          lease_until?: string
+          name: string
+        }
+        Update: {
+          fencing?: number
+          heartbeat_at?: string | null
+          holder?: string | null
+          last_block?: number | null
+          last_error?: string | null
+          lease_until?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      autotrade_worker_metrics: {
+        Row: {
+          block: number | null
+          block_time: string | null
+          consensus: string | null
+          decided_at: string
+          fencing: number | null
+          holder: string | null
+          id: number
+          latency_ms: number | null
+          orders: number | null
+          skipped_blocks: number | null
+        }
+        Insert: {
+          block?: number | null
+          block_time?: string | null
+          consensus?: string | null
+          decided_at?: string
+          fencing?: number | null
+          holder?: string | null
+          id?: number
+          latency_ms?: number | null
+          orders?: number | null
+          skipped_blocks?: number | null
+        }
+        Update: {
+          block?: number | null
+          block_time?: string | null
+          consensus?: string | null
+          decided_at?: string
+          fencing?: number | null
+          holder?: string | null
+          id?: number
+          latency_ms?: number | null
+          orders?: number | null
+          skipped_blocks?: number | null
         }
         Relationships: []
       }
@@ -3621,6 +3788,24 @@ export type Database = {
           p_wallet: string
         }
         Returns: Json
+      }
+      autotrade_acquire_lease: {
+        Args: { _holder: string; _name: string; _ttl_seconds: number }
+        Returns: number
+      }
+      autotrade_heartbeat: {
+        Args: {
+          _block: number
+          _fencing: number
+          _holder: string
+          _name: string
+          _ttl_seconds: number
+        }
+        Returns: boolean
+      }
+      autotrade_release_lease: {
+        Args: { _fencing: number; _holder: string; _name: string }
+        Returns: undefined
       }
       award_referral_milestone_v366: {
         Args: {

@@ -19,7 +19,24 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       const { db } = await import("@/lib/autotrade/store.server");
       const cfg = await import("@/lib/autotrade/config");
       const { data } = await (await db()).from("autotrade_orders").select("id,pair,mode,state,order_json,last_decision,created_by_email,updated_at").order("created_at", { ascending: false }).limit(50);
-      return jsonResponse({ live: cfg.AUTOTRADE_LIVE_ENABLED, public: cfg.AUTOTRADE_PUBLIC_ENABLED, pairs: cfg.AUTOTRADE_PAIRS.map((p) => p.id), excluded: cfg.EXCLUDED_VENUES, orders: data ?? [] });
+      const R = await import("@/lib/autotrade/registry");
+      const { createPublicClient, http, parseAbi } = await import("viem");
+      const pc = createPublicClient({ transport: http("https://rpc.botchain.ai", { timeout: 6_000 }) });
+      const a = parseAbi(["function owner() view returns (address)", "function paused() view returns (bool)", "function routerCount() view returns (uint256)", "function routers(uint256) view returns (address,uint8,address,bool,string,string)", "function globalFeeBps() view returns (uint256)"]);
+      const registry = await (async () => {
+        const [owner, paused, count, globalFeeBps] = await Promise.all([pc.readContract({ address: cfg.ROUTER_V4, abi: a, functionName: "owner" }), pc.readContract({ address: cfg.ROUTER_V4, abi: a, functionName: "paused" }), pc.readContract({ address: cfg.ROUTER_V4, abi: a, functionName: "routerCount" }), pc.readContract({ address: cfg.ROUTER_V4, abi: a, functionName: "globalFeeBps" })]);
+        const routers = await Promise.all(Array.from({ length: Math.min(Number(count), 6) }, (_, i) => pc.readContract({ address: cfg.ROUTER_V4, abi: a, functionName: "routers", args: [BigInt(i)] }).then((r) => ({ id: i, router: r[0], type: r[1] === 0 ? "V2" : "V3", wrappedNative: r[2], active: r[3], name: r[4] }))));
+        return { owner, paused, globalFeeBps: Number(globalFeeBps), routers };
+      })().catch(() => null);
+      const dd = await db();
+      const [{ data: lease }, { data: metrics }, { data: control }] = await Promise.all([
+        dd.from("autotrade_worker_lease").select("heartbeat_at,lease_until,last_block,fencing").eq("name", "autotrade-main").maybeSingle(),
+        dd.from("autotrade_worker_metrics").select("latency_ms,consensus,decided_at").order("decided_at", { ascending: false }).limit(200),
+        dd.from("autotrade_control").select("emergency_paused,updated_at").eq("id", true).maybeSingle()]);
+      const { percentile } = await import("@/lib/autotrade/worker");
+      const l = (metrics ?? []).map((m) => m.latency_ms ?? 0);
+      const worker = { lease, samples: l.length, p50: percentile(l, 50), p95: percentile(l, 95), lastConsensus: metrics?.[0]?.consensus ?? null, lastAt: metrics?.[0]?.decided_at ?? null };
+      return jsonResponse({ registry, candidates: R.VENUE_CANDIDATES, registryWrites: R.REGISTRY_WRITES_ENABLED, worker, control, live: cfg.AUTOTRADE_LIVE_ENABLED, public: cfg.AUTOTRADE_PUBLIC_ENABLED, pairs: cfg.AUTOTRADE_PAIRS.map((p) => p.id), excluded: cfg.EXCLUDED_VENUES, orders: data ?? [] });
     },
     POST: async ({ request }) => {
       const { requireAdmin } = await import("@/lib/admin/adminGate.server");
@@ -47,6 +64,17 @@ export const Route = createFileRoute("/api/admin/autotrade")({
           if (error) throw new Error("Could not save order.");
           await d.from("admin_audit_events").insert({ actor_user_id: gate.admin.userId, actor_email: gate.admin.email, actor_role: gate.admin.role, object_type: "autotrade_order", object_id: order.id, action: "create_paper", old_value: null, new_value: S.serialize(order) });
           return jsonResponse({ ok: true, id: order.id });
+        }
+        if (body.action === "emergency") {
+          const paused = z.object({ paused: z.boolean() }).parse(body).paused;
+          await d.from("autotrade_control").update({ emergency_paused: paused, updated_by: gate.admin.email, updated_at: new Date().toISOString() }).eq("id", true);
+          await d.from("admin_audit_events").insert({ actor_user_id: gate.admin.userId, actor_email: gate.admin.email, actor_role: gate.admin.role, object_type: "autotrade_control", object_id: "singleton", action: paused ? "emergency_pause" : "emergency_resume", old_value: null, new_value: { paused } });
+          return jsonResponse({ ok: true, paused });
+        }
+        if (body.action === "registry_preview") {
+          const k = z.object({ key: z.enum(["caswap-v2", "bdex-v2"]) }).parse(body).key;
+          const R = await import("@/lib/autotrade/registry");
+          return jsonResponse({ preview: R.registerPreview(k, "0x524Db06954de917025180057BCBeB36eC96A98c5") });
         }
         const c = ctl.parse(body);
         const { data: row } = await d.from("autotrade_orders").select("order_json").eq("id", c.id).maybeSingle();
