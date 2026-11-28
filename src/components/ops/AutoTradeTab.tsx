@@ -20,9 +20,15 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
   const [err, setErr] = useState<string | null>(null);
   const [preview, setPreview] = useState<any>(null);
   const [preparation, setPreparation] = useState<any>(null);
+  const [canary, setCanary] = useState({ maxBuyPrice: "", minSellPrice: "", slippageBps: "50", expiresInMinutes: "60" });
   const [f, setF] = useState<Record<string, string>>({ pair: "CA/BOT", slippageBps: "50", expiresInMinutes: "60" });
   const load = () => call(wallet).then(setS).catch((e) => setErr(e.message));
-  useEffect(() => { void load(); }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setPreparation(null); void load(); }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!preparation) return;
+    const timer = setTimeout(() => setPreparation(null), Math.max(0, preparation.expiresAt - Date.now()));
+    return () => clearTimeout(timer);
+  }, [preparation]);
   const run = async (b: unknown) => { setErr(null); try { await call(wallet, b); await load(); } catch (e: any) { setErr(e.message); } };
   if (!s) return <p className="text-sm text-muted">{err ?? "Loading…"}</p>;
   return (
@@ -32,11 +38,22 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
       <section className="space-y-2 border-b border-hairline pb-3 text-sm">
         <p><b>{CANARY_APPROVAL.status}</b> · 5 USDT equivalent · CA/BOT · one buy/sell cycle</p>
         <p className="text-muted">Gas approval pending · Order authorization pending · Dedicated account not provisioned</p>
-        <Button variant="outline" onClick={async () => { setPreparation(null); setErr(null); try { const j = await call(wallet, { action: "prepare_canary" }); setPreparation(j.preparation); } catch (e: any) { setErr(e.message); } }}>Refresh canary estimate</Button>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {[["maxBuyPrice", "Canary max buy (BOT/CA)"], ["minSellPrice", "Canary min sell (BOT/CA)"], ["slippageBps", "Canary max slippage (bps)"], ["expiresInMinutes", "Proposed expiry (minutes)"]].map(([key, label]) => {
+            if (!key || !label) return null;
+            return <label className="text-xs" key={key}>{label}<input className={input} inputMode="decimal" value={canary[key as keyof typeof canary]} onChange={e => { setPreparation(null); setCanary({ ...canary, [key]: e.target.value }); }} /></label>;
+          })}
+        </div>
+        <Button variant="outline" onClick={async () => { setPreparation(null); setErr(null); try { const j = await call(wallet, { action: "prepare_canary", ...canary, slippageBps: Number(canary.slippageBps), expiresInMinutes: Number(canary.expiresInMinutes) }); setPreparation(j.preparation); } catch (e: any) { setErr(e.message); } }}>Prepare review ticket</Button>
         {preparation && <div className="text-xs text-muted space-y-1">
           <p>Indicative cap: {preparation.indicativeBot} BOT · block {preparation.block} · {new Date(preparation.fetchedAt).toLocaleTimeString()}</p>
-          <p>Planning gas reserve: {preparation.gasReserveBot} BOT · approval pending</p>
-          <p>Not executable · independent price verification pending · exact gas simulation pending</p>
+          <p>Proposed gas cap: {preparation.gasReserveBot} BOT / {preparation.gasReserveUsdt} USDT · approval pending</p>
+          <p>Total proposed exposure: {preparation.totalExposureBot} BOT / {preparation.totalExposureUsdt} USDT (5 trade + separate gas)</p>
+          <p>Gas: {preparation.gasEffects.map((l: any) => `${l.effect} ${l.estimatedUnits} → ${l.maxUnits}`).join(" · ")} · max {preparation.maxFeeGwei} gwei</p>
+          <p>{preparation.gasContingency} · local fork model, not dedicated-account simulation</p>
+          <p>Buy max {preparation.ticket.maxBuyPrice ?? "not selected"} · sell min {preparation.ticket.minSellPrice ?? "not selected"} BOT/CA · slippage {preparation.ticket.slippageBps} bps</p>
+          <p>Proposed order expiry {new Date(preparation.ticket.proposedOrderExpiresAt).toLocaleString()} · quote and gas proposal expire {new Date(preparation.expiresAt).toLocaleTimeString()}</p>
+          <p>Review only · no order created · no guaranteed fill · independent RPC, exact gas, signer and order authorization pending</p>
         </div>}
       </section>
       <div className="rounded-lg border border-hairline bg-card p-3 text-sm space-y-1">

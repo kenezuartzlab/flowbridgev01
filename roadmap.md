@@ -277,3 +277,9 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Verify transport regressions, fork/mock recovery, release firewall and fresh review; exact production artifact and bound-wallet acceptance remain unverified.
 - [ ] Restricted publication and scheduler recovery — blocked by verified production diff and bound-wallet Ops acceptance.
 - [ ] Live canary — blocked by independent RPC, provisioned managed signer/dedicated account, human security review, gas approval and exact order authorization.
+
+## V1.4 bounded gas and first-order review
+- [x] Exact local four-effect gas simulation, bounded contingency and fresh conversion evidence.
+- [x] Non-executable order ticket with owner-entered prices, expiry, slippage and total exposure.
+- [x] Focused/fork regression, current release/worker status and secure next-step report; full regression evidence added after completion.
+- [ ] Exact dedicated-account gas/order confirmation — blocked by unprovisioned signer/account, independent RPC and owner-entered targets; no funding or live approval inferred.

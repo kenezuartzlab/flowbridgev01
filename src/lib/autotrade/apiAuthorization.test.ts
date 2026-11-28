@@ -63,4 +63,21 @@ describe("AutoTrade HTTP authorization", () => {
     expect(response.status).toBe(503);
     expect(JSON.stringify(await response.json())).not.toContain("RPC_SECRET_DETAIL");
   });
+  it("validates ticket parameters before any market read", async () => {
+    mocks.admin.mockResolvedValue({ ok: true, admin: { role: "super_admin" } });
+    for (const patch of [{ slippageBps: 301 }, { expiresInMinutes: 0 }, { maxBuyPrice: "1".repeat(65) }]) {
+      const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action: "prepare_canary", ...patch }) }) });
+      expect(response.status).toBe(400);
+    }
+    expect(mocks.preparation).not.toHaveBeenCalled();
+  });
+  it("passes exact owner-entered parameters only to the read-only preparation", async () => {
+    mocks.admin.mockResolvedValue({ ok: true, admin: { role: "super_admin" } });
+    mocks.preparation.mockResolvedValue({ executable: false, orderCreated: false });
+    const parameters = { maxBuyPrice: "0.4", minSellPrice: "0.5", slippageBps: 25, expiresInMinutes: 15 };
+    const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action: "prepare_canary", ...parameters }) }) });
+    expect(response.status).toBe(200);
+    expect(mocks.preparation).toHaveBeenCalledWith(parameters);
+    expect(mocks.worker).not.toHaveBeenCalled();
+  });
 });

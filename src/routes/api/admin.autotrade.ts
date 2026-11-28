@@ -48,8 +48,13 @@ export const Route = createFileRoute("/api/admin/autotrade")({
         const E = await import("@/lib/autotrade/engine");
         const C = await import("@/lib/autotrade/config");
         if (body.action === "prepare_canary") {
+          const parameters = z.object({
+            maxBuyPrice: z.string().max(64).default(""), minSellPrice: z.string().max(64).default(""),
+            slippageBps: z.number().int().min(1).max(C.GUARDS.maxSlippageBps).default(50),
+            expiresInMinutes: z.number().int().min(1).max(7 * 24 * 60).default(60),
+          }).parse(body);
           const { readCanaryPreparation } = await import("@/lib/autotrade/preparation.server");
-          try { return jsonResponse({ preparation: await readCanaryPreparation() }); }
+          try { return jsonResponse({ preparation: await readCanaryPreparation(parameters) }); }
           catch { return jsonResponse({ error: "Canary estimate unavailable; no order was created. Retry with fresh verified chain data." }, 503); }
         }
         const S = await import("@/lib/autotrade/store.server");

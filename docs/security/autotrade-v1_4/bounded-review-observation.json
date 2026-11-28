@@ -1,0 +1,76 @@
+{
+  "observedAt": "2026-11-28T04:27:14.125Z",
+  "block": "31807437",
+  "hash": "0x5456f8851a2a07110a2d8c7ad028a9321a0cd3bfa1ac21bfc3c956bea232e249",
+  "primaryPrice": "12736179",
+  "secondaryPrice": "12736179",
+  "gasPriceWei": "20000000000",
+  "independentRpcVerified": false,
+  "basis": "SAME_OPERATOR_READ_ONLY_QUOTE_LOCAL_GAS_FOOTPRINT",
+  "ticket": {
+    "status": "REVIEW_ONLY",
+    "pair": "CA/BOT",
+    "cycles": 1,
+    "budgetWei": "392582422090644297",
+    "tradeCapUsdt6": "5000000",
+    "gas": {
+      "legs": [
+        {
+          "effect": "buy",
+          "estimatedUnits": "232718",
+          "maxUnits": "279262"
+        },
+        {
+          "effect": "approve",
+          "estimatedUnits": "46976",
+          "maxUnits": "56372"
+        },
+        {
+          "effect": "sell",
+          "estimatedUnits": "261448",
+          "maxUnits": "313738"
+        },
+        {
+          "effect": "revoke",
+          "estimatedUnits": "26980",
+          "maxUnits": "32376"
+        }
+      ],
+      "estimatedWei": "11362440000000000",
+      "maxFeePerGas": "40000000000",
+      "capWei": "27269920000000000",
+      "contingencyWei": "15907480000000000",
+      "capUsdt6": "347315",
+      "gasApproved": false
+    },
+    "totalExposureWei": "419852342090644297",
+    "totalExposureUsdt6": "5347315",
+    "maxBuyPrice": null,
+    "minSellPrice": null,
+    "priceUnit": "BOT per CA",
+    "slippageBps": 50,
+    "proposedOrderExpiresAt": 1795843634125,
+    "quoteExpiresAt": 1795840044125,
+    "gasProposalExpiresAt": 1795840044125,
+    "missingParameters": [
+      "MAX_BUY_PRICE",
+      "MIN_SELL_PRICE"
+    ],
+    "gasBasis": "LOCAL_FORK_FOOTPRINT_REVALUED; exact dedicated-account calldata simulation required",
+    "gasApproved": false,
+    "orderAuthorized": false,
+    "orderCreated": false,
+    "executable": false,
+    "blockers": [
+      "EXACT_ACCOUNT_SIMULATION",
+      "GAS_CAP_APPROVAL",
+      "EXACT_ORDER_AUTHORIZATION",
+      "INDEPENDENT_RPC",
+      "MANAGED_SIGNER",
+      "LIVE_STORE_BINDING",
+      "SECURITY_REVIEW",
+      "RELEASE_ACCEPTANCE",
+      "LIVE_DISABLED"
+    ]
+  }
+}

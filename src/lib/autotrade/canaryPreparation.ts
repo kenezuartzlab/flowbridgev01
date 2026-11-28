@@ -8,6 +8,9 @@ export const CANARY_APPROVAL = {
   gasApproved: false,
   orderAuthorized: false,
   fundingAuthorized: false,
+  preparationStatus: "GAS_AND_FIRST_ORDER_PREPARATION_ONLY",
+  gasEstimationAuthorized: true,
+  firstOrderPreparationAuthorized: true,
 } as const;
 
 export function convertCapToBot(c: { primaryUsdt6PerBot: bigint; secondaryUsdt6PerBot: bigint; fetchedAt: number; now: number; verified: boolean }) {

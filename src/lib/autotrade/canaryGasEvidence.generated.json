@@ -1,0 +1,12 @@
+{
+  "basis": "LOCAL_FORK_ONLY",
+  "observedAt": 1795839821999,
+  "block": "31806419",
+  "blockHash": "0xed8ae9afa1a452543142a546811e3d720fb8f731ebf8061977ac14f3310a6612",
+  "gasFootprint": {
+    "buy": "232718",
+    "approve": "46976",
+    "sell": "261448",
+    "revoke": "26980"
+  }
+}
