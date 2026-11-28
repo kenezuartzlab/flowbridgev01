@@ -20,10 +20,11 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
   const [err, setErr] = useState<string | null>(null);
   const [preview, setPreview] = useState<any>(null);
   const [preparation, setPreparation] = useState<any>(null);
+  const [infrastructure, setInfrastructure] = useState<any>(null);
   const [canary, setCanary] = useState({ maxBuyPrice: "", minSellPrice: "", slippageBps: "50", expiresInMinutes: "60" });
   const [f, setF] = useState<Record<string, string>>({ pair: "CA/BOT", slippageBps: "50", expiresInMinutes: "60" });
   const load = () => call(wallet).then(setS).catch((e) => setErr(e.message));
-  useEffect(() => { setPreparation(null); void load(); }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setPreparation(null); setInfrastructure(null); void load(); }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!preparation) return;
     const timer = setTimeout(() => setPreparation(null), Math.max(0, preparation.expiresAt - Date.now()));
@@ -35,6 +36,13 @@ export function AutoTradeTab({ wallet }: { wallet: string }) {
     <div className="space-y-4">
       <p className="rounded-lg border border-hairline bg-card p-3 text-sm">Paper mode only. Live trading: <b>{s.live ? "ON" : "OFF"}</b> · Public: <b>{s.public ? "ON" : "OFF"}</b>. No wallet or key is used.</p>
       {err && <p className="text-sm text-destructive">{err}</p>}
+      {s.readiness && <section className="space-y-2 border-b border-hairline pb-3 text-sm">
+        <h3 className="font-semibold">Operational readiness · live OFF</h3>
+        <ul className="space-y-1">{s.readiness.items.map((item: any) => <li key={item.key} className="flex flex-wrap justify-between gap-2"><span>{item.label}</span><span className="text-xs text-muted">{item.status.replaceAll("_", " ")}</span></li>)}</ul>
+        <details><summary className="cursor-pointer text-xs">Bound-wallet acceptance</summary><ol className="list-decimal space-y-1 pl-5 text-xs text-muted">{s.readiness.acceptance.map((step: string) => <li key={step}>{step}</li>)}</ol></details>
+        <Button variant="outline" onClick={async () => { setErr(null); try { const result = await call(wallet, { action: "validate_infrastructure" }); setInfrastructure(result.infrastructure); } catch (e: any) { setErr(e.message); } }}>Check configured infrastructure</Button>
+        {infrastructure && <p className="text-xs text-muted">{infrastructure.status.replaceAll("_", " ")} · no signing requested</p>}
+      </section>}
       <section className="space-y-2 border-b border-hairline pb-3 text-sm">
         <p><b>{CANARY_APPROVAL.status}</b> · 5 USDT equivalent · CA/BOT · one buy/sell cycle</p>
         <p className="text-muted">Gas approval pending · Order authorization pending · Dedicated account not provisioned</p>

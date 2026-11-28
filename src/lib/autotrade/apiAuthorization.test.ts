@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ admin: vi.fn(), cron: vi.fn(), worker: vi.fn(), preparation: vi.fn() }));
+const mocks = vi.hoisted(() => ({ admin: vi.fn(), cron: vi.fn(), worker: vi.fn(), preparation: vi.fn(), infrastructure: vi.fn() }));
 vi.mock("@/lib/admin/adminGate.server", () => ({ requireAdmin: mocks.admin }));
 vi.mock("@/integrations/supabase/cron-auth", () => ({ authenticateCronRequest: mocks.cron }));
 vi.mock("@/lib/autotrade/worker.server", () => ({ runWorker: mocks.worker }));
 vi.mock("@/lib/autotrade/preparation.server", () => ({ readCanaryPreparation: mocks.preparation }));
+vi.mock("@/lib/autotrade/infrastructureValidation.server", () => ({ validateConfiguredInfrastructure: mocks.infrastructure }));
 
 import { Route as AdminRoute } from "@/routes/api/admin.autotrade";
 import { Route as HookRoute } from "@/routes/api/public/hooks/autotrade-worker";
@@ -21,14 +22,15 @@ beforeEach(() => {
 describe("AutoTrade HTTP authorization", () => {
   it("rejects signed-out admin reads and writes before storage or chain work", async () => {
     mocks.admin.mockResolvedValue({ ok: false, response: new Response("Unauthorized", { status: 401 }) });
-    expect((await admin.GET!({ request: new Request("http://localhost/api/admin/autotrade") })).status).toBe(401);
+    if (!admin.GET) throw new Error("GET_HANDLER_MISSING");
+    expect((await admin.GET({ request: new Request("http://localhost/api/admin/autotrade") })).status).toBe(401);
     expect((await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: "{}" }) })).status).toBe(401);
     expect(mocks.worker).not.toHaveBeenCalled();
   });
 
   it("allows operators to inspect but forbids every operator mutation", async () => {
     mocks.admin.mockResolvedValue({ ok: true, admin: { role: "internal_operator", email: "operator@example.invalid" } });
-    for (const action of ["create", "tick", "pause", "resume", "cancel", "emergency", "registry_preview", "prepare_canary"]) {
+    for (const action of ["create", "tick", "pause", "resume", "cancel", "emergency", "registry_preview", "prepare_canary", "validate_infrastructure"]) {
       const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action }) }) });
       expect(response.status).toBe(403);
     }
@@ -78,6 +80,14 @@ describe("AutoTrade HTTP authorization", () => {
     const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action: "prepare_canary", ...parameters }) }) });
     expect(response.status).toBe(200);
     expect(mocks.preparation).toHaveBeenCalledWith(parameters);
+    expect(mocks.worker).not.toHaveBeenCalled();
+  });
+  it("super-admin infrastructure checks return only read-only status", async () => {
+    mocks.admin.mockResolvedValue({ ok: true, admin: { role: "super_admin" } });
+    mocks.infrastructure.mockResolvedValue({ status: "NOT_CONFIGURED", signingRequested: false });
+    const response = await admin.POST({ request: new Request("http://localhost/api/admin/autotrade", { method: "POST", body: JSON.stringify({ action: "validate_infrastructure" }) }) });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ infrastructure: { status: "NOT_CONFIGURED", signingRequested: false } });
     expect(mocks.worker).not.toHaveBeenCalled();
   });
 });

@@ -5,7 +5,7 @@
 - [x] Document independent BOT node, managed non-exportable signer and dedicated-account requirements without credentials, accounts, funding or external signatures.
 - [x] Complete local CA/BOT buy→sell plus four-pair/adversarial/reward-exclusion tests; typecheck/build pass, 108 focused and 3,702 full-suite tests pass, evidence report added.
 - [ ] HOLD: resume schedule only after an authorized whole-project publish and observed heartbeat/metrics; connected bound-wallet create/tick acceptance remains blocked (403 without wallet).
-- [ ] HOLD: live trading, registry writes, public AutoTrade, owner price/budget, 5 USDT-equivalent trade cap and separate gas cap, real accounts/keys/funding/signatures.
+- [ ] HOLD: live trading, registry writes, public AutoTrade, exact owner prices/order and separate gas cap, real accounts/keys/funding/signatures; 5 USDT-equivalent single-canary cap is APPROVED_CAP_ONLY.
 
 # Exact owner-route recheck — read-only / local fork
 - [x] Pin all four owner addresses at 31,793,279; prove BDEX USDT/WBOT 0.3% identity, all five V3 entries, immutable historical factories and complete bounded V2 CA-pool enumeration.
@@ -270,6 +270,13 @@ Preserved: Round #3 published history and claimed allocation; restricted/unfunde
 - [x] Retire BNB Swap vendor endpoint; enforce source and shipping-bundle release firewall with mutation tests.
 - [x] Private reversible archive, frozen identity checks and restoration requirements.
 - [x] Unit/full tests, responsive browser checks, published-site observation and automated build signals; final verification evidence and commit recorded in the pause archive. Hosted release/CI enforcement and real devices are explicitly unverified; no publication authorized.
+
+## AutoTrade operational readiness from e2e8f2c4
+- [x] Connect separate live durable intent/nonce/effect storage to managed transport and worker dispatch; source gate remains OFF.
+- [ ] Prove store/transport crash recovery and negative authorization with mock broker and local fork; run full regression.
+- [x] Inspect actual published assets against preview and supported release options; authenticated published manual worker succeeds, but isolated release/source attestation and bound-wallet acceptance block publish/resume 334.
+- [ ] Restricted publish and schedule 334 recovery — blocked by verified deployed source/server artifact, isolated whole-release review, bound-wallet Ops acceptance and managed scheduler deadline verification.
+- [x] Expose Ops readiness and secure infrastructure setup; report exact external blockers and observed worker status.
 
 ## AutoTrade V1.4 canary preparation
 - [x] Record owner 5 USDT APPROVED_CAP_ONLY, separate gas and order authorization.

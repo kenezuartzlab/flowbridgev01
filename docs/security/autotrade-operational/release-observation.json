@@ -1,0 +1,53 @@
+{
+  "productionOrigin": "https://flowbridge.space",
+  "productionAssets": [
+    {
+      "file": "production-index.js",
+      "bytes": 445866,
+      "sha256": "2b1635d6548a0273745182b0435af3f1a57113b1a2d3178b11ea7cb5fa69c2d0"
+    },
+    {
+      "file": "production-app.js",
+      "bytes": 324052,
+      "sha256": "0e121fdf9cc7d743c8dec4f739bfdff7e1220a88adf61c997f70cf10fee5d671"
+    },
+    {
+      "file": "production-ops.js",
+      "bytes": 146718,
+      "sha256": "f33f2a755106da34e67d016756cf82ac0ae60cbe4ea6b51b47416edf26e6f462"
+    },
+    {
+      "file": "production-trade.js",
+      "bytes": 266,
+      "sha256": "2cdc2cd5698363a33f1662255980a88f5750f4e7f114e5c8f584d5ad1d302b25"
+    }
+  ],
+  "productionOpsHasBoundedTicket": true,
+  "productionOpsHasOperationalChecklist": false,
+  "publishedWorkerUnsignedStatus": 401,
+  "publishedWorkerAuthenticatedStatus": 200,
+  "publishedWorkerManualSeconds": 50.3,
+  "publishedWorkerBlocks": 10,
+  "publishedWorkerSkippedBlocks": 47,
+  "productionRevisionVerified": false,
+  "serverArtifactAvailable": false,
+  "selectivePublishAvailable": false,
+  "publicationPerformed": false,
+  "schedule334Resumed": false,
+  "scheduledSuccessEvidence": false,
+  "observations": [
+    {
+      "kind": "AUTHENTICATED_PREVIEW_MANUAL_NOT_SCHEDULED",
+      "status": 200,
+      "elapsedSeconds": 5.41,
+      "ok": true,
+      "mode": "paper",
+      "transport": "mock",
+      "blocks": 1,
+      "singleCycle": true,
+      "durationMs": 3896,
+      "p50": 1628,
+      "p95": 1628
+    }
+  ]
+}

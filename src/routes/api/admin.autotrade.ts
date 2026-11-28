@@ -36,7 +36,11 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       const { percentile } = await import("@/lib/autotrade/worker");
       const l = (metrics ?? []).map((m) => m.latency_ms ?? 0);
       const worker = { lease, samples: l.length, p50: percentile(l, 50), p95: percentile(l, 95), lastConsensus: metrics?.[0]?.consensus ?? null, lastAt: metrics?.[0]?.decided_at ?? null };
-      return jsonResponse({ registry, candidates: R.VENUE_CANDIDATES, registryWrites: R.REGISTRY_WRITES_ENABLED, worker, control, live: cfg.AUTOTRADE_LIVE_ENABLED, public: cfg.AUTOTRADE_PUBLIC_ENABLED, pairs: cfg.AUTOTRADE_PAIRS.map((p) => p.id), excluded: cfg.EXCLUDED_VENUES, orders: data ?? [] });
+      const { operationalReadiness } = await import("@/lib/autotrade/operationalReadiness");
+      const { infrastructurePresence } = await import("@/lib/autotrade/infrastructure.server");
+      const { count: intentCount, error: intentError } = await dd.from("autotrade_managed_intents").select("effect_key", { count: "exact", head: true });
+      const readiness = operationalReadiness({ ...infrastructurePresence(), intents: intentError ? null : intentCount ?? null, heartbeatAt: lease?.heartbeat_at ?? null, now: Date.now() });
+      return jsonResponse({ readiness, registry, candidates: R.VENUE_CANDIDATES, registryWrites: R.REGISTRY_WRITES_ENABLED, worker, control, live: cfg.AUTOTRADE_LIVE_ENABLED, public: cfg.AUTOTRADE_PUBLIC_ENABLED, pairs: cfg.AUTOTRADE_PAIRS.map((p) => p.id), excluded: cfg.EXCLUDED_VENUES, orders: data ?? [] });
     },
     POST: async ({ request }) => {
       const { requireAdmin } = await import("@/lib/admin/adminGate.server");
@@ -47,6 +51,10 @@ export const Route = createFileRoute("/api/admin/autotrade")({
       try {
         const E = await import("@/lib/autotrade/engine");
         const C = await import("@/lib/autotrade/config");
+        if (body.action === "validate_infrastructure") {
+          const { validateConfiguredInfrastructure } = await import("@/lib/autotrade/infrastructureValidation.server");
+          return jsonResponse({ infrastructure: await validateConfiguredInfrastructure() });
+        }
         if (body.action === "prepare_canary") {
           const parameters = z.object({
             maxBuyPrice: z.string().max(64).default(""), minSellPrice: z.string().max(64).default(""),

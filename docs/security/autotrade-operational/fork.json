@@ -1,0 +1,79 @@
+{
+  "kind": "LOCAL_ANVIL_ISOLATED_POSTGRES_MOCK_BROKER",
+  "fork": {
+    "block": "31822980",
+    "hash": "0x6a03cace540402e590adbb8bd2365bc55c5c507a06dc0335388b164c122db893",
+    "chain": 677
+  },
+  "routerRuntime": "0x13f0ab2696d66683cadc3a82a220c232799b690db36c45ed7dd9f325a7619ad0",
+  "signatures": 4,
+  "broadcasts": 4,
+  "receipts": [
+    {
+      "side": "buy",
+      "actualOut": "2386703195168937559",
+      "block": "31822981",
+      "gasUsed": "217868"
+    },
+    {
+      "side": "approve",
+      "actualOut": "0",
+      "block": "31822988",
+      "gasUsed": "46976"
+    },
+    {
+      "side": "sell",
+      "actualOut": "979913727970127718",
+      "block": "31822995",
+      "gasUsed": "245192"
+    },
+    {
+      "side": "revoke",
+      "actualOut": "0",
+      "block": "31823002",
+      "gasUsed": "26980"
+    }
+  ],
+  "journal": [
+    {
+      "nonce": 2,
+      "state": "FINAL",
+      "actual_out": "2386703195168937559",
+      "receipt_block": 31822981,
+      "receipt_block_hash": "0x0e5a6a908ef3f718d5170bad70af85e8b3fb02761a42b3bcf97175dfee76a423"
+    },
+    {
+      "nonce": 3,
+      "state": "FINAL",
+      "actual_out": "0",
+      "receipt_block": 31822988,
+      "receipt_block_hash": "0xe9aadfe36c43b37fb8c0c93f99ebd4fcacf5a68c3787e7343d4e1e74fb1b76cb"
+    },
+    {
+      "nonce": 4,
+      "state": "FINAL",
+      "actual_out": "979913727970127718",
+      "receipt_block": 31822995,
+      "receipt_block_hash": "0xd7359c83b76a371d88b43c04b73a1f29b45991a5093be5b4822aef60420803f0"
+    },
+    {
+      "nonce": 5,
+      "state": "FINAL",
+      "actual_out": "0",
+      "receipt_block": 31823002,
+      "receipt_block_hash": "0x86fa4aa1e3fb49298cafe633fde71895651ff48bb97a471fa9bca37e9ce371ad"
+    }
+  ],
+  "order": {
+    "state": "COMPLETED",
+    "version": 4
+  },
+  "allowance": "0",
+  "routerAllowance": "0",
+  "zeroResiduals": true,
+  "crashRecovery": true,
+  "highFeeRejected": true,
+  "mainnetWrites": 0,
+  "externalSignatures": 0,
+  "actualAccountProvisioned": false
+}

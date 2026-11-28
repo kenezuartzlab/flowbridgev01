@@ -9,6 +9,7 @@ import {
   type PaperExecutionStore,
 } from "./paperExecutor";
 import { SupabasePaperExecutionStore } from "./paperStore.server";
+import { processManagedOrders } from "./managedDispatch.server";
 
 const PRIMARY = "https://rpc.botchain.ai";
 const EXPLORER = "https://scan.botchain.ai/api/eth-rpc"; // Different host, same ecosystem operator: not independent infrastructure.
@@ -31,6 +32,7 @@ export async function runWorker(trigger: string) {
   if (leaseError) throw new Error("LEASE_UNAVAILABLE");
   if (fencing === null || fencing === undefined) return { ok: true, skipped: "LEASE_HELD" };
   const started = Date.now(); let leaseUntilMs = started + WORKER.ttlSeconds * 1000;
+  const singleCycle = trigger === "cron";
   let last: number | null = null; const lat: number[] = []; let blocks = 0, skippedTotal = 0;
   try {
     while (Date.now() - started < WORKER.runMs) {
@@ -40,20 +42,28 @@ export async function runWorker(trigger: string) {
         const { data: alive, error } = await d.rpc("autotrade_heartbeat", { _name: WORKER.leaseName, _holder: holder, _fencing: fencing, _ttl_seconds: WORKER.ttlSeconds, _block: last as any });
         if (error || !alive) return { ok: false, reason: "LEASE_LOST", blocks };
         leaseUntilMs = Date.now() + WORKER.ttlSeconds * 1000;
+        if (singleCycle) return { ok: true, skipped: "EMERGENCY_PAUSED", mode: "paper", blocks: 0 };
         await sleep(WORKER.pollMs); continue;
       }
       let a: Awaited<ReturnType<typeof observe>>; let consensus: string | null;
       try {
-        a = await observe(PRIMARY, null);
-        const b = await observe(EXPLORER, a.head).catch(() => null);
-        const bb = b ? await observe(EXPLORER, Math.min(a.head, b.head)) : null;
-        const aa = bb ? { ...a, hashAtCommon: (await jrpc(PRIMARY, "eth_getBlockByNumber", ["0x" + Math.min(a.head, bb.head).toString(16), false]))?.hash ?? null } : a;
-        consensus = bb ? rpcConsensus(aa, bb, Date.now(), 10) : "SECOND_RPC_MISSING";
-      } catch { consensus = "PRIMARY_RPC_DOWN"; await sleep(WORKER.pollMs); continue; }
+        const [primary, secondary] = await Promise.all([observe(PRIMARY, null), observe(EXPLORER, null).catch(() => null)]);
+        a = primary;
+        if (secondary) {
+          const common = Math.min(primary.head, secondary.head);
+          const height = "0x" + common.toString(16);
+          const [primaryHash, secondaryHash] = await Promise.all([
+            primary.head === common ? Promise.resolve(primary.hashAtCommon) : jrpc(PRIMARY, "eth_getBlockByNumber", [height, false]).then(b => b?.hash ?? null),
+            secondary.head === common ? Promise.resolve(secondary.hashAtCommon) : jrpc(EXPLORER, "eth_getBlockByNumber", [height, false]).then(b => b?.hash ?? null),
+          ]);
+          consensus = rpcConsensus({ ...primary, hashAtCommon: primaryHash }, { ...secondary, hashAtCommon: secondaryHash }, Date.now(), 10);
+        } else consensus = "SECOND_RPC_MISSING";
+      } catch { consensus = "PRIMARY_RPC_DOWN"; if (singleCycle) throw new Error("PRIMARY_RPC_DOWN"); await sleep(WORKER.pollMs); continue; }
       const step = nextBlockToProcess(last, a.head);
       if (step.process) {
         last = a.head; blocks++; skippedTotal += step.skipped;
         const n = consensus ? 0 : await processPaperOrders(d, holder, Number(fencing), leaseUntilMs);
+        if (!consensus) await processManagedOrders(d, holder, Number(fencing));
         const latency = Date.now() - a.blockTime; lat.push(latency);
         const { error: metricError } = await d.from("autotrade_worker_metrics").insert({ holder, fencing, block: a.head, block_time: new Date(a.blockTime).toISOString(), latency_ms: latency, orders: n, skipped_blocks: step.skipped, consensus: consensus ?? "OK_SAME_OPERATOR" });
         if (metricError) throw new Error("METRICS_UNAVAILABLE");
@@ -61,12 +71,16 @@ export async function runWorker(trigger: string) {
       const { data: alive, error: heartbeatError } = await d.rpc("autotrade_heartbeat", { _name: WORKER.leaseName, _holder: holder, _fencing: fencing, _ttl_seconds: WORKER.ttlSeconds, _block: last as any });
       if (heartbeatError || !alive) return { ok: false, reason: "LEASE_LOST", blocks };
       leaseUntilMs = Date.now() + WORKER.ttlSeconds * 1000;
+      if (singleCycle) break; // Scheduled HTTP calls must not wait through the 45-second polling loop.
       await sleep(WORKER.pollMs);
     }
+  } catch (error) {
+    await d.from("autotrade_worker_lease").update({ last_error: error instanceof Error ? error.message.slice(0, 120) : "WORKER_FAILED" }).eq("name", WORKER.leaseName).eq("holder", holder).eq("fencing", fencing);
+    throw error;
   } finally {
     await d.rpc("autotrade_release_lease", { _name: WORKER.leaseName, _holder: holder, _fencing: fencing });
   }
-  return { ok: true, trigger, blocks, skippedTotal, p50: percentile(lat, 50), p95: percentile(lat, 95), mode: "paper", transport: "mock", rpcOperatorIndependence: false };
+  return { ok: true, trigger, blocks, skippedTotal, p50: percentile(lat, 50), p95: percentile(lat, 95), mode: "paper", transport: "mock", rpcOperatorIndependence: false, singleCycle, durationMs: Date.now() - started };
 }
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

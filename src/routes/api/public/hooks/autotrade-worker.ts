@@ -7,7 +7,7 @@ async function workerSecretOk(request: Request) {
   const secret = process.env["AUTOTRADE_WORKER_SECRET"];
   if (!secret || !token) return false;
   const dg = async (v: string) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(v)));
-  const [a, b] = await Promise.all([dg(token), dg(secret)]); let diff = 0; for (let i = 0; i < a.length; i++) diff |= a[i]! ^ b[i]!;
+  const [a, b] = await Promise.all([dg(token), dg(secret)]); let diff = 0; for (let i = 0; i < a.length; i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
   return diff === 0;
 }
 export const Route = createFileRoute("/api/public/hooks/autotrade-worker")({

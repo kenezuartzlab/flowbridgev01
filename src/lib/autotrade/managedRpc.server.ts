@@ -63,6 +63,12 @@ export function createManagedRpcConnector(config: InfrastructureConfig, send: ty
   };
   return {
     consensus,
+    pendingNonce: async (account: Hex) => {
+      await consensus();
+      const [a, b] = await Promise.all([at<Hex>(config.primaryUrl, "eth_getTransactionCount", [account, "pending"]), at<Hex>(config.secondaryUrl, "eth_getTransactionCount", [account, "pending"])]);
+      if (BigInt(a) !== BigInt(b) || !Number.isSafeInteger(Number(BigInt(a)))) throw new Error("RPC_NONCE_DIVERGENCE");
+      return Number(BigInt(a));
+    },
     broadcast: async (raw: Hex) => {
       if (!AUTOTRADE_LIVE_ENABLED) throw new Error("LIVE_DISABLED");
       await consensus();
@@ -77,7 +83,7 @@ export function createManagedRpcConnector(config: InfrastructureConfig, send: ty
       const [ba, bb] = await Promise.all([at<RpcBlock>(config.primaryUrl, "eth_getBlockByNumber", [a.blockNumber, false]), at<RpcBlock>(config.secondaryUrl, "eth_getBlockByNumber", [a.blockNumber, false])]);
       if (ba?.hash !== a.blockHash || bb?.hash !== a.blockHash) throw new Error("REORG_REVIEW");
       if (a.status !== "0x1" && a.status !== "0x0") throw new Error("RECEIPT_STATUS_INVALID");
-      return { final: common >= BigInt(a.blockNumber) + 5n, status: a.status === "0x1" ? "success" as const : "reverted" as const, actualOut: a.status === "0x1" ? canaryReceiptOutput(a, request) : 0n };
+      return { final: common >= BigInt(a.blockNumber) + 5n, status: a.status === "0x1" ? "success" as const : "reverted" as const, actualOut: a.status === "0x1" ? canaryReceiptOutput(a, request) : 0n, blockNumber: BigInt(a.blockNumber), blockHash: a.blockHash };
     },
   };
 }

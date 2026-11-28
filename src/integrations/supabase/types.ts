@@ -397,6 +397,183 @@ export type Database = {
           },
         ]
       }
+      autotrade_managed_effects: {
+        Row: {
+          account: string
+          actual_out: number | null
+          attempt: string
+          effect_key: string
+          fencing: number
+          fingerprint: string
+          gas_reservation_wei: number
+          nonce: number
+          order_id: string
+          receipt_block: number | null
+          receipt_block_hash: string | null
+          signed_raw: string | null
+          state: string
+          tx_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          account: string
+          actual_out?: number | null
+          attempt: string
+          effect_key: string
+          fencing: number
+          fingerprint: string
+          gas_reservation_wei: number
+          nonce: number
+          order_id: string
+          receipt_block?: number | null
+          receipt_block_hash?: string | null
+          signed_raw?: string | null
+          state: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account?: string
+          actual_out?: number | null
+          attempt?: string
+          effect_key?: string
+          fencing?: number
+          fingerprint?: string
+          gas_reservation_wei?: number
+          nonce?: number
+          order_id?: string
+          receipt_block?: number | null
+          receipt_block_hash?: string | null
+          signed_raw?: string | null
+          state?: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autotrade_managed_effects_account_fkey"
+            columns: ["account"]
+            isOneToOne: false
+            referencedRelation: "autotrade_trading_accounts"
+            referencedColumns: ["address"]
+          },
+          {
+            foreignKeyName: "autotrade_managed_effects_effect_key_fkey"
+            columns: ["effect_key"]
+            isOneToOne: true
+            referencedRelation: "autotrade_managed_intents"
+            referencedColumns: ["effect_key"]
+          },
+          {
+            foreignKeyName: "autotrade_managed_effects_effect_key_fkey"
+            columns: ["effect_key"]
+            isOneToOne: true
+            referencedRelation: "autotrade_managed_pending"
+            referencedColumns: ["effect_key"]
+          },
+          {
+            foreignKeyName: "autotrade_managed_effects_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "autotrade_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      autotrade_managed_intents: {
+        Row: {
+          account: string
+          approved: boolean
+          cap_usdt6: number
+          created_at: string
+          effect_key: string
+          execution_index: number
+          expires_at: string
+          fingerprint: string
+          gas_approved: boolean
+          infrastructure_reviewed: boolean
+          order_authorized: boolean
+          order_id: string
+          order_version: number
+          request_json: Json
+          security_reviewed: boolean
+          total_gas_cap_wei: number
+          valuation_at: string | null
+          valuation_usdt6_per_bot: number
+        }
+        Insert: {
+          account: string
+          approved?: boolean
+          cap_usdt6: number
+          created_at?: string
+          effect_key: string
+          execution_index?: number
+          expires_at: string
+          fingerprint: string
+          gas_approved?: boolean
+          infrastructure_reviewed?: boolean
+          order_authorized?: boolean
+          order_id: string
+          order_version: number
+          request_json: Json
+          security_reviewed?: boolean
+          total_gas_cap_wei: number
+          valuation_at?: string | null
+          valuation_usdt6_per_bot?: number
+        }
+        Update: {
+          account?: string
+          approved?: boolean
+          cap_usdt6?: number
+          created_at?: string
+          effect_key?: string
+          execution_index?: number
+          expires_at?: string
+          fingerprint?: string
+          gas_approved?: boolean
+          infrastructure_reviewed?: boolean
+          order_authorized?: boolean
+          order_id?: string
+          order_version?: number
+          request_json?: Json
+          security_reviewed?: boolean
+          total_gas_cap_wei?: number
+          valuation_at?: string | null
+          valuation_usdt6_per_bot?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autotrade_managed_intents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "autotrade_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      autotrade_managed_nonces: {
+        Row: {
+          account: string
+          next_nonce: number
+        }
+        Insert: {
+          account: string
+          next_nonce: number
+        }
+        Update: {
+          account?: string
+          next_nonce?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autotrade_managed_nonces_account_fkey"
+            columns: ["account"]
+            isOneToOne: true
+            referencedRelation: "autotrade_trading_accounts"
+            referencedColumns: ["address"]
+          },
+        ]
+      }
       autotrade_orders: {
         Row: {
           created_at: string
@@ -3570,7 +3747,37 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      autotrade_managed_pending: {
+        Row: {
+          account: string | null
+          approved: boolean | null
+          cap_usdt6: number | null
+          created_at: string | null
+          effect_key: string | null
+          execution_index: number | null
+          expires_at: string | null
+          fingerprint: string | null
+          gas_approved: boolean | null
+          infrastructure_reviewed: boolean | null
+          order_authorized: boolean | null
+          order_id: string | null
+          order_version: number | null
+          request_json: Json | null
+          security_reviewed: boolean | null
+          total_gas_cap_wei: number | null
+          valuation_at: string | null
+          valuation_usdt6_per_bot: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autotrade_managed_intents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "autotrade_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       acquire_reviewed_reward_publication: {
@@ -3811,6 +4018,20 @@ export type Database = {
           _ttl_seconds: number
         }
         Returns: boolean
+      }
+      autotrade_managed_effect: {
+        Args: {
+          _attempt: string
+          _fencing: number
+          _fingerprint: string
+          _holder: string
+          _key: string
+          _op: string
+          _order_id: string
+          _patch: Json
+          _request: Json
+        }
+        Returns: Json
       }
       autotrade_paper_advance_effect: {
         Args: {

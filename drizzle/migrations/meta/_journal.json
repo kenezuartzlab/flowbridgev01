@@ -491,6 +491,27 @@
       "when": 1795834432017,
       "tag": "0069_autotrade_v1_3_receipt_block_evidence",
       "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1795851295249,
+      "tag": "0070_autotrade_managed_durable_store",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1795851510481,
+      "tag": "0071_autotrade_managed_cycle_receipt_fences",
+      "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1795851697565,
+      "tag": "0072_autotrade_managed_service_only_grants",
+      "breakpoints": true
     }
   ]
 }

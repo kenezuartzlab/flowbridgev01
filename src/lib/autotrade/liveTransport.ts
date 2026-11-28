@@ -13,6 +13,9 @@ export interface ManagedEffectRequest {
 export interface ManagedEffectRow {
   key: string; nonce: number; state: "RESERVED" | "SIGNED" | "BROADCAST" | "FINAL" | "REVERTED";
   raw: Hex | null; hash: Hex | null;
+  actualOut?: bigint | null;
+  receiptBlock?: bigint | null;
+  receiptBlockHash?: Hex | null;
 }
 export interface ManagedEffectIO {
   /** Authoritative storage rechecks: source flag, approvals, order fingerprint, cap, RPC, lease and pause. */
@@ -22,7 +25,7 @@ export interface ManagedEffectIO {
   sign(request: ManagedEffectRequest, nonce: number): Promise<Hex>;
   broadcast(raw: Hex): Promise<Hex>;
   /** Must compare canonical receipt evidence from independently operated nodes. */
-  receipt(hash: Hex, request: ManagedEffectRequest): Promise<{ final: boolean; status: "success" | "reverted"; actualOut: bigint } | null>;
+  receipt(hash: Hex, request: ManagedEffectRequest): Promise<{ final: boolean; status: "success" | "reverted"; actualOut: bigint; blockNumber?: bigint; blockHash?: Hex } | null>;
 }
 
 export async function validateManagedSignature(raw: Hex, request: ManagedEffectRequest, nonce: number) {
@@ -47,7 +50,7 @@ export async function executeManagedEffect(request: ManagedEffectRequest, io: Ma
   if (gasError) throw new Error(gasError);
   let row = await io.reserve(request);
   if (row.key !== request.key) throw new Error("OUTBOX_IDENTITY");
-  if (row.state === "FINAL" || row.state === "REVERTED") return { state: row.state, actualOut: null };
+  if (row.state === "FINAL" || row.state === "REVERTED") return { state: row.state, actualOut: row.actualOut ?? null };
   if (row.state === "RESERVED") {
     await io.authorize(request);
     const raw = await io.sign(request, row.nonce);
@@ -69,7 +72,7 @@ export async function executeManagedEffect(request: ManagedEffectRequest, io: Ma
   }
   const receipt = await io.receipt(txHash, request);
   if (!receipt?.final) return { state: "BROADCAST" as const, actualOut: null };
-  const next = { ...row, state: receipt.status === "success" ? "FINAL" as const : "REVERTED" as const };
+  const next = { ...row, state: receipt.status === "success" ? "FINAL" as const : "REVERTED" as const, actualOut: receipt.actualOut, receiptBlock: receipt.blockNumber ?? null, receiptBlockHash: receipt.blockHash ?? null };
   await io.advance(row, next);
   return { state: next.state, actualOut: receipt.actualOut };
 }

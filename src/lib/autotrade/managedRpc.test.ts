@@ -50,6 +50,6 @@ describe("independent RPC and actual receipt outputs", () => {
       const result = b.method === "eth_chainId" ? "0x2a5" : b.method === "eth_blockNumber" ? "0x65" : b.method === "eth_getTransactionReceipt" ? f.receipt : { hash: blockHash, timestamp: `0x${Math.floor(Date.now()/1000).toString(16)}` };
       return Response.json({ result });
     });
-    expect(await createManagedRpcConnector(config, send).receipt(hash, f.request)).toEqual({ final: true, status: "success", actualOut: 123n });
+    expect(await createManagedRpcConnector(config, send).receipt(hash, f.request)).toEqual({ final: true, status: "success", actualOut: 123n, blockNumber: 96n, blockHash });
   });
 });
