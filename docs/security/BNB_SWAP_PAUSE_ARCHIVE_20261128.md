@@ -99,3 +99,10 @@ A later authorized release uses the guarded `build` command; do not publish just
 - Frozen V1.13 SHA256 unchanged; private inventory contains **141** preserved file hashes. No secret value printed, read, changed or removed by embargo code.
 
 The final evidence-only follow-up commit records this source-freeze SHA and acceptance totals; it does not change the frozen Solidity or runtime policy.
+
+### Final acceptance
+
+- Final complete suite: **296 files / 3,680 tests passed**, including all 32 embargo tests and 81 unchanged AutoTrade tests. Evidence: `bnb-swap-pause-evidence/final-acceptance-suite.txt`.
+- Final source freeze remains `46b21ec80fbdd96052059de20c0072ace449243e`; evidence-only commit `b615993819cd8a960a53d8de29f011fbcfbfc3c7` recorded its identity. The commit containing this final addendum is discoverable through this document history.
+- All 141 inventoried preserved files byte-match starting head `5d67217a73e63ab1f9d9364cc080d683f2f30b63`. Protected AutoTrade, bridge, MultiSend, wallet, network and banner directories have no diff against that head.
+- No publication, deployment, signature, funding, live setting or secret change. Existing published BNB placeholder remains pending separate owner publish approval.
