@@ -1,0 +1,141 @@
+{
+  "algorithm": "SHA-256",
+  "kind": "OFFLINE_READ_ONLY_AUDIT_EVIDENCE",
+  "files": [
+    {
+      "path": "docs/security/caswap-correction/REPRODUCE.md",
+      "bytes": 2628,
+      "sha256": "bc91fcc5e8b06ab0d41d9eec068a30b2cb9edf88d8175fd99bb77f34af198a57"
+    },
+    {
+      "path": "docs/security/caswap-correction/bridge-depth.json",
+      "bytes": 1971,
+      "sha256": "5cb30883cc63b304f4b9a2e286c92e4e77dd8b0551705be61b6c3558c0fd7755"
+    },
+    {
+      "path": "docs/security/caswap-correction/detail.json",
+      "bytes": 15872,
+      "sha256": "fb72d65553a6912fab2e714754ab5b9f380d05ba7745bb239e25b608d687d413"
+    },
+    {
+      "path": "docs/security/caswap-correction/fork.json",
+      "bytes": 8995,
+      "sha256": "da4a981515139805f25cf336152e09b9afd6eca7db75fdc9ac9a6d9d56c22d57"
+    },
+    {
+      "path": "docs/security/caswap-correction/frozen-bnb-source.txt",
+      "bytes": 144,
+      "sha256": "486ee393792d77b4863d619e249becffb266426b79fd8a9c104c7f35fd618f91"
+    },
+    {
+      "path": "docs/security/caswap-correction/history.json",
+      "bytes": 476620,
+      "sha256": "6ac93c52bd25ce0d76376c0a029378d1dd78776a3ed994f10d3ea445c0fcd3a3"
+    },
+    {
+      "path": "docs/security/caswap-correction/live.json",
+      "bytes": 46075,
+      "sha256": "cf7ea66a2c3a3b0dc7a3527e88d74b3d1eb88cc3bf277551e0e254e137b2f470"
+    },
+    {
+      "path": "docs/security/caswap-correction/registrations-0x79653140d84b78c19354ee984f236ec92160fc61.json",
+      "bytes": 962,
+      "sha256": "8f44b90ed1582e957c56daf948d4b105db448e1e904b5dffbd7d87fd6f9150c1"
+    },
+    {
+      "path": "docs/security/caswap-correction/registrations-0x986962de6f00d0ec571b1a34fa70aeeb445b5445.json",
+      "bytes": 4582,
+      "sha256": "aa8a3ea1c83d989d618a2ad6cc43c757c07c6d5a89fedbf2347c71c5a191fe89"
+    },
+    {
+      "path": "docs/security/caswap-correction/residuals.json",
+      "bytes": 2431,
+      "sha256": "867a552004b1bcee09d4ad537d07aafc4427b6af55c5724c7a1c9f6170b1fd22"
+    },
+    {
+      "path": "docs/security/caswap-correction/source-0x5b90611d4eb8fc82fc2e3d1f0501dd6f434441ad.json",
+      "bytes": 108465,
+      "sha256": "3ad5bcb7d9612a854c4b335d4e54f50d52ef55b1a23e8e244be36800f457f702"
+    },
+    {
+      "path": "docs/security/caswap-correction/source-0x68caea9104419203cf8b8f0b222e75709b97bfc6.json",
+      "bytes": 10665,
+      "sha256": "a5ae590af08977f673887c8ca5a8aed8207354a8f6103cb0e9d74f89cabfed37"
+    },
+    {
+      "path": "docs/security/caswap-correction/source-0x986962de6f00d0ec571b1a34fa70aeeb445b5445.json",
+      "bytes": 165688,
+      "sha256": "adbaade9c1880ef7976be91cad97cfc2a8d5fbbab263cec7ea3ab7d2c86aaeb5"
+    },
+    {
+      "path": "docs/security/caswap-correction/source-0xd9a990ceff16cbcc9dc0cd669fc29cdf53759e41.json",
+      "bytes": 134754,
+      "sha256": "499a0e30663799804bc7c759d3939b1192a5cf6c33fc713eab5d2142a7bd0d25"
+    },
+    {
+      "path": "docs/security/caswap-correction/source-0xe3c1bcef83c23331593f38b85e16cf172c022737.json",
+      "bytes": 101888,
+      "sha256": "2332775cd2192c80274ef460b366a40d6f385e9fdf0394a336bf9bf1655968e1"
+    },
+    {
+      "path": "docs/security/caswap-correction/source-0xf728515430e588eec584b76e8f2c814871c609b3.json",
+      "bytes": 75166,
+      "sha256": "3499bdd0347e36e28df743f8f1a2256a869d7bae251ca9e756385f28cd82681d"
+    },
+    {
+      "path": "docs/security/caswap-correction/targeted-tests.txt",
+      "bytes": 1146,
+      "sha256": "a6be508986f82321565fa6609f6e1ac3b15969552f29714ebffb83af9b8d9c0a"
+    },
+    {
+      "path": "scripts/autotrade/caswap-audit-policy.test.ts",
+      "bytes": 2470,
+      "sha256": "176ecbd756dd884da4a749febad725186f57de3a2b93add0b14b4e1d1e280274"
+    },
+    {
+      "path": "scripts/autotrade/caswap-audit-policy.ts",
+      "bytes": 1795,
+      "sha256": "60040cfaae55201a4faab65a29c02d647abc9a98195bafb3959753991a459a9f"
+    },
+    {
+      "path": "scripts/autotrade/caswap-bridging-depth.ts",
+      "bytes": 1481,
+      "sha256": "b1a4bf41bb8b52c9de01dd6cd30b490ff424699ba0316bbbee93daa475e00f07"
+    },
+    {
+      "path": "scripts/autotrade/caswap-correction.ts",
+      "bytes": 7257,
+      "sha256": "cfdda691acb79ac7ba318581e53af02dce8879634c1f80256b1652604a4a790b"
+    },
+    {
+      "path": "scripts/autotrade/caswap-detail.ts",
+      "bytes": 5452,
+      "sha256": "6ae3f0a9001a08b31b05c7cd640409ec21d189101f87b5c34838796e80c73744"
+    },
+    {
+      "path": "scripts/autotrade/caswap-evidence-manifest.ts",
+      "bytes": 806,
+      "sha256": "4be396d61e314b79893b8b1ca837a1495aa6f085ddae1826c1b1d74a2bfd6ea8"
+    },
+    {
+      "path": "scripts/autotrade/caswap-evidence.test.ts",
+      "bytes": 4186,
+      "sha256": "2953d788b6e88f7eb239266dbd18be92e2f000d4a234e6ebd3456885a20cf6e1"
+    },
+    {
+      "path": "scripts/autotrade/caswap-fork.ts",
+      "bytes": 9730,
+      "sha256": "23cee1d44c336d4d30bfcf36854595ab71a396602db9f11bfdae4c1a7bd5422c"
+    },
+    {
+      "path": "scripts/autotrade/caswap-history.ts",
+      "bytes": 3038,
+      "sha256": "bf8cea44c90dd9430b73f9645437775a4bbbac14c5754f35f2ad97a36f17c07c"
+    },
+    {
+      "path": "scripts/autotrade/caswap-residuals.ts",
+      "bytes": 1832,
+      "sha256": "c4e3db87688eb32dad0926d3a7b7bc16d3d22fbdcca2b5bf1238aa3b5c836f42"
+    }
+  ]
+}

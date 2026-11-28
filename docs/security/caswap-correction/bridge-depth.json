@@ -1,0 +1,54 @@
+{
+  "kind": "READ_ONLY",
+  "pin": {
+    "number": "31792262",
+    "hash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "time": "2026-11-28T01:17:25.000Z",
+    "chainId": 677,
+    "secondaryChainId": {
+      "UNKNOWN": "RPC Request failed."
+    },
+    "secondaryHash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "consensus": true
+  },
+  "mainnetWrites": 0,
+  "rows": [
+    {
+      "factory": "0xD9a990Ceff16CBCc9dC0CD669fC29CDf53759E41",
+      "a": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "b": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "pair": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "factory": "0xD9a990Ceff16CBCc9dC0CD669fC29CDf53759E41",
+      "a": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+      "pair": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "factory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+      "a": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "b": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "pair": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "factory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+      "a": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+      "pair": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "factory": "0x117115f3b72c8d1989178089a67d0c26f8ee0aa3",
+      "a": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "b": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "pair": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "factory": "0x117115f3b72c8d1989178089a67d0c26f8ee0aa3",
+      "a": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+      "pair": "0x0000000000000000000000000000000000000000"
+    }
+  ],
+  "wbotSupply": "1353192271384994730785042"
+}

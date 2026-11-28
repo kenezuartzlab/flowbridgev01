@@ -1,3 +1,9 @@
+# Targeted CaSwap registry correction audit
+- [x] Pin exact new/old CaSwap identities, V3/V4 registries, historical receipt routes, backing and realistic quotes at BOT block 31,792,262.
+- [x] Local-only V4 registration and four native buy/sell pairs pass output/fee/approval/residual checks; new CaSwap sell fee is 73%, so no default/activation recommendation.
+- [x] 107 targeted tests pass; source/runtime provenance, replay, deterministic manifest and correction report archived; application/configuration unchanged.
+- [ ] Integration HOLD (outside this diagnostic): external CaSwap 73% sell fee and mutable-admin risk, refreshed evidence and separate registry/signer/canary authorization; BDEX V3 default retained.
+
 # BNB V1.16 direct-EOA governance exception — preview only
 - [x] Record exact Guardian/Treasury direct-EOA preferences as OWNER_DIRECT_EOA_CHOICE_RECORDED / OWNER_EOA_EXCEPTION_PROPOSED; preserve preferred 2-of-3 Safe policy and all execution/launch holds.
 - [x] Add exact-address two-RPC/pinned-block/empty-code/freshness/issuer/control/risk gates, private constructor argument preview (no calldata), pending owner-readable risk acknowledgment and D-01…D-05 summary.

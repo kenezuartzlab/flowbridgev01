@@ -1,0 +1,1360 @@
+{
+  "generatedAt": "2026-11-28T01:17:24.864Z",
+  "kind": "MAINNET_READ_ONLY",
+  "mainnetWrites": 0,
+  "endpoints": [
+    "https://rpc.botchain.ai",
+    "https://scan.botchain.ai/api/eth-rpc"
+  ],
+  "addresses": {
+    "supplied": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+    "old": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+    "v3": "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
+    "v4": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+    "ca": "0x546307af427902A75771434Df831d88219784E19",
+    "usdt": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+    "wbot": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+    "caWbot": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+    "bdex": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+    "quoter": "0x034A705b36067cff99ABf5C662Be881cBd8d0176"
+  },
+  "checksums": {
+    "suppliedCanonical": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+    "suppliedValid": true
+  },
+  "contracts": {
+    "supplied": {
+      "address": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "bytes": 13566,
+      "keccak": "0xbd9df451990d5cea43b51429df907bb561c8df3d091230e754365eb93b0b3f25",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": true
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": true
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": true
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": true
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": true
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": true
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": true
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": true
+        }
+      }
+    },
+    "old": {
+      "address": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+      "bytes": 15009,
+      "keccak": "0x9f2f6cc317d279510da679cdbd63493e05f0d8a34d7afc6c75889f3bbcfbc8bc",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": true
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": true
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": true
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": true
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": true
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": true
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": true
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": true
+        }
+      }
+    },
+    "v3": {
+      "address": "0x986962de6F00D0eC571b1a34Fa70AEeB445b5445",
+      "bytes": 17779,
+      "keccak": "0x30436920b0fb829855cca5bcdeadf41925318bbc5dd93ba7761434bdd3797bab",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": false
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": false
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": true
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": true
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": true
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": true
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": false
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": true
+        }
+      },
+      "registry": {
+        "owner": "0x628e237b73C5a37EF3968527563FA1a26b32BB97",
+        "count": "5",
+        "active": [
+          [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          [
+            "BDex V2",
+            "BDex V3",
+            "CASwapRouter",
+            "BDex UniswapV2R2"
+          ],
+          [
+            "2.0",
+            "3.0",
+            "3.0",
+            "2.2"
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+            "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+            "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+            "0x1414eD29FdFD322c3c0a830330ed982E2D629e76"
+          ]
+        ],
+        "globalFeeBps": "10",
+        "activationDelay": {
+          "UNKNOWN": "The contract function \"routerActivationDelay\" reverted with the following reason:\nexecution reverted: 0x"
+        },
+        "rows": [
+          {
+            "id": "0",
+            "entry": [
+              "0x5508Ec3006e6d82ec3A3219f9C041FFcD5791Cd3",
+              0,
+              "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+              false,
+              "CaSwap V2",
+              "2.0"
+            ],
+            "fee": "0"
+          },
+          {
+            "id": "1",
+            "entry": [
+              "0xaE6ae8630f7A888dEc0B9195C85F7515d5887655",
+              0,
+              "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+              true,
+              "BDex V2",
+              "2.0"
+            ],
+            "fee": "0"
+          },
+          {
+            "id": "2",
+            "entry": [
+              "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+              1,
+              "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+              true,
+              "BDex V3",
+              "3.0"
+            ],
+            "fee": "0"
+          },
+          {
+            "id": "3",
+            "entry": [
+              "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+              0,
+              "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+              true,
+              "CASwapRouter",
+              "3.0"
+            ],
+            "fee": "0"
+          },
+          {
+            "id": "4",
+            "entry": [
+              "0x1414eD29FdFD322c3c0a830330ed982E2D629e76",
+              0,
+              "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+              true,
+              "BDex UniswapV2R2",
+              "2.2"
+            ],
+            "fee": "0"
+          }
+        ]
+      }
+    },
+    "v4": {
+      "address": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "bytes": 21838,
+      "keccak": "0x13f0ab2696d66683cadc3a82a220c232799b690db36c45ed7dd9f325a7619ad0",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": false
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": false
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": false
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": true
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": true
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": true
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": false
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": true
+        }
+      },
+      "registry": {
+        "owner": "0x524Db06954de917025180057BCBeB36eC96A98c5",
+        "count": "1",
+        "active": {
+          "UNKNOWN": "The contract function \"getActiveRouters\" reverted with the following reason:\nexecution reverted: 0x"
+        },
+        "globalFeeBps": "10",
+        "activationDelay": {
+          "UNKNOWN": "The contract function \"routerActivationDelay\" reverted with the following reason:\nexecution reverted: 0x"
+        },
+        "rows": [
+          {
+            "id": "0",
+            "entry": [
+              "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+              1,
+              "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+              true,
+              "BDEX V3",
+              "3"
+            ],
+            "fee": "1"
+          }
+        ]
+      }
+    },
+    "ca": {
+      "address": "0x546307af427902A75771434Df831d88219784E19",
+      "bytes": 3988,
+      "keccak": "0xbbe176bedad6719eef6f1cbc9283089cae3eec670e64848a6f20ba86070c905b",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": false
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": false
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": false
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": false
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": false
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": false
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": false
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": false
+        }
+      }
+    },
+    "usdt": {
+      "address": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+      "bytes": 6188,
+      "keccak": "0x0b70fe4156600e95ec26f02f62ac74c98a9d57758300ebdbdd8ce4477c5d8048",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": false
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": false
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": false
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": false
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": false
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": false
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": false
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": false
+        }
+      }
+    },
+    "wbot": {
+      "address": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "bytes": 2317,
+      "keccak": "0x1de4f5357fdcd5dfca19fdb98fe059f6d63e6b8a8a9dc58cd39abdf6801419d6",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": false
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": false
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": false
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": false
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": false
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": false
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": true
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": true
+        }
+      }
+    },
+    "caWbot": {
+      "address": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "bytes": 2410,
+      "keccak": "0xe45a61e173c389ba8f44e04a1359c0b42f7cee5a9e1e7f448f0205c4f804e8d1",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": false
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": false
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": false
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": false
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": false
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": false
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": true
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": true
+        }
+      }
+    },
+    "bdex": {
+      "address": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+      "bytes": 10088,
+      "keccak": "0x8bf76921a805ebf28f4a8d0282f159cda0f2ddbc480a4635959b6edf9b9b9336",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": true
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": false
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": false
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": false
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": false
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": false
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": true
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": true
+        }
+      }
+    },
+    "quoter": {
+      "address": "0x034A705b36067cff99ABf5C662Be881cBd8d0176",
+      "bytes": 7015,
+      "keccak": "0xa80990e1b9499e1e48ad2d00f7a08c2f83cc9d18e85ed53baf1e6f068381cc07",
+      "selectors": {
+        "factory()": {
+          "selector": "0xc45a0155",
+          "present": true
+        },
+        "WETH()": {
+          "selector": "0xad5c4648",
+          "present": false
+        },
+        "WBOT()": {
+          "selector": "0xf2ceabea",
+          "present": false
+        },
+        "getAmountsOut(uint256,address[])": {
+          "selector": "0xd06ca61f",
+          "present": false
+        },
+        "swapExactETHForTokens(uint256,address[],address,uint256)": {
+          "selector": "0x7ff36ab5",
+          "present": false
+        },
+        "swapExactTokensForETH(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x18cbafe5",
+          "present": false
+        },
+        "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x38ed1739",
+          "present": false
+        },
+        "swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)": {
+          "selector": "0xb6f9de95",
+          "present": false
+        },
+        "swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)": {
+          "selector": "0x791ac947",
+          "present": false
+        },
+        "deposit()": {
+          "selector": "0xd0e30db0",
+          "present": false
+        },
+        "withdraw(uint256)": {
+          "selector": "0x2e1a7d4d",
+          "present": false
+        }
+      }
+    }
+  },
+  "venues": {
+    "supplied": {
+      "router": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "factory": "0xD9a990Ceff16CBCc9dC0CD669fC29CDf53759E41",
+      "weth": {
+        "UNKNOWN": "The contract function \"WETH\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "wbot": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "pairs": [
+        {
+          "a": "0x546307af427902A75771434Df831d88219784E19",
+          "b": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "pair": "0xf728515430E588EEc584b76E8f2C814871c609B3",
+          "token0": "0x546307af427902A75771434Df831d88219784E19",
+          "token1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "reserves": [
+            "511434669547932304486769",
+            "387896799903655838997005",
+            1795828608
+          ],
+          "code": {
+            "bytes": 9771,
+            "keccak": "0x64c778fe2b91c50fa8d309f9cf2d9bfbbbbd955307a27e00cc691fb0331f6c66"
+          },
+          "decimals": [
+            18,
+            18
+          ],
+          "normalized": [
+            "511434.669547932304486769",
+            "387896.799903655838997005"
+          ]
+        },
+        {
+          "a": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "a": "0x546307af427902A75771434Df831d88219784E19",
+          "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "a": "0x546307af427902A75771434Df831d88219784E19",
+          "b": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "a": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        }
+      ],
+      "quotes": [
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "0.01",
+          "inputDecimals": 18,
+          "amount": "10000000000000000",
+          "result": [
+            "10000000000000000",
+            "13184812467907644"
+          ]
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "0.1",
+          "inputDecimals": 18,
+          "amount": "100000000000000000",
+          "result": [
+            "100000000000000000",
+            "131848094087619737"
+          ]
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": [
+            "1000000000000000000",
+            "1318477881738334040"
+          ]
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "5",
+          "inputDecimals": 18,
+          "amount": "5000000000000000000",
+          "result": [
+            "5000000000000000000",
+            "6592321428709001091"
+          ]
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "50",
+          "inputDecimals": 18,
+          "amount": "50000000000000000000",
+          "result": [
+            "50000000000000000000",
+            "65915567504996033664"
+          ]
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "0.01",
+          "inputDecimals": 18,
+          "amount": "10000000000000000",
+          "result": [
+            "10000000000000000",
+            "2047810632659164"
+          ]
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": [
+            "1000000000000000000",
+            "204780956237682805"
+          ]
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "100",
+          "inputDecimals": 18,
+          "amount": "100000000000000000000",
+          "result": [
+            "100000000000000000000",
+            "20477025397926122861"
+          ]
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "1000",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000000",
+          "result": [
+            "1000000000000000000000",
+            "204673012006150214342"
+          ]
+        },
+        {
+          "from": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "1",
+          "inputDecimals": 6,
+          "amount": "1000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "5",
+          "inputDecimals": 6,
+          "amount": "5000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "input": "0.1",
+          "inputDecimals": 18,
+          "amount": "100000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "0.01",
+          "inputDecimals": 18,
+          "amount": "10000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "0.1",
+          "inputDecimals": 18,
+          "amount": "100000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "5",
+          "inputDecimals": 18,
+          "amount": "5000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "50",
+          "inputDecimals": 18,
+          "amount": "50000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "0.01",
+          "inputDecimals": 18,
+          "amount": "10000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "100",
+          "inputDecimals": 18,
+          "amount": "100000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "1000",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "1",
+          "inputDecimals": 6,
+          "amount": "1000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "5",
+          "inputDecimals": 6,
+          "amount": "5000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "input": "0.1",
+          "inputDecimals": 18,
+          "amount": "100000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        }
+      ],
+      "factoryCode": {
+        "bytes": 15559,
+        "keccak": "0x1fa76b535f87477f3854a047da557d7f600305c36444c087ab4c6a47ceed719d"
+      },
+      "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6": {
+        "decimals": 18,
+        "supply": "400883946450193346163144",
+        "nativeBacking": "400883946450193346163144",
+        "code": null
+      },
+      "0xD5452816194a3784dBa983426cCe7c122F4abd30": {
+        "decimals": 18,
+        "supply": "1353192271384994730785042",
+        "nativeBacking": "1353192271384994730785042",
+        "code": null
+      }
+    },
+    "old": {
+      "router": "0x5b90611D4eB8FC82Fc2E3d1F0501Dd6F434441AD",
+      "factory": "0x9c937EBC3748825026677e20B13b5e306494a38d",
+      "weth": {
+        "UNKNOWN": "The contract function \"WETH\" reverted with the following reason:\nexecution reverted: 0x"
+      },
+      "wbot": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "pairs": [
+        {
+          "a": "0x546307af427902A75771434Df831d88219784E19",
+          "b": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "pair": "0x0A0cfC8c3756D000bE19F0809A23f57522a594F6",
+          "token0": "0x546307af427902A75771434Df831d88219784E19",
+          "token1": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "reserves": [
+            "84038367",
+            "16566580112457",
+            1791254772
+          ],
+          "code": {
+            "bytes": 9771,
+            "keccak": "0x4a67a9d8a34306a34444caf1052e43a7b9ec2982e4d2e9ca6e069f5e2ae8561e"
+          },
+          "decimals": [
+            18,
+            18
+          ],
+          "normalized": [
+            "0.000000000084038367",
+            "0.000016566580112457"
+          ]
+        },
+        {
+          "a": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "a": "0x546307af427902A75771434Df831d88219784E19",
+          "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "a": "0x546307af427902A75771434Df831d88219784E19",
+          "b": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "pair": "0x0000000000000000000000000000000000000000"
+        },
+        {
+          "a": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "b": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "pair": "0x0000000000000000000000000000000000000000"
+        }
+      ],
+      "quotes": [
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "0.01",
+          "inputDecimals": 18,
+          "amount": "10000000000000000",
+          "result": [
+            "10000000000000000",
+            "83899374"
+          ]
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "0.1",
+          "inputDecimals": 18,
+          "amount": "100000000000000000",
+          "result": [
+            "100000000000000000",
+            "84024447"
+          ]
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": [
+            "1000000000000000000",
+            "84036974"
+          ]
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "5",
+          "inputDecimals": 18,
+          "amount": "5000000000000000000",
+          "result": [
+            "5000000000000000000",
+            "84038088"
+          ]
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "50",
+          "inputDecimals": 18,
+          "amount": "50000000000000000000",
+          "result": [
+            "50000000000000000000",
+            "84038339"
+          ]
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "0.01",
+          "inputDecimals": 18,
+          "amount": "10000000000000000",
+          "result": [
+            "10000000000000000",
+            "16566579913567"
+          ]
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": [
+            "1000000000000000000",
+            "16566580110468"
+          ]
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "100",
+          "inputDecimals": 18,
+          "amount": "100000000000000000000",
+          "result": [
+            "100000000000000000000",
+            "16566580112437"
+          ]
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "1000",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000000",
+          "result": [
+            "1000000000000000000000",
+            "16566580112455"
+          ]
+        },
+        {
+          "from": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "1",
+          "inputDecimals": 6,
+          "amount": "1000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "to": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "input": "5",
+          "inputDecimals": 6,
+          "amount": "5000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "input": "0.1",
+          "inputDecimals": 18,
+          "amount": "100000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+          "to": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "0.01",
+          "inputDecimals": 18,
+          "amount": "10000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "0.1",
+          "inputDecimals": 18,
+          "amount": "100000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "5",
+          "inputDecimals": 18,
+          "amount": "5000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0x546307af427902A75771434Df831d88219784E19",
+          "input": "50",
+          "inputDecimals": 18,
+          "amount": "50000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "0.01",
+          "inputDecimals": 18,
+          "amount": "10000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "100",
+          "inputDecimals": 18,
+          "amount": "100000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0x546307af427902A75771434Df831d88219784E19",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "1000",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "1",
+          "inputDecimals": 6,
+          "amount": "1000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "input": "5",
+          "inputDecimals": 6,
+          "amount": "5000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "input": "0.1",
+          "inputDecimals": 18,
+          "amount": "100000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        },
+        {
+          "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+          "to": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+          "input": "1",
+          "inputDecimals": 18,
+          "amount": "1000000000000000000",
+          "result": {
+            "UNKNOWN": "The contract function \"getAmountsOut\" reverted with the following reason:\nexecution reverted: 0x"
+          }
+        }
+      ],
+      "factoryCode": {
+        "bytes": 19905,
+        "keccak": "0x09e0d549714bf56fea4099195618dde740daa315e38098c6d9b12ad38db65aa1"
+      },
+      "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6": {
+        "decimals": 18,
+        "supply": "400883946450193346163144",
+        "nativeBacking": "400883946450193346163144",
+        "code": null
+      },
+      "0xD5452816194a3784dBa983426cCe7c122F4abd30": {
+        "decimals": 18,
+        "supply": "1353192271384994730785042",
+        "nativeBacking": "1353192271384994730785042",
+        "code": null
+      }
+    }
+  },
+  "errors": [],
+  "pin": {
+    "number": "31792262",
+    "hash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "time": "2026-11-28T01:17:25.000Z",
+    "chainId": 677,
+    "secondaryChainId": {
+      "UNKNOWN": "RPC Request failed."
+    },
+    "secondaryHash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "consensus": true
+  }
+}

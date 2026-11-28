@@ -1,0 +1,301 @@
+{
+  "kind": "LOCAL_PINNED_FORK_ONLY",
+  "mainnetWrites": 0,
+  "signatures": 0,
+  "syntheticLocalTrader": "0x1000000000000000000000000000000000000001",
+  "sourcePin": {
+    "number": "31792262",
+    "hash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "time": "2026-11-28T01:17:25.000Z",
+    "chainId": 677,
+    "secondaryChainId": {
+      "UNKNOWN": "RPC Request failed."
+    },
+    "secondaryHash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "consensus": true
+  },
+  "steps": [
+    {
+      "name": "wrapper backing and deposit/withdraw",
+      "backing": "400883946450193346163144",
+      "supply": "400883946450193346163144",
+      "backingAtLeastSupply": true,
+      "depositDelta": "10000000000000000",
+      "wrappedResidual": "0",
+      "withdrawReceipt": "success",
+      "nativeAfter": "99999999924818000000000",
+      "initialNative": "100000000000000000000000"
+    },
+    {
+      "name": "unauthorized registration",
+      "reverted": true,
+      "error": "Execution reverted with reason: custom error 0x11bf7c35."
+    },
+    {
+      "name": "local-only registration",
+      "id": "1",
+      "status": "success",
+      "entry": [
+        "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+        0,
+        "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+        true,
+        "CaSwap V2",
+        "verified-0.6.12"
+      ],
+      "activationDelay": "UNKNOWN"
+    },
+    {
+      "name": "buy excessive floor 0.01",
+      "reverted": true,
+      "error": "Execution reverted with reason: CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT."
+    },
+    {
+      "name": "buy wrong wrapper 0.01",
+      "reverted": true,
+      "error": "Execution reverted with reason: custom error 0x87e964eb."
+    },
+    {
+      "name": "buy 0.01 BOT",
+      "amount": "10000000000000000",
+      "fee": "10000000000000",
+      "bps": "10",
+      "quoted": "13184812467907644",
+      "min": "13052964343228567",
+      "actualOut": "13184812467907644",
+      "outAtLeastMin": true,
+      "feeOnce": true,
+      "routerResidualChanges": [],
+      "gas": "196502"
+    },
+    {
+      "name": "sell excessive floor 0.01",
+      "reverted": true,
+      "error": "Execution reverted with reason: CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT."
+    },
+    {
+      "name": "sell acquired CA 0.01",
+      "sellAmount": "13171640827080563",
+      "fee": "13171640827080",
+      "quoted": "2697302748083176",
+      "min": "2670329720602344",
+      "actualNative": "2697302748083176",
+      "outAtLeastMin": true,
+      "feeOnce": true,
+      "userAllowance": "0",
+      "routerAllowance": "0",
+      "caDust": "1",
+      "routerResidualChanges": [],
+      "gas": "240505"
+    },
+    {
+      "name": "buy excessive floor 0.1",
+      "reverted": true,
+      "error": "Execution reverted with reason: CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT."
+    },
+    {
+      "name": "buy wrong wrapper 0.1",
+      "reverted": true,
+      "error": "Execution reverted with reason: custom error 0x87e964eb."
+    },
+    {
+      "name": "buy 0.1 BOT",
+      "amount": "100000000000000000",
+      "fee": "100000000000000",
+      "bps": "10",
+      "quoted": "131848089123172681",
+      "min": "130529608231940954",
+      "actualOut": "131848089123172681",
+      "outAtLeastMin": true,
+      "feeOnce": true,
+      "routerResidualChanges": [],
+      "gas": "179426"
+    },
+    {
+      "name": "sell excessive floor 0.1",
+      "reverted": true,
+      "error": "Execution reverted with reason: CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT."
+    },
+    {
+      "name": "sell acquired CA 0.1",
+      "sellAmount": "131716372750422258",
+      "fee": "131716372750422",
+      "quoted": "26973032051074380",
+      "min": "26703301730563636",
+      "actualNative": "26973032051074380",
+      "outAtLeastMin": true,
+      "feeOnce": true,
+      "userAllowance": "0",
+      "routerAllowance": "0",
+      "caDust": "1",
+      "routerResidualChanges": [],
+      "gas": "226835"
+    },
+    {
+      "name": "buy excessive floor 1",
+      "reverted": true,
+      "error": "Execution reverted with reason: CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT."
+    },
+    {
+      "name": "buy wrong wrapper 1",
+      "reverted": true,
+      "error": "Execution reverted with reason: custom error 0x87e964eb."
+    },
+    {
+      "name": "buy 1 BOT",
+      "amount": "1000000000000000000",
+      "fee": "1000000000000000",
+      "bps": "10",
+      "quoted": "1318477335651243766",
+      "min": "1305292562294731328",
+      "actualOut": "1318477335651243766",
+      "outAtLeastMin": true,
+      "feeOnce": true,
+      "routerResidualChanges": [],
+      "gas": "179438"
+    },
+    {
+      "name": "sell excessive floor 1",
+      "reverted": true,
+      "error": "Execution reverted with reason: CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT."
+    },
+    {
+      "name": "sell acquired CA 1",
+      "sellAmount": "1317160175475767998",
+      "fee": "1317160175475767",
+      "quoted": "269730777534597088",
+      "min": "267033469759251117",
+      "actualNative": "269730777534597088",
+      "outAtLeastMin": true,
+      "feeOnce": true,
+      "userAllowance": "0",
+      "routerAllowance": "0",
+      "caDust": "1",
+      "routerResidualChanges": [],
+      "gas": "226854"
+    },
+    {
+      "name": "buy excessive floor 5",
+      "reverted": true,
+      "error": "Execution reverted with reason: CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT."
+    },
+    {
+      "name": "buy wrong wrapper 5",
+      "reverted": true,
+      "error": "Execution reverted with reason: custom error 0x87e964eb."
+    },
+    {
+      "name": "buy 5 BOT",
+      "amount": "5000000000000000000",
+      "fee": "5000000000000000",
+      "bps": "10",
+      "quoted": "6592293876652740388",
+      "min": "6526370937886212984",
+      "actualOut": "6592293876652740388",
+      "outAtLeastMin": true,
+      "feeOnce": true,
+      "routerResidualChanges": [],
+      "gas": "179438"
+    },
+    {
+      "name": "sell excessive floor 5",
+      "reverted": true,
+      "error": "Execution reverted with reason: CASwapRouter: INSUFFICIENT_OUTPUT_AMOUNT."
+    },
+    {
+      "name": "sell acquired CA 5",
+      "sellAmount": "6585708168484256131",
+      "fee": "6585708168484256",
+      "quoted": "1348664043700321659",
+      "min": "1335177403263318442",
+      "actualNative": "1348664043700321659",
+      "outAtLeastMin": true,
+      "feeOnce": true,
+      "userAllowance": "0",
+      "routerAllowance": "0",
+      "caDust": "1",
+      "routerResidualChanges": [],
+      "gas": "226854"
+    },
+    {
+      "name": "BDEX V3 quote",
+      "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "amount": "100000000000000000",
+      "quoted": "239421447458134747",
+      "feePool": 10000
+    },
+    {
+      "name": "BDEX V3 quote",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "amount": "100000000000000000",
+      "quoted": "40930222314934257",
+      "feePool": 10000
+    },
+    {
+      "name": "BDEX V3 quote",
+      "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "amount": "1000000000000000000",
+      "quoted": "2391996999968536525",
+      "feePool": 10000
+    },
+    {
+      "name": "BDEX V3 quote",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "amount": "1000000000000000000",
+      "quoted": "409145393079193359",
+      "feePool": 10000
+    },
+    {
+      "name": "BDEX V3 quote",
+      "from": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "to": "0x546307af427902A75771434Df831d88219784E19",
+      "amount": "5000000000000000000",
+      "quoted": "11911835452268239696",
+      "feePool": 10000
+    },
+    {
+      "name": "BDEX V3 quote",
+      "from": "0x546307af427902A75771434Df831d88219784E19",
+      "to": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "amount": "5000000000000000000",
+      "quoted": "2042249110721115598",
+      "feePool": 10000
+    },
+    {
+      "name": "unsupported atomic CA/USDT path",
+      "reverted": true,
+      "error": "Execution reverted for an unknown reason."
+    },
+    {
+      "name": "unknown registry ID",
+      "reverted": true,
+      "error": "Execution reverted with reason: custom error 0x57008a7a."
+    }
+  ],
+  "errors": [],
+  "fork": {
+    "number": "31792262",
+    "hash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "chainId": 677
+  },
+  "proposedRegistry": {
+    "router": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+    "rtype": 0,
+    "wrappedNative": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+    "name": "CaSwap V2",
+    "version": "verified-0.6.12",
+    "activation": "NOT_AUTHORIZED",
+    "defaultRoute": "UNCHANGED_BDEX_V3"
+  },
+  "directionalFees": {
+    "buy": "0",
+    "sell": "7300",
+    "v4Exempt": false,
+    "v3Exempt": false
+  },
+  "result": "LOCAL_REHEARSAL_COMPLETE"
+}

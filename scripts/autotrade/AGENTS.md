@@ -1,0 +1,1 @@
+- Keep CaSwap correction collectors and helpers offline, with no application imports; external calls are fixed-target reads and simulated effects are allowed only on literal http://127.0.0.1:8547. Why: diagnostic registry previews and historical trades must not activate or authorize an integration.

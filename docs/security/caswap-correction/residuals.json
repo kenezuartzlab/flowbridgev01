@@ -1,0 +1,88 @@
+{
+  "mainnetWrites": 0,
+  "kind": "LOCAL_RESIDUAL_COMPARISON",
+  "pin": {
+    "number": "31792262",
+    "hash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "time": "2026-11-28T01:17:25.000Z",
+    "chainId": 677,
+    "secondaryChainId": {
+      "UNKNOWN": "RPC Request failed."
+    },
+    "secondaryHash": "0x7b187dd073268ffd880c5aeefe77b333ab54ec2df94b8bcecb32b2357c568741",
+    "consensus": true
+  },
+  "localResult": "LOCAL_REHEARSAL_COMPLETE",
+  "rows": [
+    {
+      "target": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "asset": "native",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "asset": "0x546307af427902A75771434Df831d88219784E19",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "asset": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "asset": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0xe3c1bCEF83C23331593f38B85e16Cf172C022737",
+      "asset": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "asset": "native",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "asset": "0x546307af427902A75771434Df831d88219784E19",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "asset": "0x68CAeA9104419203cF8b8f0B222E75709B97bfc6",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "asset": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    },
+    {
+      "target": "0x79653140D84B78C19354ee984f236Ec92160fc61",
+      "asset": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+      "before": "0",
+      "after": "0",
+      "unchanged": true
+    }
+  ]
+}
