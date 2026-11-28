@@ -45,6 +45,8 @@ bunx vitest run --maxWorkers=2
 
 The local fixture fee is 1 gwei, hence its own gas proposal is 0.001363496 BOT; it must **not** be represented as the mainnet 20-gwei proposal. Buy crash-after-broadcast recovered with no second signature/send; four local signatures/broadcasts, zero external signatures and zero mainnet writes. Existing high-fee rejection, nonce, reorg, approval finality, four-pair and reward-exclusion tests remain unchanged.
 
+Actual receipt gas used differs from the pre-effect `eth_estimateGas` bounds above: buy **187,932**, approve **46,976**, sell **207,410**, revoke **26,980**. The proposal conservatively uses simulated units, not gas-refund-adjusted receipts. Implementation commit: `f060ac4d5794cd06de5047c961eff165006ca8dd`.
+
 ## Implemented ticket boundary
 
 `canaryTicket.ts` owns pure integer/ceiling math, fresh conversion, bounds, blank targets and non-executable facts. Server preparation reads the generated local gas evidence only server-side, revalues each effect and returns total exposure. Ops has separate canary review inputs; no preview creates or populates an order, and no ticket authorizes effects. HTTP inputs are bounded before quote reads; authorized mock read-back and invalid-parameter tests verify the real handler. Live/public/registry gates remain OFF, BNB Swap embargo unchanged.
@@ -71,4 +73,4 @@ The local fixture fee is 1 gwei, hence its own gas proposal is 0.001363496 BOT; 
 - Focused regression: **170/170 tests**, 10 files.
 - Local four-effect fixture: PASS, exact gas estimates, $5-equivalent conversion, crash recovery, zero residuals/allowances.
 - Automatic preview compilation/typecheck: build OK after implementation. No manual build/typecheck run; no hosted build/deployment claimed.
-- Full regression result recorded below after completion.
+- Full regression: **3,769/3,769 tests**, **303 files**, 215.09 seconds; all passed. No dependency or contract changes. Implementation commit `f060ac4d5794cd06de5047c961eff165006ca8dd`; this evidence follow-up changes documentation only.
